@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:gravity="center_horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:paddingLeft="8dp"
+              android:paddingRight="8dp">
+
+        <EditText android:id="@+id/number" style="@style/CardNumber"/>
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Spinner android:id="@+id/expMonth" style="@style/ExpMonth"/>
+
+            <Spinner android:id="@+id/expYear" style="@style/ExpYear" />
+
+            <EditText android:id="@+id/cvc" style="@style/CVC" />
+
+        </LinearLayout>
+
+        <Button android:id="@+id/save" style="@style/Save"/>
+
+</LinearLayout>

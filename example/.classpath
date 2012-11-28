@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="lib" path="lib/robolectric-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="lib/android-support-v4.jar"/>
+	<classpathentry kind="lib" path="lib/json.jar"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Stripe"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

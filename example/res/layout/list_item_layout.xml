@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="10dp">
+
+    <TextView android:id="@+id/last4"
+              android:layout_width="0dp"
+              android:layout_weight="6"
+              android:layout_height="wrap_content"
+              android:ellipsize="end"
+              android:singleLine="true"
+              android:textSize="16dp"/>
+
+    <TextView android:id="@+id/tokenId"
+              android:layout_width="0dp"
+              android:layout_weight="4"
+              android:layout_height="wrap_content"
+              android:ellipsize="end"
+              android:singleLine="true"
+              android:gravity="right"
+              android:textSize="16dp"/>
+
+</LinearLayout>

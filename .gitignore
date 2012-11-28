@@ -1,0 +1,12 @@
+.DS_Store
+.idea/workspace.xml
+.metadata
+tmp
+out
+**/*.class
+stripe/target
+stripe/gen
+stripe/bin
+example/bin
+example/target
+example/gen

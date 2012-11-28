@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="stripe-android">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/stripe-android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
