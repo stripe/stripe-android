@@ -1,4 +1,4 @@
-package com.stripe.time;
+package com.stripe.android.time;
 
 import java.util.Calendar;
 

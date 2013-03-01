@@ -1,6 +1,6 @@
-package com.stripe.util;
+package com.stripe.android.util;
 
-import com.stripe.time.Clock;
+import com.stripe.android.time.Clock;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.stripe.http;
+package com.stripe.android.compat;
 
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import com.stripe.util.StripeLog;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -152,7 +151,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     {@link #onProgressUpdate} and {@link #onPostExecute}.
  * </ul>
  */
-abstract class AsyncTask<Params, Progress, Result> {
+public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
 
     private static final int CORE_POOL_SIZE = 5;
@@ -248,13 +247,11 @@ abstract class AsyncTask<Params, Progress, Result> {
                 } catch (InterruptedException e) {
                     android.util.Log.w(LOG_TAG, e);
                 } catch (ExecutionException e) {
-                    StripeLog.e(e);
                     throw new RuntimeException("An error occured while executing doInBackground()",
                             e.getCause());
                 } catch (CancellationException e) {
                     postResultIfNotInvoked(null);
                 } catch (Throwable t) {
-                    StripeLog.e(t.getMessage());
                     throw new RuntimeException("An error occured while executing "
                             + "doInBackground()", t);
                 }
@@ -520,13 +517,9 @@ abstract class AsyncTask<Params, Progress, Result> {
         if (mStatus != Status.PENDING) {
             switch (mStatus) {
                 case RUNNING:
-                    StripeLog.e("Cannot execute task:"
-                            + " the task is already running.");
                     throw new IllegalStateException("Cannot execute task:"
                             + " the task is already running.");
                 case FINISHED:
-                    StripeLog.e("Cannot execute task:"
-                            + " the task has already been executed.");
                     throw new IllegalStateException("Cannot execute task:"
                             + " the task has already been executed "
                             + "(a task can be executed only once)");
