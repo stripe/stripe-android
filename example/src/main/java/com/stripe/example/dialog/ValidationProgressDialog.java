@@ -1,4 +1,4 @@
-package com.stripe.dialog;
+package com.stripe.example.dialog;
 
 import android.app.ProgressDialog;
 import android.content.Context;

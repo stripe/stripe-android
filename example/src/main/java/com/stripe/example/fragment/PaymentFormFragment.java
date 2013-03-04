@@ -1,4 +1,4 @@
-package com.stripe.fragment;
+package com.stripe.example.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import com.stripe.PaymentForm;
-import com.stripe.R;
-import com.stripe.activity.PaymentActivity;
+import com.stripe.example.PaymentForm;
+import com.stripe.example.R;
+import com.stripe.example.activity.PaymentActivity;
 
 public class PaymentFormFragment extends Fragment implements PaymentForm {
 
@@ -51,13 +51,13 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     }
 
     @Override
-    public String getExpMonth() {
-        return this.monthSpinner.getSelectedItem().toString();
+    public Integer getExpMonth() {
+        return Integer.parseInt(this.monthSpinner.getSelectedItem().toString());
     }
 
     @Override
-    public String getExpYear() {
-        return this.yearSpinner.getSelectedItem().toString();
+    public Integer getExpYear() {
+        return Integer.parseInt(this.yearSpinner.getSelectedItem().toString());
     }
 
     @SuppressWarnings("unused")

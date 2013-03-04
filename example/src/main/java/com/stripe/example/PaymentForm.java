@@ -1,8 +1,8 @@
-package com.stripe;
+package com.stripe.example;
 
 public interface PaymentForm {
     public String getCardNumber();
     public String getCvc();
-    public String getExpMonth();
-    public String getExpYear();
+    public Integer getExpMonth();
+    public Integer getExpYear();
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.stripe"
+          package="com.stripe.example"
           android:versionCode="1"
           android:versionName="1.0">
 
@@ -10,7 +10,7 @@
 
     <application android:label="@string/appName" android:icon="@drawable/ic_launcher">
 
-        <activity android:name=".activity.PaymentActivity"
+        <activity android:name="com.stripe.activity.PaymentActivity"
                   android:theme="@style/Theme"
                   android:screenOrientation="portrait">
             <intent-filter>

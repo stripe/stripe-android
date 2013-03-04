@@ -1,10 +1,19 @@
-package com.stripe.activity;
+package com.stripe.example.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import com.stripe.*;
-import com.stripe.dialog.ValidationErrorDialog;
-import com.stripe.dialog.ValidationProgressDialog;
+
+import com.stripe.example.R;
+import com.stripe.android.Stripe;
+import com.stripe.android.TokenCallback;
+import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
+//import com.stripe.exception.*;
+import com.stripe.example.dialog.ValidationErrorDialog;
+import com.stripe.example.dialog.ValidationProgressDialog;
+import com.stripe.example.PaymentForm;
+import com.stripe.example.TokenList;
+
 
 public class PaymentActivity extends FragmentActivity {
 
@@ -18,7 +27,7 @@ public class PaymentActivity extends FragmentActivity {
      *   private static final String publishableKey = "pk_something123456789";
      *
      */
-    public static final String PUBLISHABLE_KEY = YOUR_PUBLISHABLE_KEY;
+    public static final String PUBLISHABLE_KEY = "YOUR_PUBLISHABLE_KEY";
 
     ValidationProgressDialog progressDialog;
 
@@ -36,16 +45,12 @@ public class PaymentActivity extends FragmentActivity {
                 form.getExpYear(),
                 form.getCvc());
 
-        Validation validation = card.validateCard();
-        if (validation.isValid) {
+        boolean validation = card.validateCard();
+        if (validation) {
             startProgress();
-            new Stripe(PUBLISHABLE_KEY).createToken(
-                    card,
-                    new MyStripeSuccessHandler(),
-                    new MyStripeErrorHandler()
-            );
+           
         } else {
-            handleError(validation.getLocalizedErrors(this));
+            handleError("You did not enter a valid card");
         }
     }
 
@@ -65,21 +70,5 @@ public class PaymentActivity extends FragmentActivity {
 
     private TokenList getTokenList() {
         return (TokenList)(getSupportFragmentManager().findFragmentById(R.id.token_list));
-    }
-
-    public class MyStripeSuccessHandler extends StripeSuccessHandler {
-        @Override
-        public void onSuccess(Token token) {
-            getTokenList().addToList(token);
-            finishProgress();
-        }
-    }
-
-    public class MyStripeErrorHandler extends StripeErrorHandler {
-        @Override
-        public void onError(StripeError error) {
-            handleError(error.getLocalizedString(PaymentActivity.this));
-            finishProgress();
-        }
     }
 }

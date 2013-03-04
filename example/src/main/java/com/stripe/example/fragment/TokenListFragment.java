@@ -1,10 +1,10 @@
-package com.stripe.fragment;
+package com.stripe.example.fragment;
 
 import android.support.v4.app.ListFragment;
 import android.widget.SimpleAdapter;
-import com.stripe.TokenList;
-import com.stripe.R;
-import com.stripe.Token;
+import com.stripe.example.TokenList;
+import com.stripe.example.R;
+import com.stripe.android.model.Token;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ public class TokenListFragment extends ListFragment implements TokenList {
     public void addToList(Token token) {
         String endingIn = getResources().getString(R.string.endingIn);
         Map<String, String> map = new HashMap<String, String>();
-        map.put("last4", endingIn + " " + token.card.last4);
-        map.put("tokenId", token.tokenId);
+        map.put("last4", endingIn + " " + token.getCard().getLast4());
+        map.put("tokenId", token.getId());
         listItems.add(map);
         adapter.notifyDataSetChanged();
     }

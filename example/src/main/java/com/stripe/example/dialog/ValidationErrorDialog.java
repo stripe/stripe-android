@@ -1,9 +1,9 @@
-package com.stripe.dialog;
+package com.stripe.example.dialog;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import com.stripe.R;
+import com.stripe.example.R;
 
 public class ValidationErrorDialog {
 
