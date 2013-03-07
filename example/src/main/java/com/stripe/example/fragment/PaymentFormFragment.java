@@ -60,7 +60,6 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
         return Integer.parseInt(this.yearSpinner.getSelectedItem().toString());
     }
 
-    @SuppressWarnings("unused")
     public void saveForm(View button) {
         ((PaymentActivity)getActivity()).saveCreditCard(this);
     }

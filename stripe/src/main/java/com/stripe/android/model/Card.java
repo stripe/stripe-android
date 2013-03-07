@@ -1,7 +1,6 @@
 package com.stripe.android.model;
 
 import com.stripe.android.util.TextUtils;
-import com.stripe.android.util.DateUtils;
 
 public class Card extends com.stripe.model.StripeObject {
     String number;

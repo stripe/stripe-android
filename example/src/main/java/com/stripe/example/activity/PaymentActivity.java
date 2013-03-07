@@ -8,7 +8,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-//import com.stripe.exception.*;
+import com.stripe.exception.*;
 import com.stripe.example.dialog.ValidationErrorDialog;
 import com.stripe.example.dialog.ValidationProgressDialog;
 import com.stripe.example.PaymentForm;
@@ -48,6 +48,23 @@ public class PaymentActivity extends FragmentActivity {
         boolean validation = card.validateCard();
         if (validation) {
             startProgress();
+            try {
+				new Stripe(PUBLISHABLE_KEY).createToken(
+						card,
+						new TokenCallback() {
+							public void onSuccess(Token token) {
+								getTokenList().addToList(token);
+								finishProgress();
+							}
+							public void onError(Exception error) {
+								handleError(error.getLocalizedMessage());
+								finishProgress();
+								
+							}
+						});
+			} catch (AuthenticationException e) {
+				handleError(e.getLocalizedMessage());
+			}
            
         } else {
             handleError("You did not enter a valid card");
