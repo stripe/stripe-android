@@ -10,7 +10,7 @@
 
     <application android:label="@string/appName" android:icon="@drawable/ic_launcher">
 
-        <activity android:name="com.stripe.activity.PaymentActivity"
+        <activity android:name=".activity.PaymentActivity"
                   android:theme="@style/Theme"
                   android:screenOrientation="portrait">
             <intent-filter>
