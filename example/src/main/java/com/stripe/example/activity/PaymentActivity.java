@@ -27,7 +27,7 @@ public class PaymentActivity extends FragmentActivity {
      *   private static final String publishableKey = "pk_something123456789";
      *
      */
-    public static final String PUBLISHABLE_KEY = "YOUR_PUBLISHABLE_KEY";
+    public static final String PUBLISHABLE_KEY = YOUR_PUBLISHABLE_KEY;
 
     ValidationProgressDialog progressDialog;
 
@@ -49,8 +49,9 @@ public class PaymentActivity extends FragmentActivity {
         if (validation) {
             startProgress();
             try {
-				new Stripe(PUBLISHABLE_KEY).createToken(
+				new Stripe().createToken(
 						card,
+						PUBLISHABLE_KEY,
 						new TokenCallback() {
 							public void onSuccess(Token token) {
 								getTokenList().addToList(token);

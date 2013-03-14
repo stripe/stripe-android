@@ -1,4 +1,5 @@
 package com.stripe.android;
+
 import com.stripe.exception.AuthenticationException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -33,19 +34,19 @@ public class Stripe {
         }
     }
 
-    public void createToken(Card card, Executor executor, TokenCallback callback) {
+    public void createToken(Card card, Executor executor, TokenCallback callback) throws AuthenticationException {
         createToken(card, defaultPublishableKey, executor, callback);
     }
 
-    public void createToken(Card card, String publishableKey, TokenCallback callback) {
+    public void createToken(Card card, String publishableKey, TokenCallback callback) throws AuthenticationException {
         createToken(card, publishableKey, null, callback);
     }
 
-    public void createToken(Card card, TokenCallback callback) {
-        createToken(card, defaultPublishableKey, null);
+    public void createToken(Card card, TokenCallback callback) throws AuthenticationException {
+        createToken(card, defaultPublishableKey, callback);
     }
 
-    public void createToken(final Card card, final String publishableKey, Executor executor, final TokenCallback callback) {
+    public void createToken(final Card card, final String publishableKey, Executor executor, final TokenCallback callback) throws AuthenticationException {
         try {
             if (card == null)
                 throw new RuntimeException("Required Parameter: 'card' is required to create a token.");
@@ -81,9 +82,12 @@ public class Stripe {
                 task.executeOnExecutor(executor);
             else
                 task.execute();
-            
+
         } catch (Exception e) {
-        	callback.onError(e);
+            if (callback != null)
+                callback.onError(e);
+            else
+                throw new RuntimeException(e);
         }
     }
 
@@ -102,7 +106,7 @@ public class Stripe {
         cardParams.put("address_line_country", card.getAddressCountry());
         return cardParams;
     }
-    
+
     private class ResponseWrapper {
         public final Token token;
         public final Exception error;
