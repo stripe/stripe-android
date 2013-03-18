@@ -27,7 +27,7 @@ public class PaymentActivity extends FragmentActivity {
      *   private static final String publishableKey = "pk_something123456789";
      *
      */
-    public static final String PUBLISHABLE_KEY = "pk_qY2cZzSHrsrThxl07cHWpqh6Zr5LO";
+    public static final String PUBLISHABLE_KEY = YOUR_PUBLISHABLE_KEY;
 
     ValidationProgressDialog progressDialog;
 
@@ -48,19 +48,19 @@ public class PaymentActivity extends FragmentActivity {
         boolean validation = card.validateCard();
         if (validation) {
             startProgress();
-			new Stripe().createToken(
-					card,
-					PUBLISHABLE_KEY,
-					new TokenCallback() {
-					public void onSuccess(Token token) {
-						getTokenList().addToList(token);
-						finishProgress();
-						}
-					public void onError(Exception error) {
-							handleError(error.getLocalizedMessage());
-							finishProgress();						
-						}
-					});
+            new Stripe().createToken(
+                    card,
+                    PUBLISHABLE_KEY,
+                    new TokenCallback() {
+                    public void onSuccess(Token token) {
+                        getTokenList().addToList(token);
+                        finishProgress();
+                        }
+                    public void onError(Exception error) {
+                            handleError(error.getLocalizedMessage());
+                            finishProgress();
+                        }
+                    });
         } else {
             handleError("You did not enter a valid card");
         }
