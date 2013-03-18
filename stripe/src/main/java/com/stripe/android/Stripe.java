@@ -92,6 +92,7 @@ public class Stripe {
     }
 
     private Map<String, Object> hashMapFromCard(Card card) {
+        Map<String, Object> tokenParams = new HashMap<String, Object>();
         Map<String, Object> cardParams = new HashMap<String, Object>();
         cardParams.put("number", card.getNumber());
         cardParams.put("cvc", card.getCVC());
@@ -104,7 +105,8 @@ public class Stripe {
         cardParams.put("address_line_zip", card.getAddressZip());
         cardParams.put("address_line_state", card.getAddressState());
         cardParams.put("address_line_country", card.getAddressCountry());
-        return cardParams;
+        tokenParams.put("card", cardParams);
+        return tokenParams;
     }
 
     private class ResponseWrapper {
