@@ -52,15 +52,23 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
 
     @Override
     public Integer getExpMonth() {
-        return Integer.parseInt(this.monthSpinner.getSelectedItem().toString());
+        return getInteger(this.monthSpinner);
     }
 
     @Override
     public Integer getExpYear() {
-        return Integer.parseInt(this.yearSpinner.getSelectedItem().toString());
+        return getInteger(this.yearSpinner);
     }
 
     public void saveForm(View button) {
         ((PaymentActivity)getActivity()).saveCreditCard(this);
+    }
+
+    private Integer getInteger(Spinner spinner) {
+    	try {
+    		return Integer.parseInt(spinner.getSelectedItem().toString());
+    	} catch (NumberFormatException e) {
+    		return 0;
+    	}
     }
 }
