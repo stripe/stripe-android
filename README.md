@@ -88,6 +88,8 @@ Checks that the number is formatted correctly and passes the [Luhn check](http:/
 
 Checks whether or not the expiration date represents an actual month in the future.
 
+TODO: Currently this always returns true. To be implemented.
+
 ##**validateCVC**
 
 Checks whether or not the supplied number could be a valid verification code.
@@ -129,25 +131,7 @@ _Note:  We have omitted personal and/or credit card information from all log lev
 If you'd like to build the example Android project:
 
 1. Clone the git repository.
-2. Be sure you've installed the Android SDK with API Level 4 (or higher) and _android-support-v4_
-3. Import the _example_ folder into [IntelliJ](http://www.jetbrains.com/idea/webhelp/creating-new-project-from-existing-source-code.html) or [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm).
-4. [Replace the value of PUBLISHABLE_KEY in PaymentActivity with your stripe test key](https://github.com/protokris/stripe-android/blob/master/example/src/main/java/com/stripe/activity/PaymentActivity.java#L19).
+2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_
+3. Import the _example_ and _stripe_ folders into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm).
+4. [Replace the value of PUBLISHABLE_KEY in PaymentActivity with your stripe test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L30).
 5. Build and run the project on your device or in the Android emulator.
-
-#**Building your own JAR**
-
-If you'd like to build the library from scratch: 
-
-1. Clone the git repository.
-2. Be sure you've installed the Android SDK with API Level 3.
-3. Make sure you've set your ANDROID_SDK_ROOT environment variable.
-4. In the 'stripe' folder, run _ant_
-
-#**Running the unit tests**
-
-If you'd like to run the JUNit tests:
-
-1. Clone the git repository
-2. Be sure you've installed the Android SDK with API Level 3
-3. Make sure you've set your ANDROID_SDK_ROOT
-4. In the 'stripe' folder, run _ant test_
