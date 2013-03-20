@@ -6,7 +6,10 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 ##**Installation**
 
-Add stripe-android.jar to your module's libs directory.
+1. Clone the git repository.
+2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_
+3. Import the _stripe_ folder into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm).
+4. In your project settings, add the _stripe_ project under the "Libraries" section of the "Android" category.
 
 ##**setPublishableKey**
 
