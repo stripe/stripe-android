@@ -3,6 +3,7 @@
 	<name>example</name>
 	<comment></comment>
 	<projects>
+                <project>stripe</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
