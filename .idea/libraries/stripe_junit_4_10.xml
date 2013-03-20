@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="stripe-junit-4.10">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/stripe/lib/junit-4.10.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
