@@ -13,7 +13,7 @@
               android:layout_below="@id/payment_form_title"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              class="com.stripe.fragment.PaymentFormFragment"/>
+              class="com.stripe.example.fragment.PaymentFormFragment"/>
 
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
@@ -26,6 +26,6 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:layout_below="@id/token_list_title"
-              class="com.stripe.fragment.TokenListFragment"/>
+              class="com.stripe.example.fragment.TokenListFragment"/>
 
 </RelativeLayout>
