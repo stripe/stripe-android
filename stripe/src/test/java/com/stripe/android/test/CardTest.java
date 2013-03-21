@@ -83,4 +83,88 @@ public class CardTest {
         Card card = new Card("4242.4242.4242.4242", null, null, null);
         assertFalse(card.validateNumber());
     }
+
+    @Test
+    public void shouldFailValidateCVCIfNull() {
+        Card card = new Card(null, null, null, null);
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfBlank() {
+        Card card = new Card(null, null, null, "");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfUnknownTypeAndLength2() {
+        Card card = new Card(null, null, null, "12");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfUnknownTypeAndLength3() {
+        Card card = new Card(null, null, null, "123");
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfUnknownTypeAndLength4() {
+        Card card = new Card(null, null, null, "1234");
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfUnknownTypeAndLength5() {
+        Card card = new Card(null, null, null, "12345");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfVisaAndLength2() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "12");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfVisaAndLength3() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "123");
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfVisaAndLength4() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "1234");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfVisaAndLength5() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "12345");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfAmexAndLength2() {
+        Card card = new Card("378282246310005", null, null, "12");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfAmexAndLength3() {
+        Card card = new Card("378282246310005", null, null, "123");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfAmexAndLength4() {
+        Card card = new Card("378282246310005", null, null, "1234");
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCVCIfAmexAndLength5() {
+        Card card = new Card("378282246310005", null, null, "12345");
+        assertFalse(card.validateCVC());
+    }
 }
