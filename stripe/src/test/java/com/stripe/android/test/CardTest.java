@@ -1,5 +1,7 @@
 package com.stripe.android.test;
 
+import java.util.Calendar;
+
 import org.junit.Test;
 
 import com.stripe.android.model.Card;
@@ -9,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CardTest {
+	private static final int YEAR_IN_FUTURE = 9999;
 
     @Test
     public void canInitializeWithMinimalArguments() {
@@ -82,6 +85,147 @@ public class CardTest {
     public void shouldFailValidateNumberIfWithDot() {
         Card card = new Card("4242.4242.4242.4242", null, null, null);
         assertFalse(card.validateNumber());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfNull() {
+        Card card = new Card(null, null, null, null);
+        assertFalse(card.validateExpMonth());
+        assertFalse(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfNullMonth() {
+        Card card = new Card(null, null, YEAR_IN_FUTURE, null);
+        assertFalse(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfZeroMonth() {
+        Card card = new Card(null, 0, YEAR_IN_FUTURE, null);
+        assertFalse(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfNegativeMonth() {
+        Card card = new Card(null, -1, YEAR_IN_FUTURE, null);
+        assertFalse(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfMonthToLarge() {
+        Card card = new Card(null, 13, YEAR_IN_FUTURE, null);
+        assertFalse(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfNullYear() {
+        Card card = new Card(null, 1, null, null);
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfZeroYear() {
+        Card card = new Card(null, 12, 0, null);
+        assertTrue(card.validateExpMonth());
+        assertFalse(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfNegativeYear() {
+        Card card = new Card(null, 12, -1, null);
+        assertTrue(card.validateExpMonth());
+        assertFalse(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateForDecemberOfThisYear() {
+    	Calendar cal = Calendar.getInstance();
+    	int year = cal.get(Calendar.YEAR);
+
+        Card card = new Card(null, 12, year, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertTrue(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateIfCurrentMonth() {
+    	Calendar cal = Calendar.getInstance();
+    	int month = cal.get(Calendar.MONTH) + 1;
+    	int year = cal.get(Calendar.YEAR);
+
+        Card card = new Card(null, month, year, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertTrue(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateIfCurrentMonthTwoDigitYear() {
+    	Calendar cal = Calendar.getInstance();
+    	int month = cal.get(Calendar.MONTH) + 1;
+    	String year = String.valueOf(cal.get(Calendar.YEAR));
+    	String suffix = year.substring(year.length() - 2, year.length());
+    	int twoDigitYear = Integer.parseInt(suffix);
+
+        Card card = new Card(null, month, twoDigitYear, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertTrue(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldFailValidateExpiryDateIfLastMonth() {
+    	Calendar cal = Calendar.getInstance();
+    	cal.add(Calendar.MONTH, -1);
+    	int month = cal.get(Calendar.MONTH) + 1;
+    	int year = cal.get(Calendar.YEAR);
+
+        Card card = new Card(null, month, year, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateIfNextMonth() {
+    	Calendar cal = Calendar.getInstance();
+    	cal.add(Calendar.MONTH, 1);
+    	int month = cal.get(Calendar.MONTH) + 1;
+    	int year = cal.get(Calendar.YEAR);
+
+        Card card = new Card(null, month, year, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertTrue(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateForJanuary00() {
+        Card card = new Card(null, 1, 0, null);
+        assertTrue(card.validateExpMonth());
+        assertFalse(card.validateExpYear());
+        assertFalse(card.validateExpiryDate());
+    }
+
+    @Test
+    public void shouldPassValidateExpiryDateForDecember99() {
+        Card card = new Card(null, 12, 99, null);
+        assertTrue(card.validateExpMonth());
+        assertTrue(card.validateExpYear());
+        assertTrue(card.validateExpiryDate());
     }
 
     @Test

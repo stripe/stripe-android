@@ -86,8 +86,6 @@ Checks that the number is formatted correctly and passes the [Luhn check](http:/
 
 Checks whether or not the expiration date represents an actual month in the future.
 
-TODO: Currently this always returns true. To be implemented.
-
 ##**validateCVC**
 
 Checks whether or not the supplied number could be a valid verification code.

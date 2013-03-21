@@ -1,5 +1,6 @@
 package com.stripe.android.model;
 
+import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.TextUtils;
 
 public class Card extends com.stripe.model.StripeObject {
@@ -204,8 +205,27 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateExpiryDate() {
-    	// TODO: Implement this
-    	return true;
+    	if (!validateExpMonth()) {
+    		return false;
+    	}
+    	if (!validateExpYear()) {
+    		return false;
+    	}
+    	return !DateUtils.hasMonthPassed(expYear, expMonth);
+    }
+
+    public boolean validateExpMonth() {
+    	if (expMonth == null) {
+    		return false;
+    	}
+    	return (expMonth >= 1 && expMonth <= 12);
+    }
+
+    public boolean validateExpYear() {
+    	if (expYear == null) {
+    		return false;
+    	}
+    	return !DateUtils.hasYearPassed(expYear);
     }
 
     public boolean validateCVC() {
