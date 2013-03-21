@@ -169,6 +169,7 @@ public class Card extends com.stripe.model.StripeObject {
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
         this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
+        this.type = getType();
     }
 
     public boolean validateCard() {
@@ -186,12 +187,20 @@ public class Card extends com.stripe.model.StripeObject {
 
         String rawNumber = number.trim().replaceAll("\\s+|-", "");
         if (TextUtils.isBlank(rawNumber)
-                || rawNumber.length() < 10
-                || rawNumber.length() > 19
                 || !TextUtils.isWholePositiveNumber(rawNumber)
                 || !isValidLuhnNumber(rawNumber)) {
             return false;
         }
+
+
+        if (!"American Express".equals(type) && rawNumber.length() != 16) {
+        	return false;
+        }
+
+        if ("American Express".equals(type) && rawNumber.length() != 15) {
+        	return false;
+        }
+
         return true;
     }
 
@@ -230,6 +239,10 @@ public class Card extends com.stripe.model.StripeObject {
 
             if (isOdd) {
                 digitInteger *= 2;
+            }
+
+            if (digitInteger > 9) {
+                digitInteger -= 9;
             }
 
             sum += digitInteger;
