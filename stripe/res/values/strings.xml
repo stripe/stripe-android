@@ -1,2 +1,7 @@
 <resources>
+    <string name="__pk_card_type">Card type</string>
+    <string name="__pk_card_number_hint">1234 5678 9012 3456</string>
+    <string name="__pk_expiry_hint">MM/YY</string>
+    <string name="__pk_cvc_hint">CVC</string>
+    <string name="__pk_zipcode_hint">ZIP</string>
 </resources>

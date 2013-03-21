@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="__pk_background">@android:color/white</color>
+    <color name="__pk_border">#ccc</color>
+</resources>

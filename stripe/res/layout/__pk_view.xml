@@ -1,0 +1,73 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/__pk_background"
+    android:padding="4dp" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/__pk_margin_left"
+        android:orientation="horizontal" >
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <EditText
+            android:id="@+id/__pk_expiry"
+            style="@style/PaymentKit.__TextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/__pk_expiry_hint"
+            android:inputType="date"
+            android:maxLength="5"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/__pk_cvc"
+            style="@style/PaymentKit.__TextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/__pk_cvc_hint"
+            android:inputType="number"
+            android:maxLength="3"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/__pk_zipcode"
+            style="@style/PaymentKit.__TextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/__pk_zipcode_hint"
+            android:inputType="number"
+            android:maxLength="5"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/__pk_card_number"
+        style="@style/PaymentKit.__TextField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/__pk_margin_left"
+        android:hint="@string/__pk_card_number_hint"
+        android:inputType="phone"
+        android:maxLength="19" />
+
+    <ImageView
+        android:layout_width="@dimen/__pk_card_type_width"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical"
+        android:background="@color/__pk_background"
+        android:contentDescription="@string/__pk_card_type"
+        android:paddingLeft="@dimen/__pk_card_type_margin_horizontal"
+        android:paddingRight="@dimen/__pk_card_type_margin_horizontal"
+        android:src="@drawable/__pk_placeholder" />
+
+</FrameLayout>
