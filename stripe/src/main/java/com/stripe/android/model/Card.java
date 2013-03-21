@@ -192,7 +192,6 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
 
-
         if (!"American Express".equals(type) && rawNumber.length() != 16) {
         	return false;
         }
@@ -205,6 +204,7 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateExpiryDate() {
+    	// TODO: Implement this
     	return true;
     }
 
