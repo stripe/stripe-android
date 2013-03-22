@@ -11,7 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CardTest {
-	private static final int YEAR_IN_FUTURE = 9999;
+    private static final int YEAR_IN_FUTURE = 9999;
 
     @Test
     public void canInitializeWithMinimalArguments() {
@@ -151,8 +151,8 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateForDecemberOfThisYear() {
-    	Calendar cal = Calendar.getInstance();
-    	int year = cal.get(Calendar.YEAR);
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
 
         Card card = new Card(null, 12, year, null);
         assertTrue(card.validateExpMonth());
@@ -162,9 +162,9 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfCurrentMonth() {
-    	Calendar cal = Calendar.getInstance();
-    	int month = cal.get(Calendar.MONTH) + 1;
-    	int year = cal.get(Calendar.YEAR);
+        Calendar cal = Calendar.getInstance();
+        int month = cal.get(Calendar.MONTH) + 1;
+        int year = cal.get(Calendar.YEAR);
 
         Card card = new Card(null, month, year, null);
         assertTrue(card.validateExpMonth());
@@ -174,11 +174,11 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfCurrentMonthTwoDigitYear() {
-    	Calendar cal = Calendar.getInstance();
-    	int month = cal.get(Calendar.MONTH) + 1;
-    	String year = String.valueOf(cal.get(Calendar.YEAR));
-    	String suffix = year.substring(year.length() - 2, year.length());
-    	int twoDigitYear = Integer.parseInt(suffix);
+        Calendar cal = Calendar.getInstance();
+        int month = cal.get(Calendar.MONTH) + 1;
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String suffix = year.substring(year.length() - 2, year.length());
+        int twoDigitYear = Integer.parseInt(suffix);
 
         Card card = new Card(null, month, twoDigitYear, null);
         assertTrue(card.validateExpMonth());
@@ -188,10 +188,10 @@ public class CardTest {
 
     @Test
     public void shouldFailValidateExpiryDateIfLastMonth() {
-    	Calendar cal = Calendar.getInstance();
-    	cal.add(Calendar.MONTH, -1);
-    	int month = cal.get(Calendar.MONTH) + 1;
-    	int year = cal.get(Calendar.YEAR);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -1);
+        int month = cal.get(Calendar.MONTH) + 1;
+        int year = cal.get(Calendar.YEAR);
 
         Card card = new Card(null, month, year, null);
         assertTrue(card.validateExpMonth());
@@ -201,10 +201,10 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfNextMonth() {
-    	Calendar cal = Calendar.getInstance();
-    	cal.add(Calendar.MONTH, 1);
-    	int month = cal.get(Calendar.MONTH) + 1;
-    	int year = cal.get(Calendar.YEAR);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, 1);
+        int month = cal.get(Calendar.MONTH) + 1;
+        int year = cal.get(Calendar.YEAR);
 
         Card card = new Card(null, month, year, null);
         assertTrue(card.validateExpMonth());
@@ -289,6 +289,12 @@ public class CardTest {
     }
 
     @Test
+    public void shouldFailValidateCVCIfVisaAndBad() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "bad");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
     public void shouldPassValidateCVCIfAmexAndLength2() {
         Card card = new Card("378282246310005", null, null, "12");
         assertFalse(card.validateCVC());
@@ -307,8 +313,131 @@ public class CardTest {
     }
 
     @Test
-    public void shouldPassValidateCVCIfAmexAndLength5() {
+    public void shouldFailValidateCVCIfAmexAndLength5() {
         Card card = new Card("378282246310005", null, null, "12345");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCVCIfAmexAndBad() {
+        Card card = new Card("378282246310005", null, null, "bad");
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardIfNotLuhnNumber() {
+        Card card = new Card("4242-4242-4242-4241", 12, 2050, "123");
+        assertFalse(card.validateCard());
+        assertFalse(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardInvalidMonth() {
+        Card card = new Card("4242-4242-4242-4242", 13, 2050, "123");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertFalse(card.validateExpiryDate());
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardInvalidYear() {
+        Card card = new Card("4242-4242-4242-4242", 1, 2000, "123");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertFalse(card.validateExpiryDate());
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCardWithNullCVC() {
+        Card card = new Card("4242-4242-4242-4242", 12, 2050, null);
+        assertTrue(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCardVisa() {
+        Card card = new Card("4242-4242-4242-4242", 12, 2050, "123");
+        assertTrue(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardVisaWithShortCVC() {
+        Card card = new Card("4242-4242-4242-4242", 12, 2050, "12");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardVisaWithLongCVC() {
+        Card card = new Card("4242-4242-4242-4242", 12, 2050, "1234");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardVisaWithBadCVC() {
+        Card card = new Card("4242-4242-4242-4242", 12, 2050, "bad");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCardAmex() {
+        Card card = new Card("378282246310005", 12, 2050, "1234");
+        assertTrue(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertTrue(card.validateCVC());
+    }
+
+    @Test
+    public void shouldPassValidateCardAmexWithNullCVC() {
+        Card card = new Card("378282246310005", 12, 2050, null);
+        assertTrue(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardAmexWithShortCVC() {
+        Card card = new Card("378282246310005", 12, 2050, "123");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardAmexWithLongCVC() {
+        Card card = new Card("378282246310005", 12, 2050, "12345");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
+        assertFalse(card.validateCVC());
+    }
+
+    @Test
+    public void shouldFailValidateCardAmexWithBadCVC() {
+        Card card = new Card("378282246310005", 12, 2050, "bad");
+        assertFalse(card.validateCard());
+        assertTrue(card.validateNumber());
+        assertTrue(card.validateExpiryDate());
         assertFalse(card.validateCVC());
     }
 }
