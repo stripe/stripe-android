@@ -117,6 +117,12 @@ public class CardNumberFormatterTest {
     }
 
     @Test
+    public void testFullVisaWithOtherCharacters() {
+        String formatted = CardNumberFormatter.format("4242,424a242 xyz 424242", false);
+        assertEquals("4242 4242 4242 4242", formatted);
+    }
+
+    @Test
     public void testAmex4Digits() {
         String formatted = CardNumberFormatter.format("3728", false);
         assertEquals("3728", formatted);
@@ -167,6 +173,12 @@ public class CardNumberFormatterTest {
     @Test
     public void testFullAmexWithSpaces() {
         String formatted = CardNumberFormatter.format("378 282 246 310 005", false);
+        assertEquals("3782 822463 10005", formatted);
+    }
+
+    @Test
+    public void testFullAmexWIthOtherCharacters() {
+        String formatted = CardNumberFormatter.format("3782c8224_631  something 0005", false);
         assertEquals("3782 822463 10005", formatted);
     }
 

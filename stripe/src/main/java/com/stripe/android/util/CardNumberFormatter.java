@@ -20,7 +20,7 @@ public abstract class CardNumberFormatter {
     }
 
     private static String formatHelper(String number, int[] grouping, boolean trailing) {
-        String rawNumber = number.trim().replaceAll("\\s+|-", "");
+        String rawNumber = number.trim().replaceAll("[^0-9]", "");
 
         StringBuffer buf = new StringBuffer();
 
