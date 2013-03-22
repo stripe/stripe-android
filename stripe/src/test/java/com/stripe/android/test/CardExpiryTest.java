@@ -5,13 +5,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
-import java.util.Locale;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.stripe.android.time.FrozenClock;
 import com.stripe.android.util.CardExpiry;
 
 public class CardExpiryTest {
+    @Before
+    public void setup() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 1997);
+        cal.set(Calendar.MONTH, Calendar.AUGUST);
+        cal.set(Calendar.DAY_OF_MONTH, 29);
+        FrozenClock.freeze(cal);
+    }
+
+    @After
+    public void teardown() {
+        FrozenClock.unfreeze();
+    }
+
     @Test
     public void emptyConstructorShouldBeInvalid() {
         CardExpiry cardExpiry = new CardExpiry();
@@ -32,7 +48,7 @@ public class CardExpiryTest {
         assertTrue(cardExpiry.isPartiallyValid());
         assertTrue(cardExpiry.isValid());
         assertEquals(12, cardExpiry.getMonth());
-        assertEquals(2099, cardExpiry.getYear());
+        assertEquals(1999, cardExpiry.getYear());
         assertEquals("12/99", cardExpiry.toString());
     }
 
@@ -42,7 +58,7 @@ public class CardExpiryTest {
         assertFalse(cardExpiry.isPartiallyValid());
         assertFalse(cardExpiry.isValid());
         assertEquals(1, cardExpiry.getMonth());
-        assertEquals(2001, cardExpiry.getYear());
+        assertEquals(1901, cardExpiry.getYear());
     }
 
     @Test
@@ -144,28 +160,33 @@ public class CardExpiryTest {
     }
 
     @Test
-    public void trailingDoubleSlashShouldBePartiallyInvalid() {
+    public void trailingDoubleSlashShouldBeInvalid() {
         CardExpiry cardExpiry = new CardExpiry("12//");
         assertFalse(cardExpiry.isPartiallyValid());
         assertFalse(cardExpiry.isValid());
     }
 
     @Test
-    public void twoTrailingSlashesShouldBeInvalid() {
-        CardExpiry cardExpiry = new CardExpiry("01//");
+    public void lastMonthShouldBeInvalid() {
+        CardExpiry cardExpiry = new CardExpiry("7/97");
         assertFalse(cardExpiry.isPartiallyValid());
         assertFalse(cardExpiry.isValid());
+        assertEquals("07/97", cardExpiry.toString());
     }
 
     @Test
     public void currentMonthShouldBeValid() {
-        Calendar cal = Calendar.getInstance();
-        int month = cal.get(Calendar.MONTH) + 1;
-        int year = cal.get(Calendar.YEAR);
-        CardExpiry cardExpiry = new CardExpiry(month + "/" + year);
+        CardExpiry cardExpiry = new CardExpiry("8/1997");
         assertTrue(cardExpiry.isPartiallyValid());
         assertTrue(cardExpiry.isValid());
-        String expected = String.format(Locale.US, "%02d/%d", month, year);
-        assertEquals(expected, cardExpiry.toString());
+        assertEquals("08/1997", cardExpiry.toString());
+    }
+
+    @Test
+    public void nextMonthShouldBeInvalid() {
+        CardExpiry cardExpiry = new CardExpiry("9/97");
+        assertTrue(cardExpiry.isPartiallyValid());
+        assertTrue(cardExpiry.isValid());
+        assertEquals("09/97", cardExpiry.toString());
     }
 }

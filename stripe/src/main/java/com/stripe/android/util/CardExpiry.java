@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.stripe.android.time.Clock;
+
 public class CardExpiry {
     private boolean patternMismatch = false;
     private String month = "";
@@ -48,7 +50,7 @@ public class CardExpiry {
             return false;
         }
 
-        Date now = new Date();
+        Date now = Clock.getCalendarInstance().getTime();
         return now.before(getExpiryDate());
     }
 
