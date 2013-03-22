@@ -37,17 +37,6 @@
             android:inputType="number"
             android:maxLength="3"
             android:visibility="gone" />
-
-        <EditText
-            android:id="@+id/__pk_zipcode"
-            style="@style/PaymentKit.__TextField"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/__pk_zipcode_hint"
-            android:inputType="number"
-            android:maxLength="5"
-            android:visibility="gone" />
     </LinearLayout>
 
     <EditText

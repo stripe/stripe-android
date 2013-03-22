@@ -28,7 +28,6 @@ public class PaymentKitView extends FrameLayout {
     private EditText cardNumberView;
     private EditText expiryView;
     private EditText cvcView;
-    private EditText zipCodeView;
 
     private float cardNumberSlidingDelta = 0;
     private boolean isCardNumberCollapsed = false;
@@ -61,7 +60,6 @@ public class PaymentKitView extends FrameLayout {
         cardNumberView = (EditText) parent.findViewById(R.id.__pk_card_number);
         expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
-        zipCodeView = (EditText) parent.findViewById(R.id.__pk_zipcode);
 
         Resources res = getContext().getResources();
         textColor = res.getColor(R.color.__pk_text_color);
@@ -131,7 +129,6 @@ public class PaymentKitView extends FrameLayout {
 
             expiryView.setVisibility(View.VISIBLE);
             cvcView.setVisibility(View.VISIBLE);
-            zipCodeView.setVisibility(View.VISIBLE);
 
             expiryView.requestFocus();
         }
@@ -147,7 +144,6 @@ public class PaymentKitView extends FrameLayout {
 
             expiryView.setVisibility(View.GONE);
             cvcView.setVisibility(View.GONE);
-            zipCodeView.setVisibility(View.GONE);
 
             FrameLayout.LayoutParams params
                 = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
