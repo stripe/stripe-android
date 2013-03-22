@@ -193,39 +193,49 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
 
+        if (!validateNumberLength()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean validateNumberLength() {
+        String rawNumber = number.trim().replaceAll("\\s+|-", "");
+
         if (!"American Express".equals(type) && rawNumber.length() != 16) {
-        	return false;
+            return false;
         }
 
         if ("American Express".equals(type) && rawNumber.length() != 15) {
-        	return false;
+            return false;
         }
 
         return true;
     }
 
     public boolean validateExpiryDate() {
-    	if (!validateExpMonth()) {
-    		return false;
-    	}
-    	if (!validateExpYear()) {
-    		return false;
-    	}
-    	return !DateUtils.hasMonthPassed(expYear, expMonth);
+        if (!validateExpMonth()) {
+            return false;
+        }
+        if (!validateExpYear()) {
+            return false;
+        }
+        return !DateUtils.hasMonthPassed(expYear, expMonth);
     }
 
     public boolean validateExpMonth() {
-    	if (expMonth == null) {
-    		return false;
-    	}
-    	return (expMonth >= 1 && expMonth <= 12);
+        if (expMonth == null) {
+            return false;
+        }
+        return (expMonth >= 1 && expMonth <= 12);
     }
 
     public boolean validateExpYear() {
-    	if (expYear == null) {
-    		return false;
-    	}
-    	return !DateUtils.hasYearPassed(expYear);
+        if (expYear == null) {
+            return false;
+        }
+        return !DateUtils.hasYearPassed(expYear);
     }
 
     public boolean validateCVC() {

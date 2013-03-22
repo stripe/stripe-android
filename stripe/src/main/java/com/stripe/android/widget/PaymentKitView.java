@@ -1,6 +1,7 @@
 package com.stripe.android.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -16,6 +17,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Card;
 import com.stripe.android.util.CardExpiry;
 
 public class PaymentKitView extends FrameLayout {
@@ -30,6 +32,10 @@ public class PaymentKitView extends FrameLayout {
     private float cardNumberSlidingDelta = 0;
     private boolean isCardNumberCollapsed = false;
     private int cardNumberOriginalLeftMargin = -1;
+
+    private Card card = new Card(null, null, null, null);
+    private int textColor;
+    private int errorColor;
 
     public PaymentKitView(Context context) {
         super(context);
@@ -56,11 +62,22 @@ public class PaymentKitView extends FrameLayout {
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
         zipCodeView = (EditText) parent.findViewById(R.id.__pk_zipcode);
 
+        Resources res = getContext().getResources();
+        textColor = res.getColor(R.color.__pk_text_color);
+        errorColor = res.getColor(R.color.__pk_error_color);
+
         cardNumberView.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (cardNumberView.length() == 19) {
-                    collapseCardNumber();
+                String number = s.toString();
+                card.setNumber(number);
+                cardNumberView.setTextColor(textColor);
+                if (card.validateNumberLength()) {
+                    if (card.validateNumber()) {
+                        collapseCardNumber();
+                    } else {
+                        cardNumberView.setTextColor(errorColor);
+                    }
                 }
             }
             @Override

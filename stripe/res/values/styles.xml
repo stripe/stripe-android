@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="PaymentKit.__TextField" parent="@android:style/Widget.EditText">
+        <item name="android:textColor">@color/__pk_text_color</item>
         <item name="android:textSize">@dimen/__pk_text_size</item>
         <item name="android:layout_centerVertical">true</item>
         <item name="android:background">@null</item>
