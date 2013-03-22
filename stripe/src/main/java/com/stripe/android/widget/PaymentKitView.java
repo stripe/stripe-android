@@ -1,10 +1,10 @@
 package com.stripe.android.widget;
 
-import com.stripe.android.R;
-
 import android.content.Context;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.Layout;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -15,8 +15,12 @@ import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import com.stripe.android.R;
+import com.stripe.android.util.CardExpiry;
+
 public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
+    private static final int EXPIRY_VIEW_MAX_WIDTH = 5;
 
     private EditText cardNumberView;
     private EditText expiryView;
@@ -76,6 +80,10 @@ public class PaymentKitView extends FrameLayout {
                 }
             }
         });
+
+        ExpiryWatcher expiryWatcher = new ExpiryWatcher();
+        expiryView.setFilters(new InputFilter[] { expiryWatcher });
+        expiryView.addTextChangedListener(expiryWatcher);
 
         FrameLayout.LayoutParams params
             = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
@@ -146,4 +154,45 @@ public class PaymentKitView extends FrameLayout {
             cardNumberView.setLayoutParams(params);
         }
     };
+
+    private class ExpiryWatcher implements InputFilter, TextWatcher {
+        private CardExpiry cardExpiry = new CardExpiry();
+        private boolean isInserting = false;
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            StringBuffer buf = new StringBuffer();
+            buf.append(dest.subSequence(0, dstart));
+            buf.append(source.subSequence(start, end));
+            buf.append(dest.subSequence(dend, dest.length()));
+            String str = buf.toString();
+            cardExpiry.updateFromString(str);
+            return cardExpiry.isPartiallyValid() ? null : "";
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String str = s.toString();
+            cardExpiry.updateFromString(str);
+            if (cardExpiry.isPartiallyValid()) {
+                String formattedString = isInserting ?
+                        cardExpiry.toStringWithTrail() : cardExpiry.toString();
+                if (!str.equals(formattedString)) {
+                    s.replace(0, s.length(), formattedString);
+                }
+            }
+            if (s.length() == EXPIRY_VIEW_MAX_WIDTH) {
+                cvcView.requestFocus();
+            }
+        }
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            isInserting = (after > count);
+        }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // not needed
+        }
+    }
 }

@@ -19,11 +19,11 @@ public class DateUtils {
     }
 
     // Convert two-digit year to full year if necessary
-    private static int normalizeYear(int year)  {
+    public static int normalizeYear(int year)  {
         if (year < 100 && year >= 0) {
-        	Calendar now = Clock.getCalendarInstance();
-        	String currentYear = String.valueOf(now.get(Calendar.YEAR));
-        	String prefix = currentYear.substring(0, currentYear.length() - 2);
+            Calendar now = Clock.getCalendarInstance();
+            String currentYear = String.valueOf(now.get(Calendar.YEAR));
+            String prefix = currentYear.substring(0, currentYear.length() - 2);
             year = Integer.parseInt(String.format(Locale.US, "%s%02d", prefix, year));
         }
         return year;
