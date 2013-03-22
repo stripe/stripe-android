@@ -2,16 +2,33 @@ package com.stripe.android.test;
 
 import java.util.Calendar;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.time.FrozenClock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CardTest {
-    private static final int YEAR_IN_FUTURE = 9999;
+    private static final int YEAR_IN_FUTURE = 2000;
+
+    @Before
+    public void setup() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 1997);
+        cal.set(Calendar.MONTH, Calendar.AUGUST);
+        cal.set(Calendar.DAY_OF_MONTH, 29);
+        FrozenClock.freeze(cal);
+    }
+
+    @After
+    public void teardown() {
+       FrozenClock.unfreeze();
+    }
 
     @Test
     public void canInitializeWithMinimalArguments() {
@@ -205,10 +222,7 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateForDecemberOfThisYear() {
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-
-        Card card = new Card(null, 12, year, null);
+        Card card = new Card(null, 12, 1997, null);
         assertTrue(card.validateExpMonth());
         assertTrue(card.validateExpYear());
         assertTrue(card.validateExpiryDate());
@@ -216,11 +230,7 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfCurrentMonth() {
-        Calendar cal = Calendar.getInstance();
-        int month = cal.get(Calendar.MONTH) + 1;
-        int year = cal.get(Calendar.YEAR);
-
-        Card card = new Card(null, month, year, null);
+        Card card = new Card(null, 8, 1997, null);
         assertTrue(card.validateExpMonth());
         assertTrue(card.validateExpYear());
         assertTrue(card.validateExpiryDate());
@@ -228,13 +238,7 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfCurrentMonthTwoDigitYear() {
-        Calendar cal = Calendar.getInstance();
-        int month = cal.get(Calendar.MONTH) + 1;
-        String year = String.valueOf(cal.get(Calendar.YEAR));
-        String suffix = year.substring(year.length() - 2, year.length());
-        int twoDigitYear = Integer.parseInt(suffix);
-
-        Card card = new Card(null, month, twoDigitYear, null);
+        Card card = new Card(null, 8, 97, null);
         assertTrue(card.validateExpMonth());
         assertTrue(card.validateExpYear());
         assertTrue(card.validateExpiryDate());
@@ -242,12 +246,7 @@ public class CardTest {
 
     @Test
     public void shouldFailValidateExpiryDateIfLastMonth() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
-        int month = cal.get(Calendar.MONTH) + 1;
-        int year = cal.get(Calendar.YEAR);
-
-        Card card = new Card(null, month, year, null);
+        Card card = new Card(null, 7, 1997, null);
         assertTrue(card.validateExpMonth());
         assertTrue(card.validateExpYear());
         assertFalse(card.validateExpiryDate());
@@ -255,12 +254,7 @@ public class CardTest {
 
     @Test
     public void shouldPassValidateExpiryDateIfNextMonth() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 1);
-        int month = cal.get(Calendar.MONTH) + 1;
-        int year = cal.get(Calendar.YEAR);
-
-        Card card = new Card(null, month, year, null);
+        Card card = new Card(null, 9, 1997, null);
         assertTrue(card.validateExpMonth());
         assertTrue(card.validateExpYear());
         assertTrue(card.validateExpiryDate());
@@ -398,7 +392,7 @@ public class CardTest {
 
     @Test
     public void shouldFailValidateCardInvalidYear() {
-        Card card = new Card("4242-4242-4242-4242", 1, 2000, "123");
+        Card card = new Card("4242-4242-4242-4242", 1, 1990, "123");
         assertFalse(card.validateCard());
         assertTrue(card.validateNumber());
         assertFalse(card.validateExpiryDate());
