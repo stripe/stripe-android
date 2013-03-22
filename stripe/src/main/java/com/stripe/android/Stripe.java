@@ -1,17 +1,71 @@
 package com.stripe.android;
 
-import com.stripe.exception.AuthenticationException;
-import com.stripe.android.model.Card;
-import com.stripe.android.model.Token;
-import com.stripe.android.compat.AsyncTask;
-import com.stripe.android.TokenCallback;
-import java.util.concurrent.Executor;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Date;
+import java.util.concurrent.Executor;
+
+import com.stripe.android.compat.AsyncTask;
+import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
+import com.stripe.exception.AuthenticationException;
 
 public class Stripe {
     private String defaultPublishableKey;
+
+    TokenCreator tokenCreator = new TokenCreator() {
+        @Override
+        public void create(final Card card, final String publishableKey, final Executor executor,
+                final TokenCallback callback) {
+            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
+                protected ResponseWrapper doInBackground(Void... params) {
+                    try {
+                        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
+                                hashMapFromCard(card), publishableKey);
+                        com.stripe.model.Card stripeCard = stripeToken.getCard();
+                        Card card = androidCardFromStripeCard(stripeCard);
+                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        return new ResponseWrapper(token, null);
+                    } catch (Exception e) {
+                        return new ResponseWrapper(null, e);
+                    }
+                }
+
+                protected void onPostExecute(ResponseWrapper result) {
+                    tokenTaskPostExecution(result, callback);
+               }
+            };
+
+            executeTokenTask(executor, task);
+        }
+    };
+
+    TokenRequester tokenRequester = new TokenRequester() {
+          @Override
+          public void request(final String tokenId, final String publishableKey,
+                  final Executor executor, final TokenCallback callback) {
+            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
+                protected ResponseWrapper doInBackground(Void... params) {
+                    try {
+                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(
+                                tokenId, publishableKey);
+                        com.stripe.model.Card stripeCard = stripeToken.getCard();
+                        Card card = androidCardFromStripeCard(stripeCard);
+                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        return new ResponseWrapper(token, null);
+                    } catch (Exception e) {
+                        return new ResponseWrapper(null, e);
+                    }
+                }
+
+                protected void onPostExecute(ResponseWrapper result) {
+                    tokenTaskPostExecution(result, callback);
+               }
+            };
+
+            executeTokenTask(executor, task);
+          }
+    };
 
     public Stripe() {
     }
@@ -56,26 +110,7 @@ public class Stripe {
 
             validateKey(publishableKey);
 
-            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
-                protected ResponseWrapper doInBackground(Void... params) {
-                    try {
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(tokenId, publishableKey);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
-                        return new ResponseWrapper(token, null);
-                    } catch (Exception e) {
-                        return new ResponseWrapper(null, e);
-                    }
-                }
-
-                protected void onPostExecute(ResponseWrapper result) {
-                    tokenTaskPostExecution(result, callback);
-               }
-            };
-
-            executeTokenTask(executor, task);
-
+            tokenRequester.request(tokenId, publishableKey, executor, callback);
         }
         catch (AuthenticationException e) {
             callback.onError(e);
@@ -104,26 +139,7 @@ public class Stripe {
 
             validateKey(publishableKey);
 
-            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
-                protected ResponseWrapper doInBackground(Void... params) {
-                    try {
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(hashMapFromCard(card), publishableKey);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
-                        return new ResponseWrapper(token, null);
-                    } catch (Exception e) {
-                        return new ResponseWrapper(null, e);
-                    }
-                }
-
-                protected void onPostExecute(ResponseWrapper result) {
-                    tokenTaskPostExecution(result, callback);
-               }
-            };
-
-            executeTokenTask(executor, task);
-
+            tokenCreator.create(card, publishableKey, executor, callback);
         }
         catch (AuthenticationException e) {
             callback.onError(e);
@@ -147,8 +163,7 @@ public class Stripe {
             callback.onError(new RuntimeException("Somehow got neither a token response or an error response"));
     }
 
-    private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task)
-    {
+    private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
         if (executor != null)
             task.executeOnExecutor(executor);
         else
@@ -181,5 +196,13 @@ public class Stripe {
             this.error = error;
             this.token = token;
         }
+    }
+
+    interface TokenCreator {
+        public void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
+    }
+
+    interface TokenRequester {
+        public void request(String tokenId, String publishableKey, Executor executor, TokenCallback callback);
     }
 }
