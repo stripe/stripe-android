@@ -20,6 +20,42 @@ public class CardTest {
     }
 
     @Test
+    public void testTypeReturnsCorrectlyForAmexCard() {
+        Card card = new Card("3412123412341234", null, null, null);
+        assertEquals("American Express", card.getType());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForDiscoverCard() {
+        Card card = new Card("6452123412341234", null, null, null);
+        assertEquals("Discover", card.getType());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForJCBCard() {
+        Card card = new Card("3512123412341234", null, null, null);
+        assertEquals("JCB", card.getType());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForDinersClubCard() {
+        Card card = new Card("3612123412341234", null, null, null);
+        assertEquals("Diners Club", card.getType());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForVisaCard() {
+        Card card = new Card("4112123412341234", null, null, null);
+        assertEquals("Visa", card.getType());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForMasterCard() {
+        Card card = new Card("5112123412341234", null, null, null);
+        assertEquals("MasterCard", card.getType());
+    }
+
+    @Test
     public void shouldPassValidateNumberIfLuhnNumber() {
         Card card = new Card("4242-4242-4242-4242", null, null, null);
         assertTrue(card.validateNumber());
@@ -51,6 +87,12 @@ public class CardTest {
     }
 
     @Test
+    public void shouldFailValidateNumberIfJustSpaces() {
+        Card card = new Card("    ", null, null, null);
+        assertFalse(card.validateNumber());
+    }
+
+    @Test
     public void shouldFailValidateNumberIfTooShort() {
         Card card = new Card("0", null, null, null);
         assertFalse(card.validateNumber());
@@ -70,8 +112,20 @@ public class CardTest {
     }
 
     @Test
-    public void shouldPassValidateNumberWithoutDashes() {
+    public void shouldPassValidateNumber() {
         Card card = new Card("4242424242424242", null, null, null);
+        assertTrue(card.validateNumber());
+    }
+
+    @Test
+    public void shouldPassValidateNumberSpaces() {
+        Card card = new Card("4242 4242 4242 4242", null, null, null);
+        assertTrue(card.validateNumber());
+    }
+
+    @Test
+    public void shouldPassValidateNumberDashes() {
+        Card card = new Card("4242-4242-4242-4242", null, null, null);
         assertTrue(card.validateNumber());
     }
 
@@ -289,8 +343,8 @@ public class CardTest {
     }
 
     @Test
-    public void shouldFailValidateCVCIfVisaAndBad() {
-        Card card = new Card("4242 4242 4242 4242", null, null, "bad");
+    public void shouldFailValidateCVCIfVisaAndNotNumeric() {
+        Card card = new Card("4242 4242 4242 4242", null, null, "12a");
         assertFalse(card.validateCVC());
     }
 
@@ -319,8 +373,8 @@ public class CardTest {
     }
 
     @Test
-    public void shouldFailValidateCVCIfAmexAndBad() {
-        Card card = new Card("378282246310005", null, null, "bad");
+    public void shouldFailValidateCVCIfAmexAndNotNumeric() {
+        Card card = new Card("378282246310005", null, null, "123d");
         assertFalse(card.validateCVC());
     }
 
@@ -439,5 +493,16 @@ public class CardTest {
         assertTrue(card.validateNumber());
         assertTrue(card.validateExpiryDate());
         assertFalse(card.validateCVC());
+    }
+
+    public void testLast4() {
+        Card card = new Card("42 42 42 42 42 42 42 42", null, null, null);
+        assertEquals("4242", card.getLast4());
+    }
+
+    @Test
+    public void last4ShouldBeNullWhenNumberIsNull() {
+        Card card = new Card(null, null, null, null);
+        assertEquals(null, card.getLast4());
     }
 }
