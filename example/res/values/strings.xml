@@ -6,26 +6,12 @@
     <string name="paymentMethods">Payment Methods</string>
 
     <string name="endingIn">Card ending in </string>
-    <string name="progressMessage">Creating Token...</string>
+    <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
     <string name="cardNumber">Card Number</string>
     <string name="save">Save</string>
     <string name="cvc">CVC</string>
 
-    <string name="incorrect_number_message">Your card\'s number is invalid.</string>
-    <string name="incorrect_cvc_message">Your card\'s security code is invalid.</string>
-    <string name="invalid_expiry_month_message">Your card\'s expiration month is invalid.</string>
-    <string name="invalid_expiry_year_message">Your card\'s expiration year is invalid.</string>
-    <string name="expired_card_message">Your card has expired.</string>
-    <string name="card_declined_message">Your card was declined.</string>
-    <string name="processing_error_message">There was an error processing your card -- try again in a few seconds.</string>
-    <string name="unexpected_error_message">There was an unexpected error -- try again in a few seconds.</string>
-    <string name="invalid_request_error_message">There was a problem interpreting your request -- try again in a few seconds.</string>
-    <string name="unauthorized_request_error_message">There was a problem authorizing your request -- try again in a few seconds.</string>
-    <string name="missing_number_message">Your card\'s number is invalid.</string>
-    <string name="missing_cvc_message">Your card\'s security code is invalid.</string>
-    <string name="missing_expiry_month_message">Your card\'s expiration month is invalid.</string>
-    <string name="missing_expiry_year_message">Your card\'s expiration year is invalid.</string>
-
+    <string name="ok">OK</string>
 </resources>
