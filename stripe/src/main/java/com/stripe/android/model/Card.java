@@ -170,7 +170,6 @@ public class Card extends com.stripe.model.StripeObject {
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
         this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
-        this.type = getType();
     }
 
     public boolean validateCard() {
@@ -203,15 +202,13 @@ public class Card extends com.stripe.model.StripeObject {
     public boolean validateNumberLength() {
         String rawNumber = number.trim().replaceAll("\\s+|-", "");
 
-        if (!"American Express".equals(type) && rawNumber.length() != 16) {
-            return false;
+        String cardType = getType();
+
+        if ("American Express".equals(cardType)) {
+            return (rawNumber.length() == 15);
         }
 
-        if ("American Express".equals(type) && rawNumber.length() != 15) {
-            return false;
-        }
-
-        return true;
+        return (rawNumber.length() == 16);
     }
 
     public boolean validateExpiryDate() {
@@ -243,10 +240,11 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
         String cvcValue = cvc.trim();
+        String cardType = getType();
 
-        boolean validLength = ((type == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
-                ("American Express".equals(type) && cvcValue.length() == 4) ||
-                (!"American Express".equals(type) && cvcValue.length() == 3));
+        boolean validLength = ((cardType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
+                ("American Express".equals(cardType) && cvcValue.length() == 4) ||
+                (!"American Express".equals(cardType) && cvcValue.length() == 3));
 
 
         if (!TextUtils.isWholePositiveNumber(cvcValue) || !validLength) {

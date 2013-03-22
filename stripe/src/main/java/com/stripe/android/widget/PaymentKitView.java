@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardExpiry;
+import com.stripe.android.util.CardNumberFormatter;
 
 public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
@@ -66,29 +67,8 @@ public class PaymentKitView extends FrameLayout {
         textColor = res.getColor(R.color.__pk_text_color);
         errorColor = res.getColor(R.color.__pk_error_color);
 
-        cardNumberView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                String number = s.toString();
-                card.setNumber(number);
-                cardNumberView.setTextColor(textColor);
-                if (card.validateNumberLength()) {
-                    if (card.validateNumber()) {
-                        collapseCardNumber();
-                    } else {
-                        cardNumberView.setTextColor(errorColor);
-                    }
-                }
-            }
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // not needed
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // not needed
-            }
-        });
+        CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
+        cardNumberView.addTextChangedListener(cardNumberWatcher);
         cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -108,8 +88,12 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private float computeCardNumberSlidingDelta() {
+        String number = cardNumberView.getText().toString();
+        card.setNumber(number);
+        int suffixLength = "American Express".equals(card.getType()) ? 5 : 4;
+
         Layout layout = cardNumberView.getLayout();
-        return layout.getPrimaryHorizontal(15);
+        return layout.getPrimaryHorizontal(number.length() - suffixLength);
     }
 
     private void collapseCardNumber() {
@@ -171,6 +155,39 @@ public class PaymentKitView extends FrameLayout {
             cardNumberView.setLayoutParams(params);
         }
     };
+
+    private class CardNumberWatcher implements TextWatcher {
+        private boolean isInserting = false;
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String number = s.toString();
+
+            String formattedNumber = CardNumberFormatter.format(number, isInserting);
+            if (!number.equals(formattedNumber)) {
+                s.replace(0, s.length(), formattedNumber);
+                return;
+            }
+
+            card.setNumber(number);
+            cardNumberView.setTextColor(textColor);
+            if (card.validateNumberLength()) {
+                if (card.validateNumber()) {
+                    collapseCardNumber();
+                } else {
+                    cardNumberView.setTextColor(errorColor);
+                }
+            }
+        }
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            isInserting = (after > count);
+        }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // not needed
+        }
+    }
 
     private class ExpiryWatcher implements InputFilter, TextWatcher {
         private CardExpiry cardExpiry = new CardExpiry();
