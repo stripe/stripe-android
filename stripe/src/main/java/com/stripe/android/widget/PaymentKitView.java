@@ -17,6 +17,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
@@ -27,6 +28,7 @@ import com.stripe.android.util.TextUtils;
 public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
 
+    private ImageView cardImageView;
     private EditText cardNumberView;
     private EditText expiryView;
     private EditText cvcView;
@@ -83,6 +85,7 @@ public class PaymentKitView extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View parent = inflater.inflate(R.layout.__pk_view, this);
 
+        cardImageView = (ImageView) parent.findViewById(R.id.__pk_card_image);
         cardNumberView = (EditText) parent.findViewById(R.id.__pk_card_number);
         expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
@@ -107,6 +110,16 @@ public class PaymentKitView extends FrameLayout {
         expiryView.addTextChangedListener(expiryWatcher);
 
         cvcView.addTextChangedListener(new CvcWatcher());
+        cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    updateCvcType();
+                } else {
+                    updateCardType();
+                }
+            }
+        });
 
         FrameLayout.LayoutParams params
             = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
@@ -190,6 +203,48 @@ public class PaymentKitView extends FrameLayout {
         lastValidationResult = valid;
     }
 
+
+    public void updateCardType() {
+        String cardType = card.getType();
+
+        if ("American Express".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_amex);
+            return;
+        }
+
+        if ("Discover".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_discover);
+            return;
+        }
+
+        if ("JCB".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_jcb);
+            return;
+        }
+
+        if ("Diners Club".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_diners);
+            return;
+        }
+
+        if ("Visa".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_visa);
+            return;
+        }
+
+        if ("MasterCard".equals(cardType)) {
+            cardImageView.setImageResource(R.drawable.__pk_mastercard);
+            return;
+        }
+
+        cardImageView.setImageResource(R.drawable.__pk_placeholder);
+    }
+
+    public void updateCvcType() {
+        boolean isAmex = "American Express".equals(card.getType());
+        cardImageView.setImageResource(isAmex ? R.drawable.__pk_cvc_amex : R.drawable.__pk_cvc);
+    }
+
     private class CardNumberWatcher implements TextWatcher {
         private boolean isInserting = false;
 
@@ -218,6 +273,8 @@ public class PaymentKitView extends FrameLayout {
             } else {
                 cvcView.setFilters(lengthOf3);
             }
+
+            updateCardType();
 
             notifyValidationChange();
         }

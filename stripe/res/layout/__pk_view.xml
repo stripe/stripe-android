@@ -50,6 +50,7 @@
         android:maxLength="19" />
 
     <ImageView
+        android:id="@+id/__pk_card_image"
         android:layout_width="@dimen/__pk_card_type_width"
         android:layout_height="fill_parent"
         android:layout_gravity="center_vertical"
