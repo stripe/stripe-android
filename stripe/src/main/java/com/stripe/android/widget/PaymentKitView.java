@@ -1,5 +1,7 @@
 package com.stripe.android.widget;
 
+import java.util.HashSet;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.Editable;
@@ -20,10 +22,10 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardExpiry;
 import com.stripe.android.util.CardNumberFormatter;
+import com.stripe.android.util.TextUtils;
 
 public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
-    private static final int EXPIRY_VIEW_MAX_WIDTH = 5;
 
     private EditText cardNumberView;
     private EditText expiryView;
@@ -40,6 +42,23 @@ public class PaymentKitView extends FrameLayout {
     private InputFilter[] lengthOf3 = new InputFilter[] { new InputFilter.LengthFilter(3) };
     private InputFilter[] lengthOf4 = new InputFilter[] { new InputFilter.LengthFilter(4) };
 
+    private boolean lastValidationResult = false;
+
+    private HashSet<OnValidationChangeListener> listeners
+        = new HashSet<OnValidationChangeListener>();
+
+    public void registerListener(OnValidationChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void unregisterListener(OnValidationChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    public interface OnValidationChangeListener {
+        public void onChange(boolean valid);
+    }
+
     public PaymentKitView(Context context) {
         super(context);
         init();
@@ -53,6 +72,10 @@ public class PaymentKitView extends FrameLayout {
     public PaymentKitView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
+    }
+
+    public Card getCard() {
+        return card;
     }
 
     private void init() {
@@ -82,6 +105,8 @@ public class PaymentKitView extends FrameLayout {
         ExpiryWatcher expiryWatcher = new ExpiryWatcher();
         expiryView.setFilters(new InputFilter[] { expiryWatcher });
         expiryView.addTextChangedListener(expiryWatcher);
+
+        cvcView.addTextChangedListener(new CvcWatcher());
 
         FrameLayout.LayoutParams params
             = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
@@ -155,6 +180,16 @@ public class PaymentKitView extends FrameLayout {
         }
     };
 
+    private void notifyValidationChange() {
+        boolean valid = card.validateCard();
+        if (valid != lastValidationResult) {
+            for (OnValidationChangeListener listener : listeners) {
+                listener.onChange(valid);
+            }
+        }
+        lastValidationResult = valid;
+    }
+
     private class CardNumberWatcher implements TextWatcher {
         private boolean isInserting = false;
 
@@ -183,6 +218,8 @@ public class PaymentKitView extends FrameLayout {
             } else {
                 cvcView.setFilters(lengthOf3);
             }
+
+            notifyValidationChange();
         }
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -214,6 +251,8 @@ public class PaymentKitView extends FrameLayout {
         public void afterTextChanged(Editable s) {
             String str = s.toString();
             cardExpiry.updateFromString(str);
+            card.setExpMonth(cardExpiry.getMonth());
+            card.setExpYear(cardExpiry.getYear());
             if (cardExpiry.isPartiallyValid()) {
                 String formattedString = isInserting ?
                         cardExpiry.toStringWithTrail() : cardExpiry.toString();
@@ -221,13 +260,31 @@ public class PaymentKitView extends FrameLayout {
                     s.replace(0, s.length(), formattedString);
                 }
             }
-            if (s.length() == EXPIRY_VIEW_MAX_WIDTH) {
+            if (cardExpiry.isValid()) {
                 cvcView.requestFocus();
             }
+
+            notifyValidationChange();
         }
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             isInserting = (after > count);
+        }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // not needed
+        }
+    }
+
+    private class CvcWatcher implements TextWatcher {
+        @Override
+        public void afterTextChanged(Editable s) {
+            card.setCVC(TextUtils.nullIfBlank(s.toString()));
+            notifyValidationChange();
+        }
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // not needed
         }
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {

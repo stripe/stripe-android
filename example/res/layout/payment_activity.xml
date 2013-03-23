@@ -9,15 +9,23 @@
               style="@style/Header"
             />
 
-    <fragment android:id="@+id/payment_form"
-              android:layout_below="@id/payment_form_title"
+    <com.stripe.android.widget.PaymentKitView
+              android:id="@+id/payment_kit"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              class="com.stripe.example.fragment.PaymentFormFragment"/>
+              android:layout_below="@id/payment_form_title" />
+
+    <Button android:id="@+id/save_button"
+              android:text="@string/save"
+              android:layout_below="@id/payment_kit"
+              android:layout_centerHorizontal="true"
+              android:onClick="saveCreditCard"
+              android:enabled="false"
+              style="@style/Save" />
 
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
-              android:layout_below="@id/payment_form"
+              android:layout_below="@id/save_button"
               android:layout_marginTop="25dp"
               style="@style/Header"
             />
