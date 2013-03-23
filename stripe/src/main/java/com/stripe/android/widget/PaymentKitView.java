@@ -37,6 +37,9 @@ public class PaymentKitView extends FrameLayout {
     private int textColor;
     private int errorColor;
 
+    private InputFilter[] lengthOf3 = new InputFilter[] { new InputFilter.LengthFilter(3) };
+    private InputFilter[] lengthOf4 = new InputFilter[] { new InputFilter.LengthFilter(4) };
+
     public PaymentKitView(Context context) {
         super(context);
         init();
@@ -173,6 +176,12 @@ public class PaymentKitView extends FrameLayout {
                 } else {
                     cardNumberView.setTextColor(errorColor);
                 }
+            }
+
+            if ("American Express".equals(card.getType())) {
+                cvcView.setFilters(lengthOf4);
+            } else {
+                cvcView.setFilters(lengthOf3);
             }
         }
         @Override

@@ -35,7 +35,7 @@
             android:layout_weight="1"
             android:hint="@string/__pk_cvc_hint"
             android:inputType="number"
-            android:maxLength="3"
+            android:maxLength="4"
             android:visibility="gone" />
     </LinearLayout>
 
