@@ -43,8 +43,21 @@ public class PaymentKitView extends FrameLayout {
     private int textColor;
     private int errorColor;
 
-    private InputFilter[] lengthOf3 = new InputFilter[] { new InputFilter.LengthFilter(3) };
-    private InputFilter[] lengthOf4 = new InputFilter[] { new InputFilter.LengthFilter(4) };
+    private InputFilter cvcEmptyFilter = new InputFilter() {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            int n = (dstart - 0) + (end - start) + (dest.length() - dend);
+            if (n == 0) {
+                expiryView.requestFocus();
+            }
+            return null;
+        }
+    };
+    private InputFilter[] lengthOf3 = new InputFilter[] {
+            new InputFilter.LengthFilter(3), cvcEmptyFilter };
+    private InputFilter[] lengthOf4 = new InputFilter[] {
+            new InputFilter.LengthFilter(4), cvcEmptyFilter };
 
     private boolean lastValidationResult = false;
 
@@ -144,6 +157,7 @@ public class PaymentKitView extends FrameLayout {
          expiryView.setFilters(new InputFilter[] { expiryWatcher });
          expiryView.addTextChangedListener(expiryWatcher);
 
+         cvcView.setFilters(lengthOf3);
          cvcView.addTextChangedListener(new CvcWatcher());
          cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
              @Override
@@ -401,6 +415,10 @@ public class PaymentKitView extends FrameLayout {
             buf.append(source.subSequence(start, end));
             buf.append(dest.subSequence(dend, dest.length()));
             String str = buf.toString();
+            if (str.length() == 0) {
+                cardNumberView.requestFocus();
+                return null;
+            }
             if (str.length() > EXPIRY_MAX_LENGTH) {
                 return "";
             }
