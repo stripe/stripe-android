@@ -4,6 +4,8 @@ import java.util.HashSet;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -94,51 +96,107 @@ public class PaymentKitView extends FrameLayout {
         textColor = res.getColor(R.color.__pk_text_color);
         errorColor = res.getColor(R.color.__pk_error_color);
 
-        CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
-        cardNumberView.addTextChangedListener(cardNumberWatcher);
-        cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && isCardNumberCollapsed) {
-                    expandCardNumber();
-                }
-            }
-        });
-
-        ExpiryWatcher expiryWatcher = new ExpiryWatcher();
-        expiryView.setFilters(new InputFilter[] { expiryWatcher });
-        expiryView.addTextChangedListener(expiryWatcher);
-
-        cvcView.addTextChangedListener(new CvcWatcher());
-        cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    updateCvcType();
-                } else {
-                    updateCardType();
-                }
-            }
-        });
-
         FrameLayout.LayoutParams params
             = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
         cardNumberOriginalLeftMargin = params.leftMargin;
     }
 
-    private float computeCardNumberSlidingDelta() {
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        card.setNumber(cardNumberView.getText().toString());
+
+        CardExpiry cardExpiry = new CardExpiry();
+        cardExpiry.updateFromString(expiryView.getText().toString());
+        card.setExpMonth(cardExpiry.getMonth());
+        card.setExpYear(cardExpiry.getYear());
+
+        card.setCVC(TextUtils.nullIfBlank(cvcView.getText().toString()));
+
+        updateFields(false);
+        notifyValidationChange();
+
+        setupTextWatchers();
+
+        if (card.validateNumber()) {
+            if (card.validateExpiryDate()) {
+                cvcView.requestFocus();
+            } else {
+                expiryView.requestFocus();
+            }
+        }
+    }
+
+    private void setupTextWatchers() {
+         CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
+         cardNumberView.addTextChangedListener(cardNumberWatcher);
+         cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
+             @Override
+             public void onFocusChange(View v, boolean hasFocus) {
+                 if (hasFocus && isCardNumberCollapsed) {
+                     expandCardNumber();
+                 }
+             }
+         });
+
+         ExpiryWatcher expiryWatcher = new ExpiryWatcher();
+         expiryView.setFilters(new InputFilter[] { expiryWatcher });
+         expiryView.addTextChangedListener(expiryWatcher);
+
+         cvcView.addTextChangedListener(new CvcWatcher());
+         cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
+             @Override
+             public void onFocusChange(View v, boolean hasFocus) {
+                 if (hasFocus) {
+                     updateCvcType();
+                 } else {
+                     updateCardType();
+                 }
+             }
+         });
+    }
+
+    private void updateFields(boolean animate) {
+        cardNumberView.setTextColor(textColor);
+        if (card.validateNumberLength()) {
+            if (card.validateNumber()) {
+                collapseCardNumber(animate);
+            } else {
+                cardNumberView.setTextColor(errorColor);
+            }
+        }
+
+        if ("American Express".equals(card.getType())) {
+            cvcView.setFilters(lengthOf4);
+        } else {
+            cvcView.setFilters(lengthOf3);
+        }
+
+        updateCardType();
+    }
+
+    private void computeCardNumberSlidingDelta() {
+        Layout layout = cardNumberView.getLayout();
+        if (layout == null) {
+            return;
+        }
+
         String number = cardNumberView.getText().toString();
         card.setNumber(number);
         int suffixLength = "American Express".equals(card.getType()) ? 5 : 4;
 
-        Layout layout = cardNumberView.getLayout();
-        return layout.getPrimaryHorizontal(number.length() - suffixLength);
+        cardNumberSlidingDelta = layout.getPrimaryHorizontal(number.length() - suffixLength);
     }
 
-    private void collapseCardNumber() {
-        cardNumberSlidingDelta = computeCardNumberSlidingDelta();
+    private void collapseCardNumber(boolean animate) {
+        computeCardNumberSlidingDelta();
         isCardNumberCollapsed = true;
-        animateCardNumber();
+        if (animate) {
+            animateCardNumber();
+        } else {
+            showExpiryAndCvc();
+        }
     }
 
     private void expandCardNumber() {
@@ -157,20 +215,22 @@ public class PaymentKitView extends FrameLayout {
         cardNumberView.startAnimation(anim);
     }
 
+    private void showExpiryAndCvc() {
+        FrameLayout.LayoutParams params
+            = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
+        params.leftMargin = (int) (cardNumberOriginalLeftMargin - cardNumberSlidingDelta);
+        cardNumberView.setLayoutParams(params);
+
+        expiryView.setVisibility(View.VISIBLE);
+        cvcView.setVisibility(View.VISIBLE);
+    }
+
     private AnimationListener mAnimationListener = new AnimationListener() {
         public void onAnimationEnd(Animation animation) {
             if (!isCardNumberCollapsed) {
                 return;
             }
-
-            FrameLayout.LayoutParams params
-                = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
-            params.leftMargin = (int) (cardNumberOriginalLeftMargin - cardNumberSlidingDelta);
-            cardNumberView.setLayoutParams(params);
-
-            expiryView.setVisibility(View.VISIBLE);
-            cvcView.setVisibility(View.VISIBLE);
-
+            showExpiryAndCvc();
             expiryView.requestFocus();
         }
 
@@ -245,6 +305,60 @@ public class PaymentKitView extends FrameLayout {
         cardImageView.setImageResource(isAmex ? R.drawable.__pk_cvc_amex : R.drawable.__pk_cvc);
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        final SavedState myState = new SavedState(superState);
+        myState.cardNumberSlidingDelta = cardNumberSlidingDelta;
+        return myState;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (!state.getClass().equals(SavedState.class)) {
+            // Didn't save state for us in onSaveInstanceState
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        // Restore the instance state
+        SavedState myState = (SavedState) state;
+        super.onRestoreInstanceState(myState.getSuperState());
+        cardNumberSlidingDelta = myState.cardNumberSlidingDelta;
+    }
+
+    // Save cardNumberSlidingDelta so we can update the layout for the card number field during
+    // onAttachWindow, when the layout of the EditText is not yet initialized.
+    private static class SavedState extends BaseSavedState {
+        float cardNumberSlidingDelta;
+
+        public SavedState(Parcel source) {
+            super(source);
+            cardNumberSlidingDelta = source.readFloat();
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeFloat(cardNumberSlidingDelta);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<SavedState> CREATOR
+            = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
     private class CardNumberWatcher implements TextWatcher {
         private boolean isInserting = false;
 
@@ -259,22 +373,7 @@ public class PaymentKitView extends FrameLayout {
             }
 
             card.setNumber(number);
-            cardNumberView.setTextColor(textColor);
-            if (card.validateNumberLength()) {
-                if (card.validateNumber()) {
-                    collapseCardNumber();
-                } else {
-                    cardNumberView.setTextColor(errorColor);
-                }
-            }
-
-            if ("American Express".equals(card.getType())) {
-                cvcView.setFilters(lengthOf4);
-            } else {
-                cvcView.setFilters(lengthOf3);
-            }
-
-            updateCardType();
+            updateFields(true);
 
             notifyValidationChange();
         }
@@ -289,6 +388,8 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private class ExpiryWatcher implements InputFilter, TextWatcher {
+        private static final int EXPIRY_MAX_LENGTH = 5;
+
         private CardExpiry cardExpiry = new CardExpiry();
         private boolean isInserting = false;
 
@@ -300,6 +401,9 @@ public class PaymentKitView extends FrameLayout {
             buf.append(source.subSequence(start, end));
             buf.append(dest.subSequence(dend, dest.length()));
             String str = buf.toString();
+            if (str.length() > EXPIRY_MAX_LENGTH) {
+                return "";
+            }
             cardExpiry.updateFromString(str);
             return cardExpiry.isPartiallyValid() ? null : "";
         }
