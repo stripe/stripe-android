@@ -9,15 +9,15 @@
               style="@style/Header"
             />
 
-    <com.stripe.android.widget.PaymentKitView
-              android:id="@+id/payment_kit"
+    <com.stripe.android.widget.StripeView
+              android:id="@+id/stripe"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:layout_below="@id/payment_form_title" />
 
     <Button android:id="@+id/save_button"
               android:text="@string/save"
-              android:layout_below="@id/payment_kit"
+              android:layout_below="@id/stripe"
               android:layout_centerHorizontal="true"
               android:onClick="saveCreditCard"
               android:enabled="false"

@@ -5,16 +5,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
-import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
-import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.widget.PaymentKitView;
+import com.stripe.android.widget.StripeView;
 import com.stripe.example.R;
 import com.stripe.example.TokenList;
 import com.stripe.example.dialog.ErrorDialogFragment;
 import com.stripe.example.dialog.ProgressDialogFragment;
-
 
 public class PaymentActivity extends FragmentActivity {
 
@@ -32,9 +29,9 @@ public class PaymentActivity extends FragmentActivity {
 
     private ProgressDialogFragment progressFragment;
 
-    private PaymentKitView paymentKitView;
-    private PaymentKitView.OnValidationChangeListener validationListener
-        = new PaymentKitView.OnValidationChangeListener() {
+    private StripeView stripeView;
+    private StripeView.OnValidationChangeListener validationListener
+        = new StripeView.OnValidationChangeListener() {
             @Override
             public void onChange(boolean valid) {
                 saveButton.setEnabled(valid);
@@ -48,44 +45,34 @@ public class PaymentActivity extends FragmentActivity {
         setContentView(R.layout.payment_activity);
 
         progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
-        paymentKitView = (PaymentKitView) findViewById(R.id.payment_kit);
+        stripeView = (StripeView) findViewById(R.id.stripe);
         saveButton = findViewById(R.id.save_button);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        paymentKitView.registerListener(validationListener);
+        stripeView.registerListener(validationListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        paymentKitView.unregisterListener(validationListener);
+        stripeView.unregisterListener(validationListener);
     }
 
     public void saveCreditCard(View view) {
-        Card card = paymentKitView.getCard();
-
-        boolean validation = card.validateCard();
-        if (validation) {
-            startProgress();
-            new Stripe().createToken(
-                    card,
-                    PUBLISHABLE_KEY,
-                    new TokenCallback() {
-                        public void onSuccess(Token token) {
-                            getTokenList().addToList(token);
-                            finishProgress();
-                        }
-                    public void onError(Exception error) {
-                            handleError(error.getLocalizedMessage());
-                            finishProgress();
-                        }
-                    });
-        } else {
-            handleError("You did not enter a valid card");
-        }
+        startProgress();
+        stripeView.createToken(PUBLISHABLE_KEY, new TokenCallback() {
+            public void onSuccess(Token token) {
+                getTokenList().addToList(token);
+                finishProgress();
+            }
+            public void onError(Exception error) {
+                handleError(error.getLocalizedMessage());
+                finishProgress();
+            }
+        });
     }
 
     private void startProgress() {

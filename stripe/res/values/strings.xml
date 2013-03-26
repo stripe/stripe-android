@@ -3,4 +3,9 @@
     <string name="__pk_card_number_hint">1234 5678 9012 3456</string>
     <string name="__pk_expiry_hint">MM/YY</string>
     <string name="__pk_cvc_hint">CVC</string>
+    <string name="__stripe_invalid_card_message">Your card is invalid</string>
+    <string name="__stripe_invalid_number_message">Your card\'s number is invalid</string>
+    <string name="__stripe_invalid_expiry_month_message">Your card\'s expiration month is invalid</string>
+    <string name="__stripe_invalid_expiry_year_message">Your card\'s expiration year is invalid</string>
+    <string name="__stripe_invalid_cvc_message">Your card\'s security code is invalid</string>
 </resources>
