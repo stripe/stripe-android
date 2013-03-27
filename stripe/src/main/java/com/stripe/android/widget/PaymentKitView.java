@@ -255,6 +255,9 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private void collapseCardNumber(boolean animate) {
+        if (!card.validateNumber()) {
+            return;
+        }
         computeCardNumberSlidingDelta();
         isCardNumberCollapsed = true;
         if (animate) {
