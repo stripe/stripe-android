@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="__pk_background">@android:color/white</color>
-    <color name="__pk_border">#ccc</color>
-    <color name="__pk_text_color">@android:color/black</color>
     <color name="__pk_error_color">#f00</color>
 </resources>

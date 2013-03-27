@@ -1,14 +1,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/__pk_background"
-    android:padding="4dp" >
+    style="@style/PaymentKit.__Widget" >
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/__pk_margin_left"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
 
         <View
@@ -43,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/__pk_margin_left"
+        android:layout_gravity="center_vertical"
         android:hint="@string/__pk_card_number_hint"
         android:inputType="phone"
         android:maxLength="19" />

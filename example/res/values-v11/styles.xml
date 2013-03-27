@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme" parent="@android:style/Theme.Holo.NoActionBar"/>
+</resources>

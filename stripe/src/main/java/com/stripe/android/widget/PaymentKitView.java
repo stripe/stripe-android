@@ -3,7 +3,6 @@ package com.stripe.android.widget;
 import java.util.HashSet;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
@@ -103,9 +102,8 @@ public class PaymentKitView extends FrameLayout {
         expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
 
-        Resources res = getContext().getResources();
-        textColor = res.getColor(R.color.__pk_text_color);
-        errorColor = res.getColor(R.color.__pk_error_color);
+        textColor = cvcView.getCurrentTextColor();
+        errorColor = getContext().getResources().getColor(R.color.__pk_error_color);
     }
 
     @Override

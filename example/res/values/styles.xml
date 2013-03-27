@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
-    </style>
+    <style name="Theme" parent="@android:style/Theme.Black.NoTitleBar"/>
 
     <style name="TextField" parent="@android:style/Widget.EditText">
         <item name="android:layout_height">wrap_content</item>
@@ -67,12 +65,12 @@
     <style name="Header" parent="@android:style/Widget.TextView">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/header_dark</item>
         <item name="android:layout_marginBottom">5dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:paddingLeft">3dp</item>
         <item name="android:textSize">18dp</item>
         <item name="android:textColor">@color/headerText</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
