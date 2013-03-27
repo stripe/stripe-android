@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -61,6 +62,8 @@ public class PaymentKitView extends FrameLayout {
     private HashSet<OnValidationChangeListener> listeners
         = new HashSet<OnValidationChangeListener>();
 
+    private Animation fadeInAnimation;
+
     public void registerListener(OnValidationChangeListener listener) {
         listeners.add(listener);
     }
@@ -104,6 +107,9 @@ public class PaymentKitView extends FrameLayout {
 
         textColor = cvcView.getCurrentTextColor();
         errorColor = getContext().getResources().getColor(R.color.__pk_error_color);
+
+        cardImageView.setTag(R.drawable.__pk_placeholder);
+        fadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
     }
 
     @Override
@@ -259,46 +265,55 @@ public class PaymentKitView extends FrameLayout {
         lastValidationResult = valid;
     }
 
-
-    public void updateCardType() {
+    private int getImageResourceForCardType() {
         String cardType = card.getType();
 
         if ("American Express".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_amex);
-            return;
+            return R.drawable.__pk_amex;
         }
 
         if ("Discover".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_discover);
-            return;
+            return R.drawable.__pk_discover;
         }
 
         if ("JCB".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_jcb);
-            return;
+            return R.drawable.__pk_jcb;
         }
 
         if ("Diners Club".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_diners);
-            return;
+            return R.drawable.__pk_diners;
         }
 
         if ("Visa".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_visa);
-            return;
+            return R.drawable.__pk_visa;
         }
 
         if ("MasterCard".equals(cardType)) {
-            cardImageView.setImageResource(R.drawable.__pk_mastercard);
-            return;
+            return R.drawable.__pk_mastercard;
         }
 
-        cardImageView.setImageResource(R.drawable.__pk_placeholder);
+        return R.drawable.__pk_placeholder;
     }
 
-    public void updateCvcType() {
+    private void updateCardType() {
+        int resId = getImageResourceForCardType();
+        updateCardImage(resId);
+    }
+
+    private void updateCvcType() {
         boolean isAmex = "American Express".equals(card.getType());
-        cardImageView.setImageResource(isAmex ? R.drawable.__pk_cvc_amex : R.drawable.__pk_cvc);
+        int resId = isAmex ? R.drawable.__pk_cvc_amex : R.drawable.__pk_cvc;
+        updateCardImage(resId);
+    }
+
+    private void updateCardImage(int resId) {
+        Integer oldResId = (Integer) cardImageView.getTag();
+        if (oldResId == resId) {
+            return;
+        }
+        cardImageView.setTag(resId);
+        cardImageView.setImageResource(resId);
+        cardImageView.startAnimation(fadeInAnimation);
     }
 
     @Override
