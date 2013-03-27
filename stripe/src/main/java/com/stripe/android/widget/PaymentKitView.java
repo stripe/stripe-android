@@ -137,6 +137,8 @@ public class PaymentKitView extends FrameLayout {
             public void onClick(View view) {
                 if (isCardNumberCollapsed) {
                     expandCardNumber();
+                } else {
+                    collapseCardNumber(true);
                 }
             }
         });
