@@ -1,5 +1,4 @@
 <resources>
-    <dimen name="__pk_text_size">20dp</dimen>
     <dimen name="__pk_card_type_width">32dp</dimen>
     <dimen name="__pk_card_type_margin_horizontal">2dp</dimen>
     <dimen name="__pk_margin_left">36dp</dimen>
