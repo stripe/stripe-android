@@ -12,6 +12,7 @@ import android.text.Layout;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -43,20 +44,12 @@ public class PaymentKitView extends FrameLayout {
     private int textColor;
     private int errorColor;
 
-    private InputFilter cvcEmptyFilter = new InputFilter() {
-        @Override
-        public CharSequence filter(CharSequence source, int start, int end,
-                Spanned dest, int dstart, int dend) {
-            int n = (dstart - 0) + (end - start) + (dest.length() - dend);
-            if (n == 0) {
-                expiryView.requestFocus();
-            }
-            return null;
-        }
-    };
-    private InputFilter[] lengthOf3 = new InputFilter[] {
+    private OnKeyListener emptyListener = new EmptyOnKeyListener();
+
+    private InputFilter cvcEmptyFilter = new CvcEmptyFilter();
+    private InputFilter[] cvcLengthOf3 = new InputFilter[] {
             new InputFilter.LengthFilter(3), cvcEmptyFilter };
-    private InputFilter[] lengthOf4 = new InputFilter[] {
+    private InputFilter[] cvcLengthOf4 = new InputFilter[] {
             new InputFilter.LengthFilter(4), cvcEmptyFilter };
 
     private boolean lastValidationResult = false;
@@ -171,9 +164,11 @@ public class PaymentKitView extends FrameLayout {
         ExpiryWatcher expiryWatcher = new ExpiryWatcher();
         expiryView.setFilters(new InputFilter[] { expiryWatcher });
         expiryView.addTextChangedListener(expiryWatcher);
+        expiryView.setOnKeyListener(emptyListener);
 
-        cvcView.setFilters(lengthOf3);
+        cvcView.setFilters(cvcLengthOf3);
         cvcView.addTextChangedListener(new CvcWatcher());
+        cvcView.setOnKeyListener(emptyListener);
         cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -197,9 +192,9 @@ public class PaymentKitView extends FrameLayout {
         }
 
         if ("American Express".equals(card.getType())) {
-            cvcView.setFilters(lengthOf4);
+            cvcView.setFilters(cvcLengthOf4);
         } else {
-            cvcView.setFilters(lengthOf3);
+            cvcView.setFilters(cvcLengthOf3);
         }
 
         updateCardType();
@@ -449,6 +444,7 @@ public class PaymentKitView extends FrameLayout {
             buf.append(dest.subSequence(dend, dest.length()));
             String str = buf.toString();
             if (str.length() == 0) {
+                // Jump to previous field when user empties this one
                 cardNumberView.requestFocus();
                 return null;
             }
@@ -501,6 +497,47 @@ public class PaymentKitView extends FrameLayout {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             // not needed
+        }
+    }
+
+    // Jump to previous field when user hits backspace on an empty field
+    private class EmptyOnKeyListener implements OnKeyListener {
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (keyCode != KeyEvent.KEYCODE_DEL) {
+                return false;
+            }
+            if (event.getAction() != KeyEvent.ACTION_UP) {
+                return false;
+            }
+            if (v.getId() == R.id.__pk_expiry) {
+                EditText editText = (EditText) v;
+                if (editText.getText().length() == 0) {
+                    cardNumberView.requestFocus();
+                    return false;
+                }
+            }
+            if (v.getId() == R.id.__pk_cvc) {
+                EditText editText = (EditText) v;
+                if (editText.getText().length() == 0) {
+                    expiryView.requestFocus();
+                    return false;
+                }
+            }
+            return false;
+        }
+    };
+
+    // Jump to expiry date field when user empties the cvc field
+    private class CvcEmptyFilter implements InputFilter {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            int n = (dstart - 0) + (end - start) + (dest.length() - dend);
+            if (n == 0) {
+                expiryView.requestFocus();
+            }
+            return null;
         }
     }
 }
