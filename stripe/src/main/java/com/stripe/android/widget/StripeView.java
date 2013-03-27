@@ -48,7 +48,7 @@ public class StripeView extends PaymentKitView {
             return;
         }
 
-        if (!card.validateCVC()) {
+        if (card.getCVC() != null && !card.validateCVC()) {
             String msg = getContext().getResources().getString(
                     R.string.__stripe_invalid_cvc_message);
             callback.onError(new CardException(msg, "invalid_cvc", "cvc", null));
