@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -31,13 +30,12 @@ public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
 
     private ImageView cardImageView;
-    private EditText cardNumberView;
+    private ClippingEditText cardNumberView;
     private EditText expiryView;
     private EditText cvcView;
 
     private float cardNumberSlidingDelta = 0;
     private boolean isCardNumberCollapsed = false;
-    private int cardNumberOriginalLeftMargin = -1;
 
     private Card card = new Card(null, null, null, null);
     private int textColor;
@@ -101,17 +99,13 @@ public class PaymentKitView extends FrameLayout {
         View parent = inflater.inflate(R.layout.__pk_view, this);
 
         cardImageView = (ImageView) parent.findViewById(R.id.__pk_card_image);
-        cardNumberView = (EditText) parent.findViewById(R.id.__pk_card_number);
+        cardNumberView = (ClippingEditText) parent.findViewById(R.id.__pk_card_number);
         expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
 
         Resources res = getContext().getResources();
         textColor = res.getColor(R.color.__pk_text_color);
         errorColor = res.getColor(R.color.__pk_error_color);
-
-        FrameLayout.LayoutParams params
-            = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
-        cardNumberOriginalLeftMargin = params.leftMargin;
     }
 
     @Override
@@ -220,21 +214,16 @@ public class PaymentKitView extends FrameLayout {
 
     private void animateCardNumber() {
         float fromXDelta = isCardNumberCollapsed ? 0
-                : -cardNumberSlidingDelta;
-        float toXDelta = isCardNumberCollapsed ? -cardNumberSlidingDelta : 0;
-        TranslateAnimation anim = new TranslateAnimation(fromXDelta, toXDelta,
-                0, 0);
+                : cardNumberSlidingDelta;
+        float toXDelta = isCardNumberCollapsed ? cardNumberSlidingDelta : 0;
+        ClippingAnimation anim = new ClippingAnimation(cardNumberView, fromXDelta, toXDelta);
         anim.setDuration(SLIDING_DURATION_MS);
         anim.setAnimationListener(mAnimationListener);
         cardNumberView.startAnimation(anim);
     }
 
     private void showExpiryAndCvc() {
-        FrameLayout.LayoutParams params
-            = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
-        params.leftMargin = (int) (cardNumberOriginalLeftMargin - cardNumberSlidingDelta);
-        cardNumberView.setLayoutParams(params);
-
+        cardNumberView.setClipX((int) cardNumberSlidingDelta);
         expiryView.setVisibility(View.VISIBLE);
         cvcView.setVisibility(View.VISIBLE);
     }
@@ -259,11 +248,6 @@ public class PaymentKitView extends FrameLayout {
 
             expiryView.setVisibility(View.GONE);
             cvcView.setVisibility(View.GONE);
-
-            FrameLayout.LayoutParams params
-                = (FrameLayout.LayoutParams) cardNumberView.getLayoutParams();
-            params.leftMargin = cardNumberOriginalLeftMargin;
-            cardNumberView.setLayoutParams(params);
         }
     };
 

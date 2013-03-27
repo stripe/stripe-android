@@ -37,7 +37,7 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <EditText
+    <com.stripe.android.widget.ClippingEditText
         android:id="@+id/__pk_card_number"
         style="@style/PaymentKit.__TextField"
         android:layout_width="wrap_content"
@@ -52,7 +52,6 @@
         android:layout_width="@dimen/__pk_card_type_width"
         android:layout_height="fill_parent"
         android:layout_gravity="center_vertical"
-        android:background="@color/__pk_background"
         android:contentDescription="@string/__pk_card_type"
         android:paddingLeft="@dimen/__pk_card_type_margin_horizontal"
         android:paddingRight="@dimen/__pk_card_type_margin_horizontal"
