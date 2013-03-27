@@ -62,15 +62,18 @@ public class PaymentActivity extends FragmentActivity {
     }
 
     public void saveCreditCard(View view) {
+        saveButton.setEnabled(false);
         startProgress();
         stripeView.createToken(PUBLISHABLE_KEY, new TokenCallback() {
             public void onSuccess(Token token) {
                 getTokenList().addToList(token);
                 finishProgress();
+                saveButton.setEnabled(true);
             }
             public void onError(Exception error) {
                 handleError(error.getLocalizedMessage());
                 finishProgress();
+                saveButton.setEnabled(true);
             }
         });
     }
