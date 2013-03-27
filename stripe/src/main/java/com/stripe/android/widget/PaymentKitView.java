@@ -179,6 +179,15 @@ public class PaymentKitView extends FrameLayout {
         setMeasuredDimension(width, getMeasuredHeight());
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        cardImageView.setEnabled(enabled);
+        cardNumberView.setEnabled(enabled);
+        expiryView.setEnabled(enabled);
+        cvcView.setEnabled(enabled);
+    }
+
     private void setupTextWatchers() {
         CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
         cardNumberView.setFilters(new InputFilter[] {

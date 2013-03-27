@@ -9,6 +9,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
 import com.stripe.exception.CardException;
 
 public class StripeView extends PaymentKitView {
@@ -24,7 +25,7 @@ public class StripeView extends PaymentKitView {
         super(context, attrs, defStyle);
     }
 
-    public void createToken(String publishableKey, TokenCallback callback) {
+    public void createToken(final String publishableKey, final TokenCallback callback) {
         Card card = getCard();
 
         if (!card.validateNumber()) {
@@ -62,6 +63,18 @@ public class StripeView extends PaymentKitView {
             return;
         }
 
-        new Stripe().createToken(card, publishableKey, callback);
+        setEnabled(false);
+        new Stripe().createToken(card, publishableKey, new TokenCallback() {
+            @Override
+            public void onError(Exception error) {
+                setEnabled(true);
+                callback.onError(error);
+            }
+            @Override
+            public void onSuccess(Token token) {
+                setEnabled(true);
+                callback.onSuccess(token);
+            }
+        });
     }
 }
