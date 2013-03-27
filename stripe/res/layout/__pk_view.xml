@@ -44,7 +44,6 @@
         android:layout_marginLeft="@dimen/__pk_margin_left"
         android:layout_gravity="center_vertical"
         android:hint="@string/__pk_card_number_hint"
-        android:inputType="phone"
         android:maxLength="19" />
 
     <ImageView

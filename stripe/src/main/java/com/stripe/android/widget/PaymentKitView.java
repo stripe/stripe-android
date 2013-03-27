@@ -7,6 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.TextWatcher;
@@ -106,6 +107,8 @@ public class PaymentKitView extends FrameLayout {
         expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
 
+        cardNumberView.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+
         textColor = cvcView.getCurrentTextColor();
         errorColor = getContext().getResources().getColor(R.color.__pk_error_color);
 
@@ -151,6 +154,8 @@ public class PaymentKitView extends FrameLayout {
 
     private void setupTextWatchers() {
         CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
+        cardNumberView.setFilters(new InputFilter[] {
+                new InputFilter.LengthFilter(19), cardNumberWatcher });
         cardNumberView.addTextChangedListener(cardNumberWatcher);
         cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -381,8 +386,26 @@ public class PaymentKitView extends FrameLayout {
         };
     }
 
-    private class CardNumberWatcher implements TextWatcher {
+    private class CardNumberWatcher implements InputFilter, TextWatcher {
         private boolean isInserting = false;
+
+        private boolean isAllowed(char c) {
+            if (c >= '0' && c <= '9') {
+                return true;
+            }
+            return (c == ' ');
+        }
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            for (int i = start; i < end; ++i) {
+                if (!isAllowed(source.charAt(i))) {
+                    return "";
+                }
+            }
+            return null;
+        }
 
         @Override
         public void afterTextChanged(Editable s) {
