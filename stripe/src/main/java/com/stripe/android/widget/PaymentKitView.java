@@ -428,6 +428,7 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private class CardNumberWatcher implements InputFilter, TextWatcher {
+        private boolean isUserInput = true;
         private boolean isInserting = false;
 
         private boolean isAllowed(char c) {
@@ -454,6 +455,7 @@ public class PaymentKitView extends FrameLayout {
 
             String formattedNumber = CardNumberFormatter.format(number, isInserting);
             if (!number.equals(formattedNumber)) {
+                isUserInput = false;
                 s.replace(0, s.length(), formattedNumber);
                 return;
             }
@@ -462,10 +464,14 @@ public class PaymentKitView extends FrameLayout {
             updateFields(true);
 
             notifyValidationChange();
+
+            isUserInput = true;
         }
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            isInserting = (after > count);
+            if (isUserInput) {
+                isInserting = (after > count);
+            }
         }
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
