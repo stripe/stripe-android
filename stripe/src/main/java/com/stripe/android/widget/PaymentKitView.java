@@ -128,6 +128,15 @@ public class PaymentKitView extends FrameLayout {
         updateFields(false);
         notifyValidationChange();
 
+        cardImageView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isCardNumberCollapsed) {
+                    expandCardNumber();
+                }
+            }
+        });
+
         setupTextWatchers();
 
         if (card.validateNumber()) {
@@ -140,33 +149,33 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private void setupTextWatchers() {
-         CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
-         cardNumberView.addTextChangedListener(cardNumberWatcher);
-         cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
-             @Override
-             public void onFocusChange(View v, boolean hasFocus) {
-                 if (hasFocus && isCardNumberCollapsed) {
-                     expandCardNumber();
-                 }
-             }
-         });
+        CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
+        cardNumberView.addTextChangedListener(cardNumberWatcher);
+        cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && isCardNumberCollapsed) {
+                    expandCardNumber();
+                }
+            }
+        });
 
-         ExpiryWatcher expiryWatcher = new ExpiryWatcher();
-         expiryView.setFilters(new InputFilter[] { expiryWatcher });
-         expiryView.addTextChangedListener(expiryWatcher);
+        ExpiryWatcher expiryWatcher = new ExpiryWatcher();
+        expiryView.setFilters(new InputFilter[] { expiryWatcher });
+        expiryView.addTextChangedListener(expiryWatcher);
 
-         cvcView.setFilters(lengthOf3);
-         cvcView.addTextChangedListener(new CvcWatcher());
-         cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
-             @Override
-             public void onFocusChange(View v, boolean hasFocus) {
-                 if (hasFocus) {
-                     updateCvcType();
-                 } else {
-                     updateCardType();
-                 }
-             }
-         });
+        cvcView.setFilters(lengthOf3);
+        cvcView.addTextChangedListener(new CvcWatcher());
+        cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    updateCvcType();
+                } else {
+                    updateCardType();
+                }
+            }
+        });
     }
 
     private void updateFields(boolean animate) {
