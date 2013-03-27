@@ -3,6 +3,8 @@ package com.stripe.android.widget;
 import java.util.HashSet;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
@@ -59,6 +61,8 @@ public class PaymentKitView extends FrameLayout {
 
     private Animation fadeInAnimation;
 
+    private int minWidth;
+
     public void registerListener(OnValidationChangeListener listener) {
         listeners.add(listener);
     }
@@ -104,9 +108,22 @@ public class PaymentKitView extends FrameLayout {
 
         textColor = cvcView.getCurrentTextColor();
         errorColor = getContext().getResources().getColor(R.color.__pk_error_color);
+        computeMinWidth();
 
         cardImageView.setTag(R.drawable.__pk_placeholder);
         fadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
+    }
+
+    private void computeMinWidth() {
+        Rect bounds = new Rect();
+        Paint textPaint = cardNumberView.getPaint();
+        textPaint.getTextBounds("4", 0, 1, bounds);    // widest digit
+        int cardNumberMinWidth = bounds.width() * 21;  // wide enough for 21 digits
+
+        int marginLeft = getContext().getResources().getDimensionPixelSize(
+                R.dimen.__pk_margin_left);
+
+        minWidth = getPaddingLeft() + marginLeft + cardNumberMinWidth + getPaddingRight();
     }
 
     @Override
@@ -145,6 +162,21 @@ public class PaymentKitView extends FrameLayout {
                 expiryView.requestFocus();
             }
         }
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // We want to be at least minWidth wide
+        int width = Math.max(minWidth, getMeasuredWidth());
+
+        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
+            // If the measure spec gives us an upper bound, do a tight fit.
+            width = Math.min(minWidth, getMeasuredWidth());
+        }
+
+        setMeasuredDimension(width, getMeasuredHeight());
     }
 
     private void setupTextWatchers() {
