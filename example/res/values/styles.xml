@@ -21,20 +21,6 @@
         <item name="android:layout_width">0dp</item>
     </style>
 
-    <style name="Button" parent="@android:style/Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
-        <item name="android:textColor">@color/buttonText</item>
-        <item name="android:background">@drawable/btn_default_holo_dark</item>
-    </style>
-
-    <style name="Save" parent="@style/Button">
-        <item name="android:layout_width">160dp</item>
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:text">@string/save</item>
-    </style>
-
     <style name="Spinner" parent="@android:style/Widget.Spinner">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/spinner_background_holo_dark</item>

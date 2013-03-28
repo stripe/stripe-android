@@ -17,18 +17,21 @@
 
     <Button android:id="@+id/save_button"
               android:text="@string/save"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
               android:layout_below="@id/stripe"
               android:layout_centerHorizontal="true"
+              android:layout_marginTop="4dp"
+              android:paddingLeft="32dp"
+              android:paddingRight="32dp"
               android:onClick="saveCreditCard"
-              android:enabled="false"
-              style="@style/Save" />
+              android:enabled="false" />
 
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
               android:layout_below="@id/save_button"
               android:layout_marginTop="25dp"
-              style="@style/Header"
-            />
+              style="@style/Header" />
 
     <fragment android:id="@+id/token_list"
               android:layout_width="fill_parent"
