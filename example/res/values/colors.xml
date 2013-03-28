@@ -1,6 +1,3 @@
 <resources>
-    <color name="spinnerItem">#AAAAAA</color>
-    <color name="editText">#AAAAAA</color>
-    <color name="buttonText">#EEEEEE</color>
     <color name="headerText">#EEEEEE</color>
 </resources>

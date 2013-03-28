@@ -9,9 +9,7 @@
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
-    <string name="cardNumber">Card Number</string>
     <string name="save">Save</string>
-    <string name="cvc">CVC</string>
 
     <string name="ok">OK</string>
 </resources>
