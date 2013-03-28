@@ -27,63 +27,63 @@ public class PaymentActivity extends FragmentActivity {
      */
     public static final String PUBLISHABLE_KEY = YOUR_PUBLISHABLE_KEY;
 
-    private ProgressDialogFragment progressFragment;
+    private ProgressDialogFragment mProgressFragment;
 
-    private StripeView stripeView;
-    private StripeView.OnValidationChangeListener validationListener
+    private StripeView mStripeView;
+    private StripeView.OnValidationChangeListener mValidationListener
         = new StripeView.OnValidationChangeListener() {
             @Override
             public void onChange(boolean valid) {
-                saveButton.setEnabled(valid);
+                mSaveButton.setEnabled(valid);
             }
     };
-    private View saveButton;
+    private View mSaveButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.payment_activity);
 
-        progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
-        stripeView = (StripeView) findViewById(R.id.stripe);
-        saveButton = findViewById(R.id.save_button);
+        mProgressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
+        mStripeView = (StripeView) findViewById(R.id.stripe);
+        mSaveButton = findViewById(R.id.save_button);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        stripeView.registerListener(validationListener);
+        mStripeView.registerListener(mValidationListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        stripeView.unregisterListener(validationListener);
+        mStripeView.unregisterListener(mValidationListener);
     }
 
     public void saveCreditCard(View view) {
-        saveButton.setEnabled(false);
+        mSaveButton.setEnabled(false);
         startProgress();
-        stripeView.createToken(PUBLISHABLE_KEY, new TokenCallback() {
+        mStripeView.createToken(PUBLISHABLE_KEY, new TokenCallback() {
             public void onSuccess(Token token) {
                 getTokenList().addToList(token);
                 finishProgress();
-                saveButton.setEnabled(true);
+                mSaveButton.setEnabled(true);
             }
             public void onError(Exception error) {
                 handleError(error.getLocalizedMessage());
                 finishProgress();
-                saveButton.setEnabled(true);
+                mSaveButton.setEnabled(true);
             }
         });
     }
 
     private void startProgress() {
-        progressFragment.show(getSupportFragmentManager(), "progress");
+        mProgressFragment.show(getSupportFragmentManager(), "progress");
     }
 
     private void finishProgress() {
-        progressFragment.dismiss();
+        mProgressFragment.dismiss();
     }
 
     private void handleError(String error) {

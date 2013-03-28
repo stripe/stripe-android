@@ -3,18 +3,19 @@ package com.stripe.android.time;
 import java.util.Calendar;
 
 public class Clock {
-    private static Clock instance;
-    protected Calendar calendarInstance;
+    private static Clock mInstance;
+    protected Calendar mCalendarInstance;
 
     protected static Clock getInstance() {
-        if (instance == null) {
-            instance = new Clock();
+        if (mInstance == null) {
+            mInstance = new Clock();
         }
-        return instance;
+        return mInstance;
     }
 
     private Calendar _calendarInstance() {
-        return calendarInstance != null ? (Calendar) calendarInstance.clone() : Calendar.getInstance();
+        return (mCalendarInstance != null) ?
+                (Calendar) mCalendarInstance.clone() : Calendar.getInstance();
     }
 
     public static Calendar getCalendarInstance() {

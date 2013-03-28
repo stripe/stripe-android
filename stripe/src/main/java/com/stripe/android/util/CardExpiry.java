@@ -8,11 +8,11 @@ import java.util.regex.Pattern;
 import com.stripe.android.time.Clock;
 
 public class CardExpiry {
-    private boolean patternMismatch = false;
-    private String month = "";
-    private String year = "";
+    private boolean mPatternMismatch = false;
+    private String mMonth = "";
+    private String mYear = "";
 
-    private Pattern datePattern = Pattern
+    private Pattern mDatePattern = Pattern
             .compile("^([0-9][0-9]?)?/?([0-9][0-9]?[0-9]?[0-9]?)?$");
 
     public CardExpiry() {
@@ -24,15 +24,15 @@ public class CardExpiry {
 
     @Override
     public String toString() {
-        if (this.year.length() == 0) {
-            return this.month;
+        if (mYear.length() == 0) {
+            return mMonth;
         }
-        return this.month + "/" + this.year;
+        return mMonth + "/" + mYear;
     }
 
     public String toStringWithTrail() {
-        if (this.year.length() == 0 && this.month.length() == 2) {
-            return this.month + "/";
+        if (mYear.length() == 0 && mMonth.length() == 2) {
+            return mMonth + "/";
         }
         return toString();
     }
@@ -42,7 +42,7 @@ public class CardExpiry {
     }
 
     private boolean isValidLength() {
-        return (this.month.length() == 2) && (this.year.length() == 2 || this.year.length() == 4);
+        return (mMonth.length() == 2) && (mYear.length() == 2 || mYear.length() == 4);
     }
 
     private boolean isValidDate() {
@@ -55,19 +55,19 @@ public class CardExpiry {
     }
 
     public boolean isPartiallyValid() {
-        if (patternMismatch) {
+        if (mPatternMismatch) {
             return false;
         }
         if (isValidLength()) {
             return isValidDate();
         } else {
-            return getMonth() <= 12 && this.year.length() <= 4;
+            return getMonth() <= 12 && mYear.length() <= 4;
         }
     }
 
     public int getMonth() {
         try {
-            return Integer.parseInt(this.month);
+            return Integer.parseInt(mMonth);
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -75,7 +75,7 @@ public class CardExpiry {
 
     public int getYear() {
         try {
-            int year = Integer.parseInt(this.year);
+            int year = Integer.parseInt(mYear);
             return DateUtils.normalizeYear(year);
         } catch (NumberFormatException e) {
             return 0;
@@ -91,29 +91,29 @@ public class CardExpiry {
     }
 
     public void updateFromString(String str) {
-        Matcher m = datePattern.matcher(str);
-        patternMismatch = !m.find();
-        if (patternMismatch) {
-            this.month = "";
-            this.year = "";
+        Matcher m = mDatePattern.matcher(str);
+        mPatternMismatch = !m.find();
+        if (mPatternMismatch) {
+            mMonth = "";
+            mYear = "";
             return;
         }
         String monthStr = m.group(1);
         if (monthStr == null) {
-            this.month = "";
+            mMonth = "";
         } else {
-            this.month = monthStr;
-            if (this.month.length() == 1) {
-                if (!(this.month.equals("0") || this.month.equals("1"))) {
-                    this.month = "0" + this.month;
+            mMonth = monthStr;
+            if (mMonth.length() == 1) {
+                if (!(mMonth.equals("0") || mMonth.equals("1"))) {
+                    mMonth = "0" + mMonth;
                 }
             }
         }
         String yearStr = m.group(2);
         if (yearStr == null) {
-            this.year = "";
+            mYear = "";
         } else {
-            this.year = yearStr;
+            mYear = yearStr;
         }
     }
 }

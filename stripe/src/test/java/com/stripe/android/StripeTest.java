@@ -92,7 +92,7 @@ public class StripeTest {
         final boolean[] tokenRequesterCalled = { false };
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new TokenRequester() {
+            stripe.mTokenRequester = new TokenRequester() {
                 @Override
                 public void request(String tokenId, String publishableKey,
                         Executor executor, TokenCallback callback) {
@@ -116,7 +116,7 @@ public class StripeTest {
 
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new TokenRequester() {
+            stripe.mTokenRequester = new TokenRequester() {
                 @Override
                 public void request(String tokenId, String publishableKey, Executor executor,
                         TokenCallback callback) {
@@ -139,7 +139,7 @@ public class StripeTest {
 
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new TokenRequester() {
+            stripe.mTokenRequester = new TokenRequester() {
                 @Override
                 public void request(String tokenId, String publishableKey, Executor executor,
                         TokenCallback callback) {
@@ -185,7 +185,7 @@ public class StripeTest {
         final boolean[] tokenCreatorCalled = { false };
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new TokenCreator() {
+            stripe.mTokenCreator = new TokenCreator() {
                 @Override
                 public void create(Card card, String publishableKey,
                         Executor executor, TokenCallback callback) {
@@ -209,7 +209,7 @@ public class StripeTest {
 
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new TokenCreator() {
+            stripe.mTokenCreator = new TokenCreator() {
                 @Override
                 public void create(Card card, String publishableKey,
                         Executor executor, TokenCallback callback) {
@@ -231,7 +231,7 @@ public class StripeTest {
         final String expectedPublishableKey = "pk_this_one";
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new TokenCreator() {
+            stripe.mTokenCreator = new TokenCreator() {
                 @Override
                 public void create(Card card, String publishableKey,
                         Executor executor, TokenCallback callback) {

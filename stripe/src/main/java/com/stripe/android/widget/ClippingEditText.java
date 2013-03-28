@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 
 public class ClippingEditText extends EditText {
-    private int clipX = 0;
+    private int mClipX = 0;
 
     public ClippingEditText(Context context) {
         super(context);
@@ -25,22 +25,22 @@ public class ClippingEditText extends EditText {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         Layout layout = getLayout();
-        if (clipX != 0 && layout != null) {
+        if (mClipX != 0 && layout != null) {
             int width = (int) layout.getPrimaryHorizontal(getText().length());
-            setMeasuredDimension(width - clipX, getMeasuredHeight());
+            setMeasuredDimension(width - mClipX, getMeasuredHeight());
         }
     }
 
     public void setClipX(int clipX) {
-        if (this.clipX == clipX) {
+        if (mClipX == clipX) {
             return;
         }
-        if (this.clipX == 0 && clipX != 0) {
+        if (mClipX == 0 && clipX != 0) {
             // Put the cursor at the end so we show the last digits
             int n = getText().length();
             setSelection(n, n);
         }
-        this.clipX = clipX;
+        mClipX = clipX;
         requestLayout();
     }
 }

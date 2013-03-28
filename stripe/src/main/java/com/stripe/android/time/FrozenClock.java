@@ -4,10 +4,10 @@ import java.util.Calendar;
 
 public class FrozenClock extends Clock {
     public static void freeze(Calendar freeze) {
-        getInstance().calendarInstance = freeze;
+        getInstance().mCalendarInstance = freeze;
     }
 
     public static void unfreeze() {
-        getInstance().calendarInstance = null;
+        getInstance().mCalendarInstance = null;
     }
 }

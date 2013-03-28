@@ -4,176 +4,183 @@ import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.TextUtils;
 
 public class Card extends com.stripe.model.StripeObject {
-    String number;
-    String cvc;
-    Integer expMonth;
-    Integer expYear;
-    String name;
-    String addressLine1;
-    String addressLine2;
-    String addressCity;
-    String addressState;
-    String addressZip;
-    String addressCountry;
-    String last4;
-    String type;
-    String fingerprint;
-    String country;
+    private String mNumber;
+    private String mCvc;
+    private Integer mExpMonth;
+    private Integer mExpYear;
+    private String mName;
+    private String mAddressLine1;
+    private String mAddressLine2;
+    private String mAddressCity;
+    private String mAddressState;
+    private String mAddressZip;
+    private String mAddressCountry;
+    private String mLast4;
+    private String mType;
+    private String mFingerprint;
+    private String mCountry;
 
     public String getNumber() {
-        return number;
+        return mNumber;
     }
 
     public void setNumber(String number) {
-        this.number = number;
+        mNumber = number;
     }
 
     public String getCVC() {
-        return cvc;
+        return mCvc;
     }
 
     public void setCVC(String cvc) {
-        this.cvc = cvc;
+        mCvc = cvc;
     }
 
     public Integer getExpMonth() {
-        return expMonth;
+        return mExpMonth;
     }
 
     public void setExpMonth(Integer expMonth) {
-        this.expMonth = expMonth;
+        mExpMonth = expMonth;
     }
 
     public Integer getExpYear() {
-        return expYear;
+        return mExpYear;
     }
 
     public void setExpYear(Integer expYear) {
-        this.expYear = expYear;
+        mExpYear = expYear;
     }
 
     public String getName() {
-        return name;
+        return mName;
     }
     public void setName(String name) {
-        this.name = name;
+        mName = name;
     }
 
     public String getAddressLine1() {
-        return addressLine1;
+        return mAddressLine1;
     }
 
     public void setAddressLine1(String addressLine1) {
-        this.addressLine1 = addressLine1;
+        mAddressLine1 = addressLine1;
     }
 
     public String getAddressLine2() {
-        return addressLine2;
+        return mAddressLine2;
     }
 
     public void setAddressLine2(String addressLine2) {
-        this.addressLine2 = addressLine2;
+        mAddressLine2 = addressLine2;
     }
 
     public String getAddressCity() {
-        return addressCity;
+        return mAddressCity;
     }
 
     public void setAddressCity(String addressCity) {
-        this.addressCity = addressCity;
+        mAddressCity = addressCity;
     }
 
     public String getAddressZip() {
-        return addressZip;
+        return mAddressZip;
     }
 
     public void setAddressZip(String addressZip) {
-        this.addressZip = addressZip;
+        mAddressZip = addressZip;
     }
 
     public String getAddressState() {
-        return addressState;
+        return mAddressState;
     }
 
     public void setAddressState(String addressState) {
-        this.addressState = addressState;
+        mAddressState = addressState;
     }
 
     public String getAddressCountry() {
-        return addressCountry;
+        return mAddressCountry;
     }
 
     public void setAddressCountry(String addressCountry) {
-        this.addressCountry = addressCountry;
+        mAddressCountry = addressCountry;
     }
 
     public String getLast4() {
-        if (!TextUtils.isBlank(last4)) {
-            return last4;
+        if (!TextUtils.isBlank(mLast4)) {
+            return mLast4;
         }
-        if (number != null && number.length() > 4) {
-            return number.substring(number.length() - 4, number.length());
+        if (mNumber != null && mNumber.length() > 4) {
+            return mNumber.substring(mNumber.length() - 4, mNumber.length());
         }
         return null;
     }
 
     public String getType() {
-        if (TextUtils.isBlank(type) && !TextUtils.isBlank(number)) {
-            if (TextUtils.hasAnyPrefix(number, "34", "37")) {
+        if (TextUtils.isBlank(mType) && !TextUtils.isBlank(mNumber)) {
+            if (TextUtils.hasAnyPrefix(mNumber, "34", "37")) {
                 return "American Express";
-            } else if (TextUtils.hasAnyPrefix(number, "60", "62", "64", "65")) {
+            } else if (TextUtils.hasAnyPrefix(mNumber, "60", "62", "64", "65")) {
                 return "Discover";
-            } else if (TextUtils.hasAnyPrefix(number, "35")) {
+            } else if (TextUtils.hasAnyPrefix(mNumber, "35")) {
                 return "JCB";
-            } else if (TextUtils.hasAnyPrefix(number, "30", "36", "38", "39")) {
+            } else if (TextUtils.hasAnyPrefix(mNumber, "30", "36", "38", "39")) {
                 return "Diners Club";
-            } else if (TextUtils.hasAnyPrefix(number, "4")) {
+            } else if (TextUtils.hasAnyPrefix(mNumber, "4")) {
                 return "Visa";
-            } else if (TextUtils.hasAnyPrefix(number, "5")) {
+            } else if (TextUtils.hasAnyPrefix(mNumber, "5")) {
                 return "MasterCard";
             } else {
                 return "Unknown";
             }
         }
-        return type;
+        return mType;
     }
 
     public String getFingerprint() {
-        return fingerprint;
+        return mFingerprint;
     }
 
     public String getCountry() {
-        return country;
+        return mCountry;
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
-        this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
-        this.expMonth = expMonth;
-        this.expYear = expYear;
-        this.cvc = TextUtils.nullIfBlank(cvc);
-        this.name = TextUtils.nullIfBlank(name);
-        this.addressLine1 = TextUtils.nullIfBlank(addressLine1);
-        this.addressLine2 = TextUtils.nullIfBlank(addressLine2);
-        this.addressCity = TextUtils.nullIfBlank(addressCity);
-        this.addressState = TextUtils.nullIfBlank(addressState);
-        this.addressZip = TextUtils.nullIfBlank(addressZip);
-        this.addressCountry = TextUtils.nullIfBlank(addressCountry);
-        this.last4 = TextUtils.nullIfBlank(last4);
-        this.type = TextUtils.nullIfBlank(type);
-        this.fingerprint = TextUtils.nullIfBlank(fingerprint);
-        this.country = TextUtils.nullIfBlank(country);
+    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name,
+            String addressLine1, String addressLine2, String addressCity, String addressState,
+            String addressZip, String addressCountry, String last4, String type, String fingerprint,
+            String country) {
+        mNumber = TextUtils.nullIfBlank(normalizeCardNumber(number));
+        mExpMonth = expMonth;
+        mExpYear = expYear;
+        mCvc = TextUtils.nullIfBlank(cvc);
+        mName = TextUtils.nullIfBlank(name);
+        mAddressLine1 = TextUtils.nullIfBlank(addressLine1);
+        mAddressLine2 = TextUtils.nullIfBlank(addressLine2);
+        mAddressCity = TextUtils.nullIfBlank(addressCity);
+        mAddressState = TextUtils.nullIfBlank(addressState);
+        mAddressZip = TextUtils.nullIfBlank(addressZip);
+        mAddressCountry = TextUtils.nullIfBlank(addressCountry);
+        mLast4 = TextUtils.nullIfBlank(last4);
+        mType = TextUtils.nullIfBlank(type);
+        mFingerprint = TextUtils.nullIfBlank(fingerprint);
+        mCountry = TextUtils.nullIfBlank(country);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry) {
-        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, null, null, null, null);
+    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name,
+            String addressLine1, String addressLine2, String addressCity, String addressState,
+            String addressZip, String addressCountry) {
+        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity,
+                addressState, addressZip, addressCountry, null, null, null, null);
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
-        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
+        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null,
+                null, null);
     }
 
     public boolean validateCard() {
-        if (cvc == null) {
+        if (mCvc == null) {
             return validateNumber() && validateExpiryDate();
         } else {
             return validateNumber() && validateExpiryDate() && validateCVC();
@@ -181,11 +188,11 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateNumber() {
-        if (TextUtils.isBlank(number)) {
+        if (TextUtils.isBlank(mNumber)) {
             return false;
         }
 
-        String rawNumber = number.trim().replaceAll("\\s+|-", "");
+        String rawNumber = mNumber.trim().replaceAll("\\s+|-", "");
         if (TextUtils.isBlank(rawNumber)
                 || !TextUtils.isWholePositiveNumber(rawNumber)
                 || !isValidLuhnNumber(rawNumber)) {
@@ -200,7 +207,7 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateNumberLength() {
-        String rawNumber = number.trim().replaceAll("\\s+|-", "");
+        String rawNumber = mNumber.trim().replaceAll("\\s+|-", "");
 
         String cardType = getType();
 
@@ -218,31 +225,32 @@ public class Card extends com.stripe.model.StripeObject {
         if (!validateExpYear()) {
             return false;
         }
-        return !DateUtils.hasMonthPassed(expYear, expMonth);
+        return !DateUtils.hasMonthPassed(mExpYear, mExpMonth);
     }
 
     public boolean validateExpMonth() {
-        if (expMonth == null) {
+        if (mExpMonth == null) {
             return false;
         }
-        return (expMonth >= 1 && expMonth <= 12);
+        return (mExpMonth >= 1 && mExpMonth <= 12);
     }
 
     public boolean validateExpYear() {
-        if (expYear == null) {
+        if (mExpYear == null) {
             return false;
         }
-        return !DateUtils.hasYearPassed(expYear);
+        return !DateUtils.hasYearPassed(mExpYear);
     }
 
     public boolean validateCVC() {
-        if (TextUtils.isBlank(cvc)) {
+        if (TextUtils.isBlank(mCvc)) {
             return false;
         }
-        String cvcValue = cvc.trim();
+        String cvcValue = mCvc.trim();
         String cardType = getType();
 
-        boolean validLength = ((cardType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
+        boolean validLength = (
+                (cardType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
                 ("American Express".equals(cardType) && cvcValue.length() == 4) ||
                 (!"American Express".equals(cardType) && cvcValue.length() == 3));
 

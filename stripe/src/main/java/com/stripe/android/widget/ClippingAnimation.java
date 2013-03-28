@@ -4,23 +4,23 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 public class ClippingAnimation extends Animation {
-    private ClippingEditText view;
+    private ClippingEditText mView;
 
-    private float fromXDelta;
-    private float toXDelta;
+    private float mFromXDelta;
+    private float mToXDelta;
 
     public ClippingAnimation(ClippingEditText view, float fromXDelta, float toXDelta) {
-        this.view = view;
-        this.fromXDelta = fromXDelta;
-        this.toXDelta = toXDelta;
+        mView = view;
+        mFromXDelta = fromXDelta;
+        mToXDelta = toXDelta;
     }
 
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
-        float dx = fromXDelta;
-        if (fromXDelta != toXDelta) {
-            dx = fromXDelta + ((toXDelta - fromXDelta) * interpolatedTime);
+        float dx = mFromXDelta;
+        if (mFromXDelta != mToXDelta) {
+            dx = mFromXDelta + ((mToXDelta - mFromXDelta) * interpolatedTime);
         }
-        view.setClipX((int) dx);
+        mView.setClipX((int) dx);
     }
 }

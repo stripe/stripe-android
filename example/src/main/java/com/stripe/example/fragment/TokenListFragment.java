@@ -12,19 +12,18 @@ import java.util.List;
 import java.util.Map;
 
 public class TokenListFragment extends ListFragment implements TokenList {
-
-    List<Map<String, String>> listItems = new ArrayList<Map<String, String>>();
-    SimpleAdapter adapter;
+    private List<Map<String, String>> mListItems = new ArrayList<Map<String, String>>();
+    private SimpleAdapter mAdapter;
 
     @Override
     public void onViewCreated(android.view.View view, android.os.Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        adapter = new SimpleAdapter(getActivity(),
-                listItems,
+        mAdapter = new SimpleAdapter(getActivity(),
+                mListItems,
                 R.layout.list_item_layout,
-                new String[]{"last4", "tokenId"},
-                new int[]{R.id.last4, R.id.tokenId});
-        setListAdapter(adapter);
+                new String[]{ "last4", "tokenId" },
+                new int[]{ R.id.last4, R.id.tokenId });
+        setListAdapter(mAdapter);
     }
 
     @Override
@@ -39,8 +38,7 @@ public class TokenListFragment extends ListFragment implements TokenList {
         Map<String, String> map = new HashMap<String, String>();
         map.put("last4", endingIn + " " + token.getCard().getLast4());
         map.put("tokenId", token.getId());
-        listItems.add(map);
-        adapter.notifyDataSetChanged();
+        mListItems.add(map);
+        mAdapter.notifyDataSetChanged();
     }
-
 }

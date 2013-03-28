@@ -34,41 +34,41 @@ import com.stripe.android.util.TextUtils;
 public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
 
-    private ImageView cardImageView;
-    private ClippingEditText cardNumberView;
-    private EditText expiryView;
-    private EditText cvcView;
+    private ImageView mCardImageView;
+    private ClippingEditText mCardNumberView;
+    private EditText mExpiryView;
+    private EditText mCvcView;
 
-    private float cardNumberSlidingDelta = 0;
-    private boolean isCardNumberCollapsed = false;
+    private float mCardNumberSlidingDelta = 0;
+    private boolean mIsCardNumberCollapsed = false;
 
-    private Card card = new Card(null, null, null, null);
-    private int textColor;
-    private int errorColor;
+    private Card mCard = new Card(null, null, null, null);
+    private int mTextColor;
+    private int mErrorColor;
 
-    private OnKeyListener emptyListener = new EmptyOnKeyListener();
+    private OnKeyListener mEmptyListener = new EmptyOnKeyListener();
 
-    private InputFilter cvcEmptyFilter = new CvcEmptyFilter();
-    private InputFilter[] cvcLengthOf3 = new InputFilter[] {
-            new InputFilter.LengthFilter(3), cvcEmptyFilter };
-    private InputFilter[] cvcLengthOf4 = new InputFilter[] {
-            new InputFilter.LengthFilter(4), cvcEmptyFilter };
+    private InputFilter mCvcEmptyFilter = new CvcEmptyFilter();
+    private InputFilter[] mCvcLengthOf3 = new InputFilter[] {
+            new InputFilter.LengthFilter(3), mCvcEmptyFilter };
+    private InputFilter[] mCvcLengthOf4 = new InputFilter[] {
+            new InputFilter.LengthFilter(4), mCvcEmptyFilter };
 
-    private boolean lastValidationResult = false;
+    private boolean mLastValidationResult = false;
 
-    private HashSet<OnValidationChangeListener> listeners
+    private HashSet<OnValidationChangeListener> mListeners
         = new HashSet<OnValidationChangeListener>();
 
-    private Animation fadeInAnimation;
+    private Animation mFadeInAnimation;
 
-    private int minWidth;
+    private int mMinWidth;
 
     public void registerListener(OnValidationChangeListener listener) {
-        listeners.add(listener);
+        mListeners.add(listener);
     }
 
     public void unregisterListener(OnValidationChangeListener listener) {
-        listeners.remove(listener);
+        mListeners.remove(listener);
     }
 
     public interface OnValidationChangeListener {
@@ -91,7 +91,7 @@ public class PaymentKitView extends FrameLayout {
     }
 
     public Card getCard() {
-        return card;
+        return mCard;
     }
 
     private void init() {
@@ -99,53 +99,53 @@ public class PaymentKitView extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View parent = inflater.inflate(R.layout.__pk_view, this);
 
-        cardImageView = (ImageView) parent.findViewById(R.id.__pk_card_image);
-        cardNumberView = (ClippingEditText) parent.findViewById(R.id.__pk_card_number);
-        expiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
-        cvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
+        mCardImageView = (ImageView) parent.findViewById(R.id.__pk_card_image);
+        mCardNumberView = (ClippingEditText) parent.findViewById(R.id.__pk_card_number);
+        mExpiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
+        mCvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
 
-        cardNumberView.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        mCardNumberView.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 
-        textColor = cvcView.getCurrentTextColor();
-        errorColor = getContext().getResources().getColor(R.color.__pk_error_color);
+        mTextColor = mCvcView.getCurrentTextColor();
+        mErrorColor = getContext().getResources().getColor(R.color.__pk_error_color);
         computeMinWidth();
 
-        cardImageView.setTag(R.drawable.__pk_placeholder);
-        fadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
+        mCardImageView.setTag(R.drawable.__pk_placeholder);
+        mFadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
     }
 
     private void computeMinWidth() {
         Rect bounds = new Rect();
-        Paint textPaint = cardNumberView.getPaint();
+        Paint textPaint = mCardNumberView.getPaint();
         textPaint.getTextBounds("4", 0, 1, bounds);    // widest digit
         int cardNumberMinWidth = bounds.width() * 21;  // wide enough for 21 digits
 
         int marginLeft = getContext().getResources().getDimensionPixelSize(
                 R.dimen.__pk_margin_left);
 
-        minWidth = getPaddingLeft() + marginLeft + cardNumberMinWidth + getPaddingRight();
+        mMinWidth = getPaddingLeft() + marginLeft + cardNumberMinWidth + getPaddingRight();
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        card.setNumber(cardNumberView.getText().toString());
+        mCard.setNumber(mCardNumberView.getText().toString());
 
         CardExpiry cardExpiry = new CardExpiry();
-        cardExpiry.updateFromString(expiryView.getText().toString());
-        card.setExpMonth(cardExpiry.getMonth());
-        card.setExpYear(cardExpiry.getYear());
+        cardExpiry.updateFromString(mExpiryView.getText().toString());
+        mCard.setExpMonth(cardExpiry.getMonth());
+        mCard.setExpYear(cardExpiry.getYear());
 
-        card.setCVC(TextUtils.nullIfBlank(cvcView.getText().toString()));
+        mCard.setCVC(TextUtils.nullIfBlank(mCvcView.getText().toString()));
 
         updateFields(false);
         notifyValidationChange();
 
-        cardImageView.setOnClickListener(new OnClickListener() {
+        mCardImageView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isCardNumberCollapsed) {
+                if (mIsCardNumberCollapsed) {
                     expandCardNumber();
                 } else {
                     collapseCardNumber(true);
@@ -155,11 +155,11 @@ public class PaymentKitView extends FrameLayout {
 
         setupTextWatchers();
 
-        if (card.validateNumber()) {
-            if (card.validateExpiryDate()) {
-                cvcView.requestFocus();
+        if (mCard.validateNumber()) {
+            if (mCard.validateExpiryDate()) {
+                mCvcView.requestFocus();
             } else {
-                expiryView.requestFocus();
+                mExpiryView.requestFocus();
             }
         }
     }
@@ -169,11 +169,11 @@ public class PaymentKitView extends FrameLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         // We want to be at least minWidth wide
-        int width = Math.max(minWidth, getMeasuredWidth());
+        int width = Math.max(mMinWidth, getMeasuredWidth());
 
         if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
             // If the measure spec gives us an upper bound, do a tight fit.
-            width = Math.min(minWidth, getMeasuredWidth());
+            width = Math.min(mMinWidth, getMeasuredWidth());
         }
 
         setMeasuredDimension(width, getMeasuredHeight());
@@ -182,35 +182,35 @@ public class PaymentKitView extends FrameLayout {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        cardImageView.setEnabled(enabled);
-        cardNumberView.setEnabled(enabled);
-        expiryView.setEnabled(enabled);
-        cvcView.setEnabled(enabled);
+        mCardImageView.setEnabled(enabled);
+        mCardNumberView.setEnabled(enabled);
+        mExpiryView.setEnabled(enabled);
+        mCvcView.setEnabled(enabled);
     }
 
     private void setupTextWatchers() {
         CardNumberWatcher cardNumberWatcher = new CardNumberWatcher();
-        cardNumberView.setFilters(new InputFilter[] {
+        mCardNumberView.setFilters(new InputFilter[] {
                 new InputFilter.LengthFilter(19), cardNumberWatcher });
-        cardNumberView.addTextChangedListener(cardNumberWatcher);
-        cardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
+        mCardNumberView.addTextChangedListener(cardNumberWatcher);
+        mCardNumberView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && isCardNumberCollapsed) {
+                if (hasFocus && mIsCardNumberCollapsed) {
                     expandCardNumber();
                 }
             }
         });
 
         ExpiryWatcher expiryWatcher = new ExpiryWatcher();
-        expiryView.setFilters(new InputFilter[] { expiryWatcher });
-        expiryView.addTextChangedListener(expiryWatcher);
-        expiryView.setOnKeyListener(emptyListener);
+        mExpiryView.setFilters(new InputFilter[] { expiryWatcher });
+        mExpiryView.addTextChangedListener(expiryWatcher);
+        mExpiryView.setOnKeyListener(mEmptyListener);
 
-        cvcView.setFilters(cvcLengthOf3);
-        cvcView.addTextChangedListener(new CvcWatcher());
-        cvcView.setOnKeyListener(emptyListener);
-        cvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
+        mCvcView.setFilters(mCvcLengthOf3);
+        mCvcView.addTextChangedListener(new CvcWatcher());
+        mCvcView.setOnKeyListener(mEmptyListener);
+        mCvcView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
@@ -223,43 +223,43 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private void updateFields(boolean animate) {
-        cardNumberView.setTextColor(textColor);
-        if (card.validateNumberLength()) {
-            if (card.validateNumber()) {
+        mCardNumberView.setTextColor(mTextColor);
+        if (mCard.validateNumberLength()) {
+            if (mCard.validateNumber()) {
                 collapseCardNumber(animate);
             } else {
-                cardNumberView.setTextColor(errorColor);
+                mCardNumberView.setTextColor(mErrorColor);
             }
         }
 
-        if ("American Express".equals(card.getType())) {
-            cvcView.setFilters(cvcLengthOf4);
+        if ("American Express".equals(mCard.getType())) {
+            mCvcView.setFilters(mCvcLengthOf4);
         } else {
-            cvcView.setFilters(cvcLengthOf3);
+            mCvcView.setFilters(mCvcLengthOf3);
         }
 
         updateCardType();
     }
 
     private void computeCardNumberSlidingDelta() {
-        Layout layout = cardNumberView.getLayout();
+        Layout layout = mCardNumberView.getLayout();
         if (layout == null) {
             return;
         }
 
-        String number = cardNumberView.getText().toString();
-        card.setNumber(number);
-        int suffixLength = "American Express".equals(card.getType()) ? 5 : 4;
+        String number = mCardNumberView.getText().toString();
+        mCard.setNumber(number);
+        int suffixLength = "American Express".equals(mCard.getType()) ? 5 : 4;
 
-        cardNumberSlidingDelta = layout.getPrimaryHorizontal(number.length() - suffixLength);
+        mCardNumberSlidingDelta = layout.getPrimaryHorizontal(number.length() - suffixLength);
     }
 
     private void collapseCardNumber(boolean animate) {
-        if (!card.validateNumber()) {
+        if (!mCard.validateNumber()) {
             return;
         }
         computeCardNumberSlidingDelta();
-        isCardNumberCollapsed = true;
+        mIsCardNumberCollapsed = true;
         if (animate) {
             animateCardNumber();
         } else {
@@ -268,34 +268,34 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private void expandCardNumber() {
-        isCardNumberCollapsed = false;
+        mIsCardNumberCollapsed = false;
         animateCardNumber();
     }
 
     private void animateCardNumber() {
-        float fromXDelta = isCardNumberCollapsed ? 0
-                : cardNumberSlidingDelta;
-        float toXDelta = isCardNumberCollapsed ? cardNumberSlidingDelta : 0;
-        ClippingAnimation anim = new ClippingAnimation(cardNumberView, fromXDelta, toXDelta);
+        float fromXDelta = mIsCardNumberCollapsed ? 0
+                : mCardNumberSlidingDelta;
+        float toXDelta = mIsCardNumberCollapsed ? mCardNumberSlidingDelta : 0;
+        ClippingAnimation anim = new ClippingAnimation(mCardNumberView, fromXDelta, toXDelta);
         anim.setDuration(SLIDING_DURATION_MS);
         anim.setAnimationListener(mAnimationListener);
         anim.setInterpolator(new DecelerateInterpolator());
-        cardNumberView.startAnimation(anim);
+        mCardNumberView.startAnimation(anim);
     }
 
     private void showExpiryAndCvc() {
-        cardNumberView.setClipX((int) cardNumberSlidingDelta);
-        expiryView.setVisibility(View.VISIBLE);
-        cvcView.setVisibility(View.VISIBLE);
+        mCardNumberView.setClipX((int) mCardNumberSlidingDelta);
+        mExpiryView.setVisibility(View.VISIBLE);
+        mCvcView.setVisibility(View.VISIBLE);
     }
 
     private AnimationListener mAnimationListener = new AnimationListener() {
         public void onAnimationEnd(Animation animation) {
-            if (!isCardNumberCollapsed) {
+            if (!mIsCardNumberCollapsed) {
                 return;
             }
             showExpiryAndCvc();
-            expiryView.requestFocus();
+            mExpiryView.requestFocus();
         }
 
         public void onAnimationRepeat(Animation animation) {
@@ -303,27 +303,27 @@ public class PaymentKitView extends FrameLayout {
         }
 
         public void onAnimationStart(Animation animation) {
-            if (isCardNumberCollapsed) {
+            if (mIsCardNumberCollapsed) {
                 return;
             }
 
-            expiryView.setVisibility(View.GONE);
-            cvcView.setVisibility(View.GONE);
+            mExpiryView.setVisibility(View.GONE);
+            mCvcView.setVisibility(View.GONE);
         }
     };
 
     private void notifyValidationChange() {
-        boolean valid = card.validateCard();
-        if (valid != lastValidationResult) {
-            for (OnValidationChangeListener listener : listeners) {
+        boolean valid = mCard.validateCard();
+        if (valid != mLastValidationResult) {
+            for (OnValidationChangeListener listener : mListeners) {
                 listener.onChange(valid);
             }
         }
-        lastValidationResult = valid;
+        mLastValidationResult = valid;
     }
 
     private int getImageResourceForCardType() {
-        String cardType = card.getType();
+        String cardType = mCard.getType();
 
         if ("American Express".equals(cardType)) {
             return R.drawable.__pk_amex;
@@ -358,26 +358,26 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private void updateCvcType() {
-        boolean isAmex = "American Express".equals(card.getType());
+        boolean isAmex = "American Express".equals(mCard.getType());
         int resId = isAmex ? R.drawable.__pk_cvc_amex : R.drawable.__pk_cvc;
         updateCardImage(resId);
     }
 
     private void updateCardImage(int resId) {
-        Integer oldResId = (Integer) cardImageView.getTag();
+        Integer oldResId = (Integer) mCardImageView.getTag();
         if (oldResId == resId) {
             return;
         }
-        cardImageView.setTag(resId);
-        cardImageView.setImageResource(resId);
-        cardImageView.startAnimation(fadeInAnimation);
+        mCardImageView.setTag(resId);
+        mCardImageView.setImageResource(resId);
+        mCardImageView.startAnimation(mFadeInAnimation);
     }
 
     @Override
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
         final SavedState myState = new SavedState(superState);
-        myState.cardNumberSlidingDelta = cardNumberSlidingDelta;
+        myState.mSlidingDelta = mCardNumberSlidingDelta;
         return myState;
     }
 
@@ -392,17 +392,17 @@ public class PaymentKitView extends FrameLayout {
         // Restore the instance state
         SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
-        cardNumberSlidingDelta = myState.cardNumberSlidingDelta;
+        mCardNumberSlidingDelta = myState.mSlidingDelta;
     }
 
-    // Save cardNumberSlidingDelta so we can update the layout for the card number field during
+    // Save mCardNumberSlidingDelta so we can update the layout for the card number field during
     // onAttachWindow, when the layout of the EditText is not yet initialized.
     private static class SavedState extends BaseSavedState {
-        float cardNumberSlidingDelta;
+        float mSlidingDelta;
 
         public SavedState(Parcel source) {
             super(source);
-            cardNumberSlidingDelta = source.readFloat();
+            mSlidingDelta = source.readFloat();
         }
 
         public SavedState(Parcelable superState) {
@@ -411,7 +411,7 @@ public class PaymentKitView extends FrameLayout {
 
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
-            dest.writeFloat(cardNumberSlidingDelta);
+            dest.writeFloat(mSlidingDelta);
         }
 
         @SuppressWarnings("unused")
@@ -428,8 +428,8 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private class CardNumberWatcher implements InputFilter, TextWatcher {
-        private boolean isUserInput = true;
-        private boolean isInserting = false;
+        private boolean mIsUserInput = true;
+        private boolean mIsInserting = false;
 
         private boolean isAllowed(char c) {
             if (c >= '0' && c <= '9') {
@@ -453,24 +453,24 @@ public class PaymentKitView extends FrameLayout {
         public void afterTextChanged(Editable s) {
             String number = s.toString();
 
-            String formattedNumber = CardNumberFormatter.format(number, isInserting);
+            String formattedNumber = CardNumberFormatter.format(number, mIsInserting);
             if (!number.equals(formattedNumber)) {
-                isUserInput = false;
+                mIsUserInput = false;
                 s.replace(0, s.length(), formattedNumber);
                 return;
             }
 
-            card.setNumber(number);
+            mCard.setNumber(number);
             updateFields(true);
 
             notifyValidationChange();
 
-            isUserInput = true;
+            mIsUserInput = true;
         }
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            if (isUserInput) {
-                isInserting = (after > count);
+            if (mIsUserInput) {
+                mIsInserting = (after > count);
             }
         }
         @Override
@@ -482,8 +482,8 @@ public class PaymentKitView extends FrameLayout {
     private class ExpiryWatcher implements InputFilter, TextWatcher {
         private static final int EXPIRY_MAX_LENGTH = 5;
 
-        private CardExpiry cardExpiry = new CardExpiry();
-        private boolean isInserting = false;
+        private CardExpiry mCardExpiry = new CardExpiry();
+        private boolean mIsInserting = false;
 
         @Override
         public CharSequence filter(CharSequence source, int start, int end,
@@ -495,38 +495,38 @@ public class PaymentKitView extends FrameLayout {
             String str = buf.toString();
             if (str.length() == 0) {
                 // Jump to previous field when user empties this one
-                cardNumberView.requestFocus();
+                mCardNumberView.requestFocus();
                 return null;
             }
             if (str.length() > EXPIRY_MAX_LENGTH) {
                 return "";
             }
-            cardExpiry.updateFromString(str);
-            return cardExpiry.isPartiallyValid() ? null : "";
+            mCardExpiry.updateFromString(str);
+            return mCardExpiry.isPartiallyValid() ? null : "";
         }
 
         @Override
         public void afterTextChanged(Editable s) {
             String str = s.toString();
-            cardExpiry.updateFromString(str);
-            card.setExpMonth(cardExpiry.getMonth());
-            card.setExpYear(cardExpiry.getYear());
-            if (cardExpiry.isPartiallyValid()) {
-                String formattedString = isInserting ?
-                        cardExpiry.toStringWithTrail() : cardExpiry.toString();
+            mCardExpiry.updateFromString(str);
+            mCard.setExpMonth(mCardExpiry.getMonth());
+            mCard.setExpYear(mCardExpiry.getYear());
+            if (mCardExpiry.isPartiallyValid()) {
+                String formattedString = mIsInserting ?
+                        mCardExpiry.toStringWithTrail() : mCardExpiry.toString();
                 if (!str.equals(formattedString)) {
                     s.replace(0, s.length(), formattedString);
                 }
             }
-            if (cardExpiry.isValid()) {
-                cvcView.requestFocus();
+            if (mCardExpiry.isValid()) {
+                mCvcView.requestFocus();
             }
 
             notifyValidationChange();
         }
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            isInserting = (after > count);
+            mIsInserting = (after > count);
         }
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -537,7 +537,7 @@ public class PaymentKitView extends FrameLayout {
     private class CvcWatcher implements TextWatcher {
         @Override
         public void afterTextChanged(Editable s) {
-            card.setCVC(TextUtils.nullIfBlank(s.toString()));
+            mCard.setCVC(TextUtils.nullIfBlank(s.toString()));
             notifyValidationChange();
         }
         @Override
@@ -563,14 +563,14 @@ public class PaymentKitView extends FrameLayout {
             if (v.getId() == R.id.__pk_expiry) {
                 EditText editText = (EditText) v;
                 if (editText.getText().length() == 0) {
-                    cardNumberView.requestFocus();
+                    mCardNumberView.requestFocus();
                     return false;
                 }
             }
             if (v.getId() == R.id.__pk_cvc) {
                 EditText editText = (EditText) v;
                 if (editText.getText().length() == 0) {
-                    expiryView.requestFocus();
+                    mExpiryView.requestFocus();
                     return false;
                 }
             }
@@ -585,7 +585,7 @@ public class PaymentKitView extends FrameLayout {
                 Spanned dest, int dstart, int dend) {
             int n = (dstart - 0) + (end - start) + (dest.length() - dend);
             if (n == 0) {
-                expiryView.requestFocus();
+                mExpiryView.requestFocus();
             }
             return null;
         }
