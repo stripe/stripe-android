@@ -3,6 +3,7 @@
     style="@style/PaymentKit.__Widget" >
 
     <LinearLayout
+        android:id="@+id/__pk_other_fields"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/__pk_margin_left"

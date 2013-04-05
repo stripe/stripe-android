@@ -21,6 +21,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -36,6 +37,7 @@ public class PaymentKitView extends FrameLayout {
 
     private ImageView mCardImageView;
     private ClippingEditText mCardNumberView;
+    private View mOtherFieldsContainer;
     private EditText mExpiryView;
     private EditText mCvcView;
 
@@ -103,6 +105,7 @@ public class PaymentKitView extends FrameLayout {
         mCardNumberView = (ClippingEditText) parent.findViewById(R.id.__pk_card_number);
         mExpiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         mCvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
+        mOtherFieldsContainer = parent.findViewById(R.id.__pk_other_fields);
 
         mCardNumberView.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 
@@ -261,7 +264,7 @@ public class PaymentKitView extends FrameLayout {
         computeCardNumberSlidingDelta();
         mIsCardNumberCollapsed = true;
         if (animate) {
-            animateCardNumber();
+            animationFields();
         } else {
             showExpiryAndCvc();
         }
@@ -269,7 +272,12 @@ public class PaymentKitView extends FrameLayout {
 
     private void expandCardNumber() {
         mIsCardNumberCollapsed = false;
+        animationFields();
+    }
+
+    private void animationFields() {
         animateCardNumber();
+        animateOtherFields();
     }
 
     private void animateCardNumber() {
@@ -283,6 +291,19 @@ public class PaymentKitView extends FrameLayout {
         mCardNumberView.startAnimation(anim);
     }
 
+    private void animateOtherFields() {
+        float delta = mOtherFieldsContainer.getWidth() - mExpiryView.getLeft();
+        float fromXDelta = mIsCardNumberCollapsed ? delta : 0;
+        float toXDelta = mIsCardNumberCollapsed ? 0 : delta;
+        TranslateAnimation anim = new TranslateAnimation(fromXDelta, toXDelta, 0, 0);
+        anim.setDuration(SLIDING_DURATION_MS);
+        anim.setFillBefore(true);
+        anim.setFillAfter(true);
+        anim.setFillEnabled(true);
+        anim.setInterpolator(new DecelerateInterpolator());
+        mOtherFieldsContainer.startAnimation(anim);
+    }
+
     private void showExpiryAndCvc() {
         mCardNumberView.setClipX((int) mCardNumberSlidingDelta);
         mExpiryView.setVisibility(View.VISIBLE);
@@ -290,25 +311,25 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private AnimationListener mAnimationListener = new AnimationListener() {
-        public void onAnimationEnd(Animation animation) {
-            if (!mIsCardNumberCollapsed) {
-                return;
+        public void onAnimationStart(Animation animation) {
+            mExpiryView.setVisibility(View.VISIBLE);
+            mCvcView.setVisibility(View.VISIBLE);
+            if (mIsCardNumberCollapsed) {
+                mExpiryView.requestFocus();
             }
-            showExpiryAndCvc();
-            mExpiryView.requestFocus();
+        }
+
+        public void onAnimationEnd(Animation animation) {
+            if (mIsCardNumberCollapsed) {
+                showExpiryAndCvc();
+            } else {
+                mExpiryView.setVisibility(View.GONE);
+                mCvcView.setVisibility(View.GONE);
+            }
         }
 
         public void onAnimationRepeat(Animation animation) {
             // not needed
-        }
-
-        public void onAnimationStart(Animation animation) {
-            if (mIsCardNumberCollapsed) {
-                return;
-            }
-
-            mExpiryView.setVisibility(View.GONE);
-            mCvcView.setVisibility(View.GONE);
         }
     };
 
