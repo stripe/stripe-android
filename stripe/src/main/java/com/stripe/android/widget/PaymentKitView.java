@@ -61,7 +61,7 @@ public class PaymentKitView extends FrameLayout {
     private HashSet<OnValidationChangeListener> mListeners
         = new HashSet<OnValidationChangeListener>();
 
-    private Animation mFadeInAnimation;
+    private Animation mScaleAnimation;
 
     private int mMinWidth;
 
@@ -114,7 +114,8 @@ public class PaymentKitView extends FrameLayout {
         computeMinWidth();
 
         mCardImageView.setTag(R.drawable.__pk_placeholder);
-        mFadeInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fade_in);
+        mScaleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_out);
+        mScaleAnimation.setAnimationListener(mCardImageAnimationListener);
     }
 
     private void computeMinWidth() {
@@ -286,7 +287,7 @@ public class PaymentKitView extends FrameLayout {
         float toXDelta = mIsCardNumberCollapsed ? mCardNumberSlidingDelta : 0;
         ClippingAnimation anim = new ClippingAnimation(mCardNumberView, fromXDelta, toXDelta);
         anim.setDuration(SLIDING_DURATION_MS);
-        anim.setAnimationListener(mAnimationListener);
+        anim.setAnimationListener(mCardNumberAnimationListener);
         anim.setInterpolator(new DecelerateInterpolator());
         mCardNumberView.startAnimation(anim);
     }
@@ -310,7 +311,26 @@ public class PaymentKitView extends FrameLayout {
         mCvcView.setVisibility(View.VISIBLE);
     }
 
-    private AnimationListener mAnimationListener = new AnimationListener() {
+    private AnimationListener mCardImageAnimationListener = new AnimationListener() {
+        Animation mScaleDownAnimation
+            = AnimationUtils.loadAnimation(getContext(), R.anim.scale_in);
+
+        public void onAnimationStart(Animation animation) {
+            // not needed
+        }
+
+        public void onAnimationEnd(Animation animation) {
+            Integer resId = (Integer) mCardImageView.getTag();
+            mCardImageView.setImageResource(resId);
+            mCardImageView.startAnimation(mScaleDownAnimation);
+        }
+
+        public void onAnimationRepeat(Animation animation) {
+            // not needed
+        }
+    };
+
+    private AnimationListener mCardNumberAnimationListener = new AnimationListener() {
         public void onAnimationStart(Animation animation) {
             mExpiryView.setVisibility(View.VISIBLE);
             mCvcView.setVisibility(View.VISIBLE);
@@ -390,8 +410,7 @@ public class PaymentKitView extends FrameLayout {
             return;
         }
         mCardImageView.setTag(resId);
-        mCardImageView.setImageResource(resId);
-        mCardImageView.startAnimation(mFadeInAnimation);
+        mCardImageView.startAnimation(mScaleAnimation);
     }
 
     @Override
