@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="__pk_card_image_animation_duration" type="integer" format="integer">250</item>
+</resources>

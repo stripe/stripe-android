@@ -36,6 +36,8 @@ public class PaymentKitView extends FrameLayout {
     private static final long SLIDING_DURATION_MS = 500;
 
     private ImageView mCardImageView;
+    private ImageView mCardImageBottomView;  // for cross-fading
+
     private ClippingEditText mCardNumberView;
     private View mOtherFieldsContainer;
     private EditText mExpiryView;
@@ -61,7 +63,8 @@ public class PaymentKitView extends FrameLayout {
     private HashSet<OnValidationChangeListener> mListeners
         = new HashSet<OnValidationChangeListener>();
 
-    private Animation mScaleAnimation;
+    private Animation mScaleInAnimation;
+    private Animation mScaleOutAnimation;
 
     private int mMinWidth;
 
@@ -102,6 +105,7 @@ public class PaymentKitView extends FrameLayout {
         View parent = inflater.inflate(R.layout.__pk_view, this);
 
         mCardImageView = (ImageView) parent.findViewById(R.id.__pk_card_image);
+        mCardImageBottomView = (ImageView) parent.findViewById(R.id.__pk_card_image_bottom);
         mCardNumberView = (ClippingEditText) parent.findViewById(R.id.__pk_card_number);
         mExpiryView = (EditText) parent.findViewById(R.id.__pk_expiry);
         mCvcView = (EditText) parent.findViewById(R.id.__pk_cvc);
@@ -114,8 +118,9 @@ public class PaymentKitView extends FrameLayout {
         computeMinWidth();
 
         mCardImageView.setTag(R.drawable.__pk_placeholder);
-        mScaleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_out);
-        mScaleAnimation.setAnimationListener(mCardImageAnimationListener);
+        mScaleOutAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_out);
+        mScaleInAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_in);
+        mScaleInAnimation.setAnimationListener(mCardImageAnimationListener);
     }
 
     private void computeMinWidth() {
@@ -312,17 +317,14 @@ public class PaymentKitView extends FrameLayout {
     }
 
     private AnimationListener mCardImageAnimationListener = new AnimationListener() {
-        Animation mScaleDownAnimation
-            = AnimationUtils.loadAnimation(getContext(), R.anim.scale_in);
-
         public void onAnimationStart(Animation animation) {
-            // not needed
+            mCardImageBottomView.setVisibility(View.VISIBLE);
         }
 
         public void onAnimationEnd(Animation animation) {
             Integer resId = (Integer) mCardImageView.getTag();
             mCardImageView.setImageResource(resId);
-            mCardImageView.startAnimation(mScaleDownAnimation);
+            mCardImageBottomView.setVisibility(View.INVISIBLE);
         }
 
         public void onAnimationRepeat(Animation animation) {
@@ -410,7 +412,9 @@ public class PaymentKitView extends FrameLayout {
             return;
         }
         mCardImageView.setTag(resId);
-        mCardImageView.startAnimation(mScaleAnimation);
+        mCardImageBottomView.setImageResource(resId);
+        mCardImageView.startAnimation(mScaleOutAnimation);
+        mCardImageBottomView.startAnimation(mScaleInAnimation);
     }
 
     @Override

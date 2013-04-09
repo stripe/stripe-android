@@ -48,6 +48,17 @@
         android:maxLength="19" />
 
     <ImageView
+        android:id="@+id/__pk_card_image_bottom"
+        android:layout_width="@dimen/__pk_card_type_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="@string/__pk_card_type"
+        android:paddingLeft="@dimen/__pk_card_type_margin_horizontal"
+        android:paddingRight="@dimen/__pk_card_type_margin_horizontal"
+        android:src="@drawable/__pk_placeholder"
+        android:visibility="invisible" />
+
+    <ImageView
         android:id="@+id/__pk_card_image"
         android:layout_width="@dimen/__pk_card_type_width"
         android:layout_height="match_parent"
