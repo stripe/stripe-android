@@ -140,7 +140,7 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateCard() {
-        if (getCVC() == null) {
+        if (cvc == null) {
             return validateNumber() && validateExpiryDate();
         } else {
             return validateNumber() && validateExpiryDate() && validateCVC();
@@ -148,22 +148,22 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public boolean validateNumber() {
-        if (TextUtils.isBlank(getNumber())) {
+        if (TextUtils.isBlank(number)) {
             return false;
         }
 
-        String rawNumber = getNumber().trim().replaceAll("\\s+|-", "");
+        String rawNumber = number.trim().replaceAll("\\s+|-", "");
         if (TextUtils.isBlank(rawNumber)
                 || !TextUtils.isWholePositiveNumber(rawNumber)
                 || !isValidLuhnNumber(rawNumber)) {
             return false;
         }
 
-        if (!"American Express".equals(getType()) && rawNumber.length() != 16) {
+        if (!"American Express".equals(type) && rawNumber.length() != 16) {
         	return false;
         }
 
-        if ("American Express".equals(getType()) && rawNumber.length() != 15) {
+        if ("American Express".equals(type) && rawNumber.length() != 15) {
         	return false;
         }
 
@@ -177,32 +177,32 @@ public class Card extends com.stripe.model.StripeObject {
     	if (!validateExpYear()) {
     		return false;
     	}
-    	return !DateUtils.hasMonthPassed(getExpYear(), getExpMonth());
+    	return !DateUtils.hasMonthPassed(expYear, expMonth);
     }
 
     public boolean validateExpMonth() {
-    	if (getExpMonth() == null) {
+    	if (expMonth == null) {
     		return false;
     	}
-    	return (getExpMonth() >= 1 && getExpMonth() <= 12);
+    	return (expMonth >= 1 && expMonth <= 12);
     }
 
     public boolean validateExpYear() {
-    	if (getExpYear() == null) {
+    	if (expYear == null) {
     		return false;
     	}
-    	return !DateUtils.hasYearPassed(getExpYear());
+    	return !DateUtils.hasYearPassed(expYear);
     }
 
     public boolean validateCVC() {
-        if (TextUtils.isBlank(getCVC())) {
+        if (TextUtils.isBlank(cvc)) {
             return false;
         }
-        String cvcValue = getCVC().trim();
+        String cvcValue = cvc.trim();
 
-        boolean validLength = ((getType() == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
-                ("American Express".equals(getType()) && cvcValue.length() == 4) ||
-                (!"American Express".equals(getType()) && cvcValue.length() == 3));
+        boolean validLength = ((type == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
+                ("American Express".equals(type) && cvcValue.length() == 4) ||
+                (!"American Express".equals(type) && cvcValue.length() == 3));
 
 
         if (!TextUtils.isWholePositiveNumber(cvcValue) || !validLength) {
@@ -335,25 +335,25 @@ public class Card extends com.stripe.model.StripeObject {
         if (!TextUtils.isBlank(last4)) {
             return last4;
         }
-        if (getNumber() != null && getNumber().length() > 4) {
-            return getNumber().substring(getNumber().length() - 4, getNumber().length());
+        if (number != null && number.length() > 4) {
+            return number.substring(number.length() - 4, number.length());
         }
         return null;
     }
 
     public String getType() {
-        if (TextUtils.isBlank(type) && !TextUtils.isBlank(getNumber())) {
-            if (TextUtils.hasAnyPrefix(getNumber(), "34", "37")) {
+        if (TextUtils.isBlank(type) && !TextUtils.isBlank(number)) {
+            if (TextUtils.hasAnyPrefix(number, "34", "37")) {
                 return "American Express";
-            } else if (TextUtils.hasAnyPrefix(getNumber(), "60", "62", "64", "65")) {
+            } else if (TextUtils.hasAnyPrefix(number, "60", "62", "64", "65")) {
                 return "Discover";
-            } else if (TextUtils.hasAnyPrefix(getNumber(), "35")) {
+            } else if (TextUtils.hasAnyPrefix(number, "35")) {
                 return "JCB";
-            } else if (TextUtils.hasAnyPrefix(getNumber(), "30", "36", "38", "39")) {
+            } else if (TextUtils.hasAnyPrefix(number, "30", "36", "38", "39")) {
                 return "Diners Club";
-            } else if (TextUtils.hasAnyPrefix(getNumber(), "4")) {
+            } else if (TextUtils.hasAnyPrefix(number, "4")) {
                 return "Visa";
-            } else if (TextUtils.hasAnyPrefix(getNumber(), "5")) {
+            } else if (TextUtils.hasAnyPrefix(number, "5")) {
                 return "MasterCard";
             } else {
                 return "Unknown";
