@@ -178,12 +178,12 @@ public class Stripe {
         cardParams.put("exp_month", card.getExpMonth());
         cardParams.put("exp_year", card.getExpYear());
         cardParams.put("name", card.getName());
-        cardParams.put("address_line_1", card.getAddressLine1());
-        cardParams.put("address_line_2", card.getAddressLine2());
-        cardParams.put("address_line_city", card.getAddressCity());
-        cardParams.put("address_line_zip", card.getAddressZip());
-        cardParams.put("address_line_state", card.getAddressState());
-        cardParams.put("address_line_country", card.getAddressCountry());
+        cardParams.put("address_line1", card.getAddressLine1());
+        cardParams.put("address_line2", card.getAddressLine2());
+        cardParams.put("address_city", card.getAddressCity());
+        cardParams.put("address_zip", card.getAddressZip());
+        cardParams.put("address_state", card.getAddressState());
+        cardParams.put("address_country", card.getAddressCountry());
         tokenParams.put("card", cardParams);
         return tokenParams;
     }
