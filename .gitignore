@@ -1,4 +1,6 @@
 .DS_Store
+.idea/
+*.iml
 .idea/workspace.xml
 .metadata
 *.iws

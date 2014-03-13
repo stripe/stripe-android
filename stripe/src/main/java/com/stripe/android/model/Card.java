@@ -4,6 +4,27 @@ import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.TextUtils;
 
 public class Card extends com.stripe.model.StripeObject {
+
+    public static final String AMERICAN_EXPRESS = "American Express";
+    public static final String DISCOVER = "Discover";
+    public static final String JCB = "JCB";
+    public static final String DINERS_CLUB = "Diners Club";
+    public static final String VISA = "Visa";
+    public static final String MASTERCARD = "MasterCard";
+    public static final String UNKNOWN = "Unknown";
+
+    // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
+    public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
+    public static final String[] PREFIXES_DISCOVER = {"60", "62", "64", "65"};
+    public static final String[] PREFIXES_JCB = {"35"};
+    public static final String[] PREFIXES_DINERS_CLUB = {"300", "301", "302", "303", "304", "305", "309", "36", "38", "37", "39"};
+    public static final String[] PREFIXES_VISA = {"4"};
+    public static final String[] PREFIXES_MASTERCARD = {"50", "51", "52", "53", "54", "55"};
+
+    public static final int MAX_LENGTH_STANDARD = 16;
+    public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
+    public static final int MAX_LENGTH_DINERS_CLUB = 14;
+
     String number;
     String cvc;
     Integer expMonth;
@@ -119,20 +140,20 @@ public class Card extends com.stripe.model.StripeObject {
 
     public String getType() {
         if (TextUtils.isBlank(type) && !TextUtils.isBlank(number)) {
-            if (TextUtils.hasAnyPrefix(number, "34", "37")) {
-                return "American Express";
-            } else if (TextUtils.hasAnyPrefix(number, "60", "62", "64", "65")) {
-                return "Discover";
-            } else if (TextUtils.hasAnyPrefix(number, "35")) {
-                return "JCB";
-            } else if (TextUtils.hasAnyPrefix(number, "30", "36", "38", "39")) {
-                return "Diners Club";
-            } else if (TextUtils.hasAnyPrefix(number, "4")) {
-                return "Visa";
-            } else if (TextUtils.hasAnyPrefix(number, "5")) {
-                return "MasterCard";
+            if (TextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
+                return AMERICAN_EXPRESS;
+            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
+                return DISCOVER;
+            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_JCB)) {
+                return JCB;
+            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_DINERS_CLUB)) {
+                return DINERS_CLUB;
+            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_VISA)) {
+                return VISA;
+            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_MASTERCARD)) {
+                return MASTERCARD;
             } else {
-                return "Unknown";
+                return UNKNOWN;
             }
         }
         return type;
@@ -193,15 +214,14 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
 
-        if (!"American Express".equals(type) && rawNumber.length() != 16) {
-        	return false;
+        if (AMERICAN_EXPRESS.equals(type)) {
+            return rawNumber.length() == MAX_LENGTH_AMERICAN_EXPRESS;
+        } else if (DINERS_CLUB.equals(type)) {
+            return rawNumber.length() == MAX_LENGTH_DINERS_CLUB;
+        } else {
+            return rawNumber.length() == MAX_LENGTH_STANDARD;
         }
 
-        if ("American Express".equals(type) && rawNumber.length() != 15) {
-        	return false;
-        }
-
-        return true;
     }
 
     public boolean validateExpiryDate() {
@@ -235,9 +255,8 @@ public class Card extends com.stripe.model.StripeObject {
         String cvcValue = cvc.trim();
 
         boolean validLength = ((type == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
-                ("American Express".equals(type) && cvcValue.length() == 4) ||
-                (!"American Express".equals(type) && cvcValue.length() == 3));
-
+                (AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 4) ||
+                (!AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 3));
 
         if (!TextUtils.isWholePositiveNumber(cvcValue) || !validLength) {
             return false;
