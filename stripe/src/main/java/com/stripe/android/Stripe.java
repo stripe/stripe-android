@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import com.stripe.android.compat.AsyncTask;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.util.TextUtils;
 import com.stripe.exception.AuthenticationException;
 
 public class Stripe {
@@ -181,7 +182,12 @@ public class Stripe {
         cardParams.put("address_line1", card.getAddressLine1());
         cardParams.put("address_line2", card.getAddressLine2());
         cardParams.put("address_city", card.getAddressCity());
-        cardParams.put("address_zip", card.getAddressZip());
+
+        // null entry in hashmap create emtpy zip code string " " that breaks stripe card validation
+        if (!TextUtils.isBlank(card.getAddressZip())) {
+            cardParams.put("address_zip", card.getAddressZip());
+        }
+
         cardParams.put("address_state", card.getAddressState());
         cardParams.put("address_country", card.getAddressCountry());
         tokenParams.put("card", cardParams);
