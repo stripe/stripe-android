@@ -13,7 +13,7 @@ import com.stripe.exception.AuthenticationException;
 public class Stripe {
     private String defaultPublishableKey;
 
-    TokenCreator tokenCreator = new TokenCreator() {
+    public TokenCreator tokenCreator = new TokenCreator() {
         @Override
         public void create(final Card card, final String publishableKey, final Executor executor,
                 final TokenCallback callback) {
@@ -40,7 +40,7 @@ public class Stripe {
         }
     };
 
-    TokenRequester tokenRequester = new TokenRequester() {
+    public TokenRequester tokenRequester = new TokenRequester() {
           @Override
           public void request(final String tokenId, final String publishableKey,
                   final Executor executor, final TokenCallback callback) {
