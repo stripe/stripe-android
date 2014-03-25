@@ -18,9 +18,9 @@ import com.stripe.example.TokenList;
 public class PaymentActivity extends FragmentActivity {
 
     /*
-     * Change this to your publishable key!
+     * Change this to your publishable key.
      *
-     * You can get it here: https://manage.stripe.com/account/apikeys
+     * You can get your key here: https://manage.stripe.com/account/apikeys
      */
     public static final String PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
 
