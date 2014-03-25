@@ -6,7 +6,7 @@ dependencies {
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.0.3"
+    buildToolsVersion '19.0.3'
 
     sourceSets {
         main {
@@ -20,6 +20,6 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        instrumentTest.setRoot('test')
     }
 }
