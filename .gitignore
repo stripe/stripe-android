@@ -39,6 +39,7 @@ tmp/
 stripe/target
 stripe/gen
 stripe/bin
+stripe/*.log
 example/bin
 example/target
 example/gen
