@@ -6,15 +6,16 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 ##**Installation**
 
-1. Clone the git repository.
+1. Clone the repository.
 2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_
-3. Import the _stripe_ folder into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm).
+3. Import the _stripe_ folder into [ADT](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) (use "Existing Projects into Workspace, [not Existing Android Code](https://github.com/stripe/stripe-android/issues/7).
 4. In your project settings, add the _stripe_ project under the "Libraries" section of the "Android" category.
 
 ##**setPublishableKey**
 
 A publishable key is required to identify your website when communicating with Stripe. Remember to replace the test key with your live key in production.
-You can get all your keys from your [account page](https://manage.stripe.com/#account/apikeys).
+
+You can get all your keys from [your account page](https://manage.stripe.com/#account/apikeys).
 This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
 
     new Stripe("YOUR_PUBLISHABLE_KEY");
