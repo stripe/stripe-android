@@ -183,6 +183,7 @@ public class Card extends com.stripe.model.StripeObject {
         this.type = TextUtils.nullIfBlank(type);
         this.fingerprint = TextUtils.nullIfBlank(fingerprint);
         this.country = TextUtils.nullIfBlank(country);
+        this.type = getType();
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry) {
@@ -191,7 +192,6 @@ public class Card extends com.stripe.model.StripeObject {
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
         this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
-        this.type = getType();
     }
 
     public boolean validateCard() {
