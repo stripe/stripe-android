@@ -116,8 +116,10 @@ If you're implementing a complex workflow, you may want to know if you've alread
 
 If you'd like to build the example Android project:
 
+### via Eclipse
+
 1. Clone the git repository.
 2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_
-3. Import the _example_ and _stripe_ folders into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm).
+3. Import the _example_ and _stripe_ folders into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm), by using Import -> General -> Existing Projects into Workspace, and browsing the `stripe-android` folder.
 4. [Replace the value of PUBLISHABLE_KEY in PaymentActivity with your stripe test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L30).
 5. Build and run the project on your device or in the Android emulator.
