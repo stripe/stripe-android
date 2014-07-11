@@ -7,18 +7,18 @@
               android:paddingLeft="8dp"
               android:paddingRight="8dp">
 
-        <EditText android:id="@+id/number" style="@style/CardNumber"/>
+        <EditText android:id="@+id/number" style="@style/CardNumber" android:nextFocusDown="@+id/expMonth" android:nextFocusRight="@+id/expMonth" android:nextFocusForward="@+id/expMonth" />
 
         <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-            <Spinner android:id="@+id/expMonth" style="@style/ExpMonth"/>
+            <Spinner android:id="@+id/expMonth" style="@style/ExpMonth" android:nextFocusForward="@+id/expYear" />
 
-            <Spinner android:id="@+id/expYear" style="@style/ExpYear" />
+            <Spinner android:id="@+id/expYear" style="@style/ExpYear" android:nextFocusForward="@+id/cvc" />
 
-            <EditText android:id="@+id/cvc" style="@style/CVC" />
+            <EditText android:id="@+id/cvc" style="@style/CVC" android:nextFocusForward="@+id/save" />
 
         </LinearLayout>
 
