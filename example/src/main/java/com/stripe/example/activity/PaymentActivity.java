@@ -59,13 +59,13 @@ public class PaymentActivity extends FragmentActivity {
                         }
                     });
         } else if (!card.validateExpiryDate()) {
-        	handleError("You did not enter a valid expiration date");
+        	handleError("The expiration date that you entered is invalid");
         } else if (!card.validateCVC()) {
-        	handleError("You did not enter a valid CVC code");
+        	handleError("The CVC code you entered is invalid");
         } else if (!card.validateNumber()) {
-        	handleError("You did not enter a valid card number");
+        	handleError("The card number you entered is invalid");
         } else {
-        	handleError("You did not enter valid card details");
+        	handleError("The card details you entered are invalid");
         }
     }
 
