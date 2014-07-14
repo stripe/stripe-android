@@ -140,6 +140,8 @@ public class Card extends com.stripe.model.StripeObject {
         this.type = TextUtils.nullIfBlank(builder.type);
         this.fingerprint = TextUtils.nullIfBlank(builder.fingerprint);
         this.country = TextUtils.nullIfBlank(builder.country);
+        this.type = getType();
+        this.last4 = getLast4();
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
@@ -159,6 +161,7 @@ public class Card extends com.stripe.model.StripeObject {
         this.fingerprint = TextUtils.nullIfBlank(fingerprint);
         this.country = TextUtils.nullIfBlank(country);
         this.type = getType();
+        this.last4 = getLast4();
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry) {
@@ -387,7 +390,7 @@ public class Card extends com.stripe.model.StripeObject {
             }
         }
 
-        return null;
+        return type;
     }
 
     public String getFingerprint() {
