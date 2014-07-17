@@ -8,6 +8,8 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.Executor;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import com.stripe.android.Stripe.TokenCreator;
 import com.stripe.android.Stripe.TokenRequester;
@@ -15,6 +17,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.exception.AuthenticationException;
 
+@RunWith(RobolectricTestRunner.class)
 public class StripeTest {
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";

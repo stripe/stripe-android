@@ -1,25 +1,23 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
+    compile 'com.stripe:stripe-java:1.15.1'
+    compile 'com.google.code.gson:gson:2.2.4'
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion '19.0.3'
+    buildToolsVersion '19.1.0'
 
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src/main/java','src/test/java']
-            resources.srcDirs = ['src/main/java','src/test/java']
-            aidl.srcDirs = ['src/main/java','src/test/java']
-            renderscript.srcDirs = ['src/main/java','src/test/java']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
-
-        // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('test')
     }
 }

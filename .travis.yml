@@ -1,0 +1,12 @@
+language: android
+jdk: oraclejdk7
+
+android:
+  components:
+    - build-tools-19.1.0
+    - android-17
+  licenses:
+    - android-sdk-license-5be876d5
+
+script:
+  - ./gradlew clean test

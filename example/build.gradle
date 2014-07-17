@@ -1,26 +1,33 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
+apply plugin: 'robolectric'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':stripe')
+    compile 'com.android.support:support-v4:18.0.+'
+    androidTestCompile 'junit:junit:4.+'
+    androidTestCompile 'org.robolectric:robolectric:2.3+'
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.0.3"
+    buildToolsVersion "19.1.0"
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
 
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src/main/java']
-            resources.srcDirs = ['src/main/java']
-            aidl.srcDirs = ['src/main/java']
-            renderscript.srcDirs = ['src/main/java']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
-
-        // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        androidTest {
+            setRoot('src/test')
+        }
     }
 }
