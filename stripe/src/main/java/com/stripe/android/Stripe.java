@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -173,23 +174,27 @@ public class Stripe {
 
     private Map<String, Object> hashMapFromCard(Card card) {
         Map<String, Object> tokenParams = new HashMap<String, Object>();
+
         Map<String, Object> cardParams = new HashMap<String, Object>();
-        cardParams.put("number", card.getNumber());
-        cardParams.put("cvc", card.getCVC());
+        cardParams.put("number", TextUtils.nullIfBlank(card.getNumber()));
+        cardParams.put("cvc", TextUtils.nullIfBlank(card.getCVC()));
         cardParams.put("exp_month", card.getExpMonth());
         cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", card.getName());
-        cardParams.put("address_line1", card.getAddressLine1());
-        cardParams.put("address_line2", card.getAddressLine2());
-        cardParams.put("address_city", card.getAddressCity());
+        cardParams.put("name", TextUtils.nullIfBlank(card.getName()));
+        cardParams.put("address_line1", TextUtils.nullIfBlank(card.getAddressLine1()));
+        cardParams.put("address_line2", TextUtils.nullIfBlank(card.getAddressLine2()));
+        cardParams.put("address_city", TextUtils.nullIfBlank(card.getAddressCity()));
+        cardParams.put("address_zip", TextUtils.nullIfBlank(card.getAddressZip()));
+        cardParams.put("address_state", TextUtils.nullIfBlank(card.getAddressState()));
+        cardParams.put("address_country", TextUtils.nullIfBlank(card.getAddressCountry()));
 
-        // Don't allow empty strings, as they cause validation to fail.
-        if (!TextUtils.isBlank(card.getAddressZip())) {
-            cardParams.put("address_zip", card.getAddressZip());
+        // Remove all null values; they cause validation errors
+        for (String key : new HashSet<String>(cardParams.keySet())) {
+            if (cardParams.get(key) == null) {
+                cardParams.remove(key);
+            }
         }
 
-        cardParams.put("address_state", card.getAddressState());
-        cardParams.put("address_country", card.getAddressCountry());
         tokenParams.put("card", cardParams);
         return tokenParams;
     }
