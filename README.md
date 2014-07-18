@@ -21,6 +21,12 @@ No need to clone the repository or download any files -- just add this line to y
 3. Import the _stripe_ folder into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) (use "Existing Projects into Workspace", [not "Existing Android Code"](https://github.com/stripe/stripe-android/issues/7)).
 4. In your project settings, add the _stripe_ project under the "Libraries" section of the "Android" category.
 
+### ProGuard
+
+If you're planning on optimizing your app with ProGuard, make sure that you exclude the Stripe bindings. You can do this by adding the following to your app's `proguard.cfg` file:
+
+    -keep class com.stripe.** { *; }
+
 ## Usage
 
 ### setPublishableKey
