@@ -7,14 +7,14 @@ repositories {
 
 dependencies {
     compile project(':stripe')
-    compile 'com.android.support:support-v4:18.0.+'
+    compile 'com.android.support:support-v4:+'
     androidTestCompile 'junit:junit:4.+'
     androidTestCompile 'org.robolectric:robolectric:2.3+'
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.0"
 
     packagingOptions {
         exclude 'LICENSE.txt'
