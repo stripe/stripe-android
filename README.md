@@ -17,7 +17,7 @@ No need to clone the repository or download any files -- just add this line to y
 ### Eclipse
 
 1. Clone the repository.
-2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_.
+2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_. This is only a requirement for development. Our bindings require the API Level 7 as a minimum at runtime which would work on almost any modern version of Android.
 3. Import the _stripe_ folder into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) (use "Existing Projects into Workspace", [not "Existing Android Code"](https://github.com/stripe/stripe-android/issues/7)).
 4. In your project settings, add the _stripe_ project under the "Libraries" section of the "Android" category.
 
@@ -133,7 +133,7 @@ If you're implementing a complex workflow, you may want to know if you've alread
 ## Building the example project
 
 1. Clone the git repository.
-2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_.
+2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_. This is only a requirement for development. Our bindings require the API Level 7 as a minimum at runtime which would work on almost any modern version of Android.
 3. Import the project.
     * For Android Studio, choose _Import Project..._ from the "Welcome to Android Studio" screen. Select the `build.gradle` file at the top of the `stripe-android` repository.
     * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
