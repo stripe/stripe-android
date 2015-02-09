@@ -280,6 +280,7 @@ public class Card extends com.stripe.model.StripeObject {
 
     public void setNumber(String number) {
         this.number = number;
+        this.type = getType();
     }
 
     public String getCVC() {
