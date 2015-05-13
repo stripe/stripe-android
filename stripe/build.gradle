@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.stripe:stripe-java:1.15.1'
+    compile 'com.stripe:stripe-java:1.28.0'
     compile 'com.google.code.gson:gson:2.2.4'
 }
 

@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'robolectric'
+apply plugin: 'org.robolectric'
 
 repositories {
     mavenCentral()
@@ -7,9 +7,10 @@ repositories {
 
 dependencies {
     compile project(':stripe')
-    compile 'com.android.support:support-v4:18.0.+'
-    androidTestCompile 'junit:junit:4.+'
-    androidTestCompile 'org.robolectric:robolectric:2.3+'
+    compile 'com.android.support:support-v4:19.0.1'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:2.4'
 }
 
 android {
@@ -25,9 +26,6 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
-        }
-        androidTest {
-            setRoot('src/test')
         }
     }
 }
