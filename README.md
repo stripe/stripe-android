@@ -140,3 +140,9 @@ If you're implementing a complex workflow, you may want to know if you've alread
 4. Build and run the project on your device or in the Android emulator.
 
 The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in PaymentActivity with your test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L25).
+
+## Running example project tests in Android Studio 1.2.2
+1. Open **Build Variants** on the left side of the IDE and set **Test Artifact** to **Unit Tests** ![Build Variants](/screenshots/buildvariants.png?raw=true "Build Variants")
+2. Create a JUnit configuration that looks like this: ![JUnit Configuration](/screenshots/junitconfiguration.png?raw=true "JUnit Config")
+3. Run the JUnit Configuration
+
