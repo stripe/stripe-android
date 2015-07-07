@@ -39,6 +39,7 @@ public class Card extends com.stripe.model.StripeObject {
     private String type;
     private String fingerprint;
     private String country;
+    private String currency;
 
     public static class Builder {
         private final String number;
@@ -56,6 +57,7 @@ public class Card extends com.stripe.model.StripeObject {
         private String type;
         private String fingerprint;
         private String country;
+        private String currency;
 
         public Builder(String number, Integer expMonth, Integer expYear, String cvc) {
             this.number = number;
@@ -119,6 +121,11 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
+        public Builder currency(String currency) {
+            this.currency = currency;
+            return this;
+        }
+
         public Card build() {
             return new Card(this);
         }
@@ -142,9 +149,10 @@ public class Card extends com.stripe.model.StripeObject {
         this.country = TextUtils.nullIfBlank(builder.country);
         this.type = getType();
         this.last4 = getLast4();
+        this.currency = TextUtils.nullIfBlank(builder.currency);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
+    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country, String currency) {
         this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
@@ -162,14 +170,15 @@ public class Card extends com.stripe.model.StripeObject {
         this.country = TextUtils.nullIfBlank(country);
         this.type = getType();
         this.last4 = getLast4();
+        this.currency = TextUtils.nullIfBlank(currency);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry) {
-        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, null, null, null, null);
+    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String currency) {
+        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, null, null, null, null, currency);
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
-        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
+        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public boolean validateCard() {
@@ -400,4 +409,9 @@ public class Card extends com.stripe.model.StripeObject {
     public String getCountry() {
         return country;
     }
+
+    public String getCurrency() { return currency; }
+
+    public void setCurrency(String currency) { this.currency = currency; }
+
 }
