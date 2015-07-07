@@ -83,10 +83,10 @@ public class Stripe {
 
     private void validateKey(String publishableKey) throws AuthenticationException {
         if (publishableKey == null || publishableKey.length() == 0) {
-            throw new AuthenticationException("Invalid Publishable Key: You must use a valid publishable key to create a token.  For more info, see https://stripe.com/docs/stripe.js.");
+            throw new AuthenticationException("Invalid Publishable Key: You must use a valid publishable key to create a token.  For more info, see https://stripe.com/docs/stripe.js.", null);
         }
         if (publishableKey.startsWith("sk_")) {
-            throw new AuthenticationException("Invalid Publishable Key: You are using a secret key to create a token, instead of the publishable one. For more info, see https://stripe.com/docs/stripe.js");
+            throw new AuthenticationException("Invalid Publishable Key: You are using a secret key to create a token, instead of the publishable one. For more info, see https://stripe.com/docs/stripe.js", null);
         }
     }
 
@@ -149,7 +149,7 @@ public class Stripe {
     }
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
+        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry(), stripeCard.getCurrency());
     }
 
     private Token androidTokenFromStripeToken(Card androidCard, com.stripe.model.Token stripeToken) {
@@ -187,6 +187,7 @@ public class Stripe {
         cardParams.put("address_zip", TextUtils.nullIfBlank(card.getAddressZip()));
         cardParams.put("address_state", TextUtils.nullIfBlank(card.getAddressState()));
         cardParams.put("address_country", TextUtils.nullIfBlank(card.getAddressCountry()));
+        cardParams.put("currency", TextUtils.nullIfBlank(card.getCurrency()));
 
         // Remove all null values; they cause validation errors
         for (String key : new HashSet<String>(cardParams.keySet())) {
