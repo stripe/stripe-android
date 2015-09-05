@@ -201,6 +201,7 @@ public class Stripe {
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
         return new Card(
+                stripeCard.getId()
                 null,
                 stripeCard.getExpMonth(),
                 stripeCard.getExpYear(),

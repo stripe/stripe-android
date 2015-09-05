@@ -34,7 +34,7 @@ public class Card extends com.stripe.model.StripeObject {
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
-
+    private String id;
     private String number;
     private String cvc;
     private Integer expMonth;
@@ -53,6 +53,7 @@ public class Card extends com.stripe.model.StripeObject {
     private String currency;
 
     public static class Builder {
+        private final String id;
         private final String number;
         private final String cvc;
         private final Integer expMonth;
@@ -75,6 +76,11 @@ public class Card extends com.stripe.model.StripeObject {
             this.expMonth = expMonth;
             this.expYear = expYear;
             this.cvc = cvc;
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
         }
 
         public Builder name(String name) {
@@ -144,6 +150,7 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     private Card(Builder builder) {
+        this.id = builder.id;
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
         this.expYear = builder.expYear;
@@ -164,8 +171,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity,
+    public Card((String id, String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity,
                 String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
+        this.id = StripeTextUtils.nullIfBlank(id);
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
@@ -200,6 +208,7 @@ public class Card extends com.stripe.model.StripeObject {
             String addressCountry,
             String currency) {
         this(
+                null
                 number,
                 expMonth,
                 expYear,
@@ -223,6 +232,7 @@ public class Card extends com.stripe.model.StripeObject {
             Integer expYear,
             String cvc) {
         this(
+                null
                 number,
                 expMonth,
                 expYear,
@@ -365,6 +375,14 @@ public class Card extends com.stripe.model.StripeObject {
             return null;
         }
         return number.trim().replaceAll("\\s+|-", "");
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNumber() {
