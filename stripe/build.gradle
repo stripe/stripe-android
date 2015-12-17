@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.stripe:stripe-java:1.15.1'
+    compile 'com.stripe:stripe-java:1.40.0'
     compile 'com.google.code.gson:gson:2.2.4'
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion '19.1.0'
+    buildToolsVersion '23.0.2'
 
     defaultConfig {
         minSdkVersion 7
@@ -26,12 +26,4 @@ android {
 // Apply chrisbanes' excellent gradle-mvn-push recipe,
 // which lets us publish the build artifacts to maven
 // without *writing a single line of XML.*
-//
-// N.B.: We're using a specific commit from a fork to
-// work around a bug in the recipe caused by the new
-// version of gradle which hasn't been upstreamed yet.
-apply from: 'https://raw.github.com/shamanland/gradle-mvn-push/cc18d56549cdea03f744b6fff27911569394073e/gradle-mvn-push.gradle'
-//
-// Revert to this version once chrisbanes/gradle-mvn-push#29
-// is merged.
-// apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'

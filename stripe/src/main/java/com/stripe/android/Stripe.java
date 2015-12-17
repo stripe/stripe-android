@@ -11,6 +11,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.TextUtils;
 import com.stripe.exception.AuthenticationException;
+import com.stripe.net.RequestOptions;
 
 public class Stripe {
     private String defaultPublishableKey;
@@ -22,8 +23,10 @@ public class Stripe {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
                 protected ResponseWrapper doInBackground(Void... params) {
                     try {
+                        RequestOptions requestOptions = RequestOptions.builder()
+                                .setApiKey(publishableKey).build();
                         com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                                hashMapFromCard(card), publishableKey);
+                                hashMapFromCard(card), requestOptions);
                         com.stripe.model.Card stripeCard = stripeToken.getCard();
                         Card card = androidCardFromStripeCard(stripeCard);
                         Token token = androidTokenFromStripeToken(card, stripeToken);
@@ -83,10 +86,10 @@ public class Stripe {
 
     private void validateKey(String publishableKey) throws AuthenticationException {
         if (publishableKey == null || publishableKey.length() == 0) {
-            throw new AuthenticationException("Invalid Publishable Key: You must use a valid publishable key to create a token.  For more info, see https://stripe.com/docs/stripe.js.");
+            throw new AuthenticationException("Invalid Publishable Key: You must use a valid publishable key to create a token.  For more info, see https://stripe.com/docs/stripe.js.", null, 0);
         }
         if (publishableKey.startsWith("sk_")) {
-            throw new AuthenticationException("Invalid Publishable Key: You are using a secret key to create a token, instead of the publishable one. For more info, see https://stripe.com/docs/stripe.js");
+            throw new AuthenticationException("Invalid Publishable Key: You are using a secret key to create a token, instead of the publishable one. For more info, see https://stripe.com/docs/stripe.js", null, 0);
         }
     }
 

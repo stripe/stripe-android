@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'robolectric'
 
 repositories {
     mavenCentral()
@@ -8,13 +7,13 @@ repositories {
 dependencies {
     compile project(':stripe')
     compile 'com.android.support:support-v4:18.0.+'
-    androidTestCompile 'junit:junit:4.+'
-    androidTestCompile 'org.robolectric:robolectric:2.3+'
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.robolectric:robolectric:3+'
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "23.0.2"
 
     packagingOptions {
         exclude 'LICENSE.txt'
