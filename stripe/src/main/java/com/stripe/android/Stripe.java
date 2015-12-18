@@ -1,5 +1,9 @@
 package com.stripe.android;
 
+import android.util.Log;
+
+import java.util.concurrent.Executor;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -152,7 +156,7 @@ public class Stripe {
     }
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getCurrency(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
+        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
     }
 
     private Token androidTokenFromStripeToken(Card androidCard, com.stripe.model.Token stripeToken) {
@@ -184,6 +188,7 @@ public class Stripe {
         cardParams.put("exp_month", card.getExpMonth());
         cardParams.put("exp_year", card.getExpYear());
         cardParams.put("name", TextUtils.nullIfBlank(card.getName()));
+        cardParams.put("currency", TextUtils.nullIfBlank(card.getCurrency()));
         cardParams.put("address_line1", TextUtils.nullIfBlank(card.getAddressLine1()));
         cardParams.put("address_line2", TextUtils.nullIfBlank(card.getAddressLine2()));
         cardParams.put("address_city", TextUtils.nullIfBlank(card.getAddressCity()));

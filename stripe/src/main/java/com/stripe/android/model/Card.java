@@ -155,7 +155,7 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity,
-                String addressState, String addressZip, String addressCountry, String currency, String last4, String type, String fingerprint, String country) {
+                String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
         this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
@@ -177,11 +177,11 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String currency) {
-        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, currency, null, null, null, null);
+        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, null, null, null, null);
     }
 
     public Card(String number, Integer expMonth, Integer expYear, String cvc) {
-        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null, null);
+        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public boolean validateCard() {

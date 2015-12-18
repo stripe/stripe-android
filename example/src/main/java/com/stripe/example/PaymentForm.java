@@ -5,4 +5,5 @@ public interface PaymentForm {
     public String getCvc();
     public Integer getExpMonth();
     public Integer getExpYear();
+    public String getCurrency();
 }
