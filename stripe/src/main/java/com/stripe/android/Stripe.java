@@ -1,9 +1,5 @@
 package com.stripe.android;
 
-import android.util.Log;
-
-import java.util.concurrent.Executor;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;

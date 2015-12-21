@@ -20,7 +20,7 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     Spinner monthSpinner;
     Spinner yearSpinner;
     Spinner currencySpinner;
-    private static final String CURRENCY_NONE = "None";
+    private static final String CURRENCY_UNSPECIFIED = "Unspecified";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,10 +67,10 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     public String getCurrency() {
         if (currencySpinner.getSelectedItemPosition() == 0) return null;
         String selected = (String) currencySpinner.getSelectedItem();
-        if (selected.equals(CURRENCY_NONE))
+        if (selected.equals(CURRENCY_UNSPECIFIED))
             return null;
         else
-            return selected;
+            return selected.toLowerCase();
     }
 
     public void saveForm(View button) {

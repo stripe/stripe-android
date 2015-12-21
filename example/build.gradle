@@ -6,9 +6,9 @@ repositories {
 
 dependencies {
     compile project(':stripe')
-    compile 'com.android.support:support-v4:23.1.1'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.0'
+    compile 'com.android.support:support-v4:18.0.+'
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile 'org.robolectric:robolectric:3+'
 }
 
 android {
@@ -30,7 +30,5 @@ android {
         }
     }
 }
-dependencies {
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.robolectric:robolectric:3.0'
-}
+
+

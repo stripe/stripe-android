@@ -17,7 +17,7 @@
 
     <string-array name="currency_array">
         <item>Currency (optional)</item>
-        <item>None</item>
-        <item>usd</item>
+        <item>Unspecified</item>
+        <item>Usd</item>
     </string-array>
 </resources>
