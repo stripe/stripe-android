@@ -14,4 +14,10 @@
     <string name="cvc">CVC</string>
 
     <string name="ok">OK</string>
+
+    <string-array name="currency_array">
+        <item>Currency (optional)</item>
+        <item>Unspecified</item>
+        <item>USD</item>
+    </string-array>
 </resources>

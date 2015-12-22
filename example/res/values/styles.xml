@@ -64,6 +64,12 @@
         <item name="android:layout_weight">0.8</item>
     </style>
 
+    <style name="Currency" parent="@style/Spinner">
+        <item name="android:entries">@array/currency_array</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1.0</item>
+    </style>
+
     <style name="Header" parent="@android:style/Widget.TextView">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>

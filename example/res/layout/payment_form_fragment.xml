@@ -18,10 +18,16 @@
 
             <Spinner android:id="@+id/expYear" style="@style/ExpYear" android:nextFocusForward="@+id/cvc" />
 
-            <EditText android:id="@+id/cvc" style="@style/CVC" android:nextFocusForward="@+id/save" />
+            <EditText android:id="@+id/cvc" style="@style/CVC" android:nextFocusForward="@+id/currency" />
+
 
         </LinearLayout>
-
-        <Button android:id="@+id/save" style="@style/Save"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Spinner android:id="@+id/currency" style="@style/Currency"  android:nextFocusForward="@+id/save" />
+    </LinearLayout>
+    <Button android:id="@+id/save" style="@style/Save"/>
 
 </LinearLayout>

@@ -184,6 +184,7 @@ public class Stripe {
         cardParams.put("exp_month", card.getExpMonth());
         cardParams.put("exp_year", card.getExpYear());
         cardParams.put("name", TextUtils.nullIfBlank(card.getName()));
+        cardParams.put("currency", TextUtils.nullIfBlank(card.getCurrency()));
         cardParams.put("address_line1", TextUtils.nullIfBlank(card.getAddressLine1()));
         cardParams.put("address_line2", TextUtils.nullIfBlank(card.getAddressLine2()));
         cardParams.put("address_city", TextUtils.nullIfBlank(card.getAddressCity()));

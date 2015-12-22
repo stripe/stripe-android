@@ -19,6 +19,8 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     EditText cvc;
     Spinner monthSpinner;
     Spinner yearSpinner;
+    Spinner currencySpinner;
+    private static final String CURRENCY_UNSPECIFIED = "Unspecified";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -36,6 +38,7 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
         this.cvc = (EditText) view.findViewById(R.id.cvc);
         this.monthSpinner = (Spinner) view.findViewById(R.id.expMonth);
         this.yearSpinner = (Spinner) view.findViewById(R.id.expYear);
+        this.currencySpinner = (Spinner) view.findViewById(R.id.currency);
 
         return view;
     }
@@ -58,6 +61,16 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     @Override
     public Integer getExpYear() {
         return getInteger(this.yearSpinner);
+    }
+
+    @Override
+    public String getCurrency() {
+        if (currencySpinner.getSelectedItemPosition() == 0) return null;
+        String selected = (String) currencySpinner.getSelectedItem();
+        if (selected.equals(CURRENCY_UNSPECIFIED))
+            return null;
+        else
+            return selected.toLowerCase();
     }
 
     public void saveForm(View button) {

@@ -4,15 +4,15 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.stripe.example.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.example.PaymentForm;
+import com.stripe.example.R;
+import com.stripe.example.TokenList;
 import com.stripe.example.dialog.ErrorDialogFragment;
 import com.stripe.example.dialog.ProgressDialogFragment;
-import com.stripe.example.PaymentForm;
-import com.stripe.example.TokenList;
 
 
 public class PaymentActivity extends FragmentActivity {
@@ -41,6 +41,7 @@ public class PaymentActivity extends FragmentActivity {
                 form.getExpMonth(),
                 form.getExpYear(),
                 form.getCvc());
+        card.setCurrency(form.getCurrency());
 
         boolean validation = card.validateCard();
         if (validation) {
