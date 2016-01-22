@@ -85,7 +85,7 @@ Here's a sample implementation of the token callback:
             }
             public void onError(Exception error) {
                 Toast.makeText(getContext(),
-                    error.getLocalizedString(getContext()),
+                    error.getLocalizedMessage(),
                     Toast.LENGTH_LONG).show();
             }
         }
