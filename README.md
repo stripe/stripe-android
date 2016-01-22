@@ -29,7 +29,7 @@ If you're planning on optimizing your app with ProGuard, make sure that you excl
 
 ## Usage
 
-### setPublishableKey
+### setDefaultPublishableKey
 
 A publishable key is required to identify your website when communicating with Stripe. Remember to replace the test key with your live key in production.
 
@@ -40,7 +40,7 @@ This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in m
 
 or
 
-    new Stripe().setPublishableKey("YOUR_PUBLISHABLE_KEY");
+    new Stripe().setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
 
 ### createToken
 
