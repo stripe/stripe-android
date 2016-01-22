@@ -48,19 +48,19 @@ public class StripeTest {
     }
 
     @Test(expected = AuthenticationException.class)
-    public void setPublishableKeyShouldFailWhenNull() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWhenNull() throws AuthenticationException {
         Stripe stripe = new Stripe();
         stripe.setDefaultPublishableKey(null);
     }
 
     @Test(expected = AuthenticationException.class)
-    public void setPublishableKeyShouldFailWhenEmpty() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWhenEmpty() throws AuthenticationException {
         Stripe stripe = new Stripe();
         stripe.setDefaultPublishableKey("");
     }
 
     @Test(expected = AuthenticationException.class)
-    public void setPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
         Stripe stripe = new Stripe();
         stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
     }
