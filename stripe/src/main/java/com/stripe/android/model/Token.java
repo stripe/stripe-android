@@ -6,39 +6,67 @@ import java.util.Date;
 public class Token extends com.stripe.model.StripeObject {
     private final String id;
     private final Date created;
-    private final boolean livemode;
-    private final boolean used;
+    private final String currency;
+    private final String email;
+    private final String clientIp;
+    private final String type;
+    private final Integer amount;
+    private final Boolean livemode;
+    private final Boolean used;
     private final Card card;
+    //BankAccount bankAccount;
 
-    /**
-     * This method should not be invoked in your code.  This is used by Stripe to
-     * create tokens using a Stripe API response
-     */
-    public Token(String id, boolean livemode, Date created, Boolean used, Card card) {
+    public Token(String id, boolean livemode, Date created, Boolean used, String currency, String email, String clientIp, String type, Integer amount, Card card) {
         this.id = id;
         this.livemode = livemode;
         this.card = card;
         this.created = created;
         this.used = used;
-    }
-
-    public Date getCreated() {
-        return created;
+        this.currency = currency;
+        this.email = email;
+        this.clientIp = clientIp;
+        this.type = type;
+        this.amount = amount;
     }
 
     public String getId() {
         return id;
     }
 
-    public boolean getLivemode() {
-        return livemode;
+    public Date getCreated() {
+        return created;
     }
 
-    public boolean getUsed() {
-        return used;
+    public String getCurrency() {
+        return currency;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public Boolean getLivemode() {
+        return livemode;
     }
 
     public Card getCard() {
         return card;
     }
+
+    public Boolean getUsed() {
+        return used;
+    }
+
 }

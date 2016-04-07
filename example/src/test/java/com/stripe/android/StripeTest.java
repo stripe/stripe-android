@@ -1,5 +1,7 @@
 package com.stripe.android;
 
+import android.util.Log;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -13,7 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import com.stripe.android.Stripe.TokenCreator;
 import com.stripe.android.Stripe.TokenRequester;
-import com.stripe.android.model.Card;
+import com.stripe.android.model.CardParams;
 import com.stripe.android.model.Token;
 import com.stripe.exception.AuthenticationException;
 
@@ -21,7 +23,7 @@ import com.stripe.exception.AuthenticationException;
 public class StripeTest {
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
-    private static final Card DEFAULT_CARD = new Card(null, null, null, null);
+    private static final CardParams DEFAULT_CARD = new CardParams(null, null, null, null);
     private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
         @Override
         public void onError(Exception error) {
@@ -190,7 +192,7 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(CardParams cardParams, String publishableKey,
                         Executor executor, TokenCallback callback) {
                     tokenCreatorCalled[0] = true;
                 }
@@ -214,11 +216,11 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(CardParams cardParams, String publishableKey,
                         Executor executor, TokenCallback callback) {
                     assertEquals(expectedExecutor, executor);
 
-                    assertEquals(DEFAULT_CARD, card);
+                    assertEquals(DEFAULT_CARD, cardParams);
                     assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
                     assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                 }
@@ -236,11 +238,11 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(CardParams cardParams, String publishableKey,
                         Executor executor, TokenCallback callback) {
                   assertEquals(expectedPublishableKey, publishableKey);
 
-                  assertEquals(DEFAULT_CARD, card);
+                  assertEquals(DEFAULT_CARD, cardParams);
                   assertNull(executor);
                   assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                 }
