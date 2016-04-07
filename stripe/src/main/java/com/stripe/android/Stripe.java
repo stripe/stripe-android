@@ -8,7 +8,9 @@ import java.util.concurrent.Executor;
 
 import com.stripe.android.compat.AsyncTask;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.model.TokenBuilder;
 import com.stripe.android.util.TextUtils;
 import com.stripe.exception.AuthenticationException;
 import com.stripe.net.RequestOptions;
@@ -18,18 +20,14 @@ public class Stripe {
 
     public TokenCreator tokenCreator = new TokenCreator() {
         @Override
-        public void create(final Card card, final String publishableKey, final Executor executor,
-                final TokenCallback callback) {
+        public void create(final CardParams cardParams, final String publishableKey, final Executor executor, final TokenCallback callback) {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
+
                 protected ResponseWrapper doInBackground(Void... params) {
                     try {
-                        RequestOptions requestOptions = RequestOptions.builder()
-                                .setApiKey(publishableKey).build();
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                                hashMapFromCard(card), requestOptions);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        RequestOptions requestOptions = RequestOptions.builder().setApiKey(publishableKey).build();
+                        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(hashMapFromCardParams(cardParams), requestOptions);
+                        Token token = androidTokenFromStripeToken(stripeToken);
                         return new ResponseWrapper(token, null);
                     } catch (Exception e) {
                         return new ResponseWrapper(null, e);
@@ -38,10 +36,11 @@ public class Stripe {
 
                 protected void onPostExecute(ResponseWrapper result) {
                     tokenTaskPostExecution(result, callback);
-               }
+                }
             };
 
             executeTokenTask(executor, task);
+
         }
     };
 
@@ -52,11 +51,9 @@ public class Stripe {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
                 protected ResponseWrapper doInBackground(Void... params) {
                     try {
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(
-                                tokenId, publishableKey);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        RequestOptions requestOptions = RequestOptions.builder().setApiKey(publishableKey).build();
+                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(tokenId, requestOptions);
+                        Token token = androidTokenFromStripeToken(stripeToken);
                         return new ResponseWrapper(token, null);
                     } catch (Exception e) {
                         return new ResponseWrapper(null, e);
@@ -122,29 +119,29 @@ public class Stripe {
         }
     }
 
-    public void createToken(final Card card, final Executor executor, final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, executor, callback);
+    public void createToken(final CardParams cardParams, final Executor executor, final TokenCallback callback) {
+        createToken(cardParams, defaultPublishableKey, executor, callback);
     }
 
-    public void createToken(final Card card, final String publishableKey, final TokenCallback callback) {
-        createToken(card, publishableKey, null, callback);
+    public void createToken(final CardParams cardParams, final String publishableKey, final TokenCallback callback) {
+        createToken(cardParams, publishableKey, null, callback);
     }
 
-    public void createToken(final Card card, final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, callback);
+    public void createToken(final CardParams cardParams, final TokenCallback callback) {
+        createToken(cardParams, defaultPublishableKey, callback);
     }
 
-    public void createToken(final Card card, final String publishableKey, final Executor executor, final TokenCallback callback) {
+    public void createToken(final CardParams cardParams, final String publishableKey, final Executor executor, final TokenCallback callback) {
         try {
-            if (card == null)
-                throw new RuntimeException("Required Parameter: 'card' is required to create a token");
+            if (cardParams == null)
+                throw new RuntimeException("Required Parameter: 'cardParams' is required to create a token");
 
             if (callback == null)
                 throw new RuntimeException("Required Parameter: 'callback' is required to use the created token and handle errors");
 
             validateKey(publishableKey);
 
-            tokenCreator.create(card, publishableKey, executor, callback);
+            tokenCreator.create(cardParams, publishableKey, executor, callback);
         }
         catch (AuthenticationException e) {
             callback.onError(e);
@@ -152,11 +149,17 @@ public class Stripe {
     }
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
+        return new Card(stripeCard.getId(), stripeCard.getStatus(), stripeCard.getExpMonth(), stripeCard.getExpYear(), stripeCard.getLast4(), stripeCard.getDynamicLast4(), stripeCard.getCountry(), stripeCard.getType(), stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressZip(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressCountry(), stripeCard.getAddressZipCheck(), stripeCard.getAddressLine1Check(), stripeCard.getCvcCheck(), stripeCard.getFingerprint(), stripeCard.getBrand(), stripeCard.getFunding(), stripeCard.getCurrency(), stripeCard.getTokenizationMethod());
     }
 
-    private Token androidTokenFromStripeToken(Card androidCard, com.stripe.model.Token stripeToken) {
-        return new Token(stripeToken.getId(), stripeToken.getLivemode(), new Date(stripeToken.getCreated() * 1000), stripeToken.getUsed(), androidCard);
+    private Token androidTokenFromStripeToken(com.stripe.model.Token stripeToken) {
+        TokenBuilder tb = new TokenBuilder(stripeToken.getId(), new Date(stripeToken.getCreated() * 1000), stripeToken.getLivemode())
+            .setUsed(stripeToken.getUsed())
+            .setCurrency(stripeToken.getCurrency());
+        if (stripeToken.getCard() != null) {
+            tb.setCard(androidCardFromStripeCard(stripeToken.getCard()));
+        }
+        return tb.createToken();
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
@@ -175,32 +178,34 @@ public class Stripe {
             task.execute();
     }
 
-    private Map<String, Object> hashMapFromCard(Card card) {
-        Map<String, Object> tokenParams = new HashMap<String, Object>();
+    // TODO: Move to CardParams?
+    private Map<String, Object> hashMapFromCardParams(CardParams cardParams) {
+        Map<String, Object> tokenParamsMap = new HashMap<String, Object>();
 
-        Map<String, Object> cardParams = new HashMap<String, Object>();
-        cardParams.put("number", TextUtils.nullIfBlank(card.getNumber()));
-        cardParams.put("cvc", TextUtils.nullIfBlank(card.getCVC()));
-        cardParams.put("exp_month", card.getExpMonth());
-        cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", TextUtils.nullIfBlank(card.getName()));
-        cardParams.put("currency", TextUtils.nullIfBlank(card.getCurrency()));
-        cardParams.put("address_line1", TextUtils.nullIfBlank(card.getAddressLine1()));
-        cardParams.put("address_line2", TextUtils.nullIfBlank(card.getAddressLine2()));
-        cardParams.put("address_city", TextUtils.nullIfBlank(card.getAddressCity()));
-        cardParams.put("address_zip", TextUtils.nullIfBlank(card.getAddressZip()));
-        cardParams.put("address_state", TextUtils.nullIfBlank(card.getAddressState()));
-        cardParams.put("address_country", TextUtils.nullIfBlank(card.getAddressCountry()));
+        Map<String, Object> cardParamsMap = new HashMap<String, Object>();
+        cardParamsMap.put("number", TextUtils.nullIfBlank(cardParams.getNumber()));
+        cardParamsMap.put("exp_month", cardParams.getExpMonth());
+        cardParamsMap.put("exp_year", cardParams.getExpYear());
+
+        cardParamsMap.put("cvc", TextUtils.nullIfBlank(cardParams.getCvc()));
+        cardParamsMap.put("currency", TextUtils.nullIfBlank(cardParams.getCurrency()));
+        cardParamsMap.put("name", TextUtils.nullIfBlank(cardParams.getName()));
+        cardParamsMap.put("address_line1", TextUtils.nullIfBlank(cardParams.getAddressLine1()));
+        cardParamsMap.put("address_line2", TextUtils.nullIfBlank(cardParams.getAddressLine2()));
+        cardParamsMap.put("address_city", TextUtils.nullIfBlank(cardParams.getAddressCity()));
+        cardParamsMap.put("address_state", TextUtils.nullIfBlank(cardParams.getAddressState()));
+        cardParamsMap.put("address_zip", TextUtils.nullIfBlank(cardParams.getAddressZip()));
+        cardParamsMap.put("address_country", TextUtils.nullIfBlank(cardParams.getAddressCountry()));
 
         // Remove all null values; they cause validation errors
-        for (String key : new HashSet<String>(cardParams.keySet())) {
-            if (cardParams.get(key) == null) {
-                cardParams.remove(key);
+        for (String key : new HashSet<String>(cardParamsMap.keySet())) {
+            if (cardParamsMap.get(key) == null) {
+                cardParamsMap.remove(key);
             }
         }
 
-        tokenParams.put("card", cardParams);
-        return tokenParams;
+        tokenParamsMap.put("card", cardParamsMap);
+        return tokenParamsMap;
     }
 
     private class ResponseWrapper {
@@ -214,7 +219,7 @@ public class Stripe {
     }
 
     interface TokenCreator {
-        public void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
+        public void create(CardParams cardParams, String publishableKey, Executor executor, TokenCallback callback);
     }
 
     interface TokenRequester {

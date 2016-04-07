@@ -1,13 +1,19 @@
 language: android
-jdk: oraclejdk7
 
 android:
   components:
     - tools
-    - build-tools-23.0.2
-    - android-17
+    - build-tools-23.0.3
+    - android-23
   licenses:
     - android-sdk-license-5be876d5
 
 script:
   - ./gradlew clean test
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
