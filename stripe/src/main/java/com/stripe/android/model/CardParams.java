@@ -1,8 +1,9 @@
 package com.stripe.android.model;
 
 import com.stripe.android.util.TextUtils;
+import com.stripe.android.validators.CardParamsValidator;
 
-public class CardParams {
+public class CardParams extends CardParamsValidator {
 
     // Required Parameters
     private String number;
@@ -121,12 +122,6 @@ public class CardParams {
     }
 
     // Helpers
-    private String normalizeCardNumber(String number) {
-        if (number == null) {
-            return null;
-        }
-        return number.trim().replaceAll("\\s+|-", "");
-    }
 
     public String getLast4() {
         if (number != null && number.length() > 4) {
