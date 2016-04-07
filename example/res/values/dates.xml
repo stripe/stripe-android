@@ -1,15 +1,16 @@
 <resources>
     <string-array name="year_array">
         <item>Year</item>
-        <item>2012</item>
-        <item>2013</item>
-        <item>2014</item>
-        <item>2015</item>
         <item>2016</item>
         <item>2017</item>
         <item>2018</item>
         <item>2019</item>
         <item>2020</item>
+        <item>2021</item>
+        <item>2022</item>
+        <item>2023</item>
+        <item>2024</item>
+        <item>2025</item>
     </string-array>
 
     <string-array name="month_array">

@@ -21,87 +21,20 @@ public class CardParams extends CardParamsValidator {
     private String addressZip;
     private String addressCountry;
 
-    public static class Builder {
-        private final String number;
-        private final Integer expMonth;
-        private final Integer expYear;
-        private String cvc;
-        private String currency;
-        private String name;
-        private String addressLine1;
-        private String addressLine2;
-        private String addressCity;
-        private String addressState;
-        private String addressZip;
-        private String addressCountry;
-
-        public Builder(String number, Integer expMonth, Integer expYear) {
-            this.number = number;
-            this.expMonth = expMonth;
-            this.expYear = expYear;
-        }
-
-        public Builder(String number, Integer expMonth, Integer expYear, String cvc) {
-            this.number = number;
-            this.expMonth = expMonth;
-            this.expYear = expYear;
-            this.cvc = cvc;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder addressLine1(String address) {
-            this.addressLine1 = address;
-            return this;
-        }
-
-        public Builder addressLine2(String address) {
-            this.addressLine2 = address;
-            return this;
-        }
-
-        public Builder addressCity(String city) {
-            this.addressCity = city;
-            return this;
-        }
-
-        public Builder addressState(String state) {
-            this.addressState = state;
-            return this;
-        }
-
-        public Builder addressZip(String zip) {
-            this.addressZip = zip;
-            return this;
-        }
-
-        public Builder addressCountry(String country) {
-            this.addressCountry = country;
-            return this;
-        }
-
-        public Builder currency(String currency)
-        {
-            this.currency = currency;
-            return this;
-        }
-
-        public CardParams build() {
-            return new CardParams(number, expMonth, expYear, cvc, currency, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry);
-        }
-    }
+    // TODO: Metadata
 
     public CardParams(String number, Integer expMonth, Integer expYear) {
+        super(number, expMonth, expYear);
         this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
     }
 
     public CardParams(String number, Integer expMonth, Integer expYear, String cvc) {
-        this(number, expMonth, expYear);
+        super(number, expMonth, expYear, cvc);
+        this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
+        this.expMonth = expMonth;
+        this.expYear = expYear;
         this.cvc = TextUtils.nullIfBlank(cvc);
     }
 

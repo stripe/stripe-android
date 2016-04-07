@@ -30,6 +30,17 @@ public class CardParamsValidator {
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
+    protected CardParamsValidator(String number, Integer expMonth, Integer expYear) {
+        this.number = number;
+        this.expMonth = expMonth;
+        this.expYear = expYear;
+    }
+
+    protected CardParamsValidator(String number, Integer expMonth, Integer expYear, String cvc) {
+        this(number, expMonth, expYear);
+        this.cvc = cvc;
+    }
+
     public String getType() {
         if (!TextUtils.isBlank(number)) {
             if (TextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
@@ -120,7 +131,7 @@ public class CardParamsValidator {
 
     public boolean validateCVC(String cvc) {
 
-        if (cvc != null && TextUtils.isBlank(cvc)) {
+        if (cvc == null || TextUtils.isBlank(cvc)) {
             return false;
         }
 
@@ -134,7 +145,7 @@ public class CardParamsValidator {
         return (TextUtils.isWholePositiveNumber(cvcValue) && validLength);
 
     }
-    private boolean validateCVC() { return validateCVC(cvc); }
+    public boolean validateCVC() { return validateCVC(cvc); }
 
     public boolean validateExpiryDate(Integer expMonth, Integer expYear) {
         if (!validateExpMonth(expMonth)) {
