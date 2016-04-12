@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardParams;
 import com.stripe.android.model.Token;
 import com.stripe.example.PaymentForm;
 import com.stripe.example.R;
@@ -36,18 +37,18 @@ public class PaymentActivity extends FragmentActivity {
 
     public void saveCreditCard(PaymentForm form) {
 
-        Card card = new Card(
+        CardParams cardParams = new CardParams(
                 form.getCardNumber(),
                 form.getExpMonth(),
                 form.getExpYear(),
                 form.getCvc());
-        card.setCurrency(form.getCurrency());
+        cardParams.setCurrency(form.getCurrency());
 
-        boolean validation = card.validateCard();
+        boolean validation = cardParams.validateCardParams();
         if (validation) {
             startProgress();
             new Stripe().createToken(
-                    card,
+                    cardParams,
                     PUBLISHABLE_KEY,
                     new TokenCallback() {
                     public void onSuccess(Token token) {
@@ -59,11 +60,11 @@ public class PaymentActivity extends FragmentActivity {
                             finishProgress();
                         }
                     });
-        } else if (!card.validateNumber()) {
+        } else if (!cardParams.validateNumber()) {
         	handleError("The card number that you entered is invalid");
-        } else if (!card.validateExpiryDate()) {
+        } else if (!cardParams.validateExpiryDate()) {
         	handleError("The expiration date that you entered is invalid");
-        } else if (!card.validateCVC()) {
+        } else if (!cardParams.validateCVC()) {
         	handleError("The CVC code that you entered is invalid");
         } else {
         	handleError("The card details that you entered are invalid");
