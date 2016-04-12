@@ -1,25 +1,25 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.stripe:stripe-java:1.40.0'
+    compile 'com.stripe:stripe-java:1.48.0'
     compile 'com.google.code.gson:gson:2.2.4'
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion '23.0.2'
-
+    compileSdkVersion 21
+    buildToolsVersion '23.0.3'
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 19
+        targetSdkVersion 21
     }
-
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+    }
+    productFlavors {
     }
 }
 
