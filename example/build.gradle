@@ -8,14 +8,14 @@ dependencies {
     compile project(':stripe')
     compile 'com.android.support:support-v4:18.0.+'
     androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.robolectric:robolectric:3+'
+    androidTestCompile 'org.robolectric:robolectric:3.0'
     testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3+'
+    testCompile "org.robolectric:robolectric:3.0"
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 21
+    buildToolsVersion "23.0.3"
 
     packagingOptions {
         exclude 'LICENSE.txt'
