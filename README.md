@@ -27,6 +27,8 @@ If you're planning on optimizing your app with ProGuard, make sure that you excl
 
     -keep class com.stripe.** { *; }
 
+You also need to add some configuration options for Gson, which is used by the Stripe bindings to serialize and deserialize JSON data. You can find the recommended ProGuard configuration for Gson [here](https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg).
+
 ## Usage
 
 ### setDefaultPublishableKey
