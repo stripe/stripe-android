@@ -1,16 +1,16 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.stripe:stripe-java:1.48.0'
+    compile 'com.stripe:stripe-java:2.6.0'
     compile 'com.google.code.gson:gson:2.2.4'
 }
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '23.0.3'
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 21
+        targetSdkVersion 23
     }
     sourceSets {
         main {
