@@ -1,3 +1,8 @@
+1.0.5 2016-08-26
+	Modified Java bindings dependency
+	Updated Card model to reflect recent changes
+	Updated proguard and dependency versions
+
 1.0.4 2016-01-29
 	Remove incorrect Diner's Club card prefix
 	Add Fabric properties file
