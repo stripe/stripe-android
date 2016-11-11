@@ -18,7 +18,10 @@ public class Stripe {
 
     public TokenCreator tokenCreator = new TokenCreator() {
         @Override
-        public void create(final Card card, final String publishableKey, final Executor executor,
+        public void create(
+                final Card card,
+                final String publishableKey,
+                final Executor executor,
                 final TokenCallback callback) {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
                 protected ResponseWrapper doInBackground(Void... params) {
