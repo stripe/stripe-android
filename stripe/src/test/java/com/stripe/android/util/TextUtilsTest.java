@@ -1,17 +1,19 @@
-package com.stripe.android.test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+package com.stripe.android.util;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import com.stripe.android.util.TextUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test class for {@link TextUtils}.
+ */
 @RunWith(RobolectricTestRunner.class)
 public class TextUtilsTest {
+
     @Test
     public void hasAnyPrefixShouldFailIfNull() {
         assertFalse(TextUtils.hasAnyPrefix(null));
