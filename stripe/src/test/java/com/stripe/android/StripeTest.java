@@ -7,6 +7,7 @@ import com.stripe.exception.AuthenticationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.concurrent.Executor;
 
@@ -19,6 +20,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Stripe}.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 23)
 public class StripeTest {
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
