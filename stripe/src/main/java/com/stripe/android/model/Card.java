@@ -18,7 +18,13 @@ public class Card extends com.stripe.model.StripeObject {
     public static final String[] PREFIXES_JCB = {"35"};
     public static final String[] PREFIXES_DINERS_CLUB = {"300", "301", "302", "303", "304", "305", "309", "36", "38", "39"};
     public static final String[] PREFIXES_VISA = {"4"};
-    public static final String[] PREFIXES_MASTERCARD = {"50", "51", "52", "53", "54", "55"};
+    public static final String[] PREFIXES_MASTERCARD = {
+        "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229",
+        "223", "224", "225", "226", "227", "228", "229",
+        "23", "24", "25", "26",
+        "270", "271", "2720",
+        "50", "51", "52", "53", "54", "55"
+    };
 
     public static final int MAX_LENGTH_STANDARD = 16;
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
