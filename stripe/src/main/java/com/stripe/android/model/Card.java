@@ -270,9 +270,10 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
 
-        if (AMERICAN_EXPRESS.equals(type)) {
+        String updatedType = getType();
+        if (AMERICAN_EXPRESS.equals(updatedType)) {
             return rawNumber.length() == MAX_LENGTH_AMERICAN_EXPRESS;
-        } else if (DINERS_CLUB.equals(type)) {
+        } else if (DINERS_CLUB.equals(updatedType)) {
             return rawNumber.length() == MAX_LENGTH_DINERS_CLUB;
         } else {
             return rawNumber.length() == MAX_LENGTH_STANDARD;
@@ -306,9 +307,10 @@ public class Card extends com.stripe.model.StripeObject {
         }
         String cvcValue = cvc.trim();
 
-        boolean validLength = ((type == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
-                (AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 4) ||
-                (!AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 3));
+        String updatedType = getType();
+        boolean validLength = ((updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
+                (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4) ||
+                (!AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 3));
 
         return TextUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
