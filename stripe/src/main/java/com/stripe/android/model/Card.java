@@ -3,6 +3,10 @@ package com.stripe.android.model;
 import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.TextUtils;
 
+/**
+ * A model object representing a Card in the Android SDK. Note that this is slightly different
+ * from the Card model in stripe-java.
+ */
 public class Card extends com.stripe.model.StripeObject {
     public static final String AMERICAN_EXPRESS = "American Express";
     public static final String DISCOVER = "Discover";
@@ -182,14 +186,65 @@ public class Card extends com.stripe.model.StripeObject {
         this.currency = TextUtils.nullIfBlank(currency);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity, String addressState, String addressZip, String addressCountry, String currency) {
-        this(number, expMonth, expYear, cvc, name, addressLine1, addressLine2, addressCity, addressState, addressZip, addressCountry, null, null, null, null);
+    public Card(
+            String number,
+            Integer expMonth,
+            Integer expYear,
+            String cvc,
+            String name,
+            String addressLine1,
+            String addressLine2,
+            String addressCity,
+            String addressState,
+            String addressZip,
+            String addressCountry,
+            String currency) {
+        this(
+                number,
+                expMonth,
+                expYear,
+                cvc,
+                name,
+                addressLine1,
+                addressLine2,
+                addressCity,
+                addressState,
+                addressZip,
+                addressCountry,
+                null,
+                null,
+                null,
+                null);
     }
 
-    public Card(String number, Integer expMonth, Integer expYear, String cvc) {
-        this(number, expMonth, expYear, cvc, null, null, null, null, null, null, null, null, null, null, null);
+    public Card(
+            String number,
+            Integer expMonth,
+            Integer expYear,
+            String cvc) {
+        this(
+                number,
+                expMonth,
+                expYear,
+                cvc,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
+    /**
+     * Checks whether {@code this} represents a valid card.
+     *
+     * @return {@code true} if valid, {@code false} otherwise.
+     */
     public boolean validateCard() {
         if (cvc == null) {
             return validateNumber() && validateExpiryDate();
@@ -198,6 +253,11 @@ public class Card extends com.stripe.model.StripeObject {
         }
     }
 
+    /**
+     * Checks whether or not the {@link #number} field is valid.
+     *
+     * @return {@code true} if valid, {@code false} otherwise.
+     */
     public boolean validateNumber() {
         if (TextUtils.isBlank(number)) {
             return false;
@@ -219,30 +279,27 @@ public class Card extends com.stripe.model.StripeObject {
         }
     }
 
+    /**
+     * Checks whether or not the {@link #expMonth} and {@link #expYear} fields represent a valid
+     * expiry date.
+     *
+     * @return {@code true} if valid, {@code false} otherwise
+     */
     public boolean validateExpiryDate() {
-    	if (!validateExpMonth()) {
-    		return false;
-    	}
-    	if (!validateExpYear()) {
-    		return false;
-    	}
-    	return !DateUtils.hasMonthPassed(expYear, expMonth);
+        if (!validateExpMonth()) {
+            return false;
+        }
+        if (!validateExpYear()) {
+            return false;
+        }
+        return !DateUtils.hasMonthPassed(expYear, expMonth);
     }
 
-    public boolean validateExpMonth() {
-    	if (expMonth == null) {
-    		return false;
-    	}
-    	return (expMonth >= 1 && expMonth <= 12);
-    }
-
-    public boolean validateExpYear() {
-    	if (expYear == null) {
-    		return false;
-    	}
-    	return !DateUtils.hasYearPassed(expYear);
-    }
-
+    /**
+     * Checks whether or not the {@link #cvc} field is valid.
+     *
+     * @return {@code true} if valid, {@code false} otherwise
+     */
     public boolean validateCVC() {
         if (TextUtils.isBlank(cvc)) {
             return false;
@@ -253,10 +310,25 @@ public class Card extends com.stripe.model.StripeObject {
                 (AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 4) ||
                 (!AMERICAN_EXPRESS.equals(type) && cvcValue.length() == 3));
 
-        if (!TextUtils.isWholePositiveNumber(cvcValue) || !validLength) {
-            return false;
-        }
-        return true;
+        return TextUtils.isWholePositiveNumber(cvcValue) && validLength;
+    }
+
+    /**
+     * Checks whether or not the {@link #expMonth} field is valid.
+     *
+     * @return {@code true} if valid, {@code false} otherwise.
+     */
+    boolean validateExpMonth() {
+        return expMonth != null && expMonth >= 1 && expMonth <= 12;
+    }
+
+    /**
+     * Checks whether or not the {@link #expYear} field is valid.
+     *
+     * @return {@code true} if valid, {@code false} otherwise.
+     */
+    boolean validateExpYear() {
+        return expYear != null && !DateUtils.hasYearPassed(expYear);
     }
 
     private boolean isValidLuhnNumber(String number) {

@@ -155,11 +155,31 @@ public class Stripe {
     }
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
+        return new Card(
+                null,
+                stripeCard.getExpMonth(),
+                stripeCard.getExpYear(),
+                null,
+                stripeCard.getName(),
+                stripeCard.getAddressLine1(),
+                stripeCard.getAddressLine2(),
+                stripeCard.getAddressCity(),
+                stripeCard.getAddressState(),
+                stripeCard.getAddressZip(),
+                stripeCard.getAddressCountry(),
+                stripeCard.getLast4(),
+                stripeCard.getBrand(),
+                stripeCard.getFingerprint(),
+                stripeCard.getCountry());
     }
 
     private Token androidTokenFromStripeToken(Card androidCard, com.stripe.model.Token stripeToken) {
-        return new Token(stripeToken.getId(), stripeToken.getLivemode(), new Date(stripeToken.getCreated() * 1000), stripeToken.getUsed(), androidCard);
+        return new Token(
+                stripeToken.getId(),
+                stripeToken.getLivemode(),
+                new Date(stripeToken.getCreated() * 1000),
+                stripeToken.getUsed(),
+                androidCard);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
