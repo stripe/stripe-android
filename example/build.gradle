@@ -6,16 +6,12 @@ repositories {
 
 dependencies {
     compile project(':stripe')
-    compile 'com.android.support:support-v4:23.4.0'
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.0"
+    compile 'com.android.support:support-v4:24.1.1'
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
 
     packagingOptions {
         exclude 'LICENSE.txt'

@@ -1,15 +1,15 @@
 language: android
+jdk: oraclejdk8
 
 android:
   components:
     - tools
-    - build-tools-23.0.3
-    - android-23
+    - build-tools-25.0.0
+    - android-25
     - extra-google-m2repository
     - extra-android-m2repository
   licenses:
-    - android-sdk-license-5be876d5
-    - android-sdk-license-c81a61d9
+    - 'android-sdk-license-.+'
 
 script:
   - ./gradlew clean test
