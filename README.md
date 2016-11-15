@@ -16,10 +16,7 @@ No need to clone the repository or download any files -- just add this line to y
 
 ### Eclipse
 
-1. Clone the repository.
-2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_. This is only a requirement for development. Our bindings require the API Level 7 as a minimum at runtime which would work on almost any modern version of Android.
-3. Import the _stripe_ folder into [Eclipse](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) (use "Existing Projects into Workspace", [not "Existing Android Code"](https://github.com/stripe/stripe-android/issues/7)).
-4. In your project settings, add the _stripe_ project under the "Libraries" section of the "Android" category.
+Note - as Google has stopped supporting Eclipse for Android Development, we will no longer be actively testing the project's compatibility within Eclipse. You may still clone and include the library as you would any other Android library project.
 
 ### ProGuard
 
