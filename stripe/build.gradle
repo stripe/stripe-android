@@ -3,6 +3,9 @@ apply plugin: 'com.android.library'
 dependencies {
     compile 'com.stripe:stripe-java:2.6.0'
     compile 'com.google.code.gson:gson:2.2.4'
+
+    testCompile 'junit:junit:4.12'
+    testCompile "org.robolectric:robolectric:3.1.4"
 }
 
 android {
@@ -10,7 +13,7 @@ android {
     buildToolsVersion '23.0.3'
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 23
+        targetSdkVersion 25
     }
     sourceSets {
         main {
@@ -18,11 +21,17 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+        test {
+
+        }
     }
     productFlavors {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
+}
 // Apply chrisbanes' excellent gradle-mvn-push recipe,
 // which lets us publish the build artifacts to maven
 // without *writing a single line of XML.*

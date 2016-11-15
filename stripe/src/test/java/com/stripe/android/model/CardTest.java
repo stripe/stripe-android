@@ -1,6 +1,6 @@
-package com.stripe.android.test;
+package com.stripe.android.model;
 
-import java.util.Calendar;
+import com.stripe.android.time.FrozenClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -8,13 +8,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import com.stripe.android.model.Card;
-import com.stripe.android.time.FrozenClock;
+import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Test class for {@link Card}.
+ */
 @RunWith(RobolectricTestRunner.class)
 public class CardTest {
     private static final int YEAR_IN_FUTURE = 2000;
@@ -30,7 +32,7 @@ public class CardTest {
 
     @After
     public void teardown() {
-       FrozenClock.unfreeze();
+        FrozenClock.unfreeze();
     }
 
     @Test
@@ -492,6 +494,7 @@ public class CardTest {
         assertFalse(card.validateCVC());
     }
 
+    @Test
     public void testLast4() {
         Card card = new Card("42 42 42 42 42 42 42 42", null, null, null);
         assertEquals("4242", card.getLast4());
@@ -503,3 +506,4 @@ public class CardTest {
         assertEquals(null, card.getLast4());
     }
 }
+
