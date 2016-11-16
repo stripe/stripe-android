@@ -29,6 +29,13 @@ android {
     }
 }
 
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath = configurations.compile
+    destinationDir = file("../javadoc/")
+    failOnError false
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '3.1'
 }
