@@ -1,3 +1,8 @@
+1.0.6 2016-11-15
+	Updated to stripe-java 3.2.0
+	Fixed American Express number validation problem
+	Updated build target sdk version, build tools
+	Moved tests out of example project and into stripe project
 1.0.5 2016-08-26
 	Modified Java bindings dependency
 	Updated Card model to reflect recent changes
