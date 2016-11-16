@@ -13,8 +13,10 @@ import com.stripe.android.util.TextUtils;
 import com.stripe.exception.AuthenticationException;
 import com.stripe.net.RequestOptions;
 
+/**
+ * Class that handles {@link Token} creation from charges and {@link Card} models.
+ */
 public class Stripe {
-    private String defaultPublishableKey;
 
     public TokenCreator tokenCreator = new TokenCreator() {
         @Override
@@ -23,25 +25,28 @@ public class Stripe {
                 final String publishableKey,
                 final Executor executor,
                 final TokenCallback callback) {
-            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
-                protected ResponseWrapper doInBackground(Void... params) {
-                    try {
-                        RequestOptions requestOptions = RequestOptions.builder()
-                                .setApiKey(publishableKey).build();
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                                hashMapFromCard(card), requestOptions);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
-                        return new ResponseWrapper(token, null);
-                    } catch (Exception e) {
-                        return new ResponseWrapper(null, e);
-                    }
-                }
+            AsyncTask<Void, Void, ResponseWrapper> task =
+                    new AsyncTask<Void, Void, ResponseWrapper>() {
+                        @Override
+                        protected ResponseWrapper doInBackground(Void... params) {
+                            try {
+                                RequestOptions requestOptions = RequestOptions.builder()
+                                        .setApiKey(publishableKey).build();
+                                com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
+                                        hashMapFromCard(card), requestOptions);
+                                com.stripe.model.Card stripeCard = stripeToken.getCard();
+                                Card card = androidCardFromStripeCard(stripeCard);
+                                Token token = androidTokenFromStripeToken(card, stripeToken);
+                                return new ResponseWrapper(token, null);
+                            } catch (Exception e) {
+                                return new ResponseWrapper(null, e);
+                            }
+                        }
 
-                protected void onPostExecute(ResponseWrapper result) {
-                    tokenTaskPostExecution(result, callback);
-               }
+                        @Override
+                        protected void onPostExecute(ResponseWrapper result) {
+                            tokenTaskPostExecution(result, callback);
+                        }
             };
 
             executeTokenTask(executor, task);
@@ -75,11 +80,35 @@ public class Stripe {
           }
     };
 
-    public Stripe() {
-    }
+    private String defaultPublishableKey;
 
+    /**
+     * A blank constructor to set the key later.
+     */
+    public Stripe() { }
+
+    /**
+     * Constructor with publishable key.
+     *
+     * @param publishableKey the client's publishable key
+     * @throws AuthenticationException if the key is invalid
+     */
     public Stripe(String publishableKey) throws AuthenticationException {
         setDefaultPublishableKey(publishableKey);
+    }
+
+    /**
+     * Call to create a {@link Token}.
+     *
+     * @param card the {@link Card} used for this transaction
+     * @param publishableKey the public key used for this transaction
+     * @param callback a {@link TokenCallback} to receive the result of this operation
+     */
+    public void createToken(
+            final Card card,
+            final String publishableKey,
+            final TokenCallback callback) {
+        createToken(card, publishableKey, null, callback);
     }
 
     public void setDefaultPublishableKey(String publishableKey) throws AuthenticationException {
@@ -89,10 +118,15 @@ public class Stripe {
 
     private void validateKey(String publishableKey) throws AuthenticationException {
         if (publishableKey == null || publishableKey.length() == 0) {
-            throw new AuthenticationException("Invalid Publishable Key: You must use a valid publishable key to create a token.  For more info, see https://stripe.com/docs/stripe.js.", null, 0);
+            throw new AuthenticationException("Invalid Publishable Key: " +
+                    "You must use a valid publishable key to create a token.  " +
+                    "For more info, see https://stripe.com/docs/stripe.js.", null, 0);
         }
         if (publishableKey.startsWith("sk_")) {
-            throw new AuthenticationException("Invalid Publishable Key: You are using a secret key to create a token, instead of the publishable one. For more info, see https://stripe.com/docs/stripe.js", null, 0);
+            throw new AuthenticationException("Invalid Publishable Key: " +
+                    "You are using a secret key to create a token, " +
+                    "instead of the publishable one. For more info, " +
+                    "see https://stripe.com/docs/stripe.js", null, 0);
         }
     }
 
@@ -108,7 +142,19 @@ public class Stripe {
         requestToken(tokenId, defaultPublishableKey, callback);
     }
 
-    public void requestToken(final String tokenId, final String publishableKey, final Executor executor, final TokenCallback callback) {
+    public void createToken(final Card card, final Executor executor, final TokenCallback callback) {
+        createToken(card, defaultPublishableKey, executor, callback);
+    }
+
+    public void createToken(final Card card, final TokenCallback callback) {
+        createToken(card, defaultPublishableKey, callback);
+    }
+
+    public void requestToken(
+            final String tokenId,
+            final String publishableKey,
+            final Executor executor,
+            final TokenCallback callback) {
         try {
             if (tokenId == null)
                 throw new RuntimeException("Required Parameter: 'tokenId' is required to request a token");
@@ -125,25 +171,22 @@ public class Stripe {
         }
     }
 
-    public void createToken(final Card card, final Executor executor, final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, executor, callback);
-    }
-
-    public void createToken(final Card card, final String publishableKey, final TokenCallback callback) {
-        createToken(card, publishableKey, null, callback);
-    }
-
-    public void createToken(final Card card, final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, callback);
-    }
-
-    public void createToken(final Card card, final String publishableKey, final Executor executor, final TokenCallback callback) {
+    public void createToken(
+            final Card card,
+            final String publishableKey,
+            final Executor executor,
+            final TokenCallback callback) {
         try {
-            if (card == null)
-                throw new RuntimeException("Required Parameter: 'card' is required to create a token");
+            if (card == null) {
+                throw new RuntimeException(
+                        "Required Parameter: 'card' is required to create a token");
+            }
 
-            if (callback == null)
-                throw new RuntimeException("Required Parameter: 'callback' is required to use the created token and handle errors");
+            if (callback == null) {
+                throw new RuntimeException(
+                        "Required Parameter: 'callback' is required to use the created " +
+                                "token and handle errors");
+            }
 
             validateKey(publishableKey);
 
@@ -155,20 +198,46 @@ public class Stripe {
     }
 
     private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(null, stripeCard.getExpMonth(), stripeCard.getExpYear(), null, stripeCard.getName(), stripeCard.getAddressLine1(), stripeCard.getAddressLine2(), stripeCard.getAddressCity(), stripeCard.getAddressState(), stripeCard.getAddressZip(), stripeCard.getAddressCountry(), stripeCard.getLast4(), stripeCard.getType(), stripeCard.getFingerprint(), stripeCard.getCountry());
+        return new Card(
+                null,
+                stripeCard.getExpMonth(),
+                stripeCard.getExpYear(),
+                null,
+                stripeCard.getName(),
+                stripeCard.getAddressLine1(),
+                stripeCard.getAddressLine2(),
+                stripeCard.getAddressCity(),
+                stripeCard.getAddressState(),
+                stripeCard.getAddressZip(),
+                stripeCard.getAddressCountry(),
+                stripeCard.getLast4(),
+                stripeCard.getBrand(),
+                stripeCard.getFingerprint(),
+                stripeCard.getCountry());
     }
 
-    private Token androidTokenFromStripeToken(Card androidCard, com.stripe.model.Token stripeToken) {
-        return new Token(stripeToken.getId(), stripeToken.getLivemode(), new Date(stripeToken.getCreated() * 1000), stripeToken.getUsed(), androidCard);
+    private Token androidTokenFromStripeToken(
+            Card androidCard,
+            com.stripe.model.Token stripeToken) {
+        return new Token(
+                stripeToken.getId(),
+                stripeToken.getLivemode(),
+                new Date(stripeToken.getCreated() * 1000),
+                stripeToken.getUsed(),
+                androidCard);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
-        if (result.token != null)
+        if (result.token != null) {
             callback.onSuccess(result.token);
-        else if (result.error != null)
+        }
+        else if (result.error != null) {
             callback.onError(result.error);
-        else
-            callback.onError(new RuntimeException("Somehow got neither a token response or an error response"));
+        }
+        else {
+            callback.onError(new RuntimeException(
+                    "Somehow got neither a token response or an error response"));
+        }
     }
 
     private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
@@ -179,9 +248,9 @@ public class Stripe {
     }
 
     private Map<String, Object> hashMapFromCard(Card card) {
-        Map<String, Object> tokenParams = new HashMap<String, Object>();
+        Map<String, Object> tokenParams = new HashMap<>();
 
-        Map<String, Object> cardParams = new HashMap<String, Object>();
+        Map<String, Object> cardParams = new HashMap<>();
         cardParams.put("number", TextUtils.nullIfBlank(card.getNumber()));
         cardParams.put("cvc", TextUtils.nullIfBlank(card.getCVC()));
         cardParams.put("exp_month", card.getExpMonth());
@@ -196,7 +265,7 @@ public class Stripe {
         cardParams.put("address_country", TextUtils.nullIfBlank(card.getAddressCountry()));
 
         // Remove all null values; they cause validation errors
-        for (String key : new HashSet<String>(cardParams.keySet())) {
+        for (String key : new HashSet<>(cardParams.keySet())) {
             if (cardParams.get(key) == null) {
                 cardParams.remove(key);
             }
@@ -217,10 +286,10 @@ public class Stripe {
     }
 
     interface TokenCreator {
-        public void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
+        void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
     }
 
     interface TokenRequester {
-        public void request(String tokenId, String publishableKey, Executor executor, TokenCallback callback);
+        void request(String tokenId, String publishableKey, Executor executor, TokenCallback callback);
     }
 }

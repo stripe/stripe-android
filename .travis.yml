@@ -8,8 +8,6 @@ android:
     - android-25
     - extra-google-m2repository
     - extra-android-m2repository
-  licenses:
-    - 'android-sdk-license-.+'
 
 script:
   - ./gradlew clean test
