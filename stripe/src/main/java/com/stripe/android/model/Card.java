@@ -320,7 +320,7 @@ public class Card extends com.stripe.model.StripeObject {
      *
      * @return {@code true} if valid, {@code false} otherwise.
      */
-    boolean validateExpMonth() {
+    public boolean validateExpMonth() {
         return expMonth != null && expMonth >= 1 && expMonth <= 12;
     }
 
@@ -329,7 +329,7 @@ public class Card extends com.stripe.model.StripeObject {
      *
      * @return {@code true} if valid, {@code false} otherwise.
      */
-    boolean validateExpYear() {
+    public boolean validateExpYear() {
         return expYear != null && !DateUtils.hasYearPassed(expYear);
     }
 

@@ -18,7 +18,7 @@ import com.stripe.net.RequestOptions;
  */
 public class Stripe {
 
-    TokenCreator tokenCreator = new TokenCreator() {
+    public TokenCreator tokenCreator = new TokenCreator() {
         @Override
         public void create(
                 final Card card,
@@ -53,7 +53,7 @@ public class Stripe {
         }
     };
 
-    TokenRequester tokenRequester = new TokenRequester() {
+    public TokenRequester tokenRequester = new TokenRequester() {
           @Override
           public void request(final String tokenId, final String publishableKey,
                   final Executor executor, final TokenCallback callback) {
@@ -111,7 +111,7 @@ public class Stripe {
         createToken(card, publishableKey, null, callback);
     }
 
-    void setDefaultPublishableKey(String publishableKey) throws AuthenticationException {
+    public void setDefaultPublishableKey(String publishableKey) throws AuthenticationException {
         validateKey(publishableKey);
         this.defaultPublishableKey = publishableKey;
     }
@@ -130,27 +130,27 @@ public class Stripe {
         }
     }
 
-    void requestToken(final String tokenId, final Executor executor, final TokenCallback callback) {
+    public void requestToken(final String tokenId, final Executor executor, final TokenCallback callback) {
         requestToken(tokenId, defaultPublishableKey, executor, callback);
     }
 
-    void requestToken(final String tokenId, final String publishableKey, final TokenCallback callback) {
+    public void requestToken(final String tokenId, final String publishableKey, final TokenCallback callback) {
         requestToken(tokenId, publishableKey, null, callback);
     }
 
-    void requestToken(final String tokenId, final TokenCallback callback) {
+    public void requestToken(final String tokenId, final TokenCallback callback) {
         requestToken(tokenId, defaultPublishableKey, callback);
     }
 
-    void createToken(final Card card, final Executor executor, final TokenCallback callback) {
+    public void createToken(final Card card, final Executor executor, final TokenCallback callback) {
         createToken(card, defaultPublishableKey, executor, callback);
     }
 
-    void createToken(final Card card, final TokenCallback callback) {
+    public void createToken(final Card card, final TokenCallback callback) {
         createToken(card, defaultPublishableKey, callback);
     }
 
-    private void requestToken(
+    public void requestToken(
             final String tokenId,
             final String publishableKey,
             final Executor executor,
@@ -171,7 +171,7 @@ public class Stripe {
         }
     }
 
-    private void createToken(
+    public void createToken(
             final Card card,
             final String publishableKey,
             final Executor executor,
@@ -276,8 +276,8 @@ public class Stripe {
     }
 
     private class ResponseWrapper {
-        final Token token;
-        final Exception error;
+        public final Token token;
+        public final Exception error;
 
         private ResponseWrapper(Token token, Exception error) {
             this.error = error;
