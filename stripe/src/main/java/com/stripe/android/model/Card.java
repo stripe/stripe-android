@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
@@ -29,7 +28,7 @@ public class Card extends com.stripe.model.StripeObject {
             MASTERCARD,
             UNKNOWN
     })
-    public @interface CardType { }
+    public @interface CardBrand { }
     public static final String AMERICAN_EXPRESS = "American Express";
     public static final String DISCOVER = "Discover";
     public static final String JCB = "JCB";
@@ -37,19 +36,6 @@ public class Card extends com.stripe.model.StripeObject {
     public static final String VISA = "Visa";
     public static final String MASTERCARD = "MasterCard";
     public static final String UNKNOWN = "Unknown";
-
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            FUNDING_CREDIT,
-            FUNDING_DEBIT,
-            FUNDING_PREPAID,
-            FUNDING_UNKNOWN
-    })
-    public @interface FundingType { }
-    public static final String FUNDING_CREDIT = "credit";
-    public static final String FUNDING_DEBIT = "debit";
-    public static final String FUNDING_PREPAID = "prepaid";
-    public static final String FUNDING_UNKNOWN = "unknown";
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
@@ -82,8 +68,8 @@ public class Card extends com.stripe.model.StripeObject {
     private String addressZip;
     private String addressCountry;
     @Size(4) private String last4;
-    @CardType private String brand;
-    @FundingType private String fundingType;
+    @CardBrand
+    private String brand;
     private String fingerprint;
     private String country;
     private String currency;
@@ -103,10 +89,10 @@ public class Card extends com.stripe.model.StripeObject {
         private String addressState;
         private String addressZip;
         private String addressCountry;
-        private @CardType String brand;
+        private @CardBrand
+        String brand;
         private @Size(4) String last4;
         private String fingerprint;
-        private @FundingType String fundingType;
         private String country;
         private String currency;
 
@@ -174,13 +160,8 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
-        public Builder brand(@CardType String brand) {
+        public Builder brand(@CardBrand String brand) {
             this.brand = brand;
-            return this;
-        }
-
-        public Builder fundingType(@FundingType String fundingType) {
-            this.fundingType = fundingType;
             return this;
         }
 
@@ -197,7 +178,8 @@ public class Card extends com.stripe.model.StripeObject {
 
         /**
          * Generate a new {@link Card} object based on the arguments held by this Builder.
-         * @return
+         *
+         * @return the newly created {@link Card} object
          */
         public Card build() {
             return new Card(this);
@@ -220,7 +202,6 @@ public class Card extends com.stripe.model.StripeObject {
      * @param addressCountry country for the billing address
      * @param brand brand of this card
      * @param last4 last 4 digits of the card
-     * @param fundingType the funding type of this card
      * @param fingerprint the card fingerprint
      * @param country ISO country code of the card itself
      * @param currency currency used by the card
@@ -239,7 +220,6 @@ public class Card extends com.stripe.model.StripeObject {
             String addressCountry,
             String brand,
             @Size(4) String last4,
-            String fundingType,
             String fingerprint,
             String country,
             String currency) {
@@ -257,7 +237,6 @@ public class Card extends com.stripe.model.StripeObject {
         this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.brand = StripeTextUtils.asCardType(brand) == null ? getBrand() : brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
-        this.fundingType = StripeTextUtils.asFundingType(fundingType);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);
     }
@@ -307,7 +286,6 @@ public class Card extends com.stripe.model.StripeObject {
                 null,
                 null,
                 null,
-                null,
                 currency);
     }
 
@@ -329,7 +307,6 @@ public class Card extends com.stripe.model.StripeObject {
                 expMonth,
                 expYear,
                 cvc,
-                null,
                 null,
                 null,
                 null,
@@ -645,10 +622,10 @@ public class Card extends com.stripe.model.StripeObject {
      * Gets the {@link #brand} of this card, changed from the "type" field. Use {@link #getBrand()}
      * instead.
      *
-     * @return
+     * @return the {@link #brand} of this card
      */
     @Deprecated
-    @CardType
+    @CardBrand
     public String getType() {
         return getBrand();
     }
@@ -659,10 +636,10 @@ public class Card extends com.stripe.model.StripeObject {
      *
      * @return the {@link #brand} of this card
      */
-    @CardType
+    @CardBrand
     public String getBrand() {
         if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
-            @CardType String evaluatedType;
+            @CardBrand String evaluatedType;
             if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
                 evaluatedType = AMERICAN_EXPRESS;
             } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
@@ -692,15 +669,6 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     /**
-     * @return the {@link #fundingType} of this card
-     */
-    @Nullable
-    @FundingType
-    public String getFundingType() {
-        return fundingType;
-    }
-
-    /**
      * @return the {@link #country} of this card
      */
     public String getCountry() {
@@ -726,7 +694,6 @@ public class Card extends com.stripe.model.StripeObject {
                 ? getBrand()
                 : builder.brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
-        this.fundingType = StripeTextUtils.asFundingType(builder.fundingType);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
     }

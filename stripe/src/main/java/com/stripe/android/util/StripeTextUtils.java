@@ -5,8 +5,7 @@ import android.text.TextUtils;
 
 import com.stripe.android.model.Card;
 
-import static com.stripe.android.model.Card.CardType;
-import static com.stripe.android.model.Card.FundingType;
+import static com.stripe.android.model.Card.CardBrand;
 
 /**
  * Utility class for common text-related operations on Stripe data coming from the server.
@@ -73,13 +72,13 @@ public class StripeTextUtils {
     }
 
     /**
-     * Converts an unchecked String value to a {@link CardType} or {@code null}.
+     * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
      *
-     * @param possibleCardType a String that might match a {@link CardType} or be empty.
-     * @return {@code null} if the input is blank, else the appropriate {@link CardType}.
+     * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
+     * @return {@code null} if the input is blank, else the appropriate {@link CardBrand}.
      */
     @Nullable
-    @CardType
+    @CardBrand
     public static String asCardType(@Nullable String possibleCardType) {
         if (isBlank(possibleCardType)) {
             return null;
@@ -99,30 +98,6 @@ public class StripeTextUtils {
             return Card.VISA;
         } else {
             return Card.UNKNOWN;
-        }
-    }
-
-    /**
-     * Converts an unchecked String value to a {@link FundingType} or {@code null}.
-     *
-     * @param possibleFundingType a String that might match a {@link FundingType} or be empty
-     * @return {@code null} if the input is blank, else the appropriate {@link FundingType}
-     */
-    @Nullable
-    @FundingType
-    public static String asFundingType(@Nullable String possibleFundingType) {
-        if (isBlank(possibleFundingType)) {
-            return null;
-        }
-
-        if (Card.FUNDING_CREDIT.equals(possibleFundingType)) {
-            return Card.FUNDING_CREDIT;
-        } else if (Card.FUNDING_DEBIT.equals(possibleFundingType)) {
-            return Card.FUNDING_DEBIT;
-        } else if (Card.FUNDING_PREPAID.equals(possibleFundingType)) {
-            return Card.FUNDING_PREPAID;
-        } else {
-            return Card.FUNDING_UNKNOWN;
         }
     }
 }

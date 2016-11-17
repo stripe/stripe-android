@@ -526,7 +526,6 @@ public class CardTest {
                 "1234",
                 null,
                 null,
-                null,
                 null
                 );
         assertEquals("1234", card.getLast4());
@@ -547,7 +546,6 @@ public class CardTest {
                 null,
                 null,
                 Card.AMERICAN_EXPRESS,
-                null,
                 null,
                 null,
                 null,
