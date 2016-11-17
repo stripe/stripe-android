@@ -309,9 +309,9 @@ public class Card extends com.stripe.model.StripeObject {
 
         String updatedType = getType();
         boolean validLength =
-                ((updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4)
+                (updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4)
                 || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
-                || (cvcValue.length() == 3));
+                || cvcValue.length() == 3;
 
         return TextUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
