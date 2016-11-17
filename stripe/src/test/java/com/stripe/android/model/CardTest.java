@@ -507,5 +507,54 @@ public class CardTest {
         Card card = new Card(null, null, null, null);
         assertEquals(null, card.getLast4());
     }
+
+    @Test
+    public void getLast4_whenNumberIsNullButLast4IsSet_returnsCorrectValue() {
+        Card card = new Card(
+                null,
+                2,
+                2020,
+                "123",
+                "John Q Public",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "1234",
+                null,
+                null,
+                null,
+                null
+                );
+        assertEquals("1234", card.getLast4());
+    }
+
+    @Test
+    public void getBrand_whenNumberIsNullButBrandIsSet_returnsCorrectValue() {
+        Card card = new Card(
+                null,
+                2,
+                2020,
+                "123",
+                "John Q Public",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Card.AMERICAN_EXPRESS,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+        assertEquals(Card.AMERICAN_EXPRESS, card.getType());
+    }
 }
 
