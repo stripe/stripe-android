@@ -296,6 +296,7 @@ public class Stripe {
                 stripeCard.getAddressState(),
                 stripeCard.getAddressZip(),
                 stripeCard.getAddressCountry(),
+                stripeCard.getBrand(),
                 stripeCard.getLast4(),
                 stripeCard.getFunding(),
                 stripeCard.getFingerprint(),

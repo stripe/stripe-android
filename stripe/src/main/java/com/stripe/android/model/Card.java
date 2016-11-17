@@ -103,6 +103,7 @@ public class Card extends com.stripe.model.StripeObject {
         private String addressState;
         private String addressZip;
         private String addressCountry;
+        private @CardType String brand;
         private @Size(4) String last4;
         private String fingerprint;
         private @FundingType String fundingType;
@@ -173,6 +174,11 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
+        public Builder brand(@CardType String brand) {
+            this.brand = brand;
+            return this;
+        }
+
         public Builder fundingType(@FundingType String fundingType) {
             this.fundingType = fundingType;
             return this;
@@ -212,6 +218,7 @@ public class Card extends com.stripe.model.StripeObject {
      * @param addressState state of the billing address
      * @param addressZip zip code of the billing address
      * @param addressCountry country for the billing address
+     * @param brand brand of this card
      * @param last4 last 4 digits of the card
      * @param fundingType the funding type of this card
      * @param fingerprint the card fingerprint
@@ -230,6 +237,7 @@ public class Card extends com.stripe.model.StripeObject {
             String addressState,
             String addressZip,
             String addressCountry,
+            String brand,
             @Size(4) String last4,
             String fundingType,
             String fingerprint,
@@ -246,13 +254,11 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressState = StripeTextUtils.nullIfBlank(addressState);
         this.addressZip = StripeTextUtils.nullIfBlank(addressZip);
         this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
-        this.last4 = StripeTextUtils.nullIfBlank(last4);
-        this.brand = StripeTextUtils.isBlank(brand) ? null : brand;
+        this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
+        this.brand = StripeTextUtils.asCardType(brand) == null ? getBrand() : brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
         this.fundingType = StripeTextUtils.asFundingType(fundingType);
         this.country = StripeTextUtils.nullIfBlank(country);
-        this.brand = getBrand();
-        this.last4 = getLast4();
         this.currency = StripeTextUtils.nullIfBlank(currency);
     }
 
@@ -301,6 +307,7 @@ public class Card extends com.stripe.model.StripeObject {
                 null,
                 null,
                 null,
+                null,
                 currency);
     }
 
@@ -322,6 +329,7 @@ public class Card extends com.stripe.model.StripeObject {
                 expMonth,
                 expYear,
                 cvc,
+                null,
                 null,
                 null,
                 null,
@@ -711,12 +719,15 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressState = StripeTextUtils.nullIfBlank(builder.addressState);
         this.addressZip = StripeTextUtils.nullIfBlank(builder.addressZip);
         this.addressCountry = StripeTextUtils.nullIfBlank(builder.addressCountry);
-        this.last4 = StripeTextUtils.nullIfBlank(builder.last4);
+        this.last4 = StripeTextUtils.nullIfBlank(builder.last4) == null
+                ? getLast4()
+                : builder.last4;
+        this.brand = StripeTextUtils.asCardType(builder.brand) == null
+                ? getBrand()
+                : builder.brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
         this.fundingType = StripeTextUtils.asFundingType(builder.fundingType);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
-        this.brand = getBrand();
-        this.last4 = getLast4();
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
     }
 
