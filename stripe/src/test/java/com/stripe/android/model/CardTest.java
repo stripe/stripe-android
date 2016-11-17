@@ -46,37 +46,37 @@ public class CardTest {
     @Test
     public void testTypeReturnsCorrectlyForAmexCard() {
         Card card = new Card("3412123412341234", null, null, null);
-        assertEquals(Card.AMERICAN_EXPRESS, card.getType());
+        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForDiscoverCard() {
         Card card = new Card("6452123412341234", null, null, null);
-        assertEquals(Card.DISCOVER, card.getType());
+        assertEquals(Card.DISCOVER, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForJCBCard() {
         Card card = new Card("3512123412341234", null, null, null);
-        assertEquals(Card.JCB, card.getType());
+        assertEquals(Card.JCB, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForDinersClubCard() {
         Card card = new Card("3612123412341234", null, null, null);
-        assertEquals(Card.DINERS_CLUB, card.getType());
+        assertEquals(Card.DINERS_CLUB, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForVisaCard() {
         Card card = new Card("4112123412341234", null, null, null);
-        assertEquals(Card.VISA, card.getType());
+        assertEquals(Card.VISA, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForMasterCard() {
         Card card = new Card("5112123412341234", null, null, null);
-        assertEquals(Card.MASTERCARD, card.getType());
+        assertEquals(Card.MASTERCARD, card.getBrand());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class CardTest {
     @Test
     public void shouldPassValidateNumberIfLuhnNumberAmex() {
         Card card = new Card("378282246310005", null, null, null);
-        assertEquals(Card.AMERICAN_EXPRESS, card.getType());
+        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
         assertTrue(card.validateNumber());
     }
 
@@ -131,7 +131,7 @@ public class CardTest {
     @Test
     public void shouldFailValidateNumberIfTooLong() {
         Card card = new Card("4242 4242 4242 4242 6", null, null, null);
-        assertEquals(Card.VISA, card.getType());
+        assertEquals(Card.VISA, card.getBrand());
         assertFalse(card.validateNumber());
     }
 

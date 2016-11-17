@@ -1,13 +1,33 @@
 package com.stripe.android.model;
 
+import android.support.annotation.IntRange;
+import android.support.annotation.Size;
+import android.support.annotation.StringDef;
+import android.text.TextUtils;
+
 import com.stripe.android.util.DateUtils;
-import com.stripe.android.util.TextUtils;
+import com.stripe.android.util.StripeTextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A model object representing a Card in the Android SDK. Note that this is slightly different
  * from the Card model in stripe-java.
  */
 public class Card extends com.stripe.model.StripeObject {
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            AMERICAN_EXPRESS,
+            DISCOVER,
+            JCB,
+            DINERS_CLUB,
+            VISA,
+            MASTERCARD,
+            UNKNOWN
+    })
+    public @interface CardType { }
     public static final String AMERICAN_EXPRESS = "American Express";
     public static final String DISCOVER = "Discover";
     public static final String JCB = "JCB";
@@ -15,6 +35,19 @@ public class Card extends com.stripe.model.StripeObject {
     public static final String VISA = "Visa";
     public static final String MASTERCARD = "MasterCard";
     public static final String UNKNOWN = "Unknown";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            FUNDING_CREDIT,
+            FUNDING_DEBIT,
+            FUNDING_PREPAID,
+            FUNDING_UNKNOWN
+    })
+    public @interface FundingType { }
+    public static final String FUNDING_CREDIT = "credit";
+    public static final String FUNDING_DEBIT = "debit";
+    public static final String FUNDING_PREPAID = "prepaid";
+    public static final String FUNDING_UNKNOWN = "unknown";
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
@@ -46,12 +79,16 @@ public class Card extends com.stripe.model.StripeObject {
     private String addressState;
     private String addressZip;
     private String addressCountry;
-    private String last4;
-    private String type;
+    @Size(4) private String last4;
+    @CardType private String brand;
+    @FundingType private String fundingType;
     private String fingerprint;
     private String country;
     private String currency;
 
+    /**
+     * Builder class for a {@link Card} model.
+     */
     public static class Builder {
         private final String number;
         private final String cvc;
@@ -64,13 +101,25 @@ public class Card extends com.stripe.model.StripeObject {
         private String addressState;
         private String addressZip;
         private String addressCountry;
-        private String last4;
-        private String type;
+        private @Size(4) String last4;
         private String fingerprint;
+        private @FundingType String fundingType;
         private String country;
         private String currency;
 
-        public Builder(String number, Integer expMonth, Integer expYear, String cvc) {
+        /**
+         * Constructor with most common {@link Card} fields.
+         *
+         * @param number the credit card number
+         * @param expMonth the expiry month, as an integer value between 1 and 12
+         * @param expYear the expiry year
+         * @param cvc the card CVC number
+         */
+        public Builder(
+                String number,
+                @IntRange(from = 1, to = 12) Integer expMonth,
+                @IntRange(from = 0) Integer expYear,
+                String cvc) {
             this.number = number;
             this.expMonth = expMonth;
             this.expYear = expYear;
@@ -117,13 +166,13 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
-        public Builder type(String type) {
-            this.type = type;
+        public Builder fingerprint(String fingerprint) {
+            this.fingerprint = fingerprint;
             return this;
         }
 
-        public Builder fingerprint(String fingerprint) {
-            this.fingerprint = fingerprint;
+        public Builder fundingType(@FundingType String fundingType) {
+            this.fundingType = fundingType;
             return this;
         }
 
@@ -138,54 +187,86 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
+        /**
+         * Generate a new {@link Card} object based on the arguments held by this Builder.
+         * @return
+         */
         public Card build() {
             return new Card(this);
         }
     }
 
-    private Card(Builder builder) {
-        this.number = TextUtils.nullIfBlank(normalizeCardNumber(builder.number));
-        this.expMonth = builder.expMonth;
-        this.expYear = builder.expYear;
-        this.cvc = TextUtils.nullIfBlank(builder.cvc);
-        this.name = TextUtils.nullIfBlank(builder.name);
-        this.addressLine1 = TextUtils.nullIfBlank(builder.addressLine1);
-        this.addressLine2 = TextUtils.nullIfBlank(builder.addressLine2);
-        this.addressCity = TextUtils.nullIfBlank(builder.addressCity);
-        this.addressState = TextUtils.nullIfBlank(builder.addressState);
-        this.addressZip = TextUtils.nullIfBlank(builder.addressZip);
-        this.addressCountry = TextUtils.nullIfBlank(builder.addressCountry);
-        this.last4 = TextUtils.nullIfBlank(builder.last4);
-        this.type = TextUtils.nullIfBlank(builder.type);
-        this.fingerprint = TextUtils.nullIfBlank(builder.fingerprint);
-        this.country = TextUtils.nullIfBlank(builder.country);
-        this.type = getType();
-        this.last4 = getLast4();
-        this.currency = TextUtils.nullIfBlank(builder.currency);
-    }
-
-    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity,
-                String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
-        this.number = TextUtils.nullIfBlank(normalizeCardNumber(number));
+    /**
+     * Card constructor with all available fields.
+     *
+     * @param number the credit card number
+     * @param expMonth the expiry month
+     * @param expYear the expiry year
+     * @param cvc the CVC number
+     * @param name the card name
+     * @param addressLine1 first line of the billing address
+     * @param addressLine2 second line of the billing address
+     * @param addressCity city of the billing address
+     * @param addressState state of the billing address
+     * @param addressZip zip code of the billing address
+     * @param addressCountry country for the billing address
+     * @param last4 last 4 digits of the card
+     * @param fingerprint the card fingerprint
+     * @param country ISO country code of the card itself
+     * @param currency currency used by the card
+     */
+    public Card(
+            String number,
+            Integer expMonth,
+            Integer expYear,
+            String cvc,
+            String name,
+            String addressLine1,
+            String addressLine2,
+            String addressCity,
+            String addressState,
+            String addressZip,
+            String addressCountry,
+            @Size(4) String last4,
+            String fingerprint,
+            String country,
+            String currency) {
+        this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
-        this.cvc = TextUtils.nullIfBlank(cvc);
-        this.name = TextUtils.nullIfBlank(name);
-        this.addressLine1 = TextUtils.nullIfBlank(addressLine1);
-        this.addressLine2 = TextUtils.nullIfBlank(addressLine2);
-        this.addressCity = TextUtils.nullIfBlank(addressCity);
-        this.addressState = TextUtils.nullIfBlank(addressState);
-        this.addressZip = TextUtils.nullIfBlank(addressZip);
-        this.addressCountry = TextUtils.nullIfBlank(addressCountry);
-        this.last4 = TextUtils.nullIfBlank(last4);
-        this.type = TextUtils.nullIfBlank(type);
-        this.fingerprint = TextUtils.nullIfBlank(fingerprint);
-        this.country = TextUtils.nullIfBlank(country);
-        this.type = getType();
+        this.cvc = StripeTextUtils.nullIfBlank(cvc);
+        this.name = StripeTextUtils.nullIfBlank(name);
+        this.addressLine1 = StripeTextUtils.nullIfBlank(addressLine1);
+        this.addressLine2 = StripeTextUtils.nullIfBlank(addressLine2);
+        this.addressCity = StripeTextUtils.nullIfBlank(addressCity);
+        this.addressState = StripeTextUtils.nullIfBlank(addressState);
+        this.addressZip = StripeTextUtils.nullIfBlank(addressZip);
+        this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
+        this.last4 = StripeTextUtils.nullIfBlank(last4);
+        this.brand = StripeTextUtils.isBlank(brand) ? null : brand;
+        this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
+        this.country = StripeTextUtils.nullIfBlank(country);
+        this.brand = getBrand();
         this.last4 = getLast4();
-        this.currency = TextUtils.nullIfBlank(currency);
+        this.currency = StripeTextUtils.nullIfBlank(currency);
     }
 
+    /**
+     * Convenience constructor with address and currency.
+     *
+     * @param number the card number
+     * @param expMonth the expiry month
+     * @param expYear the expiry year
+     * @param cvc the CVC code
+     * @param name the cardholder name
+     * @param addressLine1
+     * @param addressLine2
+     * @param addressCity
+     * @param addressState
+     * @param addressZip
+     * @param addressCountry
+     * @param currency
+     */
     public Card(
             String number,
             Integer expMonth,
@@ -214,7 +295,7 @@ public class Card extends com.stripe.model.StripeObject {
                 null,
                 null,
                 null,
-                null);
+                currency);
     }
 
     public Card(
@@ -259,18 +340,18 @@ public class Card extends com.stripe.model.StripeObject {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateNumber() {
-        if (TextUtils.isBlank(number)) {
+        if (StripeTextUtils.isBlank(number)) {
             return false;
         }
 
         String rawNumber = number.trim().replaceAll("\\s+|-", "");
-        if (TextUtils.isBlank(rawNumber)
-                || !TextUtils.isWholePositiveNumber(rawNumber)
+        if (TextUtils.isEmpty(rawNumber)
+                || !StripeTextUtils.isWholePositiveNumber(rawNumber)
                 || !isValidLuhnNumber(rawNumber)) {
             return false;
         }
 
-        String updatedType = getType();
+        String updatedType = getBrand();
         if (AMERICAN_EXPRESS.equals(updatedType)) {
             return rawNumber.length() == MAX_LENGTH_AMERICAN_EXPRESS;
         } else if (DINERS_CLUB.equals(updatedType)) {
@@ -302,17 +383,17 @@ public class Card extends com.stripe.model.StripeObject {
      * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean validateCVC() {
-        if (TextUtils.isBlank(cvc)) {
+        if (StripeTextUtils.isBlank(cvc)) {
             return false;
         }
         String cvcValue = cvc.trim();
 
-        String updatedType = getType();
+        String updatedType = getBrand();
         boolean validLength = ((updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
                 (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4) ||
                 (!AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 3));
 
-        return TextUtils.isWholePositiveNumber(cvcValue) && validLength;
+        return StripeTextUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
 
     /**
@@ -333,45 +414,19 @@ public class Card extends com.stripe.model.StripeObject {
         return expYear != null && !DateUtils.hasYearPassed(expYear);
     }
 
-    private boolean isValidLuhnNumber(String number) {
-        boolean isOdd = true;
-        int sum = 0;
-
-        for (int index = number.length() - 1; index >= 0; index--) {
-            char c = number.charAt(index);
-            if (!Character.isDigit(c)) {
-                return false;
-            }
-            int digitInteger = Integer.parseInt("" + c);
-            isOdd = !isOdd;
-
-            if (isOdd) {
-                digitInteger *= 2;
-            }
-
-            if (digitInteger > 9) {
-                digitInteger -= 9;
-            }
-
-            sum += digitInteger;
-        }
-
-        return sum % 10 == 0;
-    }
-
-    private String normalizeCardNumber(String number) {
-        if (number == null) {
-            return null;
-        }
-        return number.trim().replaceAll("\\s+|-", "");
-    }
-
     public String getNumber() {
         return number;
     }
 
+    /**
+     * Setter for the card number. Note that mutating the number of this card object
+     * invalidates the {@link #brand}.
+     *
+     * @param number the new {@link #number}
+     */
     public void setNumber(String number) {
         this.number = number;
+        this.brand = null;
     }
 
     public String getCVC() {
@@ -401,6 +456,7 @@ public class Card extends com.stripe.model.StripeObject {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -462,35 +518,40 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     public String getLast4() {
-        if (!TextUtils.isBlank(last4)) {
+        if (!StripeTextUtils.isBlank(last4)) {
             return last4;
         }
+
         if (number != null && number.length() > 4) {
-            return number.substring(number.length() - 4, number.length());
+            last4 = number.substring(number.length() - 4, number.length());
+            return last4;
         }
+
         return null;
     }
 
-    public String getType() {
-        if (TextUtils.isBlank(type) && !TextUtils.isBlank(number)) {
-            if (TextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
-                return AMERICAN_EXPRESS;
-            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
-                return DISCOVER;
-            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_JCB)) {
-                return JCB;
-            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_DINERS_CLUB)) {
-                return DINERS_CLUB;
-            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_VISA)) {
-                return VISA;
-            } else if (TextUtils.hasAnyPrefix(number, PREFIXES_MASTERCARD)) {
-                return MASTERCARD;
+    public @CardType String getBrand() {
+        if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
+            @CardType String evaluatedType = null;
+            if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
+                evaluatedType = AMERICAN_EXPRESS;
+            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
+                evaluatedType = DISCOVER;
+            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_JCB)) {
+                evaluatedType = JCB;
+            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DINERS_CLUB)) {
+                evaluatedType = DINERS_CLUB;
+            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_VISA)) {
+                evaluatedType = VISA;
+            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_MASTERCARD)) {
+                evaluatedType = MASTERCARD;
             } else {
-                return UNKNOWN;
+                evaluatedType = UNKNOWN;
             }
+            brand = evaluatedType;
         }
 
-        return type;
+        return brand;
     }
 
     public String getFingerprint() {
@@ -500,4 +561,59 @@ public class Card extends com.stripe.model.StripeObject {
     public String getCountry() {
         return country;
     }
+
+    private Card(Builder builder) {
+        this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
+        this.expMonth = builder.expMonth;
+        this.expYear = builder.expYear;
+        this.cvc = StripeTextUtils.nullIfBlank(builder.cvc);
+        this.name = StripeTextUtils.nullIfBlank(builder.name);
+        this.addressLine1 = StripeTextUtils.nullIfBlank(builder.addressLine1);
+        this.addressLine2 = StripeTextUtils.nullIfBlank(builder.addressLine2);
+        this.addressCity = StripeTextUtils.nullIfBlank(builder.addressCity);
+        this.addressState = StripeTextUtils.nullIfBlank(builder.addressState);
+        this.addressZip = StripeTextUtils.nullIfBlank(builder.addressZip);
+        this.addressCountry = StripeTextUtils.nullIfBlank(builder.addressCountry);
+        this.last4 = StripeTextUtils.nullIfBlank(builder.last4);
+        this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
+        this.fundingType = StripeTextUtils.asFundingType(builder.fundingType);
+        this.country = StripeTextUtils.nullIfBlank(builder.country);
+        this.brand = getBrand();
+        this.last4 = getLast4();
+        this.currency = StripeTextUtils.nullIfBlank(builder.currency);
+    }
+
+    private boolean isValidLuhnNumber(String number) {
+        boolean isOdd = true;
+        int sum = 0;
+
+        for (int index = number.length() - 1; index >= 0; index--) {
+            char c = number.charAt(index);
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+            int digitInteger = Integer.parseInt("" + c);
+            isOdd = !isOdd;
+
+            if (isOdd) {
+                digitInteger *= 2;
+            }
+
+            if (digitInteger > 9) {
+                digitInteger -= 9;
+            }
+
+            sum += digitInteger;
+        }
+
+        return sum % 10 == 0;
+    }
+
+    private String normalizeCardNumber(String number) {
+        if (number == null) {
+            return null;
+        }
+        return number.trim().replaceAll("\\s+|-", "");
+    }
+
 }
