@@ -78,10 +78,10 @@ public class PaymentFormFragment extends Fragment implements PaymentForm {
     }
 
     private Integer getInteger(Spinner spinner) {
-        try {
-            return Integer.parseInt(spinner.getSelectedItem().toString());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+    	try {
+    		return Integer.parseInt(spinner.getSelectedItem().toString());
+    	} catch (NumberFormatException e) {
+    		return 0;
+    	}
     }
 }
