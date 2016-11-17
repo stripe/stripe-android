@@ -259,13 +259,13 @@ public class Card extends com.stripe.model.StripeObject {
      * @param expYear the expiry year
      * @param cvc the CVC code
      * @param name the cardholder name
-     * @param addressLine1
-     * @param addressLine2
-     * @param addressCity
-     * @param addressState
-     * @param addressZip
-     * @param addressCountry
-     * @param currency
+     * @param addressLine1 the first line of the billing address
+     * @param addressLine2 the second line of the billing address
+     * @param addressCity the city of the billing address
+     * @param addressState the state of the billing address
+     * @param addressZip the zip code of the billing address
+     * @param addressCountry the country of the billing address
+     * @param currency the currency of the card
      */
     public Card(
             String number,
@@ -298,6 +298,14 @@ public class Card extends com.stripe.model.StripeObject {
                 currency);
     }
 
+    /**
+     * Convenience constructor for a Card object with a minimum number of inputs.
+     *
+     * @param number the card number
+     * @param expMonth the expiry month
+     * @param expYear the expiry year
+     * @param cvc the CVC code
+     */
     public Card(
             String number,
             Integer expMonth,
@@ -429,6 +437,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.brand = null;
     }
 
+    /**
+     * @return
+     */
     public String getCVC() {
         return cvc;
     }
@@ -437,6 +448,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.cvc = cvc;
     }
 
+    /**
+     * @return
+     */
     public Integer getExpMonth() {
         return expMonth;
     }
@@ -445,6 +459,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.expMonth = expMonth;
     }
 
+    /**
+     * @return
+     */
     public Integer getExpYear() {
         return expYear;
     }
@@ -453,6 +470,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.expYear = expYear;
     }
 
+    /**
+     * @return
+     */
     public String getName() {
         return name;
     }
@@ -461,6 +481,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.name = name;
     }
 
+    /**
+     * @return
+     */
     public String getAddressLine1() {
         return addressLine1;
     }
@@ -469,6 +492,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressLine1 = addressLine1;
     }
 
+    /**
+     * @return
+     */
     public String getAddressLine2() {
         return addressLine2;
     }
@@ -477,6 +503,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressLine2 = addressLine2;
     }
 
+    /**
+     * @return
+     */
     public String getAddressCity() {
         return addressCity;
     }
@@ -485,6 +514,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressCity = addressCity;
     }
 
+    /**
+     * @return
+     */
     public String getAddressZip() {
         return addressZip;
     }
@@ -493,6 +525,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressZip = addressZip;
     }
 
+    /**
+     * @return
+     */
     public String getAddressState() {
         return addressState;
     }
@@ -501,6 +536,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressState = addressState;
     }
 
+    /**
+     * @return
+     */
     public String getAddressCountry() {
         return addressCountry;
     }
@@ -509,6 +547,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressCountry = addressCountry;
     }
 
+    /**
+     * @return
+     */
     public String getCurrency() {
         return currency;
     }
@@ -517,6 +558,9 @@ public class Card extends com.stripe.model.StripeObject {
         this.currency = currency;
     }
 
+    /**
+     * @return
+     */
     public String getLast4() {
         if (!StripeTextUtils.isBlank(last4)) {
             return last4;
@@ -530,6 +574,9 @@ public class Card extends com.stripe.model.StripeObject {
         return null;
     }
 
+    /**
+     * @return
+     */
     public @CardType String getBrand() {
         if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
             @CardType String evaluatedType = null;
@@ -554,10 +601,16 @@ public class Card extends com.stripe.model.StripeObject {
         return brand;
     }
 
+    /**
+     * @return
+     */
     public String getFingerprint() {
         return fingerprint;
     }
 
+    /**
+     * @return
+     */
     public String getCountry() {
         return country;
     }
