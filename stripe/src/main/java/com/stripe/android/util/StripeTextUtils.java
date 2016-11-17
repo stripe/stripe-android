@@ -5,6 +5,9 @@ import android.text.TextUtils;
 
 import com.stripe.android.model.Card;
 
+import static com.stripe.android.model.Card.CardType;
+import static com.stripe.android.model.Card.FundingType;
+
 /**
  * Utility class for common text-related operations on Stripe data coming from the server.
  */
@@ -69,8 +72,14 @@ public class StripeTextUtils {
         return value == null || value.trim().length() == 0;
     }
 
+    /**
+     * Converts an unchecked String value to a {@link CardType} or {@code null}.
+     *
+     * @param possibleCardType a String that might match a {@link CardType} or be empty.
+     * @return {@code null} if the input is blank, else the appropriate {@link CardType}.
+     */
     @Nullable
-    @Card.CardType
+    @CardType
     public static String asCardType(@Nullable String possibleCardType) {
         if (isBlank(possibleCardType)) {
             return null;
@@ -93,8 +102,14 @@ public class StripeTextUtils {
         }
     }
 
+    /**
+     * Converts an unchecked String value to a {@link FundingType} or {@code null}.
+     *
+     * @param possibleFundingType a String that might match a {@link FundingType} or be empty
+     * @return {@code null} if the input is blank, else the appropriate {@link FundingType}
+     */
     @Nullable
-    @Card.FundingType
+    @FundingType
     public static String asFundingType(@Nullable String possibleFundingType) {
         if (isBlank(possibleFundingType)) {
             return null;

@@ -1,6 +1,8 @@
 package com.stripe.android.model;
 
+import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
+import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 import android.text.TextUtils;
@@ -211,6 +213,7 @@ public class Card extends com.stripe.model.StripeObject {
      * @param addressZip zip code of the billing address
      * @param addressCountry country for the billing address
      * @param last4 last 4 digits of the card
+     * @param fundingType the funding type of this card
      * @param fingerprint the card fingerprint
      * @param country ISO country code of the card itself
      * @param currency currency used by the card
@@ -228,6 +231,7 @@ public class Card extends com.stripe.model.StripeObject {
             String addressZip,
             String addressCountry,
             @Size(4) String last4,
+            String fundingType,
             String fingerprint,
             String country,
             String currency) {
@@ -245,6 +249,7 @@ public class Card extends com.stripe.model.StripeObject {
         this.last4 = StripeTextUtils.nullIfBlank(last4);
         this.brand = StripeTextUtils.isBlank(brand) ? null : brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
+        this.fundingType = StripeTextUtils.asFundingType(fundingType);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.brand = getBrand();
         this.last4 = getLast4();
@@ -295,6 +300,7 @@ public class Card extends com.stripe.model.StripeObject {
                 null,
                 null,
                 null,
+                null,
                 currency);
     }
 
@@ -316,6 +322,7 @@ public class Card extends com.stripe.model.StripeObject {
                 expMonth,
                 expYear,
                 cvc,
+                null,
                 null,
                 null,
                 null,
@@ -422,144 +429,196 @@ public class Card extends com.stripe.model.StripeObject {
         return expYear != null && !DateUtils.hasYearPassed(expYear);
     }
 
+    /**
+     * @return the {@link #number} of this card
+     */
     public String getNumber() {
         return number;
     }
 
     /**
      * Setter for the card number. Note that mutating the number of this card object
-     * invalidates the {@link #brand}.
+     * invalidates the {@link #brand} and {@link #last4}.
      *
      * @param number the new {@link #number}
      */
+    @Deprecated
     public void setNumber(String number) {
         this.number = number;
         this.brand = null;
+        this.last4 = null;
     }
 
     /**
-     * @return
+     * @return the {@link #cvc} for this card
      */
     public String getCVC() {
         return cvc;
     }
 
+    /**
+     * @param cvc the new {@link #cvc} code for this card
+     */
+    @Deprecated
     public void setCVC(String cvc) {
         this.cvc = cvc;
     }
 
     /**
-     * @return
+     * @return the {@link #expMonth} for this card
      */
+    @Nullable
+    @IntRange(from = 1, to = 12)
     public Integer getExpMonth() {
         return expMonth;
     }
 
-    public void setExpMonth(Integer expMonth) {
+    /**
+     * @param expMonth sets the {@link #expMonth} for this card
+     */
+    @Deprecated
+    public void setExpMonth(@Nullable @IntRange(from = 1, to = 12) Integer expMonth) {
         this.expMonth = expMonth;
     }
 
     /**
-     * @return
+     * @return the {@link #expYear} for this card
      */
     public Integer getExpYear() {
         return expYear;
     }
 
+    /**
+     * @param expYear sets the {@link #expYear} for this card
+     */
+    @Deprecated
     public void setExpYear(Integer expYear) {
         this.expYear = expYear;
     }
 
     /**
-     * @return
+     * @return the cardholder {@link #name} for this card
      */
     public String getName() {
         return name;
     }
 
+    /**
+     * @param name sets the cardholder {@link #name} for this card
+     */
+    @Deprecated
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @return
+     * @return the {@link #addressLine1} of this card
      */
     public String getAddressLine1() {
         return addressLine1;
     }
 
+    /**
+     * @param addressLine1 sets the {@link #addressLine1} for this card
+     */
+    @Deprecated
     public void setAddressLine1(String addressLine1) {
         this.addressLine1 = addressLine1;
     }
 
     /**
-     * @return
+     * @return the {@link #addressLine2} of this card
      */
     public String getAddressLine2() {
         return addressLine2;
     }
 
+    /**
+     * @param addressLine2 sets the {@link #addressLine2} for this card
+     */
+    @Deprecated
     public void setAddressLine2(String addressLine2) {
         this.addressLine2 = addressLine2;
     }
 
     /**
-     * @return
+     * @return the {@link #addressCity} for this card
      */
     public String getAddressCity() {
         return addressCity;
     }
 
+    /**
+     * @param addressCity sets the {@link #addressCity} for this card
+     */
+    @Deprecated
     public void setAddressCity(String addressCity) {
         this.addressCity = addressCity;
     }
 
     /**
-     * @return
+     * @return the {@link #addressZip} of this card
      */
     public String getAddressZip() {
         return addressZip;
     }
 
+    /**
+     * @param addressZip sets the {@link #addressZip} for this card
+     */
+    @Deprecated
     public void setAddressZip(String addressZip) {
         this.addressZip = addressZip;
     }
 
     /**
-     * @return
+     * @return the {@link #addressState} of this card
      */
     public String getAddressState() {
         return addressState;
     }
 
+    /**
+     * @param addressState sets the {@link #addressState} for this card
+     */
+    @Deprecated
     public void setAddressState(String addressState) {
         this.addressState = addressState;
     }
 
     /**
-     * @return
+     * @return the {@link #addressCountry} of this card
      */
     public String getAddressCountry() {
         return addressCountry;
     }
 
+    /**
+     * @param addressCountry sets the {@link #addressCountry} for this card
+     */
+    @Deprecated
     public void setAddressCountry(String addressCountry) {
         this.addressCountry = addressCountry;
     }
 
     /**
-     * @return
+     * @return the {@link #currency} of this card. Only supported for Managed accounts.
      */
     public String getCurrency() {
         return currency;
     }
 
+    /**
+     * @param currency sets the {@link #currency} of this card. Only supported for Managed accounts.
+     */
+    @Deprecated
     public void setCurrency(String currency) {
         this.currency = currency;
     }
 
     /**
-     * @return
+     * @return the {@link #last4} digits of this card. Sets the value based on the {@link #number}
+     * if it has not already been set.
      */
     public String getLast4() {
         if (!StripeTextUtils.isBlank(last4)) {
@@ -575,11 +634,27 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     /**
+     * Gets the {@link #brand} of this card, changed from the "type" field. Use {@link #getBrand()}
+     * instead.
+     *
      * @return
      */
-    public @CardType String getBrand() {
+    @Deprecated
+    @CardType
+    public String getType() {
+        return getBrand();
+    }
+
+    /**
+     * Gets the {@link #brand} of this card. Updates the value if none has yet been set, or
+     * if the {@link #number} has been changed.
+     *
+     * @return the {@link #brand} of this card
+     */
+    @CardType
+    public String getBrand() {
         if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
-            @CardType String evaluatedType = null;
+            @CardType String evaluatedType;
             if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
                 evaluatedType = AMERICAN_EXPRESS;
             } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
@@ -602,14 +677,23 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     /**
-     * @return
+     * @return the {@link #fingerprint} of this card
      */
     public String getFingerprint() {
         return fingerprint;
     }
 
     /**
-     * @return
+     * @return the {@link #fundingType} of this card
+     */
+    @Nullable
+    @FundingType
+    public String getFundingType() {
+        return fundingType;
+    }
+
+    /**
+     * @return the {@link #country} of this card
      */
     public String getCountry() {
         return country;
