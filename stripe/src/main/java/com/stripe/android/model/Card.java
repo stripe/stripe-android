@@ -68,8 +68,7 @@ public class Card extends com.stripe.model.StripeObject {
     private String addressZip;
     private String addressCountry;
     @Size(4) private String last4;
-    @CardBrand
-    private String brand;
+    @CardBrand private String brand;
     private String fingerprint;
     private String country;
     private String currency;
@@ -89,8 +88,7 @@ public class Card extends com.stripe.model.StripeObject {
         private String addressState;
         private String addressZip;
         private String addressCountry;
-        private @CardBrand
-        String brand;
+        private @CardBrand String brand;
         private @Size(4) String last4;
         private String fingerprint;
         private String country;
