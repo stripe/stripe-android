@@ -2,13 +2,11 @@ package com.stripe.android;
 
 import android.os.AsyncTask;
 import android.os.Build;
-<<<<<<< HEAD
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
-=======
->>>>>>> master
 
 import java.util.Date;
 import java.util.HashMap;
@@ -331,10 +329,9 @@ public class Stripe {
     }
 
     private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
-        if (executor != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
+        if (executor != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
             task.executeOnExecutor(executor);
-        }
-        else {
+        } else {
             task.execute();
         }
     }
