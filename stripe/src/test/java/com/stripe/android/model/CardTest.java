@@ -356,9 +356,9 @@ public class CardTest {
     }
 
     @Test
-    public void shouldFailValidateCVCIfAmexAndLength3() {
+    public void shouldPassValidateCVCIfAmexAndLength3() {
         Card card = new Card("378282246310005", null, null, "123");
-        assertFalse(card.validateCVC());
+        assertTrue(card.validateCVC());
     }
 
     @Test
@@ -471,7 +471,7 @@ public class CardTest {
 
     @Test
     public void shouldFailValidateCardAmexWithShortCVC() {
-        Card card = new Card("378282246310005", 12, 2050, "123");
+        Card card = new Card("378282246310005", 12, 2050, "12");
         assertFalse(card.validateCard());
         assertTrue(card.validateNumber());
         assertTrue(card.validateExpiryDate());

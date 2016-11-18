@@ -387,11 +387,11 @@ public class Card extends com.stripe.model.StripeObject {
             return false;
         }
         String cvcValue = cvc.trim();
-
         String updatedType = getBrand();
-        boolean validLength = ((updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4) ||
-                (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4) ||
-                (!AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 3));
+        boolean validLength =
+                (updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4)
+                || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
+                || cvcValue.length() == 3;
 
         return StripeTextUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
