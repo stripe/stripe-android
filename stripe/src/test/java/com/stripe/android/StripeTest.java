@@ -251,7 +251,7 @@ public class StripeTest {
         }
     }
 
-    private static class ErrorTokenCallback extends TokenCallback {
+    private static class ErrorTokenCallback implements TokenCallback {
         final Class<?> expectedError;
 
         public ErrorTokenCallback(Class<?> expectedError) {
