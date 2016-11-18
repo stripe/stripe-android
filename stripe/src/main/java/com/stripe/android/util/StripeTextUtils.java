@@ -84,17 +84,17 @@ public class StripeTextUtils {
             return null;
         }
 
-        if (Card.AMERICAN_EXPRESS.equals(possibleCardType)) {
+        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
             return Card.AMERICAN_EXPRESS;
-        } else if (Card.MASTERCARD.equals(possibleCardType)) {
+        } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
             return Card.MASTERCARD;
-        } else if (Card.DINERS_CLUB.equals(possibleCardType)) {
+        } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
             return Card.DINERS_CLUB;
-        } else if (Card.DISCOVER.equals(possibleCardType)) {
+        } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
             return Card.DISCOVER;
-        } else if (Card.JCB.equals(possibleCardType)) {
+        } else if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
             return Card.JCB;
-        } else if (Card.VISA.equals(possibleCardType)) {
+        } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
             return Card.VISA;
         } else {
             return Card.UNKNOWN;

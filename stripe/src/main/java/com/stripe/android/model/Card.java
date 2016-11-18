@@ -232,11 +232,8 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressState = StripeTextUtils.nullIfBlank(addressState);
         this.addressZip = StripeTextUtils.nullIfBlank(addressZip);
         this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
-        this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.brand = StripeTextUtils.asCardBrand(brand) == null ? getBrand() : brand;
-        this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
-        this.country = StripeTextUtils.nullIfBlank(country);
-        this.last4 = StripeTextUtils.nullIfBlank(last4);
+        this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);

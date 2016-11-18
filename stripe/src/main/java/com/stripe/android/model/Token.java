@@ -3,7 +3,7 @@ package com.stripe.android.model;
 import java.util.Date;
 
 /**
- * The model of a Stripe payment token.
+ * The model of a Stripe card token.
  */
 public class Token extends com.stripe.model.StripeObject {
     private final String id;
