@@ -13,6 +13,7 @@
 # Generated files
 bin/
 gen/
+javadoc/
 
 # Gradle files
 .gradle/
