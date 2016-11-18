@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.util.TextUtils;
+import com.stripe.android.util.StripeTextUtils;
 import com.stripe.exception.AuthenticationException;
 import com.stripe.net.RequestOptions;
 
@@ -253,18 +253,18 @@ public class Stripe {
         Map<String, Object> tokenParams = new HashMap<>();
 
         Map<String, Object> cardParams = new HashMap<>();
-        cardParams.put("number", TextUtils.nullIfBlank(card.getNumber()));
-        cardParams.put("cvc", TextUtils.nullIfBlank(card.getCVC()));
+        cardParams.put("number", StripeTextUtils.nullIfBlank(card.getNumber()));
+        cardParams.put("cvc", StripeTextUtils.nullIfBlank(card.getCVC()));
         cardParams.put("exp_month", card.getExpMonth());
         cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", TextUtils.nullIfBlank(card.getName()));
-        cardParams.put("currency", TextUtils.nullIfBlank(card.getCurrency()));
-        cardParams.put("address_line1", TextUtils.nullIfBlank(card.getAddressLine1()));
-        cardParams.put("address_line2", TextUtils.nullIfBlank(card.getAddressLine2()));
-        cardParams.put("address_city", TextUtils.nullIfBlank(card.getAddressCity()));
-        cardParams.put("address_zip", TextUtils.nullIfBlank(card.getAddressZip()));
-        cardParams.put("address_state", TextUtils.nullIfBlank(card.getAddressState()));
-        cardParams.put("address_country", TextUtils.nullIfBlank(card.getAddressCountry()));
+        cardParams.put("name", StripeTextUtils.nullIfBlank(card.getName()));
+        cardParams.put("currency", StripeTextUtils.nullIfBlank(card.getCurrency()));
+        cardParams.put("address_line1", StripeTextUtils.nullIfBlank(card.getAddressLine1()));
+        cardParams.put("address_line2", StripeTextUtils.nullIfBlank(card.getAddressLine2()));
+        cardParams.put("address_city", StripeTextUtils.nullIfBlank(card.getAddressCity()));
+        cardParams.put("address_zip", StripeTextUtils.nullIfBlank(card.getAddressZip()));
+        cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
+        cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
 
         // Remove all null values; they cause validation errors
         for (String key : new HashSet<>(cardParams.keySet())) {
