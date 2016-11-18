@@ -1,6 +1,6 @@
 package com.stripe.android.util;
 
-public class TextUtils {
+public class StripeTextUtils {
     public static boolean hasAnyPrefix(String number, String... prefixes) {
         if (number == null) {
             return false;
