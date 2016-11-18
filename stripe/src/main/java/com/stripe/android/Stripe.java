@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.os.AsyncTask;
 import android.os.Build;
 
 import java.util.Date;
@@ -8,7 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import com.stripe.android.compat.AsyncTask;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.TextUtils;
