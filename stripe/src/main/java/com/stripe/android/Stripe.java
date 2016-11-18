@@ -1,5 +1,7 @@
 package com.stripe.android;
 
+import android.os.Build;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -241,7 +243,7 @@ public class Stripe {
     }
 
     private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
-        if (executor != null)
+        if (executor != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
             task.executeOnExecutor(executor);
         else
             task.execute();
