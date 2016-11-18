@@ -12,6 +12,7 @@ import com.stripe.android.util.StripeTextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+
 /**
  * A model object representing a Card in the Android SDK. Note that this is slightly different
  * from the Card model in stripe-java.
@@ -184,6 +185,7 @@ public class Card extends com.stripe.model.StripeObject {
         }
     }
 
+<<<<<<< HEAD
     /**
      * Card constructor with all available fields.
      *
@@ -221,6 +223,30 @@ public class Card extends com.stripe.model.StripeObject {
             String fingerprint,
             String country,
             String currency) {
+=======
+    private Card(Builder builder) {
+        this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
+        this.expMonth = builder.expMonth;
+        this.expYear = builder.expYear;
+        this.cvc = StripeTextUtils.nullIfBlank(builder.cvc);
+        this.name = StripeTextUtils.nullIfBlank(builder.name);
+        this.addressLine1 = StripeTextUtils.nullIfBlank(builder.addressLine1);
+        this.addressLine2 = StripeTextUtils.nullIfBlank(builder.addressLine2);
+        this.addressCity = StripeTextUtils.nullIfBlank(builder.addressCity);
+        this.addressState = StripeTextUtils.nullIfBlank(builder.addressState);
+        this.addressZip = StripeTextUtils.nullIfBlank(builder.addressZip);
+        this.addressCountry = StripeTextUtils.nullIfBlank(builder.addressCountry);
+        this.last4 = StripeTextUtils.nullIfBlank(builder.last4);
+        this.type = StripeTextUtils.nullIfBlank(builder.type);
+        this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
+        this.country = StripeTextUtils.nullIfBlank(builder.country);
+        this.type = getType();
+        this.last4 = getLast4();
+        this.currency = StripeTextUtils.nullIfBlank(builder.currency);
+    }
+
+    public Card(String number, Integer expMonth, Integer expYear, String cvc, String name, String addressLine1, String addressLine2, String addressCity,
+                String addressState, String addressZip, String addressCountry, String last4, String type, String fingerprint, String country) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
@@ -234,6 +260,10 @@ public class Card extends com.stripe.model.StripeObject {
         this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
         this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.brand = StripeTextUtils.asCardType(brand) == null ? getBrand() : brand;
+        this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
+        this.country = StripeTextUtils.nullIfBlank(country);
+        this.last4 = StripeTextUtils.nullIfBlank(last4);
+        this.type = StripeTextUtils.nullIfBlank(type);
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);
@@ -343,7 +373,7 @@ public class Card extends com.stripe.model.StripeObject {
         }
 
         String rawNumber = number.trim().replaceAll("\\s+|-", "");
-        if (TextUtils.isEmpty(rawNumber)
+        if (StripeTextUtils.isBlank(rawNumber)
                 || !StripeTextUtils.isWholePositiveNumber(rawNumber)
                 || !isValidLuhnNumber(rawNumber)) {
             return false;
@@ -625,6 +655,7 @@ public class Card extends com.stripe.model.StripeObject {
     @Deprecated
     @CardBrand
     public String getType() {
+<<<<<<< HEAD
         return getBrand();
     }
 
