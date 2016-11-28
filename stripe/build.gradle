@@ -37,18 +37,8 @@ android {
     }
 }
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath = configurations.compile
-    classpath += configurations.javadocDeps
-    destinationDir = file("../javadoc/")
-    failOnError false
-}
-
 task wrapper(type: Wrapper) {
     gradleVersion = '3.1'
 }
-// Apply chrisbanes' excellent gradle-mvn-push recipe,
-// which lets us publish the build artifacts to maven
-// without *writing a single line of XML.*
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+
+apply from: 'deploy.gradle'
