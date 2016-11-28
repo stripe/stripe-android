@@ -1,5 +1,8 @@
 package com.stripe.android.util;
 
+import com.stripe.android.Stripe;
+import com.stripe.android.model.Card;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -7,6 +10,7 @@ import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -159,5 +163,51 @@ public class StripeTextUtilsTest {
     @Test
     public void isBlankShouldFailIfLetters() {
         assertFalse(StripeTextUtils.isBlank("abc"));
+    }
+
+    @Test
+    public void asCardBrand_whenBlank_returnsNull() {
+        assertNull(StripeTextUtils.asCardBrand("   "));
+        assertNull(StripeTextUtils.asCardBrand(null));
+    }
+
+    @Test
+    public void asCardBrand_whenNonemptyButWeird_returnsUnknown() {
+        assertEquals(Card.UNKNOWN, StripeTextUtils.asCardBrand("Awesome New Brand"));
+    }
+
+    @Test
+    public void asCardBrand_whenMastercard_returnsMasterCard() {
+        assertEquals(Card.MASTERCARD, StripeTextUtils.asCardBrand("MasterCard"));
+    }
+
+    @Test
+    public void asCardBrand_whenCapitalizedStrangely_stillRecognizesCard() {
+        assertEquals(Card.MASTERCARD, StripeTextUtils.asCardBrand("Mastercard"));
+    }
+
+    @Test
+    public void asCardBrand_whenVisa_returnsVisa() {
+        assertEquals(Card.VISA, StripeTextUtils.asCardBrand("visa"));
+    }
+
+    @Test
+    public void asCardBrand_whenJcb_returnsJcb() {
+        assertEquals(Card.JCB, StripeTextUtils.asCardBrand("Jcb"));
+    }
+
+    @Test
+    public void asCardBrand_whenDiscover_returnsDiscover() {
+        assertEquals(Card.DISCOVER, StripeTextUtils.asCardBrand("Discover"));
+    }
+
+    @Test
+    public void asCardBrand_whenDinersClub_returnsDinersClub() {
+        assertEquals(Card.DINERS_CLUB, StripeTextUtils.asCardBrand("Diners Club"));
+    }
+
+    @Test
+    public void asCardBrand_whenAmericanExpress_returnsAmericanExpress() {
+        assertEquals(Card.AMERICAN_EXPRESS, StripeTextUtils.asCardBrand("American express"));
     }
 }

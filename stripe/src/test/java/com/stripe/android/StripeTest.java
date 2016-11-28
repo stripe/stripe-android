@@ -34,6 +34,7 @@ public class StripeTest {
         public void onSuccess(Token token) {
         }
     };
+
     private static final String DEFAULT_TOKEN_ID = "tok_default";
 
     @Test(expected = AuthenticationException.class)
