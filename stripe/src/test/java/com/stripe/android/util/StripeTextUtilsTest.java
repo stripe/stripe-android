@@ -210,4 +210,39 @@ public class StripeTextUtilsTest {
     public void asCardBrand_whenAmericanExpress_returnsAmericanExpress() {
         assertEquals(Card.AMERICAN_EXPRESS, StripeTextUtils.asCardBrand("American express"));
     }
+
+    @Test
+    public void asFundingType_whenDebit_returnsDebit() {
+        assertEquals(Card.FUNDING_DEBIT, StripeTextUtils.asFundingType("debit"));
+    }
+
+    @Test
+    public void asFundingType_whenCredit_returnsCredit() {
+        assertEquals(Card.FUNDING_CREDIT, StripeTextUtils.asFundingType("credit"));
+    }
+
+    @Test
+    public void asFundingType_whenCreditAndCapitalized_returnsCredit() {
+        assertEquals(Card.FUNDING_CREDIT, StripeTextUtils.asFundingType("Credit"));
+    }
+
+    @Test
+    public void asFundingType_whenNull_returnsNull() {
+        assertNull(StripeTextUtils.asFundingType(null));
+    }
+
+    @Test
+    public void asFundingType_whenBlank_returnsNull() {
+        assertNull(StripeTextUtils.asFundingType("   \t"));
+    }
+
+    @Test
+    public void asFundingType_whenUnknown_returnsUnknown() {
+        assertEquals(Card.FUNDING_UNKNOWN, StripeTextUtils.asFundingType("unknown"));
+    }
+
+    @Test
+    public void asFundingType_whenGobbledegook_returnsUnkown() {
+        assertEquals(Card.FUNDING_UNKNOWN, StripeTextUtils.asFundingType("personal iou"));
+    }
 }

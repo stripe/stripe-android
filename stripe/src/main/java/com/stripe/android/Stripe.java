@@ -300,6 +300,7 @@ public class Stripe {
                 stripeCard.getBrand(),
                 stripeCard.getLast4(),
                 stripeCard.getFingerprint(),
+                stripeCard.getFunding(),
                 stripeCard.getCountry(),
                 stripeCard.getCurrency());
     }
@@ -352,6 +353,7 @@ public class Stripe {
         cardParams.put("address_zip", StripeTextUtils.nullIfBlank(card.getAddressZip()));
         cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
         cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
+        cardParams.put("funding", StripeTextUtils.nullIfBlank(card.getFunding()));
 
         // Remove all null values; they cause validation errors
         for (String key : new HashSet<>(cardParams.keySet())) {
