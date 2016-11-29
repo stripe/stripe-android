@@ -1,27 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="8dp"
+    android:paddingStart="8dp"
+    android:paddingRight="8dp"
+    android:paddingEnd="8dp"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addPayment"
               style="@style/Header" />
 
-    <fragment android:id="@+id/payment_form"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              class="com.stripe.example.fragment.PaymentFormFragment"/>
+    <EditText
+        android:id="@+id/number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TextField"
+        android:hint="@string/cardNumber"
+        android:inputType="numberDecimal"
+        android:nextFocusDown="@+id/expMonth"
+        android:nextFocusRight="@+id/expMonth"
+        android:nextFocusForward="@+id/expMonth" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/expMonth"
+            style="@style/Spinner"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:entries="@array/month_array"
+            android:nextFocusForward="@+id/expYear"/>
+
+        <Spinner
+            android:id="@+id/expYear"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            style="@style/Spinner"
+            android:clickable="true"
+            android:entries="@array/year_array"
+            android:nextFocusForward="@+id/cvc"/>
+
+        <EditText
+            android:id="@+id/cvc"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/cvc"
+            style="@style/TextField"
+            android:nextFocusForward="@+id/currency" />
+
+    </LinearLayout>
+
+    <Spinner
+        android:id="@+id/currency"
+        style="@style/Spinner"
+        android:entries="@array/currency_array"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:nextFocusForward="@+id/save"/>
+
+    <Button
+        android:id="@+id/save"
+        android:text="@string/save"
+        style="@style/Save"/>
 
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
-              android:layout_marginTop="25dp"
+              android:layout_marginTop="12dp"
               style="@style/Header" />
 
-    <fragment android:id="@+id/token_list"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              class="com.stripe.example.fragment.TokenListFragment"/>
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>

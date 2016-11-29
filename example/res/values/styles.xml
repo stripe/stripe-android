@@ -11,7 +11,6 @@
     </style>
 
     <style name="CardNumber" parent="@style/TextField">
-        <item name="android:layout_width">fill_parent</item>
         <item name="android:inputType">numberDecimal</item>
         <item name="android:hint">@string/cardNumber</item>
     </style>
@@ -50,25 +49,6 @@
         <item name="android:textColor">@color/spinnerItem</item>
     </style>
 
-
-    <style name="ExpMonth" parent="@style/Spinner">
-        <item name="android:entries">@array/month_array</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1.0</item>
-    </style>
-
-    <style name="ExpYear" parent="@style/Spinner">
-        <item name="android:entries">@array/year_array</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">0.8</item>
-    </style>
-
-    <style name="Currency" parent="@style/Spinner">
-        <item name="android:entries">@array/currency_array</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1.0</item>
-    </style>
-
     <style name="Header" parent="@android:style/Widget.TextView">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -78,7 +58,6 @@
         <item name="android:paddingLeft">3dp</item>
         <item name="android:textSize">18dp</item>
         <item name="android:textColor">@color/headerText</item>
-        <item name="android:gravity">center_vertical</item>
     </style>
 
 </resources>
