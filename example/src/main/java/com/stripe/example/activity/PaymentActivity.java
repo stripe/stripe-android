@@ -137,7 +137,7 @@ public class PaymentActivity extends AppCompatActivity {
         progressFragment.dismiss();
     }
 
-    public String getCurrency() {
+    private String getCurrency() {
         if (currencySpinner.getSelectedItemPosition() == 0) {
             return null;
         }
