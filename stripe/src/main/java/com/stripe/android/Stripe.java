@@ -268,23 +268,14 @@ public class Stripe {
         this.defaultPublishableKey = publishableKey;
     }
 
-    private void validateKey(@NonNull @Size(min = 1) String publishableKey)
-            throws AuthenticationException {
-        if (publishableKey == null || publishableKey.length() == 0) {
-            throw new AuthenticationException("Invalid Publishable Key: " +
-                    "You must use a valid publishable key to create a token.  " +
-                    "For more info, see https://stripe.com/docs/stripe.js.", null, 0);
-        }
-
-        if (publishableKey.startsWith("sk_")) {
-            throw new AuthenticationException("Invalid Publishable Key: " +
-                    "You are using a secret key to create a token, " +
-                    "instead of the publishable one. For more info, " +
-                    "see https://stripe.com/docs/stripe.js", null, 0);
-        }
-    }
-
-    private Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
+    /**
+     * Converts a stripe-java card model into a {@link Card} model.
+     *
+     * @param stripeCard the server-returned {@link com.stripe.model.Card}.
+     * @return an equivalent {@link Card}.
+     */
+    @VisibleForTesting
+    Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
         return new Card(
                 null,
                 stripeCard.getExpMonth(),
@@ -300,8 +291,25 @@ public class Stripe {
                 stripeCard.getBrand(),
                 stripeCard.getLast4(),
                 stripeCard.getFingerprint(),
+                stripeCard.getFunding(),
                 stripeCard.getCountry(),
                 stripeCard.getCurrency());
+    }
+
+    private void validateKey(@NonNull @Size(min = 1) String publishableKey)
+            throws AuthenticationException {
+        if (publishableKey == null || publishableKey.length() == 0) {
+            throw new AuthenticationException("Invalid Publishable Key: " +
+                    "You must use a valid publishable key to create a token.  " +
+                    "For more info, see https://stripe.com/docs/stripe.js.", null, 0);
+        }
+
+        if (publishableKey.startsWith("sk_")) {
+            throw new AuthenticationException("Invalid Publishable Key: " +
+                    "You are using a secret key to create a token, " +
+                    "instead of the publishable one. For more info, " +
+                    "see https://stripe.com/docs/stripe.js", null, 0);
+        }
     }
 
     private Token androidTokenFromStripeToken(

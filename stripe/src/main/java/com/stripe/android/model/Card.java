@@ -37,6 +37,19 @@ public class Card extends com.stripe.model.StripeObject {
     public static final String MASTERCARD = "MasterCard";
     public static final String UNKNOWN = "Unknown";
 
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            FUNDING_CREDIT,
+            FUNDING_DEBIT,
+            FUNDING_PREPAID,
+            FUNDING_UNKNOWN
+    })
+    public @interface FundingType { }
+    public static final String FUNDING_CREDIT = "credit";
+    public static final String FUNDING_DEBIT = "debit";
+    public static final String FUNDING_PREPAID = "prepaid";
+    public static final String FUNDING_UNKNOWN = "unknown";
+
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
     public static final String[] PREFIXES_DISCOVER = {"60", "62", "64", "65"};
@@ -55,7 +68,6 @@ public class Card extends com.stripe.model.StripeObject {
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
-
     private String number;
     private String cvc;
     private Integer expMonth;
@@ -69,6 +81,7 @@ public class Card extends com.stripe.model.StripeObject {
     private String addressCountry;
     @Size(4) private String last4;
     @CardBrand private String brand;
+    @FundingType private String funding;
     private String fingerprint;
     private String country;
     private String currency;
@@ -89,6 +102,7 @@ public class Card extends com.stripe.model.StripeObject {
         private String addressZip;
         private String addressCountry;
         private @CardBrand String brand;
+        private @FundingType String funding;
         private @Size(4) String last4;
         private String fingerprint;
         private String country;
@@ -148,8 +162,8 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
-        public Builder last4(String last4) {
-            this.last4 = last4;
+        public Builder brand(@CardBrand String brand) {
+            this.brand = brand;
             return this;
         }
 
@@ -158,8 +172,8 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
-        public Builder brand(@CardBrand String brand) {
-            this.brand = brand;
+        public Builder funding(@FundingType String funding) {
+            this.funding = funding;
             return this;
         }
 
@@ -168,9 +182,13 @@ public class Card extends com.stripe.model.StripeObject {
             return this;
         }
 
-        public Builder currency(String currency)
-        {
+        public Builder currency(String currency) {
             this.currency = currency;
+            return this;
+        }
+
+        public Builder last4(String last4) {
+            this.last4 = last4;
             return this;
         }
 
@@ -201,6 +219,7 @@ public class Card extends com.stripe.model.StripeObject {
      * @param brand brand of this card
      * @param last4 last 4 digits of the card
      * @param fingerprint the card fingerprint
+     * @param funding the funding type of the card
      * @param country ISO country code of the card itself
      * @param currency currency used by the card
      */
@@ -219,6 +238,7 @@ public class Card extends com.stripe.model.StripeObject {
             String brand,
             @Size(4) String last4,
             String fingerprint,
+            String funding,
             String country,
             String currency) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
@@ -235,6 +255,7 @@ public class Card extends com.stripe.model.StripeObject {
         this.brand = StripeTextUtils.asCardBrand(brand) == null ? getBrand() : brand;
         this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
+        this.funding = StripeTextUtils.asFundingType(funding);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);
     }
@@ -284,6 +305,7 @@ public class Card extends com.stripe.model.StripeObject {
                 null,
                 null,
                 null,
+                null,
                 currency);
     }
 
@@ -305,6 +327,7 @@ public class Card extends com.stripe.model.StripeObject {
                 expMonth,
                 expYear,
                 cvc,
+                null,
                 null,
                 null,
                 null,
@@ -667,6 +690,15 @@ public class Card extends com.stripe.model.StripeObject {
     }
 
     /**
+     * @return the {@link #funding} type of this card
+     */
+    @Nullable
+    @FundingType
+    public String getFunding() {
+        return funding;
+    }
+
+    /**
      * @return the {@link #country} of this card
      */
     public String getCountry() {
@@ -692,6 +724,7 @@ public class Card extends com.stripe.model.StripeObject {
                 ? getBrand()
                 : builder.brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
+        this.funding = StripeTextUtils.asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
     }
