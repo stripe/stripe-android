@@ -17,7 +17,11 @@ import java.util.concurrent.Executor;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.StripeTextUtils;
+import com.stripe.exception.APIConnectionException;
+import com.stripe.exception.APIException;
 import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
 import com.stripe.net.RequestOptions;
 
 /**
@@ -179,6 +183,44 @@ public class Stripe {
         catch (AuthenticationException e) {
             callback.onError(e);
         }
+    }
+
+    public Token createTokenSynchronous(final Card card)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createTokenSynchronous(card, defaultPublishableKey);
+    }
+
+    public Token createTokenSynchronous(Card card, String publishableKey)
+            throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException {
+        validateKey(publishableKey);
+
+        RequestOptions requestOptions = RequestOptions.builder()
+                .setApiKey(publishableKey).build();
+        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
+                hashMapFromCard(card), requestOptions);
+        com.stripe.model.Card stripeCard = stripeToken.getCard();
+        Card resultCard = androidCardFromStripeCard(stripeCard);
+        return androidTokenFromStripeToken(resultCard, stripeToken);
+//        try {
+//            validateKey(publishableKey);
+//
+//            RequestOptions requestOptions = RequestOptions.builder()
+//                    .setApiKey(publishableKey).build();
+//            com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
+//                    hashMapFromCard(card), requestOptions);
+//            com.stripe.model.Card stripeCard = stripeToken.getCard();
+//            Card resultCard = androidCardFromStripeCard(stripeCard);
+//            return androidTokenFromStripeToken(resultCard, stripeToken);
+////            return new ResponseWrapper(token, null);
+//        } catch (AuthenticationException authenticationException) {
+//            return new ResponseWrapper(null, authenticationException);
+//        } catch (Exception e) {
+//            return new ResponseWrapper(null, e);
+//        }
     }
 
     /**
@@ -372,7 +414,7 @@ public class Stripe {
         return tokenParams;
     }
 
-    private class ResponseWrapper {
+    public class ResponseWrapper {
         public final Token token;
         public final Exception error;
 
