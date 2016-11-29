@@ -68,7 +68,6 @@ public class Card extends com.stripe.model.StripeObject {
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
-
     private String number;
     private String cvc;
     private Integer expMonth;

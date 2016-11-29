@@ -252,6 +252,64 @@ public class StripeTest {
         }
     }
 
+    @Test
+    public void androidCardFromStripeCard_properlyConvertsStandardFields() {
+        Stripe stripe;
+        try {
+            stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
+        } catch (AuthenticationException e) {
+            fail("Unexpected error: " + e.getMessage());
+            return;
+        }
+
+        com.stripe.model.Card stripeCard = new com.stripe.model.Card();
+        final Integer EXP_MONTH = 3;
+        final Integer EXP_YEAR = 2020;
+        final String NAME = "Anita Cardholder";
+        final String ADDR_FIRST_LINE = "123 Burns Street";
+        final String ADDR_SECOND_LINE = "Apartment 456";
+        final String ADDR_STATE = "CA";
+        final String ADDR_CITY = "Eureka";
+        final String ADDR_ZIP = "95501";
+        final String CARD_BRAND = "Visa";
+        final String LAST_FOUR = "6789";
+        final String FINGERPRINT = "abc123";
+        final String FUNDING = "credit";
+        final String COUNTRY = "us";
+        final String CURRENCY = "usd";
+        stripeCard.setExpMonth(EXP_MONTH);
+        stripeCard.setExpYear(EXP_YEAR);
+        stripeCard.setName(NAME);
+        stripeCard.setAddressLine1(ADDR_FIRST_LINE);
+        stripeCard.setAddressLine2(ADDR_SECOND_LINE);
+        stripeCard.setAddressCity(ADDR_CITY);
+        stripeCard.setAddressState(ADDR_STATE);
+        stripeCard.setAddressZip(ADDR_ZIP);
+        stripeCard.setAddressCountry(COUNTRY);
+        stripeCard.setBrand(CARD_BRAND);
+        stripeCard.setLast4(LAST_FOUR);
+        stripeCard.setFingerprint(FINGERPRINT);
+        stripeCard.setFunding(FUNDING);
+        stripeCard.setCurrency(CURRENCY);
+        stripeCard.setCountry(COUNTRY);
+
+        Card androidCard = stripe.androidCardFromStripeCard(stripeCard);
+        assertEquals(EXP_MONTH, androidCard.getExpMonth());
+        assertEquals(EXP_YEAR, androidCard.getExpYear());
+        assertEquals(ADDR_FIRST_LINE, androidCard.getAddressLine1());
+        assertEquals(ADDR_SECOND_LINE, androidCard.getAddressLine2());
+        assertEquals(ADDR_CITY, androidCard.getAddressCity());
+        assertEquals(COUNTRY, androidCard.getCountry());
+        assertEquals(COUNTRY, androidCard.getCountry());
+        assertEquals(ADDR_ZIP, androidCard.getAddressZip());
+        assertEquals(ADDR_STATE, androidCard.getAddressState());
+        assertEquals(CARD_BRAND, androidCard.getBrand());
+        assertEquals(LAST_FOUR, androidCard.getLast4());
+        assertEquals(FINGERPRINT, androidCard.getFingerprint());
+        assertEquals(FUNDING, androidCard.getFunding());
+        assertEquals(CURRENCY, androidCard.getCurrency());
+    }
+
     private static class ErrorTokenCallback implements TokenCallback {
         final Class<?> expectedError;
 

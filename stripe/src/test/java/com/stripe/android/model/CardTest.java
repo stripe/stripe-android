@@ -556,5 +556,6 @@ public class CardTest {
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
         assertEquals(Card.AMERICAN_EXPRESS, card.getType());
     }
+
 }
 
