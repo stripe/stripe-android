@@ -4,19 +4,22 @@
           android:versionCode="1"
           android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="25"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:label="@string/appName" android:icon="@drawable/ic_launcher">
+    <application
+        android:label="@string/appName"
+        android:icon="@drawable/ic_launcher">
 
-        <activity android:name=".activity.PaymentActivity"
-                  android:theme="@style/Theme"
-                  android:screenOrientation="portrait">
+        <activity
+            android:name=".activity.PaymentActivity"
+            android:theme="@style/Theme"
+            android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
 
     </application>
