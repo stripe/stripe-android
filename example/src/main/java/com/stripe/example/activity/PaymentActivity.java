@@ -2,7 +2,7 @@ package com.stripe.example.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-public class PaymentActivity extends FragmentActivity {
+public class PaymentActivity extends AppCompatActivity {
 
     /*
      * Change this to your publishable key.
@@ -36,13 +35,14 @@ public class PaymentActivity extends FragmentActivity {
 
     private ProgressDialogFragment progressFragment;
 
-    private Button saveButton;
+    // Controls for card entry
     private EditText cardNumberEditText;
     private EditText cvcEditText;
     private Spinner monthSpinner;
     private Spinner yearSpinner;
     private Spinner currencySpinner;
 
+    // Fields used to display the returned card tokens
     private ListView listView;
     private SimpleAdapter simpleAdapter;
     private List<Map<String, String>> cardTokens = new ArrayList<Map<String, String>>();
@@ -55,7 +55,7 @@ public class PaymentActivity extends FragmentActivity {
 
         progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
 
-        this.saveButton = (Button) findViewById(R.id.save);
+        Button saveButton = (Button) findViewById(R.id.save);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
