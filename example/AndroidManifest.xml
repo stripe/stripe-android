@@ -12,7 +12,7 @@
 
         <activity
             android:name=".activity.PaymentActivity"
-            android:theme="@style/Theme"
+            android:theme="@style/Theme.AppCompat"
             android:screenOrientation="portrait">
 
             <intent-filter>

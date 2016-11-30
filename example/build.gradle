@@ -6,6 +6,7 @@ repositories {
 
 dependencies {
     compile project(':stripe')
+    compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:support-v4:24.1.1'
 }
 
