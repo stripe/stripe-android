@@ -56,7 +56,8 @@
         <item name="android:layout_marginBottom">5dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:paddingLeft">3dp</item>
-        <item name="android:textSize">18dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/headerText</item>
     </style>
 
