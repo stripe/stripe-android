@@ -209,6 +209,7 @@ public class Stripe {
      * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
+    @Deprecated
     public void requestToken(
             @NonNull final String tokenId,
             @NonNull @Size(min = 1) final String publishableKey,
@@ -227,6 +228,7 @@ public class Stripe {
      * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
+    @Deprecated
     public void requestToken(
             @NonNull final String tokenId,
             @NonNull final Executor executor,
@@ -249,6 +251,7 @@ public class Stripe {
      * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
+    @Deprecated
     public void requestToken(
             @NonNull final String tokenId,
             @NonNull @Size(min = 1) final String publishableKey,
