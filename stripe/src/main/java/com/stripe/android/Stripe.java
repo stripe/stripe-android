@@ -188,7 +188,7 @@ public class Stripe {
      * @param callback a {@link TokenCallback} to receive the result
      *
      * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
     @Deprecated
@@ -206,7 +206,7 @@ public class Stripe {
      * @param callback a {@link TokenCallback} to receive the result
      *
      * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
     public void requestToken(
@@ -224,7 +224,7 @@ public class Stripe {
      * @param callback a {@link TokenCallback} to receive the result
      *
      * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
     public void requestToken(
@@ -246,7 +246,7 @@ public class Stripe {
      * @param callback a {@link TokenCallback} to receive the result
      *
      * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
      * keys should not be included in mobile applications.
      */
     public void requestToken(
