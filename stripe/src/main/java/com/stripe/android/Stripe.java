@@ -186,7 +186,12 @@ public class Stripe {
      *
      * @param tokenId the id of the {@link Token} being requested
      * @param callback a {@link TokenCallback} to receive the result
+     *
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * keys should not be included in mobile applications.
      */
+    @Deprecated
     public void requestToken(
             @NonNull final String tokenId,
             @NonNull final TokenCallback callback) {
@@ -199,6 +204,10 @@ public class Stripe {
      * @param tokenId the id of the {@link Token} being requested
      * @param publishableKey the publishable key used to create this token
      * @param callback a {@link TokenCallback} to receive the result
+     *
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * keys should not be included in mobile applications.
      */
     public void requestToken(
             @NonNull final String tokenId,
@@ -213,6 +222,10 @@ public class Stripe {
      * @param tokenId the id of the {@link Token} being requested
      * @param executor an {@link Executor} on which to run this request
      * @param callback a {@link TokenCallback} to receive the result
+     *
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * keys should not be included in mobile applications.
      */
     public void requestToken(
             @NonNull final String tokenId,
@@ -231,6 +244,10 @@ public class Stripe {
      * @param executor an {@link Executor} on which to run this operation, or {@code null} to run
      *                 on a default background executor
      * @param callback a {@link TokenCallback} to receive the result
+     *
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-11-07. Secret
+     * keys should not be included in mobile applications.
      */
     public void requestToken(
             @NonNull final String tokenId,
