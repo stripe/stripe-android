@@ -55,7 +55,7 @@ public class PaymentActivity extends AppCompatActivity {
     private SimpleAdapter simpleAdapter;
     private List<Map<String, String>> cardTokens = new ArrayList<Map<String, String>>();
 
-    // A CompositeSubscription object to make cleaning up simpler
+    // A CompositeSubscription object to make cleaning up our rx subscriptions simpler
     private CompositeSubscription compositeSubscription;
 
     @Override
@@ -97,7 +97,89 @@ public class PaymentActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void saveCreditCard() {
+    private void addToList(Token token) {
+        String endingIn = getResources().getString(R.string.endingIn);
+        Map<String, String> map = new HashMap<>();
+        map.put("last4", endingIn + " " + token.getCard().getLast4());
+        map.put("tokenId", token.getId());
+        cardTokens.add(map);
+        simpleAdapter.notifyDataSetChanged();
+    }
+
+    private Card createCardToSave() {
+        String cardNumber = cardNumberEditText.getText().toString();
+        String cvc = cvcEditText.getText().toString();
+
+        int expMonth = getIntegerFromSpinner(monthSpinner);
+        int expYear = getIntegerFromSpinner(yearSpinner);
+
+        String currency = getCurrency();
+        Card cardToSave = new Card(cardNumber, expMonth, expYear, cvc);
+        cardToSave.setCurrency(currency);
+        return cardToSave;
+    }
+
+    private boolean validateCard(Card card) {
+        boolean valid = true;
+        if (!card.validateNumber()) {
+            handleError("The card number that you entered is invalid");
+            valid = false;
+        } else if (!card.validateExpiryDate()) {
+            handleError("The expiration date that you entered is invalid");
+            valid = false;
+        } else if (!card.validateCVC()) {
+            handleError("The CVC code that you entered is invalid");
+            valid = false;
+        } else if (!card.validateCard()){
+            handleError("The card details that you entered are invalid");
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    private void finishProgress() {
+        progressFragment.dismiss();
+    }
+
+    private String getCurrency() {
+        if (currencySpinner.getSelectedItemPosition() == 0) {
+            return null;
+        }
+
+        String selected = (String) currencySpinner.getSelectedItem();
+
+        if (selected.equals(CURRENCY_UNSPECIFIED)) {
+            return null;
+        }
+
+        return selected.toLowerCase();
+    }
+
+    private int getIntegerFromSpinner(Spinner spinner) {
+        try {
+            return Integer.parseInt(spinner.getSelectedItem().toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private void handleError(String error) {
+        DialogFragment fragment = ErrorDialogFragment.newInstance(R.string.validationErrors, error);
+        fragment.show(getSupportFragmentManager(), "error");
+    }
+
+    private void initListView() {
+        simpleAdapter = new SimpleAdapter(
+                this,
+                cardTokens,
+                R.layout.list_item_layout,
+                new String[]{"last4", "tokenId"},
+                new int[]{R.id.last4, R.id.tokenId});
+        listView.setAdapter(simpleAdapter);
+    }
+
+    private void saveCreditCard() {
         Card cardToSave = createCardToSave();
 
         if (validateCard(cardToSave)) {
@@ -155,89 +237,7 @@ public class PaymentActivity extends AppCompatActivity {
                         }));
     }
 
-    private void addToList(Token token) {
-        String endingIn = getResources().getString(R.string.endingIn);
-        Map<String, String> map = new HashMap<>();
-        map.put("last4", endingIn + " " + token.getCard().getLast4());
-        map.put("tokenId", token.getId());
-        cardTokens.add(map);
-        simpleAdapter.notifyDataSetChanged();
-    }
-
-    private Card createCardToSave() {
-        String cardNumber = cardNumberEditText.getText().toString();
-        String cvc = cvcEditText.getText().toString();
-
-        int expMonth = getIntegerFromSpinner(monthSpinner);
-        int expYear = getIntegerFromSpinner(yearSpinner);
-
-        String currency = getCurrency();
-        Card cardToSave = new Card(cardNumber, expMonth, expYear, cvc);
-        cardToSave.setCurrency(currency);
-        return cardToSave;
-    }
-
-    private boolean validateCard(Card card) {
-        boolean valid = true;
-        if (!card.validateNumber()) {
-            handleError("The card number that you entered is invalid");
-            valid = false;
-        } else if (!card.validateExpiryDate()) {
-            handleError("The expiration date that you entered is invalid");
-            valid = false;
-        } else if (!card.validateCVC()) {
-            handleError("The CVC code that you entered is invalid");
-            valid = false;
-        } else if (!card.validateCard()){
-            handleError("The card details that you entered are invalid");
-            valid = false;
-        }
-
-        return valid;
-    }
-
     private void startProgress() {
         progressFragment.show(getSupportFragmentManager(), "progress");
-    }
-
-    private void finishProgress() {
-        progressFragment.dismiss();
-    }
-
-    private String getCurrency() {
-        if (currencySpinner.getSelectedItemPosition() == 0) {
-            return null;
-        }
-
-        String selected = (String) currencySpinner.getSelectedItem();
-
-        if (selected.equals(CURRENCY_UNSPECIFIED)) {
-            return null;
-        }
-
-        return selected.toLowerCase();
-    }
-
-    private int getIntegerFromSpinner(Spinner spinner) {
-        try {
-            return Integer.parseInt(spinner.getSelectedItem().toString());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private void handleError(String error) {
-        DialogFragment fragment = ErrorDialogFragment.newInstance(R.string.validationErrors, error);
-        fragment.show(getSupportFragmentManager(), "error");
-    }
-
-    private void initListView() {
-        simpleAdapter = new SimpleAdapter(
-                this,
-                cardTokens,
-                R.layout.list_item_layout,
-                new String[]{"last4", "tokenId"},
-                new int[]{R.id.last4, R.id.tokenId});
-        listView.setAdapter(simpleAdapter);
     }
 }
