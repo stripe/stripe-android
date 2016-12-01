@@ -95,6 +95,9 @@ public class PaymentActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (compositeSubscription != null) {
+            compositeSubscription.unsubscribe();
+        }
     }
 
     private void addToList(Token token) {
