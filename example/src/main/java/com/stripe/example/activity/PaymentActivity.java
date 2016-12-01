@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -215,7 +216,6 @@ public class PaymentActivity extends AppCompatActivity {
                         new Callable<Token>() {
                             @Override
                             public Token call() throws Exception {
-                                startProgress();
                                 return stripe.createTokenSynchronous(cardToSave, PUBLISHABLE_KEY);
                             }
                         });
@@ -223,19 +223,31 @@ public class PaymentActivity extends AppCompatActivity {
         compositeSubscription.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                startProgress();
+                            }
+                        })
+                .doOnUnsubscribe(
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                finishProgress();
+                            }
+                        })
                 .subscribe(
                         new Action1<Token>() {
                             @Override
                             public void call(Token token) {
                                 addToList(token);
-                                finishProgress();
                             }
                         },
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
                                 handleError(throwable.getLocalizedMessage());
-                                finishProgress();
                             }
                         }));
     }
