@@ -431,9 +431,9 @@ public class Stripe {
         return tokenParams;
     }
 
-    public class ResponseWrapper {
-        public final Token token;
-        public final Exception error;
+    private class ResponseWrapper {
+        final Token token;
+        final Exception error;
 
         private ResponseWrapper(Token token, Exception error) {
             this.error = error;
