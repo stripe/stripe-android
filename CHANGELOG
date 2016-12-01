@@ -1,3 +1,9 @@
+1.1.0 2016-12-01
+    Exposed funding property on Card object
+    Updated getType() to getBrand() to match Stripe API (getType() is still supported)
+    Added synchronous method to create tokens which allows integration with RxJava
+    Updated example application to include RxJava integration example
+    Flattened example project structure for clarity
 1.0.6 2016-11-15
 	Updated to stripe-java 3.2.0
 	Fixed American Express number validation problem
