@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 
+import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
@@ -22,6 +23,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -47,6 +55,8 @@ public class PaymentActivity extends AppCompatActivity {
     private SimpleAdapter simpleAdapter;
     private List<Map<String, String>> cardTokens = new ArrayList<Map<String, String>>();
 
+    // A CompositeSubscription object to make cleaning up our rx subscriptions simpler
+    private CompositeSubscription compositeSubscription;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +73,16 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
 
+        compositeSubscription = new CompositeSubscription();
+        Button saveRxButton = (Button) findViewById(R.id.saverx);
+        compositeSubscription.add(
+                RxView.clicks(saveRxButton).subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        saveCreditCardWithRx();
+                    }
+                }));
+
         this.cardNumberEditText = (EditText) findViewById(R.id.number);
         this.cvcEditText = (EditText) findViewById(R.id.cvc);
         this.monthSpinner = (Spinner) findViewById(R.id.expMonth);
@@ -72,7 +92,24 @@ public class PaymentActivity extends AppCompatActivity {
         initListView();
     }
 
-    public void saveCreditCard() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (compositeSubscription != null) {
+            compositeSubscription.unsubscribe();
+        }
+    }
+
+    private void addToList(Token token) {
+        String endingIn = getResources().getString(R.string.endingIn);
+        Map<String, String> map = new HashMap<>();
+        map.put("last4", endingIn + " " + token.getCard().getLast4());
+        map.put("tokenId", token.getId());
+        cardTokens.add(map);
+        simpleAdapter.notifyDataSetChanged();
+    }
+
+    private Card createCardToSave() {
         String cardNumber = cardNumberEditText.getText().toString();
         String cvc = cvcEditText.getText().toString();
 
@@ -82,32 +119,7 @@ public class PaymentActivity extends AppCompatActivity {
         String currency = getCurrency();
         Card cardToSave = new Card(cardNumber, expMonth, expYear, cvc);
         cardToSave.setCurrency(currency);
-
-        if (validateCard(cardToSave)) {
-            startProgress();
-            new Stripe().createToken(
-                    cardToSave,
-                    PUBLISHABLE_KEY,
-                    new TokenCallback() {
-                        public void onSuccess(Token token) {
-                            addToList(token);
-                            finishProgress();
-                        }
-                        public void onError(Exception error) {
-                            handleError(error.getLocalizedMessage());
-                            finishProgress();
-                        }
-                    });
-        }
-    }
-
-    private void addToList(Token token) {
-        String endingIn = getResources().getString(R.string.endingIn);
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("last4", endingIn + " " + token.getCard().getLast4());
-        map.put("tokenId", token.getId());
-        cardTokens.add(map);
-        simpleAdapter.notifyDataSetChanged();
+        return cardToSave;
     }
 
     private boolean validateCard(Card card) {
@@ -127,10 +139,6 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         return valid;
-    }
-
-    private void startProgress() {
-        progressFragment.show(getSupportFragmentManager(), "progress");
     }
 
     private void finishProgress() {
@@ -172,5 +180,67 @@ public class PaymentActivity extends AppCompatActivity {
                 new String[]{"last4", "tokenId"},
                 new int[]{R.id.last4, R.id.tokenId});
         listView.setAdapter(simpleAdapter);
+    }
+
+    private void saveCreditCard() {
+        Card cardToSave = createCardToSave();
+
+        if (validateCard(cardToSave)) {
+            startProgress();
+            new Stripe().createToken(
+                    cardToSave,
+                    PUBLISHABLE_KEY,
+                    new TokenCallback() {
+                        public void onSuccess(Token token) {
+                            addToList(token);
+                            finishProgress();
+                        }
+                        public void onError(Exception error) {
+                            handleError(error.getLocalizedMessage());
+                            finishProgress();
+                        }
+                    });
+        }
+    }
+
+    private void saveCreditCardWithRx() {
+        final Card cardToSave = createCardToSave();
+        if (!validateCard(cardToSave)) {
+            return;
+        }
+
+        final Stripe stripe = new Stripe();
+        final Observable<Token> tokenObservable =
+                Observable.fromCallable(
+                        new Callable<Token>() {
+                            @Override
+                            public Token call() throws Exception {
+                                startProgress();
+                                return stripe.createTokenSynchronous(cardToSave, PUBLISHABLE_KEY);
+                            }
+                        });
+
+        compositeSubscription.add(tokenObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        new Action1<Token>() {
+                            @Override
+                            public void call(Token token) {
+                                addToList(token);
+                                finishProgress();
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                handleError(throwable.getLocalizedMessage());
+                                finishProgress();
+                            }
+                        }));
+    }
+
+    private void startProgress() {
+        progressFragment.show(getSupportFragmentManager(), "progress");
     }
 }

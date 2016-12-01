@@ -17,7 +17,11 @@ import java.util.concurrent.Executor;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.StripeTextUtils;
+import com.stripe.exception.APIConnectionException;
+import com.stripe.exception.APIException;
 import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
 import com.stripe.net.RequestOptions;
 
 /**
@@ -149,7 +153,7 @@ public class Stripe {
     /**
      * Call to create a {@link Token} with the publishable key and {@link Executor} specified.
      *
-     * @param card the {@link Card} used for this payment token
+     * @param card the {@link Card} used for this token
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *                 default non-ui executor
@@ -179,6 +183,61 @@ public class Stripe {
         catch (AuthenticationException e) {
             callback.onError(e);
         }
+    }
+
+    /**
+     * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
+     * will crash. This method uses the default publishable key for this {@link Stripe} instance.
+     *
+     * @param card the {@link Card} to use for this token
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException the card cannot be charged for some reason
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    public Token createTokenSynchronous(final Card card)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createTokenSynchronous(card, defaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
+     * will crash.
+     *
+     * @param card the {@link Card} to use for this token
+     * @param publishableKey the publishable key to use with this request
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException the card cannot be charged for some reason
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    public Token createTokenSynchronous(Card card, String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        validateKey(publishableKey);
+
+        RequestOptions requestOptions = RequestOptions.builder()
+                .setApiKey(publishableKey).build();
+        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
+                hashMapFromCard(card), requestOptions);
+        com.stripe.model.Card stripeCard = stripeToken.getCard();
+        Card resultCard = androidCardFromStripeCard(stripeCard);
+        return androidTokenFromStripeToken(resultCard, stripeToken);
     }
 
     /**
@@ -393,8 +452,8 @@ public class Stripe {
     }
 
     private class ResponseWrapper {
-        public final Token token;
-        public final Exception error;
+        final Token token;
+        final Exception error;
 
         private ResponseWrapper(Token token, Exception error) {
             this.error = error;
