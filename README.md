@@ -12,7 +12,9 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:+'
+    compile 'com.stripe:stripe-android:1.1.0'
+
+Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
 ### Eclipse
 
@@ -91,6 +93,54 @@ Here's a sample implementation of the token callback:
     );
 
 createToken is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
+
+### createTokenSynchronous
+
+The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava. **Note: do not call this method on the main thread or your app will crash!**
+
+    Observable<Token> tokenObservable =
+        Observable.fromCallable(
+                new Callable<Token>() {
+                    @Override
+                    public Token call() throws Exception {
+                        // When executed, this method will conduct i/o on whatever thread it is run on
+                        return stripe.createTokenSynchronous(cardToCharge);
+                    }
+                });
+    tokenObservable
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnSubscribe(
+                new Action0() {
+                    @Override
+                    public void call() {
+                        // Show a progress dialog if you prefer
+                        showProgressDialog();
+                    }
+                })
+        .doOnUnsubscribe(
+                new Action0() {
+                    @Override
+                    public void call() {
+                        // Close the progress dialog if you opened one
+                        closeProgressDialog();
+                    }
+                })
+        .subscribe(
+                new Action1<Token>() {
+                    @Override
+                    public void call(Token token) {
+                        // Send token to your own web service
+                        MyServer.chargeToken(token);
+                    }
+                },
+                new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        // Tell the user about the error
+                        handleError(throwable.getLocalizedMessage());
+                    }
+                });
 
 ### Client-side validation helpers
 
