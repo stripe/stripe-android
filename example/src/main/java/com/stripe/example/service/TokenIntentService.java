@@ -54,7 +54,6 @@ public class TokenIntentService extends IntentService {
         String errorMessage = null;
         Token token = null;
         if (intent != null) {
-            final String action = intent.getAction();
             String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
             Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
             Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
