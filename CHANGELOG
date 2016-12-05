@@ -4,16 +4,18 @@
     Added synchronous method to create tokens which allows integration with RxJava
     Updated example application to include RxJava integration example
     Flattened example project structure for clarity
+    
 1.0.6 2016-11-15
-	Updated to stripe-java 3.2.0
-	Fixed American Express number validation problem
-	Updated build target sdk version, build tools
-	Moved tests out of example project and into stripe project
+    Updated to stripe-java 3.2.0
+    Fixed American Express number validation problem
+    Updated build target sdk version, build tools
+    Moved tests out of example project and into stripe project
+    
 1.0.5 2016-08-26
-	Modified Java bindings dependency
-	Updated Card model to reflect recent changes
-	Updated proguard and dependency versions
+    Modified Java bindings dependency
+    Updated Card model to reflect recent changes
+    Updated proguard and dependency versions
 
 1.0.4 2016-01-29
-	Remove incorrect Diner's Club card prefix
-	Add Fabric properties file
+    Remove incorrect Diner's Club card prefix
+    Add Fabric properties file
