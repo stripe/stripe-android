@@ -7,7 +7,7 @@ import com.stripe.example.R;
 import com.stripe.example.dialog.ProgressDialogFragment;
 
 /**
- * Created by mrmcduff on 12/5/16.
+ * Class used to show and hide the progress spinner.
  */
 public class ProgressDialogController {
 
@@ -19,11 +19,11 @@ public class ProgressDialogController {
         mProgressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
     }
 
-    public void startProgress() {
+    void startProgress() {
         mProgressFragment.show(mFragmentManager, "progress");
     }
 
-    public void finishProgress() {
+    void finishProgress() {
         mProgressFragment.dismiss();
     }
 }
