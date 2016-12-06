@@ -22,8 +22,12 @@ import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.example.R;
+import com.stripe.example.controller.AsyncTaskTokenController;
+import com.stripe.example.controller.IntentServiceTokenController;
+import com.stripe.example.controller.RxTokenController;
 import com.stripe.example.dialog.ErrorDialogFragment;
 import com.stripe.example.dialog.ProgressDialogFragment;
+import com.stripe.example.module.DependencyHandler;
 import com.stripe.example.service.TokenIntentService;
 
 import java.util.ArrayList;
@@ -69,48 +73,64 @@ public class PaymentActivity extends AppCompatActivity {
     // A receiver used to listen for local broadcasts.
     private TokenBroadcastReceiver tokenBroadcastReceiver;
 
+    private DependencyHandler mDependencyHandler;
+
+    private AsyncTaskTokenController mAsyncTaskTokenController;
+    private IntentServiceTokenController mIntentServiceTokenController;
+    private RxTokenController mRxTokenController;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.payment_activity);
 
-        progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
+        mDependencyHandler = new DependencyHandler(
+                this,
+                (EditText) findViewById(R.id.number),
+                (Spinner) findViewById(R.id.expMonth),
+                (Spinner) findViewById(R.id.expYear),
+                (EditText) findViewById(R.id.cvc),
+                (Spinner) findViewById(R.id.currency),
+                (ListView) findViewById(R.id.listview));
 
+//        progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
+//
         Button saveButton = (Button) findViewById(R.id.save);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveCreditCard();
-            }
-        });
+        mAsyncTaskTokenController = mDependencyHandler.getAsyncTaskTokenController(saveButton);
 
-        compositeSubscription = new CompositeSubscription();
         Button saveRxButton = (Button) findViewById(R.id.saverx);
-        compositeSubscription.add(
-                RxView.clicks(saveRxButton).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCreditCardWithRx();
-                    }
-                }));
+        mRxTokenController = mDependencyHandler.getRxTokenController(saveRxButton);
 
-        Button saveServiceButton = (Button) findViewById(R.id.saveWithService);
-        compositeSubscription.add(
-                RxView.clicks(saveServiceButton).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCreditCardWithIntentService();
-                    }
-                }));
-
-        this.cardNumberEditText = (EditText) findViewById(R.id.number);
-        this.cvcEditText = (EditText) findViewById(R.id.cvc);
-        this.monthSpinner = (Spinner) findViewById(R.id.expMonth);
-        this.yearSpinner = (Spinner) findViewById(R.id.expYear);
-        this.currencySpinner = (Spinner) findViewById(R.id.currency);
-        this.listView = (ListView) findViewById(R.id.listview);
-        registerBroadcastReceiver();
-        initListView();
+        Button saveIntentServiceButton = (Button) findViewById(R.id.saveWithService);
+        mIntentServiceTokenController = mDependencyHandler.getIntentServiceTokenController(
+                this, saveIntentServiceButton);
+//
+//        compositeSubscription = new CompositeSubscription();
+//        Button saveRxButton = (Button) findViewById(R.id.saverx);
+//        compositeSubscription.add(
+//                RxView.clicks(saveRxButton).subscribe(new Action1<Void>() {
+//                    @Override
+//                    public void call(Void aVoid) {
+//                        saveCreditCardWithRx();
+//                    }
+//                }));
+//
+//        Button saveServiceButton = (Button) findViewById(R.id.saveWithService);
+//        compositeSubscription.add(
+//                RxView.clicks(saveServiceButton).subscribe(new Action1<Void>() {
+//                    @Override
+//                    public void call(Void aVoid) {
+//                        saveCreditCardWithIntentService();
+//                    }
+//                }));
+//
+//        this.cardNumberEditText = (EditText) findViewById(R.id.number);
+//        this.cvcEditText = (EditText) findViewById(R.id.cvc);
+//        this.monthSpinner = (Spinner) findViewById(R.id.expMonth);
+//        this.yearSpinner = (Spinner) findViewById(R.id.expYear);
+//        this.currencySpinner = (Spinner) findViewById(R.id.currency);
+//        this.listView = (ListView) findViewById(R.id.listview);
+//        registerBroadcastReceiver();
+//        initListView();
     }
 
     @Override
