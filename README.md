@@ -96,8 +96,9 @@ createToken is an asynchronous call – it returns immediately and invokes the c
 
 ### createTokenSynchronous
 
-The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava. **Note: do not call this method on the main thread or your app will crash!**
+The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService. **Note: do not call this method on the main thread or your app will crash!**
 
+#### RxJava Example
     Observable<Token> tokenObservable =
         Observable.fromCallable(
                 new Callable<Token>() {
@@ -141,6 +142,75 @@ The createTokenSynchronous method allows you to handle threading on your own, us
                         handleError(throwable.getLocalizedMessage());
                     }
                 });
+
+#### IntentService Example
+
+You can invoke the following from your code (where `cardToSave` is some Card object that you have created.)
+
+        Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
+                mActivity,
+                cardToSave.getNumber(),
+                cardToSave.getExpMonth(),
+                cardToSave.getExpYear(),
+                cardToSave.getCVC(),
+                mPublishableKey);
+        mActivity.startService(tokenServiceIntent);
+
+Your IntentService can then perform the following in its `onHandleIntent` method.
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        String errorMessage = null;
+        Token token = null;
+        if (intent != null) {
+            String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
+            Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
+            Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
+            String cvc = intent.getStringExtra(EXTRA_CVC);
+            String publishableKey = intent.getStringExtra(EXTRA_PUBLISHABLE_KEY);
+            Card card = new Card(cardNumber, month, year, cvc);
+            Stripe stripe = new Stripe();
+            try {
+                token = stripe.createTokenSynchronous(card, publishableKey);
+            } catch (StripeException stripeEx) {
+                errorMessage = stripeEx.getLocalizedMessage();
+            }
+        }
+        Intent localIntent = new Intent(TOKEN_ACTION);
+        if (token != null) {
+            // extract whatever information you want from your Token object
+            localIntent.putExtra(STRIPE_CARD_LAST_FOUR, token.getCard().getLast4());
+            localIntent.putExtra(STRIPE_CARD_TOKEN_ID, token.getId());
+        }
+        if (errorMessage != null) {
+            localIntent.putExtra(STRIPE_ERROR_MESSAGE, errorMessage);
+        }
+        // Broadcasts the Intent to receivers in this app.
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+Registering a local BroadcastReceiver in your activity then allows you to handle the results.
+
+    private class TokenBroadcastReceiver extends BroadcastReceiver {
+        private TokenBroadcastReceiver() { }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mProgressDialogController.finishProgress();
+            if (intent == null) {
+                return;
+            }
+            if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
+                // handle your error!
+                return;
+            }
+            if (intent.hasExtra(TokenIntentService.STRIPE_CARD_TOKEN_ID) &&
+                    intent.hasExtra(TokenIntentService.STRIPE_CARD_LAST_FOUR)) {
+                        // handle your resulting token here
+                    }
+            }
+        }
+    }
+
 
 ### Client-side validation helpers
 
@@ -189,3 +259,6 @@ If you're implementing a complex workflow, you may want to know if you've alread
 4. Build and run the project on your device or in the Android emulator.
 
 The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in PaymentActivity with your test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L25).
+
+Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
+`AsyncTaskTokenController`, `RxTokenController`, and `IntentServiceTokenController`.
