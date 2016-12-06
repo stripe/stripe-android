@@ -7,9 +7,8 @@ import com.stripe.example.R;
 import com.stripe.example.dialog.ErrorDialogFragment;
 
 /**
- * Created by mrmcduff on 12/5/16.
+ * A convenience class to handle displaying error dialogs.
  */
-
 public class ErrorDialogHandler {
 
     FragmentManager mFragmentManager;

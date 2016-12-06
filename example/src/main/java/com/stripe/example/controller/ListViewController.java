@@ -14,9 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by mrmcduff on 12/5/16.
+ * A controller for the {@link ListView} used to display the results.
  */
-
 public class ListViewController {
 
     private SimpleAdapter mAdatper;
@@ -34,11 +33,11 @@ public class ListViewController {
         listView.setAdapter(mAdatper);
     }
 
-    public void addToList(Token token) {
+    void addToList(Token token) {
         addToList(token.getCard().getLast4(), token.getId());
     }
 
-    public void addToList(@NonNull String last4, @NonNull String tokenId) {
+    void addToList(@NonNull String last4, @NonNull String tokenId) {
         String endingIn = mContext.getString(R.string.endingIn);
         Map<String, String> map = new HashMap<>();
         map.put("last4", endingIn + " " + last4);

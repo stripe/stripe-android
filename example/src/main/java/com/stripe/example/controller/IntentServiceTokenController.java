@@ -56,6 +56,9 @@ public class IntentServiceTokenController {
         registerBroadcastReceiver();
     }
 
+    /**
+     * Unregister the {@link BroadcastReceiver}.
+     */
     public void detach() {
         if (mTokenBroadcastReceiver != null) {
             LocalBroadcastManager.getInstance(mActivity)

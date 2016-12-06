@@ -6,7 +6,7 @@ import android.widget.Spinner;
 import com.stripe.android.model.Card;
 
 /**
- * Created by mrmcduff on 12/5/16.
+ * A class that reads the UI.
  */
 public class CardInformationReader {
 
@@ -31,6 +31,11 @@ public class CardInformationReader {
         mCurrencySpinner = currencySpinner;
     }
 
+    /**
+     * Read the user input and create a {@link Card} from it.\
+     *
+     * @return a {@link Card} based on the currently displayed user input
+     */
     public Card readCardData() {
         String cardNumber = mCardNumberEditText.getText().toString();
         String cvc = mCvcEditText.getText().toString();

@@ -56,6 +56,15 @@ public class RxTokenController {
         );
     }
 
+    /**
+     * Release subscriptions to prevent memory leaks.
+     */
+    public void detach() {
+        if  (mCompositeSubscription != null) {
+            mCompositeSubscription.unsubscribe();
+        }
+    }
+
     private void saveCard() {
         final Card cardToSave = mCardInformationHolder.readCardData();
         final Stripe stripe = new Stripe();
@@ -98,11 +107,5 @@ public class RxTokenController {
                                 mErrorDialogHandler.showError(throwable.getLocalizedMessage());
                             }
                         }));
-    }
-
-    public void detach() {
-        if  (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
-        }
     }
 }
