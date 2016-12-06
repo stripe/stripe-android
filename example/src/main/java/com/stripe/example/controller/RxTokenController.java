@@ -17,10 +17,11 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-/**
- * Created by mrmcduff on 12/5/16.
- */
 
+/**
+ * Class containing all the logic needed to create a token and listen for the results using
+ * RxJava.
+ */
 public class RxTokenController {
 
     private CardInformationReader mCardInformationHolder;

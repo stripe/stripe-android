@@ -17,9 +17,9 @@ import com.stripe.example.activity.PaymentActivity;
 import com.stripe.example.service.TokenIntentService;
 
 /**
- * Created by mrmcduff on 12/5/16.
+ * Example class showing how to save tokens with an {@link android.app.IntentService} doing your
+ * background I/O work.
  */
-
 public class IntentServiceTokenController {
 
     private Activity mActivity;
@@ -53,6 +53,7 @@ public class IntentServiceTokenController {
                 saveCard();
             }
         });
+        registerBroadcastReceiver();
     }
 
     public void detach() {
@@ -86,7 +87,7 @@ public class IntentServiceTokenController {
 
     private class TokenBroadcastReceiver extends BroadcastReceiver {
 
-        // Prevent instantiation of a local broadcast receiver.
+        // Prevent instantiation of a local broadcast receiver outside this class.
         private TokenBroadcastReceiver() { }
 
         @Override
