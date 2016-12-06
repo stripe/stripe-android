@@ -43,6 +43,8 @@ public class StripeTextUtils {
             return false;
         }
 
+        // Refraining from using android's TextUtils in order to avoid
+        // depending on another package.
         for (int i = 0; i < value.length(); i++) {
             if (!Character.isDigit(value.charAt(i))) {
                 return false;
