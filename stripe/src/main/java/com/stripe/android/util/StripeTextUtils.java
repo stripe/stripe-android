@@ -1,7 +1,6 @@
 package com.stripe.android.util;
 
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.stripe.android.model.Card;
 
@@ -44,7 +43,14 @@ public class StripeTextUtils {
             return false;
         }
 
-        return TextUtils.isDigitsOnly(value);
+        // Refraining from using android's TextUtils in order to avoid
+        // depending on another package.
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -62,7 +68,7 @@ public class StripeTextUtils {
 
     /**
      * A checker for whether or not the input value is entirely whitespace. This is slightly more
-     * aggressive than {@link TextUtils#isEmpty(CharSequence)}, which only returns true for
+     * aggressive than the android TextUtils#isEmpty method, which only returns true for
      * {@code null} or {@code ""}.
      *
      * @param value a possibly blank input string value
