@@ -68,6 +68,9 @@ public class RxTokenController {
     private void saveCard() {
         final Card cardToSave = mCardInformationHolder.readCardData();
         final Stripe stripe = new Stripe();
+
+        // Note: using this style of Observable creation results in us having a method that
+        // will not be called until we subscribe to it.
         final Observable<Token> tokenObservable =
                 Observable.fromCallable(
                         new Callable<Token>() {
