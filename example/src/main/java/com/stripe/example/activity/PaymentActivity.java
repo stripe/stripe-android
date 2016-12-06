@@ -139,7 +139,6 @@ public class PaymentActivity extends AppCompatActivity {
         simpleAdapter.notifyDataSetChanged();
     }
 
-
     private Card createCardToSave() {
         String cardNumber = cardNumberEditText.getText().toString();
         String cvc = cvcEditText.getText().toString();
@@ -218,7 +217,6 @@ public class PaymentActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 tokenBroadcastReceiver,
                 new IntentFilter(TokenIntentService.TOKEN_ACTION));
-
     }
 
     private void saveCreditCard() {
