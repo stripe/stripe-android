@@ -12,6 +12,7 @@
     <string name="cardNumber">Card Number</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
+    <string name="saveService">Save with Service</string>
     <string name="cvc">CVC</string>
 
     <string name="ok">OK</string>
