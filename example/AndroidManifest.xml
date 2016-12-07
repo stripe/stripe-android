@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.stripe.example"
-          android:versionCode="1"
-          android:versionName="1.0">
+    package="com.stripe.example"
+    android:versionCode="1"
+    android:versionName="1.0">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="@string/appName"
-        android:icon="@drawable/ic_launcher">
-
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/appName">
         <activity
             android:name=".activity.PaymentActivity"
-            android:theme="@style/Theme.AppCompat"
-            android:screenOrientation="portrait">
-
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
+        <service
+            android:name=".service.TokenIntentService"
+            android:exported="false"/>
     </application>
+
 </manifest>

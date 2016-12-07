@@ -1,7 +1,13 @@
 package com.stripe.example.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +25,7 @@ import com.stripe.example.R;
 import com.stripe.example.dialog.ErrorDialogFragment;
 import com.stripe.example.dialog.ProgressDialogFragment;
 import com.stripe.example.view.CreditCardView;
+import com.stripe.example.service.TokenIntentService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +65,9 @@ public class PaymentActivity extends AppCompatActivity {
     // A CompositeSubscription object to make cleaning up our rx subscriptions simpler
     private CompositeSubscription compositeSubscription;
 
+    // A receiver used to listen for local broadcasts.
+    private TokenBroadcastReceiver tokenBroadcastReceiver;
+
     private Card validatedCard;
 
     @Override
@@ -85,10 +95,19 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 }));
 
+        Button saveServiceButton = (Button) findViewById(R.id.saveWithService);
+        compositeSubscription.add(
+                RxView.clicks(saveServiceButton).subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        saveCreditCardWithIntentService();
+                    }
+                }));
         this.creditCardView = (CreditCardView) findViewById(R.id.credit_card);
         this.currencySpinner = (Spinner) findViewById(R.id.currency);
         this.validationErrorTextView = (TextView) findViewById(R.id.validation_error);
         this.listView = (ListView) findViewById(R.id.listview);
+        registerBroadcastReceiver();
         initListView();
         creditCardView.setCallback(new CreditCardView.Callback() {
             @Override
@@ -122,13 +141,22 @@ public class PaymentActivity extends AppCompatActivity {
         if (compositeSubscription != null) {
             compositeSubscription.unsubscribe();
         }
+
+        if (tokenBroadcastReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(tokenBroadcastReceiver);
+            tokenBroadcastReceiver = null;
+        }
     }
 
     private void addToList(Token token) {
+        addToList(token.getCard().getLast4(), token.getId());
+    }
+
+    private void addToList(@NonNull String last4, @NonNull String tokenId) {
         String endingIn = getResources().getString(R.string.endingIn);
         Map<String, String> map = new HashMap<>();
-        map.put("last4", endingIn + " " + token.getCard().getLast4());
-        map.put("tokenId", token.getId());
+        map.put("last4", endingIn + " " + last4);
+        map.put("tokenId", tokenId);
         cardTokens.add(map);
         simpleAdapter.notifyDataSetChanged();
     }
@@ -184,6 +212,13 @@ public class PaymentActivity extends AppCompatActivity {
         listView.setAdapter(simpleAdapter);
     }
 
+    private void registerBroadcastReceiver() {
+        tokenBroadcastReceiver = new TokenBroadcastReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                tokenBroadcastReceiver,
+                new IntentFilter(TokenIntentService.TOKEN_ACTION));
+    }
+
     private void saveCreditCard() {
         if (validatedCard == null) {
             showValidationError(creditCardView.getError());
@@ -203,6 +238,23 @@ public class PaymentActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    private void saveCreditCardWithIntentService() {
+        if (validatedCard == null) {
+            showValidationError(creditCardView.getError());
+            return;
+        }
+
+        Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
+                this,
+                validatedCard.getNumber(),
+                validatedCard.getExpMonth(),
+                validatedCard.getExpYear(),
+                validatedCard.getCVC(),
+                PUBLISHABLE_KEY);
+        startProgress();
+        startService(tokenServiceIntent);
     }
 
     private void saveCreditCardWithRx() {
@@ -256,4 +308,31 @@ public class PaymentActivity extends AppCompatActivity {
     private void startProgress() {
         progressFragment.show(getSupportFragmentManager(), "progress");
     }
+
+    private class TokenBroadcastReceiver extends BroadcastReceiver {
+
+        // Prevent instantiation of a local broadcast receiver.
+        private TokenBroadcastReceiver() { }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finishProgress();
+
+            if (intent == null) {
+                return;
+            }
+
+            if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
+                showErrorDialog(intent.getStringExtra(TokenIntentService.STRIPE_ERROR_MESSAGE));
+                return;
+            }
+
+            if (intent.hasExtra(TokenIntentService.STRIPE_CARD_TOKEN_ID) &&
+                    intent.hasExtra(TokenIntentService.STRIPE_CARD_LAST_FOUR)) {
+                addToList(intent.getStringExtra(TokenIntentService.STRIPE_CARD_LAST_FOUR),
+                        intent.getStringExtra(TokenIntentService.STRIPE_CARD_TOKEN_ID));
+            }
+        }
+    }
+
 }
