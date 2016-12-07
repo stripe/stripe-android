@@ -5,10 +5,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
@@ -18,6 +18,7 @@ import com.stripe.android.model.Token;
 import com.stripe.example.R;
 import com.stripe.example.dialog.ErrorDialogFragment;
 import com.stripe.example.dialog.ProgressDialogFragment;
+import com.stripe.example.view.CreditCardView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,11 +46,9 @@ public class PaymentActivity extends AppCompatActivity {
     private ProgressDialogFragment progressFragment;
 
     // Controls for card entry
-    private EditText cardNumberEditText;
-    private EditText cvcEditText;
-    private Spinner monthSpinner;
-    private Spinner yearSpinner;
+    private CreditCardView creditCardView;
     private Spinner currencySpinner;
+    private TextView validationErrorTextView;
 
     // Fields used to display the returned card tokens
     private ListView listView;
@@ -59,6 +58,8 @@ public class PaymentActivity extends AppCompatActivity {
     // A CompositeSubscription object to make cleaning up our rx subscriptions simpler
     private CompositeSubscription compositeSubscription;
 
+    private Card validatedCard;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +67,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         progressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
 
-        Button saveButton = (Button) findViewById(R.id.save);
+        final Button saveButton = (Button) findViewById(R.id.save);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,7 +76,7 @@ public class PaymentActivity extends AppCompatActivity {
         });
 
         compositeSubscription = new CompositeSubscription();
-        Button saveRxButton = (Button) findViewById(R.id.saverx);
+        final Button saveRxButton = (Button) findViewById(R.id.saverx);
         compositeSubscription.add(
                 RxView.clicks(saveRxButton).subscribe(new Action1<Void>() {
                     @Override
@@ -84,13 +85,35 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 }));
 
-        this.cardNumberEditText = (EditText) findViewById(R.id.number);
-        this.cvcEditText = (EditText) findViewById(R.id.cvc);
-        this.monthSpinner = (Spinner) findViewById(R.id.expMonth);
-        this.yearSpinner = (Spinner) findViewById(R.id.expYear);
+        this.creditCardView = (CreditCardView) findViewById(R.id.credit_card);
         this.currencySpinner = (Spinner) findViewById(R.id.currency);
+        this.validationErrorTextView = (TextView) findViewById(R.id.validation_error);
         this.listView = (ListView) findViewById(R.id.listview);
         initListView();
+        creditCardView.setCallback(new CreditCardView.Callback() {
+            @Override
+            public void onValidated(Card card) {
+                validatedCard = card;
+                validatedCard.setCurrency(getCurrency());
+                saveButton.setEnabled(true);
+                saveRxButton.setEnabled(true);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                showValidationError(creditCardView.getError());
+                validatedCard = null;
+                saveButton.setEnabled(false);
+                saveRxButton.setEnabled(false);
+            }
+
+            @Override
+            public void onClearError() {
+                showValidationError(CreditCardView.ERROR_NONE);
+                saveButton.setEnabled(true);
+                saveRxButton.setEnabled(true);
+            }
+        });
     }
 
     @Override
@@ -110,36 +133,22 @@ public class PaymentActivity extends AppCompatActivity {
         simpleAdapter.notifyDataSetChanged();
     }
 
-    private Card createCardToSave() {
-        String cardNumber = cardNumberEditText.getText().toString();
-        String cvc = cvcEditText.getText().toString();
 
-        int expMonth = getIntegerFromSpinner(monthSpinner);
-        int expYear = getIntegerFromSpinner(yearSpinner);
-
-        String currency = getCurrency();
-        Card cardToSave = new Card(cardNumber, expMonth, expYear, cvc);
-        cardToSave.setCurrency(currency);
-        return cardToSave;
-    }
-
-    private boolean validateCard(Card card) {
-        boolean valid = true;
-        if (!card.validateNumber()) {
-            handleError("The card number that you entered is invalid");
-            valid = false;
-        } else if (!card.validateExpiryDate()) {
-            handleError("The expiration date that you entered is invalid");
-            valid = false;
-        } else if (!card.validateCVC()) {
-            handleError("The CVC code that you entered is invalid");
-            valid = false;
-        } else if (!card.validateCard()){
-            handleError("The card details that you entered are invalid");
-            valid = false;
+    private void showValidationError(int errorCode) {
+        if (validationErrorTextView != null) {
+            if (errorCode == CreditCardView.ERROR_NUMBER) {
+                validationErrorTextView.setText("The card number that you entered is invalid");
+            } else if (errorCode == CreditCardView.ERROR_EXPIRY_MONTH
+                    || errorCode == CreditCardView.ERROR_EXPIRY_YEAR) {
+                validationErrorTextView.setText("The expiration date that you entered is invalid");
+            } else if (errorCode == CreditCardView.ERROR_CVC) {
+                validationErrorTextView.setText("The CVC code that you entered is invalid");
+            } else if (errorCode == CreditCardView.ERROR_UNKNOWN) {
+                validationErrorTextView.setText("The card details that you entered are invalid");
+            } else {
+                validationErrorTextView.setText("");
+            }
         }
-
-        return valid;
     }
 
     private void finishProgress() {
@@ -160,16 +169,8 @@ public class PaymentActivity extends AppCompatActivity {
         return selected.toLowerCase();
     }
 
-    private int getIntegerFromSpinner(Spinner spinner) {
-        try {
-            return Integer.parseInt(spinner.getSelectedItem().toString());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private void handleError(String error) {
-        DialogFragment fragment = ErrorDialogFragment.newInstance(R.string.validationErrors, error);
+    private void showErrorDialog(String message) {
+        DialogFragment fragment = ErrorDialogFragment.newInstance(R.string.validationErrors, message);
         fragment.show(getSupportFragmentManager(), "error");
     }
 
@@ -184,12 +185,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void saveCreditCard() {
-        Card cardToSave = createCardToSave();
-
-        if (validateCard(cardToSave)) {
+        if (validatedCard == null) {
+            showValidationError(creditCardView.getError());
+        } else {
             startProgress();
             new Stripe().createToken(
-                    cardToSave,
+                    validatedCard,
                     PUBLISHABLE_KEY,
                     new TokenCallback() {
                         public void onSuccess(Token token) {
@@ -197,7 +198,7 @@ public class PaymentActivity extends AppCompatActivity {
                             finishProgress();
                         }
                         public void onError(Exception error) {
-                            handleError(error.getLocalizedMessage());
+                            showErrorDialog(error.getLocalizedMessage());
                             finishProgress();
                         }
                     });
@@ -205,8 +206,8 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void saveCreditCardWithRx() {
-        final Card cardToSave = createCardToSave();
-        if (!validateCard(cardToSave)) {
+        if (validatedCard == null) {
+            showValidationError(creditCardView.getError());
             return;
         }
 
@@ -216,7 +217,7 @@ public class PaymentActivity extends AppCompatActivity {
                         new Callable<Token>() {
                             @Override
                             public Token call() throws Exception {
-                                return stripe.createTokenSynchronous(cardToSave, PUBLISHABLE_KEY);
+                                return stripe.createTokenSynchronous(validatedCard, PUBLISHABLE_KEY);
                             }
                         });
 
@@ -247,7 +248,7 @@ public class PaymentActivity extends AppCompatActivity {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                handleError(throwable.getLocalizedMessage());
+                                showErrorDialog(throwable.getLocalizedMessage());
                             }
                         }));
     }
