@@ -43,7 +43,7 @@
                     android:hint="1234 5678 1234 5678"
                     android:inputType="number"
                     android:maxLength="19"
-                    android:textColorHint="#9Affffff"/>
+                    android:textColorHint="@color/creditCardView_hintTextColor"/>
 
                 <android.support.v4.widget.Space
                     android:id="@+id/space_in_container"
@@ -64,7 +64,7 @@
             android:hint="MM/YY"
             android:inputType="number"
             android:maxLength="5"
-            android:textColorHint="#9Affffff"
+            android:textColorHint="@color/creditCardView_hintTextColor"
             android:visibility="invisible"/>
 
         <EditText
@@ -81,8 +81,9 @@
             android:hint="CVC"
             android:inputType="number"
             android:maxLength="3"
-            android:textColorHint="#9Affffff"
+            android:textColorHint="@color/creditCardView_hintTextColor"
             android:visibility="invisible"/>
+
     </RelativeLayout>
 
 </LinearLayout>

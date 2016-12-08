@@ -2,6 +2,8 @@ package com.stripe.example.view;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IntDef;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.Space;
 import android.text.Editable;
@@ -24,11 +26,20 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Created by simonkenny on 05/12/2016.
+ * Widget to facilitate simple entry of entire card information that users expect, with
+ * card number formatting, number and date formatting built in.
+ *
+ * Callback interface provided for containing validation event triggers. Validation and Card object
+ * can also be accessed directly using class methods.
+ *
+ * Created by simon-marino on 05/12/2016.
  */
 
 public class CreditCardView extends FrameLayout {
 
+    @IntDef({ERROR_NONE, ERROR_NUMBER, ERROR_EXPIRY_MONTH, ERROR_EXPIRY_YEAR,
+            ERROR_CVC, ERROR_UNKNOWN})
+    public @interface ErrorCode {}
     public static final int ERROR_NONE = 0;
     public static final int ERROR_NUMBER = 1;
     public static final int ERROR_EXPIRY_MONTH = 2;
@@ -37,13 +48,13 @@ public class CreditCardView extends FrameLayout {
     public static final int ERROR_UNKNOWN = 5;
 
     /**
-     * Callback interface, set using setCallback(Callback callback)
+     * Callback interface for validation events.
      *
-     * Required to make this useful
+     * Add as listener using setCallback(Callback callback)
      */
     public interface Callback {
         void onValidated(Card card);
-        void onError(int errorCode);
+        void onError(@ErrorCode int errorCode);
         void onClearError();
     }
 
@@ -65,7 +76,7 @@ public class CreditCardView extends FrameLayout {
         return sScreenWidth;
     }
 
-    public static int getImageResForCardBrand(String brand){
+    public static @DrawableRes int getImageResForCardBrand(String brand){
         if (brand.equals(Card.AMERICAN_EXPRESS)) {
             return R.drawable.stp_card_amex;
         }
@@ -88,12 +99,14 @@ public class CreditCardView extends FrameLayout {
 
     }
 
-    CustomHorizontalScrollView mScrollView;
-    Space mSpaceInContainer;
-    ImageView mIvCreditCardIcon;
-    EditText mEtNumber;
-    EditText mEtExpiryDate;
-    EditText mEtCvcNum;
+    private static final float SCROLL_VIEW_SIZE_WIDTH_RATIO = 0.65f;
+
+    private CustomHorizontalScrollView mScrollView;
+    private Space mSpaceInContainer;
+    private ImageView mCreditCardIconImageView;
+    private EditText mCvcEditText;
+    private EditText mExpiryDateEditText;
+    private EditText mNumberEditText;
 
     private Callback mCallback;
 
@@ -103,7 +116,7 @@ public class CreditCardView extends FrameLayout {
     private int mColor;
 
     private Card mCard;
-    private int mError;
+    private @ErrorCode int mError;
 
     public void setCallback(Callback callback) {
         this.mCallback = callback;
@@ -127,16 +140,15 @@ public class CreditCardView extends FrameLayout {
     private void bindViews() {
         mScrollView = (CustomHorizontalScrollView) findViewById(R.id.root_scroll_view);
         mSpaceInContainer = (Space) findViewById(R.id.space_in_container);
-        mIvCreditCardIcon = (ImageView) findViewById(R.id.iv_credit_card_icon);
-        mEtNumber = (EditText) findViewById(R.id.et_credit_card_number);
-        mEtExpiryDate = (EditText) findViewById(R.id.et_expiry_date);
-        mEtCvcNum = (EditText) findViewById(R.id.et_cvc_num);
+        mCreditCardIconImageView = (ImageView) findViewById(R.id.iv_credit_card_icon);
+        mNumberEditText = (EditText) findViewById(R.id.et_credit_card_number);
+        mExpiryDateEditText = (EditText) findViewById(R.id.et_expiry_date);
+        mCvcEditText = (EditText) findViewById(R.id.et_cvc_num);
     }
 
     private void initView() {
         inflate(getContext(), R.layout.view_credit_card, this);
 
-        // TODO : could also do this with ButterKnife
         bindViews();
 
         mError = ERROR_NONE;
@@ -144,10 +156,10 @@ public class CreditCardView extends FrameLayout {
         mColor = ContextCompat.getColor(getContext(), android.R.color.white);
         mScrollView.setScrollingEnabled(false);
 
-        mScrollViewWidth = (int) (getScreenWidth(getContext()) * 0.65f);
+        mScrollViewWidth = (int) (getScreenWidth(getContext()) * SCROLL_VIEW_SIZE_WIDTH_RATIO);
 
         mScrollView.getLayoutParams().width = mScrollViewWidth;
-        mEtNumber.getLayoutParams().width = mScrollViewWidth;
+        mNumberEditText.getLayoutParams().width = mScrollViewWidth;
         mSpaceInContainer.getLayoutParams().width = mScrollViewWidth;
 
         mScrollToPosition = mScrollViewWidth;
@@ -155,7 +167,7 @@ public class CreditCardView extends FrameLayout {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
-        mEtNumber.setOnFocusChangeListener(new OnFocusChangeListener() {
+        mNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focused) {
                 if (focused) {
@@ -164,52 +176,52 @@ public class CreditCardView extends FrameLayout {
             }
         });
 
-        mEtNumber.addTextChangedListener(new TextWatcher() {
+        mNumberEditText.addTextChangedListener(new TextWatcher() {
             boolean freeze = false;
-            int beforeStringLen = 0;
+            int beforeStringLength = 0;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
                 if (!freeze) {
-                    beforeStringLen = mEtNumber.getText().toString().length();
+                    beforeStringLength = mNumberEditText.getText().toString().length();
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 if (!freeze) {
-                    String curString = mEtNumber.getText().toString();
-                    int curStringLen = curString.length();
+                    String curString = mNumberEditText.getText().toString();
+                    int curStringLength = curString.length();
 
-                    mEtNumber.setTextColor(mColor);
+                    mNumberEditText.setTextColor(mColor);
 
                     // reformat with spaces
                     // TODO : add formatting for non-16 digit cards
                     String cleanedString = curString.replace(" ", "");
-                    int cleanedStringLen = cleanedString.length();
+                    int cleanedStringLength = cleanedString.length();
                     String formattedString = "";
-                    for (int i = 0 ; i < 4 ; i++) {
-                        if (cleanedStringLen > (i * 4) + 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (cleanedStringLength > (i * 4) + 4) {
                             formattedString += cleanedString.substring((i * 4), ((i * 4) + 4)) + " ";
                         } else {
-                            formattedString += cleanedString.substring((i * 4), cleanedStringLen);
+                            formattedString += cleanedString.substring((i * 4), cleanedStringLength);
                             break;
                         }
                     }
                     freeze = true;
-                    mEtNumber.setText(formattedString);
+                    mNumberEditText.setText(formattedString);
                     freeze = false;
 
                     // always move cursor (selection) to end
                     freeze = true;
-                    mEtNumber.setSelection(mEtNumber.getText().toString().length());
+                    mNumberEditText.setSelection(mNumberEditText.getText().toString().length());
                     freeze = false;
 
                     mCard = new Card.Builder(formattedString, 1, 0, "").build();
                     setCreditCardIconForNumber();
 
                     // scroll to right if entered last number of card
-                    if (beforeStringLen == 18 && curStringLen == 19) {
+                    if (beforeStringLength == 18 && curStringLength == 19) {
                         if (mCard.validateNumber()) {
                             freeze = true;
                             scrollRight();
@@ -218,7 +230,7 @@ public class CreditCardView extends FrameLayout {
                                 mCallback.onClearError();
                             }
                         } else {
-                            mEtNumber.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                            mNumberEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
                             if (mCallback != null) {
                                 mCallback.onError(ERROR_NUMBER);
                             }
@@ -235,48 +247,48 @@ public class CreditCardView extends FrameLayout {
             }
         });
 
-        mEtExpiryDate.setOnKeyListener(new OnKeyListener() {
+        mExpiryDateEditText.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if(keyCode == KeyEvent.KEYCODE_DEL && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (mEtExpiryDate.getText().toString().length() == 0) {
-                        mEtNumber.setText(mEtNumber.getText().toString().substring(0, mEtNumber.getText().toString().length() - 1));
-                        mEtNumber.setSelection(mEtNumber.getText().toString().length());
-                        mEtNumber.requestFocus();
+                    if (mExpiryDateEditText.getText().toString().length() == 0) {
+                        mNumberEditText.setText(mNumberEditText.getText().toString().substring(0, mNumberEditText.getText().toString().length() - 1));
+                        mNumberEditText.setSelection(mNumberEditText.getText().toString().length());
+                        mNumberEditText.requestFocus();
                     }
                 }
                 return false;
             }
         });
 
-        mEtExpiryDate.addTextChangedListener(new TextWatcher() {
+        mExpiryDateEditText.addTextChangedListener(new TextWatcher() {
             boolean freeze = false;
             boolean hadSlash = false;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
                 if (!freeze) {
-                    hadSlash = mEtExpiryDate.getText().toString().contains("/");
+                    hadSlash = mExpiryDateEditText.getText().toString().contains("/");
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 if (!freeze) {
-                    String curString = mEtExpiryDate.getText().toString();
+                    String curString = mExpiryDateEditText.getText().toString();
 
                     if (curString.isEmpty()) {
                         return;
                     }
 
-                    if (hadSlash && !mEtExpiryDate.getText().toString().contains("/")) {
+                    if (hadSlash && !mExpiryDateEditText.getText().toString().contains("/")) {
                         freeze = true;
-                        mEtExpiryDate.setText("");
+                        mExpiryDateEditText.setText("");
                         freeze = false;
                         return;
                     }
 
-                    mEtExpiryDate.setTextColor(mColor);
+                    mExpiryDateEditText.setTextColor(mColor);
 
                     String monthStr = null;
                     String yearStr = null;
@@ -293,7 +305,7 @@ public class CreditCardView extends FrameLayout {
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                             freeze = true;
-                            mEtExpiryDate.setText("");
+                            mExpiryDateEditText.setText("");
                             freeze = false;
                             return;
                         }
@@ -305,7 +317,7 @@ public class CreditCardView extends FrameLayout {
                             } catch (NumberFormatException e) {
                                 e.printStackTrace();
                                 freeze = true;
-                                mEtExpiryDate.setText("");
+                                mExpiryDateEditText.setText("");
                                 freeze = false;
                                 return;
                             }
@@ -315,33 +327,33 @@ public class CreditCardView extends FrameLayout {
                     freeze = true;
                     if (!StripeTextUtils.isBlank(monthStr)) {
                         if (mCard.validateExpMonth() && monthStr.length() > 1) {
-                            mEtExpiryDate.setText(String.format("%s/%s", monthStr, yearStr != null ? yearStr : ""));
+                            mExpiryDateEditText.setText(String.format("%s/%s", monthStr, yearStr != null ? yearStr : ""));
                         } else {
-                            mEtExpiryDate.setText(String.format("%s", monthStr));
+                            mExpiryDateEditText.setText(String.format("%s", monthStr));
                         }
                     } else {
-                        mEtExpiryDate.setText("");
+                        mExpiryDateEditText.setText("");
                     }
-                    mEtExpiryDate.setSelection(mEtExpiryDate.getText().toString().length());
+                    mExpiryDateEditText.setSelection(mExpiryDateEditText.getText().toString().length());
                     freeze = false;
 
                     boolean error = false;
 
                     if (!StripeTextUtils.isBlank(monthStr) || !StripeTextUtils.isBlank(yearStr)) {
                         if ((!StripeTextUtils.isBlank(monthStr) && monthStr.length() == 2 && !mCard.validateExpMonth())) {
-                            mEtExpiryDate.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                            mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
                             if (mCallback != null) {
                                 mCallback.onError(ERROR_EXPIRY_MONTH);
                             }
                             error = true;
                         } else if ((!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2 && !mCard.validateExpYear())) {
-                            mEtExpiryDate.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                            mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
                             if (mCallback != null) {
                                 mCallback.onError(ERROR_EXPIRY_YEAR);
                             }
                             error = true;
                         } else if (!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2) { // only move to next field when year entered
-                            mEtCvcNum.requestFocus();
+                            mCvcEditText.requestFocus();
                         }
                     }
                     if (!error) {
@@ -360,7 +372,7 @@ public class CreditCardView extends FrameLayout {
             }
         });
 
-        mEtCvcNum.setOnFocusChangeListener(new OnFocusChangeListener() {
+        mCvcEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focus) {
                 if (focus) {
@@ -371,33 +383,33 @@ public class CreditCardView extends FrameLayout {
             }
         });
 
-        mEtCvcNum.addTextChangedListener(new TextWatcher() {
+        mCvcEditText.addTextChangedListener(new TextWatcher() {
             boolean freeze = false;
-            int beforeStringLen = 0;
+            int beforeStringLength = 0;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
                 if (!freeze) {
-                    beforeStringLen = mEtCvcNum.getText().toString().length();
+                    beforeStringLength = mCvcEditText.getText().toString().length();
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 if (!freeze) {
-                    String curString = mEtCvcNum.getText().toString();
-                    int curStringLen = curString.length();
+                    String curString = mCvcEditText.getText().toString();
+                    int curStringLength = curString.length();
 
                     // TODO : this is deprecated, but what else should be used?
                     mCard.setCVC(curString);
 
-                    if (beforeStringLen > curStringLen) {
+                    if (beforeStringLength > curStringLength) {
                         // removing space
-                        if (beforeStringLen == 1) {
-                            mEtExpiryDate.requestFocus();
+                        if (beforeStringLength == 1) {
+                            mExpiryDateEditText.requestFocus();
                             return;
                         }
-                    } else if (curStringLen == 3) {
+                    } else if (curStringLength == 3) {
                         setCreditCardIconForNumber();
                     }
 
@@ -414,14 +426,14 @@ public class CreditCardView extends FrameLayout {
             }
         });
 
-        mEtCvcNum.setOnKeyListener(new OnKeyListener() {
+        mCvcEditText.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if(keyCode == KeyEvent.KEYCODE_DEL && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (mEtCvcNum.getText().toString().length() == 0 && mEtExpiryDate.getText().toString().length() > 0) {
-                        mEtExpiryDate.setText(mEtExpiryDate.getText().toString().substring(0, mEtExpiryDate.getText().toString().length() - 1));
-                        mEtExpiryDate.setSelection(mEtExpiryDate.getText().toString().length());
-                        mEtExpiryDate.requestFocus();
+                    if (mCvcEditText.getText().toString().length() == 0 && mExpiryDateEditText.getText().toString().length() > 0) {
+                        mExpiryDateEditText.setText(mExpiryDateEditText.getText().toString().substring(0, mExpiryDateEditText.getText().toString().length() - 1));
+                        mExpiryDateEditText.setSelection(mExpiryDateEditText.getText().toString().length());
+                        mExpiryDateEditText.requestFocus();
                     }
                 }
                 return false;
@@ -432,9 +444,9 @@ public class CreditCardView extends FrameLayout {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        mEtNumber.setEnabled(enabled);
-        mEtExpiryDate.setEnabled(enabled);
-        mEtCvcNum.setEnabled(enabled);
+        mNumberEditText.setEnabled(enabled);
+        mExpiryDateEditText.setEnabled(enabled);
+        mCvcEditText.setEnabled(enabled);
     }
 
     private void scrollRight() {
@@ -444,12 +456,12 @@ public class CreditCardView extends FrameLayout {
         mCardNumberInView = false;
         updateScrollToPosition();
         mScrollView.smoothScrollBy(mScrollToPosition, 0);
-        mEtExpiryDate.setVisibility(VISIBLE);
-        mEtCvcNum.setVisibility(VISIBLE);
-        if (!mEtExpiryDate.getText().toString().isEmpty()) {
-            mEtExpiryDate.setSelection(mEtExpiryDate.getText().toString().length());
+        mExpiryDateEditText.setVisibility(VISIBLE);
+        mCvcEditText.setVisibility(VISIBLE);
+        if (!mExpiryDateEditText.getText().toString().isEmpty()) {
+            mExpiryDateEditText.setSelection(mExpiryDateEditText.getText().toString().length());
         }
-        mEtExpiryDate.requestFocus();
+        mExpiryDateEditText.requestFocus();
     }
 
     private void scrollLeft() {
@@ -457,18 +469,18 @@ public class CreditCardView extends FrameLayout {
             return;
         }
         mCardNumberInView = true;
-        mEtNumber.setSelection(mEtNumber.getText().toString().length());
+        mNumberEditText.setSelection(mNumberEditText.getText().toString().length());
         mScrollView.smoothScrollBy(-mScrollToPosition, 0);
-        mEtExpiryDate.setVisibility(INVISIBLE);
-        mEtCvcNum.setVisibility(INVISIBLE);
+        mExpiryDateEditText.setVisibility(INVISIBLE);
+        mCvcEditText.setVisibility(INVISIBLE);
     }
 
     private void updateScrollToPosition() {
-        String numStr = mEtNumber.getText().toString();
+        String numStr = mNumberEditText.getText().toString();
         mScrollToPosition = mScrollViewWidth;
         if (!numStr.isEmpty()) {
             String scrollStr = numStr.substring(0, 14);
-            mScrollToPosition = (int) Layout.getDesiredWidth(scrollStr, mEtNumber.getPaint());
+            mScrollToPosition = (int) Layout.getDesiredWidth(scrollStr, mNumberEditText.getPaint());
         }
     }
 
@@ -479,14 +491,14 @@ public class CreditCardView extends FrameLayout {
         if (mCard.getNumber() != null) {
             String type = mCard.getBrand();
             if (!type.equals(Card.UNKNOWN)) {
-                mIvCreditCardIcon.setImageResource(getImageResForCardBrand(type));
+                mCreditCardIconImageView.setImageResource(getImageResForCardBrand(type));
                 if (mCallback != null) {
                     mCallback.onClearError();
                 }
             } else {
-                mIvCreditCardIcon.setImageResource(R.drawable.stp_card_placeholder);
+                mCreditCardIconImageView.setImageResource(R.drawable.stp_card_placeholder);
                 if (mCard.getNumber().length() >= 4) {
-                    mEtNumber.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                    mNumberEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
                     if (mCallback != null) {
                         mError = ERROR_NUMBER;
                         mCallback.onError(mError);
@@ -497,7 +509,7 @@ public class CreditCardView extends FrameLayout {
             if (mCallback != null) {
                 mCallback.onClearError();
             }
-            mIvCreditCardIcon.setImageResource(R.drawable.stp_card_placeholder);
+            mCreditCardIconImageView.setImageResource(R.drawable.stp_card_placeholder);
         }
     }
 
@@ -506,9 +518,9 @@ public class CreditCardView extends FrameLayout {
             return;
         }
         if (mCard.getBrand().equals(Card.AMERICAN_EXPRESS)) {
-            mIvCreditCardIcon.setImageResource(R.drawable.stp_card_cvc_amex);
+            mCreditCardIconImageView.setImageResource(R.drawable.stp_card_cvc_amex);
         } else {
-            mIvCreditCardIcon.setImageResource(R.drawable.stp_card_cvc);
+            mCreditCardIconImageView.setImageResource(R.drawable.stp_card_cvc);
         }
     }
 
@@ -520,15 +532,15 @@ public class CreditCardView extends FrameLayout {
 
     public void setTextColor(int color){
         mColor = color;
-        this.mEtNumber.setTextColor(color);
-        this.mEtExpiryDate.setTextColor(color);
-        this.mEtCvcNum.setTextColor(color);
+        this.mNumberEditText.setTextColor(color);
+        this.mExpiryDateEditText.setTextColor(color);
+        this.mCvcEditText.setTextColor(color);
     }
 
     public void setHintTextColor(int color){
-        this.mEtNumber.setHintTextColor(color);
-        this.mEtExpiryDate.setHintTextColor(color);
-        this.mEtCvcNum.setHintTextColor(color);
+        this.mNumberEditText.setHintTextColor(color);
+        this.mExpiryDateEditText.setHintTextColor(color);
+        this.mCvcEditText.setHintTextColor(color);
     }
 
     public Card getCard() {

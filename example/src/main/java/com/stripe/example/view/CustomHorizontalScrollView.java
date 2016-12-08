@@ -43,7 +43,9 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // if we can scroll pass the event to the superclass
-                if (mScrollable) return super.onTouchEvent(ev);
+                if (mScrollable) {
+                    return super.onTouchEvent(ev);
+                }
                 // only continue to handle the touch event if scrolling enabled
                 return mScrollable; // mScrollable is always false at this point
             default:
@@ -55,7 +57,9 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Don't do anything with intercepted touch events if
         // we are not scrollable
-        if (!mScrollable) return false;
+        if (!mScrollable) {
+            return false;
+        }
         else return super.onInterceptTouchEvent(ev);
     }
 }
