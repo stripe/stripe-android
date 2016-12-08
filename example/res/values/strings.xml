@@ -8,12 +8,19 @@
     <string name="endingIn">Card ending in </string>
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
+    <string name="validationSuccess">Validation Success</string>
+    <string name="cardValidatedMessage">Card validated, please press save</string>
 
     <string name="cardNumber">Card Number</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
     <string name="saveService">Save with Service</string>
     <string name="cvc">CVC</string>
+
+    <string name="cardErrorNumber">The card number that you entered is invalid</string>
+    <string name="cardErrorExpDate">The expiration date that you entered is invalid</string>
+    <string name="cardErrorCvc">The CVC code that you entered is invalid</string>
+    <string name="cardErrorUnknown">The card details that you entered are invalid</string>
 
     <string name="ok">OK</string>
 

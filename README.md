@@ -36,21 +36,24 @@ A publishable key is required to identify your website when communicating with S
 
 You can get all your keys from [your account page](https://manage.stripe.com/#account/apikeys).
 This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
-
+```java
     new Stripe("YOUR_PUBLISHABLE_KEY");
-
+```
 or
 
+```java
     new Stripe().setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
-
+```
 ### createToken
 
 createToken converts sensitive card data to a single-use token which you can safely pass to your server to charge the user. The [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
 
-    stripe.createToken(
-        new Card("4242424242424242", 12, 2013, "123"),
-        tokenCallback
-    );
+```java
+stripe.createToken(
+    new Card("4242424242424242", 12, 2013, "123"),
+    tokenCallback
+);
+```
 
 The first argument to createToken is a Card object. A Card contains the following fields:
 
@@ -76,71 +79,145 @@ The second argument tokenCallback is a callback you provide to handle responses 
 It should send the token to your server for processing onSuccess, and notify the user onError.
 
 Here's a sample implementation of the token callback:
-
-    stripe.createToken(
-        card,
-        new TokenCallback() {
-            public void onSuccess(Token token) {
-                // Send token to your own web service
-                MyServer.chargeToken(token);
-            }
-            public void onError(Exception error) {
-                Toast.makeText(getContext(),
-                    error.getLocalizedMessage(),
-                    Toast.LENGTH_LONG).show();
-            }
+```java
+stripe.createToken(
+    card,
+    new TokenCallback() {
+        public void onSuccess(Token token) {
+            // Send token to your own web service
+            MyServer.chargeToken(token);
         }
-    );
-
+        public void onError(Exception error) {
+            Toast.makeText(getContext(),
+                error.getLocalizedMessage(),
+                Toast.LENGTH_LONG).show();
+        }
+    }
+);
+```
 createToken is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
 
 ### createTokenSynchronous
 
-The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava. **Note: do not call this method on the main thread or your app will crash!**
+The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService. **Note: do not call this method on the main thread or your app will crash!**
 
-    Observable<Token> tokenObservable =
-        Observable.fromCallable(
-                new Callable<Token>() {
-                    @Override
-                    public Token call() throws Exception {
-                        // When executed, this method will conduct i/o on whatever thread it is run on
-                        return stripe.createTokenSynchronous(cardToCharge);
-                    }
-                });
-    tokenObservable
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe(
-                new Action0() {
-                    @Override
-                    public void call() {
-                        // Show a progress dialog if you prefer
-                        showProgressDialog();
-                    }
-                })
-        .doOnUnsubscribe(
-                new Action0() {
-                    @Override
-                    public void call() {
-                        // Close the progress dialog if you opened one
-                        closeProgressDialog();
-                    }
-                })
-        .subscribe(
-                new Action1<Token>() {
-                    @Override
-                    public void call(Token token) {
-                        // Send token to your own web service
-                        MyServer.chargeToken(token);
-                    }
-                },
-                new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        // Tell the user about the error
-                        handleError(throwable.getLocalizedMessage());
-                    }
-                });
+#### RxJava Example
+```java
+Observable<Token> tokenObservable =
+    Observable.fromCallable(
+            new Callable<Token>() {
+                @Override
+                public Token call() throws Exception {
+                    // When executed, this method will conduct i/o on whatever thread it is run on
+                    return stripe.createTokenSynchronous(cardToCharge);
+                }
+            });
+
+tokenObservable
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe(
+            new Action0() {
+                @Override
+                public void call() {
+                    // Show a progress dialog if you prefer
+                    showProgressDialog();
+                }
+            })
+    .doOnUnsubscribe(
+            new Action0() {
+                @Override
+                public void call() {
+                    // Close the progress dialog if you opened one
+                    closeProgressDialog();
+                }
+            })
+    .subscribe(
+            new Action1<Token>() {
+                @Override
+                public void call(Token token) {
+                    // Send token to your own web service
+                    MyServer.chargeToken(token);
+                }
+            },
+            new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    // Tell the user about the error
+                    handleError(throwable.getLocalizedMessage());
+                }
+            });
+```
+#### IntentService Example
+
+You can invoke the following from your code (where `cardToSave` is some Card object that you have created.)
+```java
+Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
+        mActivity,
+        cardToSave.getNumber(),
+        cardToSave.getExpMonth(),
+        cardToSave.getExpYear(),
+        cardToSave.getCVC(),
+        mPublishableKey);
+mActivity.startService(tokenServiceIntent);
+```
+Your IntentService can then perform the following in its `onHandleIntent` method.
+```java
+@Override
+protected void onHandleIntent(Intent intent) {
+    String errorMessage = null;
+    Token token = null;
+    if (intent != null) {
+        String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
+        Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
+        Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
+        String cvc = intent.getStringExtra(EXTRA_CVC);
+        String publishableKey = intent.getStringExtra(EXTRA_PUBLISHABLE_KEY);
+        Card card = new Card(cardNumber, month, year, cvc);
+        Stripe stripe = new Stripe();
+        try {
+            token = stripe.createTokenSynchronous(card, publishableKey);
+        } catch (StripeException stripeEx) {
+            errorMessage = stripeEx.getLocalizedMessage();
+        }
+    }
+    Intent localIntent = new Intent(TOKEN_ACTION);
+    if (token != null) {
+        // extract whatever information you want from your Token object
+        localIntent.putExtra(STRIPE_CARD_LAST_FOUR, token.getCard().getLast4());
+        localIntent.putExtra(STRIPE_CARD_TOKEN_ID, token.getId());
+    }
+    if (errorMessage != null) {
+        localIntent.putExtra(STRIPE_ERROR_MESSAGE, errorMessage);
+    }
+    // Broadcasts the Intent to receivers in this app.
+    LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+}
+```
+Registering a local BroadcastReceiver in your activity then allows you to handle the results.
+```java
+private class TokenBroadcastReceiver extends BroadcastReceiver {
+
+    private TokenBroadcastReceiver() { }
+    
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        mProgressDialogController.finishProgress();
+        if (intent == null) {
+            return;
+        }
+        if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
+            // handle your error!
+            return;
+        }
+        if (intent.hasExtra(TokenIntentService.STRIPE_CARD_TOKEN_ID) &&
+                intent.hasExtra(TokenIntentService.STRIPE_CARD_LAST_FOUR)) {
+                    // handle your resulting token here
+                }
+        }
+    }
+}
+```
 
 ### Client-side validation helpers
 
@@ -165,20 +242,20 @@ Convenience method to validate card number, expiry date and CVC.
 ### Retrieving information about a token
 
 If you're implementing a complex workflow, you may want to know if you've already charged a token (since they can only be charged once). You can call requestToken with a token id and callbacks to find out whether or not the token has already been used. This will return an object with the same structure as the object returned from createToken.
-
-    stripe.requestToken(
-        tokenID,
-        new TokenCallback() {
-            public void onSuccess(Token token) {
-                if (token.getUsed()) {
-                    Log.d("Token has already been charged.");
-                }
+```java
+stripe.requestToken(
+    tokenID,
+    new TokenCallback() {
+        public void onSuccess(Token token) {
+            if (token.getUsed()) {
+                Log.d("Token has already been charged.");
             }
-            public void onError(Exception error) {
-                // handle error
-            }
-        });
-
+        }
+        public void onError(Exception error) {
+            // handle error
+        }
+    });
+```
 ## Building the example project
 
 1. Clone the git repository.
@@ -188,4 +265,7 @@ If you're implementing a complex workflow, you may want to know if you've alread
     * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
 4. Build and run the project on your device or in the Android emulator.
 
-The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in PaymentActivity with your test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L25).
+The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in DependencyHandler with your test key](example/src/main/java/com/stripe/example/module/DependencyHandler.java#L30).
+
+Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
+[AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).

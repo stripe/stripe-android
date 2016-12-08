@@ -8,9 +8,9 @@ import android.support.v4.app.DialogFragment;
 
 import com.stripe.example.R;
 
-public class ErrorDialogFragment extends DialogFragment {
-    public static ErrorDialogFragment newInstance(int titleId, String message) {
-        ErrorDialogFragment fragment = new ErrorDialogFragment();
+public class MessageDialogFragment extends DialogFragment {
+    public static MessageDialogFragment newInstance(int titleId, String message) {
+        MessageDialogFragment fragment = new MessageDialogFragment();
 
         Bundle args = new Bundle();
         args.putInt("titleId", titleId);
@@ -21,7 +21,7 @@ public class ErrorDialogFragment extends DialogFragment {
         return fragment;
    }
 
-    public ErrorDialogFragment() {
+    public MessageDialogFragment() {
         // Empty constructor required for DialogFragment
     }
 
