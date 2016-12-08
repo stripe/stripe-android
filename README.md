@@ -197,7 +197,9 @@ protected void onHandleIntent(Intent intent) {
 Registering a local BroadcastReceiver in your activity then allows you to handle the results.
 ```java
 private class TokenBroadcastReceiver extends BroadcastReceiver {
+
     private TokenBroadcastReceiver() { }
+    
     @Override
     public void onReceive(Context context, Intent intent) {
         mProgressDialogController.finishProgress();
