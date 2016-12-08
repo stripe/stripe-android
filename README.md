@@ -265,7 +265,7 @@ stripe.requestToken(
     * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
 4. Build and run the project on your device or in the Android emulator.
 
-The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in PaymentActivity with your test key](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/PaymentActivity.java#L25).
+The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in DependencyHandler with your test key](example/src/main/java/com/stripe/example/module/DependencyHandler.java#L30).
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
