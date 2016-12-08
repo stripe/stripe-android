@@ -397,6 +397,8 @@ public class CreditCardView extends FrameLayout {
                             mEtExpiryDate.requestFocus();
                             return;
                         }
+                    } else if (curStringLen == 3) {
+                        setCreditCardIconForNumber();
                     }
 
                     // don't send CVC validation messages, interface does not respond to short CVC numbers
@@ -474,7 +476,7 @@ public class CreditCardView extends FrameLayout {
         if (mCard == null) {
             return;
         }
-        if (mCard.getNumber() != null && mCard.getNumber().length() >= 2) {
+        if (mCard.getNumber() != null) {
             String type = mCard.getBrand();
             if (!type.equals(Card.UNKNOWN)) {
                 mIvCreditCardIcon.setImageResource(getImageResForCardBrand(type));
@@ -483,10 +485,12 @@ public class CreditCardView extends FrameLayout {
                 }
             } else {
                 mIvCreditCardIcon.setImageResource(R.drawable.stp_card_placeholder);
-                mEtNumber.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
-                if (mCallback != null) {
-                    mError = ERROR_NUMBER;
-                    mCallback.onError(mError);
+                if (mCard.getNumber().length() >= 4) {
+                    mEtNumber.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                    if (mCallback != null) {
+                        mError = ERROR_NUMBER;
+                        mCallback.onError(mError);
+                    }
                 }
             }
         } else {
