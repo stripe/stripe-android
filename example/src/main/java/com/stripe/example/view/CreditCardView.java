@@ -177,68 +177,69 @@ public class CreditCardView extends FrameLayout {
         });
 
         mNumberEditText.addTextChangedListener(new TextWatcher() {
-            boolean freeze = false;
+            boolean ignoreTextChanges = false;
             int beforeStringLength = 0;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-                if (!freeze) {
+                if (!ignoreTextChanges) {
                     beforeStringLength = mNumberEditText.getText().toString().length();
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (!freeze) {
-                    String curString = mNumberEditText.getText().toString();
-                    int curStringLength = curString.length();
-
-                    mNumberEditText.setTextColor(mColor);
-
-                    // reformat with spaces
-                    // TODO : add formatting for non-16 digit cards
-                    String cleanedString = curString.replace(" ", "");
-                    int cleanedStringLength = cleanedString.length();
-                    String formattedString = "";
-                    for (int i = 0; i < 4; i++) {
-                        if (cleanedStringLength > (i * 4) + 4) {
-                            formattedString += cleanedString.substring((i * 4), ((i * 4) + 4)) + " ";
-                        } else {
-                            formattedString += cleanedString.substring((i * 4), cleanedStringLength);
-                            break;
-                        }
-                    }
-                    freeze = true;
-                    mNumberEditText.setText(formattedString);
-                    freeze = false;
-
-                    // always move cursor (selection) to end
-                    freeze = true;
-                    mNumberEditText.setSelection(mNumberEditText.getText().toString().length());
-                    freeze = false;
-
-                    mCard = new Card.Builder(formattedString, 1, 0, "").build();
-                    setCreditCardIconForNumber();
-
-                    // scroll to right if entered last number of card
-                    if (beforeStringLength == 18 && curStringLength == 19) {
-                        if (mCard.validateNumber()) {
-                            freeze = true;
-                            scrollRight();
-                            freeze = false;
-                            if (mCallback != null) {
-                                mCallback.onClearError();
-                            }
-                        } else {
-                            mNumberEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
-                            if (mCallback != null) {
-                                mCallback.onError(ERROR_NUMBER);
-                            }
-                        }
-                    }
-
-                    sendCardValidationCallback();
+                if (ignoreTextChanges) {
+                    return;
                 }
+                String curString = mNumberEditText.getText().toString();
+                int curStringLength = curString.length();
+
+                mNumberEditText.setTextColor(mColor);
+
+                // reformat with spaces
+                // TODO : add formatting for non-16 digit cards
+                String cleanedString = curString.replace(" ", "");
+                int cleanedStringLength = cleanedString.length();
+                String formattedString = "";
+                for (int i = 0; i < 4; i++) {
+                    if (cleanedStringLength > (i * 4) + 4) {
+                        formattedString += cleanedString.substring((i * 4), ((i * 4) + 4)) + " ";
+                    } else {
+                        formattedString += cleanedString.substring((i * 4), cleanedStringLength);
+                        break;
+                    }
+                }
+                ignoreTextChanges = true;
+                mNumberEditText.setText(formattedString);
+                ignoreTextChanges = false;
+
+                // always move cursor (selection) to end
+                ignoreTextChanges = true;
+                mNumberEditText.setSelection(mNumberEditText.getText().toString().length());
+                ignoreTextChanges = false;
+
+                mCard = new Card.Builder(formattedString, 1, 0, "").build();
+                setCreditCardIconForNumber();
+
+                // scroll to right if entered last number of card
+                if (beforeStringLength == 18 && curStringLength == 19) {
+                    if (mCard.validateNumber()) {
+                        ignoreTextChanges = true;
+                        scrollRight();
+                        ignoreTextChanges = false;
+                        if (mCallback != null) {
+                            mCallback.onClearError();
+                        }
+                    } else {
+                        mNumberEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                        if (mCallback != null) {
+                            mCallback.onError(ERROR_NUMBER);
+                        }
+                    }
+                }
+
+                sendCardValidationCallback();
             }
 
             @Override
@@ -262,108 +263,109 @@ public class CreditCardView extends FrameLayout {
         });
 
         mExpiryDateEditText.addTextChangedListener(new TextWatcher() {
-            boolean freeze = false;
+            boolean ignoreTextChanges = false;
             boolean hadSlash = false;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-                if (!freeze) {
+                if (!ignoreTextChanges) {
                     hadSlash = mExpiryDateEditText.getText().toString().contains("/");
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (!freeze) {
-                    String curString = mExpiryDateEditText.getText().toString();
+                if (ignoreTextChanges) {
+                    return;
+                }
+                String curString = mExpiryDateEditText.getText().toString();
 
-                    if (curString.isEmpty()) {
-                        return;
-                    }
+                if (curString.isEmpty()) {
+                    return;
+                }
 
-                    if (hadSlash && !mExpiryDateEditText.getText().toString().contains("/")) {
-                        freeze = true;
+                if (hadSlash && !mExpiryDateEditText.getText().toString().contains("/")) {
+                    ignoreTextChanges = true;
+                    mExpiryDateEditText.setText("");
+                    ignoreTextChanges = false;
+                    return;
+                }
+
+                mExpiryDateEditText.setTextColor(mColor);
+
+                String monthStr = null;
+                String yearStr = null;
+
+                String []parts = curString.split("[/]");
+                if (parts.length > 0 && !StripeTextUtils.isBlank(parts[0])) {
+                    try {
+                        monthStr = parts[0].substring(0, parts[0].length() > 2 ? 2 : parts[0].length());
+                        int month = Integer.parseInt(monthStr);
+                        mCard.setExpMonth(month);
+                        if (parts[0].length() == 1 && month > 1) {
+                            monthStr = String.format("%02d", month);
+                        }
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        ignoreTextChanges = true;
                         mExpiryDateEditText.setText("");
-                        freeze = false;
+                        ignoreTextChanges = false;
                         return;
                     }
-
-                    mExpiryDateEditText.setTextColor(mColor);
-
-                    String monthStr = null;
-                    String yearStr = null;
-
-                    String []parts = curString.split("[/]");
-                    if (parts.length > 0 && !StripeTextUtils.isBlank(parts[0])) {
+                    if (mCard.validateExpMonth() && parts.length > 1) {
                         try {
-                            monthStr = parts[0].substring(0, parts[0].length() > 2 ? 2 : parts[0].length());
-                            int month = Integer.parseInt(monthStr);
-                            mCard.setExpMonth(month);
-                            if (parts[0].length() == 1 && month > 1) {
-                                monthStr = String.format("%02d", month);
-                            }
+                            yearStr = parts[1].substring(0, parts[1].length() > 2 ? 2 : parts[1].length());
+                            int year = Integer.parseInt(yearStr);
+                            mCard.setExpYear(year);
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
-                            freeze = true;
+                            ignoreTextChanges = true;
                             mExpiryDateEditText.setText("");
-                            freeze = false;
+                            ignoreTextChanges = false;
                             return;
                         }
-                        if (mCard.validateExpMonth() && parts.length > 1) {
-                            try {
-                                yearStr = parts[1].substring(0, parts[1].length() > 2 ? 2 : parts[1].length());
-                                int year = Integer.parseInt(yearStr);
-                                mCard.setExpYear(year);
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                                freeze = true;
-                                mExpiryDateEditText.setText("");
-                                freeze = false;
-                                return;
-                            }
-                        }
                     }
-
-                    freeze = true;
-                    if (!StripeTextUtils.isBlank(monthStr)) {
-                        if (mCard.validateExpMonth() && monthStr.length() > 1) {
-                            mExpiryDateEditText.setText(String.format("%s/%s", monthStr, yearStr != null ? yearStr : ""));
-                        } else {
-                            mExpiryDateEditText.setText(String.format("%s", monthStr));
-                        }
-                    } else {
-                        mExpiryDateEditText.setText("");
-                    }
-                    mExpiryDateEditText.setSelection(mExpiryDateEditText.getText().toString().length());
-                    freeze = false;
-
-                    boolean error = false;
-
-                    if (!StripeTextUtils.isBlank(monthStr) || !StripeTextUtils.isBlank(yearStr)) {
-                        if ((!StripeTextUtils.isBlank(monthStr) && monthStr.length() == 2 && !mCard.validateExpMonth())) {
-                            mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
-                            if (mCallback != null) {
-                                mCallback.onError(ERROR_EXPIRY_MONTH);
-                            }
-                            error = true;
-                        } else if ((!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2 && !mCard.validateExpYear())) {
-                            mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
-                            if (mCallback != null) {
-                                mCallback.onError(ERROR_EXPIRY_YEAR);
-                            }
-                            error = true;
-                        } else if (!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2) { // only move to next field when year entered
-                            mCvcEditText.requestFocus();
-                        }
-                    }
-                    if (!error) {
-                        if (mCallback != null) {
-                            mCallback.onClearError();
-                        }
-                    }
-
-                    sendCardValidationCallback();
                 }
+
+                ignoreTextChanges = true;
+                if (!StripeTextUtils.isBlank(monthStr)) {
+                    if (mCard.validateExpMonth() && monthStr.length() > 1) {
+                        mExpiryDateEditText.setText(String.format("%s/%s", monthStr, yearStr != null ? yearStr : ""));
+                    } else {
+                        mExpiryDateEditText.setText(String.format("%s", monthStr));
+                    }
+                } else {
+                    mExpiryDateEditText.setText("");
+                }
+                mExpiryDateEditText.setSelection(mExpiryDateEditText.getText().toString().length());
+                ignoreTextChanges = false;
+
+                boolean error = false;
+
+                if (!StripeTextUtils.isBlank(monthStr) || !StripeTextUtils.isBlank(yearStr)) {
+                    if ((!StripeTextUtils.isBlank(monthStr) && monthStr.length() == 2 && !mCard.validateExpMonth())) {
+                        mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                        if (mCallback != null) {
+                            mCallback.onError(ERROR_EXPIRY_MONTH);
+                        }
+                        error = true;
+                    } else if ((!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2 && !mCard.validateExpYear())) {
+                        mExpiryDateEditText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_red_dark));
+                        if (mCallback != null) {
+                            mCallback.onError(ERROR_EXPIRY_YEAR);
+                        }
+                        error = true;
+                    } else if (!StripeTextUtils.isBlank(yearStr) && yearStr.length() == 2) { // only move to next field when year entered
+                        mCvcEditText.requestFocus();
+                    }
+                }
+                if (!error) {
+                    if (mCallback != null) {
+                        mCallback.onClearError();
+                    }
+                }
+
+                sendCardValidationCallback();
             }
 
             @Override
@@ -384,40 +386,41 @@ public class CreditCardView extends FrameLayout {
         });
 
         mCvcEditText.addTextChangedListener(new TextWatcher() {
-            boolean freeze = false;
+            boolean ignoreTextChanges = false;
             int beforeStringLength = 0;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-                if (!freeze) {
+                if (!ignoreTextChanges) {
                     beforeStringLength = mCvcEditText.getText().toString().length();
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (!freeze) {
-                    String curString = mCvcEditText.getText().toString();
-                    int curStringLength = curString.length();
-
-                    // TODO : this is deprecated, but what else should be used?
-                    mCard.setCVC(curString);
-
-                    if (beforeStringLength > curStringLength) {
-                        // removing space
-                        if (beforeStringLength == 1) {
-                            mExpiryDateEditText.requestFocus();
-                            return;
-                        }
-                    } else if (curStringLength == 3) {
-                        setCreditCardIconForNumber();
-                    }
-
-                    // don't send CVC validation messages, interface does not respond to short CVC numbers
-                    // however, ERROR_CVC set if isValid() called and CVC not valid
-
-                    sendCardValidationCallback();
+                if (ignoreTextChanges) {
+                    return;
                 }
+                String curString = mCvcEditText.getText().toString();
+                int curStringLength = curString.length();
+
+                // TODO : this is deprecated, but what else should be used?
+                mCard.setCVC(curString);
+
+                if (beforeStringLength > curStringLength) {
+                    // removing space
+                    if (beforeStringLength == 1) {
+                        mExpiryDateEditText.requestFocus();
+                        return;
+                    }
+                } else if (curStringLength == 3) {
+                    setCreditCardIconForNumber();
+                }
+
+                // don't send CVC validation messages, interface does not respond to short CVC numbers
+                // however, ERROR_CVC set if isValid() called and CVC not valid
+
+                sendCardValidationCallback();
             }
 
             @Override
