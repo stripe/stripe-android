@@ -3,9 +3,11 @@ package com.stripe.android.util;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
 
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.model.Card.FundingType;
+import static com.stripe.android.model.Token.TokenType;
 
 /**
  * Utility class for common text-related operations on Stripe data coming from the server.
@@ -130,5 +132,21 @@ public class StripeTextUtils {
         } else {
             return Card.FUNDING_UNKNOWN;
         }
+    }
+
+    /**
+     * Converts an unchecked String value to a {@link TokenType} or {@code null}.
+     *
+     * @param possibleTokenType a String that might match a {@link TokenType} or be empty
+     * @return {@code null} if the input is blank or otherwise does not match a {@link TokenType},
+     * else the appropriate {@link TokenType}.
+     */
+    @Nullable
+    @TokenType
+    public static String asTokenType(@Nullable String possibleTokenType) {
+        if (Token.TYPE_CARD.equals(possibleTokenType)) {
+            return Token.TYPE_CARD;
+        }
+        return null;
     }
 }

@@ -1,41 +1,62 @@
 package com.stripe.android.model;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 
 /**
  * The model of a Stripe card token.
  */
 public class Token extends com.stripe.model.StripeObject {
-    private final String id;
-    private final Date created;
-    private final boolean livemode;
-    private final boolean used;
-    private final Card card;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({TYPE_CARD})
+    public @interface TokenType {}
+    public static final String TYPE_CARD = "card";
+
+    private final String mId;
+    private final String mType;
+    private final Date mCreated;
+    private final boolean mLivemode;
+    private final boolean mUsed;
+    private final Card mCard;
 
     /**
-     * This method should not be invoked in your code.  This is used by Stripe to
-     * create tokens using a Stripe API response
+     * Constructor that should not be invoked in your code.  This is used by Stripe to
+     * create tokens using a Stripe API response.
+     *
+     *
      */
-    public Token(String id, boolean livemode, Date created, Boolean used, Card card) {
-        this.id = id;
-        this.livemode = livemode;
-        this.card = card;
-        this.created = created;
-        this.used = used;
+    public Token(
+            String id,
+            boolean livemode,
+            Date created,
+            Boolean used,
+            Card card,
+            @TokenType String type) {
+        mId = id;
+        mType = type;
+        mCreated = created;
+        mLivemode = livemode;
+        mCard = card;
+        mUsed = used;
     }
 
     /***
      * @return the {@link Date} this token was created
      */
     public Date getCreated() {
-        return created;
+        return mCreated;
     }
 
     /**
-     * @return the {@link #id} of this token
+     * @return the {@link #mId} of this token
      */
     public String getId() {
-        return id;
+        return mId;
     }
 
     /**
@@ -43,20 +64,28 @@ public class Token extends com.stripe.model.StripeObject {
      * it is only usable for testing
      */
     public boolean getLivemode() {
-        return livemode;
+        return mLivemode;
     }
 
     /**
      * @return {@code true} if this token has been used, {@code false} otherwise
      */
     public boolean getUsed() {
-        return used;
+        return mUsed;
+    }
+
+    /**
+     * @return Get the {@link TokenType} of this token.
+     */
+    @TokenType
+    public String getType() {
+        return mType;
     }
 
     /**
      * @return the {@link Card} for this token
      */
     public Card getCard() {
-        return card;
+        return mCard;
     }
 }
