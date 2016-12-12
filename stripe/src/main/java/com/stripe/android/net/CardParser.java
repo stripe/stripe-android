@@ -22,13 +22,13 @@ public class CardParser {
     static final String FIELD_ADDRESS_ZIP = "address_zip";
     static final String FIELD_BRAND = "brand";
     static final String FIELD_COUNTRY = "country";
+    static final String FIELD_CURRENCY = "currency";
     static final String FIELD_EXP_MONTH = "exp_month";
     static final String FIELD_EXP_YEAR = "exp_year";
+    static final String FIELD_FINGERPRINT = "fingerprint";
     static final String FIELD_FUNDING = "funding";
     static final String FIELD_LAST4 = "last4";
-    static final String FIELD_FINGERPRINT = "fingerprint";
     static final String FIELD_NAME = "name";
-    static final String FIELD_CURRENCY = "currency";
 
     /**
      * Parse the card directly from a JSON-formatted {@link String} value.

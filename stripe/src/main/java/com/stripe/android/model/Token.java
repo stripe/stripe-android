@@ -31,12 +31,12 @@ public class Token extends com.stripe.model.StripeObject {
      *
      */
     public Token(
-            @NonNull String id,
+            String id,
             boolean livemode,
             Date created,
             Boolean used,
             Card card,
-            @NonNull @TokenType String type) {
+            @TokenType String type) {
         mId = id;
         mType = type;
         mCreated = created;
@@ -55,7 +55,6 @@ public class Token extends com.stripe.model.StripeObject {
     /**
      * @return the {@link #mId} of this token
      */
-    @NonNull
     public String getId() {
         return mId;
     }
@@ -79,7 +78,6 @@ public class Token extends com.stripe.model.StripeObject {
      * @return Get the {@link TokenType} of this token.
      */
     @TokenType
-    @NonNull
     public String getType() {
         return mType;
     }
