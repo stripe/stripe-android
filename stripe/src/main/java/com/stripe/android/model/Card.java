@@ -761,5 +761,4 @@ public class Card extends com.stripe.model.StripeObject {
         }
         return number.trim().replaceAll("\\s+|-", "");
     }
-
 }

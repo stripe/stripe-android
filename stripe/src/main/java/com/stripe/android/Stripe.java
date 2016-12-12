@@ -399,7 +399,8 @@ public class Stripe {
                 stripeToken.getLivemode(),
                 new Date(stripeToken.getCreated() * 1000),
                 stripeToken.getUsed(),
-                androidCard);
+                androidCard,
+                Token.TYPE_CARD);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
