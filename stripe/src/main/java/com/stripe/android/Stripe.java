@@ -14,15 +14,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.RequestOptions;
+import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.util.StripeTextUtils;
-import com.stripe.exception.APIConnectionException;
-import com.stripe.exception.APIException;
-import com.stripe.exception.AuthenticationException;
-import com.stripe.exception.CardException;
-import com.stripe.exception.InvalidRequestException;
-import com.stripe.net.RequestOptions;
 
 /**
  * Class that handles {@link Token} creation from charges and {@link Card} models.
@@ -42,15 +44,13 @@ public class Stripe {
                         @Override
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
-                                RequestOptions requestOptions = RequestOptions.builder()
-                                        .setApiKey(publishableKey).build();
-                                com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                                        hashMapFromCard(card), requestOptions);
-                                com.stripe.model.Card stripeCard = stripeToken.getCard();
-                                Card card = androidCardFromStripeCard(stripeCard);
-                                Token token = androidTokenFromStripeToken(card, stripeToken);
+                                RequestOptions requestOptions =
+                                        RequestOptions.builder(publishableKey).build();
+                                Token token = StripeApiHandler.createToken(
+                                        hashMapFromCard(card),
+                                        requestOptions);
                                 return new ResponseWrapper(token, null);
-                            } catch (Exception e) {
+                            } catch (StripeException e) {
                                 return new ResponseWrapper(null, e);
                             }
                         }
@@ -73,11 +73,9 @@ public class Stripe {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
                 protected ResponseWrapper doInBackground(Void... params) {
                     try {
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(
-                                tokenId, publishableKey);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        RequestOptions requestOptions =
+                                RequestOptions.builder(publishableKey).build();
+                        Token token = StripeApiHandler.retrieveToken(requestOptions, tokenId);
                         return new ResponseWrapper(token, null);
                     } catch (Exception e) {
                         return new ResponseWrapper(null, e);
@@ -221,7 +219,7 @@ public class Stripe {
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     * Stripe's servers)
      */
     public Token createTokenSynchronous(Card card, String publishableKey)
             throws AuthenticationException,
@@ -231,13 +229,52 @@ public class Stripe {
             APIException {
         validateKey(publishableKey);
 
-        RequestOptions requestOptions = RequestOptions.builder()
-                .setApiKey(publishableKey).build();
-        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                hashMapFromCard(card), requestOptions);
-        com.stripe.model.Card stripeCard = stripeToken.getCard();
-        Card resultCard = androidCardFromStripeCard(stripeCard);
-        return androidTokenFromStripeToken(resultCard, stripeToken);
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.createToken(hashMapFromCard(card), requestOptions);
+    }
+
+    /**
+     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param tokenId the ID of the token you're trying to retrieve
+     * @return the {@link Token}, if it exists and you can access it
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token requestTokenSynchronous(@NonNull String tokenId)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return requestTokenSynchronous(tokenId, defaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param tokenId the ID of the token you're trying to retrieve
+     * @param publishableKey a publishable key to use with this request
+     * @return the {@link Token}, if it exists and you can access it
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token requestTokenSynchronous(@NonNull String tokenId, @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.retrieveToken(requestOptions, tokenId);
     }
 
     /**

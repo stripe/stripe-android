@@ -50,6 +50,16 @@ public class RequestOptions {
     }
 
     /**
+     * Static accessor for the {@link RequestOptionsBuilder} class.
+     *
+     * @param publishableApiKey your publishable API key
+     * @return a {@link RequestOptionsBuilder} instance
+     */
+    public static RequestOptions.RequestOptionsBuilder builder(@NonNull String publishableApiKey) {
+        return new RequestOptions.RequestOptionsBuilder(publishableApiKey);
+    }
+
+    /**
      * Builder class for a set of {@link RequestOptions}.
      */
     public static final class RequestOptionsBuilder {
