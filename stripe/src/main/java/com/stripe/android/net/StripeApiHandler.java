@@ -41,10 +41,10 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class StripeApiHandler {
 
-    public static final String LIVE_API_BASE = "https://api.stripe.com";
-    public static final String CHARSET = "UTF-8";
-    public static final String TOKENS = "tokens";
-    public static final String VERSION = "3.5.0";
+    static final String LIVE_API_BASE = "https://api.stripe.com";
+    static final String CHARSET = "UTF-8";
+    static final String TOKENS = "tokens";
+    static final String VERSION = "3.5.0";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -61,12 +61,14 @@ public class StripeApiHandler {
     /**
      * Create a {@link Token} using the input card parameters.
      *
-     * @param cardParams
-     * @param options
-     * @return
-     * @throws AuthenticationException if there is a problem authenticating to the stripe api
+     * @param cardParams a mapped set of parameters representing the object for which this token
+     *                   is being created
+     * @param options a {@link RequestOptions} object that contains connection data like the api
+     *                key, api version, etc
+     * @return a {@link Token} that can be used to perform other operations with this card
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
      * @throws InvalidRequestException if one or more of the parameters is incorrect
-     * @throws APIConnectionException if there is a problem connecting to the stripe api
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
      * @throws CardException if there is a problem with the card information
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
@@ -82,8 +84,79 @@ public class StripeApiHandler {
         return requestToken(POST, getApiUrl(), cardParams, options);
     }
 
+    /**
+     * Retrieve a {@link Token} by its ID.
+     *
+     * @param options a {@link RequestOptions} object that contains
+     * @param tokenId the id of the token that you're looking for
+     * @return a {@link Token} if one exists and you have the permissions to access it
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if the token ID parameter is invalid
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Nullable
+    public static Token retrieveToken(
+            @NonNull RequestOptions options,
+            @NonNull String tokenId)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        try {
+            return requestToken(GET, getRetrieveTokenApiUrl(tokenId), null, options);
+        } catch (CardException cardException) {
+            // It shouldn't be possible to throw a CardException from the retrieve token method.
+            throw new APIException(
+                    cardException.getMessage(),
+                    cardException.getRequestId(),
+                    cardException.getStatusCode(),
+                    cardException);
+        }
+    }
+
+    static Map<String, String> getHeaders(RequestOptions options) {
+        Map<String, String> headers = new HashMap<>();
+        String apiVersion = options.getApiVersion();
+        headers.put("Accept-Charset", CHARSET);
+        headers.put("Accept", "application/json");
+        headers.put("User-Agent",
+                String.format("Stripe/v1 JavaBindings/%s", VERSION));
+
+        headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
+
+        // debug headers
+        String[] propertyNames = { "os.name", "os.version", "os.arch",
+                "java.version", "java.vendor", "java.vm.version",
+                "java.vm.vendor" };
+
+        Map<String, String> propertyMap = new HashMap<>();
+        for (String propertyName : propertyNames) {
+            propertyMap.put(propertyName, System.getProperty(propertyName));
+        }
+        propertyMap.put("bindings.version", VERSION);
+        propertyMap.put("lang", "Java");
+        propertyMap.put("publisher", "Stripe");
+        JSONObject headerMappingObject = new JSONObject(propertyMap);
+        headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
+
+        if (apiVersion != null) {
+            headers.put("Stripe-Version", apiVersion);
+        }
+
+        if (options.getIdempotencyKey() != null) {
+            headers.put("Idempotency-Key", options.getIdempotencyKey());
+        }
+
+        return headers;
+    }
+
     private static String getApiUrl() {
         return String.format("%s/v1/%s", LIVE_API_BASE, TOKENS);
+    }
+
+    private static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
+        return String.format("%s/%s", getApiUrl(), tokenId);
     }
 
     private static String formatURL(String url, String query) {
@@ -124,42 +197,6 @@ public class StripeApiHandler {
             }
         }
         return conn;
-    }
-
-    static Map<String, String> getHeaders(RequestOptions options) {
-        Map<String, String> headers = new HashMap<>();
-        String apiVersion = options.getApiVersion();
-        headers.put("Accept-Charset", CHARSET);
-        headers.put("Accept", "application/json");
-        headers.put("User-Agent",
-                String.format("Stripe/v1 JavaBindings/%s", VERSION));
-
-        headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
-
-        // debug headers
-        String[] propertyNames = { "os.name", "os.version", "os.arch",
-                "java.version", "java.vendor", "java.vm.version",
-                "java.vm.vendor" };
-
-        Map<String, String> propertyMap = new HashMap<>();
-        for (String propertyName : propertyNames) {
-            propertyMap.put(propertyName, System.getProperty(propertyName));
-        }
-        propertyMap.put("bindings.version", VERSION);
-        propertyMap.put("lang", "Java");
-        propertyMap.put("publisher", "Stripe");
-        JSONObject headerMappingObject = new JSONObject(propertyMap);
-        headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
-
-        if (apiVersion != null) {
-            headers.put("Stripe-Version", apiVersion);
-        }
-
-        if (options.getIdempotencyKey() != null) {
-            headers.put("Idempotency-Key", options.getIdempotencyKey());
-        }
-
-        return headers;
     }
 
     private static java.net.HttpURLConnection createStripeConnection(
