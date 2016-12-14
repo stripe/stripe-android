@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -384,34 +383,6 @@ public class Stripe {
         this.defaultPublishableKey = publishableKey;
     }
 
-    /**
-     * Converts a stripe-java card model into a {@link Card} model.
-     *
-     * @param stripeCard the server-returned {@link com.stripe.model.Card}.
-     * @return an equivalent {@link Card}.
-     */
-    @VisibleForTesting
-    Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(
-                null,
-                stripeCard.getExpMonth(),
-                stripeCard.getExpYear(),
-                null,
-                stripeCard.getName(),
-                stripeCard.getAddressLine1(),
-                stripeCard.getAddressLine2(),
-                stripeCard.getAddressCity(),
-                stripeCard.getAddressState(),
-                stripeCard.getAddressZip(),
-                stripeCard.getAddressCountry(),
-                stripeCard.getBrand(),
-                stripeCard.getLast4(),
-                stripeCard.getFingerprint(),
-                stripeCard.getFunding(),
-                stripeCard.getCountry(),
-                stripeCard.getCurrency());
-    }
-
     private void validateKey(@NonNull @Size(min = 1) String publishableKey)
             throws AuthenticationException {
         if (publishableKey == null || publishableKey.length() == 0) {
@@ -426,18 +397,6 @@ public class Stripe {
                     "instead of the publishable one. For more info, " +
                     "see https://stripe.com/docs/stripe.js", null, 0);
         }
-    }
-
-    private Token androidTokenFromStripeToken(
-            Card androidCard,
-            com.stripe.model.Token stripeToken) {
-        return new Token(
-                stripeToken.getId(),
-                stripeToken.getLivemode(),
-                new Date(stripeToken.getCreated() * 1000),
-                stripeToken.getUsed(),
-                androidCard,
-                Token.TYPE_CARD);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {

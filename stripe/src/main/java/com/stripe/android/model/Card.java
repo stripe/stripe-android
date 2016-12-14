@@ -13,10 +13,9 @@ import java.lang.annotation.RetentionPolicy;
 
 
 /**
- * A model object representing a Card in the Android SDK. Note that this is slightly different
- * from the Card model in stripe-java.
+ * A model object representing a Card in the Android SDK.
  */
-public class Card extends com.stripe.model.StripeObject {
+public class Card {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
