@@ -26,27 +26,27 @@ class ErrorParser {
     private static final String FIELD_TYPE = "type";
 
     @NonNull
-    static Error parseError(String rawError) {
-        Error error = new Error();
+    static StripeError parseError(String rawError) {
+        StripeError stripeError = new StripeError();
         try {
             JSONObject jsonError = new JSONObject(rawError);
             JSONObject errorObject = jsonError.getJSONObject(FIELD_ERROR);
-            error.charge = StripeJsonUtils.optString(errorObject, FIELD_CHARGE);
-            error.code = StripeJsonUtils.optString(errorObject, FIELD_CODE);
-            error.decline_code = StripeJsonUtils.optString(errorObject, FIELD_DECLINE_CODE);
-            error.message = StripeJsonUtils.optString(errorObject, FIELD_MESSAGE);
-            error.param = StripeJsonUtils.optString(errorObject, FIELD_PARAM);
-            error.type = StripeJsonUtils.optString(errorObject, FIELD_TYPE);
+            stripeError.charge = StripeJsonUtils.optString(errorObject, FIELD_CHARGE);
+            stripeError.code = StripeJsonUtils.optString(errorObject, FIELD_CODE);
+            stripeError.decline_code = StripeJsonUtils.optString(errorObject, FIELD_DECLINE_CODE);
+            stripeError.message = StripeJsonUtils.optString(errorObject, FIELD_MESSAGE);
+            stripeError.param = StripeJsonUtils.optString(errorObject, FIELD_PARAM);
+            stripeError.type = StripeJsonUtils.optString(errorObject, FIELD_TYPE);
         } catch (JSONException jsonException) {
-            error.message = MALFORMED_RESPONSE_MESSAGE;
+            stripeError.message = MALFORMED_RESPONSE_MESSAGE;
         }
-        return error;
+        return stripeError;
     }
 
     /**
      * A model for error objects sent from the server.
      */
-    static class Error {
+    static class StripeError {
         public String type;
 
         public String message;

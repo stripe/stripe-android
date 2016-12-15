@@ -402,40 +402,40 @@ public class StripeApiHandler {
             throws InvalidRequestException, AuthenticationException,
             CardException, APIException {
 
-        ErrorParser.Error error = ErrorParser.parseError(rBody);
+        ErrorParser.StripeError stripeError = ErrorParser.parseError(rBody);
         switch (rCode) {
             case 400:
                 throw new InvalidRequestException(
-                        error.message,
-                        error.param,
+                        stripeError.message,
+                        stripeError.param,
                         requestId,
                         rCode,
                         null);
             case 404:
                 throw new InvalidRequestException(
-                        error.message,
-                        error.param,
+                        stripeError.message,
+                        stripeError.param,
                         requestId,
                         rCode,
                         null);
             case 401:
-                throw new AuthenticationException(error.message, requestId, rCode);
+                throw new AuthenticationException(stripeError.message, requestId, rCode);
             case 402:
                 throw new CardException(
-                        error.message,
+                        stripeError.message,
                         requestId,
-                        error.code,
-                        error.param,
-                        error.decline_code,
-                        error.charge,
+                        stripeError.code,
+                        stripeError.param,
+                        stripeError.decline_code,
+                        stripeError.charge,
                         rCode,
                         null);
             case 403:
-                throw new PermissionException(error.message, requestId, rCode);
+                throw new PermissionException(stripeError.message, requestId, rCode);
             case 429:
-                throw new RateLimitException(error.message, error.param, requestId, rCode, null);
+                throw new RateLimitException(stripeError.message, stripeError.param, requestId, rCode, null);
             default:
-                throw new APIException(error.message, requestId, rCode, null);
+                throw new APIException(stripeError.message, requestId, rCode, null);
         }
     }
 

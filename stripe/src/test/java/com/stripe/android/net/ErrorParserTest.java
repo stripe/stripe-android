@@ -1,7 +1,5 @@
 package com.stripe.android.net;
 
-import com.stripe.android.model.Token;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -35,18 +33,18 @@ public class ErrorParserTest {
 
     @Test
     public void parseError_withInvalidRequestError_createsCorrectObject() {
-        ErrorParser.Error parsedError = ErrorParser.parseError(RAW_INVALID_REQUEST_ERROR);
+        ErrorParser.StripeError parsedStripeError = ErrorParser.parseError(RAW_INVALID_REQUEST_ERROR);
         String errorMessage = "The Stripe API is only accessible over HTTPS.  " +
                 "Please see <https://stripe.com/docs> for more information.";
-        assertEquals(errorMessage, parsedError.message);
-        assertEquals("invalid_request_error", parsedError.type);
-        assertNull(parsedError.param);
+        assertEquals(errorMessage, parsedStripeError.message);
+        assertEquals("invalid_request_error", parsedStripeError.type);
+        assertNull(parsedStripeError.param);
     }
 
     @Test
     public void parseError_withNoErrorMessage_addsInvalidResponseMessage() {
-        ErrorParser.Error badError = ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR);
-        assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, badError.message);
-        assertNull(badError.type);
+        ErrorParser.StripeError badStripeError = ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR);
+        assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, badStripeError.message);
+        assertNull(badStripeError.type);
     }
 }
