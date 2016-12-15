@@ -1,6 +1,7 @@
 package com.stripe.android.net;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.util.StripeJsonUtils;
 
@@ -12,6 +13,10 @@ import org.json.JSONObject;
  */
 class ErrorParser {
 
+    @VisibleForTesting
+    static final String MALFORMED_RESPONSE_MESSAGE =
+            "An improperly formatted error response was found.";
+
     private static final String FIELD_CHARGE = "charge";
     private static final String FIELD_CODE = "code";
     private static final String FIELD_DECLINE_CODE = "decline_code";
@@ -19,9 +24,6 @@ class ErrorParser {
     private static final String FIELD_MESSAGE = "message";
     private static final String FIELD_PARAM = "param";
     private static final String FIELD_TYPE = "type";
-
-    private static final String MALFORMED_RESPONSE_MESSAGE =
-            "An improperly formatted error response was found.";
 
     @NonNull
     static Error parseError(String rawError) {

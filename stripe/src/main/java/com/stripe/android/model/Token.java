@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
