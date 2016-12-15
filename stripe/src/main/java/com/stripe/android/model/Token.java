@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
@@ -10,7 +9,7 @@ import java.util.Date;
 /**
  * The model of a Stripe card token.
  */
-public class Token extends com.stripe.model.StripeObject {
+public class Token {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({TYPE_CARD})
@@ -27,8 +26,6 @@ public class Token extends com.stripe.model.StripeObject {
     /**
      * Constructor that should not be invoked in your code.  This is used by Stripe to
      * create tokens using a Stripe API response.
-     *
-     *
      */
     public Token(
             String id,

@@ -6,8 +6,6 @@ configurations {
 
 dependencies {
     compile 'com.android.support:support-annotations:25.0.1'
-    compile 'com.stripe:stripe-java:3.2.0'
-    compile 'com.google.code.gson:gson:2.2.4'
 
     javadocDeps 'com.android.support:support-annotations:25.0.1'
     provided 'javax.annotation:jsr250-api:1.0'
