@@ -1,9 +1,5 @@
 package com.stripe.android.net;
 
-
-import android.os.Build;
-
-import com.stripe.android.Stripe;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.StripeNetworkUtils;
@@ -61,9 +57,8 @@ public class StripeApiHandlerTest {
 
         assertNotNull(headerMap);
         assertFalse(headerMap.containsKey("Idempotency-Key"));
+        assertFalse(headerMap.containsKey("Stripe-Version"));
         assertTrue(headerMap.containsKey("Authorization"));
-        // Note: it contains this because RequestOptions always returns a value for api version
-        assertTrue(headerMap.containsKey("Stripe-Version"));
     }
 
     @Test

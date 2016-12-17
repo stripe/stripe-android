@@ -10,8 +10,6 @@ import com.stripe.android.util.StripeTextUtils;
  */
 public class RequestOptions {
 
-    public static final String DEFAULT_API_VERSION = "2016-07-06";
-
     @NonNull private final String mApiVersion;
     @Nullable private final String mIdempotencyKey;
     @NonNull private final String mPublishableApiKey;
@@ -28,7 +26,7 @@ public class RequestOptions {
     /**
      * @return the API version for this request
      */
-    @NonNull
+    @Nullable
     public String getApiVersion() {
         return mApiVersion;
     }
@@ -75,7 +73,6 @@ public class RequestOptions {
          */
         public RequestOptionsBuilder(@NonNull String publishableApiKey) {
             this.publishableApiKey = publishableApiKey;
-            this.apiVersion = DEFAULT_API_VERSION;
         }
 
         /**
@@ -84,6 +81,7 @@ public class RequestOptions {
          * @param publishableApiKey your publishable API key
          * @return {@code this}, for chaining purposes
          */
+        @NonNull
         public RequestOptionsBuilder setPublishableApiKey(@NonNull String publishableApiKey) {
             this.publishableApiKey = publishableApiKey;
             return this;
@@ -96,6 +94,7 @@ public class RequestOptions {
          * @param idempotencyKey the idempotency key
          * @return {@code this}, for chaining purposes
          */
+        @NonNull
         public RequestOptionsBuilder setIdempotencyKey(@Nullable String idempotencyKey) {
             this.idempotencyKey = idempotencyKey;
             return this;
@@ -103,14 +102,15 @@ public class RequestOptions {
 
         /**
          * Setter for the API version for this set of {@link RequestOptions}. If not set,
-         * {@link RequestOptions#DEFAULT_API_VERSION} is used.
+         * your account default API version is used.
          *
          * @param apiVersion the API version to use
          * @return {@code this}, for chaining purposes
          */
+        @NonNull
         public RequestOptionsBuilder setApiVersion(@Nullable String apiVersion) {
             this.apiVersion = StripeTextUtils.isBlank(apiVersion)
-                    ? DEFAULT_API_VERSION
+                    ? null
                     : apiVersion;
             return this;
         }
