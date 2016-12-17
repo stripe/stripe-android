@@ -34,6 +34,13 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void testGetRequestTokenApiUrl() {
+        String tokenId = "tok_sample";
+        String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
+        assertEquals("https://api.stripe.com/v1/tokens/" + tokenId, requestApi);
+    }
+
+    @Test
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
