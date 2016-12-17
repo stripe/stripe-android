@@ -22,16 +22,16 @@ import static org.junit.Assert.assertNotNull;
 @Config(sdk = 23)
 public class StripeNetworkUtilsTest {
 
-    private static final String CARD_NUMBER = "4242424242424242";
-    private static final String CARD_CVC = "123";
-    private static final String CARD_CITY = "San Francisco";
-    private static final String CARD_CURRENCY = "USD";
     private static final String CARD_ADDRESS_L1 = "123 Main Street";
     private static final String CARD_ADDRESS_L2 = "906";
-    private static final String CARD_ZIP = "94107";
-    private static final String CARD_STATE = "CA";
+    private static final String CARD_CITY = "San Francisco";
     private static final String CARD_COUNTRY = "US";
+    private static final String CARD_CURRENCY = "USD";
+    private static final String CARD_CVC = "123";
     private static final String CARD_NAME = "J Q Public";
+    private static final String CARD_NUMBER = "4242424242424242";
+    private static final String CARD_STATE = "CA";
+    private static final String CARD_ZIP = "94107";
 
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
