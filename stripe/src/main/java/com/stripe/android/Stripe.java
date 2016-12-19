@@ -8,9 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import com.stripe.android.exception.APIConnectionException;
@@ -23,7 +20,8 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.RequestOptions;
 import com.stripe.android.net.StripeApiHandler;
-import com.stripe.android.util.StripeTextUtils;
+
+import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
 
 /**
  * Class that handles {@link Token} creation from charges and {@link Card} models.
@@ -418,34 +416,6 @@ public class Stripe {
         } else {
             task.execute();
         }
-    }
-
-    private Map<String, Object> hashMapFromCard(Card card) {
-        Map<String, Object> tokenParams = new HashMap<>();
-
-        Map<String, Object> cardParams = new HashMap<>();
-        cardParams.put("number", StripeTextUtils.nullIfBlank(card.getNumber()));
-        cardParams.put("cvc", StripeTextUtils.nullIfBlank(card.getCVC()));
-        cardParams.put("exp_month", card.getExpMonth());
-        cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", StripeTextUtils.nullIfBlank(card.getName()));
-        cardParams.put("currency", StripeTextUtils.nullIfBlank(card.getCurrency()));
-        cardParams.put("address_line1", StripeTextUtils.nullIfBlank(card.getAddressLine1()));
-        cardParams.put("address_line2", StripeTextUtils.nullIfBlank(card.getAddressLine2()));
-        cardParams.put("address_city", StripeTextUtils.nullIfBlank(card.getAddressCity()));
-        cardParams.put("address_zip", StripeTextUtils.nullIfBlank(card.getAddressZip()));
-        cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
-        cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
-
-        // Remove all null values; they cause validation errors
-        for (String key : new HashSet<>(cardParams.keySet())) {
-            if (cardParams.get(key) == null) {
-                cardParams.remove(key);
-            }
-        }
-
-        tokenParams.put("card", cardParams);
-        return tokenParams;
     }
 
     private class ResponseWrapper {

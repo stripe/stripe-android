@@ -3,6 +3,7 @@ package com.stripe.android.net;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -115,6 +116,23 @@ public class StripeApiHandler {
         }
     }
 
+    static String createQuery(Map<String, Object> params)
+            throws UnsupportedEncodingException, InvalidRequestException {
+        StringBuilder queryStringBuffer = new StringBuilder();
+        List<Parameter> flatParams = flattenParams(params);
+        Iterator<Parameter> it = flatParams.iterator();
+
+        while (it.hasNext()) {
+            if (queryStringBuffer.length() > 0) {
+                queryStringBuffer.append("&");
+            }
+            Parameter param = it.next();
+            queryStringBuffer.append(urlEncodePair(param.key, param.value));
+        }
+
+        return queryStringBuffer.toString();
+    }
+
     static Map<String, String> getHeaders(RequestOptions options) {
         Map<String, String> headers = new HashMap<>();
         String apiVersion = options.getApiVersion();
@@ -134,6 +152,7 @@ public class StripeApiHandler {
         for (String propertyName : propertyNames) {
             propertyMap.put(propertyName, System.getProperty(propertyName));
         }
+
         propertyMap.put("bindings.version", VERSION);
         propertyMap.put("lang", "Java");
         propertyMap.put("publisher", "Stripe");
@@ -151,11 +170,13 @@ public class StripeApiHandler {
         return headers;
     }
 
-    private static String getApiUrl() {
+    @VisibleForTesting
+    static String getApiUrl() {
         return String.format("%s/v1/%s", LIVE_API_BASE, TOKENS);
     }
 
-    private static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
+    @VisibleForTesting
+    static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
         return String.format("%s/%s", getApiUrl(), tokenId);
     }
 
@@ -307,23 +328,6 @@ public class StripeApiHandler {
 
         // HTTPSURLConnection verifies SSL cert by default
         return makeURLConnectionRequest(method, url, query, options);
-    }
-
-    private static String createQuery(Map<String, Object> params)
-            throws UnsupportedEncodingException, InvalidRequestException {
-        StringBuilder queryStringBuffer = new StringBuilder();
-        List<Parameter> flatParams = flattenParams(params);
-        Iterator<Parameter> it = flatParams.iterator();
-
-        while (it.hasNext()) {
-            if (queryStringBuffer.length() > 0) {
-                queryStringBuffer.append("&");
-            }
-            Parameter param = it.next();
-            queryStringBuffer.append(urlEncodePair(param.key, param.value));
-        }
-
-        return queryStringBuffer.toString();
     }
 
     private static List<Parameter> flattenParams(Map<String, Object> params)
