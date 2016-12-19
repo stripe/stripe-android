@@ -69,7 +69,7 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void getHeaders_containsAndroidPropertyMapValues() {
+    public void getHeaders_containsPropertyMapValues() {
         RequestOptions requestOptions = RequestOptions.builder("some_key").build();
         Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
 
@@ -80,17 +80,6 @@ public class StripeApiHandlerTest {
             assertEquals("3.5.0", mapObject.getString("bindings.version"));
             assertEquals("Java", mapObject.getString("lang"));
             assertEquals("Stripe", mapObject.getString("publisher"));
-
-            // This is the only android-specific value we can actually test in automation because
-            // it is taken from the @Config annotation on the test class.
-            assertEquals(23, mapObject.getInt("phone.sdk_version"));
-
-            // The value for all of these comes up as unknown in automation.
-            assertTrue(mapObject.has("phone.brand"));
-            assertTrue(mapObject.has("phone.device"));
-            assertTrue(mapObject.has("phone.manufacturer"));
-            assertTrue(mapObject.has("phone.model"));
-            assertTrue(mapObject.has("phone.android_name"));
         } catch (JSONException jsonException) {
             fail("Failed to get a parsable JsonObject for the user agent.");
         }
