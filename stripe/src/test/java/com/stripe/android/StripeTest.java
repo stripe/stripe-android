@@ -32,7 +32,6 @@ import static org.junit.Assert.fail;
 @Config(sdk = 23)
 public class StripeTest {
 
-    private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
@@ -48,7 +47,9 @@ public class StripeTest {
 
     private static final String DEFAULT_TOKEN_ID = "tok_default";
 
+    private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
     private static final String TEST_CARD_NUMBER = "4242424242424242";
+
     private Card mCard;
     private int mYear;
 
