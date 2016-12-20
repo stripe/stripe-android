@@ -242,7 +242,11 @@ public class Stripe {
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
+     * keys should not be included in mobile applications.
      */
+    @Deprecated
     public Token requestTokenSynchronous(@NonNull String tokenId)
             throws AuthenticationException,
             InvalidRequestException,
@@ -264,7 +268,11 @@ public class Stripe {
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
+     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
+     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
+     * keys should not be included in mobile applications.
      */
+    @Deprecated
     public Token requestTokenSynchronous(@NonNull String tokenId, @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
