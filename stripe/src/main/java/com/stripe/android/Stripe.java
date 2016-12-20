@@ -8,21 +8,20 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.util.StripeTextUtils;
-import com.stripe.exception.APIConnectionException;
-import com.stripe.exception.APIException;
-import com.stripe.exception.AuthenticationException;
-import com.stripe.exception.CardException;
-import com.stripe.exception.InvalidRequestException;
-import com.stripe.net.RequestOptions;
+import com.stripe.android.net.RequestOptions;
+import com.stripe.android.net.StripeApiHandler;
+
+import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
 
 /**
  * Class that handles {@link Token} creation from charges and {@link Card} models.
@@ -42,15 +41,13 @@ public class Stripe {
                         @Override
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
-                                RequestOptions requestOptions = RequestOptions.builder()
-                                        .setApiKey(publishableKey).build();
-                                com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                                        hashMapFromCard(card), requestOptions);
-                                com.stripe.model.Card stripeCard = stripeToken.getCard();
-                                Card card = androidCardFromStripeCard(stripeCard);
-                                Token token = androidTokenFromStripeToken(card, stripeToken);
+                                RequestOptions requestOptions =
+                                        RequestOptions.builder(publishableKey).build();
+                                Token token = StripeApiHandler.createToken(
+                                        hashMapFromCard(card),
+                                        requestOptions);
                                 return new ResponseWrapper(token, null);
-                            } catch (Exception e) {
+                            } catch (StripeException e) {
                                 return new ResponseWrapper(null, e);
                             }
                         }
@@ -73,11 +70,9 @@ public class Stripe {
             AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
                 protected ResponseWrapper doInBackground(Void... params) {
                     try {
-                        com.stripe.model.Token stripeToken = com.stripe.model.Token.retrieve(
-                                tokenId, publishableKey);
-                        com.stripe.model.Card stripeCard = stripeToken.getCard();
-                        Card card = androidCardFromStripeCard(stripeCard);
-                        Token token = androidTokenFromStripeToken(card, stripeToken);
+                        RequestOptions requestOptions =
+                                RequestOptions.builder(publishableKey).build();
+                        Token token = StripeApiHandler.retrieveToken(requestOptions, tokenId);
                         return new ResponseWrapper(token, null);
                     } catch (Exception e) {
                         return new ResponseWrapper(null, e);
@@ -221,7 +216,7 @@ public class Stripe {
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     * Stripe's servers)
      */
     public Token createTokenSynchronous(Card card, String publishableKey)
             throws AuthenticationException,
@@ -231,13 +226,52 @@ public class Stripe {
             APIException {
         validateKey(publishableKey);
 
-        RequestOptions requestOptions = RequestOptions.builder()
-                .setApiKey(publishableKey).build();
-        com.stripe.model.Token stripeToken = com.stripe.model.Token.create(
-                hashMapFromCard(card), requestOptions);
-        com.stripe.model.Card stripeCard = stripeToken.getCard();
-        Card resultCard = androidCardFromStripeCard(stripeCard);
-        return androidTokenFromStripeToken(resultCard, stripeToken);
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.createToken(hashMapFromCard(card), requestOptions);
+    }
+
+    /**
+     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param tokenId the ID of the token you're trying to retrieve
+     * @return the {@link Token}, if it exists and you can access it
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token requestTokenSynchronous(@NonNull String tokenId)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return requestTokenSynchronous(tokenId, defaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param tokenId the ID of the token you're trying to retrieve
+     * @param publishableKey a publishable key to use with this request
+     * @return the {@link Token}, if it exists and you can access it
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token requestTokenSynchronous(@NonNull String tokenId, @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.retrieveToken(requestOptions, tokenId);
     }
 
     /**
@@ -347,34 +381,6 @@ public class Stripe {
         this.defaultPublishableKey = publishableKey;
     }
 
-    /**
-     * Converts a stripe-java card model into a {@link Card} model.
-     *
-     * @param stripeCard the server-returned {@link com.stripe.model.Card}.
-     * @return an equivalent {@link Card}.
-     */
-    @VisibleForTesting
-    Card androidCardFromStripeCard(com.stripe.model.Card stripeCard) {
-        return new Card(
-                null,
-                stripeCard.getExpMonth(),
-                stripeCard.getExpYear(),
-                null,
-                stripeCard.getName(),
-                stripeCard.getAddressLine1(),
-                stripeCard.getAddressLine2(),
-                stripeCard.getAddressCity(),
-                stripeCard.getAddressState(),
-                stripeCard.getAddressZip(),
-                stripeCard.getAddressCountry(),
-                stripeCard.getBrand(),
-                stripeCard.getLast4(),
-                stripeCard.getFingerprint(),
-                stripeCard.getFunding(),
-                stripeCard.getCountry(),
-                stripeCard.getCurrency());
-    }
-
     private void validateKey(@NonNull @Size(min = 1) String publishableKey)
             throws AuthenticationException {
         if (publishableKey == null || publishableKey.length() == 0) {
@@ -389,17 +395,6 @@ public class Stripe {
                     "instead of the publishable one. For more info, " +
                     "see https://stripe.com/docs/stripe.js", null, 0);
         }
-    }
-
-    private Token androidTokenFromStripeToken(
-            Card androidCard,
-            com.stripe.model.Token stripeToken) {
-        return new Token(
-                stripeToken.getId(),
-                stripeToken.getLivemode(),
-                new Date(stripeToken.getCreated() * 1000),
-                stripeToken.getUsed(),
-                androidCard);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
@@ -421,34 +416,6 @@ public class Stripe {
         } else {
             task.execute();
         }
-    }
-
-    private Map<String, Object> hashMapFromCard(Card card) {
-        Map<String, Object> tokenParams = new HashMap<>();
-
-        Map<String, Object> cardParams = new HashMap<>();
-        cardParams.put("number", StripeTextUtils.nullIfBlank(card.getNumber()));
-        cardParams.put("cvc", StripeTextUtils.nullIfBlank(card.getCVC()));
-        cardParams.put("exp_month", card.getExpMonth());
-        cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", StripeTextUtils.nullIfBlank(card.getName()));
-        cardParams.put("currency", StripeTextUtils.nullIfBlank(card.getCurrency()));
-        cardParams.put("address_line1", StripeTextUtils.nullIfBlank(card.getAddressLine1()));
-        cardParams.put("address_line2", StripeTextUtils.nullIfBlank(card.getAddressLine2()));
-        cardParams.put("address_city", StripeTextUtils.nullIfBlank(card.getAddressCity()));
-        cardParams.put("address_zip", StripeTextUtils.nullIfBlank(card.getAddressZip()));
-        cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
-        cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
-
-        // Remove all null values; they cause validation errors
-        for (String key : new HashSet<>(cardParams.keySet())) {
-            if (cardParams.get(key) == null) {
-                cardParams.remove(key);
-            }
-        }
-
-        tokenParams.put("card", cardParams);
-        return tokenParams;
     }
 
     private class ResponseWrapper {

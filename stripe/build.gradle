@@ -5,11 +5,9 @@ configurations {
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:25.0.1'
-    compile 'com.stripe:stripe-java:3.2.0'
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.android.support:support-annotations:25.1.0'
 
-    javadocDeps 'com.android.support:support-annotations:25.0.1'
+    javadocDeps 'com.android.support:support-annotations:25.1.0'
     provided 'javax.annotation:jsr250-api:1.0'
 
     testCompile 'junit:junit:4.12'
@@ -20,7 +18,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.0'
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 9
         targetSdkVersion 25
     }
     sourceSets {

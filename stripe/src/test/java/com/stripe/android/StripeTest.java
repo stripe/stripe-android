@@ -1,17 +1,26 @@
 package com.stripe.android;
 
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.exception.AuthenticationException;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -22,6 +31,7 @@ import static org.junit.Assert.fail;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
 public class StripeTest {
+
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
@@ -36,6 +46,22 @@ public class StripeTest {
     };
 
     private static final String DEFAULT_TOKEN_ID = "tok_default";
+
+    private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
+    private static final String TEST_CARD_NUMBER = "4242424242424242";
+
+    private Card mCard;
+    private int mYear;
+
+    @Before
+    public void setup() {
+        String cvc = "123";
+        int month = 12;
+        Calendar rightNow = Calendar.getInstance();
+        // Try to make the test card always expire next year
+        mYear = rightNow.get(Calendar.YEAR) + 1;
+        mCard = new Card(TEST_CARD_NUMBER, month, mYear, cvc);
+    }
 
     @Test(expected = AuthenticationException.class)
     public void constructorShouldFailWithNullPublishableKey() throws AuthenticationException {
@@ -253,61 +279,75 @@ public class StripeTest {
     }
 
     @Test
-    public void androidCardFromStripeCard_properlyConvertsStandardFields() {
-        Stripe stripe;
+    public void createTokenSynchronous_withValidData_returnsToken() {
         try {
-            stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-            return;
+            Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
+            Token token = stripe.createTokenSynchronous(mCard);
+
+            assertNotNull(token);
+            Card returnedCard = token.getCard();
+            assertNotNull(returnedCard);
+            assertEquals(mCard.getLast4(), returnedCard.getLast4());
+            assertEquals(Card.VISA, returnedCard.getBrand());
+            assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
+            assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
+            assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
         }
+    }
 
-        com.stripe.model.Card stripeCard = new com.stripe.model.Card();
-        final Integer EXP_MONTH = 3;
-        final Integer EXP_YEAR = 2020;
-        final String NAME = "Anita Cardholder";
-        final String ADDR_FIRST_LINE = "123 Burns Street";
-        final String ADDR_SECOND_LINE = "Apartment 456";
-        final String ADDR_STATE = "CA";
-        final String ADDR_CITY = "Eureka";
-        final String ADDR_ZIP = "95501";
-        final String CARD_BRAND = "Visa";
-        final String LAST_FOUR = "6789";
-        final String FINGERPRINT = "abc123";
-        final String FUNDING = "credit";
-        final String COUNTRY = "us";
-        final String CURRENCY = "usd";
-        stripeCard.setExpMonth(EXP_MONTH);
-        stripeCard.setExpYear(EXP_YEAR);
-        stripeCard.setName(NAME);
-        stripeCard.setAddressLine1(ADDR_FIRST_LINE);
-        stripeCard.setAddressLine2(ADDR_SECOND_LINE);
-        stripeCard.setAddressCity(ADDR_CITY);
-        stripeCard.setAddressState(ADDR_STATE);
-        stripeCard.setAddressZip(ADDR_ZIP);
-        stripeCard.setAddressCountry(COUNTRY);
-        stripeCard.setBrand(CARD_BRAND);
-        stripeCard.setLast4(LAST_FOUR);
-        stripeCard.setFingerprint(FINGERPRINT);
-        stripeCard.setFunding(FUNDING);
-        stripeCard.setCurrency(CURRENCY);
-        stripeCard.setCountry(COUNTRY);
+    @Test
+    public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
+        try {
+            // This key won't work for a real connection to the api.
+            Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
+            stripe.createTokenSynchronous(mCard);
+            fail("Expecting an error, but did not get one.");
+        } catch (AuthenticationException authEx) {
+            String message = authEx.getMessage();
+            assertTrue(message.startsWith("Invalid API Key provided"));
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
 
-        Card androidCard = stripe.androidCardFromStripeCard(stripeCard);
-        assertEquals(EXP_MONTH, androidCard.getExpMonth());
-        assertEquals(EXP_YEAR, androidCard.getExpYear());
-        assertEquals(ADDR_FIRST_LINE, androidCard.getAddressLine1());
-        assertEquals(ADDR_SECOND_LINE, androidCard.getAddressLine2());
-        assertEquals(ADDR_CITY, androidCard.getAddressCity());
-        assertEquals(COUNTRY, androidCard.getCountry());
-        assertEquals(COUNTRY, androidCard.getCountry());
-        assertEquals(ADDR_ZIP, androidCard.getAddressZip());
-        assertEquals(ADDR_STATE, androidCard.getAddressState());
-        assertEquals(CARD_BRAND, androidCard.getBrand());
-        assertEquals(LAST_FOUR, androidCard.getLast4());
-        assertEquals(FINGERPRINT, androidCard.getFingerprint());
-        assertEquals(FUNDING, androidCard.getFunding());
-        assertEquals(CURRENCY, androidCard.getCurrency());
+    @Test
+    public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
+        try {
+            // This card is missing quite a few numbers.
+            Card card = new Card("42424242", 12, mYear, "123");
+            Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
+            Token token = stripe.createTokenSynchronous(card);
+            fail("Expecting an exception, but created a token instead: " + token.toString());
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (CardException cardException) {
+            assertTrue(cardException.getMessage().startsWith("Your card number is incorrect."));
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createTokenSynchronous_withExpiredCard_throwsCardException() {
+        try {
+            // This card is missing quite a few numbers.
+            Card card = new Card("4242424242424242", 11, 2015, "123");
+            Stripe stripe = new Stripe();
+            Token token = stripe.createTokenSynchronous(card, FUNCTIONAL_PUBLISHABLE_KEY);
+            fail("Expecting an exception, but created a token instead: " + token.toString());
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (CardException cardException) {
+            assertTrue(cardException.getMessage()
+                    .startsWith("Your card's expiration year is invalid."));
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
     }
 
     private static class ErrorTokenCallback implements TokenCallback {
