@@ -62,32 +62,6 @@ public class Stripe {
         }
     };
 
-    @VisibleForTesting
-    TokenRequester tokenRequester = new TokenRequester() {
-          @Override
-          public void request(final String tokenId, final String publishableKey,
-                  final Executor executor, final TokenCallback callback) {
-            AsyncTask<Void, Void, ResponseWrapper> task = new AsyncTask<Void, Void, ResponseWrapper>() {
-                protected ResponseWrapper doInBackground(Void... params) {
-                    try {
-                        RequestOptions requestOptions =
-                                RequestOptions.builder(publishableKey).build();
-                        Token token = StripeApiHandler.retrieveToken(requestOptions, tokenId);
-                        return new ResponseWrapper(token, null);
-                    } catch (Exception e) {
-                        return new ResponseWrapper(null, e);
-                    }
-                }
-
-                protected void onPostExecute(ResponseWrapper result) {
-                    tokenTaskPostExecution(result, callback);
-               }
-            };
-
-            executeTokenTask(executor, task);
-          }
-    };
-
     private String defaultPublishableKey;
 
     /**
@@ -231,153 +205,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
-     * or your app will crash.
-     *
-     * @param tokenId the ID of the token you're trying to retrieve
-     * @return the {@link Token}, if it exists and you can access it
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public Token requestTokenSynchronous(@NonNull String tokenId)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return requestTokenSynchronous(tokenId, defaultPublishableKey);
-    }
-
-    /**
-     * Blocking method to retrieve an existing {@link Token}. Do not call this on the UI thread
-     * or your app will crash.
-     *
-     * @param tokenId the ID of the token you're trying to retrieve
-     * @param publishableKey a publishable key to use with this request
-     * @return the {@link Token}, if it exists and you can access it
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public Token requestTokenSynchronous(@NonNull String tokenId, @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
-        return StripeApiHandler.retrieveToken(requestOptions, tokenId);
-    }
-
-    /**
-     * Retrieve a token for inspection, using the token's id.
-     *
-     * @param tokenId the id of the {@link Token} being requested
-     * @param callback a {@link TokenCallback} to receive the result
-     *
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public void requestToken(
-            @NonNull final String tokenId,
-            @NonNull final TokenCallback callback) {
-        requestToken(tokenId, defaultPublishableKey, callback);
-    }
-
-    /**
-     * Retrieve a token for inspection, using the token's id and a publishable key.
-     *
-     * @param tokenId the id of the {@link Token} being requested
-     * @param publishableKey the publishable key used to create this token
-     * @param callback a {@link TokenCallback} to receive the result
-     *
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public void requestToken(
-            @NonNull final String tokenId,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @NonNull final TokenCallback callback) {
-        requestToken(tokenId, publishableKey, null, callback);
-    }
-
-    /**
-     * Retrieve a token for inspection on a specific {@link Executor}, using the token's id.
-     *
-     * @param tokenId the id of the {@link Token} being requested
-     * @param executor an {@link Executor} on which to run this request
-     * @param callback a {@link TokenCallback} to receive the result
-     *
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public void requestToken(
-            @NonNull final String tokenId,
-            @NonNull final Executor executor,
-            @NonNull final TokenCallback callback) {
-        requestToken(tokenId, defaultPublishableKey, executor, callback);
-    }
-
-
-    /**
-     * Retrieve a token for inspection on a specific {@link Executor}, using the publishable key
-     * that was used to create the token.
-     *
-     * @param tokenId the id of the token being requested
-     * @param publishableKey the key used to create the token
-     * @param executor an {@link Executor} on which to run this operation, or {@code null} to run
-     *                 on a default background executor
-     * @param callback a {@link TokenCallback} to receive the result
-     *
-     * @deprecated the requestToken endpoint is not guaranteed to work with a public key, as that
-     * ability has been turned off for accounts using API versions later than 2014-10-07. Secret
-     * keys should not be included in mobile applications.
-     */
-    @Deprecated
-    public void requestToken(
-            @NonNull final String tokenId,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
-        try {
-            if (tokenId == null) {
-                throw new RuntimeException("Required Parameter: 'tokenId' " +
-                        "is required to request a token");
-            }
-
-            if (callback == null) {
-                throw new RuntimeException("Required Parameter: 'callback' " +
-                        "is required to use the requested token and handle errors");
-            }
-
-            validateKey(publishableKey);
-
-            tokenRequester.request(tokenId, publishableKey, executor, callback);
-        } catch (AuthenticationException e) {
-            callback.onError(e);
-        }
-    }
-
-    /**
      * Set the default publishable key to use with this {@link Stripe} instance.
      *
      * @param publishableKey the key to be set
@@ -439,10 +266,5 @@ public class Stripe {
     @VisibleForTesting
     interface TokenCreator {
         void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
-    }
-
-    @VisibleForTesting
-    interface TokenRequester {
-        void request(String tokenId, String publishableKey, Executor executor, TokenCallback callback);
     }
 }

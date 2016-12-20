@@ -1,9 +1,7 @@
 package com.stripe.android;
 
-import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
-import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -15,11 +13,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -94,98 +90,6 @@ public class StripeTest {
     public void setDefaultPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
         Stripe stripe = new Stripe();
         stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void requestTokenShouldFailWithNull() {
-        Stripe stripe = new Stripe();
-        stripe.requestToken(null, null);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void requestTokenShouldFailWithNullCard() {
-        Stripe stripe = new Stripe();
-        stripe.requestToken(null, DEFAULT_TOKEN_CALLBACK);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void requestTokenShouldFailWithNullTokencallback() {
-        Stripe stripe = new Stripe();
-        stripe.requestToken(DEFAULT_TOKEN_ID, null);
-    }
-
-    @Test
-    public void requestTokenShouldFailWithNullPublishableKey() {
-        Stripe stripe = new Stripe();
-        stripe.requestToken(
-                DEFAULT_TOKEN_ID, new ErrorTokenCallback(AuthenticationException.class));
-    }
-
-    @Test
-    public void requestTokenShouldCallTokenRequester() {
-        final boolean[] tokenRequesterCalled = { false };
-        try {
-            Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new Stripe.TokenRequester() {
-                @Override
-                public void request(String tokenId, String publishableKey,
-                                    Executor executor, TokenCallback callback) {
-                    tokenRequesterCalled[0] = true;
-                }
-            };
-            stripe.requestToken(DEFAULT_TOKEN_ID, DEFAULT_TOKEN_CALLBACK);
-            assertTrue(tokenRequesterCalled[0]);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
-    }
-
-    @Test
-    public void requestTokenShouldUseExecutor() {
-        final Executor expectedExecutor = new Executor() {
-            @Override
-            public void execute(Runnable command) {
-            }
-        };
-
-        try {
-            Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new Stripe.TokenRequester() {
-                @Override
-                public void request(String tokenId, String publishableKey, Executor executor,
-                                    TokenCallback callback) {
-                    assertEquals(expectedExecutor, executor);
-                    assertEquals(DEFAULT_TOKEN_ID, tokenId);
-                    assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
-                    assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                }
-            };
-            stripe.requestToken(DEFAULT_TOKEN_ID, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
-    }
-
-    @Test
-    public void requestTokenShouldUseProvidedKey() {
-        final String expectedPublishableKey = "pk_this_one";
-
-        try {
-            Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenRequester = new Stripe.TokenRequester() {
-                @Override
-                public void request(String tokenId, String publishableKey, Executor executor,
-                                    TokenCallback callback) {
-                    assertEquals(expectedPublishableKey, publishableKey);
-                    assertEquals(DEFAULT_TOKEN_ID, tokenId);
-                    assertNull(executor);
-                    assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                }
-            };
-            stripe.requestToken(DEFAULT_TOKEN_ID, expectedPublishableKey, DEFAULT_TOKEN_CALLBACK);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
     }
 
     @Test(expected = RuntimeException.class)
