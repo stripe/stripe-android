@@ -1,3 +1,8 @@
+2.0.0 2016-12-20
+    Removed the dependency on stripe-java and gson
+    Added a synchronous version of requestToken (still deprecated)
+    Removed the (previously deprecated) requestToken methods
+
 1.1.1 2016-12-09
     Refactored the bundled example project
     Reverted change in StripeTextUtils to exclude reference to framework classes
