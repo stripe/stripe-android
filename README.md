@@ -241,21 +241,12 @@ Convenience method to validate card number, expiry date and CVC.
 
 ### Retrieving information about a token
 
-If you're implementing a complex workflow, you may want to know if you've already charged a token (since they can only be charged once). You can call requestToken with a token id and callbacks to find out whether or not the token has already been used. This will return an object with the same structure as the object returned from createToken.
-```java
-stripe.requestToken(
-    tokenID,
-    new TokenCallback() {
-        public void onSuccess(Token token) {
-            if (token.getUsed()) {
-                Log.d("Token has already been charged.");
-            }
-        }
-        public void onError(Exception error) {
-            // handle error
-        }
-    });
+The bindings for retrieving information about a token has been removed from the Android SDK because only older Stripe accounts (from early 2014) can perform this operation with a public key. If you still need this functionality, make sure to use the last version of the Android bindings that contained this functionality by setting your version in the `build.gradle` file as follows.
+```groovy
+    // Using older bindings to have access to requestToken
+    compile 'com.stripe:stripe-android:1.1.1'
 ```
+
 ## Building the example project
 
 1. Clone the git repository.
