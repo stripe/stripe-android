@@ -12,7 +12,7 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:2.0.0'
+    compile 'com.stripe:stripe-android:2.0.1'
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
@@ -199,7 +199,7 @@ Registering a local BroadcastReceiver in your activity then allows you to handle
 private class TokenBroadcastReceiver extends BroadcastReceiver {
 
     private TokenBroadcastReceiver() { }
-    
+
     @Override
     public void onReceive(Context context, Intent intent) {
         mProgressDialogController.finishProgress();

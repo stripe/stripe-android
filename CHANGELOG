@@ -1,3 +1,6 @@
+2.0.1 2016-12-22
+    Made the Token, Card, and Error parsing functions public.
+
 2.0.0 2016-12-20
     Removed the dependency on stripe-java and gson
     Added a synchronous version of requestToken (still deprecated)
