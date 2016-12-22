@@ -22,7 +22,7 @@ public class TokenParser {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_USED = "used";
 
-    static Token parseToken(String jsonToken) throws JSONException {
+    public static Token parseToken(String jsonToken) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonToken);
         String tokenId = StripeJsonUtils.getString(jsonObject, FIELD_ID);
         Long createdTimeStamp = jsonObject.getLong(FIELD_CREATED);
