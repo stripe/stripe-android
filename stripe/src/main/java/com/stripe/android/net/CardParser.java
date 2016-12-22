@@ -38,7 +38,7 @@ public class CardParser {
      * @throws JSONException if the String is improperly formatted or is missing required values
      */
     @NonNull
-    static Card parseCard(String jsonCard) throws JSONException {
+    public static Card parseCard(String jsonCard) throws JSONException {
         JSONObject cardObject = new JSONObject(jsonCard);
         return parseCard(cardObject);
     }
@@ -51,7 +51,7 @@ public class CardParser {
      * @throws JSONException if the input is missing a required field
      */
     @NonNull
-    static Card parseCard(@NonNull JSONObject objectCard) throws JSONException {
+    public static Card parseCard(@NonNull JSONObject objectCard) throws JSONException {
         return new Card(
                 null,
                 objectCard.getInt(FIELD_EXP_MONTH),
