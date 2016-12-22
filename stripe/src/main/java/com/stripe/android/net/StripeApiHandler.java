@@ -42,10 +42,10 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class StripeApiHandler {
 
-    static final String LIVE_API_BASE = "https://api.stripe.com";
-    static final String CHARSET = "UTF-8";
-    static final String TOKENS = "tokens";
-    static final String VERSION = "3.5.0";
+    public static final String LIVE_API_BASE = "https://api.stripe.com";
+    public static final String CHARSET = "UTF-8";
+    public static final String TOKENS = "tokens";
+    public static final String VERSION = "3.5.0";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
