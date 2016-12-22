@@ -1,3 +1,6 @@
+2.0.2 2016-12-22
+    Made the StripeApiHandler.VERSION constant public
+
 2.0.1 2016-12-22
     Made the Token, Card, and Error parsing functions public.
 
