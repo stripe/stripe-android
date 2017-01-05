@@ -1,5 +1,6 @@
 package com.stripe.android.net;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -144,15 +145,12 @@ public class StripeApiHandler {
         headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
 
         // debug headers
-        String[] propertyNames = { "os.name", "os.version", "os.arch",
-                "java.version", "java.vendor", "java.vm.version",
-                "java.vm.vendor" };
-
         Map<String, String> propertyMap = new HashMap<>();
-        for (String propertyName : propertyNames) {
-            propertyMap.put(propertyName, System.getProperty(propertyName));
-        }
 
+        final String systemPropertyName = "java.version";
+        propertyMap.put(systemPropertyName, System.getProperty(systemPropertyName));
+        propertyMap.put("os.name", "android");
+        propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
         propertyMap.put("bindings.version", VERSION);
         propertyMap.put("lang", "Java");
         propertyMap.put("publisher", "Stripe");
