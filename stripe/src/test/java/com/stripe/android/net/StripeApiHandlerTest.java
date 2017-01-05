@@ -80,6 +80,8 @@ public class StripeApiHandlerTest {
             assertEquals("3.5.0", mapObject.getString("bindings.version"));
             assertEquals("Java", mapObject.getString("lang"));
             assertEquals("Stripe", mapObject.getString("publisher"));
+            assertEquals("android", mapObject.getString("os.name"));
+            assertTrue(mapObject.has("java.version"));
         } catch (JSONException jsonException) {
             fail("Failed to get a parsable JsonObject for the user agent.");
         }
