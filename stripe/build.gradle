@@ -6,6 +6,7 @@ configurations {
 
 dependencies {
     compile 'com.android.support:support-annotations:25.1.0'
+    compile 'com.android.support:support-v4:25.1.0'
 
     javadocDeps 'com.android.support:support-annotations:25.1.0'
     provided 'javax.annotation:jsr250-api:1.0'
