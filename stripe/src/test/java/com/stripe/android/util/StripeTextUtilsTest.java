@@ -352,31 +352,31 @@ public class StripeTextUtilsTest {
     }
 
     @Test
-    public void convertToSpacelessNumber_withSpacesInInterior_returnsSpacelessNumber() {
+    public void removeSpaces_withSpacesInInterior_returnsSpacelessNumber() {
         String testCardNumber = "4242 4242 4242 4242";
-        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+        assertEquals("4242424242424242", StripeTextUtils.removeSpaces(testCardNumber));
     }
 
     @Test
-    public void convertToSpacelessNumber_withExcessiveSpacesInInterior_returnsSpacelessNumber() {
+    public void removeSpaces_withExcessiveSpacesInInterior_returnsSpacelessNumber() {
         String testCardNumber = "4  242                  4 242 4  242 42 4   2";
-        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+        assertEquals("4242424242424242", StripeTextUtils.removeSpaces(testCardNumber));
     }
 
     @Test
-    public void convertToSpacelessNumber_withSpacesOnExterior_returnsSpacelessNumber() {
+    public void removeSpaces_withSpacesOnExterior_returnsSpacelessNumber() {
         String testCardNumber = "      42424242 4242 4242    ";
-        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+        assertEquals("4242424242424242", StripeTextUtils.removeSpaces(testCardNumber));
     }
 
     @Test
-    public void convertToSpacelessNumber_whenEmpty_returnsNull () {
-        assertNull(StripeTextUtils.convertToSpacelessNumber("        "));
+    public void removeSpaces_whenEmpty_returnsNull () {
+        assertNull(StripeTextUtils.removeSpaces("        "));
     }
 
     @Test
-    public void convertToSpacelessNumber_whenNull_returnsNull() {
-        assertNull(StripeTextUtils.convertToSpacelessNumber(null));
+    public void removeSpaces_whenNull_returnsNull() {
+        assertNull(StripeTextUtils.removeSpaces(null));
     }
 
     @Test
