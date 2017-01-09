@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -32,7 +33,7 @@ public class CardNumberEditText extends EditText {
     private static final Set<Integer> SPACE_SET_AMEX =
             new HashSet<>(Arrays.asList(SPACES_ARRAY_AMEX));
 
-    @Card.CardBrand private String mCardBrand = Card.UNKNOWN;
+    @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
     private int mLengthMax = 19;
 
     public CardNumberEditText(Context context) {
@@ -48,6 +49,26 @@ public class CardNumberEditText extends EditText {
     public CardNumberEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
+    }
+
+    @VisibleForTesting
+    int updateSelectionIndex(int oldPosition, int oldLength, int newLength) {
+        int increment, newPosition;
+        Set<Integer> spaceSet = Card.AMERICAN_EXPRESS.equals(mCardBrand)
+                ? SPACE_SET_AMEX
+                : SPACE_SET_COMMON;
+
+        boolean growing = newLength > oldLength;
+
+        if (growing) {
+            increment = spaceSet.contains(oldPosition) ? 2 : 1;
+            newPosition = oldPosition + increment;
+            return newPosition <= newLength ? newPosition : newLength;
+        } else {
+            increment = spaceSet.contains(oldPosition - 2) ? 2 : 1;
+            newPosition = oldPosition - increment;
+            return newPosition > 0 ? newPosition : 0;
+        }
     }
 
     private void listenForTextChanges() {
@@ -117,28 +138,6 @@ public class CardNumberEditText extends EditText {
 
             }
         });
-    }
-
-    private int updateSelectionIndex(int oldPosition,
-                                     int oldLength,
-                                     int newLength) {
-
-        int increment, newPosition;
-        Set<Integer> spaceSet = Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? SPACE_SET_AMEX
-                : SPACE_SET_COMMON;
-
-        boolean growing = newLength > oldLength;
-
-        if (growing) {
-            increment = spaceSet.contains(oldPosition) ? 2 : 1;
-            newPosition = oldPosition + increment;
-            return newPosition <= newLength ? newPosition : newLength;
-        } else {
-            increment = spaceSet.contains(oldPosition - 2) ? 2 : 1;
-            newPosition = oldPosition - increment;
-            return newPosition > 0 ? newPosition : 0;
-        }
     }
 
     private void updateCardBrand(String partialNumber) {
