@@ -339,4 +339,88 @@ public class StripeTextUtilsTest {
         assertEquals("5566", groups[2]);
         assertEquals("555", groups[3]);
     }
+
+    @Test
+    public void convertToSpacelessNumber_withSpacesInInterior_returnsSpacelessNumber() {
+        String testCardNumber = "4242 4242 4242 4242";
+        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+    }
+
+    @Test
+    public void convertToSpacelessNumber_withExcessiveSpacesInInterior_returnsSpacelessNumber() {
+        String testCardNumber = "4  242                  4 242 4  242 42 4   2";
+        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+    }
+
+    @Test
+    public void convertToSpacelessNumber_withSpacesOnExterior_returnsSpacelessNumber() {
+        String testCardNumber = "      42424242 4242 4242";
+        assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
+    }
+
+    @Test
+    public void convertToSpacelessNumber_whenEmpty_returnsNull () {
+        assertNull(StripeTextUtils.convertToSpacelessNumber("        "));
+    }
+
+    @Test
+    public void convertToSpacelessNumber_whenNull_returnsNull() {
+        assertNull(StripeTextUtils.convertToSpacelessNumber(null));
+    }
+
+    @Test
+    public void getPossibleCardType_withEmptyCard_returnsUnknown() {
+        assertEquals(Card.UNKNOWN, StripeTextUtils.getPossibleCardType("   "));
+    }
+
+    @Test
+    public void getPossibleCardType_withNullCardNumber_returnsUnknown() {
+        assertEquals(Card.UNKNOWN, StripeTextUtils.getPossibleCardType(null));
+    }
+
+    @Test
+    public void getPossibleCardType_withVisaPrefix_returnsVisa() {
+        assertEquals(Card.VISA, StripeTextUtils.getPossibleCardType("4899 99"));
+        assertEquals(Card.VISA, StripeTextUtils.getPossibleCardType("4"));
+    }
+
+    @Test
+    public void getPossibleCardType_withAmexPrefix_returnsAmex() {
+        assertEquals(Card.AMERICAN_EXPRESS, StripeTextUtils.getPossibleCardType("345"));
+        assertEquals(Card.AMERICAN_EXPRESS, StripeTextUtils.getPossibleCardType("37999999999"));
+    }
+
+    @Test
+    public void getPossibleCardType_withJCBPrefix_returnsJCB() {
+        assertEquals(Card.JCB, StripeTextUtils.getPossibleCardType("3535 3535"));
+    }
+
+    @Test
+    public void getPossibleCardType_withMasterCardPrefix_returnsMasterCard() {
+        assertEquals(Card.MASTERCARD, StripeTextUtils.getPossibleCardType("2222 452"));
+        assertEquals(Card.MASTERCARD, StripeTextUtils.getPossibleCardType("5050"));
+    }
+
+    @Test
+    public void getPossibleCardType_withDinersClubPrefix_returnsDinersClub() {
+        assertEquals(Card.DINERS_CLUB, StripeTextUtils.getPossibleCardType("303922 2234"));
+        assertEquals(Card.DINERS_CLUB, StripeTextUtils.getPossibleCardType("36778 9098"));
+    }
+
+    @Test
+    public void getPossibleCardType_withDiscoverPrefix_returnsDiscover() {
+        assertEquals(Card.DISCOVER, StripeTextUtils.getPossibleCardType("60355"));
+        assertEquals(Card.DISCOVER, StripeTextUtils.getPossibleCardType("62"));
+        assertEquals(Card.DISCOVER, StripeTextUtils.getPossibleCardType("6433 8 90923"));
+        // This one has too many numbers on purpose. Checking for length is not part of the
+        // function under test.
+        assertEquals(Card.DISCOVER, StripeTextUtils.getPossibleCardType("6523452309209340293423"));
+    }
+
+    @Test
+    public void getPossibleCardType_withNonsenseNumber_returnsUnknown() {
+        assertEquals(Card.UNKNOWN, StripeTextUtils.getPossibleCardType("1234567890123456"));
+        assertEquals(Card.UNKNOWN, StripeTextUtils.getPossibleCardType("9999 9999 9999 9999"));
+        assertEquals(Card.UNKNOWN, StripeTextUtils.getPossibleCardType("3"));
+    }
 }
