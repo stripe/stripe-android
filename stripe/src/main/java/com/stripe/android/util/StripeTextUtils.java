@@ -117,7 +117,7 @@ public class StripeTextUtils {
             return Card.UNKNOWN;
         }
 
-        String spacelessCardNumber = convertToSpacelessNumber(cardNumber);
+        String spacelessCardNumber = removeSpaces(cardNumber);
 
         if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
             return Card.AMERICAN_EXPRESS;
@@ -138,12 +138,14 @@ public class StripeTextUtils {
 
     /**
      * Converts a card number that may have spaces between the numbers into one without any spaces.
+     * Note: method does not check that all characters are digits or spaces.
+     *
      * @param cardNumberWithSpaces a card number, for instance "4242 4242 4242 4242"
      * @return the input number minus any spaces, for instance "4242424242424242".
      * Returns {@code null} if the input was {@code null} or all spaces.
      */
     @Nullable
-    public static String convertToSpacelessNumber(@Nullable String cardNumberWithSpaces) {
+    public static String removeSpaces(@Nullable String cardNumberWithSpaces) {
         if (isBlank(cardNumberWithSpaces)) {
             return null;
         }
@@ -153,6 +155,7 @@ public class StripeTextUtils {
     /**
      * Separates a card number according to the brand requirements, including prefixes of card
      * numbers, so that the groups can be easily displayed if the user is typing them in.
+     * Note that this does not verify that the card number is valid, or even that it is a number.
      *
      * @param spacelessCardNumber the raw card number, without spaces
      * @param brand the {@link CardBrand} to use as a separating scheme

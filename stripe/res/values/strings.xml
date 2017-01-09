@@ -1,5 +1,5 @@
 <resources>
-    <string name="card_number_hint">1234 5678 9012 3456</string>
+    <string name="card_number_hint">4242 4242 4242 4242</string>
     <string name="cvc_number_hint">123</string>
     <string name="expiry_date_hint">MM/YY</string>
 </resources>

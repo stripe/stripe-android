@@ -110,7 +110,7 @@ public class CardNumberEditText extends EditText {
                     return;
                 }
 
-                String spacelessNumber = StripeTextUtils.convertToSpacelessNumber(s.toString());
+                String spacelessNumber = StripeTextUtils.removeSpaces(s.toString());
                 if (spacelessNumber == null) {
                     return;
                 }
