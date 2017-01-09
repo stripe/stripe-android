@@ -51,6 +51,15 @@ public class CardNumberEditText extends EditText {
         listenForTextChanges();
     }
 
+    /**
+     * Updates the selection index based on the current (pre-edit) index, and
+     * the size change of the number being input.
+     *
+     * @param oldPosition the original position of the cursor
+     * @param oldLength the pre-edit length of the string
+     * @param newLength the post-edit length of the string
+     * @return an index within the string at which to put the cursor
+     */
     @VisibleForTesting
     int updateSelectionIndex(int oldPosition, int oldLength, int newLength) {
         int increment, newPosition;
