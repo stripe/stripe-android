@@ -280,6 +280,17 @@ public class StripeTextUtilsTest {
     }
 
     @Test
+    public void separateCardNumberGroups_withInvalid_returnsCorrectCardGroups() {
+        String testCardNumber = "1234056655665556";
+        String[] groups = StripeTextUtils.separateCardNumberGroups(testCardNumber, Card.UNKNOWN);
+        assertEquals(4, groups.length);
+        assertEquals("1234", groups[0]);
+        assertEquals("0566", groups[1]);
+        assertEquals("5566", groups[2]);
+        assertEquals("5556", groups[3]);
+    }
+
+    @Test
     public void separateCardNumberGroups_withAmexPrefix_returnsPrefixGroups() {
         String testCardNumber = "378282246310005";
         String[] groups = StripeTextUtils.separateCardNumberGroups(
@@ -354,7 +365,7 @@ public class StripeTextUtilsTest {
 
     @Test
     public void convertToSpacelessNumber_withSpacesOnExterior_returnsSpacelessNumber() {
-        String testCardNumber = "      42424242 4242 4242";
+        String testCardNumber = "      42424242 4242 4242    ";
         assertEquals("4242424242424242", StripeTextUtils.convertToSpacelessNumber(testCardNumber));
     }
 

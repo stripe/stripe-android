@@ -4,10 +4,12 @@ repositories {
     mavenCentral()
 }
 
+def android_support_version = '25.1.0'
+
 dependencies {
     compile project(':stripe')
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:support-v4:25.0.1'
+    compile 'com.android.support:appcompat-v7:' + android_support_version
+    compile 'com.android.support:support-v4:' + android_support_version
     /* Needed for RxAndroid */
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
