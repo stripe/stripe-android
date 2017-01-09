@@ -1,3 +1,6 @@
+2.0.3 2017-01-09
+    Updated OS version logging to be relevant for Android
+
 2.0.2 2016-12-22
     Made the StripeApiHandler.VERSION constant public
 
