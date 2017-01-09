@@ -65,4 +65,16 @@ public class CardNumberEditTextTest {
         assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 6, 4));
         assertEquals(11, mCardNumberEditText.updateSelectionIndex(13, 13, 11));
     }
+
+    @Test
+    public void updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
+        mCardNumberEditText.mCardBrand = Card.VISA;
+        assertEquals(6, mCardNumberEditText.updateSelectionIndex(4, 8, 9));
+    }
+
+    @Test
+    public void updateSelectionIndex_whenSelectionInTheMiddle_skipsBackDownOverASpace() {
+        mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
+        assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 8, 7));
+    }
 }
