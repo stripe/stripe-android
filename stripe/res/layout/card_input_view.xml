@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <com.stripe.android.view.LockableHorizontalScrollView
+        android:id="@+id/root_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:fillViewport="true"
+        android:fadeScrollbars="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.stripe.android.view.CardNumberEditText
+                android:id="@+id/et_card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="@string/card_number_hint"
+                android:inputType="number"
+                android:maxLength="19"
+                />
+
+            <android.support.v4.widget.Space
+                android:id="@+id/space_in_container"
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </com.stripe.android.view.LockableHorizontalScrollView>
+
+    <EditText
+        android:id="@+id/et_expiry_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="@string/expiry_date_hint"
+        android:inputType="date"
+        android:maxLength="5"
+        android:visibility="gone"
+        />
+
+    <EditText
+        android:id="@+id/et_cvc_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="@string/cvc_number_hint"
+        android:inputType="number"
+        android:maxLength="4"
+        android:visibility="gone"/>
+
+</LinearLayout>

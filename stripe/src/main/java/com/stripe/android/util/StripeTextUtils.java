@@ -1,5 +1,6 @@
 package com.stripe.android.util;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
@@ -78,6 +79,110 @@ public class StripeTextUtils {
      */
     public static boolean isBlank(String value) {
         return value == null || value.trim().length() == 0;
+    }
+
+    /**
+     * Returns a {@link CardBrand} corresponding to a partial card number, or {@link Card#UNKNOWN}
+     * if the card brand can't be determined from the input value.
+     *
+     * @param cardNumber a credit card number or partial card number
+     * @return the {@link CardBrand} corresponding to that number, or {@link Card#UNKNOWN} if it
+     * can't be determined
+     */
+    @NonNull
+    @CardBrand
+    public static String getPossibleCardType(@Nullable String cardNumber) {
+        if (isBlank(cardNumber)) {
+            return Card.UNKNOWN;
+        }
+
+        String spacelessCardNumber = removeSpaces(cardNumber);
+
+        if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
+            return Card.AMERICAN_EXPRESS;
+        } else if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
+            return Card.DISCOVER;
+        } else if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_JCB)) {
+            return Card.JCB;
+        } else if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
+            return Card.DINERS_CLUB;
+        } else if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_VISA)) {
+            return Card.VISA;
+        } else if (hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
+            return Card.MASTERCARD;
+        } else {
+            return Card.UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts a card number that may have spaces between the numbers into one without any spaces.
+     * Note: method does not check that all characters are digits or spaces.
+     *
+     * @param cardNumberWithSpaces a card number, for instance "4242 4242 4242 4242"
+     * @return the input number minus any spaces, for instance "4242424242424242".
+     * Returns {@code null} if the input was {@code null} or all spaces.
+     */
+    @Nullable
+    public static String removeSpaces(@Nullable String cardNumberWithSpaces) {
+        if (isBlank(cardNumberWithSpaces)) {
+            return null;
+        }
+        return cardNumberWithSpaces.replaceAll("\\s", "");
+    }
+
+    /**
+     * Separates a card number according to the brand requirements, including prefixes of card
+     * numbers, so that the groups can be easily displayed if the user is typing them in.
+     * Note that this does not verify that the card number is valid, or even that it is a number.
+     *
+     * @param spacelessCardNumber the raw card number, without spaces
+     * @param brand the {@link CardBrand} to use as a separating scheme
+     * @return an array of strings with the number groups, in order. If the number is not complete,
+     * some of the array entries may be {@code null}.
+     */
+    @NonNull
+    public static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
+                                                    @NonNull @CardBrand String brand) {
+        String[] numberGroups;
+        if (brand.equals(Card.AMERICAN_EXPRESS)) {
+            numberGroups = new String[3];
+
+            int length = spacelessCardNumber.length();
+            int lastUsedIndex = 0;
+            if (length > 4) {
+                numberGroups[0] = spacelessCardNumber.substring(0, 4);
+                lastUsedIndex = 4;
+            }
+
+            if (length > 10) {
+                numberGroups[1] = spacelessCardNumber.substring(4, 10);
+                lastUsedIndex = 10;
+            }
+
+            for (int i = 0; i < 3; i++) {
+                if (numberGroups[i] != null) {
+                    continue;
+                }
+                numberGroups[i] = spacelessCardNumber.substring(lastUsedIndex);
+                break;
+            }
+
+        } else {
+            numberGroups = new String[4];
+            int i = 0;
+            int previousStart = 0;
+            while((i + 1) * 4 < spacelessCardNumber.length()) {
+                String group = spacelessCardNumber.substring(previousStart, (i + 1) * 4);
+                numberGroups[i] = group;
+                previousStart = (i + 1) * 4;
+                i++;
+            }
+            // Always stuff whatever is left into the next available array entry. This handles
+            // incomplete numbers, full 16-digit numbers, and full 14-digit numbers
+            numberGroups[i] = spacelessCardNumber.substring(previousStart);
+        }
+        return numberGroups;
     }
 
     /**
