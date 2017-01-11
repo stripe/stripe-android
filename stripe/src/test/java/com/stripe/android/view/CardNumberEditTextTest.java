@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import android.annotation.SuppressLint;
+
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 
@@ -12,6 +14,8 @@ import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link CardNumberEditText}. Note that we have to test against SDK 22
@@ -22,6 +26,8 @@ import static org.junit.Assert.assertEquals;
 @Config(sdk = 22)
 public class CardNumberEditTextTest {
 
+    private static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
+    private static final String VALID_AMEX_WITH_SPACES = "3782 822463 10005";
     private CardNumberEditText mCardNumberEditText;
 
     @Before
@@ -31,6 +37,7 @@ public class CardNumberEditTextTest {
 
         mCardNumberEditText =
                 ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
+        mCardNumberEditText.setText("");
     }
 
     @Test
@@ -96,5 +103,29 @@ public class CardNumberEditTextTest {
         mCardNumberEditText.mCardBrand = Card.VISA;
         // This case could happen when you paste over 5 digits with only 2
         assertEquals(3, mCardNumberEditText.updateSelectionIndex(3, 3, 2));
+    }
+
+    @Test
+    public void setText_whenTextIsValidCommonLengthNumber_changesCardValidState() {
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+
+        assertTrue(mCardNumberEditText.isCardNumberValid());
+    }
+
+    @Test
+    public void setText_whenTextIsValidAmExDinersClubLengthNumber_changesCardValidState() {
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+
+        assertTrue(mCardNumberEditText.isCardNumberValid());
+    }
+
+    @Test
+    public void setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        String mutable = mCardNumberEditText.getText().toString();
+        // Removing a single character should make this invalid
+        mutable = mutable.substring(0, 18);
+        mCardNumberEditText.setText(mutable);
+        assertFalse(mCardNumberEditText.isCardNumberValid());
     }
 }
