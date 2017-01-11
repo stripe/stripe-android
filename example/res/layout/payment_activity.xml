@@ -14,10 +14,6 @@
               android:text="@string/addPayment"
               style="@style/Header" />
 
-    <com.stripe.android.view.CardInputView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
     <EditText
         android:id="@+id/number"
         android:layout_width="match_parent"
