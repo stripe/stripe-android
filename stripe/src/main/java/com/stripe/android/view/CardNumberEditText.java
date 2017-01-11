@@ -6,7 +6,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
@@ -36,7 +35,6 @@ public class CardNumberEditText extends EditText {
 
     @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
     private int mLengthMax = 19;
-    private int mCachedSelection = 0;
     private boolean mIgnoreChanges = false;
 
     public CardNumberEditText(Context context) {
