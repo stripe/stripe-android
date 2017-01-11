@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
@@ -35,6 +36,8 @@ public class CardNumberEditText extends EditText {
 
     @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
     private int mLengthMax = 19;
+    private int mCachedSelection = 0;
+    private boolean mIgnoreChanges = false;
 
     public CardNumberEditText(Context context) {
         super(context);
@@ -55,48 +58,57 @@ public class CardNumberEditText extends EditText {
      * Updates the selection index based on the current (pre-edit) index, and
      * the size change of the number being input.
      *
-     * @param oldPosition the original position of the cursor
-     * @param oldLength the pre-edit length of the string
      * @param newLength the post-edit length of the string
+     * @param editActionStart the position in the string at which the edit action starts
+     * @param editActionAddition the number of new characters going into the string (zero for delete)
      * @return an index within the string at which to put the cursor
      */
     @VisibleForTesting
-    int updateSelectionIndex(int oldPosition, int oldLength, int newLength) {
-        int increment, newPosition;
-        Set<Integer> spaceSet = Card.AMERICAN_EXPRESS.equals(mCardBrand)
+    int updateSelectionIndex(
+            int newLength,
+            int editActionStart,
+            int editActionAddition) {
+        int newPosition, gapsJumped = 0;
+        Set<Integer> gapSet = Card.AMERICAN_EXPRESS.equals(mCardBrand)
                 ? SPACE_SET_AMEX
                 : SPACE_SET_COMMON;
+        boolean skipBack = false;
+        for (Integer gap : gapSet) {
+            if (editActionStart <= gap && editActionStart + editActionAddition > gap) {
+                gapsJumped++;
+            }
 
-        boolean growing = newLength > oldLength;
-
-        if (growing) {
-            increment = spaceSet.contains(oldPosition) ? 2 : 1;
-            newPosition = oldPosition + increment;
-            return newPosition <= newLength ? newPosition : newLength;
-        } else {
-            increment = spaceSet.contains(oldPosition - 2) ? 2 : 1;
-            newPosition = oldPosition - increment;
-            return newPosition > 0 ? newPosition : 0;
+            // editActionAddition can only be 0 if we are deleting,
+            // so we need to check whether or not to skip backwards one space
+            if (editActionAddition == 0 && editActionStart == gap + 1) {
+                skipBack = true;
+            }
         }
+
+        newPosition = editActionStart + editActionAddition + gapsJumped;
+        if (skipBack && newPosition > 0) {
+            newPosition--;
+        }
+
+        return newPosition <= newLength ? newPosition : newLength;
     }
 
     private void listenForTextChanges() {
         addTextChangedListener(new TextWatcher() {
-            boolean ignoreChanges = false;
-            int beforeStringLength = 0;
-            int beforeSelectionIndex = 0;
+            int latestChangeStart;
+            int latestInsertionSize;
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!ignoreChanges) {
-                    beforeStringLength = getText().toString().length();
-                    beforeSelectionIndex = getSelectionEnd();
+                if (!mIgnoreChanges) {
+                    latestChangeStart = start;
+                    latestInsertionSize = after;
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (ignoreChanges) {
+                if (mIgnoreChanges) {
                     return;
                 }
 
@@ -105,7 +117,7 @@ public class CardNumberEditText extends EditText {
                     // update the card icon here
                 }
 
-                if (beforeSelectionIndex > 16) {
+                if (start > 16) {
                     // no need to do formatting if we're past all of the spaces.
                     return;
                 }
@@ -131,15 +143,14 @@ public class CardNumberEditText extends EditText {
 
                 String formattedNumber = formattedNumberBuilder.toString();
                 int cursorPosition = updateSelectionIndex(
-                        beforeSelectionIndex,
-                        beforeStringLength,
-                        formattedNumber.length());
+                        formattedNumber.length(),
+                        latestChangeStart,
+                        latestInsertionSize);
 
-                ignoreChanges = true;
+                mIgnoreChanges = true;
                 setText(formattedNumber);
                 setSelection(cursorPosition);
-                ignoreChanges = false;
-
+                mIgnoreChanges = false;
             }
 
             @Override

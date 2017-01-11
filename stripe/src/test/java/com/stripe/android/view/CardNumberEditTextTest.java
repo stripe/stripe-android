@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.app.Activity;
-
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 
@@ -39,42 +37,64 @@ public class CardNumberEditTextTest {
     public void updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() {
         // Directly setting card brand as a testing hack (annotated in source)
         mCardNumberEditText.mCardBrand = Card.VISA;
-        assertEquals(6, mCardNumberEditText.updateSelectionIndex(4, 4, 6));
-        assertEquals(11, mCardNumberEditText.updateSelectionIndex(9, 9, 11));
-        assertEquals(16, mCardNumberEditText.updateSelectionIndex(14, 14, 16));
+
+        // Adding 1 character, starting at position 4, with a final string length 6
+        assertEquals(6, mCardNumberEditText.updateSelectionIndex(6, 4, 1));
+        assertEquals(6, mCardNumberEditText.updateSelectionIndex(8, 4, 1));
+        assertEquals(11, mCardNumberEditText.updateSelectionIndex(11, 9, 1));
+        assertEquals(16, mCardNumberEditText.updateSelectionIndex(16, 14, 1));
     }
 
     @Test
     public void updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() {
         mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
-        assertEquals(6, mCardNumberEditText.updateSelectionIndex(4, 4, 6));
-        assertEquals(13, mCardNumberEditText.updateSelectionIndex(11, 11, 13));
+        assertEquals(6, mCardNumberEditText.updateSelectionIndex(6, 4, 1));
+        assertEquals(13, mCardNumberEditText.updateSelectionIndex(13, 11, 1));
     }
 
     @Test
     public void updateSelectionIndex_whenDinersClub_decreasesIndexWhenDeletingPastTheSpaces() {
         mCardNumberEditText.mCardBrand = Card.DINERS_CLUB;
-        assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 6, 4));
-        assertEquals(9, mCardNumberEditText.updateSelectionIndex(11, 11, 9));
-        assertEquals(14, mCardNumberEditText.updateSelectionIndex(16, 16, 14));
+        assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 5, 0));
+        assertEquals(9, mCardNumberEditText.updateSelectionIndex(13, 10, 0));
+        assertEquals(14, mCardNumberEditText.updateSelectionIndex(17, 15, 0));
+    }
+
+    @Test
+    public void updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() {
+        mCardNumberEditText.mCardBrand = Card.DINERS_CLUB;
+        assertEquals(7, mCardNumberEditText.updateSelectionIndex(12, 7, 0));
     }
 
     @Test
     public void updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() {
         mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
-        assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 6, 4));
-        assertEquals(11, mCardNumberEditText.updateSelectionIndex(13, 13, 11));
+        assertEquals(4, mCardNumberEditText.updateSelectionIndex(10, 5, 0));
+        assertEquals(11, mCardNumberEditText.updateSelectionIndex(13, 12, 0));
     }
 
     @Test
     public void updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
         mCardNumberEditText.mCardBrand = Card.VISA;
-        assertEquals(6, mCardNumberEditText.updateSelectionIndex(4, 8, 9));
+        assertEquals(6, mCardNumberEditText.updateSelectionIndex(10, 4, 1));
     }
 
     @Test
-    public void updateSelectionIndex_whenSelectionInTheMiddle_skipsBackDownOverASpace() {
-        mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
-        assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 8, 7));
+    public void updateSelectionIndex_whenPastingIntoAGap_includesTheGapJump() {
+        mCardNumberEditText.mCardBrand = Card.UNKNOWN;
+        assertEquals(11, mCardNumberEditText.updateSelectionIndex(12, 8, 2));
+    }
+
+    @Test
+    public void updateSelectionIndex_whenPastingOverAGap_includesTheGapJump() {
+        mCardNumberEditText.mCardBrand = Card.UNKNOWN;
+        assertEquals(9, mCardNumberEditText.updateSelectionIndex(12, 3, 5));
+    }
+
+    @Test
+    public void updateSelectionIndex_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
+        mCardNumberEditText.mCardBrand = Card.VISA;
+        // This case could happen when you paste over 5 digits with only 2
+        assertEquals(3, mCardNumberEditText.updateSelectionIndex(3, 3, 2));
     }
 }
