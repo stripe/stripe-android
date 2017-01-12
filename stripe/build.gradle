@@ -20,6 +20,7 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 25
+        consumerProguardFiles 'proguard-rules.pro'
     }
     sourceSets {
         main {
