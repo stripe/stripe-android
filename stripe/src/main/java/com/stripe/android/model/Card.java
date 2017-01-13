@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.StripeTextUtils;
 
@@ -360,25 +361,7 @@ public class Card {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateNumber() {
-        if (StripeTextUtils.isBlank(number)) {
-            return false;
-        }
-
-        String rawNumber = number.trim().replaceAll("\\s+|-", "");
-        if (StripeTextUtils.isBlank(rawNumber)
-                || !StripeTextUtils.isWholePositiveNumber(rawNumber)
-                || !isValidLuhnNumber(rawNumber)) {
-            return false;
-        }
-
-        String updatedType = getBrand();
-        if (AMERICAN_EXPRESS.equals(updatedType)) {
-            return rawNumber.length() == MAX_LENGTH_AMERICAN_EXPRESS;
-        } else if (DINERS_CLUB.equals(updatedType)) {
-            return rawNumber.length() == MAX_LENGTH_DINERS_CLUB;
-        } else {
-            return rawNumber.length() == MAX_LENGTH_STANDARD;
-        }
+        return CardUtils.isValidCardNumber(number);
     }
 
     /**
@@ -726,32 +709,6 @@ public class Card {
         this.funding = StripeTextUtils.asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
-    }
-
-    private boolean isValidLuhnNumber(String number) {
-        boolean isOdd = true;
-        int sum = 0;
-
-        for (int index = number.length() - 1; index >= 0; index--) {
-            char c = number.charAt(index);
-            if (!Character.isDigit(c)) {
-                return false;
-            }
-            int digitInteger = Integer.parseInt("" + c);
-            isOdd = !isOdd;
-
-            if (isOdd) {
-                digitInteger *= 2;
-            }
-
-            if (digitInteger > 9) {
-                digitInteger -= 9;
-            }
-
-            sum += digitInteger;
-        }
-
-        return sum % 10 == 0;
     }
 
     private String normalizeCardNumber(String number) {

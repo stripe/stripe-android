@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.Arrays;
@@ -36,6 +37,7 @@ public class CardNumberEditText extends EditText {
     @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
     private int mLengthMax = 19;
     private boolean mIgnoreChanges = false;
+    private boolean mIsCardNumberValid = false;
 
     public CardNumberEditText(Context context) {
         super(context);
@@ -50,6 +52,14 @@ public class CardNumberEditText extends EditText {
     public CardNumberEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
+    }
+
+    /**
+     * Check whether or not the card number is valid
+     * @return
+     */
+    public boolean isCardNumberValid() {
+        return mIsCardNumberValid;
     }
 
     /**
@@ -120,12 +130,12 @@ public class CardNumberEditText extends EditText {
                     return;
                 }
 
-                String spacelessNumber = StripeTextUtils.removeSpaces(s.toString());
+                String spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(s.toString());
                 if (spacelessNumber == null) {
                     return;
                 }
 
-                String[] cardParts = StripeTextUtils.separateCardNumberGroups(
+                String[] cardParts = CardUtils.separateCardNumberGroups(
                         spacelessNumber, mCardBrand);
                 StringBuilder formattedNumberBuilder = new StringBuilder();
                 for (int i = 0; i < cardParts.length; i++) {
@@ -153,14 +163,18 @@ public class CardNumberEditText extends EditText {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                if (s.length() == mLengthMax) {
+                    mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
+                } else {
+                    mIsCardNumberValid = false;
+                }
             }
         });
     }
 
     private void updateCardBrand(String partialNumber) {
         @Card.CardBrand String oldBrand = mCardBrand;
-        mCardBrand = StripeTextUtils.getPossibleCardType(partialNumber);
+        mCardBrand = CardUtils.getPossibleCardType(partialNumber);
         if (mCardBrand.equals(oldBrand)) {
             return;
         }
