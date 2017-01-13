@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.annotation.SuppressLint;
-
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 
