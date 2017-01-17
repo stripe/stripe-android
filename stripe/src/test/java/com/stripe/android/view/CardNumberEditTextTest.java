@@ -6,6 +6,8 @@ import com.stripe.android.testharness.CardInputTestActivity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -14,6 +16,10 @@ import org.robolectric.util.ActivityController;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Test class for {@link CardNumberEditText}. Note that we have to test against SDK 22
@@ -24,18 +30,21 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = 22)
 public class CardNumberEditTextTest {
 
+    @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
     private static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
     private static final String VALID_AMEX_WITH_SPACES = "3782 822463 10005";
     private CardNumberEditText mCardNumberEditText;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         ActivityController activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
         mCardNumberEditText =
                 ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
         mCardNumberEditText.setText("");
+        mCardNumberEditText.setCardNumberCompleteListener(mCardNumberCompleteListener);
     }
 
     @Test
@@ -108,6 +117,7 @@ public class CardNumberEditTextTest {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
 
         assertTrue(mCardNumberEditText.isCardNumberValid());
+        verify(mCardNumberCompleteListener, times(1)).onCardNumberComplete();
     }
 
     @Test
@@ -115,15 +125,29 @@ public class CardNumberEditTextTest {
         mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
 
         assertTrue(mCardNumberEditText.isCardNumberValid());
+        verify(mCardNumberCompleteListener, times(1)).onCardNumberComplete();
     }
 
     @Test
     public void setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        // Simply setting the value interacts with this mock once -- that is tested elsewhere
+        reset(mCardNumberCompleteListener);
+
         String mutable = mCardNumberEditText.getText().toString();
         // Removing a single character should make this invalid
         mutable = mutable.substring(0, 18);
         mCardNumberEditText.setText(mutable);
         assertFalse(mCardNumberEditText.isCardNumberValid());
+        verifyZeroInteractions(mCardNumberCompleteListener);
+    }
+
+    @Test
+    public void setText_whenTextIsInvalidCommonLengthNumber_doesNotNotifyListener() {
+        // This creates a full-length but not valid number: 4242 4242 4242 4243
+        String almostValid = VALID_VISA_WITH_SPACES.substring(0, 18) + "3";
+        mCardNumberEditText.setText(almostValid);
+        assertFalse(mCardNumberEditText.isCardNumberValid());
+        verifyZeroInteractions(mCardNumberCompleteListener);
     }
 }
