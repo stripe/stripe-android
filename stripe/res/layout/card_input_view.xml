@@ -45,7 +45,8 @@
                 <View
                     android:id="@+id/space_in_container"
                     android:layout_width="match_parent"
-                    android:layout_height="10dp"/>
+                    android:layout_height="10dp"
+                    />
 
             </LinearLayout>
 
@@ -73,7 +74,8 @@
             android:hint="@string/cvc_number_hint"
             android:inputType="number"
             android:maxLength="4"
-            android:visibility="invisible"/>
+            android:visibility="invisible"
+            />
 
     </RelativeLayout>
 
