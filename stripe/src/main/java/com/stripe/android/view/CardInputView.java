@@ -59,15 +59,7 @@ public class CardInputView extends FrameLayout {
         mExpiryDateEditText = (EditText) findViewById(R.id.et_expiry_date);
         mCvcNumberEditText = (EditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
-
         mCardNumberIsViewed = true;
-        mCardNumberEditText.setCardNumberCompleteListener(
-                new CardNumberEditText.CardNumberCompleteListener() {
-                    @Override
-                    public void onCardNumberComplete() {
-                        scrollRight();
-                    }
-                });
 
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -109,6 +101,14 @@ public class CardInputView extends FrameLayout {
             }
         });
 
+        mCardNumberEditText.setCardNumberCompleteListener(
+                new CardNumberEditText.CardNumberCompleteListener() {
+                    @Override
+                    public void onCardNumberComplete() {
+                        mExpiryDateEditText.requestFocus();
+                        scrollRight();
+                    }
+                });
     }
 
     @Override
