@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -35,6 +36,7 @@ public class CardNumberEditText extends EditText {
             new HashSet<>(Arrays.asList(SPACES_ARRAY_AMEX));
 
     @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
+    private CardNumberCompleteListener mCardNumberCompleteListener;
     private int mLengthMax = 19;
     private boolean mIgnoreChanges = false;
     private boolean mIsCardNumberValid = false;
@@ -60,6 +62,10 @@ public class CardNumberEditText extends EditText {
      */
     public boolean isCardNumberValid() {
         return mIsCardNumberValid;
+    }
+
+    void setCardNumberCompleteListener(@NonNull CardNumberCompleteListener listener) {
+        mCardNumberCompleteListener = listener;
     }
 
     /**
@@ -164,7 +170,11 @@ public class CardNumberEditText extends EditText {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() == mLengthMax) {
+                    boolean before = mIsCardNumberValid;
                     mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
+                    if (!before && mIsCardNumberValid && mCardNumberCompleteListener != null) {
+                        mCardNumberCompleteListener.onCardNumberComplete();
+                    }
                 } else {
                     mIsCardNumberValid = false;
                 }
@@ -194,5 +204,9 @@ public class CardNumberEditText extends EditText {
         } else {
             return MAX_LENGTH_COMMON;
         }
+    }
+
+    interface CardNumberCompleteListener {
+        void onCardNumberComplete();
     }
 }

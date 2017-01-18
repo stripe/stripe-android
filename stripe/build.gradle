@@ -14,7 +14,8 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
 
     testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.2.1"
+    testCompile 'org.mockito:mockito-core:2.6.3'
+    testCompile 'org.robolectric:robolectric:3.2.1'
 }
 
 android {
