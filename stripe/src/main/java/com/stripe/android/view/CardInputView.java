@@ -106,7 +106,6 @@ public class CardInputView extends FrameLayout {
                     @Override
                     public void onCardNumberComplete() {
                         scrollRight();
-                        mExpiryDateEditText.requestFocus();
                     }
                 });
 
@@ -156,6 +155,7 @@ public class CardInputView extends FrameLayout {
         mScrollView.smoothScrollBy(-1*mScrollToPostion, 0);
         mExpiryDateEditText.setVisibility(View.INVISIBLE);
         mCvcNumberEditText.setVisibility(View.INVISIBLE);
+        mCardNumberEditText.requestFocus();
     }
 
     private void updateScrollToPosition() {
