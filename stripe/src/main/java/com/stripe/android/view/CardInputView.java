@@ -105,10 +105,12 @@ public class CardInputView extends FrameLayout {
                 new CardNumberEditText.CardNumberCompleteListener() {
                     @Override
                     public void onCardNumberComplete() {
-                        mExpiryDateEditText.requestFocus();
                         scrollRight();
+                        mExpiryDateEditText.requestFocus();
                     }
                 });
+
+        mCardNumberEditText.requestFocus();
     }
 
     @Override

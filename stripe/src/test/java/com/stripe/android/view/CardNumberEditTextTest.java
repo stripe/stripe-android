@@ -13,6 +13,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,8 +33,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public class CardNumberEditTextTest {
 
     @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
-    private static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
-    private static final String VALID_AMEX_WITH_SPACES = "3782 822463 10005";
     private CardNumberEditText mCardNumberEditText;
 
     @Before
