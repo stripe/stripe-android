@@ -1,8 +1,11 @@
+2.1.0 2017-01-19
+    Added bindings to allow creation of bank account tokens.
+
 2.0.3 2017-01-09
-    Updated OS version logging to be relevant for Android
+    Updated OS version logging to be relevant for Android.
 
 2.0.2 2016-12-22
-    Made the StripeApiHandler.VERSION constant public
+    Made the StripeApiHandler.VERSION constant public.
 
 2.0.1 2016-12-22
     Made the Token, Card, and Error parsing functions public.
