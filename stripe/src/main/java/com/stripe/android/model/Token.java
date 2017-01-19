@@ -12,15 +12,17 @@ import java.util.Date;
 public class Token {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_CARD})
+    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT})
     public @interface TokenType {}
     public static final String TYPE_CARD = "card";
+    public static final String TYPE_BANK_ACCOUNT = "bank_account";
 
     private final String mId;
     private final String mType;
     private final Date mCreated;
     private final boolean mLivemode;
     private final boolean mUsed;
+    private final BankAccount mBankAccount;
     private final Card mCard;
 
     /**
@@ -32,14 +34,33 @@ public class Token {
             boolean livemode,
             Date created,
             Boolean used,
-            Card card,
-            @TokenType String type) {
+            Card card) {
         mId = id;
-        mType = type;
+        mType = TYPE_CARD;
         mCreated = created;
         mLivemode = livemode;
         mCard = card;
         mUsed = used;
+        mBankAccount = null;
+    }
+
+    /**
+     * Constructor that should not be invoked in your code.  This is used by Stripe to
+     * create tokens using a Stripe API response.
+     */
+    public Token(
+            String id,
+            boolean livemode,
+            Date created,
+            Boolean used,
+            BankAccount bankAccount) {
+        mId = id;
+        mType = TYPE_BANK_ACCOUNT;
+        mCreated = created;
+        mLivemode = livemode;
+        mCard = null;
+        mUsed = used;
+        mBankAccount = bankAccount;
     }
 
     /***
@@ -84,5 +105,12 @@ public class Token {
      */
     public Card getCard() {
         return mCard;
+    }
+
+    /**
+     * @return the {@link BankAccount} for this token
+     */
+    public BankAccount getBankAccount() {
+        return mBankAccount;
     }
 }
