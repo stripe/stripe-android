@@ -3,6 +3,7 @@ package com.stripe.android;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 
@@ -13,6 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
@@ -41,11 +43,12 @@ public class StripeTest {
         }
     };
 
-    private static final String DEFAULT_TOKEN_ID = "tok_default";
-
     private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
     private static final String TEST_CARD_NUMBER = "4242424242424242";
+    private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
+    private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
 
+    private BankAccount mBankAccount;
     private Card mCard;
     private int mYear;
 
@@ -57,6 +60,11 @@ public class StripeTest {
         // Try to make the test card always expire next year
         mYear = rightNow.get(Calendar.YEAR) + 1;
         mCard = new Card(TEST_CARD_NUMBER, month, mYear, cvc);
+        mBankAccount = new BankAccount(
+                TEST_BANK_ACCOUNT_NUMBER,
+                "US",
+                "usd",
+                TEST_BANK_ROUTING_NUMBER);
     }
 
     @Test(expected = AuthenticationException.class)
@@ -95,13 +103,13 @@ public class StripeTest {
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNull() {
         Stripe stripe = new Stripe();
-        stripe.createToken(null, null);
+        stripe.createToken((Card) null, null);
     }
 
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNullCard() {
         Stripe stripe = new Stripe();
-        stripe.createToken(null, DEFAULT_TOKEN_CALLBACK);
+        stripe.createToken((Card) null, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test(expected = RuntimeException.class)
@@ -123,7 +131,7 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new Stripe.TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
                     tokenCreatorCalled[0] = true;
                 }
@@ -147,10 +155,9 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new Stripe.TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
                     assertEquals(expectedExecutor, executor);
-                    assertEquals(DEFAULT_CARD, card);
                     assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
                     assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                 }
@@ -168,10 +175,9 @@ public class StripeTest {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
             stripe.tokenCreator = new Stripe.TokenCreator() {
                 @Override
-                public void create(Card card, String publishableKey,
+                public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
                     assertEquals(expectedPublishableKey, publishableKey);
-                    assertEquals(DEFAULT_CARD, card);
                     assertNull(executor);
                     assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                 }
@@ -191,11 +197,37 @@ public class StripeTest {
             assertNotNull(token);
             Card returnedCard = token.getCard();
             assertNotNull(returnedCard);
+            assertNull(token.getBankAccount());
+            assertEquals(Token.TYPE_CARD, token.getType());
             assertEquals(mCard.getLast4(), returnedCard.getLast4());
             assertEquals(Card.VISA, returnedCard.getBrand());
             assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
             assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
             assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createTokenSynchronous_withValidBankAccount_returnsToken() {
+        try {
+            Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
+            Token token = stripe.createTokenSynchronous(mBankAccount);
+            assertNotNull(token);
+            assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
+            assertNull(token.getCard());
+
+            BankAccount returnedBankAccount = token.getBankAccount();
+            String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
+                    .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
+            assertEquals(expectedLast4, returnedBankAccount.getLast4());
+            assertEquals(mBankAccount.getCountryCode(), returnedBankAccount.getCountryCode());
+            assertEquals(mBankAccount.getCurrency(), returnedBankAccount.getCurrency());
+            assertEquals(mBankAccount.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {

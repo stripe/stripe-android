@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import com.stripe.android.exception.APIConnectionException;
@@ -34,7 +35,7 @@ public class Stripe {
     TokenCreator tokenCreator = new TokenCreator() {
         @Override
         public void create(
-                final Card card,
+                final Map<String, Object> tokenParams,
                 final String publishableKey,
                 final Executor executor,
                 final TokenCallback callback) {
@@ -46,7 +47,7 @@ public class Stripe {
                                 RequestOptions requestOptions =
                                         RequestOptions.builder(publishableKey).build();
                                 Token token = StripeApiHandler.createToken(
-                                        hashMapFromCard(card),
+                                        tokenParams,
                                         requestOptions);
                                 return new ResponseWrapper(token, null);
                             } catch (StripeException e) {
@@ -94,6 +95,19 @@ public class Stripe {
     }
 
     /**
+     * THe simplest way to create a {@link BankAccount} token. This runs on the default
+     * {@link Executor} and with the currently set {@link #defaultPublishableKey}.
+     *
+     * @param bankAccount the {@link BankAccount} used to create this token
+     * @param callback a {@link TokenCallback} to receive either the token or an error
+     */
+    public void createToken(
+            @NonNull final BankAccount bankAccount,
+            @NonNull final TokenCallback callback) {
+        createToken(bankAccount, defaultPublishableKey, null, callback);
+    }
+
+    /**
      * Call to create a {@link Token} with a specific public key.
      *
      * @param card the {@link Card} used for this transaction
@@ -135,25 +149,36 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-        try {
-            if (card == null) {
-                throw new RuntimeException(
-                        "Required Parameter: 'card' is required to create a token");
-            }
-
-            if (callback == null) {
-                throw new RuntimeException(
-                        "Required Parameter: 'callback' is required to use the created " +
-                                "token and handle errors");
-            }
-
-            validateKey(publishableKey);
-
-            tokenCreator.create(card, publishableKey, executor, callback);
+        if (card == null) {
+            throw new RuntimeException(
+                    "Required Parameter: 'card' is required to create a token");
         }
-        catch (AuthenticationException e) {
-            callback.onError(e);
+
+        createToken(hashMapFromCard(card), publishableKey, executor, callback);
+    }
+
+    /**
+     * Call to create a {@link Token} for a {@link BankAccount} with the publishable key and
+     * {@link Executor} specified.
+     *
+     * @param bankAccount the {@link BankAccount} for which to create a {@link Token}
+     * @param publishableKey the publishable key to use
+     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
+     *                 default non-ui executor
+     * @param callback a {@link TokenCallback} to receive the result or error message
+     */
+    public void createToken(
+            @NonNull final BankAccount bankAccount,
+            @NonNull @Size(min = 1) final String publishableKey,
+            @Nullable final Executor executor,
+            @NonNull final TokenCallback callback) {
+
+        if (bankAccount == null) {
+            throw new RuntimeException(
+                    "Required parameter: 'bankAccount' is requred to create a token");
         }
+
+        createToken(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
     }
 
     /**
@@ -179,7 +204,47 @@ public class Stripe {
         return createTokenSynchronous(card, defaultPublishableKey);
     }
 
-    public Token createBankTokenSynchronous(final BankAccount bankAccount, String publishableKey)
+    /**
+     * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * This method uses the default publishable key for this {@link Stripe} instance.
+     *
+     * @param bankAccount the {@link Card} to use for this token
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     * possible given the underlying methods called
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    public Token createTokenSynchronous(final BankAccount bankAccount)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createTokenSynchronous(bankAccount, defaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} using a {@link BankAccount}. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * @param bankAccount the {@link BankAccount} to use for this token
+     * @param publishableKey the publishable key to use with this request
+     * @return
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     * possible given the underlying methods called
+     * @throws APIException any other type of problem
+     */
+    public Token createTokenSynchronous(final BankAccount bankAccount, String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -227,6 +292,27 @@ public class Stripe {
             throws AuthenticationException {
         validateKey(publishableKey);
         this.defaultPublishableKey = publishableKey;
+    }
+
+    private void createToken(
+            @NonNull final Map<String, Object> tokenParams,
+            @NonNull @Size(min = 1) final String publishableKey,
+            @Nullable final Executor executor,
+            @NonNull final TokenCallback callback) {
+        try {
+            if (callback == null) {
+                throw new RuntimeException(
+                        "Required Parameter: 'callback' is required to use the created " +
+                                "token and handle errors");
+            }
+
+            validateKey(publishableKey);
+
+            tokenCreator.create(tokenParams, publishableKey, executor, callback);
+        }
+        catch (AuthenticationException e) {
+            callback.onError(e);
+        }
     }
 
     private void validateKey(@NonNull @Size(min = 1) String publishableKey)
@@ -278,6 +364,9 @@ public class Stripe {
 
     @VisibleForTesting
     interface TokenCreator {
-        void create(Card card, String publishableKey, Executor executor, TokenCallback callback);
+        void create(Map<String, Object> params,
+                    String publishableKey,
+                    Executor executor,
+                    TokenCallback callback);
     }
 }
