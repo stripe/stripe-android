@@ -46,7 +46,7 @@ public class Stripe {
                             try {
                                 RequestOptions requestOptions =
                                         RequestOptions.builder(publishableKey).build();
-                                Token token = StripeApiHandler.createToken(
+                                Token token = StripeApiHandler.createTokenOnServer(
                                         tokenParams,
                                         requestOptions);
                                 return new ResponseWrapper(token, null);
@@ -95,16 +95,16 @@ public class Stripe {
     }
 
     /**
-     * THe simplest way to create a {@link BankAccount} token. This runs on the default
+     * The simplest way to create a {@link BankAccount} token. This runs on the default
      * {@link Executor} and with the currently set {@link #defaultPublishableKey}.
      *
      * @param bankAccount the {@link BankAccount} used to create this token
      * @param callback a {@link TokenCallback} to receive either the token or an error
      */
-    public void createToken(
+    public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
             @NonNull final TokenCallback callback) {
-        createToken(bankAccount, defaultPublishableKey, null, callback);
+        createBankAccountToken(bankAccount, defaultPublishableKey, null, callback);
     }
 
     /**
@@ -125,7 +125,7 @@ public class Stripe {
      * Call to create a {@link Token} on a specific {@link Executor}.
      * @param card the {@link Card} to use for this token creation
      * @param executor An {@link Executor} on which to run this operation. If you don't wish to
-     *                 specify an executor, use one of the other createToken methods.
+     *                 specify an executor, use one of the other createTokenFromParams methods.
      * @param callback a {@link TokenCallback} to receive the result of this operation
      */
     public void createToken(
@@ -154,7 +154,7 @@ public class Stripe {
                     "Required Parameter: 'card' is required to create a token");
         }
 
-        createToken(hashMapFromCard(card), publishableKey, executor, callback);
+        createTokenFromParams(hashMapFromCard(card), publishableKey, executor, callback);
     }
 
     /**
@@ -167,18 +167,17 @@ public class Stripe {
      *                 default non-ui executor
      * @param callback a {@link TokenCallback} to receive the result or error message
      */
-    public void createToken(
+    public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-
         if (bankAccount == null) {
             throw new RuntimeException(
                     "Required parameter: 'bankAccount' is requred to create a token");
         }
 
-        createToken(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
+        createTokenFromParams(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
     }
 
     /**
@@ -252,7 +251,7 @@ public class Stripe {
             APIException {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
-        return StripeApiHandler.createToken(hashMapFromBankAccount(bankAccount), requestOptions);
+        return StripeApiHandler.createTokenOnServer(hashMapFromBankAccount(bankAccount), requestOptions);
     }
 
     /**
@@ -270,7 +269,7 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
      */
-    public Token createTokenSynchronous(Card card, String publishableKey)
+    public Token createTokenSynchronous(final Card card, String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -279,7 +278,7 @@ public class Stripe {
         validateKey(publishableKey);
 
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
-        return StripeApiHandler.createToken(hashMapFromCard(card), requestOptions);
+        return StripeApiHandler.createTokenOnServer(hashMapFromCard(card), requestOptions);
     }
 
     /**
@@ -294,7 +293,7 @@ public class Stripe {
         this.defaultPublishableKey = publishableKey;
     }
 
-    private void createToken(
+    private void createTokenFromParams(
             @NonNull final Map<String, Object> tokenParams,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
@@ -307,7 +306,6 @@ public class Stripe {
             }
 
             validateKey(publishableKey);
-
             tokenCreator.create(tokenParams, publishableKey, executor, callback);
         }
         catch (AuthenticationException e) {

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,7 @@ public class StripeNetworkUtils {
         // Remove all null values; they cause validation errors
         removeNullParams(cardParams);
 
-        tokenParams.put("card", cardParams);
+        tokenParams.put(Token.TYPE_CARD, cardParams);
         return tokenParams;
     }
 
@@ -65,7 +66,7 @@ public class StripeNetworkUtils {
         // Remove all null values; they cause validation errors
         removeNullParams(accountParams);
 
-        tokenParams.put("bank_account", accountParams);
+        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
         return tokenParams;
     }
 

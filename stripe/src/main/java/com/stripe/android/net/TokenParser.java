@@ -16,11 +16,14 @@ import java.util.Date;
  */
 public class TokenParser {
 
-    private static final String FIELD_BANK_ACCOUNT = "bank_account";
-    private static final String FIELD_CARD = "card";
+    // The key for these object fields is identical to their retrieved values
+    // from the Type field.
+    private static final String FIELD_BANK_ACCOUNT = Token.TYPE_BANK_ACCOUNT;
+    private static final String FIELD_CARD = Token.TYPE_CARD;
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_ID = "id";
     private static final String FIELD_LIVEMODE = "livemode";
+
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_USED = "used";
 

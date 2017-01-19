@@ -75,7 +75,7 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    public static Token createToken (
+    public static Token createTokenOnServer(
             @NonNull Map<String, Object> cardParams,
             @NonNull RequestOptions options)
             throws AuthenticationException,
@@ -98,7 +98,7 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    public static Token retrieveToken(
+    public static Token retrieveTokenFromServer(
             @NonNull RequestOptions options,
             @NonNull String tokenId)
             throws AuthenticationException,

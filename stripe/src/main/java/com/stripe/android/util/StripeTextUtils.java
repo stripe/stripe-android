@@ -92,10 +92,6 @@ public class StripeTextUtils {
     @Nullable
     @BankAccountType
     public static String asBankAccountType(@Nullable String possibleAccountType) {
-        if (isBlank(possibleAccountType)) {
-            return null;
-        }
-
         if (BankAccount.TYPE_COMPANY.equals(possibleAccountType)) {
             return BankAccount.TYPE_COMPANY;
         } else if (BankAccount.TYPE_INDIVIDUAL.equals(possibleAccountType)) {
