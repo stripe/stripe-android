@@ -52,7 +52,7 @@
 
         </com.stripe.android.view.LockableHorizontalScrollView>
 
-        <EditText
+        <com.stripe.android.view.ExpiryDateEditText
             android:id="@+id/et_expiry_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
