@@ -41,11 +41,7 @@ public class StripeNetworkUtils {
         cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
 
         // Remove all null values; they cause validation errors
-        for (String key : new HashSet<>(cardParams.keySet())) {
-            if (cardParams.get(key) == null) {
-                cardParams.remove(key);
-            }
-        }
+        removeNullParams(cardParams);
 
         tokenParams.put("card", cardParams);
         return tokenParams;
@@ -67,13 +63,19 @@ public class StripeNetworkUtils {
                 StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
 
         // Remove all null values; they cause validation errors
-        for (String key : new HashSet<>(accountParams.keySet())) {
-            if (accountParams.get(key) == null) {
-                accountParams.remove(key);
-            }
-        }
+        removeNullParams(accountParams);
 
         tokenParams.put("bank_account", accountParams);
         return tokenParams;
     }
+
+    static void removeNullParams(Map<String, Object> mapToEdit) {
+        // Remove all null values; they cause validation errors
+        for (String key : new HashSet<>(mapToEdit.keySet())) {
+            if (mapToEdit.get(key) == null) {
+                mapToEdit.remove(key);
+            }
+        }
+    }
+
 }

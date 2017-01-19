@@ -2,6 +2,7 @@ package com.stripe.android.util;
 
 import android.support.annotation.NonNull;
 
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 
 import org.junit.Test;
@@ -33,6 +34,10 @@ public class StripeNetworkUtilsTest {
     private static final String CARD_STATE = "CA";
     private static final String CARD_ZIP = "94107";
 
+    private static final String BANK_ACCOUNT_NUMBER = "000123456789";
+    private static final String BANK_ROUTING_NUMBER = "110000000";
+    private static final String BANK_ACCOUNT_HOLDER_NAME = "Lily Thomas";
+
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
         Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
@@ -63,6 +68,22 @@ public class StripeNetworkUtilsTest {
     }
 
     @Test
+    public void hashMapFromBankAccount_mapsCorrectFields() {
+        BankAccount bankAccount = new BankAccount(
+                BANK_ACCOUNT_NUMBER, "US", "usd", BANK_ROUTING_NUMBER)
+                .setAccountHolderName(BANK_ACCOUNT_HOLDER_NAME)
+                .setAccountHolderType(BankAccount.TYPE_INDIVIDUAL);
+        Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+
+        assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
+        assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
+        assertEquals("US", bankAccountMap.get("country"));
+        assertEquals("usd", bankAccountMap.get("currency"));
+        assertEquals(BANK_ACCOUNT_HOLDER_NAME, bankAccountMap.get("account_holder_name"));
+        assertEquals(BankAccount.TYPE_INDIVIDUAL, bankAccountMap.get("account_holder_type"));
+    }
+
+    @Test
     public void hashMapFromCard_omitsEmptyFields() {
         Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC).build();
 
@@ -82,10 +103,31 @@ public class StripeNetworkUtilsTest {
         assertFalse(cardMap.containsKey("address_country"));
     }
 
+    @Test
+    public void hashMapFromBankAccount_omitsEmptyFields() {
+        BankAccount bankAccount = new BankAccount(
+                BANK_ACCOUNT_NUMBER, "US", "usd", BANK_ROUTING_NUMBER);
+        Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+
+        assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
+        assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
+        assertEquals("US", bankAccountMap.get("country"));
+        assertEquals("usd", bankAccountMap.get("currency"));
+        assertFalse(bankAccountMap.containsKey("account_holder_name"));
+        assertFalse(bankAccountMap.containsKey("account_holder_type"));
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
         Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(card);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("card");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
+        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromBankAccount(bankAccount);
+        assertNotNull(tokenMap);
+        return (Map<String, Object>) tokenMap.get("bank_account");
     }
 }

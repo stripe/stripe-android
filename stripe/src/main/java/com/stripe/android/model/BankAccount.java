@@ -52,7 +52,6 @@ public class BankAccount {
         mRoutingNumber = routingNumber;
     }
 
-
     /**
      * Constructor with no account number used internally to initialize an object
      * from JSON returned from the server.
@@ -95,10 +94,22 @@ public class BankAccount {
         return mAccountHolderName;
     }
 
+    @NonNull
+    public BankAccount setAccountHolderName(String accountHolderName) {
+        mAccountHolderName = accountHolderName;
+        return this;
+    }
+
     @Nullable
     @BankAccountType
     public String getAccountHolderType() {
         return mAccountHolderType;
+    }
+
+    @NonNull
+    public BankAccount setAccountHolderType(@BankAccountType String accountHolderType) {
+        mAccountHolderType = accountHolderType;
+        return this;
     }
 
     @Nullable
