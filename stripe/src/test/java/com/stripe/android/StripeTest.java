@@ -189,7 +189,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withValidData_returnsToken() {
+    public void createBankAccountTokenSynchronous_withValidData_returnsToken() {
         try {
             Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(mCard);
@@ -213,10 +213,10 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withValidBankAccount_returnsToken() {
+    public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
         try {
             Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
-            Token token = stripe.createTokenSynchronous(mBankAccount);
+            Token token = stripe.createBankAccountTokenSynchronous(mBankAccount);
             assertNotNull(token);
             assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
             assertNull(token.getCard());

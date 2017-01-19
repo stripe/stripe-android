@@ -83,18 +83,6 @@ public class Stripe {
     }
 
     /**
-     * The simplest way to create a token, using a {@link Card} and {@link TokenCallback}. This
-     * runs on the default {@link Executor} and with the
-     * currently set {@link #defaultPublishableKey}.
-     *
-     * @param card the {@link Card} used to create this payment token
-     * @param callback a {@link TokenCallback} to receive either the token or an error
-     */
-    public void createToken(@NonNull final Card card, @NonNull final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, callback);
-    }
-
-    /**
      * The simplest way to create a {@link BankAccount} token. This runs on the default
      * {@link Executor} and with the currently set {@link #defaultPublishableKey}.
      *
@@ -105,6 +93,96 @@ public class Stripe {
             @NonNull final BankAccount bankAccount,
             @NonNull final TokenCallback callback) {
         createBankAccountToken(bankAccount, defaultPublishableKey, null, callback);
+    }
+
+    /**
+     * Call to create a {@link Token} for a {@link BankAccount} with the publishable key and
+     * {@link Executor} specified.
+     *
+     * @param bankAccount the {@link BankAccount} for which to create a {@link Token}
+     * @param publishableKey the publishable key to use
+     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
+     *                 default non-ui executor
+     * @param callback a {@link TokenCallback} to receive the result or error message
+     */
+    public void createBankAccountToken(
+            @NonNull final BankAccount bankAccount,
+            @NonNull @Size(min = 1) final String publishableKey,
+            @Nullable final Executor executor,
+            @NonNull final TokenCallback callback) {
+        if (bankAccount == null) {
+            throw new RuntimeException(
+                    "Required parameter: 'bankAccount' is requred to create a token");
+        }
+
+        createTokenFromParams(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * This method uses the default publishable key for this {@link Stripe} instance.
+     *
+     * @param bankAccount the {@link Card} to use for this token
+     * @return a {@link Token} that can be used for this {@link BankAccount}
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     * possible given the underlying methods called
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    public Token createBankAccountTokenSynchronous(final BankAccount bankAccount)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createBankAccountTokenSynchronous(bankAccount, defaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} using a {@link BankAccount}. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * @param bankAccount the {@link BankAccount} to use for this token
+     * @param publishableKey the publishable key to use with this request
+     * @return a {@link Token} that can be used for this {@link BankAccount}
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     * possible given the underlying methods called
+     * @throws APIException any other type of problem
+     */
+    public Token createBankAccountTokenSynchronous(
+                final BankAccount bankAccount,
+                String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        validateKey(publishableKey);
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.createTokenOnServer(
+                hashMapFromBankAccount(bankAccount), requestOptions);
+    }
+
+    /**
+     * The simplest way to create a token, using a {@link Card} and {@link TokenCallback}. This
+     * runs on the default {@link Executor} and with the
+     * currently set {@link #defaultPublishableKey}.
+     *
+     * @param card the {@link Card} used to create this payment token
+     * @param callback a {@link TokenCallback} to receive either the token or an error
+     */
+    public void createToken(@NonNull final Card card, @NonNull final TokenCallback callback) {
+        createToken(card, defaultPublishableKey, callback);
     }
 
     /**
@@ -158,29 +236,6 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} for a {@link BankAccount} with the publishable key and
-     * {@link Executor} specified.
-     *
-     * @param bankAccount the {@link BankAccount} for which to create a {@link Token}
-     * @param publishableKey the publishable key to use
-     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *                 default non-ui executor
-     * @param callback a {@link TokenCallback} to receive the result or error message
-     */
-    public void createBankAccountToken(
-            @NonNull final BankAccount bankAccount,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
-        if (bankAccount == null) {
-            throw new RuntimeException(
-                    "Required parameter: 'bankAccount' is requred to create a token");
-        }
-
-        createTokenFromParams(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
-    }
-
-    /**
      * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
      * will crash. This method uses the default publishable key for this {@link Stripe} instance.
      *
@@ -201,57 +256,6 @@ public class Stripe {
             CardException,
             APIException {
         return createTokenSynchronous(card, defaultPublishableKey);
-    }
-
-    /**
-     * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
-     * the UI thread or your app will crash.
-     *
-     * This method uses the default publishable key for this {@link Stripe} instance.
-     *
-     * @param bankAccount the {@link Card} to use for this token
-     * @return a {@link Token} that can be used for this card
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException should not be thrown with this type of token, but is theoretically
-     * possible given the underlying methods called
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
-     */
-    public Token createTokenSynchronous(final BankAccount bankAccount)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        return createTokenSynchronous(bankAccount, defaultPublishableKey);
-    }
-
-    /**
-     * Blocking method to create a {@link Token} using a {@link BankAccount}. Do not call this on
-     * the UI thread or your app will crash.
-     *
-     * @param bankAccount the {@link BankAccount} to use for this token
-     * @param publishableKey the publishable key to use with this request
-     * @return
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException should not be thrown with this type of token, but is theoretically
-     * possible given the underlying methods called
-     * @throws APIException any other type of problem
-     */
-    public Token createTokenSynchronous(final BankAccount bankAccount, String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
-        return StripeApiHandler.createTokenOnServer(hashMapFromBankAccount(bankAccount), requestOptions);
     }
 
     /**
