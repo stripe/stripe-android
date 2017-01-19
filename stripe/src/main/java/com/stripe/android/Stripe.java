@@ -16,11 +16,13 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.RequestOptions;
 import com.stripe.android.net.StripeApiHandler;
 
+import static com.stripe.android.util.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
 
 /**
@@ -175,6 +177,17 @@ public class Stripe {
             CardException,
             APIException {
         return createTokenSynchronous(card, defaultPublishableKey);
+    }
+
+    public Token createBankTokenSynchronous(final BankAccount bankAccount, String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        validateKey(publishableKey);
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.createToken(hashMapFromBankAccount(bankAccount), requestOptions);
     }
 
     /**

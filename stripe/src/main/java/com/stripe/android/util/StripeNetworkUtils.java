@@ -1,5 +1,8 @@
 package com.stripe.android.util;
 
+import android.support.annotation.NonNull;
+
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 
 import java.util.HashMap;
@@ -19,6 +22,7 @@ public class StripeNetworkUtils {
      * @param card the {@link Card} to be read
      * @return a {@link Map} containing the appropriate values read from the card
      */
+    @NonNull
     public static Map<String, Object> hashMapFromCard(Card card) {
         Map<String, Object> tokenParams = new HashMap<>();
 
@@ -44,6 +48,32 @@ public class StripeNetworkUtils {
         }
 
         tokenParams.put("card", cardParams);
+        return tokenParams;
+    }
+
+    @NonNull
+    public static Map<String, Object> hashMapFromBankAccount(@NonNull BankAccount bankAccount) {
+        Map<String, Object> tokenParams = new HashMap<>();
+        Map<String, Object> accountParams = new HashMap<>();
+
+        accountParams.put("country", bankAccount.getCountryCode());
+        accountParams.put("currency", bankAccount.getCurrency());
+        accountParams.put("account_number", bankAccount.getAccountNumber());
+        accountParams.put("routing_number",
+                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
+        accountParams.put("account_holder_name",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
+        accountParams.put("account_holder_type",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
+
+        // Remove all null values; they cause validation errors
+        for (String key : new HashSet<>(accountParams.keySet())) {
+            if (accountParams.get(key) == null) {
+                accountParams.remove(key);
+            }
+        }
+
+        tokenParams.put("bank_account", accountParams);
         return tokenParams;
     }
 }

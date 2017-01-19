@@ -2,9 +2,11 @@ package com.stripe.android.util;
 
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 
+import static com.stripe.android.model.BankAccount.BankAccountType;
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.model.Card.FundingType;
 import static com.stripe.android.model.Token.TokenType;
@@ -81,6 +83,29 @@ public class StripeTextUtils {
     }
 
     /**
+     * Converts a String value into the appropriate {@link BankAccountType}.
+     *
+     * @param possibleAccountType a String that might match a {@link BankAccountType} or be empty.
+     * @return {@code null} if the input is blank or of unknown type, else the appropriate
+     *         {@link BankAccountType}.
+     */
+    @Nullable
+    @BankAccountType
+    public static String asBankAccountType(@Nullable String possibleAccountType) {
+        if (isBlank(possibleAccountType)) {
+            return null;
+        }
+
+        if (BankAccount.TYPE_COMPANY.equals(possibleAccountType)) {
+            return BankAccount.TYPE_COMPANY;
+        } else if (BankAccount.TYPE_INDIVIDUAL.equals(possibleAccountType)) {
+            return BankAccount.TYPE_INDIVIDUAL;
+        }
+
+        return null;
+    }
+
+    /**
      * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
      *
      * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
@@ -144,9 +169,16 @@ public class StripeTextUtils {
     @Nullable
     @TokenType
     public static String asTokenType(@Nullable String possibleTokenType) {
+        if (isBlank(possibleTokenType)) {
+            return null;
+        }
+
         if (Token.TYPE_CARD.equals(possibleTokenType)) {
             return Token.TYPE_CARD;
+        } else if (Token.TYPE_BANK_ACCOUNT.equals(possibleTokenType)) {
+            return Token.TYPE_BANK_ACCOUNT;
         }
+
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.net;
 
+import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.StripeJsonUtils;
@@ -15,6 +16,7 @@ import java.util.Date;
  */
 public class TokenParser {
 
+    private static final String FIELD_BANK_ACCOUNT = "bank_account";
     private static final String FIELD_CARD = "card";
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_ID = "id";
@@ -24,6 +26,7 @@ public class TokenParser {
 
     public static Token parseToken(String jsonToken) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonToken);
+
         String tokenId = StripeJsonUtils.getString(jsonObject, FIELD_ID);
         Long createdTimeStamp = jsonObject.getLong(FIELD_CREATED);
         Boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
@@ -31,11 +34,19 @@ public class TokenParser {
                 StripeTextUtils.asTokenType(StripeJsonUtils.getString(jsonObject, FIELD_TYPE));
         Boolean used = jsonObject.getBoolean(FIELD_USED);
 
-        JSONObject cardObject = jsonObject.getJSONObject(FIELD_CARD);
-        Card card = CardParser.parseCard(cardObject);
-
         Date date = new Date(createdTimeStamp * 1000);
 
-        return new Token(tokenId, liveMode, date, used, card, tokenType);
+        Token token = null;
+        if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
+            JSONObject bankAccountObject = jsonObject.getJSONObject(FIELD_BANK_ACCOUNT);
+            BankAccount bankAccount = BankAccountParser.parseBankAccount(bankAccountObject);
+            token = new Token(tokenId, liveMode, date, used, bankAccount);
+        } else if (Token.TYPE_CARD.equals(tokenType)) {
+            JSONObject cardObject = jsonObject.getJSONObject(FIELD_CARD);
+            Card card = CardParser.parseCard(cardObject);
+            token = new Token(tokenId, liveMode, date, used, card);
+        }
+
+        return token;
     }
 }

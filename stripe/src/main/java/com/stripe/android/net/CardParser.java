@@ -12,23 +12,23 @@ import org.json.JSONObject;
 /**
  * A helper class for parsing {@link Card} objects returned from the server.
  */
-public class CardParser {
+class CardParser {
 
-    static final String FIELD_ADDRESS_CITY = "address_city";
-    static final String FIELD_ADDRESS_COUNTRY = "address_country";
-    static final String FIELD_ADDRESS_LINE1 = "address_line1";
-    static final String FIELD_ADDRESS_LINE2 = "address_line2";
-    static final String FIELD_ADDRESS_STATE = "address_state";
-    static final String FIELD_ADDRESS_ZIP = "address_zip";
-    static final String FIELD_BRAND = "brand";
-    static final String FIELD_COUNTRY = "country";
-    static final String FIELD_CURRENCY = "currency";
-    static final String FIELD_EXP_MONTH = "exp_month";
-    static final String FIELD_EXP_YEAR = "exp_year";
-    static final String FIELD_FINGERPRINT = "fingerprint";
-    static final String FIELD_FUNDING = "funding";
-    static final String FIELD_LAST4 = "last4";
-    static final String FIELD_NAME = "name";
+    private static final String FIELD_ADDRESS_CITY = "address_city";
+    private static final String FIELD_ADDRESS_COUNTRY = "address_country";
+    private static final String FIELD_ADDRESS_LINE1 = "address_line1";
+    private static final String FIELD_ADDRESS_LINE2 = "address_line2";
+    private static final String FIELD_ADDRESS_STATE = "address_state";
+    private static final String FIELD_ADDRESS_ZIP = "address_zip";
+    private static final String FIELD_BRAND = "brand";
+    private static final String FIELD_COUNTRY = "country";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_EXP_MONTH = "exp_month";
+    private static final String FIELD_EXP_YEAR = "exp_year";
+    private static final String FIELD_FINGERPRINT = "fingerprint";
+    private static final String FIELD_FUNDING = "funding";
+    private static final String FIELD_LAST4 = "last4";
+    private static final String FIELD_NAME = "name";
 
     /**
      * Parse the card directly from a JSON-formatted {@link String} value.
@@ -38,7 +38,7 @@ public class CardParser {
      * @throws JSONException if the String is improperly formatted or is missing required values
      */
     @NonNull
-    public static Card parseCard(String jsonCard) throws JSONException {
+    static Card parseCard(String jsonCard) throws JSONException {
         JSONObject cardObject = new JSONObject(jsonCard);
         return parseCard(cardObject);
     }
@@ -51,7 +51,7 @@ public class CardParser {
      * @throws JSONException if the input is missing a required field
      */
     @NonNull
-    public static Card parseCard(@NonNull JSONObject objectCard) throws JSONException {
+    static Card parseCard(@NonNull JSONObject objectCard) throws JSONException {
         return new Card(
                 null,
                 objectCard.getInt(FIELD_EXP_MONTH),

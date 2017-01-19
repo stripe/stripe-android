@@ -48,6 +48,46 @@ public class StripeJsonUtils {
         return nullIfNullOrEmpty(jsonObject.optString(fieldName));
     }
 
+    /**
+     * Calls through to {@link JSONObject#optString(String)} while safely converting
+     * the raw string "null" and the empty string to {@code null}, along with any value that isn't
+     * a two-character string.
+     * @param jsonObject the object from which to retrieve the country code
+     * @param fieldName the name of the field in which the country code is stored
+     * @return a two-letter country code if one is found, or {@code null}
+     */
+    @Nullable
+    @Size(2)
+    public static String optCountryCode(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        String value = nullIfNullOrEmpty(jsonObject.optString(fieldName));
+        if (value != null && value.length() == 2) {
+            return value;
+        }
+        return null;
+    }
+
+    /**
+     * Calls through to {@link JSONObject#optString(String)} while safely converting
+     * the raw string "null" and the empty string to {@code null}, along with any value that isn't
+     * a three-character string.
+     * @param jsonObject the object from which to retrieve the currency code
+     * @param fieldName the name of the field in which the currency code is stored
+     * @return a three-letter currency code if one is found, or {@code null}
+     */
+    @Nullable
+    @Size(3)
+    public static String optCurrency(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        String value = nullIfNullOrEmpty(jsonObject.optString(fieldName));
+        if (value != null && value.length() == 3) {
+            return value;
+        }
+        return null;
+    }
+
     @Nullable
     @VisibleForTesting
     static String nullIfNullOrEmpty(@Nullable String possibleNull) {
