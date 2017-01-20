@@ -1,11 +1,7 @@
 package com.stripe.android.view;
 
-import android.view.KeyEvent;
-
-import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
-
-import net.bytebuddy.asm.Advice;
+import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,8 +61,7 @@ public class ExpiryDateEditTextTest {
         mExpiryDateEditText.append("1");
         mExpiryDateEditText.append("2");
         mExpiryDateEditText.append("3");
-        mExpiryDateEditText.dispatchKeyEvent(
-                new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
         String text = mExpiryDateEditText.getText().toString();
         assertEquals("12", text);
     }
@@ -97,8 +92,7 @@ public class ExpiryDateEditTextTest {
         mExpiryDateEditText.append("59");
         assertTrue(mExpiryDateEditText.isDateValid());
 
-        mExpiryDateEditText.dispatchKeyEvent(
-                new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
         verify(mExpiryDateEditListener, times(1)).onExpiryDateComplete();
         assertFalse(mExpiryDateEditText.isDateValid());
     }
