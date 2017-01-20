@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.view.CardInputView;
 import com.stripe.android.view.CardNumberEditText;
+import com.stripe.android.view.ExpiryDateEditText;
 
 /**
  * Activity used to test UI components. We add the layout programmatically to avoid needing test
@@ -31,6 +32,10 @@ public class CardInputTestActivity extends Activity {
 
     public CardNumberEditText getCardNumberEditText() {
         return (CardNumberEditText) mCardInputView.findViewById(R.id.et_card_number);
+    }
+
+    public ExpiryDateEditText getExpiryDateEditText() {
+        return (ExpiryDateEditText) mCardInputView.findViewById(R.id.et_expiry_date);
     }
 
     public CardInputView getCardInputView() {
