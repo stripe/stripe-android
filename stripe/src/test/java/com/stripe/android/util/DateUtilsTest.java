@@ -41,10 +41,22 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void convertTwoDigitYearToFour_whenDateIsEarlyCenturyAndYearIsLarge_addsNormalBase() {
+    public void convertTwoDigitYearToFour_whenDateIsEarlyCenturyAndYearIsLarge_addsLowerBase() {
         Calendar earlyCenturyCalendar = Calendar.getInstance();
         earlyCenturyCalendar.set(Calendar.YEAR, 2502);
-        assertEquals(DateUtils.convertTwoDigitYearToFour(95, earlyCenturyCalendar), 2595);
+        // In the year 2502, when you say "95", you probably mean 2495.
+        assertEquals(DateUtils.convertTwoDigitYearToFour(95, earlyCenturyCalendar), 2495);
+
+        // A more practical test
+        earlyCenturyCalendar.set(Calendar.YEAR, 2017);
+        assertEquals(DateUtils.convertTwoDigitYearToFour(99, earlyCenturyCalendar), 1999);
+    }
+
+    @Test
+    public void convertTwoDigitYearToFour_whenDateIsMidCenturyAndYearIsLarge_addsNormalBase() {
+        Calendar midCenturyCalendar = Calendar.getInstance();
+        midCenturyCalendar.set(Calendar.YEAR, 3535);
+        assertEquals(DateUtils.convertTwoDigitYearToFour(99, midCenturyCalendar), 3599);
     }
 
     @Test

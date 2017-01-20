@@ -61,11 +61,6 @@ public class ExpiryDateEditText extends EditText {
         mExpiryDateEditListener = expiryDateEditListener;
     }
 
-    @Override
-    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
-    }
-
     private void listenForTextChanges() {
         addTextChangedListener(new TextWatcher() {
             boolean ignoreChanges = false;
@@ -120,45 +115,11 @@ public class ExpiryDateEditText extends EditText {
                     if (!wasComplete && mIsDateValid && mExpiryDateEditListener != null) {
                         mExpiryDateEditListener.onExpiryDateComplete();
                     }
+                } else {
+                    mIsDateValid = false;
                 }
             }
         });
-    }
-
-    void updateInputValues(@NonNull @Size(2) String[] parts) {
-        if (parts[0].length() != 2) {
-            mInputMonth = INVALID_INPUT;
-        } else {
-            try {
-                mInputMonth = Integer.parseInt(parts[0]);
-            } catch (NumberFormatException numEx) {
-                mInputMonth = INVALID_INPUT;
-            }
-        }
-
-        if (parts[1].length() != 2) {
-            mInputYear = INVALID_INPUT;
-        } else {
-            try {
-                mInputYear = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]));
-            } catch (NumberFormatException numEx) {
-                mInputYear = INVALID_INPUT;
-            }
-        }
-
-        mIsDateValid = DateUtils.isExpiryDataValid(mInputMonth, mInputYear);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d("keyspy", String.format("OKD %d", keyCode));
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        Log.d("keyspy", String.format("OnPreIme %d", keyCode));
-        return super.onKeyPreIme(keyCode, event);
     }
 
     /**
@@ -196,42 +157,31 @@ public class ExpiryDateEditText extends EditText {
         return newPosition <= newLength ? newPosition : newLength;
     }
 
-    interface ExpiryDateEditListener {
-        void onExpiryDateComplete();
-        void onDeleteEmpty();
+    private void updateInputValues(@NonNull @Size(2) String[] parts) {
+        if (parts[0].length() != 2) {
+            mInputMonth = INVALID_INPUT;
+        } else {
+            try {
+                mInputMonth = Integer.parseInt(parts[0]);
+            } catch (NumberFormatException numEx) {
+                mInputMonth = INVALID_INPUT;
+            }
+        }
+
+        if (parts[1].length() != 2) {
+            mInputYear = INVALID_INPUT;
+        } else {
+            try {
+                mInputYear = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]));
+            } catch (NumberFormatException numEx) {
+                mInputYear = INVALID_INPUT;
+            }
+        }
+
+        mIsDateValid = DateUtils.isExpiryDataValid(mInputMonth, mInputYear);
     }
 
-    private class SoftDeleteInputConnection extends InputConnectionWrapper {
-
-        public SoftDeleteInputConnection(InputConnection target, boolean mutable) {
-            super(target, mutable);
-        }
-
-        @Override
-        public boolean performEditorAction(int editorAction) {
-            Log.d("keyspy", String.format("keyspy", "performEditorAction %d", editorAction));
-            return super.performEditorAction(editorAction);
-        }
-
-        @Override
-        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-            Log.d("keyspy", String.format("delSur - before: %d, after: %d", beforeLength, afterLength));
-            if (getTextBeforeCursor(1, 0).length() == 0 && mExpiryDateEditListener != null) {
-                Log.d("keyspy", "I want to move");
-                mExpiryDateEditListener.onDeleteEmpty();
-            }
-            return super.deleteSurroundingText(beforeLength, afterLength);
-        }
-
-        @Override
-        public boolean sendKeyEvent(KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.getKeyCode() == KeyEvent.KEYCODE_DEL
-                    && getText().length() == 0
-                    && mExpiryDateEditListener != null) {
-                mExpiryDateEditListener.onDeleteEmpty();
-            }
-            return super.sendKeyEvent(event);
-        }
+    interface ExpiryDateEditListener {
+        void onExpiryDateComplete();
     }
 }
