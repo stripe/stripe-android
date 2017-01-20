@@ -87,9 +87,11 @@ public class ExpiryDateEditText extends EditText {
 
                 StringBuilder formattedDateBuilder = new StringBuilder();
                 formattedDateBuilder.append(parts[0]);
+                // parts[0] is the two-digit month
                 if ((parts[0].length() == 2 && latestInsertionSize > 0)
                         || rawNumericInput.length() > 2) {
                     formattedDateBuilder.append("/");
+                    // parts[1] is the two-digit year
                     formattedDateBuilder.append(parts[1]);
                 }
 
