@@ -97,9 +97,6 @@ public class CardInputView extends FrameLayout {
                         mCardNumberEditText.requestFocus();
                     }
                 }
-                if(event.getAction() == KeyEvent.ACTION_DOWN) {
-                    Log.d("keyspy", String.format("Keycode is %d", keyCode));
-                }
                 return false;
             }
         });
@@ -116,11 +113,6 @@ public class CardInputView extends FrameLayout {
             @Override
             public void onExpiryDateComplete() {
                 mCvcNumberEditText.requestFocus();
-            }
-
-            @Override
-            public void onDeleteEmpty() {
-                mCardNumberEditText.requestFocus();
             }
         });
         mCardNumberEditText.requestFocus();

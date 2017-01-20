@@ -122,6 +122,8 @@ public class DateUtils {
         int centuryBase = year / 100;
         if (year % 100 > 80 && inputYear < 20) {
             centuryBase++;
+        } else if (year % 100 < 20 && inputYear > 80) {
+            centuryBase--;
         }
         return centuryBase * 100 + inputYear;
     }
