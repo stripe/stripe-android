@@ -107,13 +107,13 @@ public class DateUtils {
      * @param inputYear a two-digit integer, between 0 and 99, inclusive
      * @return a four-digit year
      */
-    @IntRange(from = 2000, to = 9999)
+    @IntRange(from = 1000, to = 9999)
     public static int convertTwoDigitYearToFour(@IntRange(from = 0, to = 99) int inputYear) {
         return convertTwoDigitYearToFour(inputYear, Calendar.getInstance());
     }
 
     @VisibleForTesting
-    @IntRange(from = 2000, to = 9999)
+    @IntRange(from = 1000, to = 9999)
     static int convertTwoDigitYearToFour(
             @IntRange(from = 0, to = 99) int inputYear,
             @NonNull Calendar calendar) {
