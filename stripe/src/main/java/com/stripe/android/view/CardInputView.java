@@ -27,7 +27,7 @@ public class CardInputView extends FrameLayout {
 
     private CardNumberEditText mCardNumberEditText;
     private EditText mCvcNumberEditText;
-    private EditText mExpiryDateEditText;
+    private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
     private int mScrollViewWidth;
@@ -56,7 +56,7 @@ public class CardInputView extends FrameLayout {
 
         mScrollView = (LockableHorizontalScrollView) findViewById(R.id.root_scroll_view);
         mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);
-        mExpiryDateEditText = (EditText) findViewById(R.id.et_expiry_date);
+        mExpiryDateEditText = (ExpiryDateEditText) findViewById(R.id.et_expiry_date);
         mCvcNumberEditText = (EditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
         mCardNumberIsViewed = true;
@@ -109,6 +109,12 @@ public class CardInputView extends FrameLayout {
                     }
                 });
 
+        mExpiryDateEditText.setExpiryDateEditListener(new ExpiryDateEditText.ExpiryDateEditListener() {
+            @Override
+            public void onExpiryDateComplete() {
+                mCvcNumberEditText.requestFocus();
+            }
+        });
         mCardNumberEditText.requestFocus();
     }
 
