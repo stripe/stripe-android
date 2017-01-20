@@ -25,11 +25,10 @@ import java.util.Set;
 public class ExpiryDateEditText extends EditText {
 
     static final int INVALID_INPUT = -1;
+    private static final int MAX_INPUT_LENGTH = 5;
 
     private ExpiryDateEditListener mExpiryDateEditListener;
     private boolean mIsDateValid;
-    private int mInputMonth = INVALID_INPUT;
-    private int mInputYear = INVALID_INPUT;
 
     public ExpiryDateEditText(Context context) {
         super(context);
@@ -83,6 +82,7 @@ public class ExpiryDateEditText extends EditText {
                 }
 
                 String rawNumericInput = s.toString().replaceAll("/", "");
+                // Date input is MM/YY, so the separated parts will be {MM, YY}
                 String[] parts = DateUtils.separateDateStringParts(rawNumericInput);
 
                 StringBuilder formattedDateBuilder = new StringBuilder();
@@ -107,9 +107,10 @@ public class ExpiryDateEditText extends EditText {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 5) {
+                if (s.length() == MAX_INPUT_LENGTH) {
                     String completeText = s.toString();
-                    String[] parts = {completeText.substring(0, 2), completeText.substring(3,5)};
+                    String[] parts = {completeText.substring(0, 2),
+                            completeText.substring(3, MAX_INPUT_LENGTH)};
                     boolean wasComplete = mIsDateValid;
                     updateInputValues(parts);
                     if (!wasComplete && mIsDateValid && mExpiryDateEditListener != null) {
@@ -158,27 +159,29 @@ public class ExpiryDateEditText extends EditText {
     }
 
     private void updateInputValues(@NonNull @Size(2) String[] parts) {
+        int inputMonth;
+        int inputYear;
         if (parts[0].length() != 2) {
-            mInputMonth = INVALID_INPUT;
+            inputMonth = INVALID_INPUT;
         } else {
             try {
-                mInputMonth = Integer.parseInt(parts[0]);
+                inputMonth = Integer.parseInt(parts[0]);
             } catch (NumberFormatException numEx) {
-                mInputMonth = INVALID_INPUT;
+                inputMonth = INVALID_INPUT;
             }
         }
 
         if (parts[1].length() != 2) {
-            mInputYear = INVALID_INPUT;
+            inputYear = INVALID_INPUT;
         } else {
             try {
-                mInputYear = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]));
+                inputYear = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]));
             } catch (NumberFormatException numEx) {
-                mInputYear = INVALID_INPUT;
+                inputYear = INVALID_INPUT;
             }
         }
 
-        mIsDateValid = DateUtils.isExpiryDataValid(mInputMonth, mInputYear);
+        mIsDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear);
     }
 
     interface ExpiryDateEditListener {
