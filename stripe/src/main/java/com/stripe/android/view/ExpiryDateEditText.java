@@ -8,8 +8,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
@@ -24,6 +26,7 @@ public class ExpiryDateEditText extends EditText {
 
     static final int INVALID_INPUT = -1;
 
+    private ExpiryDateEditListener mExpiryDateEditListener;
     private boolean mIsDateValid;
     private int mInputMonth = INVALID_INPUT;
     private int mInputYear = INVALID_INPUT;
@@ -54,9 +57,13 @@ public class ExpiryDateEditText extends EditText {
         return mIsDateValid;
     }
 
+    public void setExpiryDateEditListener(ExpiryDateEditListener expiryDateEditListener) {
+        mExpiryDateEditListener = expiryDateEditListener;
+    }
+
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        return super.onCreateInputConnection(outAttrs);
+        return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
     }
 
     private void listenForTextChanges() {
@@ -72,7 +79,6 @@ public class ExpiryDateEditText extends EditText {
                 }
                 latestChangeStart = start;
                 latestInsertionSize = after;
-                Log.d("expiry", String.format("BeforeTC. start: %d, count: %d, after %d", start, count, after));
             }
 
             @Override
@@ -80,7 +86,6 @@ public class ExpiryDateEditText extends EditText {
                 if (ignoreChanges || s.length() == 0) {
                     return;
                 }
-                Log.d("expiry", String.format("OnTC. start: %d, before: %d, count %d", start, before, count));
 
                 String rawNumericInput = s.toString().replaceAll("/", "");
                 String[] parts = DateUtils.separateDateStringParts(rawNumericInput);
@@ -107,22 +112,53 @@ public class ExpiryDateEditText extends EditText {
 
             @Override
             public void afterTextChanged(Editable s) {
-//                if (s.length() == 2 && latestChangeStart < 2) {
-//                    ignoreChanges = true;
-//                    s.append('/');
-//                    ExpiryDateEditText.this.setSelection(3);
-//                    ignoreChanges = false;
-//                }
+                if (s.length() == 5) {
+                    String completeText = s.toString();
+                    String[] parts = {completeText.substring(0, 2), completeText.substring(3,5)};
+                    boolean wasComplete = mIsDateValid;
+                    updateInputValues(parts);
+                    if (!wasComplete && mIsDateValid && mExpiryDateEditListener != null) {
+                        mExpiryDateEditListener.onExpiryDateComplete();
+                    }
+                }
             }
         });
     }
 
     void updateInputValues(@NonNull @Size(2) String[] parts) {
-        mInputMonth = parts[0].length() == 2 ? Integer.parseInt(parts[0]) : INVALID_INPUT;
-        mInputYear = parts[1].length() == 2
-                ? DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]))
-                : INVALID_INPUT;
+        if (parts[0].length() != 2) {
+            mInputMonth = INVALID_INPUT;
+        } else {
+            try {
+                mInputMonth = Integer.parseInt(parts[0]);
+            } catch (NumberFormatException numEx) {
+                mInputMonth = INVALID_INPUT;
+            }
+        }
+
+        if (parts[1].length() != 2) {
+            mInputYear = INVALID_INPUT;
+        } else {
+            try {
+                mInputYear = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(parts[1]));
+            } catch (NumberFormatException numEx) {
+                mInputYear = INVALID_INPUT;
+            }
+        }
+
         mIsDateValid = DateUtils.isExpiryDataValid(mInputMonth, mInputYear);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d("keyspy", String.format("OKD %d", keyCode));
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        Log.d("keyspy", String.format("OnPreIme %d", keyCode));
+        return super.onKeyPreIme(keyCode, event);
     }
 
     /**
@@ -158,5 +194,44 @@ public class ExpiryDateEditText extends EditText {
         }
 
         return newPosition <= newLength ? newPosition : newLength;
+    }
+
+    interface ExpiryDateEditListener {
+        void onExpiryDateComplete();
+        void onDeleteEmpty();
+    }
+
+    private class SoftDeleteInputConnection extends InputConnectionWrapper {
+
+        public SoftDeleteInputConnection(InputConnection target, boolean mutable) {
+            super(target, mutable);
+        }
+
+        @Override
+        public boolean performEditorAction(int editorAction) {
+            Log.d("keyspy", String.format("keyspy", "performEditorAction %d", editorAction));
+            return super.performEditorAction(editorAction);
+        }
+
+        @Override
+        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+            Log.d("keyspy", String.format("delSur - before: %d, after: %d", beforeLength, afterLength));
+            if (getTextBeforeCursor(1, 0).length() == 0 && mExpiryDateEditListener != null) {
+                Log.d("keyspy", "I want to move");
+                mExpiryDateEditListener.onDeleteEmpty();
+            }
+            return super.deleteSurroundingText(beforeLength, afterLength);
+        }
+
+        @Override
+        public boolean sendKeyEvent(KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getKeyCode() == KeyEvent.KEYCODE_DEL
+                    && getText().length() == 0
+                    && mExpiryDateEditListener != null) {
+                mExpiryDateEditListener.onDeleteEmpty();
+            }
+            return super.sendKeyEvent(event);
+        }
     }
 }

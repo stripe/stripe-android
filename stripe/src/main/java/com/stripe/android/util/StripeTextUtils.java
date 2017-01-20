@@ -2,6 +2,7 @@ package com.stripe.android.util;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.KeyEvent;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
@@ -16,6 +17,20 @@ import static com.stripe.android.model.Token.TokenType;
  * Utility class for common text-related operations on Stripe data coming from the server.
  */
 public class StripeTextUtils {
+
+    private static int[] NON_DELETE_KEYS = {
+            KeyEvent.KEYCODE_0,
+            KeyEvent.KEYCODE_1,
+            KeyEvent.KEYCODE_2,
+            KeyEvent.KEYCODE_3,
+            KeyEvent.KEYCODE_4,
+            KeyEvent.KEYCODE_5,
+            KeyEvent.KEYCODE_6,
+            KeyEvent.KEYCODE_7,
+            KeyEvent.KEYCODE_8,
+            KeyEvent.KEYCODE_9,
+            KeyEvent.KEYCODE_SLASH
+    };
 
     /**
      * Check to see if the input number has any of the given prefixes.
