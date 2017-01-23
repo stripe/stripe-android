@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  * An {@link EditText} that handles putting numbers around a central divider character.
  */
-public class ExpiryDateEditText extends EditText {
+public class ExpiryDateEditText extends DeleteWatchEditText {
 
     static final int INVALID_INPUT = -1;
     private static final int MAX_INPUT_LENGTH = 5;

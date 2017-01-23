@@ -26,7 +26,7 @@ public class CardInputView extends FrameLayout {
     private static final int END_INDEX_AMEX = 11;
 
     private CardNumberEditText mCardNumberEditText;
-    private EditText mCvcNumberEditText;
+    private DeleteWatchEditText mCvcNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
@@ -57,7 +57,7 @@ public class CardInputView extends FrameLayout {
         mScrollView = (LockableHorizontalScrollView) findViewById(R.id.root_scroll_view);
         mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);
         mExpiryDateEditText = (ExpiryDateEditText) findViewById(R.id.et_expiry_date);
-        mCvcNumberEditText = (EditText) findViewById(R.id.et_cvc_number);
+        mCvcNumberEditText = (DeleteWatchEditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
         mCardNumberIsViewed = true;
 
@@ -88,18 +88,22 @@ public class CardInputView extends FrameLayout {
             }
         });
 
-        mExpiryDateEditText.setOnKeyListener(new OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_DEL
-                        && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (mExpiryDateEditText.getText().length() == 0) {
+        mExpiryDateEditText.setDeleteEmptyListener(
+                new DeleteWatchEditText.DeleteEmptyListener() {
+                    @Override
+                    public void onDeleteEmpty() {
                         mCardNumberEditText.requestFocus();
                     }
+                });
+
+        mCvcNumberEditText.setDeleteEmptyListener(
+                new DeleteWatchEditText.DeleteEmptyListener() {
+                    @Override
+                    public void onDeleteEmpty() {
+                        mExpiryDateEditText.requestFocus();
+                    }
                 }
-                return false;
-            }
-        });
+        );
 
         mCardNumberEditText.setCardNumberCompleteListener(
                 new CardNumberEditText.CardNumberCompleteListener() {

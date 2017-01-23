@@ -1,16 +1,13 @@
 package com.stripe.android.view;
 
 import android.support.annotation.IdRes;
-import android.support.annotation.IntRange;
-import android.support.annotation.LayoutRes;
-import android.text.InputFilter;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 
 import com.stripe.android.R;
 import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +20,6 @@ import org.robolectric.util.ActivityController;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link CardInputView}. Note that we have to test against SDK 22
@@ -66,8 +61,7 @@ public class CardInputViewTest {
     @Test
     public void onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumber() {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
-        mExpiryEditText.dispatchKeyEvent(
-                new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL, 0));
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
     }
