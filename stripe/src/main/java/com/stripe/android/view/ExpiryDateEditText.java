@@ -83,11 +83,13 @@ public class ExpiryDateEditText extends DeleteWatchEditText {
 
                 String rawNumericInput = s.toString().replaceAll("/", "");
 
-                if(s.length() == 1 && latestChangeStart == 0 && latestInsertionSize == 1) {
-                    char first = s.charAt(0);
-                    if (first == '0' || first == '1') {
-                        // do nothing; this could be a valid two-digit number
-                    } else {
+                if(rawNumericInput.length() == 1 && latestChangeStart == 0 && latestInsertionSize == 1) {
+                    char first = rawNumericInput.charAt(0);
+                    if (!(first == '0' || first == '1')) {
+                        // If the first digit typed isn't 0 or 1, then it can't be a valid
+                        // two-digit month. Hence, we assume the user is inputting a one-digit
+                        // month. We bump it to the preferred input, so "4" becomes "04", which
+                        // later in this method goes to "04/".
                         rawNumericInput = "0" + rawNumericInput;
                         latestInsertionSize++;
                     }

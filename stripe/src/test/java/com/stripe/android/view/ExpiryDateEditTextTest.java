@@ -83,6 +83,16 @@ public class ExpiryDateEditTextTest {
     }
 
     @Test
+    public void inputMultipleDigits_whenStartingFromEmpty_doesNotPrependZero() {
+        // This isn't a valid date, but we don't want to change complicated pastes.
+        mExpiryDateEditText.append("23");
+
+        String text = mExpiryDateEditText.getText().toString();
+        assertEquals("23/", text);
+        assertEquals(3, mExpiryDateEditText.getSelectionStart());
+    }
+
+    @Test
     public void afterInputThreeDigits_whenDeletingOne_textDoesNotContainSlash() {
         mExpiryDateEditText.append("1");
         mExpiryDateEditText.append("2");
