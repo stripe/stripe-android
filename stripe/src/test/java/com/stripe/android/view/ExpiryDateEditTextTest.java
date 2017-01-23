@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import android.view.KeyEvent;
+
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -54,6 +56,30 @@ public class ExpiryDateEditTextTest {
 
         String text = mExpiryDateEditText.getText().toString();
         assertEquals("12/", text);
+    }
+
+    @Test
+    public void inputSingleDigit_whenDigitIsTooLargeForMonth_prependsZero() {
+        mExpiryDateEditText.append("4");
+        assertEquals("04/", mExpiryDateEditText.getText().toString());
+        assertEquals(3, mExpiryDateEditText.getSelectionStart());
+    }
+
+    @Test
+    public void inputSingleDigit_whenDigitIsZeroOrOne_doesNotPrependZero() {
+        mExpiryDateEditText.append("1");
+        assertEquals("1", mExpiryDateEditText.getText().toString());
+        assertEquals(1, mExpiryDateEditText.getSelectionStart());
+    }
+
+    @Test
+    public void inputSingleDigit_whenAtFirstCharacterButTextNotEmpty_doesNotPrependZero() {
+        mExpiryDateEditText.append("1");
+        mExpiryDateEditText.setSelection(0);
+        mExpiryDateEditText.getEditableText().replace(0, 0, "3", 0, 1);
+
+        assertEquals("31/", mExpiryDateEditText.getText().toString());
+        assertEquals(1, mExpiryDateEditText.getSelectionStart());
     }
 
     @Test

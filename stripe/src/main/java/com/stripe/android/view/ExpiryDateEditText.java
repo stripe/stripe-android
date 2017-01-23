@@ -77,11 +77,22 @@ public class ExpiryDateEditText extends DeleteWatchEditText {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (ignoreChanges || s.length() == 0) {
+                if (ignoreChanges) {
                     return;
                 }
 
                 String rawNumericInput = s.toString().replaceAll("/", "");
+
+                if(s.length() == 1 && latestChangeStart == 0 && latestInsertionSize == 1) {
+                    char first = s.charAt(0);
+                    if (first == '0' || first == '1') {
+                        // do nothing; this could be a valid two-digit number
+                    } else {
+                        rawNumericInput = "0" + rawNumericInput;
+                        latestInsertionSize++;
+                    }
+                }
+
                 // Date input is MM/YY, so the separated parts will be {MM, YY}
                 String[] parts = DateUtils.separateDateStringParts(rawNumericInput);
 
