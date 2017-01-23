@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.view.KeyEvent;
-
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
