@@ -1,6 +1,9 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -9,6 +12,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.widget.EditText;
+
+import com.stripe.android.R;
 
 /**
  * Extension of {@link EditText} that listens for users pressing the delete key when there is
@@ -20,20 +25,26 @@ import android.widget.EditText;
 public class StripeEditText extends EditText {
 
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
+    @Nullable private ColorStateList mCachedColorStateList;
+    private boolean mShouldShowError;
+    @ColorRes private int mColorResId;
 
     public StripeEditText(Context context) {
         super(context);
         listenForDeleteEmpty();
+        determineErrorColor();
     }
 
     public StripeEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
         listenForDeleteEmpty();
+        determineErrorColor();
     }
 
     public StripeEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForDeleteEmpty();
+        determineErrorColor();
     }
 
     @Override
@@ -48,6 +59,38 @@ public class StripeEditText extends EditText {
      */
     public void setDeleteEmptyListener(DeleteEmptyListener deleteEmptyListener) {
         mDeleteEmptyListener = deleteEmptyListener;
+    }
+
+    public void setShouldShowError(boolean shouldShowError) {
+        if (!mShouldShowError && shouldShowError) {
+            mCachedColorStateList = getTextColors();
+            setTextColor(getResources().getColor(mColorResId));
+
+        } else if (mShouldShowError && !shouldShowError){
+            setTextColor(mCachedColorStateList);
+        }
+
+        mShouldShowError = shouldShowError;
+        refreshDrawableState();
+    }
+
+    public boolean isColorDark(int color){
+        double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114* Color.blue(color))/255;
+        if(darkness>0.5){
+            return false; // It's a light color
+        }else{
+            return true; // It's a dark color
+        }
+    }
+
+    private void determineErrorColor() {
+        mCachedColorStateList = getTextColors();
+        int color = mCachedColorStateList.getDefaultColor();
+        if (isColorDark(color)) {
+            mColorResId = R.color.error_text_dark;
+        } else {
+            mColorResId = R.color.error_text;
+        }
     }
 
     private void listenForDeleteEmpty() {
