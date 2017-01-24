@@ -18,14 +18,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
- * Test class for {@link DeleteWatchEditText}.
+ * Test class for {@link StripeEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 22)
-public class DeleteWatchEditTextTest {
+public class StripeEditTextTest {
 
-    @Mock DeleteWatchEditText.DeleteEmptyListener mDeleteEmptyListener;
-    private DeleteWatchEditText mEditText;
+    @Mock StripeEditText.DeleteEmptyListener mDeleteEmptyListener;
+    private StripeEditText mEditText;
 
     @Before
     public void setup() {

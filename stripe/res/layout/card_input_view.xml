@@ -64,7 +64,7 @@
             android:visibility="invisible"
             />
 
-        <com.stripe.android.view.DeleteWatchEditText
+        <com.stripe.android.view.StripeEditText
             android:id="@+id/et_cvc_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

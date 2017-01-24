@@ -17,21 +17,21 @@ import android.widget.EditText;
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-public class DeleteWatchEditText extends EditText {
+public class StripeEditText extends EditText {
 
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
 
-    public DeleteWatchEditText(Context context) {
+    public StripeEditText(Context context) {
         super(context);
         listenForDeleteEmpty();
     }
 
-    public DeleteWatchEditText(Context context, AttributeSet attrs) {
+    public StripeEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
         listenForDeleteEmpty();
     }
 
-    public DeleteWatchEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public StripeEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForDeleteEmpty();
     }

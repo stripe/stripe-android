@@ -1,18 +1,10 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.Space;
-import android.text.Editable;
 import android.text.Layout;
-import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.stripe.android.R;
@@ -26,7 +18,7 @@ public class CardInputView extends FrameLayout {
     private static final int END_INDEX_AMEX = 11;
 
     private CardNumberEditText mCardNumberEditText;
-    private DeleteWatchEditText mCvcNumberEditText;
+    private StripeEditText mCvcNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
@@ -57,7 +49,7 @@ public class CardInputView extends FrameLayout {
         mScrollView = (LockableHorizontalScrollView) findViewById(R.id.root_scroll_view);
         mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);
         mExpiryDateEditText = (ExpiryDateEditText) findViewById(R.id.et_expiry_date);
-        mCvcNumberEditText = (DeleteWatchEditText) findViewById(R.id.et_cvc_number);
+        mCvcNumberEditText = (StripeEditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
         mCardNumberIsViewed = true;
 
@@ -89,7 +81,7 @@ public class CardInputView extends FrameLayout {
         });
 
         mExpiryDateEditText.setDeleteEmptyListener(
-                new DeleteWatchEditText.DeleteEmptyListener() {
+                new StripeEditText.DeleteEmptyListener() {
                     @Override
                     public void onDeleteEmpty() {
                         mCardNumberEditText.requestFocus();
@@ -97,7 +89,7 @@ public class CardInputView extends FrameLayout {
                 });
 
         mCvcNumberEditText.setDeleteEmptyListener(
-                new DeleteWatchEditText.DeleteEmptyListener() {
+                new StripeEditText.DeleteEmptyListener() {
                     @Override
                     public void onDeleteEmpty() {
                         mExpiryDateEditText.requestFocus();

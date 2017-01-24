@@ -7,22 +7,14 @@ import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputConnectionWrapper;
 import android.widget.EditText;
 
-import com.stripe.android.model.Card;
 import com.stripe.android.util.DateUtils;
-
-import java.util.Set;
 
 /**
  * An {@link EditText} that handles putting numbers around a central divider character.
  */
-public class ExpiryDateEditText extends DeleteWatchEditText {
+public class ExpiryDateEditText extends StripeEditText {
 
     static final int INVALID_INPUT = -1;
     private static final int MAX_INPUT_LENGTH = 5;
