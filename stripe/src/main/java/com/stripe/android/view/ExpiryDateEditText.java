@@ -57,6 +57,7 @@ public class ExpiryDateEditText extends StripeEditText {
             boolean ignoreChanges = false;
             int latestChangeStart;
             int latestInsertionSize;
+            String[] parts = new String[2];
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -73,9 +74,13 @@ public class ExpiryDateEditText extends StripeEditText {
                     return;
                 }
 
+                boolean inErrorState = false;
+
                 String rawNumericInput = s.toString().replaceAll("/", "");
 
-                if(rawNumericInput.length() == 1 && latestChangeStart == 0 && latestInsertionSize == 1) {
+                if(rawNumericInput.length() == 1
+                        && latestChangeStart == 0
+                        && latestInsertionSize == 1) {
                     char first = rawNumericInput.charAt(0);
                     if (!(first == '0' || first == '1')) {
                         // If the first digit typed isn't 0 or 1, then it can't be a valid
@@ -85,20 +90,32 @@ public class ExpiryDateEditText extends StripeEditText {
                         rawNumericInput = "0" + rawNumericInput;
                         latestInsertionSize++;
                     }
+                } else if (rawNumericInput.length() == 2
+                        && latestChangeStart == 2
+                        && latestInsertionSize == 0) {
+                    // This allows us to delete past the separator, so that if a user presses
+                    // delete when the current string is "12/", the resulting string is "1," since
+                    // we pretend that the "/" isn't really there. The case that we also want,
+                    // where "12/3" + DEL => "12" is handled elsewhere.
+                    rawNumericInput = rawNumericInput.substring(0, 1);
                 }
 
                 // Date input is MM/YY, so the separated parts will be {MM, YY}
-                String[] parts = DateUtils.separateDateStringParts(rawNumericInput);
+                parts = DateUtils.separateDateStringParts(rawNumericInput);
+
+                if (!DateUtils.isValidMonth(parts[0])) {
+                    inErrorState = true;
+                }
 
                 StringBuilder formattedDateBuilder = new StringBuilder();
                 formattedDateBuilder.append(parts[0]);
                 // parts[0] is the two-digit month
-                if ((parts[0].length() == 2 && latestInsertionSize > 0)
+                if ((parts[0].length() == 2 && latestInsertionSize > 0 && !inErrorState)
                         || rawNumericInput.length() > 2) {
                     formattedDateBuilder.append("/");
-                    // parts[1] is the two-digit year
-                    formattedDateBuilder.append(parts[1]);
                 }
+                // parts[1] is the two-digit year
+                formattedDateBuilder.append(parts[1]);
 
                 String formattedDate = formattedDateBuilder.toString();
                 int cursorPosition = updateSelectionIndex(
@@ -114,18 +131,33 @@ public class ExpiryDateEditText extends StripeEditText {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == MAX_INPUT_LENGTH) {
-                    String completeText = s.toString();
-                    String[] parts = {completeText.substring(0, 2),
-                            completeText.substring(3, MAX_INPUT_LENGTH)};
+                // Note: we want to show an error state if the month is invalid or the
+                // final, complete date is in the past. We don't want to show an error state for
+                // incomplete entries.
+                boolean shouldShowError = false;
+                if (parts[0].length() == 2 && !DateUtils.isValidMonth(parts[0])) {
+                    // This covers the case where the user has entered a month of 15, for instance.
+                    shouldShowError = true;
+                }
+
+                // Note that we have to check the parts array because afterTextChanged has odd
+                // behavior when it comes to pasting, where a paste of "1212" triggers this
+                // function for the strings "12/12" (what it actually becomes) and "1212",
+                // so we might not be properly catching an error state.
+                if (parts[0].length() == 2 && parts[1].length() == 2) {
                     boolean wasComplete = mIsDateValid;
                     updateInputValues(parts);
+                    // Here, we have a complete date, so if we've made an invalid one, we want
+                    // to show an error.
+                    shouldShowError = !mIsDateValid;
                     if (!wasComplete && mIsDateValid && mExpiryDateEditListener != null) {
                         mExpiryDateEditListener.onExpiryDateComplete();
                     }
                 } else {
                     mIsDateValid = false;
                 }
+
+                setShouldShowError(shouldShowError);
             }
         });
     }
