@@ -68,7 +68,8 @@ public class StripeEditText extends EditText {
      */
     @SuppressWarnings("deprecation")
     public void setShouldShowError(boolean shouldShowError) {
-        if (!mShouldShowError && shouldShowError) {
+        mShouldShowError = shouldShowError;
+        if (mShouldShowError) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 setTextColor(getResources().getColor(mColorResId, null));
             } else {
@@ -77,12 +78,20 @@ public class StripeEditText extends EditText {
                 setTextColor(getResources().getColor(mColorResId));
             }
 
-        } else if (mShouldShowError && !shouldShowError){
+        } else {
             setTextColor(mCachedColorStateList);
         }
 
-        mShouldShowError = shouldShowError;
         refreshDrawableState();
+    }
+
+    /**
+     * Gets whether or not the text should be displayed in error mode.
+     *
+     * @return the value of {@link #mShouldShowError}
+     */
+    public boolean getShouldShowError() {
+        return mShouldShowError;
     }
 
     /**
