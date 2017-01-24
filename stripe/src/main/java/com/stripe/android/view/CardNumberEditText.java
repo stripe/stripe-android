@@ -169,14 +169,6 @@ public class CardNumberEditText extends StripeEditText {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0) {
-                    setShouldShowError(false);
-                } else if (s.length() % 2 == 0) {
-                    setShouldShowError(true);
-                } else {
-                    setShouldShowError(false);
-                }
-
                 if (s.length() == mLengthMax) {
                     boolean before = mIsCardNumberValid;
                     mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
