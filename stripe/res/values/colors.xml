@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="error_text">#ffd00000</color>
-    <color name="error_text_dark">#ffee0000</color>
+    <color name="error_text_light_theme">#ffd00000</color>
+    <color name="error_text_dark_theme">#ffee0000</color>
 </resources>

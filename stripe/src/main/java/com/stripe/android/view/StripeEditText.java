@@ -3,6 +3,8 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
+import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -31,20 +33,17 @@ public class StripeEditText extends EditText {
 
     public StripeEditText(Context context) {
         super(context);
-        listenForDeleteEmpty();
-        determineErrorColor();
+        initView();
     }
 
     public StripeEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        listenForDeleteEmpty();
-        determineErrorColor();
+        initView();
     }
 
     public StripeEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        listenForDeleteEmpty();
-        determineErrorColor();
+        initView();
     }
 
     @Override
@@ -61,10 +60,22 @@ public class StripeEditText extends EditText {
         mDeleteEmptyListener = deleteEmptyListener;
     }
 
+    /**
+     * Sets whether or not the text should be put into "error mode," which displays
+     * the text in an error color determined by the original text color.
+     *
+     * @param shouldShowError whether or not we should display text in an error state.
+     */
+    @SuppressWarnings("deprecation")
     public void setShouldShowError(boolean shouldShowError) {
         if (!mShouldShowError && shouldShowError) {
-            mCachedColorStateList = getTextColors();
-            setTextColor(getResources().getColor(mColorResId));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setTextColor(getResources().getColor(mColorResId, null));
+            } else {
+                // Resources#getColor(int) is deprecated, but the replacement only exists in
+                // SDK 23 and above.
+                setTextColor(getResources().getColor(mColorResId));
+            }
 
         } else if (mShouldShowError && !shouldShowError){
             setTextColor(mCachedColorStateList);
@@ -74,22 +85,49 @@ public class StripeEditText extends EditText {
         refreshDrawableState();
     }
 
-    public boolean isColorDark(int color){
-        double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114* Color.blue(color))/255;
-        if(darkness>0.5){
-            return false; // It's a light color
-        }else{
-            return true; // It's a dark color
+    /**
+     * A crude mechanism by which we check whether or not a color is "dark."
+     * This is subject to much interpretation, but we attempt to follow traditional
+     * design standards.
+     *
+     * @param color an integer representation of a color
+     * @return {@code true} if the color is "dark," else {@link false}
+     */
+    static boolean isColorDark(@ColorInt int color){
+        // Forumla comes from W3C standards and conventional theory
+        // about how to calculate the "brightness" of a color, often
+        // thought of as how far along the spectrum from white to black the
+        // grayscale version would be.
+        // See https://www.w3.org/TR/AERT#color-contrast and
+        // http://paulbourke.net/texture_colour/colourspace/ for further reading.
+        double luminescence = 0.299*Color.red(color)
+                + 0.587*Color.green(color)
+                + 0.114* Color.blue(color);
+
+        // Because the colors are all hex integers.
+        double luminescencePercentage = luminescence / 255;
+        if (luminescencePercentage > 0.5) {
+            return false;
+        } else {
+            return true;
         }
+    }
+
+    private void initView() {
+        listenForDeleteEmpty();
+        determineErrorColor();
+        mCachedColorStateList = getTextColors();
     }
 
     private void determineErrorColor() {
         mCachedColorStateList = getTextColors();
         int color = mCachedColorStateList.getDefaultColor();
         if (isColorDark(color)) {
-            mColorResId = R.color.error_text_dark;
+            // Note: if the _text_ color is dark, then this is a
+            // light theme, and vice-versa.
+            mColorResId = R.color.error_text_light_theme;
         } else {
-            mColorResId = R.color.error_text;
+            mColorResId = R.color.error_text_dark_theme;
         }
     }
 
