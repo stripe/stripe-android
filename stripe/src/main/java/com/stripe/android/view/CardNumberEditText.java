@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * An {@link EditText} that handles spacing out the digits of a credit card.
  */
-public class CardNumberEditText extends EditText {
+public class CardNumberEditText extends StripeEditText {
 
     private static final int MAX_LENGTH_COMMON = 19;
     // Note that AmEx and Diners Club have the same length

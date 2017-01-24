@@ -7,7 +7,7 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.view.CardInputView;
 import com.stripe.android.view.CardNumberEditText;
-import com.stripe.android.view.DeleteWatchEditText;
+import com.stripe.android.view.StripeEditText;
 import com.stripe.android.view.ExpiryDateEditText;
 
 /**
@@ -39,8 +39,8 @@ public class CardInputTestActivity extends Activity {
         return (ExpiryDateEditText) mCardInputView.findViewById(R.id.et_expiry_date);
     }
 
-    public DeleteWatchEditText getCvcEditText() {
-        return (DeleteWatchEditText) mCardInputView.findViewById(R.id.et_cvc_number);
+    public StripeEditText getCvcEditText() {
+        return (StripeEditText) mCardInputView.findViewById(R.id.et_cvc_number);
     }
 
     public CardInputView getCardInputView() {
