@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -149,5 +151,72 @@ public class CardNumberEditTextTest {
         mCardNumberEditText.setText(almostValid);
         assertFalse(mCardNumberEditText.isCardNumberValid());
         verifyZeroInteractions(mCardNumberCompleteListener);
+    }
+
+    @Test
+    public void whenNotFinishedTyping_doesNotSetErrorValue() {
+        // We definitely shouldn't start out in an error state.
+        assertFalse(mCardNumberEditText.getShouldShowError());
+
+        mCardNumberEditText.append("123");
+        assertFalse(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void finishTypingCommonLengthCardNumber_whenValidCard_doesNotSetErrorValue() {
+        String almostThere = VALID_VISA_WITH_SPACES.substring(0, 18);
+        mCardNumberEditText.setText(almostThere);
+        assertFalse(mCardNumberEditText.getShouldShowError());
+        // We now have the valid 4242 Visa
+        mCardNumberEditText.append("2");
+        assertFalse(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void finishTypingCommonLengthCardNumber_whenInvalidCard_setsErrorValue() {
+        String almostThere = VALID_VISA_WITH_SPACES.substring(0, 18);
+        mCardNumberEditText.setText(almostThere);
+        // This makes the number officially invalid
+        mCardNumberEditText.append("3");
+        assertTrue(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void finishTypingInvalidCardNumber_whenFollowedByDelete_setsErrorBackToFalse() {
+        String notQuiteValid = VALID_VISA_WITH_SPACES.substring(0, 18) + "3";
+        mCardNumberEditText.setText(notQuiteValid);
+        assertTrue(mCardNumberEditText.getShouldShowError());
+
+        // Now that we're in an error state, back up by one
+        ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
+        assertFalse(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void finishTypingDinersClub_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
+        String notQuiteValid = VALID_DINERS_CLUB_WITH_SPACES.substring(0, 16) + "3";
+        mCardNumberEditText.setText(notQuiteValid);
+        assertTrue(mCardNumberEditText.getShouldShowError());
+
+        // Now that we're in an error state, back up by one
+        ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
+        assertFalse(mCardNumberEditText.getShouldShowError());
+
+        mCardNumberEditText.append("4");
+        assertFalse(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void finishTypingAmEx_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
+        String notQuiteValid = VALID_AMEX_WITH_SPACES.substring(0, 16) + "3";
+        mCardNumberEditText.setText(notQuiteValid);
+        assertTrue(mCardNumberEditText.getShouldShowError());
+
+        // Now that we're in an error state, back up by one
+        ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
+        assertFalse(mCardNumberEditText.getShouldShowError());
+
+        mCardNumberEditText.append("5");
+        assertFalse(mCardNumberEditText.getShouldShowError());
     }
 }

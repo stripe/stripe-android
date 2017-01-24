@@ -17,6 +17,7 @@ import com.stripe.android.view.ExpiryDateEditText;
 public class CardInputTestActivity extends Activity {
 
     public static final String VALID_AMEX_WITH_SPACES = "3782 822463 10005";
+    public static final String VALID_DINERS_CLUB_WITH_SPACES = "3056 9309 0259 04";
     public static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
 
     private CardInputView mCardInputView;

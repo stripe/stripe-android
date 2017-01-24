@@ -172,11 +172,14 @@ public class CardNumberEditText extends StripeEditText {
                 if (s.length() == mLengthMax) {
                     boolean before = mIsCardNumberValid;
                     mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
+                    setShouldShowError(!mIsCardNumberValid);
                     if (!before && mIsCardNumberValid && mCardNumberCompleteListener != null) {
                         mCardNumberCompleteListener.onCardNumberComplete();
                     }
                 } else {
                     mIsCardNumberValid = false;
+                    // Don't show errors if we aren't full-length.
+                    setShouldShowError(false);
                 }
             }
         });
