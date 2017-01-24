@@ -2,6 +2,7 @@ package com.stripe.android.util;
 
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
@@ -45,7 +46,37 @@ public class DateUtils {
                 && month < (now.get(Calendar.MONTH) + 1);
     }
 
+    /**
+     * Checks to see if the string input represents a valid month.
+     *
+     * @param monthString user input representing the month
+     * @return {@code true} if the string is a number between "01" and "12" inclusive,
+     * {@code false} otherwise
+     */
+    public static boolean isValidMonth(@Nullable String monthString) {
+        if (monthString == null) {
+            return false;
+        }
+
+        try {
+            int monthInt = Integer.parseInt(monthString);
+            return monthInt > 0 && monthInt <= 12;
+        } catch (NumberFormatException numEx) {
+            return false;
+        }
+    }
+
+    /**
+     * Separates raw string input of the format MMYY into a "month" group and a "year" group.
+     * Either or both of these may be incomplete. This method does not check to see if the input
+     * is valid.
+     *
+     * @param expiryInput up to four characters of user input
+     * @return a length-2 array containing the first two characters in the 0 index, and the last
+     * two characters in the 1 index. "123" gets split into {"12" , "3"}, and "1" becomes {"1", ""}.
+     */
     @Size(2)
+    @NonNull
     public static String[] separateDateStringParts(@NonNull @Size(max = 4) String expiryInput) {
         String[] parts = new String[2];
         if (expiryInput.length() >= 2) {

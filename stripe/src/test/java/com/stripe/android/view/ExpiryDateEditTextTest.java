@@ -73,20 +73,21 @@ public class ExpiryDateEditTextTest {
     @Test
     public void inputSingleDigit_whenAtFirstCharacterButTextNotEmpty_doesNotPrependZero() {
         mExpiryDateEditText.append("1");
+        // This case can occur when the user moves the cursor behind the already-entered text.
         mExpiryDateEditText.setSelection(0);
         mExpiryDateEditText.getEditableText().replace(0, 0, "3", 0, 1);
 
-        assertEquals("31/", mExpiryDateEditText.getText().toString());
+        assertEquals("31", mExpiryDateEditText.getText().toString());
         assertEquals(1, mExpiryDateEditText.getSelectionStart());
     }
 
     @Test
-    public void inputMultipleDigits_whenStartingFromEmpty_doesNotPrependZero() {
-        // This isn't a valid date, but we don't want to change complicated pastes.
-        mExpiryDateEditText.append("23");
+    public void inputMultipleValidDigits_whenEmpty_doesNotPrependZeroOrShowErrorState() {
+        mExpiryDateEditText.append("11");
 
         String text = mExpiryDateEditText.getText().toString();
-        assertEquals("23/", text);
+        assertEquals("11/", text);
+        assertFalse(mExpiryDateEditText.getShouldShowError());
         assertEquals(3, mExpiryDateEditText.getSelectionStart());
     }
 
@@ -144,5 +145,75 @@ public class ExpiryDateEditTextTest {
     @Test
     public void updateSelectionIndex_whenDeletingAcrossTheGap_staysAtEnd() {
         assertEquals(2, mExpiryDateEditText.updateSelectionIndex(2, 4, 0));
+    }
+
+    @Test
+    public void inputZero_whenEmpty_doesNotShowErrorState() {
+        mExpiryDateEditText.append("0");
+
+        assertFalse(mExpiryDateEditText.getShouldShowError());
+        assertEquals("0", mExpiryDateEditText.getText().toString());
+    }
+
+    @Test
+    public void inputOne_whenEmpty_doesNotShowErrorState() {
+        mExpiryDateEditText.append("1");
+
+        assertFalse(mExpiryDateEditText.getShouldShowError());
+        assertEquals("1", mExpiryDateEditText.getText().toString());
+    }
+
+    @Test
+    public void inputTwoDigitMonth_whenInvalid_showsErrorAndDoesNotAddSlash() {
+        mExpiryDateEditText.append("14");
+
+        assertTrue(mExpiryDateEditText.getShouldShowError());
+        assertEquals("14", mExpiryDateEditText.getText().toString());
+    }
+
+    @Test
+    public void inputThreeDigits_whenInvalid_showsErrorAndDoesAddSlash() {
+        mExpiryDateEditText.append("143");
+
+        assertTrue(mExpiryDateEditText.getShouldShowError());
+        assertEquals("14/3", mExpiryDateEditText.getText().toString());
+    }
+
+    @Test
+    public void delete_whenAcrossSeparator_alwaysDeletesNumber() {
+        mExpiryDateEditText.append("12");
+        assertEquals("12/", mExpiryDateEditText.getText().toString());
+
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
+        assertEquals("1", mExpiryDateEditText.getText().toString());
+    }
+
+    @Test
+    public void inputCompleteDate_whenInPast_showsInvalid() {
+        // This test will be invalid if run between 2080 and 2112. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+        // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
+        // December, 2112. Also, this simulates a PASTE action.
+        mExpiryDateEditText.append("1212");
+
+        assertTrue(mExpiryDateEditText.getShouldShowError());
+        verifyZeroInteractions(mExpiryDateEditListener);
+    }
+
+    @Test
+    public void inputCompleteDateInPast_thenDelete_showsValid() {
+        // This test will be invalid if run between 2080 and 2112. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+        // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
+        // December, 2112.
+        mExpiryDateEditText.append("12/12");
+        assertTrue(mExpiryDateEditText.getShouldShowError());
+
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
+        assertEquals("12/1", mExpiryDateEditText.getText().toString());
+        assertFalse(mExpiryDateEditText.getShouldShowError());
+
+        // The date is no longer "in error", but it still shouldn't have triggered the listener.
+        verifyZeroInteractions(mExpiryDateEditListener);
     }
 }
