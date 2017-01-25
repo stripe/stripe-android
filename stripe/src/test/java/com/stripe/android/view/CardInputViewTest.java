@@ -1,11 +1,13 @@
 package com.stripe.android.view;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -20,6 +22,8 @@ import org.robolectric.util.ActivityController;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link CardInputView}. Note that we have to test against SDK 22
@@ -32,14 +36,17 @@ public class CardInputViewTest {
 
     private CardInputView mCardInputView;
     private CardNumberEditText mCardNumberEditText;
-    private EditText mExpiryEditText;
+    private StripeEditText mExpiryEditText;
     private TestFocusChangeListener mOnGlobalFocusChangeListener;
+    private StripeEditText mCvcEditText;
+    private ImageView mIconView;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         ActivityController activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start().visible();
+                Robolectric.buildActivity(CardInputTestActivity.class)
+                        .create().start().visible().resume();
 
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardNumberEditText =
@@ -48,7 +55,9 @@ public class CardInputViewTest {
         mCardInputView = ((CardInputTestActivity) activityController.get()).getCardInputView();
         mCardInputView.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
-        mExpiryEditText = (EditText) mCardInputView.findViewById(R.id.et_expiry_date);
+        mExpiryEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_expiry_date);
+        mCvcEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_cvc_number);
+        mIconView = (ImageView) mCardInputView.findViewById(R.id.iv_card_icon);
     }
 
     @Test
@@ -64,6 +73,24 @@ public class CardInputViewTest {
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
+    }
+
+    @Test
+    public void onUpdateIcon_forCommonLengthBrand_callsSetImageResourceAndSetsLengthOnCvc() {
+        // This should set the brand to Visa. Note that more extensive brand checking occurs
+        // in CardNumberEditTextTest.
+        Drawable old = mIconView.getDrawable();
+        mCardNumberEditText.append(Card.PREFIXES_VISA[0]);
+        assertNotEquals(old, mIconView.getDrawable());
+        assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 3));
+    }
+
+    @Test
+    public void onUpdateText_forAmExPrefix_callsSetImageResourceAndSetsLengthOnCvc() {
+        Drawable old = mIconView.getDrawable();
+        mCardNumberEditText.append(Card.PREFIXES_AMERICAN_EXPRESS[0]);
+        assertNotEquals(old, mIconView.getDrawable());
+        assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 4));
     }
 
     class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusChangeListener {

@@ -17,7 +17,7 @@
     <!-- When merged to master, this should replace all input fields.-->
     <com.stripe.android.view.CardInputView
         android:layout_width="match_parent"
-        android:layout_height="20dp"/>
+        android:layout_height="wrap_content"/>
 
     <EditText
         android:id="@+id/number"

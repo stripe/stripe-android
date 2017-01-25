@@ -1,13 +1,26 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.text.InputFilter;
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Card;
+import com.stripe.android.util.CardUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Custom view to accept credit card numbers information.
@@ -17,6 +30,18 @@ public class CardInputView extends FrameLayout {
     private static final int END_INDEX_COMMON = 14;
     private static final int END_INDEX_AMEX = 11;
 
+    private static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.stp_card_amex);
+                put(Card.DINERS_CLUB, R.drawable.stp_card_diners);
+                put(Card.DISCOVER, R.drawable.stp_card_discover);
+                put(Card.JCB, R.drawable.stp_card_jcb);
+                put(Card.MASTERCARD, R.drawable.stp_card_mastercard);
+                put(Card.VISA, R.drawable.stp_card_visa);
+                put(Card.UNKNOWN, R.drawable.stp_card_placeholder_template);
+            }};
+
+    private ImageView mCardIconImageView;
     private CardNumberEditText mCardNumberEditText;
     private StripeEditText mCvcNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
@@ -46,6 +71,7 @@ public class CardInputView extends FrameLayout {
     private void initView() {
         inflate(getContext(), R.layout.card_input_view, this);
 
+        mCardIconImageView = (ImageView) findViewById(R.id.iv_card_icon);
         mScrollView = (LockableHorizontalScrollView) findViewById(R.id.root_scroll_view);
         mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);
         mExpiryDateEditText = (ExpiryDateEditText) findViewById(R.id.et_expiry_date);
@@ -105,12 +131,22 @@ public class CardInputView extends FrameLayout {
                     }
                 });
 
+        mCardNumberEditText.setCardBrandChangeListener(
+                new CardNumberEditText.CardBrandChangeListener() {
+                    @Override
+                    public void onCardBrandChanged(@NonNull @Card.CardBrand String brand) {
+                        updateIcon(brand);
+                        updateCvc(brand);
+                    }
+                });
+
         mExpiryDateEditText.setExpiryDateEditListener(new ExpiryDateEditText.ExpiryDateEditListener() {
             @Override
             public void onExpiryDateComplete() {
                 mCvcNumberEditText.requestFocus();
             }
         });
+
         mCardNumberEditText.requestFocus();
     }
 
@@ -158,6 +194,29 @@ public class CardInputView extends FrameLayout {
         mExpiryDateEditText.setVisibility(View.INVISIBLE);
         mCvcNumberEditText.setVisibility(View.INVISIBLE);
         mCardNumberEditText.requestFocus();
+    }
+
+    private void updateIcon(@NonNull @Card.CardBrand String brand) {
+        if (Card.UNKNOWN.equals(brand)) {
+            Drawable icon  = getResources().getDrawable(R.drawable.stp_card_placeholder_template);
+            Drawable compatIcon = DrawableCompat.wrap(icon);
+            DrawableCompat.setTintList(compatIcon, mCardNumberEditText.getHintTextColors());
+            mCardIconImageView.setImageDrawable(compatIcon);
+        } else {
+            mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
+        }
+    }
+
+    private void updateCvc(@NonNull @Card.CardBrand String brand) {
+        if (Card.AMERICAN_EXPRESS.equals(brand)) {
+            mCvcNumberEditText.setFilters(
+                    new InputFilter[] {new InputFilter.LengthFilter(CardUtils.CVC_LENGTH_AMEX)});
+            mCvcNumberEditText.setHint(R.string.cvc_amex_hint);
+        } else {
+            mCvcNumberEditText.setFilters(
+                    new InputFilter[] {new InputFilter.LengthFilter(CardUtils.CVC_LENGTH_COMMON)});
+            mCvcNumberEditText.setHint(R.string.cvc_number_hint);
+        }
     }
 
     private void updateScrollToPosition() {

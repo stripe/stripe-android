@@ -2,19 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+              android:layout_height="wrap_content"
+              >
 
-    <!-- The source value of this ImageView is a placeholder and should not remain in master -->
     <ImageView
         android:id="@+id/iv_card_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/card_icon_placeholder"
+        android:layout_marginTop="@dimen/card_icon_padding"
+        android:layout_marginEnd="@dimen/card_icon_padding"
+        android:layout_marginRight="@dimen/card_icon_padding"
+        android:layout_marginStart="@dimen/card_icon_padding"
+        android:layout_marginLeft="@dimen/card_icon_padding"
+        android:src="@drawable/stp_card_placeholder_template"
         />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        >
 
         <com.stripe.android.view.LockableHorizontalScrollView
             android:id="@+id/root_scroll_view"

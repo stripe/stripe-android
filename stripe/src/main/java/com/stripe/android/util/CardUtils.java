@@ -16,6 +16,9 @@ public class CardUtils {
     public static final int LENGTH_AMERICAN_EXPRESS = 15;
     public static final int LENGTH_DINERS_CLUB = 14;
 
+    public static final int CVC_LENGTH_COMMON = 3;
+    public static final int CVC_LENGTH_AMEX = 4;
+
     public static boolean isValidCardNumber(@Nullable String cardNumber) {
         String normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(cardNumber);
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber);
