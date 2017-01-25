@@ -36,6 +36,7 @@ public class CardNumberEditText extends StripeEditText {
             new HashSet<>(Arrays.asList(SPACES_ARRAY_AMEX));
 
     @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
+    private CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberCompleteListener mCardNumberCompleteListener;
     private int mLengthMax = 19;
     private boolean mIgnoreChanges = false;
@@ -58,7 +59,8 @@ public class CardNumberEditText extends StripeEditText {
 
     /**
      * Check whether or not the card number is valid
-     * @return
+     *
+     * @return the value of {@link #mIsCardNumberValid}
      */
     public boolean isCardNumberValid() {
         return mIsCardNumberValid;
@@ -66,6 +68,13 @@ public class CardNumberEditText extends StripeEditText {
 
     void setCardNumberCompleteListener(@NonNull CardNumberCompleteListener listener) {
         mCardNumberCompleteListener = listener;
+    }
+
+    void setCardBrandChangeListener(@NonNull CardBrandChangeListener listener) {
+        mCardBrandChangeListener = listener;
+        // Immediately display the brand if known, in case this method is invoked when
+        // partial data already exists.
+        mCardBrandChangeListener.onCardBrandChanged(mCardBrand);
     }
 
     /**
@@ -127,7 +136,7 @@ public class CardNumberEditText extends StripeEditText {
                 }
 
                 if (start < 4) {
-                    updateCardBrand(s.toString());
+                    updateCardBrandFromNumber(s.toString());
                     // update the card icon here
                 }
 
@@ -185,11 +194,15 @@ public class CardNumberEditText extends StripeEditText {
         });
     }
 
-    private void updateCardBrand(String partialNumber) {
-        @Card.CardBrand String oldBrand = mCardBrand;
-        mCardBrand = CardUtils.getPossibleCardType(partialNumber);
-        if (mCardBrand.equals(oldBrand)) {
+    private void updateCardBrand(@NonNull @Card.CardBrand String brand) {
+        if (mCardBrand.equals(brand)) {
             return;
+        }
+
+        mCardBrand = brand;
+
+        if (mCardBrandChangeListener != null) {
+            mCardBrandChangeListener.onCardBrandChanged(mCardBrand);
         }
 
         int oldLength = mLengthMax;
@@ -199,6 +212,10 @@ public class CardNumberEditText extends StripeEditText {
         }
 
         setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
+    }
+
+    private void updateCardBrandFromNumber(String partialNumber) {
+        updateCardBrand(CardUtils.getPossibleCardType(partialNumber));
     }
 
     private static int getLengthForBrand(@Card.CardBrand String cardBrand) {
@@ -211,5 +228,9 @@ public class CardNumberEditText extends StripeEditText {
 
     interface CardNumberCompleteListener {
         void onCardNumberComplete();
+    }
+
+    interface CardBrandChangeListener {
+        void onCardBrandChanged(@NonNull @Card.CardBrand String brand);
     }
 }
