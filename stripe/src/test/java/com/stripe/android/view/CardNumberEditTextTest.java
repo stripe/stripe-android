@@ -20,6 +20,7 @@ import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WI
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public class CardNumberEditTextTest {
 
     @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
+    @Mock CardNumberEditText.CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberEditText mCardNumberEditText;
 
     @Before
@@ -47,6 +49,7 @@ public class CardNumberEditTextTest {
                 ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
         mCardNumberEditText.setText("");
         mCardNumberEditText.setCardNumberCompleteListener(mCardNumberCompleteListener);
+        mCardNumberEditText.setCardBrandChangeListener(mCardBrandChangeListener);
     }
 
     @Test
@@ -218,5 +221,113 @@ public class CardNumberEditTextTest {
 
         mCardNumberEditText.append("5");
         assertFalse(mCardNumberEditText.getShouldShowError());
+    }
+
+    @Test
+    public void setCardBrandChangeListener_callsSetCardBrand() {
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+    }
+
+    @Test
+    public void addVisaPrefix_callsBrandListener() {
+        // We reset because just attaching the listener calls the method once.
+        clearInvocations(mCardBrandChangeListener);
+        // There is only one Visa Prefix.
+        mCardNumberEditText.append(Card.PREFIXES_VISA[0]);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.VISA);
+    }
+
+    @Test
+    public void addAmExPrefix_callsBrandListener() {
+        for (String prefix : Card.PREFIXES_AMERICAN_EXPRESS) {
+            // Reset inside the loop so we don't count each prefix
+            clearInvocations(mCardBrandChangeListener);
+            mCardNumberEditText.append(prefix);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.AMERICAN_EXPRESS);
+            mCardNumberEditText.setText("");
+        }
+    }
+
+    @Test
+    public void addDinersClubPrefix_callsBrandListener() {
+        for (String prefix : Card.PREFIXES_DINERS_CLUB) {
+            clearInvocations(mCardBrandChangeListener);
+            mCardNumberEditText.append(prefix);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DINERS_CLUB);
+            mCardNumberEditText.setText("");
+        }
+    }
+
+    @Test
+    public void addDiscoverPrefix_callsBrandListener() {
+        for (String prefix : Card.PREFIXES_DISCOVER) {
+            clearInvocations(mCardBrandChangeListener);
+            mCardNumberEditText.append(prefix);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DISCOVER);
+            mCardNumberEditText.setText("");
+        }
+    }
+
+    @Test
+    public void addMasterCardPrefix_callsBrandListener() {
+        for (String prefix : Card.PREFIXES_MASTERCARD) {
+            clearInvocations(mCardBrandChangeListener);
+            mCardNumberEditText.append(prefix);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.MASTERCARD);
+            mCardNumberEditText.setText("");
+        }
+    }
+
+    @Test
+    public void addJCBPrefix_callsBrandListener() {
+        for (String prefix : Card.PREFIXES_JCB) {
+            clearInvocations(mCardBrandChangeListener);
+            mCardNumberEditText.append(prefix);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.JCB);
+            mCardNumberEditText.setText("");
+        }
+    }
+
+    @Test
+    public void enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
+        clearInvocations(mCardBrandChangeListener);
+        String prefix = VALID_AMEX_WITH_SPACES.substring(0, 2);
+        String suffix = VALID_AMEX_WITH_SPACES.substring(2);
+        mCardNumberEditText.append(prefix);
+        mCardNumberEditText.append(suffix);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.AMERICAN_EXPRESS);
+    }
+
+    @Test
+    public void enterBrandPrefix_thenDelete_callsUpdateWithUnknown() {
+        clearInvocations(mCardBrandChangeListener);
+        String dinersPrefix = Card.PREFIXES_DINERS_CLUB[0];
+        // All the Diners Club prefixes are longer than one character, but I specifically want
+        // to test that a nonempty string still triggers this action, so this test will fail if
+        // the Diners Club prefixes are ever changed.
+        assertTrue(dinersPrefix.length() > 1);
+
+        mCardNumberEditText.append(dinersPrefix);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DINERS_CLUB);
+
+        ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+    }
+
+    @Test
+    public void enterBrandPrefix_thenClearAllText_callsUpdateWithUnknown() {
+        clearInvocations(mCardBrandChangeListener);
+        String prefixVisa = Card.PREFIXES_VISA[0];
+        mCardNumberEditText.append(prefixVisa);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.VISA);
+
+        // Just adding some other text. Not enough to invalidate the card or complete it.
+        mCardNumberEditText.append("123");
+        verify(mCardBrandChangeListener, times(0)).onCardBrandChanged(Card.UNKNOWN);
+
+        // This simulates the user selecting all text and deleting it.
+        mCardNumberEditText.setText("");
+
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
     }
 }
