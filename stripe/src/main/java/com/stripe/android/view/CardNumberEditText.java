@@ -137,7 +137,6 @@ public class CardNumberEditText extends StripeEditText {
 
                 if (start < 4) {
                     updateCardBrandFromNumber(s.toString());
-                    // update the card icon here
                 }
 
                 if (start > 16) {
