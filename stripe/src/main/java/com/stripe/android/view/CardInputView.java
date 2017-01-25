@@ -135,6 +135,7 @@ public class CardInputView extends FrameLayout {
                 new CardNumberEditText.CardBrandChangeListener() {
                     @Override
                     public void onCardBrandChanged(@NonNull @Card.CardBrand String brand) {
+                        mIsAmex = Card.AMERICAN_EXPRESS.equals(brand);
                         updateIcon(brand);
                         updateCvc(brand);
                     }
