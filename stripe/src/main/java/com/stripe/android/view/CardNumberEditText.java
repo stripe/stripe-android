@@ -57,6 +57,12 @@ public class CardNumberEditText extends StripeEditText {
         listenForTextChanges();
     }
 
+    @NonNull
+    @Card.CardBrand
+    public String getCardBrand() {
+        return mCardBrand;
+    }
+
     /**
      * Check whether or not the card number is valid
      *
