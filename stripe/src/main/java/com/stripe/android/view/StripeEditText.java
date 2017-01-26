@@ -94,8 +94,12 @@ public class StripeEditText extends EditText {
     }
 
     @ColorInt
+    @SuppressWarnings("deprecation")
     int getDefaultErrorColorInt() {
         @ColorInt int errorColor;
+        // It's possible that we need to verify this value again
+        // in case the user programmatically changes the text color.
+        determineDefaultErrorColor();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             errorColor = getResources().getColor(mDefaultErrorColorResId, null);
         } else {
