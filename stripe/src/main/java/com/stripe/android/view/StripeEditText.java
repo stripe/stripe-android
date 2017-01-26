@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -30,7 +29,8 @@ public class StripeEditText extends EditText {
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
     @Nullable private ColorStateList mCachedColorStateList;
     private boolean mShouldShowError;
-    @ColorRes private int mColorResId;
+    @ColorRes private int mDefaultErrorColorResId;
+    @ColorInt private int mErrorColor;
 
     public StripeEditText(Context context) {
         super(context);
@@ -71,14 +71,7 @@ public class StripeEditText extends EditText {
     public void setShouldShowError(boolean shouldShowError) {
         mShouldShowError = shouldShowError;
         if (mShouldShowError) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                setTextColor(getResources().getColor(mColorResId, null));
-            } else {
-                // Resources#getColor(int) is deprecated, but the replacement only exists in
-                // SDK 23 and above.
-                setTextColor(getResources().getColor(mColorResId));
-            }
-
+            setTextColor(mErrorColor);
         } else {
             setTextColor(mCachedColorStateList);
         }
@@ -98,6 +91,28 @@ public class StripeEditText extends EditText {
      */
     public boolean getShouldShowError() {
         return mShouldShowError;
+    }
+
+    @ColorInt
+    @SuppressWarnings("deprecation")
+    int getDefaultErrorColorInt() {
+        @ColorInt int errorColor;
+        // It's possible that we need to verify this value again
+        // in case the user programmatically changes the text color.
+        determineDefaultErrorColor();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            errorColor = getResources().getColor(mDefaultErrorColorResId, null);
+        } else {
+            // Resources#getColor(int) is deprecated, but the replacement only exists in
+            // SDK 23 and above.
+            errorColor = getResources().getColor(mDefaultErrorColorResId);
+        }
+
+        return errorColor;
+    }
+
+    void setErrorColor(@ColorInt int errorColor) {
+        mErrorColor = errorColor;
     }
 
     /**
@@ -130,19 +145,19 @@ public class StripeEditText extends EditText {
 
     private void initView() {
         listenForDeleteEmpty();
-        determineErrorColor();
+        determineDefaultErrorColor();
         mCachedColorStateList = getTextColors();
     }
 
-    private void determineErrorColor() {
+    private void determineDefaultErrorColor() {
         mCachedColorStateList = getTextColors();
         int color = mCachedColorStateList.getDefaultColor();
         if (isColorDark(color)) {
             // Note: if the _text_ color is dark, then this is a
             // light theme, and vice-versa.
-            mColorResId = R.color.error_text_light_theme;
+            mDefaultErrorColorResId = R.color.error_text_light_theme;
         } else {
-            mColorResId = R.color.error_text_dark_theme;
+            mDefaultErrorColorResId = R.color.error_text_dark_theme;
         }
     }
 

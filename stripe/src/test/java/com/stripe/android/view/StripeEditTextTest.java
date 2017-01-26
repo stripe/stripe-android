@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.stripe.android.R;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -13,9 +14,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
@@ -30,16 +33,16 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public class StripeEditTextTest {
 
     @Mock StripeEditText.DeleteEmptyListener mDeleteEmptyListener;
+    private ActivityController<CardInputTestActivity> mActivityController;
     private StripeEditText mEditText;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
+        mActivityController = Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
-        // Note that the CVC EditText is a DeleteWatchEditText
-        mEditText = ((CardInputTestActivity) activityController.get()).getCvcEditText();
+        // Note that the CVC EditText is a StripeEditText
+        mEditText =  mActivityController.get().getCvcEditText();
         mEditText.setText("");
         mEditText.setDeleteEmptyListener(mDeleteEmptyListener);
     }
@@ -110,5 +113,39 @@ public class StripeEditTextTest {
         assertTrue(StripeEditText.isColorDark(darkPurple));
         assertTrue(StripeEditText.isColorDark(darkishRed));
         assertTrue(StripeEditText.isColorDark(Color.BLACK));
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
+        mEditText.setTextColor(
+                mActivityController.get().getResources()
+                        .getColor(android.R.color.primary_text_dark));
+        @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
+        @ColorInt int expectedErrorInt =
+                mActivityController.get().getResources().getColor(R.color.error_text_dark_theme);
+        assertEquals(expectedErrorInt, colorInt);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void getDefaultErrorColorInt_onLightTheme_returnsLightError() {
+        mEditText.setTextColor(
+                mActivityController.get().getResources()
+                        .getColor(android.R.color.primary_text_light));
+        @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
+        @ColorInt int expectedErrorInt =
+                mActivityController.get().getResources().getColor(R.color.error_text_light_theme);
+        assertEquals(expectedErrorInt, colorInt);
+    }
+
+    @Test
+    public void setErrorColor_whenInError_overridesDefault() {
+        // By default, the text color in this test activity is a light theme
+        @ColorInt int blueError = 0x0000ff;
+        mEditText.setErrorColor(blueError);
+        mEditText.setShouldShowError(true);
+        int currentColorInt = mEditText.getTextColors().getDefaultColor();
+        assertEquals(blueError, currentColorInt);
     }
 }

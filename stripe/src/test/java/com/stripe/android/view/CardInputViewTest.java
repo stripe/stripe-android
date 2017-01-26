@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
 import android.view.View;
@@ -79,17 +81,17 @@ public class CardInputViewTest {
     public void onUpdateIcon_forCommonLengthBrand_callsSetImageResourceAndSetsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        Drawable old = mIconView.getDrawable();
+        Bitmap oldBitmap  = ((BitmapDrawable) mIconView.getDrawable()).getBitmap();
         mCardNumberEditText.append(Card.PREFIXES_VISA[0]);
-        assertNotEquals(old, mIconView.getDrawable());
+        assertNotEquals(oldBitmap, ((BitmapDrawable) mIconView.getDrawable()).getBitmap());
         assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 3));
     }
 
     @Test
     public void onUpdateText_forAmExPrefix_callsSetImageResourceAndSetsLengthOnCvc() {
-        Drawable old = mIconView.getDrawable();
+        Bitmap oldBitmap  = ((BitmapDrawable) mIconView.getDrawable()).getBitmap();
         mCardNumberEditText.append(Card.PREFIXES_AMERICAN_EXPRESS[0]);
-        assertNotEquals(old, mIconView.getDrawable());
+        assertNotEquals(oldBitmap, ((BitmapDrawable) mIconView.getDrawable()).getBitmap());
         assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 4));
     }
 

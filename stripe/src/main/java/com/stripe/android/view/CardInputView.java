@@ -1,11 +1,10 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -47,28 +46,30 @@ public class CardInputView extends FrameLayout {
     private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
+    private @ColorInt int mErrorColorInt;
     private int mScrollViewWidth;
     private int mScrollToPostion;
+    private @ColorInt int mTintColorInt;
     private boolean mCardNumberIsViewed;
     private boolean mIsAmex = false;
     private boolean mInitializedFlag;
 
     public CardInputView(Context context) {
         super(context);
-        initView();
+        initView(null);
     }
 
     public CardInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initView();
+        initView(attrs);
     }
 
     public CardInputView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initView();
+        initView(attrs);
     }
 
-    private void initView() {
+    private void initView(AttributeSet attrs) {
         inflate(getContext(), R.layout.card_input_view, this);
 
         mCardIconImageView = (ImageView) findViewById(R.id.iv_card_icon);
@@ -78,6 +79,28 @@ public class CardInputView extends FrameLayout {
         mCvcNumberEditText = (StripeEditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
         mCardNumberIsViewed = true;
+
+        mErrorColorInt = mCardNumberEditText.getDefaultErrorColorInt();
+        mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
+        if (attrs != null) {
+            TypedArray a = getContext().getTheme().obtainStyledAttributes(
+                    attrs,
+                    R.styleable.CardInputView,
+                    0, 0);
+
+            try {
+                mErrorColorInt =
+                        a.getColor(R.styleable.CardInputView_cardTextErrorColor, mErrorColorInt);
+                mTintColorInt =
+                        a.getColor(R.styleable.CardInputView_cardTint, mTintColorInt);
+            } finally {
+                a.recycle();
+            }
+        }
+
+        mCardNumberEditText.setErrorColor(mErrorColorInt);
+        mExpiryDateEditText.setErrorColor(mErrorColorInt);
+        mCvcNumberEditText.setErrorColor(mErrorColorInt);
 
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -152,6 +175,14 @@ public class CardInputView extends FrameLayout {
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            applyTint();
+        }
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
@@ -169,6 +200,15 @@ public class CardInputView extends FrameLayout {
             ViewGroup.LayoutParams widthParams = mCardNumberSpace.getLayoutParams();
             widthParams.width = mScrollViewWidth;
             mCardNumberSpace.setLayoutParams(widthParams);
+        }
+    }
+
+    private void applyTint() {
+        if (Card.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
+            Drawable icon = mCardIconImageView.getDrawable();
+            Drawable compatIcon = DrawableCompat.wrap(icon);
+            DrawableCompat.setTint(compatIcon, mTintColorInt);
+            mCardIconImageView.setImageDrawable(DrawableCompat.unwrap(compatIcon));
         }
     }
 
@@ -200,9 +240,8 @@ public class CardInputView extends FrameLayout {
     private void updateIcon(@NonNull @Card.CardBrand String brand) {
         if (Card.UNKNOWN.equals(brand)) {
             Drawable icon  = getResources().getDrawable(R.drawable.stp_card_placeholder_template);
-            Drawable compatIcon = DrawableCompat.wrap(icon);
-            DrawableCompat.setTintList(compatIcon, mCardNumberEditText.getHintTextColors());
-            mCardIconImageView.setImageDrawable(compatIcon);
+            mCardIconImageView.setImageDrawable(icon);
+            applyTint();
         } else {
             mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
         }
