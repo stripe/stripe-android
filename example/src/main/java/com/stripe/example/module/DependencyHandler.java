@@ -3,18 +3,20 @@ package com.stripe.example.module;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.stripe.android.model.Card;
 import com.stripe.example.controller.AsyncTaskTokenController;
 import com.stripe.example.controller.CardInformationReader;
-import com.stripe.example.controller.ErrorDialogHandler;
+import com.stripe.example.controller.CardValidationController;
+import com.stripe.example.controller.MessageDialogHandler;
 import com.stripe.example.controller.IntentServiceTokenController;
 import com.stripe.example.controller.ListViewController;
 import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.controller.RxTokenController;
+import com.stripe.example.view.CreditCardView;
 
 /**
  * A dagger-free simple way to handle dependencies in the Example project. Most of this work would
@@ -31,26 +33,22 @@ public class DependencyHandler {
 
     private AsyncTaskTokenController mAsyncTaskController;
     private CardInformationReader mCardInformationReader;
-    private ErrorDialogHandler mErrorDialogHandler;
+    private MessageDialogHandler mMessageDialogHandler;
     private IntentServiceTokenController mIntentServiceTokenController;
     private ListViewController mListViewController;
     private RxTokenController mRxTokenController;
     private ProgressDialogController mProgresDialogController;
+    private CardValidationController mCardValidationController;
 
     public DependencyHandler(
             AppCompatActivity activity,
-            EditText cardNumberEditText,
-            Spinner monthSpinner,
-            Spinner yearSpinner,
-            EditText cvcEditText,
+            CreditCardView creditCardView,
+            TextView validationErrorTextView,
             Spinner currencySpinner,
             ListView outputListView) {
 
         mCardInformationReader = new CardInformationReader(
-                cardNumberEditText,
-                monthSpinner,
-                yearSpinner,
-                cvcEditText,
+                creditCardView,
                 currencySpinner);
 
         mProgresDialogController =
@@ -58,7 +56,9 @@ public class DependencyHandler {
 
         mListViewController = new ListViewController(outputListView);
 
-        mErrorDialogHandler = new ErrorDialogHandler(activity.getSupportFragmentManager());
+        mMessageDialogHandler = new MessageDialogHandler(activity.getSupportFragmentManager());
+
+        mCardValidationController = new CardValidationController(creditCardView, validationErrorTextView, mMessageDialogHandler);
     }
 
     /**
@@ -74,7 +74,7 @@ public class DependencyHandler {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
                     mCardInformationReader,
-                    mErrorDialogHandler,
+                    mMessageDialogHandler,
                     mListViewController,
                     mProgresDialogController,
                     PUBLISHABLE_KEY);
@@ -100,7 +100,7 @@ public class DependencyHandler {
                     appCompatActivity,
                     button,
                     mCardInformationReader,
-                    mErrorDialogHandler,
+                    mMessageDialogHandler,
                     mListViewController,
                     mProgresDialogController,
                     PUBLISHABLE_KEY);
@@ -123,7 +123,7 @@ public class DependencyHandler {
             mRxTokenController = new RxTokenController(
                     button,
                     mCardInformationReader,
-                    mErrorDialogHandler,
+                    mMessageDialogHandler,
                     mListViewController,
                     mProgresDialogController,
                     PUBLISHABLE_KEY);
@@ -146,5 +146,6 @@ public class DependencyHandler {
         mAsyncTaskController = null;
         mRxTokenController = null;
         mIntentServiceTokenController = null;
+        mCardValidationController = null;
     }
 }

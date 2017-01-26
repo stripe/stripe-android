@@ -3,12 +3,13 @@ package com.stripe.example.activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.stripe.example.R;
 import com.stripe.example.module.DependencyHandler;
+import com.stripe.example.view.CreditCardView;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -21,10 +22,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         mDependencyHandler = new DependencyHandler(
                 this,
-                (EditText) findViewById(R.id.number),
-                (Spinner) findViewById(R.id.expMonth),
-                (Spinner) findViewById(R.id.expYear),
-                (EditText) findViewById(R.id.cvc),
+                (CreditCardView) findViewById(R.id.credit_card),
+                (TextView) findViewById(R.id.validation_error),
                 (Spinner) findViewById(R.id.currency),
                 (ListView) findViewById(R.id.listview));
 

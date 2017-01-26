@@ -8,6 +8,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.example.R;
 
 /**
  * Logic needed to create tokens using the {@link android.os.AsyncTask} methods included in the
@@ -16,7 +17,7 @@ import com.stripe.android.model.Token;
 public class AsyncTaskTokenController {
 
     private CardInformationReader mCardInformationReader;
-    private ErrorDialogHandler mErrorDialogHandler;
+    private MessageDialogHandler mMessageDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
     private String mPublishableKey;
@@ -24,12 +25,12 @@ public class AsyncTaskTokenController {
     public AsyncTaskTokenController(
             @NonNull Button button,
             @NonNull CardInformationReader cardInformationReader,
-            @NonNull ErrorDialogHandler errorDialogHandler,
+            @NonNull MessageDialogHandler messageDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
         mCardInformationReader = cardInformationReader;
-        mErrorDialogHandler = errorDialogHandler;
+        mMessageDialogHandler = messageDialogHandler;
         mPublishableKey = publishableKey;
         mProgressDialogController = progressDialogController;
         mOutputListController = outputListController;
@@ -54,7 +55,7 @@ public class AsyncTaskTokenController {
                         mProgressDialogController.finishProgress();
                     }
                     public void onError(Exception error) {
-                        mErrorDialogHandler.showError(error.getLocalizedMessage());
+                        mMessageDialogHandler.showMessage(R.string.validationErrors, error.getLocalizedMessage());
                         mProgressDialogController.finishProgress();
                     }
                 });

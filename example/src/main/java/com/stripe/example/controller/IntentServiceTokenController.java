@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.text.IDNA;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.model.Card;
-import com.stripe.example.activity.PaymentActivity;
+import com.stripe.example.R;
 import com.stripe.example.service.TokenIntentService;
 
 /**
@@ -24,7 +23,7 @@ public class IntentServiceTokenController {
 
     private Activity mActivity;
     private CardInformationReader mCardInformationReader;
-    private ErrorDialogHandler mErrorDialogHandler;
+    private MessageDialogHandler mMessageDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
     private String mPublishableKey;
@@ -35,14 +34,14 @@ public class IntentServiceTokenController {
             @NonNull AppCompatActivity appCompatActivity,
             @NonNull Button button,
             @NonNull CardInformationReader cardInformationReader,
-            @NonNull ErrorDialogHandler errorDialogHandler,
+            @NonNull MessageDialogHandler messageDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
 
         mActivity = appCompatActivity;
         mCardInformationReader = cardInformationReader;
-        mErrorDialogHandler = errorDialogHandler;
+        mMessageDialogHandler = messageDialogHandler;
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
         mPublishableKey = publishableKey;
@@ -102,7 +101,7 @@ public class IntentServiceTokenController {
             }
 
             if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
-                mErrorDialogHandler.showError(
+                mMessageDialogHandler.showMessage(R.string.validationErrors,
                         intent.getStringExtra(TokenIntentService.STRIPE_ERROR_MESSAGE));
                 return;
             }

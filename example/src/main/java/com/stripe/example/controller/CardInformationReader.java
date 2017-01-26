@@ -4,6 +4,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.stripe.android.model.Card;
+import com.stripe.example.view.CreditCardView;
 
 /**
  * A class that reads the UI.
@@ -12,22 +13,13 @@ public class CardInformationReader {
 
     private static final String CURRENCY_UNSPECIFIED = "Unspecified";
 
-    private EditText mCardNumberEditText;
-    private Spinner mMonthSpinner;
-    private Spinner mYearSpinner;
-    private EditText mCvcEditText;
+    private CreditCardView mCreditCardView;
     private Spinner mCurrencySpinner;
 
     public CardInformationReader(
-            EditText cardNumberEditText,
-            Spinner monthSpinner,
-            Spinner yearSpinner,
-            EditText cvcEditText,
+            CreditCardView creditCardView,
             Spinner currencySpinner) {
-        mCardNumberEditText = cardNumberEditText;
-        mMonthSpinner = monthSpinner;
-        mYearSpinner = yearSpinner;
-        mCvcEditText = cvcEditText;
+        mCreditCardView = creditCardView;
         mCurrencySpinner = currencySpinner;
     }
 
@@ -37,24 +29,13 @@ public class CardInformationReader {
      * @return a {@link Card} based on the currently displayed user input
      */
     public Card readCardData() {
-        String cardNumber = mCardNumberEditText.getText().toString();
-        String cvc = mCvcEditText.getText().toString();
-
-        int expMonth = getIntegerFromSpinner(mMonthSpinner);
-        int expYear = getIntegerFromSpinner(mYearSpinner);
-
         String currency = getCurrency();
-        Card cardToSave = new Card(cardNumber, expMonth, expYear, cvc);
-        cardToSave.setCurrency(currency);
-        return cardToSave;
-    }
-
-    private int getIntegerFromSpinner(Spinner spinner) {
-        try {
-            return Integer.parseInt(spinner.getSelectedItem().toString());
-        } catch (NumberFormatException e) {
-            return 0;
+        Card cardToSave = mCreditCardView.getCard();
+        if (cardToSave != null) {
+            cardToSave.setCurrency(currency);
+            return cardToSave;
         }
+        return new Card.Builder("", 1, 0, "").build();
     }
 
     private String getCurrency() {

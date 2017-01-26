@@ -7,6 +7,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.example.R;
 
 import java.util.concurrent.Callable;
 
@@ -26,7 +27,7 @@ public class RxTokenController {
 
     private CardInformationReader mCardInformationHolder;
     private CompositeSubscription mCompositeSubscription;
-    private ErrorDialogHandler mErrorDialogHandler;
+    private MessageDialogHandler mMessageDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
     private String mPublishableKey;
@@ -34,14 +35,14 @@ public class RxTokenController {
     public RxTokenController (
             @NonNull Button button,
             @NonNull CardInformationReader cardInformationReader,
-            @NonNull ErrorDialogHandler errorDialogHandler,
+            @NonNull MessageDialogHandler messageDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
         mCompositeSubscription = new CompositeSubscription();
 
         mCardInformationHolder = cardInformationReader;
-        mErrorDialogHandler = errorDialogHandler;
+        mMessageDialogHandler = messageDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
         mPublishableKey = publishableKey;
@@ -107,7 +108,7 @@ public class RxTokenController {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
+                                mMessageDialogHandler.showMessage(R.string.validationErrors, throwable.getLocalizedMessage());
                             }
                         }));
     }
