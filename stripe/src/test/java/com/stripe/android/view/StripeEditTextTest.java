@@ -41,7 +41,7 @@ public class StripeEditTextTest {
         MockitoAnnotations.initMocks(this);
         mActivityController = Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
-        // Note that the CVC EditText is a DeleteWatchEditText
+        // Note that the CVC EditText is a StripeEditText
         mEditText =  mActivityController.get().getCvcEditText();
         mEditText.setText("");
         mEditText.setDeleteEmptyListener(mDeleteEmptyListener);
