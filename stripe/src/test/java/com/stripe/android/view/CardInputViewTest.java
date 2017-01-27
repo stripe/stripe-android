@@ -22,6 +22,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import java.util.Calendar;
+
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -70,11 +73,63 @@ public class CardInputViewTest {
     }
 
     @Test
-    public void onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumber() {
+    public void onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        assertTrue(mExpiryEditText.hasFocus());
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
+
+        String subString = VALID_VISA_WITH_SPACES.substring(0, VALID_VISA_WITH_SPACES.length() - 1);
+        assertEquals(subString, mCardNumberEditText.getText().toString());
+        assertEquals(subString.length(), mCardNumberEditText.getSelectionStart());
+    }
+
+    @Test
+    public void onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        assertTrue(mExpiryEditText.hasFocus());
+
+        mExpiryEditText.append("1");
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
+
+        assertTrue(mExpiryEditText.hasFocus());
+        assertEquals(VALID_AMEX_WITH_SPACES, mCardNumberEditText.getText().toString());
+    }
+
+    @Test
+    public void onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() {
+        // This test will be invalid if run between 2080 and 2112. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("79");
+        assertTrue(mCvcEditText.hasFocus());
+        ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
+        assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
+        assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
+
+        String expectedResult = "12/7";
+        assertEquals(expectedResult, mExpiryEditText.getText().toString());
+        assertEquals(expectedResult.length(), mExpiryEditText.getSelectionStart());
+    }
+
+    @Test
+    public void onDeleteFromCvcDate_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
+        // This test will be invalid if run between 2080 and 2112. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("79");
+        assertTrue(mCvcEditText.hasFocus());
+
+        mCvcEditText.append("123");
+        ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
+
+        assertTrue(mCvcEditText.hasFocus());
+        assertEquals("12/79", mExpiryEditText.getText().toString());
     }
 
     @Test
