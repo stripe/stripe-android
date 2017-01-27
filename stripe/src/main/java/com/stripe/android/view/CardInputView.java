@@ -146,6 +146,13 @@ public class CardInputView extends FrameLayout {
                 }
         );
 
+        mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                updateIconCvc(mCardNumberEditText.getCardBrand(), hasFocus);
+            }
+        });
+
         mCardNumberEditText.setCardNumberCompleteListener(
                 new CardNumberEditText.CardNumberCompleteListener() {
                     @Override
@@ -244,6 +251,18 @@ public class CardInputView extends FrameLayout {
             applyTint();
         } else {
             mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
+        }
+    }
+
+    private void updateIconCvc(@NonNull @Card.CardBrand String brand, boolean isEntering) {
+        if (isEntering) {
+            if (Card.AMERICAN_EXPRESS.equals(brand)) {
+                mCardIconImageView.setImageResource(R.drawable.stp_card_cvc_amex);
+            } else {
+                mCardIconImageView.setImageResource(R.drawable.stp_card_cvc);
+            }
+        } else {
+            updateIcon(brand);
         }
     }
 
