@@ -130,21 +130,10 @@ public class CardInputView extends FrameLayout {
         });
 
         mExpiryDateEditText.setDeleteEmptyListener(
-                new StripeEditText.DeleteEmptyListener() {
-                    @Override
-                    public void onDeleteEmpty() {
-                        mCardNumberEditText.requestFocus();
-                    }
-                });
+                new BackUpFieldDeleteListener(mCardNumberEditText));
 
         mCvcNumberEditText.setDeleteEmptyListener(
-                new StripeEditText.DeleteEmptyListener() {
-                    @Override
-                    public void onDeleteEmpty() {
-                        mExpiryDateEditText.requestFocus();
-                    }
-                }
-        );
+                new BackUpFieldDeleteListener(mExpiryDateEditText));
 
         mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -289,6 +278,26 @@ public class CardInputView extends FrameLayout {
             }
         } else {
             mScrollToPostion = mScrollViewWidth;
+        }
+    }
+
+    private class BackUpFieldDeleteListener implements StripeEditText.DeleteEmptyListener {
+
+        private StripeEditText backUpTarget;
+
+        BackUpFieldDeleteListener(StripeEditText backUpTarget) {
+            this.backUpTarget = backUpTarget;
+        }
+
+        @Override
+        public void onDeleteEmpty() {
+            String fieldText = backUpTarget.getText().toString();
+            if (fieldText.length() > 1) {
+                backUpTarget.setText(
+                        fieldText.substring(0, fieldText.length() - 1));
+            }
+            backUpTarget.requestFocus();
+            backUpTarget.setSelection(backUpTarget.length());
         }
     }
 }
