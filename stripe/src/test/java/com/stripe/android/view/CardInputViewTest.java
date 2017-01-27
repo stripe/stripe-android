@@ -25,6 +25,7 @@ import org.robolectric.util.ActivityController;
 import java.util.Calendar;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -130,6 +131,18 @@ public class CardInputViewTest {
 
         assertTrue(mCvcEditText.hasFocus());
         assertEquals("12/79", mExpiryEditText.getText().toString());
+    }
+
+    @Test
+    public void onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() {
+        mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
+
+        // Simulates user tapping into this text field without filling out the date first.
+        mCvcEditText.requestFocus();
+
+        ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
+        assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
+        assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
     }
 
     @Test
