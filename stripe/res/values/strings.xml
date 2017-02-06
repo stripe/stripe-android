@@ -1,6 +1,6 @@
 <resources>
     <string name="card_number_hint">4242 4242 4242 4242</string>
-    <string name="cvc_number_hint">123</string>
-    <string name="cvc_amex_hint">1234</string>
+    <string name="cvc_number_hint">CVC</string>
+    <string name="cvc_amex_hint">CVV</string>
     <string name="expiry_date_hint">MM/YY</string>
 </resources>
