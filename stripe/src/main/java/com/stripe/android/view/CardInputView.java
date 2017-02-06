@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.Size;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -17,8 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.stripe.android.R;
-import com.stripe.android.TokenCallback;
-import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.StripeTextUtils;

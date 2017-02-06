@@ -23,7 +23,6 @@ public class CardInputTestActivity extends Activity {
     public static final String VALID_VISA_NO_SPACES = "4242424242424242";
     public static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
 
-
     private CardInputView mCardInputView;
 
     @Override
