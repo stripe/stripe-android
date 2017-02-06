@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
@@ -46,6 +47,37 @@ public class ExpiryDateEditText extends StripeEditText {
      */
     public boolean isDateValid() {
         return mIsDateValid;
+    }
+
+    /**
+     * Gets the expiry date displayed on this control if it is valid, or {@code null} if it is not.
+     * The return value is given as a length-2 {@code int} array, where the first entry is the
+     * two-digit month (from 01-12) and the second entry is the four-digit year (2017, not 17).
+     *
+     * @return an {@code int} array of the form {month, year} if the date is valid, or {@code null}
+     * if it is not
+     */
+    @Nullable
+    @Size(2)
+    public int[] getValidDateFields() {
+        if (!mIsDateValid) {
+            return null;
+        }
+
+        int [] monthYearPair = new int[2];
+        String rawNumericInput = getText().toString().replaceAll("/", "");
+        String[] dateFields = DateUtils.separateDateStringParts(rawNumericInput);
+
+        try {
+            monthYearPair[0] = Integer.parseInt(dateFields[0]);
+            monthYearPair[1] = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(dateFields[1]));
+        } catch (NumberFormatException numEx) {
+            // Given that the date should already be valid when getting to this method, we should
+            // not his this exception. Returning null to indicate error if we do.
+            return null;
+        }
+
+        return monthYearPair;
     }
 
     public void setExpiryDateEditListener(ExpiryDateEditListener expiryDateEditListener) {

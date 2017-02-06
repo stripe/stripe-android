@@ -5,6 +5,8 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -15,8 +17,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.stripe.android.R;
+import com.stripe.android.TokenCallback;
+import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,13 +51,13 @@ public class CardInputView extends FrameLayout {
     private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
+    private boolean mCardNumberIsViewed;
     private @ColorInt int mErrorColorInt;
+    private boolean mIsAmex;
+    private boolean mInitializedFlag;
     private int mScrollViewWidth;
     private int mScrollToPostion;
     private @ColorInt int mTintColorInt;
-    private boolean mCardNumberIsViewed;
-    private boolean mIsAmex = false;
-    private boolean mInitializedFlag;
 
     public CardInputView(Context context) {
         super(context);
@@ -67,6 +72,31 @@ public class CardInputView extends FrameLayout {
     public CardInputView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView(attrs);
+    }
+
+    /**
+     * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
+     * {@code null}.
+     *
+     * @return a valid {@link Card} object based on user input, or {@code null} if any field is
+     * invalid
+     */
+    @Nullable
+    public Card getCard() {
+        String cardNumber = mCardNumberEditText.getCardNumber();
+        int[] cardDate = mExpiryDateEditText.getValidDateFields();
+        if (cardNumber == null || cardDate == null || cardDate.length != 2) {
+            return null;
+        }
+
+        // CVC/CVV is the only field not validated by the entry control itself, so we check here.
+        int requiredLength = mIsAmex ? CardUtils.CVC_LENGTH_AMEX : CardUtils.CVC_LENGTH_COMMON;
+        String cvcValue = mCvcNumberEditText.getText().toString();
+        if (StripeTextUtils.isBlank(cvcValue) || cvcValue.length() != requiredLength) {
+            return null;
+        }
+
+        return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
     }
 
     private void initView(AttributeSet attrs) {

@@ -14,11 +14,15 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.reset;
@@ -329,5 +333,42 @@ public class CardNumberEditTextTest {
         mCardNumberEditText.setText("");
 
         verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+    }
+
+    @Test
+    public void getCardNumber_whenValidCard_returnsCardNumberWithoutSpaces() {
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        assertEquals(VALID_VISA_NO_SPACES, mCardNumberEditText.getCardNumber());
+
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        assertEquals(VALID_AMEX_NO_SPACES, mCardNumberEditText.getCardNumber());
+
+        mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
+        assertEquals(VALID_DINERS_CLUB_NO_SPACES, mCardNumberEditText.getCardNumber());
+    }
+
+    @Test
+    public void getCardNumber_whenIncompleteCard_returnsNull() {
+        mCardNumberEditText.setText(
+                VALID_DINERS_CLUB_WITH_SPACES
+                        .substring(0, VALID_DINERS_CLUB_WITH_SPACES.length() - 2));
+        assertNull(mCardNumberEditText.getCardNumber());
+    }
+
+    @Test
+    public void getCardNumber_whenInvalidCardNumber_returnsNull() {
+        String almostVisa =
+                VALID_VISA_WITH_SPACES.substring(0, VALID_VISA_WITH_SPACES.length() - 1);
+        almostVisa += "3"; // creates the 4242 4242 4242 4243 bad number
+        mCardNumberEditText.setText(almostVisa);
+        assertNull(mCardNumberEditText.getCardNumber());
+    }
+
+    @Test
+    public void getCardNumber_whenValidNumberIsChangedToInvalid_returnsNull() {
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
+
+        assertNull(mCardNumberEditText.getCardNumber());
     }
 }
