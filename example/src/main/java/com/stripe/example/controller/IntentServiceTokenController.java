@@ -80,7 +80,7 @@ public class IntentServiceTokenController {
     private void saveCard() {
         Card cardToSave = mCardInputView.getCard();
         if (cardToSave == null) {
-            mOutputListViewController.addErrorMessageToList("Invalid Card Data");
+            mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
         Intent tokenServiceIntent = TokenIntentService.createTokenIntent(

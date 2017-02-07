@@ -50,7 +50,7 @@ public class AsyncTaskTokenController {
     private void saveCard() {
         Card cardToSave = mCardInputView.getCard();
         if (cardToSave == null) {
-            mOutputListController.addErrorMessageToList("Invalid Card Data");
+            mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
         mProgressDialogController.startProgress();

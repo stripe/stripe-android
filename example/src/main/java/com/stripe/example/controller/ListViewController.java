@@ -33,14 +33,6 @@ public class ListViewController {
         listView.setAdapter(mAdatper);
     }
 
-    void addErrorMessageToList(String errorMessage) {
-        Map<String, String> map = new HashMap<>();
-        map.put("last4", "Error:");
-        map.put("tokenId", errorMessage);
-        mCardTokens.add(map);
-        mAdatper.notifyDataSetChanged();
-    }
-
     void addToList(Token token) {
         addToList(token.getCard().getLast4(), token.getId());
     }

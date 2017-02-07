@@ -70,7 +70,7 @@ public class RxTokenController {
     private void saveCard() {
         final Card cardToSave = mCardInputView.getCard();
         if (cardToSave == null) {
-            mOutputListController.addErrorMessageToList("Invalid Card Data");
+            mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
         final Stripe stripe = new Stripe();
