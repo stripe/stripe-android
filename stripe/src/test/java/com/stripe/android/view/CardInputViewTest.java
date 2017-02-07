@@ -24,11 +24,16 @@ import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -64,6 +69,141 @@ public class CardInputViewTest {
         mExpiryEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_expiry_date);
         mCvcEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_cvc_number);
         mIconView = (ImageView) mCardInputView.findViewById(R.id.iv_card_icon);
+    }
+
+    @Test
+    public void getCard_whenInputIsValidVisa_returnsCardObject() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("123");
+
+        Card card = mCardInputView.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, card.getExpMonth().intValue());
+        assertEquals(2050, card.getExpYear().intValue());
+        assertEquals("123", card.getCVC());
+        assertTrue(card.validateCard());
+    }
+
+    @Test
+    public void getCard_whenInputIsValidAmEx_returnsCardObject() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("1234");
+
+        Card card = mCardInputView.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_AMEX_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, card.getExpMonth().intValue());
+        assertEquals(2050, card.getExpYear().intValue());
+        assertEquals("1234", card.getCVC());
+        assertTrue(card.validateCard());
+    }
+
+    @Test
+    public void getCard_whenInputIsValidDinersClub_returnsCardObject() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("123");
+
+        Card card = mCardInputView.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_DINERS_CLUB_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, card.getExpMonth().intValue());
+        assertEquals(2050, card.getExpYear().intValue());
+        assertEquals("123", card.getCVC());
+        assertTrue(card.validateCard());
+    }
+
+    @Test
+    public void getCard_whenInputHasIncompleteCardNumber_returnsNull() {
+        // The test will be testing the wrong variable after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        // This will be 242 4242 4242 4242
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES.substring(1));
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("123");
+
+        Card card = mCardInputView.getCard();
+        assertNull(card);
+    }
+
+    @Test
+    public void getCard_whenInputHasExpiredDate_returnsNull() {
+        // The test will be testing the wrong variable after 2080. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        // Date interpreted as 12/2012 until 2080, when it will be 12/2112
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("12");
+        mCvcEditText.append("123");
+
+        Card card = mCardInputView.getCard();
+        assertNull(card);
+    }
+
+    @Test
+    public void getCard_whenIncompleteCvCForVisa_returnsNull() {
+        // The test will be testing the wrong variable after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("12");
+
+        Card card = mCardInputView.getCard();
+        assertNull(card);
+    }
+
+    @Test
+    public void getCard_whenIncompleteCvCForAmEx_returnsNull() {
+        // The test will be testing the wrong variable after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("123");
+
+        Card card = mCardInputView.getCard();
+        assertNull(card);
+    }
+
+    @Test
+    public void getCard_whenIncompleteCvCForDiners_returnsNull() {
+        // The test will be testing the wrong variable after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("12");
+
+        Card card = mCardInputView.getCard();
+        assertNull(card);
     }
 
     @Test

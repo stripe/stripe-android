@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -61,6 +62,20 @@ public class CardNumberEditText extends StripeEditText {
     @Card.CardBrand
     public String getCardBrand() {
         return mCardBrand;
+    }
+
+    /**
+     * Gets a usable form of the card number. If the text is "4242 4242 4242 4242", this
+     * method will return "4242424242424242". If the card number is invalid, this returns
+     * {@code null}.
+     *
+     * @return a space-free version of the card number, or {@code null} if the number is invalid
+     */
+    @Nullable
+    public String getCardNumber() {
+        return mIsCardNumberValid
+                ? StripeTextUtils.removeSpacesAndHyphens(getText().toString())
+                : null;
     }
 
     /**

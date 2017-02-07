@@ -17,6 +17,8 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
@@ -215,5 +217,49 @@ public class ExpiryDateEditTextTest {
 
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
         verifyZeroInteractions(mExpiryDateEditListener);
+    }
+
+    @Test
+    public void getValidDateFields_whenDataIsValid_returnsExpectedValues() {
+        // This test will be invalid if run after the year 2050. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mExpiryDateEditText.append("12");
+        mExpiryDateEditText.append("50");
+
+        int [] retrievedDate = mExpiryDateEditText.getValidDateFields();
+        assertNotNull(retrievedDate);
+        assertEquals(12, retrievedDate[0]);
+        assertEquals(2050, retrievedDate[1]);
+    }
+
+    @Test
+    public void getValidDateFields_whenDateIsValidFormatButExpired_returnsNull() {
+        // This test will be invalid if run after the year 2050. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
+
+        mExpiryDateEditText.append("12");
+        mExpiryDateEditText.append("12");
+        // 12/12 is an invalid date until 2080, at which point it will be interpreted as 12/2112
+
+        assertNull(mExpiryDateEditText.getValidDateFields());
+    }
+
+    @Test
+    public void getValidDateFields_whenDateIsIncomplete_returnsNull() {
+        mExpiryDateEditText.append("4");
+        assertNull(mExpiryDateEditText.getValidDateFields());
+    }
+
+    @Test
+    public void getValidDateFields_whenDateIsValidAndThenChangedToInvalid_returnsNull() {
+        // This test will be invalid if run after the year 2050. Please update the code.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mExpiryDateEditText.append("12");
+        mExpiryDateEditText.append("50");
+        ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
+
+        assertNull(mExpiryDateEditText.getValidDateFields());
     }
 }
