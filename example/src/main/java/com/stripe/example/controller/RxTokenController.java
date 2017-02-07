@@ -7,6 +7,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.view.CardInputView;
 
 import java.util.concurrent.Callable;
 
@@ -24,7 +25,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class RxTokenController {
 
-    private CardInformationReader mCardInformationHolder;
+    private CardInputView mCardInputView;
     private CompositeSubscription mCompositeSubscription;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
@@ -33,14 +34,14 @@ public class RxTokenController {
 
     public RxTokenController (
             @NonNull Button button,
-            @NonNull CardInformationReader cardInformationReader,
+            @NonNull CardInputView cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
         mCompositeSubscription = new CompositeSubscription();
 
-        mCardInformationHolder = cardInformationReader;
+        mCardInputView = cardInputView;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -63,10 +64,15 @@ public class RxTokenController {
         if  (mCompositeSubscription != null) {
             mCompositeSubscription.unsubscribe();
         }
+        mCardInputView = null;
     }
 
     private void saveCard() {
-        final Card cardToSave = mCardInformationHolder.readCardData();
+        final Card cardToSave = mCardInputView.getCard();
+        if (cardToSave == null) {
+            mErrorDialogHandler.showError("Invalid Card Data");
+            return;
+        }
         final Stripe stripe = new Stripe();
 
         // Note: using this style of Observable creation results in us having a method that

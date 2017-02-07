@@ -16,65 +16,9 @@
 
     <!-- When merged to master, this should replace all input fields.-->
     <com.stripe.android.view.CardInputView
+        android:id="@+id/card_input_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <EditText
-        android:id="@+id/number"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/TextField"
-        android:hint="@string/cardNumber"
-        android:inputType="numberDecimal"
-        android:nextFocusDown="@+id/expMonth"
-        android:nextFocusRight="@+id/expMonth"
-        android:nextFocusForward="@+id/expMonth" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <Spinner
-            android:id="@+id/expMonth"
-            style="@style/Spinner"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:entries="@array/month_array"
-            android:nextFocusForward="@+id/expYear"/>
-
-        <Spinner
-            android:id="@+id/expYear"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            style="@style/Spinner"
-            android:clickable="true"
-            android:entries="@array/year_array"
-            android:nextFocusForward="@+id/cvc"/>
-
-        <EditText
-            android:id="@+id/cvc"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:hint="@string/cvc"
-            style="@style/TextField"
-            android:nextFocusForward="@+id/currency" />
-
-    </LinearLayout>
-
-    <Spinner
-        android:id="@+id/currency"
-        style="@style/Spinner"
-        android:entries="@array/currency_array"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:nextFocusForward="@+id/save"/>
 
     <Button
         android:id="@+id/save"
