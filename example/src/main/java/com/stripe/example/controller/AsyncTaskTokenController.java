@@ -8,6 +8,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.view.CardInputView;
 
 /**
  * Logic needed to create tokens using the {@link android.os.AsyncTask} methods included in the
@@ -15,7 +16,7 @@ import com.stripe.android.model.Token;
  */
 public class AsyncTaskTokenController {
 
-    private CardInformationReader mCardInformationReader;
+    private CardInputView mCardInputView;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -23,12 +24,12 @@ public class AsyncTaskTokenController {
 
     public AsyncTaskTokenController(
             @NonNull Button button,
-            @NonNull CardInformationReader cardInformationReader,
+            @NonNull CardInputView cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
-        mCardInformationReader = cardInformationReader;
+        mCardInputView = cardInputView;
         mErrorDialogHandler = errorDialogHandler;
         mPublishableKey = publishableKey;
         mProgressDialogController = progressDialogController;
@@ -42,8 +43,16 @@ public class AsyncTaskTokenController {
         });
     }
 
+    public void detach() {
+        mCardInputView = null;
+    }
+
     private void saveCard() {
-        Card cardToSave = mCardInformationReader.readCardData();
+        Card cardToSave = mCardInputView.getCard();
+        if (cardToSave == null) {
+            mOutputListController.addErrorMessageToList("Invalid Card Data");
+            return;
+        }
         mProgressDialogController.startProgress();
         new Stripe().createToken(
                 cardToSave,

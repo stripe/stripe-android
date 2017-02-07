@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.view.CardInputView;
 import com.stripe.example.activity.PaymentActivity;
 import com.stripe.example.service.TokenIntentService;
 
@@ -23,7 +24,7 @@ import com.stripe.example.service.TokenIntentService;
 public class IntentServiceTokenController {
 
     private Activity mActivity;
-    private CardInformationReader mCardInformationReader;
+    private CardInputView mCardInputView;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
@@ -34,14 +35,14 @@ public class IntentServiceTokenController {
     public IntentServiceTokenController (
             @NonNull AppCompatActivity appCompatActivity,
             @NonNull Button button,
-            @NonNull CardInformationReader cardInformationReader,
+            @NonNull CardInputView cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
 
         mActivity = appCompatActivity;
-        mCardInformationReader = cardInformationReader;
+        mCardInputView = cardInputView;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -66,6 +67,7 @@ public class IntentServiceTokenController {
             mTokenBroadcastReceiver = null;
             mActivity = null;
         }
+        mCardInputView = null;
     }
 
     private void registerBroadcastReceiver() {
@@ -76,7 +78,11 @@ public class IntentServiceTokenController {
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInformationReader.readCardData();
+        Card cardToSave = mCardInputView.getCard();
+        if (cardToSave == null) {
+            mOutputListViewController.addErrorMessageToList("Invalid Card Data");
+            return;
+        }
         Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
                 mActivity,
                 cardToSave.getNumber(),
