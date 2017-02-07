@@ -39,15 +39,42 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.stripe.android.view.CardNumberEditText
-                    android:id="@+id/et_card_number"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:hint="@string/card_number_hint"
-                    android:inputType="number"
-                    android:maxLength="19"
-                    />
+                    android:layout_height="wrap_content">
+
+
+                    <com.stripe.android.view.CardNumberEditText
+                        android:id="@+id/et_card_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/card_number_hint"
+                        android:nextFocusRight="@+id/et_expiry_date"
+                        android:accessibilityTraversalAfter="@+id/et_expiry_date"
+                        android:inputType="number"
+                        android:maxLength="19"
+                        />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:textColor="@android:color/transparent"
+                        android:labelFor="@id/et_card_number"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="@string/acc_label_card_number"/>
+                </FrameLayout>
+                <!--<com.stripe.android.view.CardNumberEditText-->
+                    <!--android:id="@+id/et_card_number"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:background="@android:color/transparent"-->
+                    <!--android:hint="@string/card_number_hint"-->
+                    <!--android:inputType="number"-->
+                    <!--android:maxLength="19"-->
+                    <!--/>-->
 
                 <View
                     android:id="@+id/space_in_container"
@@ -59,17 +86,38 @@
 
         </com.stripe.android.view.LockableHorizontalScrollView>
 
-        <com.stripe.android.view.ExpiryDateEditText
-            android:id="@+id/et_expiry_date"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@android:color/transparent"
-            android:hint="@string/expiry_date_hint"
-            android:inputType="date"
-            android:maxLength="5"
-            android:visibility="invisible"
-            />
+            >
+            <com.stripe.android.view.ExpiryDateEditText
+                android:id="@+id/et_expiry_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="@string/expiry_date_hint"
+                android:accessibilityTraversalAfter="@+id/et_expiry_date"
+                android:accessibilityTraversalBefore="@id/et_card_number"
+                android:nextFocusRight="@+id/et_cvc_number"
+                android:nextFocusLeft="@id/et_card_number"
+                android:inputType="date"
+                android:maxLength="5"
+                android:visibility="invisible"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:textColor="@android:color/transparent"
+                android:labelFor="@id/et_expiry_date"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:text="@string/acc_label_expiry_date"/>
+        </FrameLayout>
+
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_cvc_number"
@@ -77,6 +125,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
+            android:accessibilityTraversalAfter="@+id/et_expiry_date"
+            android:nextFocusLeft="@id/et_expiry_date"
             android:background="@android:color/transparent"
             android:hint="@string/cvc_number_hint"
             android:inputType="number"
