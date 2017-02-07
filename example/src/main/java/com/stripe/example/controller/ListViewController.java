@@ -37,6 +37,8 @@ public class ListViewController {
         Map<String, String> map = new HashMap<>();
         map.put("last4", "Error:");
         map.put("tokenId", errorMessage);
+        mCardTokens.add(map);
+        mAdatper.notifyDataSetChanged();
     }
 
     void addToList(Token token) {
