@@ -33,16 +33,21 @@
             android:layout_alignParentStart="true"
             android:fillViewport="true"
             android:fadeScrollbars="false"
+            tools:importantForAccessibility="no"
             android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:importantForAccessibility="no"
+                >
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    tools:importantForAccessibility="no"
+                    >
 
                     <!--The only purpose of this TextView is to be an accessibility label.-->
                     <TextView
@@ -54,8 +59,10 @@
                         android:labelFor="@+id/et_card_number"
                         android:clickable="false"
                         android:focusable="false"
+                        tools:importantForAccessibility="no"
                         android:focusableInTouchMode="false"
-                        android:text="@string/acc_label_card_number"/>
+                        android:text="@string/acc_label_card_number"
+                        />
 
                     <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
                     <com.stripe.android.view.CardNumberEditText
@@ -66,6 +73,7 @@
                         android:hint="@string/card_number_hint"
                         android:nextFocusRight="@+id/et_expiry_date"
                         tools:ignore="UnusedAttribute"
+                        tools:importantForAccessibility="yes"
                         android:accessibilityTraversalBefore="@+id/et_expiry_date"
                         android:inputType="number"
                         android:maxLength="19"
@@ -79,6 +87,7 @@
                     android:layout_height="10dp"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    tools:importantForAccessibility="no"
                     />
 
             </LinearLayout>
@@ -89,6 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            tools:importantForAccessibility="no"
             >
 
             <!--The only purpose of this TextView is to be an accessibility label.-->
@@ -99,10 +109,12 @@
                 android:background="@android:color/transparent"
                 android:textColor="@android:color/transparent"
                 android:labelFor="@+id/et_expiry_date"
+                tools:importantForAccessibility="no"
                 android:clickable="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:text="@string/acc_label_expiry_date"/>
+                android:text="@string/acc_label_expiry_date"
+                />
 
             <!-- The accessibilityTraversalAfter attribute is ignored in sdk < 22 -->
             <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
@@ -113,6 +125,7 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/expiry_date_hint"
                 tools:ignore="UnusedAttribute"
+                tools:importantForAccessibility="yes"
                 android:accessibilityTraversalAfter="@+id/et_expiry_date"
                 android:accessibilityTraversalBefore="@id/et_card_number"
                 android:nextFocusRight="@+id/et_cvc_number"
@@ -132,6 +145,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             tools:ignore="UnusedAttribute"
+            tools:importantForAccessibility="yes"
             android:accessibilityTraversalAfter="@+id/et_expiry_date"
             android:nextFocusLeft="@id/et_expiry_date"
             android:background="@android:color/transparent"
