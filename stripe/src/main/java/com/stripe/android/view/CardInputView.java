@@ -108,6 +108,7 @@ public class CardInputView extends FrameLayout {
         mCvcNumberEditText = (StripeEditText) findViewById(R.id.et_cvc_number);
         mCardNumberSpace = findViewById(R.id.space_in_container);
         mCardNumberIsViewed = true;
+        mScrollView.setScrollable(false);
 
         mErrorColorInt = mCardNumberEditText.getDefaultErrorColorInt();
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
