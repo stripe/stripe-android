@@ -2,9 +2,7 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.HorizontalScrollView;
 
 /**
@@ -93,7 +91,18 @@ public class LockableHorizontalScrollView extends HorizontalScrollView {
         }
     }
 
-    public interface LockableScrollChangedListener {
+    /**
+     * Allows you to listen to {@link HorizontalScrollView#smoothScrollBy(int, int)}
+     * commands being sent to a {@link LockableHorizontalScrollView}. Useful for testing.
+     */
+    interface LockableScrollChangedListener {
+
+        /**
+         * Reacts to smoothScroll commands.
+         *
+         * @param dx the number of pixels to scroll by on the X axis
+         * @param dy the number of pixels to scroll by on the Y axis
+         */
         void onSmoothScrollBy(int dx, int dy);
     }
 }

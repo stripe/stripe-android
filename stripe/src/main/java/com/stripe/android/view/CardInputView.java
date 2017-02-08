@@ -208,11 +208,6 @@ public class CardInputView extends FrameLayout {
     }
 
     @VisibleForTesting
-    void setScrollToPosition(int scrollToPosition) {
-        mScrollToPosition = scrollToPosition;
-    }
-
-    @VisibleForTesting
     void setCustomWidthSetter(CustomWidthSetter customWidthSetter) {
         mCustomWidthSetter = customWidthSetter;
     }
