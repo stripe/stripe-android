@@ -2,7 +2,9 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.HorizontalScrollView;
 
 /**
@@ -12,6 +14,7 @@ import android.widget.HorizontalScrollView;
  */
 public class LockableHorizontalScrollView extends HorizontalScrollView {
 
+    private LockableScrollChangedListener mLockableScrollChangedListener;
     // True if and only if we can scroll the view -- it is in the not locked state.
     private boolean mScrollable;
 
@@ -27,12 +30,29 @@ public class LockableHorizontalScrollView extends HorizontalScrollView {
         super(context, attrs, defStyleAttr);
     }
 
+    /**
+     * @return {@code true} if the view is scrollable, otherwise {@code false}.
+     */
     public boolean isScrollable() {
         return mScrollable;
     }
 
+    /**
+     * Sets whether or not the control is scrollable.
+     *
+     * @param scrollable {@code true} if it should be scrollable, or {@code false} if not
+     */
     public void setScrollable(boolean scrollable) {
         mScrollable = scrollable;
+        setSmoothScrollingEnabled(scrollable);
+    }
+
+    @Override
+    public void scrollTo(int x, int y) {
+        if (!mScrollable) {
+            return;
+        }
+        super.scrollTo(x, y);
     }
 
     @Override
@@ -49,5 +69,31 @@ public class LockableHorizontalScrollView extends HorizontalScrollView {
     public boolean onInterceptTouchEvent(MotionEvent event) {
         // Reject all intercept events if mScrollable is false.
         return mScrollable && super.onInterceptTouchEvent(event);
+    }
+
+    void setScrollChangedListener(LockableScrollChangedListener listener) {
+        mLockableScrollChangedListener = listener;
+    }
+
+    /**
+     * Wrapping the {@link HorizontalScrollView#smoothScrollBy(int, int)} function to increase
+     * testability.
+     *
+     * @param dx the number of pixels to scroll by on the X axis
+     * @param dy the number of pixels to scroll by on the Y axis
+     */
+    void wrappedSmoothScrollBy(int dx, int dy) {
+        if (!mScrollable) {
+            return;
+        }
+
+        smoothScrollBy(dx, dy);
+        if (mLockableScrollChangedListener != null) {
+            mLockableScrollChangedListener.onSmoothScrollBy(dx, dy);
+        }
+    }
+
+    public interface LockableScrollChangedListener {
+        void onSmoothScrollBy(int dx, int dy);
     }
 }
