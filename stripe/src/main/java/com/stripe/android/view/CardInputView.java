@@ -323,6 +323,10 @@ public class CardInputView extends FrameLayout {
         }
     }
 
+    /**
+     * Test harness assistant - this helps us verify when we scroll.
+     */
+    @VisibleForTesting
     interface CustomWidthSetter {
         int getDesiredScrollRight(String hiddenString);
         int getDesiredScrollLeft();

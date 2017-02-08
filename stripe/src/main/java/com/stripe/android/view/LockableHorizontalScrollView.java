@@ -45,6 +45,13 @@ public class LockableHorizontalScrollView extends HorizontalScrollView {
         setSmoothScrollingEnabled(scrollable);
     }
 
+    /**
+     * Without this override, keyboard and accessibility scrolling can still cause the "locked"
+     * {@link HorizontalScrollView} to scroll.
+     *
+     * @param x the x position to scroll to
+     * @param y the y position to scroll to
+     */
     @Override
     public void scrollTo(int x, int y) {
         if (!mScrollable) {
