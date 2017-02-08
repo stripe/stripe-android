@@ -1,11 +1,8 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.HorizontalScrollView;
 
 /**
@@ -61,24 +58,6 @@ public class LockableHorizontalScrollView extends HorizontalScrollView {
             return;
         }
         super.scrollTo(x, y);
-    }
-
-    @Override
-    public void scrollBy(int x, int y) {
-        if (!mScrollable) {
-            return;
-        }
-        super.scrollBy(x, y);
-    }
-
-    @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        return super.onRequestSendAccessibilityEvent(child, event);
-    }
-
-    @Override
-    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
-        return super.onRequestFocusInDescendants(direction, previouslyFocusedRect);
     }
 
     @Override
