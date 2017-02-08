@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -44,16 +45,17 @@ public class CardInputView extends FrameLayout {
 
     private ImageView mCardIconImageView;
     private CardNumberEditText mCardNumberEditText;
+    private CustomWidthSetter mCustomWidthSetter;
     private StripeEditText mCvcNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
     private LockableHorizontalScrollView mScrollView;
     private View mCardNumberSpace;
     private boolean mCardNumberIsViewed;
     private @ColorInt int mErrorColorInt;
-    private boolean mIsAmex;
+    private boolean mIsAmEx;
     private boolean mInitializedFlag;
     private int mScrollViewWidth;
-    private int mScrollToPostion;
+    private int mScrollToPosition;
     private @ColorInt int mTintColorInt;
 
     public CardInputView(Context context) {
@@ -87,7 +89,7 @@ public class CardInputView extends FrameLayout {
         }
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        int requiredLength = mIsAmex ? CardUtils.CVC_LENGTH_AMEX : CardUtils.CVC_LENGTH_COMMON;
+        int requiredLength = mIsAmEx ? CardUtils.CVC_LENGTH_AMEX : CardUtils.CVC_LENGTH_COMMON;
         String cvcValue = mCvcNumberEditText.getText().toString();
         if (StripeTextUtils.isBlank(cvcValue) || cvcValue.length() != requiredLength) {
             return null;
@@ -181,7 +183,7 @@ public class CardInputView extends FrameLayout {
                 new CardNumberEditText.CardBrandChangeListener() {
                     @Override
                     public void onCardBrandChanged(@NonNull @Card.CardBrand String brand) {
-                        mIsAmex = Card.AMERICAN_EXPRESS.equals(brand);
+                        mIsAmEx = Card.AMERICAN_EXPRESS.equals(brand);
                         updateIcon(brand);
                         updateCvc(brand);
                     }
@@ -205,6 +207,11 @@ public class CardInputView extends FrameLayout {
         }
     }
 
+    @VisibleForTesting
+    void setCustomWidthSetter(CustomWidthSetter customWidthSetter) {
+        mCustomWidthSetter = customWidthSetter;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -219,7 +226,7 @@ public class CardInputView extends FrameLayout {
         if (!mInitializedFlag) {
             mInitializedFlag = true;
             mScrollViewWidth = mScrollView.getMeasuredWidth();
-            mScrollToPostion = mScrollViewWidth;
+            mScrollToPosition = mScrollViewWidth;
             ViewGroup.LayoutParams widthParams = mCardNumberSpace.getLayoutParams();
             widthParams.width = mScrollViewWidth;
             mCardNumberSpace.setLayoutParams(widthParams);
@@ -239,25 +246,30 @@ public class CardInputView extends FrameLayout {
         if (!mCardNumberIsViewed) {
             return;
         }
+        mScrollView.setScrollable(true);
         mCardNumberIsViewed = false;
         updateScrollToPosition();
-        mScrollView.smoothScrollBy(mScrollToPostion, 0);
+        mScrollView.wrappedSmoothScrollBy(mScrollToPosition, 0);
         mExpiryDateEditText.setVisibility(View.VISIBLE);
         mCvcNumberEditText.setVisibility(View.VISIBLE);
         mExpiryDateEditText.requestFocus();
+        mScrollView.setScrollable(false);
     }
 
     private void scrollLeft() {
         if (mCardNumberIsViewed) {
             return;
         }
+        mScrollView.setScrollable(true);
         mCardNumberIsViewed = true;
         updateScrollToPosition();
         mCardNumberEditText.setSelection(mCardNumberEditText.getText().length());
-        mScrollView.smoothScrollBy(-1*mScrollToPostion, 0);
+        mScrollView.wrappedSmoothScrollBy(-1* mScrollToPosition, 0);
         mExpiryDateEditText.setVisibility(View.INVISIBLE);
         mCvcNumberEditText.setVisibility(View.INVISIBLE);
+
         mCardNumberEditText.requestFocus();
+        mScrollView.setScrollable(false);
     }
 
     private void updateIcon(@NonNull @Card.CardBrand String brand) {
@@ -296,16 +308,28 @@ public class CardInputView extends FrameLayout {
 
     private void updateScrollToPosition() {
         if (!mCardNumberIsViewed) {
-            int endScrollIndex = mIsAmex ? END_INDEX_AMEX : END_INDEX_COMMON;
+            int endScrollIndex = mIsAmEx ? END_INDEX_AMEX : END_INDEX_COMMON;
             String cardString = mCardNumberEditText.getText().toString();
             if (cardString.length() >= endScrollIndex) {
                 String hiddenString = cardString.substring(0, endScrollIndex);
-                mScrollToPostion =
-                        (int) Layout.getDesiredWidth(hiddenString, mCardNumberEditText.getPaint());
+                mScrollToPosition = mCustomWidthSetter == null
+                        ? (int) Layout.getDesiredWidth(hiddenString, mCardNumberEditText.getPaint())
+                        : mCustomWidthSetter.getDesiredScrollRight(hiddenString);
             }
         } else {
-            mScrollToPostion = mScrollViewWidth;
+            mScrollToPosition = mCustomWidthSetter == null
+                    ? mScrollViewWidth
+                    : mCustomWidthSetter.getDesiredScrollLeft();
         }
+    }
+
+    /**
+     * Test harness assistant - this helps us verify when we scroll.
+     */
+    @VisibleForTesting
+    interface CustomWidthSetter {
+        int getDesiredScrollRight(String hiddenString);
+        int getDesiredScrollLeft();
     }
 
     /**
