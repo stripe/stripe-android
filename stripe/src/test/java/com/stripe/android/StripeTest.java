@@ -6,6 +6,8 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.StripeApiHandler;
+import com.stripe.android.net.StripeResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -129,7 +131,7 @@ public class StripeTest {
         final boolean[] tokenCreatorCalled = { false };
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new Stripe.TokenCreator() {
+            stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
@@ -153,7 +155,7 @@ public class StripeTest {
 
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new Stripe.TokenCreator() {
+            stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
@@ -173,7 +175,7 @@ public class StripeTest {
         final String expectedPublishableKey = "pk_this_one";
         try {
             Stripe stripe = new Stripe(DEFAULT_PUBLISHABLE_KEY);
-            stripe.tokenCreator = new Stripe.TokenCreator() {
+            stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
                                    Executor executor, TokenCallback callback) {
@@ -252,6 +254,43 @@ public class StripeTest {
     }
 
     @Test
+    public void createTokenSynchronous_withoutKey_shouldNotLogAnything() {
+        Stripe stripe = new Stripe();
+        TestLoggingListener listener = new TestLoggingListener();
+        stripe.setLoggingResponseListener(listener);
+        try {
+            stripe.createTokenSynchronous(mCard);
+            fail("We shouldn't be able to make a token without a key.");
+        } catch (StripeException exception) {
+            // Note: we're not testing the type of exception in this test.
+            assertNull(listener.mStripeResponse);
+            assertNull(listener.mStripeException);
+        }
+    }
+
+    @Test
+    public void createTokenSynchronous_shouldLogTokenCreation_andReturnToken() {
+        try {
+            Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
+            TestLoggingListener testLoggingListener = new TestLoggingListener();
+            stripe.setLoggingResponseListener(testLoggingListener);
+
+            Token token = stripe.createTokenSynchronous(mCard);
+            // Check that we get a token back; we don't care about its fields for this test.
+            assertNotNull(token);
+
+            assertNull(testLoggingListener.mStripeException);
+            assertNotNull(testLoggingListener.mStripeResponse);
+            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }    }
+
+    @Test
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
         try {
             // This card is missing quite a few numbers.
@@ -283,6 +322,21 @@ public class StripeTest {
                     .startsWith("Your card's expiration year is invalid."));
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
+        StripeResponse mStripeResponse;
+        StripeException mStripeException;
+
+        @Override
+        public void onLoggingResponse(StripeResponse response) {
+            mStripeResponse = response;
+        }
+
+        @Override
+        public void onStripeException(StripeException exception) {
+            mStripeException = exception;
         }
     }
 

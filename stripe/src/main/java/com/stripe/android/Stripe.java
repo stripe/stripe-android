@@ -32,7 +32,7 @@ import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
 public class Stripe {
 
     @VisibleForTesting
-    TokenCreator tokenCreator = new TokenCreator() {
+    TokenCreator mTokenCreator = new TokenCreator() {
         @Override
         public void create(
                 final Map<String, Object> tokenParams,
@@ -48,7 +48,8 @@ public class Stripe {
                                         RequestOptions.builder(publishableKey).build();
                                 Token token = StripeApiHandler.createTokenOnServer(
                                         tokenParams,
-                                        requestOptions);
+                                        requestOptions,
+                                        mLoggingResponseListener);
                                 return new ResponseWrapper(token, null);
                             } catch (StripeException e) {
                                 return new ResponseWrapper(null, e);
@@ -65,7 +66,8 @@ public class Stripe {
         }
     };
 
-    private String defaultPublishableKey;
+    private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
+    private String mDefaultPublishableKey;
 
     /**
      * A blank constructor to set the key later.
@@ -84,7 +86,7 @@ public class Stripe {
 
     /**
      * The simplest way to create a {@link BankAccount} token. This runs on the default
-     * {@link Executor} and with the currently set {@link #defaultPublishableKey}.
+     * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param bankAccount the {@link BankAccount} used to create this token
      * @param callback a {@link TokenCallback} to receive either the token or an error
@@ -92,7 +94,7 @@ public class Stripe {
     public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
             @NonNull final TokenCallback callback) {
-        createBankAccountToken(bankAccount, defaultPublishableKey, null, callback);
+        createBankAccountToken(bankAccount, mDefaultPublishableKey, null, callback);
     }
 
     /**
@@ -141,7 +143,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        return createBankAccountTokenSynchronous(bankAccount, defaultPublishableKey);
+        return createBankAccountTokenSynchronous(bankAccount, mDefaultPublishableKey);
     }
 
     /**
@@ -170,19 +172,19 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
-                hashMapFromBankAccount(bankAccount), requestOptions);
+                hashMapFromBankAccount(bankAccount), requestOptions, mLoggingResponseListener);
     }
 
     /**
      * The simplest way to create a token, using a {@link Card} and {@link TokenCallback}. This
      * runs on the default {@link Executor} and with the
-     * currently set {@link #defaultPublishableKey}.
+     * currently set {@link #mDefaultPublishableKey}.
      *
      * @param card the {@link Card} used to create this payment token
      * @param callback a {@link TokenCallback} to receive either the token or an error
      */
     public void createToken(@NonNull final Card card, @NonNull final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, callback);
+        createToken(card, mDefaultPublishableKey, callback);
     }
 
     /**
@@ -210,7 +212,7 @@ public class Stripe {
             @NonNull final Card card,
             @NonNull final Executor executor,
             @NonNull final TokenCallback callback) {
-        createToken(card, defaultPublishableKey, executor, callback);
+        createToken(card, mDefaultPublishableKey, executor, callback);
     }
 
     /**
@@ -255,7 +257,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        return createTokenSynchronous(card, defaultPublishableKey);
+        return createTokenSynchronous(card, mDefaultPublishableKey);
     }
 
     /**
@@ -282,7 +284,10 @@ public class Stripe {
         validateKey(publishableKey);
 
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
-        return StripeApiHandler.createTokenOnServer(hashMapFromCard(card), requestOptions);
+        return StripeApiHandler.createTokenOnServer(
+                hashMapFromCard(card),
+                requestOptions,
+                mLoggingResponseListener);
     }
 
     /**
@@ -294,7 +299,11 @@ public class Stripe {
     public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey)
             throws AuthenticationException {
         validateKey(publishableKey);
-        this.defaultPublishableKey = publishableKey;
+        this.mDefaultPublishableKey = publishableKey;
+    }
+
+    void setLoggingResponseListener(StripeApiHandler.LoggingResponseListener listener) {
+        mLoggingResponseListener = listener;
     }
 
     private void createTokenFromParams(
@@ -310,7 +319,7 @@ public class Stripe {
             }
 
             validateKey(publishableKey);
-            tokenCreator.create(tokenParams, publishableKey, executor, callback);
+            mTokenCreator.create(tokenParams, publishableKey, executor, callback);
         }
         catch (AuthenticationException e) {
             callback.onError(e);

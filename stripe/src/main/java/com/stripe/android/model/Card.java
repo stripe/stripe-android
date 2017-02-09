@@ -1,16 +1,20 @@
 package com.stripe.android.model;
 
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.DateUtils;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -85,6 +89,7 @@ public class Card {
     private String fingerprint;
     private String country;
     private String currency;
+    @NonNull private List<String> loggingTokens = new ArrayList<>();
 
     /**
      * Builder class for a {@link Card} model.
@@ -422,6 +427,23 @@ public class Card {
      */
     public String getNumber() {
         return number;
+    }
+
+    /**
+     * @return the {@link List} of logging tokens associated with this {@link Card} object
+     */
+    @NonNull
+    public List<String> getLoggingTokens() {
+        return loggingTokens;
+    }
+
+    /**
+     * Add a logging token to this {@link Card} object.
+     *
+     * @param loggingToken a token to be logged with this card
+     */
+    public void addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
+        loggingTokens.add(loggingToken);
     }
 
     /**

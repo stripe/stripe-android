@@ -2,6 +2,7 @@ package com.stripe.android.net;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Card;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
@@ -102,8 +103,8 @@ public class StripeApiHandlerTest {
     public void createQuery_withCardData_createsProperQueryString() {
         Card card = new Card.Builder("4242424242424242", 8, 2019, "123").build();
         Map<String, Object> cardMap = StripeNetworkUtils.hashMapFromCard(card);
-        String expectedValue = "card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123&card%5" +
-                "Bexp_month%5D=8&card%5Bexp_year%5D=2019";
+        String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
+                "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
         try {
             String query = StripeApiHandler.createQuery(cardMap);
             assertEquals(expectedValue, query);
