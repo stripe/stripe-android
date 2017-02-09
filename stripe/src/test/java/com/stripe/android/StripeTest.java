@@ -8,6 +8,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
+import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Stripe}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class StripeTest {
 
 
@@ -274,6 +275,9 @@ public class StripeTest {
             Stripe stripe = new Stripe(FUNCTIONAL_PUBLISHABLE_KEY);
             TestLoggingListener testLoggingListener = new TestLoggingListener();
             stripe.setLoggingResponseListener(testLoggingListener);
+
+            // Pretend that this one was created by the CardInputView
+            mCard.addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
 
             Token token = stripe.createTokenSynchronous(mCard);
             // Check that we get a token back; we don't care about its fields for this test.

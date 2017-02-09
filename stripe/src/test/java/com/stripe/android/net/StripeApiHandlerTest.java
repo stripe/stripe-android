@@ -1,5 +1,6 @@
 package com.stripe.android.net;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.LoggingUtils;
@@ -25,7 +26,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeApiHandler}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class StripeApiHandlerTest {
 
     @Test
@@ -78,7 +79,7 @@ public class StripeApiHandlerTest {
         String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
         try {
             JSONObject mapObject = new JSONObject(userAgentRawString);
-            assertEquals("3.5.0", mapObject.getString("bindings.version"));
+            assertEquals(BuildConfig.VERSION_NAME, mapObject.getString("bindings.version"));
             assertEquals("Java", mapObject.getString("lang"));
             assertEquals("Stripe", mapObject.getString("publisher"));
             assertEquals("android", mapObject.getString("os.name"));
@@ -94,7 +95,9 @@ public class StripeApiHandlerTest {
         Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
         assertNotNull(headerMap);
 
-        assertEquals("Stripe/v1 JavaBindings/3.5.0", headerMap.get("User-Agent"));
+        final String expectedUserAgent =
+                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
+        assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
         assertEquals("application/json", headerMap.get("Accept"));
         assertEquals("UTF-8", headerMap.get("Accept-Charset"));
     }

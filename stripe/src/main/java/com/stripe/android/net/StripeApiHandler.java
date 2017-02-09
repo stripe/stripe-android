@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
@@ -49,7 +50,6 @@ public class StripeApiHandler {
     public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     public static final String CHARSET = "UTF-8";
     public static final String TOKENS = "tokens";
-    public static final String VERSION = "3.5.0";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -161,7 +161,7 @@ public class StripeApiHandler {
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
         headers.put("User-Agent",
-                String.format("Stripe/v1 JavaBindings/%s", VERSION));
+                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME));
 
         headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
 
@@ -172,7 +172,7 @@ public class StripeApiHandler {
         propertyMap.put(systemPropertyName, System.getProperty(systemPropertyName));
         propertyMap.put("os.name", "android");
         propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
-        propertyMap.put("bindings.version", VERSION);
+        propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
         propertyMap.put("lang", "Java");
         propertyMap.put("publisher", "Stripe");
         JSONObject headerMappingObject = new JSONObject(propertyMap);
