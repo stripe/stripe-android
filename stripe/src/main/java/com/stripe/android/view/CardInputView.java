@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
@@ -95,7 +96,8 @@ public class CardInputView extends FrameLayout {
             return null;
         }
 
-        return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
+        return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
+                .addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
     }
 
     private void initView(AttributeSet attrs) {

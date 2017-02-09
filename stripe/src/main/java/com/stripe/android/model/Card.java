@@ -441,9 +441,12 @@ public class Card {
      * Add a logging token to this {@link Card} object.
      *
      * @param loggingToken a token to be logged with this card
+     * @return {@code this}, for chaining purposes
      */
-    public void addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
+    @NonNull
+    public Card addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
         loggingTokens.add(loggingToken);
+        return this;
     }
 
     /**
