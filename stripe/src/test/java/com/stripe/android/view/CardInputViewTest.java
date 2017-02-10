@@ -11,6 +11,7 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
+import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +27,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
+import java.util.List;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -33,6 +35,7 @@ import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -57,6 +60,8 @@ public class CardInputViewTest {
 
     @Mock LockableHorizontalScrollView.LockableScrollChangedListener mLockableScrollChangedListener;
 
+    // Every Card made by the CardInputView should have the card widget token.
+    private static final String[] EXPECTED_LOGGING_ARRAY = { LoggingUtils.CARD_WIDGET_TOKEN };
     private CardInputView mCardInputView;
     private CardNumberEditText mCardNumberEditText;
     private CardInputView.CustomWidthSetter mCustomWidthSetter;
@@ -102,7 +107,7 @@ public class CardInputViewTest {
     }
 
     @Test
-    public void getCard_whenInputIsValidVisa_returnsCardObject() {
+    public void getCard_whenInputIsValidVisa_returnsCardObjectWithLoggingToken() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
 
@@ -120,10 +125,11 @@ public class CardInputViewTest {
         assertEquals(2050, card.getExpYear().intValue());
         assertEquals("123", card.getCVC());
         assertTrue(card.validateCard());
+        assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
     }
 
     @Test
-    public void getCard_whenInputIsValidAmEx_returnsCardObject() {
+    public void getCard_whenInputIsValidAmEx_returnsCardObjectWithLoggingToken() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
 
@@ -141,10 +147,11 @@ public class CardInputViewTest {
         assertEquals(2050, card.getExpYear().intValue());
         assertEquals("1234", card.getCVC());
         assertTrue(card.validateCard());
+        assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
     }
 
     @Test
-    public void getCard_whenInputIsValidDinersClub_returnsCardObject() {
+    public void getCard_whenInputIsValidDinersClub_returnsCardObjectWithLoggingToken() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
 
@@ -162,6 +169,7 @@ public class CardInputViewTest {
         assertEquals(2050, card.getExpYear().intValue());
         assertEquals("123", card.getCVC());
         assertTrue(card.validateCard());
+        assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
     }
 
     @Test

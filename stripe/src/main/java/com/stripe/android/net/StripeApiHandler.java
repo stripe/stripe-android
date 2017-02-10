@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
@@ -13,7 +14,9 @@ import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Token;
+import com.stripe.android.util.LoggingUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,9 +47,9 @@ import javax.net.ssl.SSLSocketFactory;
 public class StripeApiHandler {
 
     public static final String LIVE_API_BASE = "https://api.stripe.com";
+    public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     public static final String CHARSET = "UTF-8";
     public static final String TOKENS = "tokens";
-    public static final String VERSION = "3.5.0";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -67,6 +70,8 @@ public class StripeApiHandler {
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
      *                key, api version, etc
+     * @param listener a {@link LoggingResponseListener} useful for testing logging calls
+     *
      * @return a {@link Token} that can be used to perform other operations with this card
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
      * @throws InvalidRequestException if one or more of the parameters is incorrect
@@ -75,14 +80,30 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
+    @SuppressWarnings("unchecked")
     public static Token createTokenOnServer(
             @NonNull Map<String, Object> cardParams,
-            @NonNull RequestOptions options)
+            @NonNull RequestOptions options,
+            @Nullable LoggingResponseListener listener)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             CardException,
             APIException {
+
+        // Only fires if the card params contain logging information.
+        if (cardParams.containsKey(LoggingUtils.FIELD_PRODUCT_USAGE)) {
+            try {
+                List<String> loggingTokens =
+                        (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
+                cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+                logTokenRequest(loggingTokens, options, listener);
+            } catch (ClassCastException classCastEx) {
+                // This can only happen if someone puts a weird object in the map.
+                cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+            }
+        }
+
         return requestToken(POST, getApiUrl(), cardParams, options);
     }
 
@@ -140,7 +161,7 @@ public class StripeApiHandler {
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
         headers.put("User-Agent",
-                String.format("Stripe/v1 JavaBindings/%s", VERSION));
+                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME));
 
         headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
 
@@ -151,7 +172,7 @@ public class StripeApiHandler {
         propertyMap.put(systemPropertyName, System.getProperty(systemPropertyName));
         propertyMap.put("os.name", "android");
         propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
-        propertyMap.put("bindings.version", VERSION);
+        propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
         propertyMap.put("lang", "Java");
         propertyMap.put("publisher", "Stripe");
         JSONObject headerMappingObject = new JSONObject(propertyMap);
@@ -238,6 +259,63 @@ public class StripeApiHandler {
         }
 
         return conn;
+    }
+
+    private static void logTokenRequest(
+            @NonNull List<String> loggingTokens,
+            @Nullable RequestOptions options,
+            @Nullable LoggingResponseListener listener) {
+        if (options == null) {
+            return;
+        }
+
+        String apiKey = options.getPublishableApiKey();
+        if (apiKey.trim().isEmpty()) {
+            // if there is no apiKey associated with the request, we don't need to react here.
+            return;
+        }
+
+        String originalDNSCacheTTL = null;
+        Boolean allowedToSetTTL = true;
+
+        try {
+            originalDNSCacheTTL = java.security.Security
+                    .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            // disable DNS cache
+            java.security.Security
+                    .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+        } catch (SecurityException se) {
+            allowedToSetTTL = false;
+        }
+
+        try {
+            StripeResponse response = getStripeResponse(
+                    GET,
+                    LIVE_LOGGING_BASE,
+                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey),
+                    options);
+
+            if (listener != null) {
+                listener.onLoggingResponse(response);
+            }
+        } catch(StripeException stripeException) {
+            if (listener != null) {
+                listener.onStripeException(stripeException);
+            }
+            // We're just logging. No need to crash here or attempt to re-log things.
+        } finally {
+            if (allowedToSetTTL) {
+                if (originalDNSCacheTTL == null) {
+                    // value unspecified by implementation
+                    // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
+                    java.security.Security.setProperty(
+                            DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+                } else {
+                    java.security.Security.setProperty(
+                            DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
+                }
+            }
+        }
     }
 
     private static Token requestToken(
@@ -519,6 +597,11 @@ public class StripeApiHandler {
 
         responseStream.close();
         return rBody;
+    }
+
+    public interface LoggingResponseListener {
+        void onLoggingResponse(StripeResponse response);
+        void onStripeException(StripeException exception);
     }
 
     private static final class Parameter {

@@ -1,7 +1,9 @@
 package com.stripe.android.net;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Card;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
@@ -24,7 +26,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeApiHandler}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class StripeApiHandlerTest {
 
     @Test
@@ -77,7 +79,7 @@ public class StripeApiHandlerTest {
         String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
         try {
             JSONObject mapObject = new JSONObject(userAgentRawString);
-            assertEquals("3.5.0", mapObject.getString("bindings.version"));
+            assertEquals(BuildConfig.VERSION_NAME, mapObject.getString("bindings.version"));
             assertEquals("Java", mapObject.getString("lang"));
             assertEquals("Stripe", mapObject.getString("publisher"));
             assertEquals("android", mapObject.getString("os.name"));
@@ -93,7 +95,9 @@ public class StripeApiHandlerTest {
         Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
         assertNotNull(headerMap);
 
-        assertEquals("Stripe/v1 JavaBindings/3.5.0", headerMap.get("User-Agent"));
+        final String expectedUserAgent =
+                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
+        assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
         assertEquals("application/json", headerMap.get("Accept"));
         assertEquals("UTF-8", headerMap.get("Accept-Charset"));
     }
@@ -102,8 +106,8 @@ public class StripeApiHandlerTest {
     public void createQuery_withCardData_createsProperQueryString() {
         Card card = new Card.Builder("4242424242424242", 8, 2019, "123").build();
         Map<String, Object> cardMap = StripeNetworkUtils.hashMapFromCard(card);
-        String expectedValue = "card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123&card%5" +
-                "Bexp_month%5D=8&card%5Bexp_year%5D=2019";
+        String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
+                "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
         try {
             String query = StripeApiHandler.createQuery(cardMap);
             assertEquals(expectedValue, query);

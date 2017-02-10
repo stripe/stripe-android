@@ -44,6 +44,10 @@ public class StripeNetworkUtils {
         // Remove all null values; they cause validation errors
         removeNullParams(cardParams);
 
+        // We store the logging items in this field, which is extracted from the parameters
+        // sent to the API.
+        tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
+
         tokenParams.put(Token.TYPE_CARD, cardParams);
         return tokenParams;
     }
