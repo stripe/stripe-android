@@ -302,6 +302,7 @@ public class Stripe {
         this.mDefaultPublishableKey = publishableKey;
     }
 
+    @VisibleForTesting
     void setLoggingResponseListener(StripeApiHandler.LoggingResponseListener listener) {
         mLoggingResponseListener = listener;
     }
