@@ -2,4 +2,5 @@
 <resources>
     <string name="acc_label_card_number">"カード番号"</string>
     <string name="acc_label_expiry_date">"有効期限"</string>
+    <string name="expiry_date_hint">MM/YY</string>
 </resources>
