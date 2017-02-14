@@ -2,4 +2,5 @@
 <resources>
     <string name="acc_label_card_number">"numero della carta"</string>
     <string name="acc_label_expiry_date">"data di scadenza"</string>
+    <string name="expiry_date_hint">MM/AA</string>
 </resources>
