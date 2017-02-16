@@ -78,6 +78,10 @@ public class CardNumberEditText extends StripeEditText {
                 : null;
     }
 
+    public int getLengthMax() {
+        return mLengthMax;
+    }
+
     /**
      * Check whether or not the card number is valid
      *

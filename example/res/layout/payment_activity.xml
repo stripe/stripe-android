@@ -20,6 +20,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <com.stripe.android.view.CardInputWidget
+        android:id="@+id/card_input_alternate_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
     <Button
         android:id="@+id/save"
         android:text="@string/save"
