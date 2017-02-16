@@ -22,16 +22,22 @@
 
     <Button
         android:id="@+id/save"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/save"
         style="@style/Save"/>
 
     <Button
         android:id="@+id/saverx"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/saverx"
         style="@style/Save"/>
 
     <Button
         android:id="@+id/saveWithService"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/saveService"
         style="@style/Save"/>
 

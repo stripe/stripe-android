@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
-    </style>
 
     <style name="TextField" parent="@android:style/Widget.EditText">
         <item name="android:layout_height">wrap_content</item>
@@ -33,20 +30,6 @@
     <style name="Save" parent="@style/Button">
         <item name="android:layout_width">160dp</item>
         <item name="android:layout_marginTop">4dp</item>
-    </style>
-
-    <style name="Spinner" parent="@android:style/Widget.Spinner">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/spinner_background_holo_dark</item>
-        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
-    </style>
-    <style name="SpinnerItem" parent="@android:style/Widget.TextView.SpinnerItem">
-
-        <item name="android:textAppearance">@style/TextAppearance.SpinnerItem</item>
-        <item name="android:textColor">@color/spinnerItem</item>
-    </style>
-    <style name="TextAppearance.SpinnerItem" parent="@android:style/TextAppearance.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@color/spinnerItem</item>
     </style>
 
     <style name="Header" parent="@android:style/Widget.TextView">
