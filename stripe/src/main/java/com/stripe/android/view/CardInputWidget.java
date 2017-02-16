@@ -238,6 +238,8 @@ public class CardInputWidget extends LinearLayout {
     private void initView(AttributeSet attrs) {
         inflate(getContext(), R.layout.card_input_widget, this);
 
+        setOrientation(LinearLayout.HORIZONTAL);
+        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
         mPlacementParameters = new PlacementParameters();
         mCardIconImageView = (ImageView) findViewById(R.id.iv_card_icon);
         mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);

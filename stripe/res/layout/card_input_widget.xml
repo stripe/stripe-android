@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="horizontal"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:minWidth="@dimen/card_widget_min_width"
-              android:nextFocusForward="@+id/et_card_number"
-              android:nextFocusDown="@+id/et_card_number"
-              android:nextFocusRight="@+id/et_card_number"
-              android:focusable="true"
-              android:focusableInTouchMode="true">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
         android:id="@+id/iv_card_icon"
@@ -121,4 +112,4 @@
             />
 
     </FrameLayout>
-</LinearLayout>
+</merge>
