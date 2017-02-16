@@ -15,12 +15,9 @@ import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 import com.stripe.android.util.LoggingUtils;
 
-import net.bytebuddy.asm.Advice;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -41,10 +38,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Test class for {@link CardInputWidget}. Note that we have to test against SDK 22
@@ -76,11 +69,13 @@ public class CardInputWidgetTest {
         mDimensionOverrides = new CardInputWidget.DimensionOverrideSettings() {
             @Override
             public int getPixelWidth(@NonNull String text, @NonNull EditText editText) {
+                // This makes it simple to know what to expect.
                 return text.length() * 10;
             }
 
             @Override
             public int getFrameWidth() {
+                // That's a pretty small screen, but one that we theoretically support.
                 return 500;
             }
         };
@@ -262,7 +257,6 @@ public class CardInputWidgetTest {
         assertEquals(subString.length(), mCardNumberEditText.getSelectionStart());
     }
 
-
     @Test
     public void onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
         mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
@@ -366,6 +360,34 @@ public class CardInputWidgetTest {
         assertEquals(50, shiftedParameters.dateWidth);
         assertEquals(195, shiftedParameters.dateCvcSeparation);
         assertEquals(30, shiftedParameters.cvcWidth);
+    }
+
+    @Test
+    public void addValidVisaCard_scrollsOver_andSetsExpectedDisplayValues() {
+        // Moving left with an actual Visa number does the same as moving when empty.
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        CardInputWidget.PlacementParameters shiftedParameters =
+                mCardInputWidget.getPlacementParameters();
+        assertEquals(40, shiftedParameters.peekCardWidth);
+        assertEquals(185, shiftedParameters.cardDateSeparation);
+        assertEquals(50, shiftedParameters.dateWidth);
+        assertEquals(195, shiftedParameters.dateCvcSeparation);
+        assertEquals(30, shiftedParameters.cvcWidth);
+    }
+
+    @Test
+    public void addValidAmExCard_scrollsOver_andSetsExpectedDisplayValues() {
+        // Moving left with an AmEx number has a larger peek and cvc size.
+        // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        CardInputWidget.PlacementParameters shiftedParameters =
+                mCardInputWidget.getPlacementParameters();
+        assertEquals(50, shiftedParameters.peekCardWidth);
+        assertEquals(175, shiftedParameters.cardDateSeparation);
+        assertEquals(50, shiftedParameters.dateWidth);
+        assertEquals(185, shiftedParameters.dateCvcSeparation);
+        assertEquals(40, shiftedParameters.cvcWidth);
     }
 
     @Test

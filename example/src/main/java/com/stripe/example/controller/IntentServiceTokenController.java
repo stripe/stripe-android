@@ -22,7 +22,7 @@ import com.stripe.example.service.TokenIntentService;
 public class IntentServiceTokenController {
 
     private Activity mActivity;
-    private CardInputWidget mCardInputView;
+    private CardInputWidget mCardInputWidget;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
@@ -33,14 +33,14 @@ public class IntentServiceTokenController {
     public IntentServiceTokenController (
             @NonNull AppCompatActivity appCompatActivity,
             @NonNull Button button,
-            @NonNull CardInputWidget cardInputView,
+            @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
 
         mActivity = appCompatActivity;
-        mCardInputView = cardInputView;
+        mCardInputWidget = cardInputWidget;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -65,7 +65,7 @@ public class IntentServiceTokenController {
             mTokenBroadcastReceiver = null;
             mActivity = null;
         }
-        mCardInputView = null;
+        mCardInputWidget = null;
     }
 
     private void registerBroadcastReceiver() {
@@ -76,7 +76,7 @@ public class IntentServiceTokenController {
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInputView.getCard();
+        Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;

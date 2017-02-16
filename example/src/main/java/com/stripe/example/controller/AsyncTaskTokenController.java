@@ -16,7 +16,7 @@ import com.stripe.android.view.CardInputWidget;
  */
 public class AsyncTaskTokenController {
 
-    private CardInputWidget mCardInputView;
+    private CardInputWidget mCardInputWidget;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -24,12 +24,12 @@ public class AsyncTaskTokenController {
 
     public AsyncTaskTokenController(
             @NonNull Button button,
-            @NonNull CardInputWidget cardInputView,
+            @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
-        mCardInputView = cardInputView;
+        mCardInputWidget = cardInputWidget;
         mErrorDialogHandler = errorDialogHandler;
         mPublishableKey = publishableKey;
         mProgressDialogController = progressDialogController;
@@ -44,11 +44,11 @@ public class AsyncTaskTokenController {
     }
 
     public void detach() {
-        mCardInputView = null;
+        mCardInputWidget = null;
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInputView.getCard();
+        Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;
