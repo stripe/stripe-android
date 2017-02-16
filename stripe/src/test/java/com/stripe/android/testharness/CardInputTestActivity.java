@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.view.CardInputView;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.android.view.CardNumberEditText;
 import com.stripe.android.view.StripeEditText;
 import com.stripe.android.view.ExpiryDateEditText;
@@ -23,31 +23,31 @@ public class CardInputTestActivity extends Activity {
     public static final String VALID_VISA_NO_SPACES = "4242424242424242";
     public static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
 
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputWidget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCardInputView = new CardInputView(this);
+        mCardInputWidget = new CardInputWidget(this);
         LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.addView(mCardInputView);
+        linearLayout.addView(mCardInputWidget);
         setContentView(linearLayout);
     }
 
     public CardNumberEditText getCardNumberEditText() {
-        return (CardNumberEditText) mCardInputView.findViewById(R.id.et_card_number);
+        return (CardNumberEditText) mCardInputWidget.findViewById(R.id.et_card_number);
     }
 
     public ExpiryDateEditText getExpiryDateEditText() {
-        return (ExpiryDateEditText) mCardInputView.findViewById(R.id.et_expiry_date);
+        return (ExpiryDateEditText) mCardInputWidget.findViewById(R.id.et_expiry_date);
     }
 
     public StripeEditText getCvcEditText() {
-        return (StripeEditText) mCardInputView.findViewById(R.id.et_cvc_number);
+        return (StripeEditText) mCardInputWidget.findViewById(R.id.et_cvc_number);
     }
 
-    public CardInputView getCardInputView() {
-        return mCardInputView;
+    public CardInputWidget getCardInputWidget() {
+        return mCardInputWidget;
     }
 }

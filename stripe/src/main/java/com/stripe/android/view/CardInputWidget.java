@@ -3,8 +3,12 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
@@ -13,6 +17,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.Transformation;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +25,8 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
+import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +35,6 @@ import java.util.Map;
  * A card input widget that handles all animation on its own.
  */
 public class CardInputWidget extends LinearLayout {
-
-    private static final int END_INDEX_COMMON = 14;
-    private static final int END_INDEX_AMEX = 11;
 
     private static final String PEEK_TEXT_COMMON = "4242";
     private static final String PEEK_TEXT_DINERS = "88";
@@ -42,6 +46,14 @@ public class CardInputWidget extends LinearLayout {
     // These intentionally include a space at the end.
     private static final String HIDDEN_TEXT_AMEX = "3434 343434 ";
     private static final String HIDDEN_TEXT_COMMON = "4242 4242 4242 ";
+
+    private static final String FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242";
+    private static final String FULL_SIZING_DATE_TEXT = "MM/YY";
+
+    private static final String EXTRA_CARD_VIEWED = "extra_card_viewed";
+    private static final String EXTRA_SUPER_STATE = "extra_super_state";
+
+    private static final long ANIMATION_LENGTH = 150L;
 
     private static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
@@ -56,18 +68,21 @@ public class CardInputWidget extends LinearLayout {
 
     private ImageView mCardIconImageView;
     private CardNumberEditText mCardNumberEditText;
-    private CardInputView.CustomWidthSetter mCustomWidthSetter;
+    private boolean mCardNumberIsViewed = true;
     private StripeEditText mCvcNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
 
     private FrameLayout mFrameLayout;
 
-    private boolean mCardNumberIsViewed = true;
     private @ColorInt int mErrorColorInt;
     private @ColorInt int mTintColorInt;
 
+    private boolean mIsAmEx;
     private boolean mInitFlag;
 
+    private int mTotalLengthInPixels;
+
+    private DimensionOverrideSettings mDimensionOverrides;
     private PlacementParameters mPlacementParameters;
 
     public CardInputWidget(Context context) {
@@ -85,8 +100,143 @@ public class CardInputWidget extends LinearLayout {
         initView(attrs);
     }
 
+    /**
+     * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
+     * {@code null}.
+     *
+     * @return a valid {@link Card} object based on user input, or {@code null} if any field is
+     * invalid
+     */
+    @Nullable
+    public Card getCard() {
+        String cardNumber = mCardNumberEditText.getCardNumber();
+        int[] cardDate = mExpiryDateEditText.getValidDateFields();
+        if (cardNumber == null || cardDate == null || cardDate.length != 2) {
+            return null;
+        }
+
+        // CVC/CVV is the only field not validated by the entry control itself, so we check here.
+        int requiredLength = mIsAmEx ? CardUtils.CVC_LENGTH_AMEX : CardUtils.CVC_LENGTH_COMMON;
+        String cvcValue = mCvcNumberEditText.getText().toString();
+        if (StripeTextUtils.isBlank(cvcValue) || cvcValue.length() != requiredLength) {
+            return null;
+        }
+
+        return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
+                .addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_SUPER_STATE, super.onSaveInstanceState());
+        bundle.putBoolean(EXTRA_CARD_VIEWED, mCardNumberIsViewed);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            Bundle bundleState = (Bundle) state;
+            mCardNumberIsViewed = bundleState.getBoolean(EXTRA_CARD_VIEWED, true);
+            updateSpaceSizes(mCardNumberIsViewed);
+            mTotalLengthInPixels = getFrameWidth();
+            int cardMargin, dateMargin, cvcMargin;
+            if (mCardNumberIsViewed) {
+                cardMargin = 0;
+                dateMargin = mPlacementParameters.cardWidth
+                        + mPlacementParameters.cardDateSeparation;
+                cvcMargin = mTotalLengthInPixels;
+            } else {
+                cardMargin = -1 * mPlacementParameters.hiddenCardWidth;
+                dateMargin = mPlacementParameters.peekCardWidth
+                        + mPlacementParameters.cardDateSeparation;
+                cvcMargin = dateMargin
+                        + mPlacementParameters.dateWidth
+                        + mPlacementParameters.dateCvcSeparation;
+            }
+
+            setLayoutValues(mPlacementParameters.cardWidth, cardMargin, mCardNumberEditText);
+            setLayoutValues(mPlacementParameters.dateWidth, dateMargin, mExpiryDateEditText);
+            setLayoutValues(mPlacementParameters.cvcWidth, cvcMargin, mCvcNumberEditText);
+
+            super.onRestoreInstanceState(bundleState.getParcelable(EXTRA_SUPER_STATE));
+        } else {
+            super.onRestoreInstanceState(state);
+        }
+    }
+
+    void setDimensionOverrideSettings(DimensionOverrideSettings dimensonOverrides) {
+        mDimensionOverrides = dimensonOverrides;
+    }
+
+    @NonNull
+    @VisibleForTesting
+    PlacementParameters getPlacementParameters() {
+        return mPlacementParameters;
+    }
+
+    @VisibleForTesting
+    void updateSpaceSizes(boolean isCardViewed) {
+        int frameWidth = getFrameWidth();
+        if (frameWidth == 0) {
+            // This is an invalid view state.
+            return;
+        }
+
+        mPlacementParameters.cardWidth =
+                getDesiredWidthInPixels(FULL_SIZING_CARD_TEXT, mCardNumberEditText);
+
+        mPlacementParameters.dateWidth =
+                getDesiredWidthInPixels(FULL_SIZING_DATE_TEXT, mExpiryDateEditText);
+
+        @Card.CardBrand String brand = mCardNumberEditText.getCardBrand();
+        mPlacementParameters.hiddenCardWidth =
+                getDesiredWidthInPixels(getHiddenTextForBrand(brand), mCardNumberEditText);
+
+        mPlacementParameters.cvcWidth =
+                getDesiredWidthInPixels(getCvcPlaceHolderForBrand(brand), mCvcNumberEditText);
+
+        mPlacementParameters.peekCardWidth =
+                getDesiredWidthInPixels(getPeekCardTextForBrand(brand), mCardNumberEditText);
+
+        if (isCardViewed) {
+            mPlacementParameters.cardDateSeparation = frameWidth
+                    - mPlacementParameters.cardWidth - mPlacementParameters.dateWidth;
+        } else {
+            mPlacementParameters.cardDateSeparation = frameWidth / 2
+                    - mPlacementParameters.peekCardWidth
+                    - mPlacementParameters.dateWidth / 2;
+            mPlacementParameters.dateCvcSeparation = frameWidth
+                    - mPlacementParameters.peekCardWidth
+                    - mPlacementParameters.cardDateSeparation
+                    - mPlacementParameters.dateWidth
+                    - mPlacementParameters.cvcWidth;
+        }
+    }
+
+    private void setLayoutValues(int width, int margin, @NonNull StripeEditText editText) {
+        FrameLayout.LayoutParams layoutParams =
+                (FrameLayout.LayoutParams) editText.getLayoutParams();
+        layoutParams.width = width;
+        layoutParams.leftMargin = margin;
+        editText.setLayoutParams(layoutParams);
+    }
+
+    private int getDesiredWidthInPixels(@NonNull String text, @NonNull StripeEditText editText) {
+        return mDimensionOverrides == null
+                ? (int) Layout.getDesiredWidth(text, editText.getPaint())
+                : mDimensionOverrides.getPixelWidth(text, editText);
+    }
+
+    private int getFrameWidth() {
+        return mDimensionOverrides == null
+                ? mFrameLayout.getWidth()
+                : mDimensionOverrides.getFrameWidth();
+    }
+
     private void initView(AttributeSet attrs) {
-        inflate(getContext(), R.layout.card_input_alternate_view, this);
+        inflate(getContext(), R.layout.card_input_widget, this);
 
         mPlacementParameters = new PlacementParameters();
         mCardIconImageView = (ImageView) findViewById(R.id.iv_card_icon);
@@ -171,6 +321,7 @@ public class CardInputWidget extends LinearLayout {
                 new CardNumberEditText.CardBrandChangeListener() {
                     @Override
                     public void onCardBrandChanged(@NonNull @Card.CardBrand String brand) {
+                        mIsAmEx = Card.AMERICAN_EXPRESS.equals(brand);
                         updateIcon(brand);
                         updateCvc(brand);
                     }
@@ -252,9 +403,9 @@ public class CardInputWidget extends LinearLayout {
             }
         });
 
-        slideCardLeftAnimation.setDuration(150L);
-        slideDateLeftAnimation.setDuration(150L);
-        slideCvcLeftAnimation.setDuration(150L);
+        slideCardLeftAnimation.setDuration(ANIMATION_LENGTH);
+        slideDateLeftAnimation.setDuration(ANIMATION_LENGTH);
+        slideCvcLeftAnimation.setDuration(ANIMATION_LENGTH);
 
         AnimationSet animationSet = new AnimationSet(true);
         animationSet.addAnimation(slideCardLeftAnimation);
@@ -304,7 +455,6 @@ public class CardInputWidget extends LinearLayout {
             }
         };
 
-
         final int cvcDestination =
                 mPlacementParameters.peekCardWidth
                 + mPlacementParameters.cardDateSeparation
@@ -328,9 +478,9 @@ public class CardInputWidget extends LinearLayout {
             }
         };
 
-        slideCardRightAnimation.setDuration(150L);
-        slideDateRightAnimation.setDuration(150L);
-        slideCvcRightAnimation.setDuration(150L);
+        slideCardRightAnimation.setDuration(ANIMATION_LENGTH);
+        slideDateRightAnimation.setDuration(ANIMATION_LENGTH);
+        slideCvcRightAnimation.setDuration(ANIMATION_LENGTH);
 
         slideCardRightAnimation.setAnimationListener(new AnimationEndListener() {
             @Override
@@ -349,37 +499,6 @@ public class CardInputWidget extends LinearLayout {
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        if (!mInitFlag && getWidth() != 0) {
-            mInitFlag = true;
-            int totalWidth = mFrameLayout.getWidth();
-
-            updateSpaceSizes(true);
-
-            FrameLayout.LayoutParams cardParams =
-                    (FrameLayout.LayoutParams) mCardNumberEditText.getLayoutParams();
-            cardParams.leftMargin = 0;
-            cardParams.width = mPlacementParameters.cardWidth;
-            mCardNumberEditText.setLayoutParams(cardParams);
-
-            FrameLayout.LayoutParams editTextParams =
-                    (FrameLayout.LayoutParams) mExpiryDateEditText.getLayoutParams();
-            editTextParams.leftMargin =
-                    mPlacementParameters.cardWidth + mPlacementParameters.cardDateSeparation;
-            editTextParams.width = mPlacementParameters.dateWidth;
-            mExpiryDateEditText.setLayoutParams(editTextParams);
-
-            FrameLayout.LayoutParams cvcParams =
-                    (FrameLayout.LayoutParams) mCvcNumberEditText.getLayoutParams();
-            cvcParams.width = mPlacementParameters.cvcWidth;
-            cvcParams.leftMargin = totalWidth;
-            cvcParams.rightMargin = 0;
-            mCvcNumberEditText.setLayoutParams(cvcParams);
-        }
-    }
-
-    @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (hasWindowFocus) {
@@ -387,43 +506,36 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private void updateSpaceSizes(boolean isCardViewed) {
-        int frameWidth = mFrameLayout.getWidth();
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (!mInitFlag && getWidth() != 0) {
+            mInitFlag = true;
+            mTotalLengthInPixels = getFrameWidth();
 
-        mPlacementParameters.cardWidth =
-                (int) Layout.getDesiredWidth("4242 4242 4242 4242", mCardNumberEditText.getPaint());
+            updateSpaceSizes(mCardNumberIsViewed);
 
-        mPlacementParameters.dateWidth =
-                (int) Layout.getDesiredWidth("MM/YY", mExpiryDateEditText.getPaint());
+            int cardLeftMargin = mCardNumberIsViewed
+                    ? 0 : -1 * mPlacementParameters.hiddenCardWidth;
+            setLayoutValues(mPlacementParameters.cardWidth, cardLeftMargin, mCardNumberEditText);
 
-        mPlacementParameters.hiddenCardWidth =
-                (int) Layout.getDesiredWidth(
-                        getHiddenTextForBrand(mCardNumberEditText.getCardBrand()),
-                        mCardNumberEditText.getPaint());
-        mPlacementParameters.cvcWidth =
-                (int) Layout.getDesiredWidth(
-                        getCvcPlaceHolderForBrand(mCardNumberEditText.getCardBrand()),
-                        mCvcNumberEditText.getPaint());
-        mPlacementParameters.peekCardWidth =
-                (int) Layout.getDesiredWidth(
-                        getPeekCardTextForBrand(mCardNumberEditText.getCardBrand()),
-                        mCardNumberEditText.getPaint());
 
-        if (isCardViewed) {
-            mPlacementParameters.cardDateSeparation = frameWidth
-                    - mPlacementParameters.cardWidth - mPlacementParameters.dateWidth;
-        } else {
-            mPlacementParameters.cardDateSeparation = frameWidth / 2
-                    - mPlacementParameters.peekCardWidth
-                    - mPlacementParameters.dateWidth / 2;
-            mPlacementParameters.dateCvcSeparation = frameWidth
-                    - mPlacementParameters.peekCardWidth
-                    - mPlacementParameters.cardDateSeparation
-                    - mPlacementParameters.dateWidth
-                    - mPlacementParameters.cvcWidth;
+            int dateMargin = mCardNumberIsViewed
+                    ? mPlacementParameters.cardWidth + mPlacementParameters.cardDateSeparation
+                    : mPlacementParameters.peekCardWidth + mPlacementParameters.cardDateSeparation;
+            setLayoutValues(mPlacementParameters.dateWidth, dateMargin, mExpiryDateEditText);
+
+            int cvcMargin = mCardNumberIsViewed
+                    ? mTotalLengthInPixels
+                    : mPlacementParameters.peekCardWidth
+                    + mPlacementParameters.cardDateSeparation
+                    + mPlacementParameters.dateWidth
+                    + mPlacementParameters.dateCvcSeparation;
+            setLayoutValues(mPlacementParameters.cvcWidth, cvcMargin, mCvcNumberEditText);
         }
     }
 
+    @NonNull
     private String getHiddenTextForBrand(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             return HIDDEN_TEXT_AMEX;
@@ -432,6 +544,7 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    @NonNull
     private String getCvcPlaceHolderForBrand(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             return CVC_PLACEHOLDER_AMEX;
@@ -440,6 +553,7 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    @NonNull
     private String getPeekCardTextForBrand(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             return PEEK_TEXT_AMEX;
@@ -494,6 +608,15 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
+     * Interface useful for testing calculations without generating real views.
+     */
+    @VisibleForTesting
+    interface DimensionOverrideSettings {
+        int getPixelWidth(@NonNull String text, @NonNull EditText editText);
+        int getFrameWidth();
+    }
+
+    /**
      * Class used to encapsulate the functionality of "backing up" via the delete/backspace key
      * from one text field to the previous. We use this to simulate multiple fields being all part
      * of the same EditText, so a delete key entry from field N+1 deletes the last character in
@@ -524,14 +647,15 @@ public class CardInputWidget extends LinearLayout {
     /**
      * A data-dump class.
      */
-    private class PlacementParameters {
-        private int cardWidth;
-        private int hiddenCardWidth;
-        private int peekCardWidth;
-        private int cardDateSeparation;
-        private int dateWidth;
-        private int dateCvcSeparation;
-        private int cvcWidth;
+    @VisibleForTesting
+    class PlacementParameters {
+        int cardWidth;
+        int hiddenCardWidth;
+        int peekCardWidth;
+        int cardDateSeparation;
+        int dateWidth;
+        int dateCvcSeparation;
+        int cvcWidth;
 
         @Override
         public String toString() {

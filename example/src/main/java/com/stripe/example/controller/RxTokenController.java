@@ -7,7 +7,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.view.CardInputView;
+import com.stripe.android.view.CardInputWidget;
 
 import java.util.concurrent.Callable;
 
@@ -25,7 +25,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class RxTokenController {
 
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputView;
     private CompositeSubscription mCompositeSubscription;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
@@ -34,7 +34,7 @@ public class RxTokenController {
 
     public RxTokenController (
             @NonNull Button button,
-            @NonNull CardInputView cardInputView,
+            @NonNull CardInputWidget cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,

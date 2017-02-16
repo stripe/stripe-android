@@ -6,7 +6,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.view.CardInputView;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.controller.AsyncTaskTokenController;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.IntentServiceTokenController;
@@ -28,7 +28,7 @@ public class DependencyHandler {
     private static final String PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
 
     private AsyncTaskTokenController mAsyncTaskController;
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputWidget;
     private ErrorDialogHandler mErrorDialogHandler;
     private IntentServiceTokenController mIntentServiceTokenController;
     private ListViewController mListViewController;
@@ -37,10 +37,10 @@ public class DependencyHandler {
 
     public DependencyHandler(
             AppCompatActivity activity,
-            CardInputView cardInputView,
+            CardInputWidget cardInputWidget,
             ListView outputListView) {
 
-        mCardInputView = cardInputView;
+        mCardInputWidget = cardInputWidget;
 
         mProgresDialogController =
                 new ProgressDialogController(activity.getSupportFragmentManager());
@@ -62,7 +62,7 @@ public class DependencyHandler {
         if (mAsyncTaskController == null) {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
-                    mCardInputView,
+                    mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -88,7 +88,7 @@ public class DependencyHandler {
             mIntentServiceTokenController = new IntentServiceTokenController(
                     appCompatActivity,
                     button,
-                    mCardInputView,
+                    mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -111,7 +111,7 @@ public class DependencyHandler {
         if (mRxTokenController == null) {
             mRxTokenController = new RxTokenController(
                     button,
-                    mCardInputView,
+                    mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,

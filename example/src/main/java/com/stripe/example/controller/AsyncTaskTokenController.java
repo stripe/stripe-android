@@ -8,7 +8,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.view.CardInputView;
+import com.stripe.android.view.CardInputWidget;
 
 /**
  * Logic needed to create tokens using the {@link android.os.AsyncTask} methods included in the
@@ -16,7 +16,7 @@ import com.stripe.android.view.CardInputView;
  */
 public class AsyncTaskTokenController {
 
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputView;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -24,7 +24,7 @@ public class AsyncTaskTokenController {
 
     public AsyncTaskTokenController(
             @NonNull Button button,
-            @NonNull CardInputView cardInputView,
+            @NonNull CardInputWidget cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,

@@ -3,8 +3,10 @@ package com.stripe.android.view;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.stripe.android.R;
@@ -13,12 +15,11 @@ import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 import com.stripe.android.util.LoggingUtils;
 
+import net.bytebuddy.asm.Advice;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
@@ -27,7 +28,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
-import java.util.List;
 
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -47,63 +47,60 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Test class for {@link CardInputView}. Note that we have to test against SDK 22
+ * Test class for {@link CardInputWidget}. Note that we have to test against SDK 22
  * because of a <a href="https://github.com/robolectric/robolectric/issues/1932">known issue</a> in
  * Robolectric.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 22)
-public class CardInputViewTest {
-
-    @Captor ArgumentCaptor<Integer> mDxCaptor;
-    @Captor ArgumentCaptor<Integer> mDyCaptor;
-
-    @Mock LockableHorizontalScrollView.LockableScrollChangedListener mLockableScrollChangedListener;
+public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
     private static final String[] EXPECTED_LOGGING_ARRAY = { LoggingUtils.CARD_WIDGET_TOKEN };
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputWidget;
     private CardNumberEditText mCardNumberEditText;
-    private CardInputView.CustomWidthSetter mCustomWidthSetter;
     private ImageView mIconView;
-    private LockableHorizontalScrollView mLockableHorizontalScrollView;
     private StripeEditText mExpiryEditText;
     private StripeEditText mCvcEditText;
     private TestFocusChangeListener mOnGlobalFocusChangeListener;
+
+    private CardInputWidget.DimensionOverrideSettings mDimensionOverrides;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         ActivityController activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class)
-                        .create().start().visible().resume();
+                        .create().start();
 
-        mCustomWidthSetter = new CardInputView.CustomWidthSetter() {
+        mDimensionOverrides = new CardInputWidget.DimensionOverrideSettings() {
             @Override
-            public int getDesiredScrollLeft() {
-                return 100;
+            public int getPixelWidth(@NonNull String text, @NonNull EditText editText) {
+                return text.length() * 10;
             }
 
             @Override
-            public int getDesiredScrollRight(String hiddenString) {
-                return hiddenString == null ? 0 : hiddenString.length();
+            public int getFrameWidth() {
+                return 500;
             }
         };
 
+        mCardInputWidget = ((CardInputTestActivity) activityController.get()).getCardInputWidget();
+        mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
+
+        activityController.visible().resume();
+
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
+        mCardInputWidget.getViewTreeObserver()
+                .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
+
         mCardNumberEditText =
                 ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
         mCardNumberEditText.setText("");
-        mCardInputView = ((CardInputTestActivity) activityController.get()).getCardInputView();
-        mCardInputView.setCustomWidthSetter(mCustomWidthSetter);
-        mCardInputView.getViewTreeObserver()
-                .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
-        mExpiryEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_expiry_date);
-        mCvcEditText = (StripeEditText) mCardInputView.findViewById(R.id.et_cvc_number);
-        mIconView = (ImageView) mCardInputView.findViewById(R.id.iv_card_icon);
-        mLockableHorizontalScrollView =
-                (LockableHorizontalScrollView) mCardInputView.findViewById(R.id.root_scroll_view);
-        mLockableHorizontalScrollView.setScrollChangedListener(mLockableScrollChangedListener);
+
+        mExpiryEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_expiry_date);
+        mCvcEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_cvc_number);
+        mIconView = (ImageView) mCardInputWidget.findViewById(R.id.iv_card_icon);
     }
 
     @Test
@@ -116,7 +113,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("123");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNotNull(card);
         assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
         assertNotNull(card.getExpMonth());
@@ -138,7 +135,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("1234");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNotNull(card);
         assertEquals(VALID_AMEX_NO_SPACES, card.getNumber());
         assertNotNull(card.getExpMonth());
@@ -160,7 +157,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("123");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNotNull(card);
         assertEquals(VALID_DINERS_CLUB_NO_SPACES, card.getNumber());
         assertNotNull(card.getExpMonth());
@@ -183,7 +180,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("123");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNull(card);
     }
 
@@ -198,7 +195,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("12");
         mCvcEditText.append("123");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNull(card);
     }
 
@@ -212,7 +209,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("12");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNull(card);
     }
 
@@ -226,7 +223,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("123");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNull(card);
     }
 
@@ -240,7 +237,7 @@ public class CardInputViewTest {
         mExpiryEditText.append("50");
         mCvcEditText.append("12");
 
-        Card card = mCardInputView.getCard();
+        Card card = mCardInputWidget.getCard();
         assertNull(card);
     }
 
@@ -249,17 +246,12 @@ public class CardInputViewTest {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
-
-        verify(mLockableScrollChangedListener)
-                .onSmoothScrollBy(mDxCaptor.capture(), eq(0));
-        assertTrue(mDxCaptor.getValue() > 0);
     }
 
     @Test
     public void onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
         assertTrue(mExpiryEditText.hasFocus());
-        Mockito.clearInvocations(mLockableScrollChangedListener);
 
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
@@ -268,24 +260,19 @@ public class CardInputViewTest {
         String subString = VALID_VISA_WITH_SPACES.substring(0, VALID_VISA_WITH_SPACES.length() - 1);
         assertEquals(subString, mCardNumberEditText.getText().toString());
         assertEquals(subString.length(), mCardNumberEditText.getSelectionStart());
-
-        verify(mLockableScrollChangedListener)
-                .onSmoothScrollBy(mDxCaptor.capture(), eq(0));
-        assertTrue(mDxCaptor.getValue() < 0);
     }
+
 
     @Test
     public void onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
         mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
         assertTrue(mExpiryEditText.hasFocus());
-        verify(mLockableScrollChangedListener).onSmoothScrollBy(anyInt(), anyInt());
 
         mExpiryEditText.append("1");
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
 
         assertTrue(mExpiryEditText.hasFocus());
         assertEquals(VALID_AMEX_WITH_SPACES, mCardNumberEditText.getText().toString());
-        verifyNoMoreInteractions(mLockableScrollChangedListener);
     }
 
     @Test
@@ -294,7 +281,6 @@ public class CardInputViewTest {
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
 
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
-        verify(mLockableScrollChangedListener).onSmoothScrollBy(anyInt(), anyInt());
 
         mExpiryEditText.append("12");
         mExpiryEditText.append("79");
@@ -306,7 +292,6 @@ public class CardInputViewTest {
         String expectedResult = "12/7";
         assertEquals(expectedResult, mExpiryEditText.getText().toString());
         assertEquals(expectedResult.length(), mExpiryEditText.getSelectionStart());
-        verifyNoMoreInteractions(mLockableScrollChangedListener);
     }
 
     @Test
@@ -315,7 +300,6 @@ public class CardInputViewTest {
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
 
         mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
-        verify(mLockableScrollChangedListener).onSmoothScrollBy(anyInt(), anyInt());
 
         mExpiryEditText.append("12");
         mExpiryEditText.append("79");
@@ -326,13 +310,11 @@ public class CardInputViewTest {
 
         assertTrue(mCvcEditText.hasFocus());
         assertEquals("12/79", mExpiryEditText.getText().toString());
-        verifyNoMoreInteractions(mLockableScrollChangedListener);
     }
 
     @Test
     public void onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() {
         mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
-        verify(mLockableScrollChangedListener).onSmoothScrollBy(anyInt(), anyInt());
 
         // Simulates user tapping into this text field without filling out the date first.
         mCvcEditText.requestFocus();
@@ -340,7 +322,6 @@ public class CardInputViewTest {
         ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
         assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
-        verifyNoMoreInteractions(mLockableScrollChangedListener);
     }
 
     @Test
@@ -359,6 +340,46 @@ public class CardInputViewTest {
         mCardNumberEditText.append(Card.PREFIXES_AMERICAN_EXPRESS[0]);
         assertNotEquals(oldBitmap, ((BitmapDrawable) mIconView.getDrawable()).getBitmap());
         assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 4));
+    }
+
+    @Test
+    public void updateToInitialSizes_returnsExpectedValues() {
+        // Initial spacing should look like
+        // |---total == 500--------|
+        // |(card==190)--(space==260)--(date=50)|
+        CardInputWidget.PlacementParameters initialParameters =
+                mCardInputWidget.getPlacementParameters();
+        assertEquals(190, initialParameters.cardWidth);
+        assertEquals(50, initialParameters.dateWidth);
+        assertEquals(260, initialParameters.cardDateSeparation);
+    }
+
+    @Test
+    public void updateToPeekSize_withNoData_returnsExpectedValuesForCommonCardLength() {
+        // Moving left uses Visa-style ("common") defaults
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        mCardInputWidget.updateSpaceSizes(false);
+        CardInputWidget.PlacementParameters shiftedParameters =
+                mCardInputWidget.getPlacementParameters();
+        assertEquals(40, shiftedParameters.peekCardWidth);
+        assertEquals(185, shiftedParameters.cardDateSeparation);
+        assertEquals(50, shiftedParameters.dateWidth);
+        assertEquals(195, shiftedParameters.dateCvcSeparation);
+        assertEquals(30, shiftedParameters.cvcWidth);
+    }
+
+    @Test
+    public void addDinersClubCard_scrollsOver_andSetsExpectedDisplayValues() {
+        // When we move for a Diner's club card, the peek text is shorter, so we expect:
+        // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)|
+        mCardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES);
+        CardInputWidget.PlacementParameters shiftedParameters =
+                mCardInputWidget.getPlacementParameters();
+        assertEquals(20, shiftedParameters.peekCardWidth);
+        assertEquals(205, shiftedParameters.cardDateSeparation);
+        assertEquals(50, shiftedParameters.dateWidth);
+        assertEquals(195, shiftedParameters.dateCvcSeparation);
+        assertEquals(30, shiftedParameters.cvcWidth);
     }
 
     class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusChangeListener {
@@ -389,5 +410,4 @@ public class CardInputViewTest {
             return mNewFocus != null;
         }
     }
-
 }

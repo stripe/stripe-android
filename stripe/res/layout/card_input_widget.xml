@@ -4,6 +4,7 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:minWidth="@dimen/card_widget_min_width"
               android:nextFocusForward="@+id/et_card_number"
               android:nextFocusDown="@+id/et_card_number"
               android:nextFocusRight="@+id/et_card_number"

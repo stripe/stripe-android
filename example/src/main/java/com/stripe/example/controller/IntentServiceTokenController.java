@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.text.IDNA;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.view.CardInputView;
-import com.stripe.example.activity.PaymentActivity;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.service.TokenIntentService;
 
 /**
@@ -24,7 +22,7 @@ import com.stripe.example.service.TokenIntentService;
 public class IntentServiceTokenController {
 
     private Activity mActivity;
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputView;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
@@ -35,7 +33,7 @@ public class IntentServiceTokenController {
     public IntentServiceTokenController (
             @NonNull AppCompatActivity appCompatActivity,
             @NonNull Button button,
-            @NonNull CardInputView cardInputView,
+            @NonNull CardInputWidget cardInputView,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
