@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="TextField" parent="@android:style/Widget.EditText">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/editText</item>
-        <item name="android:background">@drawable/edit_text_holo_dark</item>
-    </style>
-
-    <style name="CardNumber" parent="@style/TextField">
-        <item name="android:inputType">numberDecimal</item>
-        <item name="android:hint">@string/cardNumber</item>
-    </style>
-
-    <style name="CVC" parent="@style/TextField">
-        <item name="android:inputType">numberDecimal</item>
-        <item name="android:hint">@string/cvc</item>
-        <item name="android:layout_weight">0.7</item>
-        <item name="android:layout_width">0dp</item>
-    </style>
-
     <style name="Button" parent="@android:style/Widget.Button">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingTop">12dp</item>
@@ -28,7 +10,6 @@
     </style>
 
     <style name="Save" parent="@style/Button">
-        <item name="android:layout_width">160dp</item>
         <item name="android:layout_marginTop">4dp</item>
     </style>
 
