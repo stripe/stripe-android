@@ -14,24 +14,30 @@
               android:text="@string/addPayment"
               style="@style/Header" />
 
-    <!-- When merged to master, this should replace all input fields.-->
-    <com.stripe.android.view.CardInputView
-        android:id="@+id/card_input_view"
+    <com.stripe.android.view.CardInputWidget
+        android:id="@+id/card_input_widget"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        />
 
     <Button
         android:id="@+id/save"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/save"
         style="@style/Save"/>
 
     <Button
         android:id="@+id/saverx"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/saverx"
         style="@style/Save"/>
 
     <Button
         android:id="@+id/saveWithService"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
         android:text="@string/saveService"
         style="@style/Save"/>
 

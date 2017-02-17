@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.stripe.android.view.CardInputView;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 import com.stripe.example.module.DependencyHandler;
 
@@ -20,7 +20,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         mDependencyHandler = new DependencyHandler(
                 this,
-                (CardInputView) findViewById(R.id.card_input_view),
+                (CardInputWidget) findViewById(R.id.card_input_widget),
                 (ListView) findViewById(R.id.listview));
 
         Button saveButton = (Button) findViewById(R.id.save);

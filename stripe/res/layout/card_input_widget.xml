@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/iv_card_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/card_icon_padding"
+        android:layout_marginBottom="@dimen/card_icon_padding"
+        android:layout_marginEnd="@dimen/card_icon_padding"
+        android:layout_marginRight="@dimen/card_icon_padding"
+        android:src="@drawable/stp_card_placeholder_template"
+        />
+
+    <FrameLayout
+        android:id="@+id/frame_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        >
+
+        <!--The only purpose of this TextView is to be an accessibility label.-->
+        <TextView
+            android:id="@+id/card_number_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/transparent"
+            android:labelFor="@+id/et_card_number"
+            android:clickable="false"
+            android:focusable="false"
+            tools:importantForAccessibility="no"
+            android:focusableInTouchMode="false"
+            android:text="@string/acc_label_card_number"
+            />
+
+        <!--The only purpose of this TextView is to be an accessibility label.-->
+        <TextView
+            android:id="@+id/expiry_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/transparent"
+            android:labelFor="@+id/et_expiry_date"
+            tools:importantForAccessibility="no"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:text="@string/acc_label_expiry_date"
+            />
+
+        <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
+        <com.stripe.android.view.CardNumberEditText
+            android:id="@+id/et_card_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:hint="@string/card_number_hint"
+            android:nextFocusRight="@+id/et_expiry_date"
+            android:nextFocusForward="@+id/et_expiry_date"
+            android:nextFocusDown="@+id/et_expiry_date"
+            tools:ignore="UnusedAttribute"
+            tools:importantForAccessibility="yes"
+            android:accessibilityTraversalBefore="@+id/et_expiry_date"
+            android:inputType="number"
+            android:maxLength="19"
+            android:layout_gravity="left"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:visibility="visible"
+            />
+
+        <com.stripe.android.view.ExpiryDateEditText
+            android:id="@+id/et_expiry_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:hint="@string/expiry_date_hint"
+            tools:ignore="UnusedAttribute"
+            tools:importantForAccessibility="yes"
+            android:accessibilityTraversalAfter="@+id/et_expiry_date"
+            android:accessibilityTraversalBefore="@id/et_card_number"
+            android:nextFocusRight="@+id/et_cvc_number"
+            android:nextFocusForward="@+id/et_cvc_number"
+            android:nextFocusDown="@+id/et_cvc_number"
+            android:nextFocusLeft="@id/et_card_number"
+            android:nextFocusUp="@id/et_card_number"
+            android:inputType="date"
+            android:maxLength="5"
+            android:visibility="visible"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_gravity="left"
+            />
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_cvc_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UnusedAttribute"
+            tools:importantForAccessibility="yes"
+            android:accessibilityTraversalAfter="@+id/et_expiry_date"
+            android:nextFocusLeft="@id/et_expiry_date"
+            android:nextFocusUp="@id/et_expiry_date"
+            android:background="@android:color/transparent"
+            android:hint="@string/cvc_number_hint"
+            android:inputType="number"
+            android:maxLength="4"
+            android:layout_gravity="left"
+            />
+
+    </FrameLayout>
+</merge>

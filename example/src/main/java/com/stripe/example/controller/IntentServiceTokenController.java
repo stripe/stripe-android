@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.text.IDNA;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.view.CardInputView;
-import com.stripe.example.activity.PaymentActivity;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.service.TokenIntentService;
 
 /**
@@ -24,7 +22,7 @@ import com.stripe.example.service.TokenIntentService;
 public class IntentServiceTokenController {
 
     private Activity mActivity;
-    private CardInputView mCardInputView;
+    private CardInputWidget mCardInputWidget;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
@@ -35,14 +33,14 @@ public class IntentServiceTokenController {
     public IntentServiceTokenController (
             @NonNull AppCompatActivity appCompatActivity,
             @NonNull Button button,
-            @NonNull CardInputView cardInputView,
+            @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
 
         mActivity = appCompatActivity;
-        mCardInputView = cardInputView;
+        mCardInputWidget = cardInputWidget;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -67,7 +65,7 @@ public class IntentServiceTokenController {
             mTokenBroadcastReceiver = null;
             mActivity = null;
         }
-        mCardInputView = null;
+        mCardInputWidget = null;
     }
 
     private void registerBroadcastReceiver() {
@@ -78,7 +76,7 @@ public class IntentServiceTokenController {
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInputView.getCard();
+        Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;
