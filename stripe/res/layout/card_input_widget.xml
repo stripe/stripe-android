@@ -34,6 +34,7 @@
             tools:importantForAccessibility="no"
             android:focusableInTouchMode="false"
             android:text="@string/acc_label_card_number"
+            android:visibility="gone"
             />
 
         <!--The only purpose of this TextView is to be an accessibility label.-->
@@ -49,6 +50,7 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:text="@string/acc_label_expiry_date"
+            android:visibility="gone"
             />
 
         <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
