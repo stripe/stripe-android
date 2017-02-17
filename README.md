@@ -12,7 +12,7 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:2.1.0'
+    compile 'com.stripe:stripe-android:3.0.0'
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
@@ -26,9 +26,33 @@ If you're planning on optimizing your app with ProGuard, make sure that you excl
 
     -keep class com.stripe.** { *; }
 
-You also need to add some configuration options for Gson, which is used by the Stripe bindings to serialize and deserialize JSON data. You can find the recommended ProGuard configuration for Gson [here](https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg).
-
 ## Usage
+
+### Using the CardInputWidget
+
+You can add a widget to your apps that easily handles the UI states for collecting card data.
+
+First, add the CardInputWidget to your layout.
+
+```xml
+    <com.stripe.android.view.CardInputWidget
+        android:id="@+id/card_input_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+```
+Note: the minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, we assign one for you when the object is instantiated.
+
+Once this widget is in your layout, you can read the `Card` object simply by asking the widget. You'll be given a `null` object if the card data is invalid according to our client-side checks.
+```java
+        Card cardToSave = mCardInputWidget.getCard();
+        if (cardToSave == null) {
+            mErrorDialogHandler.showError("Invalid Card Data");
+            return;
+        }
+```
+
+Once you have a non-null `Card` object, you can call [createToken](#createtoken).
 
 ### setDefaultPublishableKey
 
