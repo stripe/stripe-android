@@ -1,3 +1,7 @@
+3.0.0 2017-02-17
+    Added a card input widget to allow easy UI for collecting card data.
+    Increased the minimum SDK version to 11 (needed for animation classes).
+    
 2.1.0 2017-01-19
     Added bindings to allow creation of bank account tokens.
 
