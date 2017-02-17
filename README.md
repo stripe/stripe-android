@@ -35,21 +35,23 @@ You can add a widget to your apps that easily handles the UI states for collecti
 First, add the CardInputWidget to your layout.
 
 ```xml
-    <com.stripe.android.view.CardInputWidget
-        android:id="@+id/card_input_widget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+<com.stripe.android.view.CardInputWidget
+    android:id="@+id/card_input_widget"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    />
 ```
+
 Note: the minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, we assign one for you when the object is instantiated.
 
 Once this widget is in your layout, you can read the `Card` object simply by asking the widget. You'll be given a `null` object if the card data is invalid according to our client-side checks.
+
 ```java
-        Card cardToSave = mCardInputWidget.getCard();
-        if (cardToSave == null) {
-            mErrorDialogHandler.showError("Invalid Card Data");
-            return;
-        }
+Card cardToSave = mCardInputWidget.getCard();
+if (cardToSave == null) {
+    mErrorDialogHandler.showError("Invalid Card Data");
+    return;
+}
 ```
 
 Once you have a non-null `Card` object, you can call [createToken](#createtoken).
@@ -60,14 +62,17 @@ A publishable key is required to identify your website when communicating with S
 
 You can get all your keys from [your account page](https://manage.stripe.com/#account/apikeys).
 This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
+
 ```java
-    new Stripe("YOUR_PUBLISHABLE_KEY");
+new Stripe("YOUR_PUBLISHABLE_KEY");
 ```
+
 or
 
 ```java
-    new Stripe().setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
+new Stripe().setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
 ```
+
 ### createToken
 
 createToken converts sensitive card data to a single-use token which you can safely pass to your server to charge the user. The [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
@@ -266,6 +271,7 @@ Convenience method to validate card number, expiry date and CVC.
 ### Retrieving information about a token
 
 The bindings for retrieving information about a token has been removed from the Android SDK because only older Stripe accounts (from early 2014) can perform this operation with a public key. If you still need this functionality, make sure to use the last version of the Android bindings that contained this functionality by setting your version in the `build.gradle` file as follows.
+
 ```groovy
     // Using older bindings to have access to requestToken
     compile 'com.stripe:stripe-android:1.1.1'
