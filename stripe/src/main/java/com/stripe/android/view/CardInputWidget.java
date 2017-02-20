@@ -14,6 +14,8 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -27,6 +29,7 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.ScreenSizeUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
@@ -132,6 +135,65 @@ public class CardInputWidget extends LinearLayout {
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.getAction() != MotionEvent.ACTION_DOWN) {
+            return super.onInterceptTouchEvent(ev);
+        }
+
+        int frameStart = mFrameLayout.getLeft();
+        int x = (int) ev.getX();
+
+        if (mCardNumberIsViewed) {
+            // Then our view is
+            // |CARDVIEW||space||DATEVIEW|
+
+            if (x < frameStart + mPlacementParameters.cardWidth) {
+                // Then the card edit view will already handle this touch.
+                return super.onInterceptTouchEvent(ev);
+            } else if (x < mPlacementParameters.cardTouchBufferLimit){
+                // Then we want to act like this was a touch on the card view
+                mCardNumberEditText.requestFocus();
+                return true;
+            } else if (x < mPlacementParameters.dateStartPosition) {
+                // Then we act like this was a touch on the date editor.
+                mExpiryDateEditText.requestFocus();
+                return true;
+            } else {
+                // Then the date editor will already handle this touch.
+                return super.onInterceptTouchEvent(ev);
+            }
+        } else {
+            // Our view is
+            // |PEEK||space||DATE||space||CVC
+            if (x < frameStart + mPlacementParameters.peekCardWidth) {
+                // This was a touch on the card number editor, so we don't need to hanlde it.
+                return super.onInterceptTouchEvent(ev);
+            } else if( x < mPlacementParameters.cardTouchBufferLimit) {
+                // Then we need to act like the user touched the card editor
+                mCardNumberEditText.requestFocus();
+                return true;
+            } else if (x < mPlacementParameters.dateStartPosition) {
+                // Then we need to act like this was a touch on the date editor
+                mExpiryDateEditText.requestFocus();
+                return true;
+            } else if (x < mPlacementParameters.dateStartPosition + mPlacementParameters.dateWidth) {
+                // Just a regular touch on the date editor.
+                return super.onInterceptTouchEvent(ev);
+            } else if (x < mPlacementParameters.dateRightTouchBufferLimit) {
+                // We need to act like this was a touch on the date editor
+                mExpiryDateEditText.requestFocus();
+                return true;
+            } else if (x < mPlacementParameters.cvcStartPosition) {
+                // We need to act like this was a touch on the cvc editor.
+                mCvcNumberEditText.requestFocus();
+                return true;
+            } else {
+                return super.onInterceptTouchEvent(ev);
+            }
+        }
+    }
+
+    @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_SUPER_STATE, super.onSaveInstanceState());
@@ -184,6 +246,7 @@ public class CardInputWidget extends LinearLayout {
     @VisibleForTesting
     void updateSpaceSizes(boolean isCardViewed) {
         int frameWidth = getFrameWidth();
+        int frameStart = mFrameLayout.getLeft();
         if (frameWidth == 0) {
             // This is an invalid view state.
             return;
@@ -208,6 +271,10 @@ public class CardInputWidget extends LinearLayout {
         if (isCardViewed) {
             mPlacementParameters.cardDateSeparation = frameWidth
                     - mPlacementParameters.cardWidth - mPlacementParameters.dateWidth;
+            mPlacementParameters.cardTouchBufferLimit = frameStart
+                    + mPlacementParameters.cardWidth + mPlacementParameters.cardDateSeparation / 2;
+            mPlacementParameters.dateStartPosition = frameStart
+                    + mPlacementParameters.cardWidth + mPlacementParameters.cardDateSeparation;
         } else {
             mPlacementParameters.cardDateSeparation = frameWidth / 2
                     - mPlacementParameters.peekCardWidth
@@ -217,6 +284,20 @@ public class CardInputWidget extends LinearLayout {
                     - mPlacementParameters.cardDateSeparation
                     - mPlacementParameters.dateWidth
                     - mPlacementParameters.cvcWidth;
+
+            mPlacementParameters.cardTouchBufferLimit = frameStart
+                    + mPlacementParameters.peekCardWidth
+                    + mPlacementParameters.cardDateSeparation / 2;
+            mPlacementParameters.dateStartPosition = frameStart
+                    + mPlacementParameters.peekCardWidth
+                    + mPlacementParameters.cardDateSeparation;
+            mPlacementParameters.dateRightTouchBufferLimit =
+                    mPlacementParameters.dateStartPosition
+                    + mPlacementParameters.dateWidth
+                    + mPlacementParameters.dateCvcSeparation / 2;
+            mPlacementParameters.cvcStartPosition = mPlacementParameters.dateStartPosition
+                    + mPlacementParameters.dateWidth
+                    + mPlacementParameters.dateCvcSeparation;
         }
     }
 
@@ -670,15 +751,29 @@ public class CardInputWidget extends LinearLayout {
         int dateCvcSeparation;
         int cvcWidth;
 
+        int cardTouchBufferLimit;
+        int dateStartPosition;
+        int dateRightTouchBufferLimit;
+        int cvcStartPosition;
+
         @Override
         public String toString() {
-            return String.format("CardWidth = %d\n" +
+            String touchBufferData = String.format("Touch Buffer Data:\n" +
+                    "CardTouchBufferLimit = %d\n" +
+                    "DateStartPosition = %d\n" +
+                    "DateRightTouchBufferLimit = %d\n" +
+                    "CvcStartPosition = %d",
+                    cardTouchBufferLimit,
+                    dateStartPosition,
+                    dateRightTouchBufferLimit,
+                    cvcStartPosition);
+            String elementSizeData = String.format("CardWidth = %d\n" +
                     "HiddenCardWidth = %d\n" +
                     "PeekCardWidth = %d\n" +
                     "CardDateSeparation = %d\n" +
                     "DateWidth = %d\n" +
                     "DateCvcSeparation = %d\n" +
-                    "CvcWidth = %d",
+                    "CvcWidth = %d\n",
                     cardWidth,
                     hiddenCardWidth,
                     peekCardWidth,
@@ -686,6 +781,7 @@ public class CardInputWidget extends LinearLayout {
                     dateWidth,
                     dateCvcSeparation,
                     cvcWidth);
+            return elementSizeData + touchBufferData;
         }
     }
 
