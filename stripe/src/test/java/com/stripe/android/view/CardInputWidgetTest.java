@@ -339,19 +339,24 @@ public class CardInputWidgetTest {
     @Test
     public void updateToInitialSizes_returnsExpectedValues() {
         // Initial spacing should look like
-        // |---total == 500--------|
-        // |(card==190)--(space==260)--(date=50)|
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+
         CardInputWidget.PlacementParameters initialParameters =
                 mCardInputWidget.getPlacementParameters();
         assertEquals(190, initialParameters.cardWidth);
         assertEquals(50, initialParameters.dateWidth);
         assertEquals(260, initialParameters.cardDateSeparation);
+        assertEquals(380, initialParameters.cardTouchBufferLimit);
+        assertEquals(510, initialParameters.dateStartPosition);
     }
 
     @Test
     public void updateToPeekSize_withNoData_returnsExpectedValuesForCommonCardLength() {
         // Moving left uses Visa-style ("common") defaults
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         mCardInputWidget.updateSpaceSizes(false);
         CardInputWidget.PlacementParameters shiftedParameters =
                 mCardInputWidget.getPlacementParameters();
@@ -360,6 +365,144 @@ public class CardInputWidgetTest {
         assertEquals(50, shiftedParameters.dateWidth);
         assertEquals(195, shiftedParameters.dateCvcSeparation);
         assertEquals(30, shiftedParameters.cvcWidth);
+        assertEquals(192, shiftedParameters.cardTouchBufferLimit);
+        assertEquals(285, shiftedParameters.dateStartPosition);
+        assertEquals(432, shiftedParameters.dateRightTouchBufferLimit);
+        assertEquals(530, shiftedParameters.cvcStartPosition);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenTouchOnImage_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // So any touch lower than 60 will be the icon
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(30));
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenTouchActualCardWidget_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // So any touch between 60 and 250 will be the actual card widget
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(200));
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenTouchInCardEditorSlop_returnsCardEditor() {
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // So any touch between 250 and 380 needs to send focus to the card editor
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(300);
+        assertNotNull(focusRequester);
+        assertEquals(mCardNumberEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenTouchInDateSlop_returnsDateEditor() {
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // So any touch between 380 and 510 needs to send focus to the date editor
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(390);
+        assertNotNull(focusRequester);
+        assertEquals(mExpiryEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenTouchInDateEditor_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(card==190)--(space==260)--(date==50)|
+        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // So any touch over 510 doesn't need to do anything
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(530));
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInPeekAfterShift_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 60 and 100 does nothing
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(75));
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInPeekSlopAfterShift_returnsCardEditor() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 100 and 192 returns the card editor
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(150);
+        assertNotNull(focusRequester);
+        assertEquals(mCardNumberEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInDateLeftSlopAfterShift_returnsDateEditor() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 192 and 285 returns the date editor
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(200);
+        assertNotNull(focusRequester);
+        assertEquals(mExpiryEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInDateAfterShift_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 285 and 335 does nothing
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(300));
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInDateRightSlopAfterShift_returnsDateEditor() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 335 and 432 returns the date editor
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(400);
+        assertNotNull(focusRequester);
+        assertEquals(mExpiryEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInCvcSlopAfterShift_returnsCvcEditor() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch between 432 and 530 returns the date editor
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        StripeEditText focusRequester = mCardInputWidget.getFocusRequestOnTouch(485);
+        assertNotNull(focusRequester);
+        assertEquals(mCvcEditText, focusRequester);
+    }
+
+    @Test
+    public void getFocusRequestOnTouch_whenInCvcAfterShift_returnsNull() {
+        // |img==60||---total == 500--------|
+        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+        // So any touch over 530 does nothing
+        mCardInputWidget.setCardNumberIsViewed(false);
+        mCardInputWidget.updateSpaceSizes(false);
+        assertNull(mCardInputWidget.getFocusRequestOnTouch(545));
     }
 
     @Test

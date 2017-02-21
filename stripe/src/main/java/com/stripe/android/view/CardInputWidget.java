@@ -186,6 +186,20 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    /**
+     * Checks on the horizontal position of a touch event to see if
+     * that event needs to be associated with one of the controls even
+     * without having actually touched it. This essentially gives a larger
+     * touch surface to the controls. We return {@code null} if the user touches
+     * actually inside the widget because no interception is necessary - the touch will
+     * naturally give focus to that control, and we don't want to interfere with what
+     * Android will naturally do in response to that touch.
+     *
+     * @param touchX distance in pixels from the left side of this control
+     * @return a {@link StripeEditText} that needs to request focus, or {@code null}
+     * if no such request is necessary.
+     */
+    @VisibleForTesting
     @Nullable
     StripeEditText getFocusRequestOnTouch(int touchX) {
         int frameStart = mFrameLayout.getLeft();
@@ -209,7 +223,7 @@ public class CardInputWidget extends LinearLayout {
             }
         } else {
             // Our view is
-            // |PEEK||space||DATE||space||CVC
+            // |PEEK||space||DATE||space||CVC|
             if (touchX < frameStart + mPlacementParameters.peekCardWidth) {
                 // This was a touch on the card number editor, so we don't need to hanlde it.
                 return null;
@@ -233,8 +247,15 @@ public class CardInputWidget extends LinearLayout {
             }
         }
     }
+
+    @VisibleForTesting
     void setDimensionOverrideSettings(DimensionOverrideSettings dimensonOverrides) {
         mDimensionOverrides = dimensonOverrides;
+    }
+
+    @VisibleForTesting
+    void setCardNumberIsViewed(boolean cardNumberIsViewed) {
+        mCardNumberIsViewed = cardNumberIsViewed;
     }
 
     @NonNull
