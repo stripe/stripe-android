@@ -2,8 +2,6 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -516,9 +514,7 @@ public class CardInputWidget extends LinearLayout {
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        if (hasWindowFocus) {
-            applyTint();
-        }
+        applyTint(false);
     }
 
     @Override
@@ -579,8 +575,8 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private void applyTint() {
-        if (Card.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
+    private void applyTint(boolean isCvc) {
+        if (isCvc || Card.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
             Drawable icon = mCardIconImageView.getDrawable();
             Drawable compatIcon = DrawableCompat.wrap(icon);
             DrawableCompat.setTint(compatIcon.mutate(), mTintColorInt);
@@ -604,7 +600,7 @@ public class CardInputWidget extends LinearLayout {
         if (Card.UNKNOWN.equals(brand)) {
             Drawable icon  = getResources().getDrawable(R.drawable.ic_unknown);
             mCardIconImageView.setImageDrawable(icon);
-            applyTint();
+            applyTint(false);
         } else {
             mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
         }
@@ -617,6 +613,7 @@ public class CardInputWidget extends LinearLayout {
             } else {
                 mCardIconImageView.setImageResource(R.drawable.ic_cvc);
             }
+            applyTint(true);
         } else {
             updateIcon(brand);
         }
