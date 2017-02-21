@@ -2,29 +2,16 @@ package com.stripe.android.testharness;
 
 
 import android.os.Build;
-import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.view.KeyEvent;
 import android.widget.EditText;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Utility class for common actions to perform on Views under test.
  */
 public class ViewTestUtils {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ MDPI, HDPI, XHDPI, XXHDPI, XXXHDPI })
-    public @interface ScreenDensity { }
-    public static final int MDPI = 1;
-    public static final int HDPI = 2;
-    public static final int XHDPI = 4;
-    public static final int XXHDPI = 8;
-    public static final int XXXHDPI = 16;
 
     /**
      * Send an action down call on the delete key.
