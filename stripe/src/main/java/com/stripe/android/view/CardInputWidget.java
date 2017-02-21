@@ -616,7 +616,9 @@ public class CardInputWidget extends LinearLayout {
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        applyTint(false);
+        if (hasWindowFocus) {
+            applyTint(false);
+        }
     }
 
     @Override
