@@ -2,6 +2,8 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -63,13 +65,13 @@ public class CardInputWidget extends LinearLayout {
 
     private static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.stp_card_amex);
-                put(Card.DINERS_CLUB, R.drawable.stp_card_diners);
-                put(Card.DISCOVER, R.drawable.stp_card_discover);
-                put(Card.JCB, R.drawable.stp_card_jcb);
-                put(Card.MASTERCARD, R.drawable.stp_card_mastercard);
-                put(Card.VISA, R.drawable.stp_card_visa);
-                put(Card.UNKNOWN, R.drawable.stp_card_placeholder_template);
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
             }};
 
     private ImageView mCardIconImageView;
@@ -683,7 +685,7 @@ public class CardInputWidget extends LinearLayout {
         if (Card.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
             Drawable icon = mCardIconImageView.getDrawable();
             Drawable compatIcon = DrawableCompat.wrap(icon);
-            DrawableCompat.setTint(compatIcon, mTintColorInt);
+            DrawableCompat.setTint(compatIcon.mutate(), mTintColorInt);
             mCardIconImageView.setImageDrawable(DrawableCompat.unwrap(compatIcon));
         }
     }
@@ -702,7 +704,7 @@ public class CardInputWidget extends LinearLayout {
 
     private void updateIcon(@NonNull @Card.CardBrand String brand) {
         if (Card.UNKNOWN.equals(brand)) {
-            Drawable icon  = getResources().getDrawable(R.drawable.stp_card_placeholder_template);
+            Drawable icon  = getResources().getDrawable(R.drawable.ic_unknown);
             mCardIconImageView.setImageDrawable(icon);
             applyTint();
         } else {
@@ -713,9 +715,9 @@ public class CardInputWidget extends LinearLayout {
     private void updateIconCvc(@NonNull @Card.CardBrand String brand, boolean isEntering) {
         if (isEntering) {
             if (Card.AMERICAN_EXPRESS.equals(brand)) {
-                mCardIconImageView.setImageResource(R.drawable.stp_card_cvc_amex);
+                mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
             } else {
-                mCardIconImageView.setImageResource(R.drawable.stp_card_cvc);
+                mCardIconImageView.setImageResource(R.drawable.ic_cvc);
             }
         } else {
             updateIcon(brand);
