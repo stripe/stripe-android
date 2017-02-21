@@ -14,7 +14,6 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -29,7 +28,6 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.ScreenSizeUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
@@ -140,57 +138,12 @@ public class CardInputWidget extends LinearLayout {
             return super.onInterceptTouchEvent(ev);
         }
 
-        int frameStart = mFrameLayout.getLeft();
-        int x = (int) ev.getX();
-
-        if (mCardNumberIsViewed) {
-            // Then our view is
-            // |CARDVIEW||space||DATEVIEW|
-
-            if (x < frameStart + mPlacementParameters.cardWidth) {
-                // Then the card edit view will already handle this touch.
-                return super.onInterceptTouchEvent(ev);
-            } else if (x < mPlacementParameters.cardTouchBufferLimit){
-                // Then we want to act like this was a touch on the card view
-                mCardNumberEditText.requestFocus();
-                return true;
-            } else if (x < mPlacementParameters.dateStartPosition) {
-                // Then we act like this was a touch on the date editor.
-                mExpiryDateEditText.requestFocus();
-                return true;
-            } else {
-                // Then the date editor will already handle this touch.
-                return super.onInterceptTouchEvent(ev);
-            }
-        } else {
-            // Our view is
-            // |PEEK||space||DATE||space||CVC
-            if (x < frameStart + mPlacementParameters.peekCardWidth) {
-                // This was a touch on the card number editor, so we don't need to hanlde it.
-                return super.onInterceptTouchEvent(ev);
-            } else if( x < mPlacementParameters.cardTouchBufferLimit) {
-                // Then we need to act like the user touched the card editor
-                mCardNumberEditText.requestFocus();
-                return true;
-            } else if (x < mPlacementParameters.dateStartPosition) {
-                // Then we need to act like this was a touch on the date editor
-                mExpiryDateEditText.requestFocus();
-                return true;
-            } else if (x < mPlacementParameters.dateStartPosition + mPlacementParameters.dateWidth) {
-                // Just a regular touch on the date editor.
-                return super.onInterceptTouchEvent(ev);
-            } else if (x < mPlacementParameters.dateRightTouchBufferLimit) {
-                // We need to act like this was a touch on the date editor
-                mExpiryDateEditText.requestFocus();
-                return true;
-            } else if (x < mPlacementParameters.cvcStartPosition) {
-                // We need to act like this was a touch on the cvc editor.
-                mCvcNumberEditText.requestFocus();
-                return true;
-            } else {
-                return super.onInterceptTouchEvent(ev);
-            }
+        StripeEditText focusEditText = getFocusRequestOnTouch((int) ev.getX());
+        if (focusEditText != null) {
+            focusEditText.requestFocus();
+            return true;
         }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
@@ -233,6 +186,53 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    @Nullable
+    StripeEditText getFocusRequestOnTouch(int touchX) {
+        int frameStart = mFrameLayout.getLeft();
+
+        if (mCardNumberIsViewed) {
+            // Then our view is
+            // |CARDVIEW||space||DATEVIEW|
+
+            if (touchX < frameStart + mPlacementParameters.cardWidth) {
+                // Then the card edit view will already handle this touch.
+                return null;
+            } else if (touchX < mPlacementParameters.cardTouchBufferLimit){
+                // Then we want to act like this was a touch on the card view
+                return mCardNumberEditText;
+            } else if (touchX < mPlacementParameters.dateStartPosition) {
+                // Then we act like this was a touch on the date editor.
+                return mExpiryDateEditText;
+            } else {
+                // Then the date editor will already handle this touch.
+                return null;
+            }
+        } else {
+            // Our view is
+            // |PEEK||space||DATE||space||CVC
+            if (touchX < frameStart + mPlacementParameters.peekCardWidth) {
+                // This was a touch on the card number editor, so we don't need to hanlde it.
+                return null;
+            } else if( touchX < mPlacementParameters.cardTouchBufferLimit) {
+                // Then we need to act like the user touched the card editor
+                return mCardNumberEditText;
+            } else if (touchX < mPlacementParameters.dateStartPosition) {
+                // Then we need to act like this was a touch on the date editor
+                return mExpiryDateEditText;
+            } else if (touchX < mPlacementParameters.dateStartPosition + mPlacementParameters.dateWidth) {
+                // Just a regular touch on the date editor.
+                return null;
+            } else if (touchX < mPlacementParameters.dateRightTouchBufferLimit) {
+                // We need to act like this was a touch on the date editor
+                return mExpiryDateEditText;
+            } else if (touchX < mPlacementParameters.cvcStartPosition) {
+                // We need to act like this was a touch on the cvc editor.
+                return mCvcNumberEditText;
+            } else {
+                return null;
+            }
+        }
+    }
     void setDimensionOverrideSettings(DimensionOverrideSettings dimensonOverrides) {
         mDimensionOverrides = dimensonOverrides;
     }
