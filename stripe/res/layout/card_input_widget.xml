@@ -10,7 +10,7 @@
         android:layout_marginBottom="@dimen/card_icon_padding"
         android:layout_marginEnd="@dimen/card_icon_padding"
         android:layout_marginRight="@dimen/card_icon_padding"
-        android:src="@drawable/stp_card_placeholder_template"
+        android:src="@drawable/ic_unknown"
         />
 
     <FrameLayout
