@@ -225,7 +225,7 @@ public class CardInputWidget extends LinearLayout {
             // Our view is
             // |PEEK||space||DATE||space||CVC|
             if (touchX < frameStart + mPlacementParameters.peekCardWidth) {
-                // This was a touch on the card number editor, so we don't need to hanlde it.
+                // This was a touch on the card number editor, so we don't need to handle it.
                 return null;
             } else if( touchX < mPlacementParameters.cardTouchBufferLimit) {
                 // Then we need to act like the user touched the card editor

@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -96,6 +97,13 @@ public class CardInputWidgetTest {
         mExpiryEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_expiry_date);
         mCvcEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_cvc_number);
         mIconView = (ImageView) mCardInputWidget.findViewById(R.id.iv_card_icon);
+
+        // Set the width of the icon and its margin so that test calculations have
+        // an expected value that is repeatable on all systems.
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mIconView.getLayoutParams();
+        params.width = 48;
+        params.rightMargin = 12;
+        mIconView.setLayoutParams(params);
     }
 
     @Test
