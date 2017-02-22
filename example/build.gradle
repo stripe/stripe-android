@@ -4,7 +4,7 @@ repositories {
     mavenCentral()
 }
 
-def android_support_version = '25.1.0'
+def android_support_version = '25.1.1'
 
 dependencies {
     compile project(':stripe')
@@ -19,7 +19,7 @@ dependencies {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 14
