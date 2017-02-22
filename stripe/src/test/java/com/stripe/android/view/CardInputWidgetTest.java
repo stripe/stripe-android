@@ -82,8 +82,6 @@ public class CardInputWidgetTest {
         mCardInputWidget = ((CardInputTestActivity) activityController.get()).getCardInputWidget();
         mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
 
-        activityController.visible().resume();
-
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
@@ -102,6 +100,7 @@ public class CardInputWidgetTest {
         params.width = 48;
         params.rightMargin = 12;
         mIconView.setLayoutParams(params);
+        activityController.visible().resume();
     }
 
     @Test
