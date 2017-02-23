@@ -126,7 +126,7 @@ public class StripeNetworkUtils {
         String guid =
                 provider == null
                 ? Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ANDROID_ID)
+                        Settings.Secure.ANDROID_ID)
                 : provider.getUid();
 
         if (StripeTextUtils.isBlank(guid)) {
@@ -146,6 +146,7 @@ public class StripeNetworkUtils {
         }
     }
 
+    @VisibleForTesting
     interface UidProvider {
         String getUid();
     }
