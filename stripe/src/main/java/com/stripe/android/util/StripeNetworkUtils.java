@@ -1,7 +1,11 @@
 package com.stripe.android.util;
 
+import android.content.Context;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 
+import com.stripe.android.BuildConfig;
+import com.stripe.android.Stripe;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -16,15 +20,19 @@ import java.util.Map;
  */
 public class StripeNetworkUtils {
 
+    private static final String MUID = "muid";
+    private static final String GUID = "guid";
+
     /**
      * A utility function to map the fields of a {@link Card} object into a {@link Map} we
      * can use in network communications.
      *
+     * @param context the {@link Context} used to resolve resources
      * @param card the {@link Card} to be read
      * @return a {@link Map} containing the appropriate values read from the card
      */
     @NonNull
-    public static Map<String, Object> hashMapFromCard(Card card) {
+    public static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
         Map<String, Object> tokenParams = new HashMap<>();
 
         Map<String, Object> cardParams = new HashMap<>();
@@ -49,11 +57,20 @@ public class StripeNetworkUtils {
         tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
 
         tokenParams.put(Token.TYPE_CARD, cardParams);
+        addUidParams(context, cardParams);
         return tokenParams;
     }
 
+    /**
+     * Util function for creating parameters for a bank account.
+     *
+     * @param context {@link Context} used to determine resources
+     * @param bankAccount {@link BankAccount} object used to create the paramters
+     * @return a map that can be used as parameters to create a bank account object
+     */
     @NonNull
-    public static Map<String, Object> hashMapFromBankAccount(@NonNull BankAccount bankAccount) {
+    public static Map<String, Object> hashMapFromBankAccount(@NonNull Context context,
+                                                             @NonNull BankAccount bankAccount) {
         Map<String, Object> tokenParams = new HashMap<>();
         Map<String, Object> accountParams = new HashMap<>();
 
@@ -71,6 +88,7 @@ public class StripeNetworkUtils {
         removeNullParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        addUidParams(context, accountParams);
         return tokenParams;
     }
 
@@ -83,4 +101,19 @@ public class StripeNetworkUtils {
         }
     }
 
+    static void addUidParams(@NonNull Context context, @NonNull Map<String, Object> tokenMap) {
+        String guid = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+        String hashGuid = StripeTextUtils.shaHashInput(guid);
+        String muid = context.getPackageName() + guid;
+        String hashMuid = StripeTextUtils.shaHashInput(muid);
+
+        if (!StripeTextUtils.isBlank(hashGuid)) {
+            tokenMap.put(GUID, hashGuid);
+        }
+
+        if (!StripeTextUtils.isBlank(hashMuid)) {
+            tokenMap.put(MUID, hashMuid);
+        }
+    }
 }

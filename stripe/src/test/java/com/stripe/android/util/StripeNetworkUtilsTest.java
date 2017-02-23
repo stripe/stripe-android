@@ -1,15 +1,19 @@
 package com.stripe.android.util;
 
+import android.animation.ObjectAnimator;
 import android.support.annotation.NonNull;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -117,16 +121,26 @@ public class StripeNetworkUtilsTest {
         assertFalse(bankAccountMap.containsKey("account_holder_type"));
     }
 
+    @Test
+    public void addUidParams_addsParams() {
+        Map<String, Object> existingMap = new HashMap<>();
+        StripeNetworkUtils.addUidParams(RuntimeEnvironment.application, existingMap);
+        assertEquals(2, existingMap.size());
+
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
-        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(card);
+        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(
+                RuntimeEnvironment.application, card);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("card");
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
-        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromBankAccount(bankAccount);
+        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromBankAccount(
+                RuntimeEnvironment.application, bankAccount);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("bank_account");
     }

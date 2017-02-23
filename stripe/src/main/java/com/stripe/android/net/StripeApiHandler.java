@@ -1,6 +1,7 @@
 package com.stripe.android.net;
 
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -17,6 +18,7 @@ import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +52,8 @@ public class StripeApiHandler {
     public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     public static final String CHARSET = "UTF-8";
     public static final String TOKENS = "tokens";
+    public static final String MUID = "muid";
+    public static final String GUID = "guid";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
