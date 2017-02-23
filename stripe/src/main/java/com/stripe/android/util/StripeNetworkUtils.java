@@ -3,9 +3,9 @@ package com.stripe.android.util;
 import android.content.Context;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.BuildConfig;
-import com.stripe.android.Stripe;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -33,6 +33,15 @@ public class StripeNetworkUtils {
      */
     @NonNull
     public static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
+        return hashMapFromCard(null, context, card);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static Map<String, Object> hashMapFromCard(
+            @Nullable UidProvider provider,
+            @NonNull Context context,
+            Card card) {
         Map<String, Object> tokenParams = new HashMap<>();
 
         Map<String, Object> cardParams = new HashMap<>();
@@ -57,7 +66,8 @@ public class StripeNetworkUtils {
         tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
 
         tokenParams.put(Token.TYPE_CARD, cardParams);
-        addUidParams(context, cardParams);
+
+        addUidParams(provider, context, tokenParams);
         return tokenParams;
     }
 
@@ -71,6 +81,15 @@ public class StripeNetworkUtils {
     @NonNull
     public static Map<String, Object> hashMapFromBankAccount(@NonNull Context context,
                                                              @NonNull BankAccount bankAccount) {
+        return hashMapFromBankAccount(null, context, bankAccount);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static Map<String, Object> hashMapFromBankAccount(
+            @Nullable UidProvider provider,
+            @NonNull Context context,
+            @NonNull BankAccount bankAccount) {
         Map<String, Object> tokenParams = new HashMap<>();
         Map<String, Object> accountParams = new HashMap<>();
 
@@ -88,7 +107,7 @@ public class StripeNetworkUtils {
         removeNullParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
-        addUidParams(context, accountParams);
+        addUidParams(provider, context, tokenParams);
         return tokenParams;
     }
 
@@ -101,19 +120,35 @@ public class StripeNetworkUtils {
         }
     }
 
-    static void addUidParams(@NonNull Context context, @NonNull Map<String, Object> tokenMap) {
-        String guid = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
+    @SuppressWarnings("HardwareIds")
+    static void addUidParams(
+            @Nullable UidProvider provider,
+            @NonNull Context context,
+            @NonNull Map<String, Object> params) {
+        String guid =
+                provider == null
+                ? Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ANDROID_ID)
+                : provider.getUid();
+
+        if (StripeTextUtils.isBlank(guid)) {
+            return;
+        }
+
         String hashGuid = StripeTextUtils.shaHashInput(guid);
-        String muid = context.getPackageName() + guid;
+        String muid = context.getApplicationContext().getPackageName() + guid;
         String hashMuid = StripeTextUtils.shaHashInput(muid);
 
         if (!StripeTextUtils.isBlank(hashGuid)) {
-            tokenMap.put(GUID, hashGuid);
+            params.put(GUID, hashGuid);
         }
 
         if (!StripeTextUtils.isBlank(hashMuid)) {
-            tokenMap.put(MUID, hashMuid);
+            params.put(MUID, hashMuid);
         }
+    }
+
+    interface UidProvider {
+        String getUid();
     }
 }

@@ -1,5 +1,6 @@
 package com.stripe.example.module;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
@@ -29,6 +30,7 @@ public class DependencyHandler {
 
     private AsyncTaskTokenController mAsyncTaskController;
     private CardInputWidget mCardInputWidget;
+    private Context mContext;
     private ErrorDialogHandler mErrorDialogHandler;
     private IntentServiceTokenController mIntentServiceTokenController;
     private ListViewController mListViewController;
@@ -41,6 +43,7 @@ public class DependencyHandler {
             ListView outputListView) {
 
         mCardInputWidget = cardInputWidget;
+        mContext = activity.getBaseContext();
 
         mProgresDialogController =
                 new ProgressDialogController(activity.getSupportFragmentManager());
@@ -63,6 +66,7 @@ public class DependencyHandler {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
                     mCardInputWidget,
+                    mContext,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -112,6 +116,7 @@ public class DependencyHandler {
             mRxTokenController = new RxTokenController(
                     button,
                     mCardInputWidget,
+                    mContext,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,

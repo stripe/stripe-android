@@ -62,7 +62,7 @@ public class TokenIntentService extends IntentService {
             String publishableKey = intent.getStringExtra(EXTRA_PUBLISHABLE_KEY);
             Card card = new Card(cardNumber, month, year, cvc);
 
-            Stripe stripe = new Stripe();
+            Stripe stripe = new Stripe(this);
             try {
                 token = stripe.createTokenSynchronous(card, publishableKey);
             } catch (StripeException stripeEx) {

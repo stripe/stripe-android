@@ -19,6 +19,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link StripeNetworkUtils}
@@ -124,9 +125,16 @@ public class StripeNetworkUtilsTest {
     @Test
     public void addUidParams_addsParams() {
         Map<String, Object> existingMap = new HashMap<>();
-        StripeNetworkUtils.addUidParams(RuntimeEnvironment.application, existingMap);
+        StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+            @Override
+            public String getUid() {
+                return "abc123";
+            }
+        };
+        StripeNetworkUtils.addUidParams(provider, RuntimeEnvironment.application, existingMap);
         assertEquals(2, existingMap.size());
-
+        assertTrue(existingMap.containsKey("muid"));
+        assertTrue(existingMap.containsKey("guid"));
     }
 
     @SuppressWarnings("unchecked")

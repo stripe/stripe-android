@@ -228,7 +228,11 @@ public class StripeTextUtils {
      * @return a hexadecimal string
      */
     @Nullable
-    public static String shaHashInput(@NonNull @Size(min = 1) String toHash) {
+    public static String shaHashInput(@Nullable String toHash) {
+        if (StripeTextUtils.isBlank(toHash)) {
+            return null;
+        }
+
         String hash;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");

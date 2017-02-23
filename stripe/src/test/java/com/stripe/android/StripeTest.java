@@ -1,9 +1,7 @@
 package com.stripe.android;
 
-import android.app.Activity;
 import android.content.Context;
 
-import com.google.android.apps.common.testing.accessibility.framework.proto.FrameworkProtos;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
@@ -12,17 +10,15 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
-import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 import java.util.Map;
@@ -63,9 +59,12 @@ public class StripeTest {
     private Card mCard;
     private int mYear;
 
-    private Context mContext;
+    @Mock Context mContext;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         String cvc = "123";
         int month = 12;
         Calendar rightNow = Calendar.getInstance();
@@ -77,11 +76,6 @@ public class StripeTest {
                 "US",
                 "usd",
                 TEST_BANK_ROUTING_NUMBER);
-
-        ActivityController activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class)
-                        .create().start();
-        mContext = (Activity) activityController.get();
     }
 
     @Test(expected = AuthenticationException.class)
@@ -101,43 +95,43 @@ public class StripeTest {
 
     @Test(expected = AuthenticationException.class)
     public void setDefaultPublishableKeyShouldFailWhenNull() throws AuthenticationException {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(null);
     }
 
     @Test(expected = AuthenticationException.class)
     public void setDefaultPublishableKeyShouldFailWhenEmpty() throws AuthenticationException {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey("");
     }
 
     @Test(expected = AuthenticationException.class)
     public void setDefaultPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
     }
 
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNull() {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.createToken((Card) null, null);
     }
 
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNullCard() {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.createToken((Card) null, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNullTokencallback() {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.createToken(DEFAULT_CARD, null);
     }
 
     @Test
     public void createTokenShouldFailWithNullPublishableKey() {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         stripe.createToken(DEFAULT_CARD, new ErrorTokenCallback(AuthenticationException.class));
     }
 
@@ -145,7 +139,7 @@ public class StripeTest {
     public void createTokenShouldCallTokenCreator() {
         final boolean[] tokenCreatorCalled = { false };
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, DEFAULT_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
             stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -169,7 +163,7 @@ public class StripeTest {
         };
 
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, DEFAULT_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
             stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -189,7 +183,7 @@ public class StripeTest {
     public void createTokenShouldUseProvidedKey() {
         final String expectedPublishableKey = "pk_this_one";
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, DEFAULT_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
             stripe.mTokenCreator = new Stripe.TokenCreator() {
                 @Override
                 public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -208,7 +202,7 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidData_returnsToken() {
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(mCard);
 
             assertNotNull(token);
@@ -232,7 +226,7 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createBankAccountTokenSynchronous(mBankAccount);
             assertNotNull(token);
             assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
@@ -257,7 +251,7 @@ public class StripeTest {
     public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
         try {
             // This key won't work for a real connection to the api.
-            Stripe stripe = new Stripe(RuntimeEnvironment.application,DEFAULT_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
             stripe.createTokenSynchronous(mCard);
             fail("Expecting an error, but did not get one.");
         } catch (AuthenticationException authEx) {
@@ -270,7 +264,7 @@ public class StripeTest {
 
     @Test
     public void createTokenSynchronous_withoutKey_shouldNotLogAnything() {
-        Stripe stripe = new Stripe(RuntimeEnvironment.application);
+        Stripe stripe = new Stripe(mContext);
         TestLoggingListener listener = new TestLoggingListener();
         stripe.setLoggingResponseListener(listener);
         try {
@@ -286,7 +280,7 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_shouldLogTokenCreation_andReturnToken() {
         try {
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             TestLoggingListener testLoggingListener = new TestLoggingListener();
             stripe.setLoggingResponseListener(testLoggingListener);
 
@@ -313,7 +307,7 @@ public class StripeTest {
         try {
             // This card is missing quite a few numbers.
             Card card = new Card("42424242", 12, mYear, "123");
-            Stripe stripe = new Stripe(RuntimeEnvironment.application, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(card);
             fail("Expecting an exception, but created a token instead: " + token.toString());
         } catch (AuthenticationException authEx) {

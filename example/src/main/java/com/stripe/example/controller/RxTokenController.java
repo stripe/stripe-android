@@ -1,5 +1,6 @@
 package com.stripe.example.controller;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.Button;
 
@@ -26,6 +27,7 @@ public class RxTokenController {
 
     private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
+    private Context mContext;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -34,6 +36,7 @@ public class RxTokenController {
     public RxTokenController (
             @NonNull Button button,
             @NonNull CardInputWidget cardInputWidget,
+            @NonNull Context context,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
@@ -41,6 +44,7 @@ public class RxTokenController {
         mCompositeSubscription = new CompositeSubscription();
 
         mCardInputWidget = cardInputWidget;
+        mContext = context;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -72,7 +76,7 @@ public class RxTokenController {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
-        final Stripe stripe = new Stripe();
+        final Stripe stripe = new Stripe(mContext);
 
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
