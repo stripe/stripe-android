@@ -1,7 +1,8 @@
-3.0.0 2017-02-17
+3.0.0 2017-02-25
     Added a card input widget to allow easy UI for collecting card data.
-    Increased the minimum SDK version to 11 (needed for animation classes).
-    
+    *breaking* Increased the minimum SDK version to 11 (needed for animation classes).
+    *breaking* Added required Context argument to Stripe constructor for resolving resources
+
 2.1.0 2017-01-19
     Added bindings to allow creation of bank account tokens.
 
