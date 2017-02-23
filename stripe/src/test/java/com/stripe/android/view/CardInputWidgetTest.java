@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -84,8 +82,6 @@ public class CardInputWidgetTest {
         mCardInputWidget = ((CardInputTestActivity) activityController.get()).getCardInputWidget();
         mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
 
-        activityController.visible().resume();
-
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
@@ -104,6 +100,7 @@ public class CardInputWidgetTest {
         params.width = 48;
         params.rightMargin = 12;
         mIconView.setLayoutParams(params);
+        activityController.visible().resume();
     }
 
     @Test
@@ -327,20 +324,16 @@ public class CardInputWidgetTest {
     }
 
     @Test
-    public void onUpdateIcon_forCommonLengthBrand_callsSetImageResourceAndSetsLengthOnCvc() {
+    public void onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        Bitmap oldBitmap  = ((BitmapDrawable) mIconView.getDrawable()).getBitmap();
         mCardNumberEditText.append(Card.PREFIXES_VISA[0]);
-        assertNotEquals(oldBitmap, ((BitmapDrawable) mIconView.getDrawable()).getBitmap());
         assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 3));
     }
 
     @Test
-    public void onUpdateText_forAmExPrefix_callsSetImageResourceAndSetsLengthOnCvc() {
-        Bitmap oldBitmap  = ((BitmapDrawable) mIconView.getDrawable()).getBitmap();
+    public void onUpdateText_forAmExPrefix_setsLengthOnCvc() {
         mCardNumberEditText.append(Card.PREFIXES_AMERICAN_EXPRESS[0]);
-        assertNotEquals(oldBitmap, ((BitmapDrawable) mIconView.getDrawable()).getBitmap());
         assertTrue(ViewTestUtils.hasMaxLength(mCvcEditText, 4));
     }
 
