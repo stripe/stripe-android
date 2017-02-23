@@ -36,9 +36,8 @@ public class StripeNetworkUtils {
         return hashMapFromCard(null, context, card);
     }
 
-    @VisibleForTesting
     @NonNull
-    static Map<String, Object> hashMapFromCard(
+    private static Map<String, Object> hashMapFromCard(
             @Nullable UidProvider provider,
             @NonNull Context context,
             Card card) {
@@ -84,9 +83,8 @@ public class StripeNetworkUtils {
         return hashMapFromBankAccount(null, context, bankAccount);
     }
 
-    @VisibleForTesting
     @NonNull
-    static Map<String, Object> hashMapFromBankAccount(
+    private static Map<String, Object> hashMapFromBankAccount(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull BankAccount bankAccount) {
