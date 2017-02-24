@@ -9,6 +9,7 @@ import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -283,5 +284,17 @@ public class StripeTextUtilsTest {
     public void removeSpacesAndHyphens_removesMultipleSpacesAndHyphens() {
         assertEquals("123",
                 StripeTextUtils.removeSpacesAndHyphens(" -    1-  --- 2   3- - - -------- "));
+    }
+
+    @Test
+    public void shaHashInput_withNullInput_returnsNull() {
+        assertNull(StripeTextUtils.shaHashInput("  "));
+    }
+
+    @Test
+    public void shaHashInput_withText_returnsDifferentText() {
+        String unhashedText = "iamtheverymodelofamodernmajorgeneral";
+        String hashedText = StripeTextUtils.shaHashInput(unhashedText);
+        assertNotEquals(unhashedText, hashedText);
     }
 }

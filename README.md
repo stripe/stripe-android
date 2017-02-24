@@ -64,13 +64,13 @@ You can get all your keys from [your account page](https://manage.stripe.com/#ac
 This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
 
 ```java
-new Stripe("YOUR_PUBLISHABLE_KEY");
+new Stripe(context, "YOUR_PUBLISHABLE_KEY");
 ```
 
 or
 
 ```java
-new Stripe().setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
+new Stripe(context).setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
 ```
 
 ### createToken
@@ -124,11 +124,12 @@ stripe.createToken(
     }
 );
 ```
-createToken is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
+
+`createToken` is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
 
 ### createTokenSynchronous
 
-The createTokenSynchronous method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService. **Note: do not call this method on the main thread or your app will crash!**
+The `createTokenSynchronous` method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService. **Note: do not call this method on the main thread or your app will crash!**
 
 #### RxJava Example
 ```java
@@ -190,6 +191,7 @@ Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
         mPublishableKey);
 mActivity.startService(tokenServiceIntent);
 ```
+
 Your IntentService can then perform the following in its `onHandleIntent` method.
 ```java
 @Override
@@ -223,6 +225,7 @@ protected void onHandleIntent(Intent intent) {
     LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
 }
 ```
+
 Registering a local BroadcastReceiver in your activity then allows you to handle the results.
 ```java
 private class TokenBroadcastReceiver extends BroadcastReceiver {

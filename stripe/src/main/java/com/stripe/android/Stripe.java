@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 
@@ -66,21 +67,28 @@ public class Stripe {
         }
     };
 
+    private Context mContext;
     private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
 
     /**
-     * A blank constructor to set the key later.
+     * A constructor with only context, to set the key later.
+     *
+     * @param context {@link Context} for resolving resources
      */
-    public Stripe() { }
+    public Stripe(@NonNull Context context) {
+        mContext = context;
+    }
 
     /**
      * Constructor with publishable key.
      *
+     * @param context {@link Context} for resolving resources
      * @param publishableKey the client's publishable key
      * @throws AuthenticationException if the key is invalid
      */
-    public Stripe(String publishableKey) throws AuthenticationException {
+    public Stripe(@NonNull Context context, String publishableKey) throws AuthenticationException {
+        mContext = context;
         setDefaultPublishableKey(publishableKey);
     }
 
@@ -117,7 +125,7 @@ public class Stripe {
                     "Required parameter: 'bankAccount' is requred to create a token");
         }
 
-        createTokenFromParams(hashMapFromBankAccount(bankAccount), publishableKey, executor, callback);
+        createTokenFromParams(hashMapFromBankAccount(mContext, bankAccount), publishableKey, executor, callback);
     }
 
     /**
@@ -172,7 +180,7 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
-                hashMapFromBankAccount(bankAccount), requestOptions, mLoggingResponseListener);
+                hashMapFromBankAccount(mContext, bankAccount), requestOptions, mLoggingResponseListener);
     }
 
     /**
@@ -234,7 +242,7 @@ public class Stripe {
                     "Required Parameter: 'card' is required to create a token");
         }
 
-        createTokenFromParams(hashMapFromCard(card), publishableKey, executor, callback);
+        createTokenFromParams(hashMapFromCard(mContext, card), publishableKey, executor, callback);
     }
 
     /**
@@ -285,7 +293,7 @@ public class Stripe {
 
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
-                hashMapFromCard(card),
+                hashMapFromCard(mContext, card),
                 requestOptions,
                 mLoggingResponseListener);
     }
