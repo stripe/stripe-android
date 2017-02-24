@@ -130,6 +130,12 @@ public class StripeNetworkUtilsTest {
             public String getUid() {
                 return "abc123";
             }
+
+            @Override
+            public String getPackageName() {
+                return "com.example.main";
+            }
+
         };
         StripeNetworkUtils.addUidParams(provider, RuntimeEnvironment.application, existingMap);
         assertEquals(2, existingMap.size());

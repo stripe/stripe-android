@@ -105,7 +105,6 @@ public class StripeNetworkUtils {
         removeNullParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
-        addUidParams(provider, context, tokenParams);
         return tokenParams;
     }
 
@@ -134,7 +133,10 @@ public class StripeNetworkUtils {
         }
 
         String hashGuid = StripeTextUtils.shaHashInput(guid);
-        String muid = context.getApplicationContext().getPackageName() + guid;
+        String muid =
+                provider == null
+                        ? context.getApplicationContext().getPackageName() + guid
+                        : provider.getPackageName() + guid;
         String hashMuid = StripeTextUtils.shaHashInput(muid);
 
         if (!StripeTextUtils.isBlank(hashGuid)) {
@@ -149,5 +151,6 @@ public class StripeNetworkUtils {
     @VisibleForTesting
     interface UidProvider {
         String getUid();
+        String getPackageName();
     }
 }
