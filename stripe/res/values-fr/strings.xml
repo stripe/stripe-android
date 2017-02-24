@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="acc_label_card_number">"numéro de carte"</string>
+    <string name="acc_label_expiry_date">"date d’expiration"</string>
+    <string name="expiry_date_hint">MM/AA</string>
+</resources>

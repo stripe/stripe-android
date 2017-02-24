@@ -1,24 +1,29 @@
 apply plugin: 'com.android.library'
 
+def android_support_version = '25.1.1'
+
 configurations {
     javadocDeps
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:25.1.0'
+    compile 'com.android.support:support-annotations:' + android_support_version
+    compile 'com.android.support:support-v4:' + android_support_version
 
-    javadocDeps 'com.android.support:support-annotations:25.1.0'
+    javadocDeps 'com.android.support:support-annotations:' + android_support_version
+    javadocDeps 'com.android.support:support-v4:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
 
     testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.1.4"
+    testCompile 'org.mockito:mockito-core:2.6.3'
+    testCompile 'org.robolectric:robolectric:3.2.1'
 }
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '25.0.2'
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 11
         targetSdkVersion 25
     }
     sourceSets {

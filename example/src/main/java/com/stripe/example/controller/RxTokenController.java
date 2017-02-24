@@ -1,5 +1,6 @@
 package com.stripe.example.controller;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.Button;
 
@@ -7,6 +8,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.view.CardInputWidget;
 
 import java.util.concurrent.Callable;
 
@@ -17,15 +19,15 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-
 /**
  * Class containing all the logic needed to create a token and listen for the results using
  * RxJava.
  */
 public class RxTokenController {
 
-    private CardInformationReader mCardInformationHolder;
+    private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
+    private Context mContext;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -33,14 +35,16 @@ public class RxTokenController {
 
     public RxTokenController (
             @NonNull Button button,
-            @NonNull CardInformationReader cardInformationReader,
+            @NonNull CardInputWidget cardInputWidget,
+            @NonNull Context context,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
         mCompositeSubscription = new CompositeSubscription();
 
-        mCardInformationHolder = cardInformationReader;
+        mCardInputWidget = cardInputWidget;
+        mContext = context;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -63,11 +67,16 @@ public class RxTokenController {
         if  (mCompositeSubscription != null) {
             mCompositeSubscription.unsubscribe();
         }
+        mCardInputWidget = null;
     }
 
     private void saveCard() {
-        final Card cardToSave = mCardInformationHolder.readCardData();
-        final Stripe stripe = new Stripe();
+        final Card cardToSave = mCardInputWidget.getCard();
+        if (cardToSave == null) {
+            mErrorDialogHandler.showError("Invalid Card Data");
+            return;
+        }
+        final Stripe stripe = new Stripe(mContext);
 
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.

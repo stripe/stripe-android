@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="error_text_light_theme">#ffeb1c26</color>
+    <color name="error_text_dark_theme">#ffe85746</color>
+</resources>

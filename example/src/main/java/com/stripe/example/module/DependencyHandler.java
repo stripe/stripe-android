@@ -1,15 +1,14 @@
 package com.stripe.example.module;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.controller.AsyncTaskTokenController;
-import com.stripe.example.controller.CardInformationReader;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.IntentServiceTokenController;
 import com.stripe.example.controller.ListViewController;
@@ -30,7 +29,8 @@ public class DependencyHandler {
     private static final String PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
 
     private AsyncTaskTokenController mAsyncTaskController;
-    private CardInformationReader mCardInformationReader;
+    private CardInputWidget mCardInputWidget;
+    private Context mContext;
     private ErrorDialogHandler mErrorDialogHandler;
     private IntentServiceTokenController mIntentServiceTokenController;
     private ListViewController mListViewController;
@@ -39,19 +39,11 @@ public class DependencyHandler {
 
     public DependencyHandler(
             AppCompatActivity activity,
-            EditText cardNumberEditText,
-            Spinner monthSpinner,
-            Spinner yearSpinner,
-            EditText cvcEditText,
-            Spinner currencySpinner,
+            CardInputWidget cardInputWidget,
             ListView outputListView) {
 
-        mCardInformationReader = new CardInformationReader(
-                cardNumberEditText,
-                monthSpinner,
-                yearSpinner,
-                cvcEditText,
-                currencySpinner);
+        mCardInputWidget = cardInputWidget;
+        mContext = activity.getBaseContext();
 
         mProgresDialogController =
                 new ProgressDialogController(activity.getSupportFragmentManager());
@@ -73,7 +65,8 @@ public class DependencyHandler {
         if (mAsyncTaskController == null) {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
-                    mCardInformationReader,
+                    mCardInputWidget,
+                    mContext,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -99,7 +92,7 @@ public class DependencyHandler {
             mIntentServiceTokenController = new IntentServiceTokenController(
                     appCompatActivity,
                     button,
-                    mCardInformationReader,
+                    mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -122,7 +115,8 @@ public class DependencyHandler {
         if (mRxTokenController == null) {
             mRxTokenController = new RxTokenController(
                     button,
-                    mCardInformationReader,
+                    mCardInputWidget,
+                    mContext,
                     mErrorDialogHandler,
                     mListViewController,
                     mProgresDialogController,
@@ -135,6 +129,11 @@ public class DependencyHandler {
      * Clear all the references so that we can start over again.
      */
     public void clearReferences() {
+
+        if (mAsyncTaskController != null) {
+            mAsyncTaskController.detach();
+        }
+
         if (mRxTokenController != null) {
             mRxTokenController.detach();
         }

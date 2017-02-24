@@ -1,15 +1,20 @@
 package com.stripe.android.model;
 
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.DateUtils;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -84,6 +89,7 @@ public class Card {
     private String fingerprint;
     private String country;
     private String currency;
+    @NonNull private List<String> loggingTokens = new ArrayList<>();
 
     /**
      * Builder class for a {@link Card} model.
@@ -360,25 +366,7 @@ public class Card {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateNumber() {
-        if (StripeTextUtils.isBlank(number)) {
-            return false;
-        }
-
-        String rawNumber = number.trim().replaceAll("\\s+|-", "");
-        if (StripeTextUtils.isBlank(rawNumber)
-                || !StripeTextUtils.isWholePositiveNumber(rawNumber)
-                || !isValidLuhnNumber(rawNumber)) {
-            return false;
-        }
-
-        String updatedType = getBrand();
-        if (AMERICAN_EXPRESS.equals(updatedType)) {
-            return rawNumber.length() == MAX_LENGTH_AMERICAN_EXPRESS;
-        } else if (DINERS_CLUB.equals(updatedType)) {
-            return rawNumber.length() == MAX_LENGTH_DINERS_CLUB;
-        } else {
-            return rawNumber.length() == MAX_LENGTH_STANDARD;
-        }
+        return CardUtils.isValidCardNumber(number);
     }
 
     /**
@@ -439,6 +427,26 @@ public class Card {
      */
     public String getNumber() {
         return number;
+    }
+
+    /**
+     * @return the {@link List} of logging tokens associated with this {@link Card} object
+     */
+    @NonNull
+    public List<String> getLoggingTokens() {
+        return loggingTokens;
+    }
+
+    /**
+     * Add a logging token to this {@link Card} object.
+     *
+     * @param loggingToken a token to be logged with this card
+     * @return {@code this}, for chaining purposes
+     */
+    @NonNull
+    public Card addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
+        loggingTokens.add(loggingToken);
+        return this;
     }
 
     /**
@@ -726,32 +734,6 @@ public class Card {
         this.funding = StripeTextUtils.asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
-    }
-
-    private boolean isValidLuhnNumber(String number) {
-        boolean isOdd = true;
-        int sum = 0;
-
-        for (int index = number.length() - 1; index >= 0; index--) {
-            char c = number.charAt(index);
-            if (!Character.isDigit(c)) {
-                return false;
-            }
-            int digitInteger = Integer.parseInt("" + c);
-            isOdd = !isOdd;
-
-            if (isOdd) {
-                digitInteger *= 2;
-            }
-
-            if (digitInteger > 9) {
-                digitInteger -= 9;
-            }
-
-            sum += digitInteger;
-        }
-
-        return sum % 10 == 0;
     }
 
     private String normalizeCardNumber(String number) {

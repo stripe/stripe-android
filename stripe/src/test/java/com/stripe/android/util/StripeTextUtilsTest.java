@@ -1,6 +1,5 @@
 package com.stripe.android.util;
 
-import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -244,5 +244,57 @@ public class StripeTextUtilsTest {
     @Test
     public void asFundingType_whenGobbledegook_returnsUnkown() {
         assertEquals(Card.FUNDING_UNKNOWN, StripeTextUtils.asFundingType("personal iou"));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_withSpacesInInterior_returnsSpacelessNumber() {
+        String testCardNumber = "4242 4242 4242 4242";
+        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_withExcessiveSpacesInInterior_returnsSpacelessNumber() {
+        String testCardNumber = "4  242                  4 242 4  242 42 4   2";
+        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_withSpacesOnExterior_returnsSpacelessNumber() {
+        String testCardNumber = "      42424242 4242 4242    ";
+        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_whenEmpty_returnsNull () {
+        assertNull(StripeTextUtils.removeSpacesAndHyphens("        "));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_whenNull_returnsNull() {
+        assertNull(StripeTextUtils.removeSpacesAndHyphens(null));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_withHyphenatedCardNumber_returnsCardNumber() {
+        assertEquals("4242424242424242",
+                StripeTextUtils.removeSpacesAndHyphens("4242-4242-4242-4242"));
+    }
+
+    @Test
+    public void removeSpacesAndHyphens_removesMultipleSpacesAndHyphens() {
+        assertEquals("123",
+                StripeTextUtils.removeSpacesAndHyphens(" -    1-  --- 2   3- - - -------- "));
+    }
+
+    @Test
+    public void shaHashInput_withNullInput_returnsNull() {
+        assertNull(StripeTextUtils.shaHashInput("  "));
+    }
+
+    @Test
+    public void shaHashInput_withText_returnsDifferentText() {
+        String unhashedText = "iamtheverymodelofamodernmajorgeneral";
+        String hashedText = StripeTextUtils.shaHashInput(unhashedText);
+        assertNotEquals(unhashedText, hashedText);
     }
 }

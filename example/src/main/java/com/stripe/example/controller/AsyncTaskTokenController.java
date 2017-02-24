@@ -1,5 +1,6 @@
 package com.stripe.example.controller;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
@@ -8,6 +9,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.view.CardInputWidget;
 
 /**
  * Logic needed to create tokens using the {@link android.os.AsyncTask} methods included in the
@@ -15,7 +17,8 @@ import com.stripe.android.model.Token;
  */
 public class AsyncTaskTokenController {
 
-    private CardInformationReader mCardInformationReader;
+    private CardInputWidget mCardInputWidget;
+    private Context mContext;
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
@@ -23,12 +26,14 @@ public class AsyncTaskTokenController {
 
     public AsyncTaskTokenController(
             @NonNull Button button,
-            @NonNull CardInformationReader cardInformationReader,
+            @NonNull CardInputWidget cardInputWidget,
+            @NonNull Context context,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController,
             @NonNull String publishableKey) {
-        mCardInformationReader = cardInformationReader;
+        mCardInputWidget = cardInputWidget;
+        mContext = context;
         mErrorDialogHandler = errorDialogHandler;
         mPublishableKey = publishableKey;
         mProgressDialogController = progressDialogController;
@@ -42,10 +47,18 @@ public class AsyncTaskTokenController {
         });
     }
 
+    public void detach() {
+        mCardInputWidget = null;
+    }
+
     private void saveCard() {
-        Card cardToSave = mCardInformationReader.readCardData();
+        Card cardToSave = mCardInputWidget.getCard();
+        if (cardToSave == null) {
+            mErrorDialogHandler.showError("Invalid Card Data");
+            return;
+        }
         mProgressDialogController.startProgress();
-        new Stripe().createToken(
+        new Stripe(mContext).createToken(
                 cardToSave,
                 mPublishableKey,
                 new TokenCallback() {
