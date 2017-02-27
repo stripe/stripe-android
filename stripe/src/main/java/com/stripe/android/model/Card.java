@@ -16,7 +16,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * A model object representing a Card in the Android SDK.
  */
@@ -519,7 +518,6 @@ public class Card {
     /**
      * @param name sets the cardholder {@link #name} for this card
      */
-    @Deprecated
     public void setName(String name) {
         this.name = name;
     }
@@ -534,7 +532,6 @@ public class Card {
     /**
      * @param addressLine1 sets the {@link #addressLine1} for this card
      */
-    @Deprecated
     public void setAddressLine1(String addressLine1) {
         this.addressLine1 = addressLine1;
     }
@@ -549,7 +546,6 @@ public class Card {
     /**
      * @param addressLine2 sets the {@link #addressLine2} for this card
      */
-    @Deprecated
     public void setAddressLine2(String addressLine2) {
         this.addressLine2 = addressLine2;
     }
@@ -564,7 +560,6 @@ public class Card {
     /**
      * @param addressCity sets the {@link #addressCity} for this card
      */
-    @Deprecated
     public void setAddressCity(String addressCity) {
         this.addressCity = addressCity;
     }
@@ -579,7 +574,6 @@ public class Card {
     /**
      * @param addressZip sets the {@link #addressZip} for this card
      */
-    @Deprecated
     public void setAddressZip(String addressZip) {
         this.addressZip = addressZip;
     }
@@ -594,7 +588,6 @@ public class Card {
     /**
      * @param addressState sets the {@link #addressState} for this card
      */
-    @Deprecated
     public void setAddressState(String addressState) {
         this.addressState = addressState;
     }
@@ -609,7 +602,6 @@ public class Card {
     /**
      * @param addressCountry sets the {@link #addressCountry} for this card
      */
-    @Deprecated
     public void setAddressCountry(String addressCountry) {
         this.addressCountry = addressCountry;
     }
@@ -624,7 +616,6 @@ public class Card {
     /**
      * @param currency sets the {@link #currency} of this card. Only supported for Managed accounts.
      */
-    @Deprecated
     public void setCurrency(String currency) {
         this.currency = currency;
     }
