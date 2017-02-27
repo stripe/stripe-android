@@ -454,6 +454,7 @@ public class Card {
      *
      * @param number the new {@link #number}
      */
+    @Deprecated
     public void setNumber(String number) {
         this.number = number;
         this.brand = null;
@@ -470,6 +471,7 @@ public class Card {
     /**
      * @param cvc the new {@link #cvc} code for this card
      */
+    @Deprecated
     public void setCVC(String cvc) {
         this.cvc = cvc;
     }
@@ -486,6 +488,7 @@ public class Card {
     /**
      * @param expMonth sets the {@link #expMonth} for this card
      */
+    @Deprecated
     public void setExpMonth(@Nullable @IntRange(from = 1, to = 12) Integer expMonth) {
         this.expMonth = expMonth;
     }
@@ -500,6 +503,7 @@ public class Card {
     /**
      * @param expYear sets the {@link #expYear} for this card
      */
+    @Deprecated
     public void setExpYear(Integer expYear) {
         this.expYear = expYear;
     }
