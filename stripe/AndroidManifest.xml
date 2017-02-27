@@ -2,5 +2,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.android"
           android:versionCode="2"
-          android:versionName="3.0.0">
+          android:versionName="3.0.1">
 </manifest>
