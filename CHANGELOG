@@ -1,3 +1,6 @@
+3.0.1 2017-02-27
+    Removed `@Deprecated` tag from most setters on the Card object
+
 3.0.0 2017-02-25
     Added a card input widget to allow easy UI for collecting card data.
     *breaking* Increased the minimum SDK version to 11 (needed for animation classes).
