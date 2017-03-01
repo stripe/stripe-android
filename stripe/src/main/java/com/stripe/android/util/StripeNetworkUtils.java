@@ -83,32 +83,12 @@ public class StripeNetworkUtils {
         return hashMapFromBankAccount(null, context, bankAccount);
     }
 
-    @NonNull
-    private static Map<String, Object> hashMapFromBankAccount(
-            @Nullable UidProvider provider,
-            @NonNull Context context,
-            @NonNull BankAccount bankAccount) {
-        Map<String, Object> tokenParams = new HashMap<>();
-        Map<String, Object> accountParams = new HashMap<>();
-
-        accountParams.put("country", bankAccount.getCountryCode());
-        accountParams.put("currency", bankAccount.getCurrency());
-        accountParams.put("account_number", bankAccount.getAccountNumber());
-        accountParams.put("routing_number",
-                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
-        accountParams.put("account_holder_name",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
-        accountParams.put("account_holder_type",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
-
-        // Remove all null values; they cause validation errors
-        removeNullParams(accountParams);
-
-        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
-        return tokenParams;
-    }
-
-    static void removeNullParams(Map<String, Object> mapToEdit) {
+    /**
+     * Remove null values from a map. This helps with JSON conversion and validation.
+     *
+     * @param mapToEdit a {@link Map} from which to remove the keys that have {@code null} values
+     */
+    public static void removeNullParams(@NonNull Map<String, Object> mapToEdit) {
         // Remove all null values; they cause validation errors
         for (String key : new HashSet<>(mapToEdit.keySet())) {
             if (mapToEdit.get(key) == null) {
@@ -146,6 +126,31 @@ public class StripeNetworkUtils {
         if (!StripeTextUtils.isBlank(hashMuid)) {
             params.put(MUID, hashMuid);
         }
+    }
+
+    @NonNull
+    private static Map<String, Object> hashMapFromBankAccount(
+            @Nullable UidProvider provider,
+            @NonNull Context context,
+            @NonNull BankAccount bankAccount) {
+        Map<String, Object> tokenParams = new HashMap<>();
+        Map<String, Object> accountParams = new HashMap<>();
+
+        accountParams.put("country", bankAccount.getCountryCode());
+        accountParams.put("currency", bankAccount.getCurrency());
+        accountParams.put("account_number", bankAccount.getAccountNumber());
+        accountParams.put("routing_number",
+                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
+        accountParams.put("account_holder_name",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
+        accountParams.put("account_holder_type",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
+
+        // Remove all null values; they cause validation errors
+        removeNullParams(accountParams);
+
+        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        return tokenParams;
     }
 
     @VisibleForTesting
