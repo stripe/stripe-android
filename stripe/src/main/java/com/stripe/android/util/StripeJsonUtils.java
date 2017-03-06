@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
-import android.widget.LinearLayout;
-
-import com.stripe.android.Stripe;
 
 import org.json.JSONArray;
 import org.json.JSONException;

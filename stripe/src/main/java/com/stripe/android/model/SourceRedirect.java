@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
-import com.stripe.android.util.StripeJsonUtils;
-import com.stripe.android.util.StripeTextUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

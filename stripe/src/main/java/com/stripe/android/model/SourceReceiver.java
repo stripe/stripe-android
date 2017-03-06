@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -120,7 +119,7 @@ public class SourceReceiver extends StripeJsonModel {
         String address = StripeJsonUtils.optString(jsonObject, FIELD_ADDRESS);
         return new SourceReceiver(address,
                 jsonObject.optLong(FIELD_AMOUNT_CHARGED),
-                jsonObject.optInt(FIELD_AMOUNT_RECEIVED),
+                jsonObject.optLong(FIELD_AMOUNT_RECEIVED),
                 jsonObject.optLong(FIELD_AMOUNT_RETURNED));
     }
 }

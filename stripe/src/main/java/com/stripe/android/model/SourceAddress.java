@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -10,7 +9,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optCountryCode;
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 
@@ -97,7 +95,12 @@ public class SourceAddress extends StripeJsonModel {
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> hashMap = new HashMap<>();
-
+        hashMap.put(FIELD_CITY, mCity);
+        hashMap.put(FIELD_COUNTRY, mCountry);
+        hashMap.put(FIELD_LINE_1, mLine1);
+        hashMap.put(FIELD_LINE_2, mLine2);
+        hashMap.put(FIELD_POSTAL_CODE, mPostalCode);
+        hashMap.put(FIELD_STATE, mState);
         return hashMap;
     }
 
