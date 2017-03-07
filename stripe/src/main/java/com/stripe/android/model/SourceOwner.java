@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
@@ -138,7 +139,7 @@ public class SourceOwner extends StripeJsonModel {
         hashMap.put(FIELD_VERIFIED_EMAIL, mVerifiedEmail);
         hashMap.put(FIELD_VERIFIED_NAME, mVerifiedName);
         hashMap.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
-        StripeNetworkUtils.removeNullParams(hashMap);
+        removeNullParams(hashMap);
         return hashMap;
     }
 

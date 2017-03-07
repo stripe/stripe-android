@@ -19,6 +19,7 @@ import java.util.Map;
 import static com.stripe.android.util.StripeJsonUtils.optLong;
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information
@@ -300,7 +301,7 @@ public class Source extends StripeJsonModel {
         hashMap.put(FIELD_STATUS, mStatus);
         hashMap.put(FIELD_TYPE, mType);
         hashMap.put(FIELD_USAGE, mUsage);
-        StripeNetworkUtils.removeNullParams(hashMap);
+        removeNullParams(hashMap);
         return hashMap;
     }
 
