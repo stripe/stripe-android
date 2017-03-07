@@ -61,7 +61,7 @@ public class SourceOwnerTest {
     }
 
     @Test
-    public void fromJsonStringWithoutNulls_backToJson_isIdempotent() {
+    public void fromJsonStringWithoutNulls_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_OWNER_WITHOUT_NULLS);
             assertJsonEquals(rawConversion, mSourceOwner.toJson());

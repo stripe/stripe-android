@@ -50,7 +50,7 @@ public class SourceAddressTest {
     }
 
     @Test
-    public void fromJsonString_backToJson_isIdempotent() {
+    public void fromJsonString_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_ADDRESS);
             assertJsonEquals(rawConversion, mSourceAddress.toJson());

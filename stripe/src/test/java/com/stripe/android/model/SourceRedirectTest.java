@@ -43,7 +43,7 @@ public class SourceRedirectTest {
     }
 
     @Test
-    public void fromJsonString_backToJson_isIdempotent() {
+    public void fromJsonString_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_REDIRECT);
             assertJsonEquals(rawConversion, mSourceRedirect.toJson());

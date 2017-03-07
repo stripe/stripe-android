@@ -12,6 +12,10 @@ import java.util.Map;
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 
+/**
+ * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
+ * object in the Source api.
+ */
 public class SourceAddress extends StripeJsonModel {
 
     private static final String FIELD_CITY = "city";

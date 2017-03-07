@@ -111,7 +111,7 @@ public class SourceTest {
     }
 
     @Test
-    public void fromJsonString_backToJson_isIdempotent() {
+    public void fromJsonString_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
             assertJsonEquals(rawConversion, mSource.toJson());
