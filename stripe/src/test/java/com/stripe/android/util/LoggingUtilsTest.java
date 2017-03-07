@@ -1,9 +1,6 @@
 package com.stripe.android.util;
 
-import android.util.Log;
-
 import com.stripe.android.BuildConfig;
-import com.stripe.android.model.Card;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,12 +10,9 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link LoggingUtils}.
