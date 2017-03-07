@@ -1,6 +1,5 @@
 package com.stripe.android.testharness;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -40,10 +39,10 @@ public class JsonTestUtils {
             } else if (first.opt(key) instanceof JSONArray) {
                 assertTrue(second.opt(key) instanceof JSONArray);
                 assertJsonArrayEquals(first.optJSONArray(key), second.optJSONArray(key));
-            } else if (first.opt(key) instanceof Long || first.opt(key) instanceof Integer) {
-                assertTrue(second.opt(key) instanceof Long ||
-                        second.opt(key) instanceof Integer);
-                assertNumericFuzzyEquals(first.opt(key), second.opt(key));
+            } else if (first.opt(key) instanceof Number) {
+                assertTrue(second.opt(key) instanceof Number);
+                assertEquals(((Number) first.opt(key)).longValue(),
+                             ((Number) second.opt(key)).longValue());
             } else {
                 assertEquals(first.opt(key), second.opt(key));
             }
@@ -68,10 +67,10 @@ public class JsonTestUtils {
             } else if (first.opt(i) instanceof JSONArray) {
                 assertTrue(second.opt(i) instanceof JSONArray);
                 assertJsonArrayEquals(first.optJSONArray(i), second.optJSONArray(i));
-            } else if (first.opt(i) instanceof Long || first.opt(i) instanceof Integer) {
-                assertTrue(second.opt(i) instanceof Long ||
-                        second.opt(i) instanceof Integer);
-                assertNumericFuzzyEquals(first.opt(i), second.opt(i));
+            } else if (first.opt(i) instanceof Number) {
+                assertTrue(second.opt(i) instanceof Number);
+                assertEquals(((Number) first.opt(i)).longValue(),
+                             ((Number) second.opt(i)).longValue());
             } else {
                 assertEquals(first.opt(i), second.opt(i));
             }
@@ -114,25 +113,6 @@ public class JsonTestUtils {
             Object firstObject = first.get(i);
             Object secondObject = second.get(i);
             assertMapValuesEqual(firstObject, secondObject);
-        }
-    }
-
-    private static void assertNumericFuzzyEquals(Object firstNumeric, Object secondNumeric) {
-        if (assertSameNullity(firstNumeric, secondNumeric)) {
-            return;
-        }
-
-        assertEquals(castNumericToLong(firstNumeric), castNumericToLong(secondNumeric));
-    }
-
-    private static long castNumericToLong(@NonNull Object numericObject) {
-        try {
-            return (long) numericObject;
-        } catch (ClassCastException classCastException) {
-            // Then it must be an Integer. You can't cast from Integer -> primitive long,
-            // but you can cast from primitive int -> primitive long.
-            int objectAsInt = (int) numericObject;
-            return (long) objectAsInt;
         }
     }
 
