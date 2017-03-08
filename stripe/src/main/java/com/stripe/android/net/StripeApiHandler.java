@@ -1,7 +1,6 @@
 package com.stripe.android.net;
 
 import android.os.Build;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -18,7 +17,6 @@ import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,12 +34,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-
 
 /**
  * Handler for calls to the Stripe API.
@@ -52,8 +50,7 @@ public class StripeApiHandler {
     public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     public static final String CHARSET = "UTF-8";
     public static final String TOKENS = "tokens";
-    public static final String MUID = "muid";
-    public static final String GUID = "guid";
+    public static final String SOURCES = "sources";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -195,7 +192,12 @@ public class StripeApiHandler {
 
     @VisibleForTesting
     static String getApiUrl() {
-        return String.format("%s/v1/%s", LIVE_API_BASE, TOKENS);
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
+    }
+
+    @VisibleForTesting
+    static String getSourcesUrl() {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
     }
 
     @VisibleForTesting

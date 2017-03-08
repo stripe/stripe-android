@@ -37,6 +37,12 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void testGetSourcesUrl() {
+        String sourcesUrl = StripeApiHandler.getSourcesUrl();
+        assertEquals("https://api.stripe.com/v1/sources", sourcesUrl);
+    }
+
+    @Test
     public void testGetRequestTokenApiUrl() {
         String tokenId = "tok_sample";
         String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
