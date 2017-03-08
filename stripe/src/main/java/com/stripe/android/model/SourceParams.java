@@ -8,7 +8,9 @@ import android.support.annotation.Size;
 import com.stripe.android.util.StripeNetworkUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.stripe.android.model.Source.SourceType;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
@@ -17,6 +19,12 @@ import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.
  */
 public class SourceParams {
+
+    static final String API_PARAM_AMOUNT = "amount";
+    static final String API_PARAM_CURRENCY = "currency";
+    static final String API_PARAM_OWNER = "owner";
+    static final String API_PARAM_REDIRECT = "redirect";
+    static final String API_PARAM_TYPE = "type";
 
     static final String FIELD_ADDRESS = "address";
     static final String FIELD_BANK = "bank";
@@ -37,8 +45,13 @@ public class SourceParams {
     static final String FIELD_STATE = "state";
     static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
 
+    static final Set<String> NO_AMOUNT_SOURCES = new HashSet<String>() {{
+        add(Source.CARD);
+        add(Source.SEPA_DEBIT);
+    }};
+
     @IntRange(from = 0) private long mAmount;
-    private Map<String, Map<String, Object>> mApiParameterMap;
+    private Map<String, Object> mApiParameterMap;
     private String mCurrency;
     private Map<String, Object> mOwner;
     private Map<String, Object> mRedirect;
@@ -71,9 +84,7 @@ public class SourceParams {
         if (statementDescriptor != null) {
             Map<String, Object> additionalParamsMap =
                     createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-            Map<String, Map<String, Object>> apiMap = new HashMap<>();
-            apiMap.put(Source.BANCONTACT, additionalParamsMap);
-            params.setApiParamterMap(apiMap);
+            params.setApiParamterMap(additionalParamsMap);
         }
 
         return params;
@@ -108,7 +119,6 @@ public class SourceParams {
     @NonNull
     public static SourceParams createCardParams(@NonNull Card card) {
         SourceParams params = new SourceParams().setType(Source.CARD);
-        Map<String, Map<String, Object>> apiMap = new HashMap<>();
 
         // Not enforcing all fields to exist at this level.
         // Instead, the server will return an error for invalid data.
@@ -119,8 +129,7 @@ public class SourceParams {
         basicInfoMap.put(FIELD_CVC, card.getCVC());
         removeNullParams(basicInfoMap);
 
-        apiMap.put(Source.CARD, basicInfoMap);
-        params.setApiParamterMap(apiMap);
+        params.setApiParamterMap(basicInfoMap);
 
         Map<String, Object> addressMap = new HashMap<>();
         addressMap.put(FIELD_LINE_1, card.getAddressLine1());
@@ -164,9 +173,7 @@ public class SourceParams {
         if (statementDescriptor != null) {
             Map<String, Object> additionalParamsMap =
                     createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-            Map<String, Map<String, Object>> apiMap = new HashMap<>();
-            apiMap.put(Source.GIROPAY, additionalParamsMap);
-            params.setApiParamterMap(apiMap);
+            params.setApiParamterMap(additionalParamsMap);
         }
 
         return params;
@@ -201,9 +208,7 @@ public class SourceParams {
                     createSimpleMap(
                             FIELD_STATEMENT_DESCRIPTOR, statementDescriptor,
                             FIELD_BANK, bank);
-            Map<String, Map<String, Object>> apiMap = new HashMap<>();
-            apiMap.put(Source.IDEAL, additionalParamsMap);
-            params.setApiParamterMap(apiMap);
+            params.setApiParamterMap(additionalParamsMap);
         }
 
         return params;
@@ -228,7 +233,9 @@ public class SourceParams {
             @NonNull String city,
             @NonNull String postalCode,
             @NonNull @Size(2) String country) {
-        SourceParams params = new SourceParams().setType(Source.SEPA_DEBIT);
+        SourceParams params = new SourceParams()
+                .setType(Source.SEPA_DEBIT)
+                .setCurrency(Source.EURO);
 
         Map<String, Object> address = new HashMap<>();
         address.put(FIELD_LINE_1, addressLine1);
@@ -240,10 +247,7 @@ public class SourceParams {
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_ADDRESS, address);
 
-        Map<String, Map<String, Object>> apiMap = new HashMap<>();
-        apiMap.put(Source.SEPA_DEBIT, createSimpleMap(FIELD_IBAN, iban));
-
-        params.setOwner(ownerMap).setApiParamterMap(apiMap);
+        params.setOwner(ownerMap).setApiParamterMap(createSimpleMap(FIELD_IBAN, iban));
         return params;
     }
 
@@ -273,9 +277,7 @@ public class SourceParams {
             sofortMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
 
-        Map<String, Map<String, Object>> apiMap = new HashMap<>();
-        apiMap.put(Source.SOFORT, sofortMap);
-        params.setApiParamterMap(apiMap);
+        params.setApiParamterMap(sofortMap);
 
         return params;
     }
@@ -300,9 +302,7 @@ public class SourceParams {
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-        Map<String, Map<String, Object>> apiMap = new HashMap<>();
-        apiMap.put(Source.THREE_D_SECURE, createSimpleMap(FIELD_CARD, cardID));
-        params.setApiParamterMap(apiMap);
+        params.setApiParamterMap(createSimpleMap(FIELD_CARD, cardID));
         return params;
     }
 
@@ -316,7 +316,7 @@ public class SourceParams {
     /**
      * @return a {@link Map} of the parameters specific to this type of source
      */
-    public Map<String, Map<String, Object>> getApiParameterMap() {
+    public Map<String, Object> getApiParameterMap() {
         return mApiParameterMap;
     }
 
@@ -348,6 +348,27 @@ public class SourceParams {
         return mType;
     }
 
+    /**
+     * Create a string-keyed map representing this object that is
+     * ready to be sent over the network.
+     *
+     * @return a String-keyed map
+     */
+    @NonNull
+    public Map<String, Object> toParamMap() {
+        Map<String, Object> networkReadyMap = new HashMap<>();
+        networkReadyMap.put(API_PARAM_TYPE, getType());
+        networkReadyMap.put(getType(), getApiParameterMap());
+        if (!(NO_AMOUNT_SOURCES.contains(getType()) && mAmount == 0L)) {
+            networkReadyMap.put(API_PARAM_AMOUNT, getAmount());
+        }
+        networkReadyMap.put(API_PARAM_CURRENCY, getCurrency());
+        networkReadyMap.put(API_PARAM_OWNER, getOwner());
+        networkReadyMap.put(API_PARAM_REDIRECT, getRedirect());
+        StripeNetworkUtils.removeNullParams(networkReadyMap);
+        return networkReadyMap;
+    }
+
     @NonNull
     private static Map<String, Object> createSimpleMap(
             @NonNull String key, @NonNull Object value) {
@@ -374,7 +395,7 @@ public class SourceParams {
     }
 
     private SourceParams setApiParamterMap(
-            @NonNull Map<String, Map<String, Object>> apiParameterMap) {
+            @NonNull Map<String, Object> apiParameterMap) {
         mApiParameterMap = apiParameterMap;
         return this;
     }
