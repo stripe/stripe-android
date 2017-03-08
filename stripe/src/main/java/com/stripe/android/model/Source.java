@@ -6,7 +6,6 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.util.StripeJsonUtils;
-import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +17,7 @@ import java.util.Map;
 
 import static com.stripe.android.util.StripeJsonUtils.optLong;
 import static com.stripe.android.util.StripeJsonUtils.optString;
+import static com.stripe.android.util.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
 
@@ -117,6 +117,7 @@ public class Source extends StripeJsonModel {
     private SourceReceiver mReceiver;
     private SourceRedirect mRedirect;
     private @SourceStatus String mStatus;
+    private Map<String, Object> mSourceTypeData;
     private @SourceType String mType;
     private @Usage String mUsage;
 
@@ -134,6 +135,7 @@ public class Source extends StripeJsonModel {
             SourceReceiver receiver,
             SourceRedirect redirect,
             @SourceStatus String status,
+            Map<String, Object> sourceTypeData,
             @SourceType String type,
             @Usage String usage
     ) {
@@ -150,6 +152,7 @@ public class Source extends StripeJsonModel {
         mReceiver = receiver;
         mRedirect = redirect;
         mStatus = status;
+        mSourceTypeData = sourceTypeData;
         mType = type;
         mUsage = usage;
     }
@@ -206,6 +209,10 @@ public class Source extends StripeJsonModel {
     @SourceStatus
     public String getStatus() {
         return mStatus;
+    }
+
+    public Map<String, Object> getSourceTypeData() {
+        return mSourceTypeData;
     }
 
     @SourceType
@@ -270,6 +277,10 @@ public class Source extends StripeJsonModel {
         mStatus = status;
     }
 
+    public void setSourceTypeData(Map<String, Object> sourceTypeData) {
+        mSourceTypeData = sourceTypeData;
+    }
+
     public void setType(@SourceType String type) {
         mType = type;
     }
@@ -298,6 +309,10 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
+        if (mType != null) {
+            hashMap.put(getType(), mSourceTypeData);
+        }
+
         hashMap.put(FIELD_STATUS, mStatus);
         hashMap.put(FIELD_TYPE, mType);
         hashMap.put(FIELD_USAGE, mUsage);
@@ -320,11 +335,15 @@ public class Source extends StripeJsonModel {
             putStringIfNotNull(jsonObject, FIELD_FLOW, mFlow);
             jsonObject.put(FIELD_LIVEMODE, mLiveMode);
 
-            JSONObject metaDataObject = StripeJsonUtils.putMapAsJson(mMetaData);
+            JSONObject metaDataObject = StripeJsonUtils.mapToJsonObject(mMetaData);
             if (metaDataObject != null) {
                 jsonObject.put(FIELD_METADATA, metaDataObject);
             }
 
+            JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
+            if (mType != null && sourceTypeJsonObject != null) {
+                jsonObject.put(mType, sourceTypeJsonObject);
+            }
             putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
@@ -375,6 +394,9 @@ public class Source extends StripeJsonModel {
                 SourceRedirect.class);
         @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
         @SourceType String type = asSourceType(optString(jsonObject, FIELD_TYPE));
+        Map<String, Object> sourceTypeData =
+                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(type));
+
         @Usage String usage = asUsage(optString(jsonObject, FIELD_USAGE));
 
         return new Source(
@@ -391,6 +413,7 @@ public class Source extends StripeJsonModel {
                 receiver,
                 redirect,
                 status,
+                sourceTypeData,
                 type,
                 usage);
     }

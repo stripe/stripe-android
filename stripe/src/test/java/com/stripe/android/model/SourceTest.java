@@ -99,7 +99,15 @@ public class SourceTest {
             "},\n"+
             "\"status\": \"pending\",\n"+
             "\"type\": \"bitcoin\",\n"+
-            "\"usage\": \"single_use\"\n"+
+            "\"usage\": \"single_use\",\n"+
+            "\"bitcoin\": {\n" +
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
+            "\"amount\": 2371000,\n" +
+            "\"amount_charged\": 0,\n" +
+            "\"amount_received\": 0,\n" +
+            "\"amount_returned\": 0,\n" +
+            "\"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
+            "}" +
             "}";
 
     private Source mSource;
@@ -114,7 +122,8 @@ public class SourceTest {
     public void fromJsonString_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
-            assertJsonEquals(rawConversion, mSource.toJson());
+            JSONObject actualObject = mSource.toJson();
+            assertJsonEquals(rawConversion, actualObject);
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }
