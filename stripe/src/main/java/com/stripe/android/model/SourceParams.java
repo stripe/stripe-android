@@ -45,12 +45,7 @@ public class SourceParams {
     static final String FIELD_STATE = "state";
     static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
 
-    static final Set<String> NO_AMOUNT_SOURCES = new HashSet<String>() {{
-        add(Source.CARD);
-        add(Source.SEPA_DEBIT);
-    }};
-
-    @IntRange(from = 0) private long mAmount;
+    @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
     private Map<String, Object> mOwner;
@@ -84,7 +79,7 @@ public class SourceParams {
         if (statementDescriptor != null) {
             Map<String, Object> additionalParamsMap =
                     createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-            params.setApiParamterMap(additionalParamsMap);
+            params.setApiParameterMap(additionalParamsMap);
         }
 
         return params;
@@ -129,7 +124,7 @@ public class SourceParams {
         basicInfoMap.put(FIELD_CVC, card.getCVC());
         removeNullParams(basicInfoMap);
 
-        params.setApiParamterMap(basicInfoMap);
+        params.setApiParameterMap(basicInfoMap);
 
         Map<String, Object> addressMap = new HashMap<>();
         addressMap.put(FIELD_LINE_1, card.getAddressLine1());
@@ -173,7 +168,7 @@ public class SourceParams {
         if (statementDescriptor != null) {
             Map<String, Object> additionalParamsMap =
                     createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-            params.setApiParamterMap(additionalParamsMap);
+            params.setApiParameterMap(additionalParamsMap);
         }
 
         return params;
@@ -208,7 +203,7 @@ public class SourceParams {
                     createSimpleMap(
                             FIELD_STATEMENT_DESCRIPTOR, statementDescriptor,
                             FIELD_BANK, bank);
-            params.setApiParamterMap(additionalParamsMap);
+            params.setApiParameterMap(additionalParamsMap);
         }
 
         return params;
@@ -247,7 +242,7 @@ public class SourceParams {
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_ADDRESS, address);
 
-        params.setOwner(ownerMap).setApiParamterMap(createSimpleMap(FIELD_IBAN, iban));
+        params.setOwner(ownerMap).setApiParameterMap(createSimpleMap(FIELD_IBAN, iban));
         return params;
     }
 
@@ -277,7 +272,7 @@ public class SourceParams {
             sofortMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
 
-        params.setApiParamterMap(sofortMap);
+        params.setApiParameterMap(sofortMap);
 
         return params;
     }
@@ -302,20 +297,22 @@ public class SourceParams {
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-        params.setApiParamterMap(createSimpleMap(FIELD_CARD, cardID));
+        params.setApiParameterMap(createSimpleMap(FIELD_CARD, cardID));
         return params;
     }
 
     /**
      * @return the amount of the transaction
      */
-    public long getAmount() {
+    @Nullable
+    public Long getAmount() {
         return mAmount;
     }
 
     /**
      * @return a {@link Map} of the parameters specific to this type of source
      */
+    @Nullable
     public Map<String, Object> getApiParameterMap() {
         return mApiParameterMap;
     }
@@ -323,6 +320,7 @@ public class SourceParams {
     /**
      * @return the currency code for the transaction
      */
+    @Nullable
     public String getCurrency() {
         return mCurrency;
     }
@@ -330,6 +328,7 @@ public class SourceParams {
     /**
      * @return details about the source owner (map contents are specific to source type)
      */
+    @Nullable
     public Map<String, Object> getOwner() {
         return mOwner;
     }
@@ -337,6 +336,7 @@ public class SourceParams {
     /**
      * @return redirect map for the source
      */
+    @Nullable
     public Map<String, Object> getRedirect() {
         return mRedirect;
     }
@@ -359,9 +359,7 @@ public class SourceParams {
         Map<String, Object> networkReadyMap = new HashMap<>();
         networkReadyMap.put(API_PARAM_TYPE, getType());
         networkReadyMap.put(getType(), getApiParameterMap());
-        if (!(NO_AMOUNT_SOURCES.contains(getType()) && mAmount == 0L)) {
-            networkReadyMap.put(API_PARAM_AMOUNT, getAmount());
-        }
+        networkReadyMap.put(API_PARAM_AMOUNT, getAmount());
         networkReadyMap.put(API_PARAM_CURRENCY, getCurrency());
         networkReadyMap.put(API_PARAM_OWNER, getOwner());
         networkReadyMap.put(API_PARAM_REDIRECT, getRedirect());
@@ -394,7 +392,7 @@ public class SourceParams {
         return this;
     }
 
-    private SourceParams setApiParamterMap(
+    private SourceParams setApiParameterMap(
             @NonNull Map<String, Object> apiParameterMap) {
         mApiParameterMap = apiParameterMap;
         return this;

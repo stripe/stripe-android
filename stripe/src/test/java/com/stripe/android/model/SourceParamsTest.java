@@ -49,13 +49,15 @@ public class SourceParamsTest {
 
         assertEquals(Source.BANCONTACT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(1000L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(1000L, params.getAmount().longValue());
         assertNotNull(params.getOwner());
         assertEquals("Stripe", params.getOwner().get("name"));
         assertNotNull(params.getRedirect());
         assertEquals("return/url/3000", params.getRedirect().get("return_url"));
 
         Map<String, Object> apiMap = params.getApiParameterMap();
+        assertNotNull(apiMap);
         assertEquals("descriptor", apiMap.get("statement_descriptor"));
     }
 
@@ -86,7 +88,8 @@ public class SourceParamsTest {
 
         assertEquals(Source.BITCOIN, params.getType());
         assertEquals(Source.USD, params.getCurrency());
-        assertEquals(10L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(10L, params.getAmount().longValue());
         assertNotNull(params.getOwner());
         assertEquals(1, params.getOwner().size());
         assertEquals("abc@def.ghi", params.getOwner().get("email"));
@@ -109,6 +112,7 @@ public class SourceParamsTest {
         SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
 
         Map<String, Object> apiMap = params.getApiParameterMap();
+        assertNotNull(apiMap);
         assertEquals(VALID_VISA_NO_SPACES, apiMap.get("number"));
         assertEquals(12, apiMap.get("exp_month"));
         assertEquals(2050, apiMap.get("exp_year"));
@@ -162,7 +166,8 @@ public class SourceParamsTest {
 
         assertEquals(Source.GIROPAY, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(150L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(150L, params.getAmount().longValue());
         assertNotNull(params.getOwner());
         assertEquals("Stripe", params.getOwner().get("name"));
         assertNotNull(params.getRedirect());
@@ -205,7 +210,8 @@ public class SourceParamsTest {
 
         assertEquals(Source.GIROPAY, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(150L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(150L, params.getAmount().longValue());
         assertNotNull(params.getOwner());
         assertEquals("Stripe", params.getOwner().get("name"));
         assertNotNull(params.getRedirect());
@@ -223,7 +229,8 @@ public class SourceParamsTest {
                 "SVB");
         assertEquals(Source.IDEAL, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(900L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(900L, params.getAmount().longValue());
         assertNotNull(params.getOwner());
         assertEquals("Default Name", params.getOwner().get("name"));
         assertNotNull(params.getRedirect());
@@ -351,7 +358,8 @@ public class SourceParamsTest {
 
         assertEquals(Source.SOFORT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(50000L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(50000L, params.getAmount().longValue());
         assertNotNull(params.getRedirect());
         assertEquals("example://return", params.getRedirect().get("return_url"));
         Map<String, Object> apiMap = params.getApiParameterMap();
@@ -393,11 +401,13 @@ public class SourceParamsTest {
         assertEquals(Source.THREE_D_SECURE, params.getType());
         // Brazilian Real
         assertEquals("brl", params.getCurrency());
-        assertEquals(99000L, params.getAmount());
+        assertNotNull(params.getAmount());
+        assertEquals(99000L, params.getAmount().longValue());
         assertNotNull(params.getRedirect());
         assertEquals("stripe://returnaddress", params.getRedirect().get("return_url"));
 
         Map<String, Object> apiMap = params.getApiParameterMap();
+        assertNotNull(apiMap);
         assertEquals(1, apiMap.size());
         assertEquals("card_id_123", apiMap.get("card"));
     }
