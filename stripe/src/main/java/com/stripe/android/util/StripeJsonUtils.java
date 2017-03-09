@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -112,21 +113,28 @@ public class StripeJsonUtils {
         return null;
     }
 
+    /**
+     * Convert a {@link JSONObject} to a {@link Map}.
+     *
+     * @param jsonObject a {@link JSONObject} to be converted
+     * @return a {@link Map} representing the input, or {@code null} if the input is {@code null}
+     */
     @Nullable
     public static Map<String, Object> jsonObjectToMap(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }
         Map<String, Object> map = new HashMap<>();
-        while(jsonObject.keys().hasNext()) {
-            String key = jsonObject.keys().next();
+        Iterator<String> keyIterator = jsonObject.keys();
+        while(keyIterator.hasNext()) {
+            String key = keyIterator.next();
             Object value = jsonObject.opt(key);
             if (NULL.equals(value)) {
                 continue;
             }
 
             if (value instanceof JSONObject) {
-                map.put(key, jsonObjectToMap(jsonObject));
+                map.put(key, jsonObjectToMap((JSONObject) value));
             } else if (value instanceof JSONArray) {
                 map.put(key, jsonArrayToList((JSONArray) value));
             } else {
@@ -136,8 +144,18 @@ public class StripeJsonUtils {
         return map;
     }
 
-    @NonNull
-    public static List<Object> jsonArrayToList(@NonNull JSONArray jsonArray) {
+    /**
+     * Converts a {@link JSONArray} to a {@link List}.
+     *
+     * @param jsonArray a {@link JSONArray} to be converted
+     * @return a {@link List} representing the input, or {@code null} if said input is {@code null}
+     */
+    @Nullable
+    public static List<Object> jsonArrayToList(@Nullable JSONArray jsonArray) {
+        if (jsonArray == null) {
+            return null;
+        }
+
         List<Object> objectList = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
@@ -162,8 +180,17 @@ public class StripeJsonUtils {
         return objectList;
     }
 
+    /**
+     * Converts a string-keyed {@link Map} into a {@link JSONObject}. This will cause a
+     * {@link ClassCastException} if any sub-map has keys that are not {@link String Strings}.
+     *
+     * @param mapObject the {@link Map} that you'd like in JSON form
+     * @return a {@link JSONObject} representing the input map, or {@code null} if the input
+     * object is {@code null}
+     */
     @Nullable
-    public static JSONObject putMapAsJson(@Nullable Map<String, Object> mapObject) {
+    @SuppressWarnings("unchecked")
+    public static JSONObject mapToJsonObject(@Nullable Map<String, Object> mapObject) {
         if (mapObject == null) {
             return null;
         }
@@ -178,12 +205,14 @@ public class StripeJsonUtils {
                 if (value instanceof Map<?, ?>) {
                     try {
                         Map<String, Object> mapValue = (Map<String, Object>) value;
-                        jsonObject.put(key, putMapAsJson(mapValue));
+                        jsonObject.put(key, mapToJsonObject(mapValue));
                     } catch (ClassCastException classCastException) {
                         // We don't include the item in the JSONObject if the keys are not Strings.
                     }
                 } else if (value instanceof List<?>) {
-                    jsonObject.put(key, putListAsJson((List<Object>) value));
+                    jsonObject.put(key, listToJsonArray((List<Object>) value));
+                } else if (value instanceof Number || value instanceof Boolean) {
+                    jsonObject.put(key, value);
                 } else {
                     jsonObject.put(key, value.toString());
                 }
@@ -194,9 +223,17 @@ public class StripeJsonUtils {
         return jsonObject;
     }
 
+    /**
+     * Converts a {@link List} into a {@link JSONArray}. A {@link ClassCastException} will be
+     * thrown if any object in the list (or any sub-list or sub-map) is a {@link Map} whose keys
+     * are not {@link String Strings}.
+     *
+     * @param values a {@link List} of values to be put in a {@link JSONArray}
+     * @return a {@link JSONArray}, or {@code null} if the input was {@code null}
+     */
     @Nullable
     @SuppressWarnings("unchecked")
-    static JSONArray putListAsJson(@Nullable List<Object> values) {
+    public static JSONArray listToJsonArray(@Nullable List values) {
         if (values == null) {
             return null;
         }
@@ -206,14 +243,17 @@ public class StripeJsonUtils {
             if (object instanceof Map<?, ?>) {
                 try {
                     Map<String, Object> mapObject = (Map<String, Object>) object;
-                    jsonArray.put(putMapAsJson(mapObject));
+                    jsonArray.put(mapToJsonObject(mapObject));
                 } catch (ClassCastException classCastException) {
                     // We don't include the item in the array if the keys are not Strings.
                 }
             } else if (object instanceof List<?>) {
-                jsonArray.put(putListAsJson((List<Object>) object));
+                jsonArray.put(listToJsonArray((List) object));
+            } else if (object instanceof Number || object instanceof Boolean) {
+                jsonArray.put(object);
+            } else {
+                jsonArray.put(object.toString());
             }
-            jsonArray.put(object.toString());
         }
         return jsonArray;
     }

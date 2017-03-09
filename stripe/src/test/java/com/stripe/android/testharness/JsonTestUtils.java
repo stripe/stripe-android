@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -32,19 +33,21 @@ public class JsonTestUtils {
         Iterator<String> keyIterator = first.keys();
         while(keyIterator.hasNext()) {
             String key = keyIterator.next();
-            assertTrue(second.has(key));
+            String errorMessage = getKeyErrorMessage(key);
+            assertTrue(errorMessage, second.has(key));
             if (first.opt(key) instanceof JSONObject) {
-                assertTrue(second.opt(key) instanceof JSONObject);
+                assertTrue(errorMessage, second.opt(key) instanceof JSONObject);
                 assertJsonEquals(first.optJSONObject(key), second.optJSONObject(key));
             } else if (first.opt(key) instanceof JSONArray) {
-                assertTrue(second.opt(key) instanceof JSONArray);
+                assertTrue(errorMessage, second.opt(key) instanceof JSONArray);
                 assertJsonArrayEquals(first.optJSONArray(key), second.optJSONArray(key));
             } else if (first.opt(key) instanceof Number) {
-                assertTrue(second.opt(key) instanceof Number);
-                assertEquals(((Number) first.opt(key)).longValue(),
-                             ((Number) second.opt(key)).longValue());
+                assertTrue(errorMessage, second.opt(key) instanceof Number);
+                assertEquals(errorMessage,
+                        ((Number) first.opt(key)).longValue(),
+                        ((Number) second.opt(key)).longValue());
             } else {
-                assertEquals(first.opt(key), second.opt(key));
+                assertEquals(errorMessage, first.opt(key), second.opt(key));
             }
         }
     }
@@ -155,5 +158,9 @@ public class JsonTestUtils {
                 : second != null;
         assertTrue(sameNullity);
         return first == null;
+    }
+
+    private static String getKeyErrorMessage(String key) {
+        return String.format(Locale.ENGLISH, "Matching error at key %s", key);
     }
 }
