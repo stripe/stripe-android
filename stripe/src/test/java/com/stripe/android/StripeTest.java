@@ -267,6 +267,7 @@ public class StripeTest {
             assertNotNull(bitcoinSource.getSourceTypeData());
             assertNotNull(bitcoinSource.getOwner());
             assertEquals("abc@def.com", bitcoinSource.getOwner().getEmail());
+            assertEquals("usd", bitcoinSource.getCurrency());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
