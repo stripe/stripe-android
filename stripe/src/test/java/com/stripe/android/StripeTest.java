@@ -300,6 +300,12 @@ public class StripeTest {
     public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
         Stripe stripe = new Stripe(mContext);
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        card.setAddressCity("Sheboygan");
+        card.setAddressCountry("US");
+        card.setAddressLine1("123 Main St");
+        card.setAddressLine2("#456");
+        card.setAddressZip("53081");
+        card.setAddressState("WI");
         SourceParams params = SourceParams.createCardParams(card);
         try {
             Source cardSource =
@@ -309,6 +315,15 @@ public class StripeTest {
             assertNotNull(cardSource.getId());
             assertEquals(Source.CARD, cardSource.getType());
             assertNotNull(cardSource.getSourceTypeData());
+
+            assertNotNull(cardSource.getOwner());
+            assertNotNull(cardSource.getOwner().getAddress());
+            assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
+            assertEquals("WI", cardSource.getOwner().getAddress().getState());
+            assertEquals("53081", cardSource.getOwner().getAddress().getPostalCode());
+            assertEquals("123 Main St", cardSource.getOwner().getAddress().getLine1());
+            assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
+            assertEquals("US", cardSource.getOwner().getAddress().getCountry());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
