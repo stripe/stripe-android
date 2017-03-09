@@ -15,6 +15,8 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
 
@@ -63,6 +65,34 @@ public class StripeApiHandler {
 
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
+
+    /**
+     * Create a {@link Source} using the input {@link SourceParams}.
+     *
+     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
+     * @param publishableKey an API key
+     * @return a {@link Source} if one could be created from the input params,
+     * or {@code null} if not
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws CardException if there is a problem with the card information
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Nullable
+    public static Source createSourceOnServer(
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        Map<String, Object> paramMap = sourceParams.toParamMap();
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+
+        return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+    }
 
     /**
      * Create a {@link Token} using the input card parameters.
@@ -324,16 +354,18 @@ public class StripeApiHandler {
         }
     }
 
-    private static Token requestToken(
+    private static String requestData(
             @RestMethod String method,
             String url,
             Map<String, Object> params,
             RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
+
         if (options == null) {
             return null;
         }
+
         String originalDNSCacheTTL = null;
         Boolean allowedToSetTTL = true;
 
@@ -356,39 +388,47 @@ public class StripeApiHandler {
                     null, 0);
         }
 
+        StripeResponse response = getStripeResponse(method, url, params, options);
+
+        int rCode = response.getResponseCode();
+        String rBody = response.getResponseBody();
+
+        String requestId = null;
+        Map<String, List<String>> headers = response.getResponseHeaders();
+        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+        if (requestIdList != null && requestIdList.size() > 0) {
+            requestId = requestIdList.get(0);
+        }
+
+        if (rCode < 200 || rCode >= 300) {
+            handleAPIError(rBody, rCode, requestId);
+        }
+
+        if (allowedToSetTTL) {
+            if (originalDNSCacheTTL == null) {
+                // value unspecified by implementation
+                // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+            } else {
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
+            }
+        }
+        return rBody;
+    }
+
+    private static Token requestToken(
+            @RestMethod String method,
+            String url,
+            Map<String, Object> params,
+            RequestOptions options)
+            throws AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException, APIException {
         try {
-            StripeResponse response = getStripeResponse(method, url, params, options);
-
-            int rCode = response.getResponseCode();
-            String rBody = response.getResponseBody();
-
-            String requestId = null;
-            Map<String, List<String>> headers = response.getResponseHeaders();
-            List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
-            if (requestIdList != null && requestIdList.size() > 0) {
-                requestId = requestIdList.get(0);
-            }
-
-            if (rCode < 200 || rCode >= 300) {
-                handleAPIError(rBody, rCode, requestId);
-            }
-
-            // Note that the 'finally' block runs immediately prior to this return statement.
-            return TokenParser.parseToken(rBody);
-        } catch(JSONException jsonException) {
+            return TokenParser.parseToken(requestData(method, url, params, options));
+        } catch (JSONException ignored) {
             return null;
-        } finally {
-            if (allowedToSetTTL) {
-                if (originalDNSCacheTTL == null) {
-                    // value unspecified by implementation
-                    // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                    java.security.Security.setProperty(
-                            DNS_CACHE_TTL_PROPERTY_NAME, "-1");
-                } else {
-                    java.security.Security.setProperty(
-                            DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
-                }
-            }
         }
     }
 

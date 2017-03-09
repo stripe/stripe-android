@@ -7,9 +7,12 @@ import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
+import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
@@ -51,6 +54,8 @@ public class StripeTest {
     };
 
     private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
+    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
+            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
     private static final String TEST_CARD_NUMBER = "4242424242424242";
     private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
     private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
@@ -244,6 +249,204 @@ public class StripeTest {
         } catch (StripeException stripeEx) {
             fail("Unexpected error when connecting to Stripe API: "
                     + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withBitcoinParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        SourceParams bitcoinParams = SourceParams.createBitcoinParams(1000L, "usd", "abc@def.com");
+        try {
+            Source bitcoinSource =
+                    stripe.createSourceSynchronous(bitcoinParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(bitcoinSource);
+            assertNotNull(bitcoinSource.getId());
+            assertNotNull(bitcoinSource.getClientSecret());
+            assertEquals(Source.BITCOIN, bitcoinSource.getType());
+            assertEquals(1000L, bitcoinSource.getAmount().longValue());
+            assertNotNull(bitcoinSource.getSourceTypeData());
+            assertNotNull(bitcoinSource.getOwner());
+            assertEquals("abc@def.com", bitcoinSource.getOwner().getEmail());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withBancontactParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        SourceParams bancontactParams = SourceParams.createBancontactParams(
+                1000L, "John Doe", "example://path", "a statement described");
+        try {
+            Source bancontactSource =
+                    stripe.createSourceSynchronous(bancontactParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(bancontactSource);
+            assertNotNull(bancontactSource.getId());
+            assertNotNull(bancontactSource.getClientSecret());
+            assertEquals(Source.BANCONTACT, bancontactSource.getType());
+            assertEquals(1000L, bancontactSource.getAmount().longValue());
+            assertNotNull(bancontactSource.getSourceTypeData());
+            assertNotNull(bancontactSource.getOwner());
+            assertNotNull(bancontactSource.getRedirect());
+            assertEquals("John Doe", bancontactSource.getOwner().getName());
+            assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        SourceParams params = SourceParams.createCardParams(card);
+        try {
+            Source cardSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(cardSource);
+            assertNotNull(cardSource.getClientSecret());
+            assertNotNull(cardSource.getId());
+            assertEquals(Source.CARD, cardSource.getType());
+            assertNotNull(cardSource.getSourceTypeData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_with3DSParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        SourceParams params = SourceParams.createCardParams(card);
+
+
+        try {
+            Source cardSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+
+            assertNotNull(cardSource);
+            assertNotNull(cardSource.getId());
+            SourceParams threeDParams = SourceParams.createThreeDSecureParams(
+                    50L,
+                    "brl",
+                    "example://return",
+                    cardSource.getId());
+            Source threeDSource =
+                    stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(threeDSource);
+            assertNotNull(threeDSource.getClientSecret());
+            assertNotNull(threeDSource.getId());
+            assertEquals(Source.THREE_D_SECURE, threeDSource.getType());
+            assertNotNull(threeDSource.getSourceTypeData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withGiropayParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        SourceParams params = SourceParams.createGiropayParams(
+                2000L,
+                "Mr. X",
+                "example://redirect",
+                "a well-described statement");
+        try {
+            Source giropaySource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(giropaySource);
+            assertNotNull(giropaySource.getClientSecret());
+            assertNotNull(giropaySource.getId());
+            assertEquals(Source.GIROPAY, giropaySource.getType());
+            assertNotNull(giropaySource.getSourceTypeData());
+            assertNotNull(giropaySource.getOwner());
+            assertNotNull(giropaySource.getRedirect());
+            assertEquals("Mr. X", giropaySource.getOwner().getName());
+            assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withSepaDebitParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        String validIban = "DE89370400440532013000";
+        SourceParams params = SourceParams.createSepaDebitParams(
+                "Sepa Account Holder",
+                validIban,
+                "123 Main St",
+                "Eureka",
+                "90210",
+                "EI");
+        try {
+            Source sepaDebitSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(sepaDebitSource);
+            assertNotNull(sepaDebitSource.getClientSecret());
+            assertNotNull(sepaDebitSource.getId());
+            assertEquals(Source.SEPA_DEBIT, sepaDebitSource.getType());
+            assertNotNull(sepaDebitSource.getSourceTypeData());
+            assertNotNull(sepaDebitSource.getOwner());
+            assertNotNull(sepaDebitSource.getOwner().getAddress());
+            assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
+            assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
+            assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
+            assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
+            assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withIDealParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        SourceParams params = SourceParams.createIdealParams(
+                5500L,
+                "Bond",
+                "example://return",
+                "A statement description",
+                "rabobank");
+        try {
+            Source idealSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(idealSource);
+            assertNotNull(idealSource.getClientSecret());
+            assertNotNull(idealSource.getId());
+            assertEquals(Source.IDEAL, idealSource.getType());
+            assertNotNull(idealSource.getSourceTypeData());
+            assertNotNull(idealSource.getOwner());
+            assertEquals("Bond", idealSource.getOwner().getName());
+            assertNotNull(idealSource.getRedirect());
+            assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withSofortParams_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        SourceParams params = SourceParams.createSofortParams(
+                70000L,
+                "example://return",
+                "NL",
+                "a description");
+        try {
+            Source sofortSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(sofortSource);
+            assertNotNull(sofortSource.getClientSecret());
+            assertNotNull(sofortSource.getId());
+            assertEquals(Source.SOFORT, sofortSource.getType());
+            assertEquals("eur", sofortSource.getCurrency());
+            assertNotNull(sofortSource.getSourceTypeData());
+            assertEquals(70000L, sofortSource.getAmount().longValue());
+            assertNotNull(sofortSource.getRedirect());
+            assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
     }
 

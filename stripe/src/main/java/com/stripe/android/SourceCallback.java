@@ -1,12 +1,12 @@
 package com.stripe.android;
 
-import com.stripe.android.model.Token;
+import com.stripe.android.model.Source;
 
 /**
  * An interface representing a callback to be notified about the results of
- * {@link Token} creation or requests
+ * {@link Source} creation.
  */
-public interface TokenCallback {
+public interface SourceCallback {
 
     /**
      * Error callback method.
@@ -16,7 +16,7 @@ public interface TokenCallback {
 
     /**
      * Success callback method.
-     * @param token the {@link Token} that was found or created.
+     * @param source the {@link Source} that was found or created.
      */
-    void onSuccess(Token token);
+    void onSuccess(Source source);
 }
