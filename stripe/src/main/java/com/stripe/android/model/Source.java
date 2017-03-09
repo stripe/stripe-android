@@ -310,7 +310,7 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
         if (mType != null) {
-            hashMap.put(getType(), mSourceTypeData);
+            hashMap.put(mType, mSourceTypeData);
         }
 
         hashMap.put(FIELD_STATUS, mStatus);
