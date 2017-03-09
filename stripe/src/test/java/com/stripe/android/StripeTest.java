@@ -350,6 +350,8 @@ public class StripeTest {
             Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(threeDSource);
+            assertEquals(50L, threeDSource.getAmount().longValue());
+            assertEquals("brl", threeDSource.getCurrency());
             assertNotNull(threeDSource.getClientSecret());
             assertNotNull(threeDSource.getId());
             assertEquals(Source.THREE_D_SECURE, threeDSource.getType());
@@ -373,6 +375,8 @@ public class StripeTest {
             assertNotNull(giropaySource);
             assertNotNull(giropaySource.getClientSecret());
             assertNotNull(giropaySource.getId());
+            assertEquals("eur", giropaySource.getCurrency());
+            assertEquals(2000L, giropaySource.getAmount().longValue());
             assertEquals(Source.GIROPAY, giropaySource.getType());
             assertNotNull(giropaySource.getSourceTypeData());
             assertNotNull(giropaySource.getOwner());
@@ -405,6 +409,7 @@ public class StripeTest {
             assertNotNull(sepaDebitSource.getSourceTypeData());
             assertNotNull(sepaDebitSource.getOwner());
             assertNotNull(sepaDebitSource.getOwner().getAddress());
+            assertEquals("eur", sepaDebitSource.getCurrency());
             assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
             assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
             assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
@@ -430,7 +435,9 @@ public class StripeTest {
             assertNotNull(idealSource);
             assertNotNull(idealSource.getClientSecret());
             assertNotNull(idealSource.getId());
+            assertEquals(5500L, idealSource.getAmount().longValue());
             assertEquals(Source.IDEAL, idealSource.getType());
+            assertEquals("eur", idealSource.getCurrency());
             assertNotNull(idealSource.getSourceTypeData());
             assertNotNull(idealSource.getOwner());
             assertEquals("Bond", idealSource.getOwner().getName());
