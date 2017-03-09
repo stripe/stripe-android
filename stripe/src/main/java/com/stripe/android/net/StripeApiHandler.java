@@ -76,7 +76,6 @@ public class StripeApiHandler {
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
      * @throws InvalidRequestException if one or more of the parameters is incorrect
      * @throws APIConnectionException if there is a problem connecting to the Stripe API
-     * @throws CardException if there is a problem with the card information
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
@@ -86,12 +85,20 @@ public class StripeApiHandler {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         Map<String, Object> paramMap = sourceParams.toParamMap();
         RequestOptions options = RequestOptions.builder(publishableKey).build();
 
-        return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+        try {
+            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
     }
 
     /**

@@ -349,7 +349,6 @@ public class Stripe {
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
@@ -359,13 +358,12 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
         if (apiKey == null) {
             return null;
         }
-        return StripeApiHandler.createSourceOnServer(params, publishableKey);
+        return StripeApiHandler.createSourceOnServer(params, apiKey);
     }
 
     /**
@@ -402,7 +400,6 @@ public class Stripe {
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
      */
@@ -472,10 +469,6 @@ public class Stripe {
                     "instead of the publishable one. For more info, " +
                     "see https://stripe.com/docs/stripe.js", null, 0);
         }
-    }
-
-    private void sourceTaskPostExecution(ResponseWrapper result, SourceCallback callback) {
-
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
