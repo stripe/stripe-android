@@ -31,12 +31,24 @@ import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * A card input widget that handles all animation on its own.
  */
 public class CardInputWidget extends LinearLayout {
+
+    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
 
     private static final String PEEK_TEXT_COMMON = "4242";
     private static final String PEEK_TEXT_DINERS = "88";
@@ -60,17 +72,6 @@ public class CardInputWidget extends LinearLayout {
     private static final @IdRes int DEFAULT_READER_ID = 42424242;
 
     private static final long ANIMATION_LENGTH = 150L;
-
-    private static final Map<String , Integer> BRAND_RESOURCE_MAP =
-            new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
-                put(Card.DINERS_CLUB, R.drawable.ic_diners);
-                put(Card.DISCOVER, R.drawable.ic_discover);
-                put(Card.JCB, R.drawable.ic_jcb);
-                put(Card.MASTERCARD, R.drawable.ic_mastercard);
-                put(Card.VISA, R.drawable.ic_visa);
-                put(Card.UNKNOWN, R.drawable.ic_unknown);
-            }};
 
     private ImageView mCardIconImageView;
     private CardNumberEditText mCardNumberEditText;
@@ -763,7 +764,6 @@ public class CardInputWidget extends LinearLayout {
     /**
      * A data-dump class.
      */
-    @VisibleForTesting
     class PlacementParameters {
         int cardWidth;
         int hiddenCardWidth;
@@ -780,7 +780,8 @@ public class CardInputWidget extends LinearLayout {
 
         @Override
         public String toString() {
-            String touchBufferData = String.format("Touch Buffer Data:\n" +
+            String touchBufferData = String.format(Locale.ENGLISH,
+                    "Touch Buffer Data:\n" +
                     "CardTouchBufferLimit = %d\n" +
                     "DateStartPosition = %d\n" +
                     "DateRightTouchBufferLimit = %d\n" +
@@ -789,7 +790,8 @@ public class CardInputWidget extends LinearLayout {
                     dateStartPosition,
                     dateRightTouchBufferLimit,
                     cvcStartPosition);
-            String elementSizeData = String.format("CardWidth = %d\n" +
+            String elementSizeData = String.format(Locale.ENGLISH,
+                    "CardWidth = %d\n" +
                     "HiddenCardWidth = %d\n" +
                     "PeekCardWidth = %d\n" +
                     "CardDateSeparation = %d\n" +
