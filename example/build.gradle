@@ -4,7 +4,7 @@ repositories {
     mavenCentral()
 }
 
-def android_support_version = '25.1.1'
+def android_support_version = '25.2.0'
 
 dependencies {
     compile project(':stripe')
@@ -27,6 +27,10 @@ android {
     }
     packagingOptions {
         exclude 'LICENSE.txt'
+    }
+
+    lintOptions {
+        disable 'MissingTranslation'
     }
 
     sourceSets {
