@@ -59,64 +59,64 @@ public class SourceOwner extends StripeJsonModel {
         mVerifiedPhone = verifiedPhone;
     }
 
-    SourceAddress getAddress() {
+    public SourceAddress getAddress() {
         return mAddress;
+    }
+
+    public String getEmail() {
+        return mEmail;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public String getPhone() {
+        return mPhone;
+    }
+
+    public SourceAddress getVerifiedAddress() {
+        return mVerifiedAddress;
+    }
+
+    public String getVerifiedEmail() {
+        return mVerifiedEmail;
+    }
+
+    public String getVerifiedName() {
+        return mVerifiedName;
+    }
+
+    public String getVerifiedPhone() {
+        return mVerifiedPhone;
     }
 
     void setAddress(SourceAddress address) {
         mAddress = address;
     }
 
-    String getEmail() {
-        return mEmail;
-    }
-
     void setEmail(String email) {
         mEmail = email;
-    }
-
-    String getName() {
-        return mName;
     }
 
     void setName(String name) {
         mName = name;
     }
 
-    String getPhone() {
-        return mPhone;
-    }
-
     void setPhone(String phone) {
         mPhone = phone;
-    }
-
-    SourceAddress getVerifiedAddress() {
-        return mVerifiedAddress;
     }
 
     void setVerifiedAddress(SourceAddress verifiedAddress) {
         mVerifiedAddress = verifiedAddress;
     }
 
-    String getVerifiedEmail() {
-        return mVerifiedEmail;
-    }
-
     void setVerifiedEmail(String verifiedEmail) {
         mVerifiedEmail = verifiedEmail;
     }
 
-    String getVerifiedName() {
-        return mVerifiedName;
-    }
-
     void setVerifiedName(String verifiedName) {
         mVerifiedName = verifiedName;
-    }
-
-    String getVerifiedPhone() {
-        return mVerifiedPhone;
     }
 
     void setVerifiedPhone(String verifiedPhone) {
