@@ -112,7 +112,7 @@ public class Source extends StripeJsonModel {
     private String mCurrency;
     private @SourceFlow String mFlow;
     private Boolean mLiveMode;
-    private Map<String, Object> mMetaData;
+    private Map<String, String> mMetaData;
     private SourceOwner mOwner;
     private SourceReceiver mReceiver;
     private SourceRedirect mRedirect;
@@ -130,7 +130,7 @@ public class Source extends StripeJsonModel {
             String currency,
             @SourceFlow String flow,
             Boolean liveMode,
-            Map<String, Object> metaData,
+            Map<String, String> metaData,
             SourceOwner owner,
             SourceReceiver receiver,
             SourceRedirect redirect,
@@ -190,7 +190,7 @@ public class Source extends StripeJsonModel {
         return mLiveMode;
     }
 
-    public Map<String, Object> getMetaData() {
+    public Map<String, String> getMetaData() {
         return mMetaData;
     }
 
@@ -257,7 +257,7 @@ public class Source extends StripeJsonModel {
         mLiveMode = liveMode;
     }
 
-    public void setMetaData(Map<String, Object> metaData) {
+    public void setMetaData(Map<String, String> metaData) {
         mMetaData = metaData;
     }
 
@@ -381,8 +381,8 @@ public class Source extends StripeJsonModel {
         String currency = optString(jsonObject, FIELD_CURRENCY);
         @SourceFlow String flow = asSourceFlow(optString(jsonObject, FIELD_FLOW));
         Boolean liveMode = jsonObject.optBoolean(FIELD_LIVEMODE);
-        Map<String, Object> metadata =
-                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(FIELD_METADATA));
+        Map<String, String> metadata =
+                StripeJsonUtils.jsonObjectToStringMap(jsonObject.optJSONObject(FIELD_METADATA));
         SourceOwner owner = optStripeJsonModel(jsonObject, FIELD_OWNER, SourceOwner.class);
         SourceReceiver receiver = optStripeJsonModel(
                 jsonObject,

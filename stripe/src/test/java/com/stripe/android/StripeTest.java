@@ -13,6 +13,7 @@ import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
 import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
@@ -24,6 +25,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -256,6 +258,11 @@ public class StripeTest {
     public void createSourceSynchronous_withBitcoinParams_passesIntegrationTest() {
         Stripe stripe = new Stripe(mContext);
         SourceParams bitcoinParams = SourceParams.createBitcoinParams(1000L, "usd", "abc@def.com");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("site", "google");
+            put("mood", "sad");
+        }};
+        bitcoinParams.setMetaData(metamap);
         try {
             Source bitcoinSource =
                     stripe.createSourceSynchronous(bitcoinParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -268,6 +275,7 @@ public class StripeTest {
             assertNotNull(bitcoinSource.getOwner());
             assertEquals("abc@def.com", bitcoinSource.getOwner().getEmail());
             assertEquals("usd", bitcoinSource.getCurrency());
+            JsonTestUtils.assertMapEquals(metamap, bitcoinSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -278,6 +286,11 @@ public class StripeTest {
         Stripe stripe = new Stripe(mContext);
         SourceParams bancontactParams = SourceParams.createBancontactParams(
                 1000L, "John Doe", "example://path", "a statement described");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("flavor", "strawberry");
+            put("type", "sherbet");
+        }};
+        bancontactParams.setMetaData(metamap);
         try {
             Source bancontactSource =
                     stripe.createSourceSynchronous(bancontactParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -291,6 +304,7 @@ public class StripeTest {
             assertNotNull(bancontactSource.getRedirect());
             assertEquals("John Doe", bancontactSource.getOwner().getName());
             assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, bancontactSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -306,7 +320,14 @@ public class StripeTest {
         card.setAddressLine2("#456");
         card.setAddressZip("53081");
         card.setAddressState("WI");
+        card.setName("Winnie Hoop");
         SourceParams params = SourceParams.createCardParams(card);
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("addons", "cream");
+            put("type", "halfandhalf");
+        }};
+        params.setMetaData(metamap);
+
         try {
             Source cardSource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -324,6 +345,8 @@ public class StripeTest {
             assertEquals("123 Main St", cardSource.getOwner().getAddress().getLine1());
             assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
             assertEquals("US", cardSource.getOwner().getAddress().getCountry());
+            assertEquals("Winnie Hoop", cardSource.getOwner().getName());
+            JsonTestUtils.assertMapEquals(metamap, cardSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -334,8 +357,6 @@ public class StripeTest {
         Stripe stripe = new Stripe(mContext);
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
-
-
         try {
             Source cardSource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -347,6 +368,12 @@ public class StripeTest {
                     "brl",
                     "example://return",
                     cardSource.getId());
+            Map<String, String> metamap = new HashMap<String, String>() {{
+                put("dimensions", "three");
+                put("type", "beach ball");
+            }};
+            threeDParams.setMetaData(metamap);
+
             Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(threeDSource);
@@ -356,6 +383,7 @@ public class StripeTest {
             assertNotNull(threeDSource.getId());
             assertEquals(Source.THREE_D_SECURE, threeDSource.getType());
             assertNotNull(threeDSource.getSourceTypeData());
+            JsonTestUtils.assertMapEquals(metamap, threeDSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -369,6 +397,11 @@ public class StripeTest {
                 "Mr. X",
                 "example://redirect",
                 "a well-described statement");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("giro", "with chicken");
+            put("type", "wrap");
+        }};
+        params.setMetaData(metamap);
         try {
             Source giropaySource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -383,6 +416,7 @@ public class StripeTest {
             assertNotNull(giropaySource.getRedirect());
             assertEquals("Mr. X", giropaySource.getOwner().getName());
             assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -399,6 +433,12 @@ public class StripeTest {
                 "Eureka",
                 "90210",
                 "EI");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
         try {
             Source sepaDebitSource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -415,6 +455,7 @@ public class StripeTest {
             assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
             assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
             assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
+            JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -429,6 +470,12 @@ public class StripeTest {
                 "example://return",
                 "A statement description",
                 "rabobank");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
         try {
             Source idealSource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -443,6 +490,7 @@ public class StripeTest {
             assertEquals("Bond", idealSource.getOwner().getName());
             assertNotNull(idealSource.getRedirect());
             assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
@@ -456,6 +504,11 @@ public class StripeTest {
                 "example://return",
                 "NL",
                 "a description");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "soforting");
+            put("repetitions", "400");
+        }};
+        params.setMetaData(metamap);
         try {
             Source sofortSource =
                     stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
@@ -468,6 +521,7 @@ public class StripeTest {
             assertEquals(70000L, sofortSource.getAmount().longValue());
             assertNotNull(sofortSource.getRedirect());
             assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, sofortSource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }

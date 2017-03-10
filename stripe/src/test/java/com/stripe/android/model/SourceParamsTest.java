@@ -108,6 +108,27 @@ public class SourceParamsTest {
     }
 
     @Test
+    public void createParams_thenAddMetadata_hasExpectedFieldsInMap() {
+        SourceParams params = SourceParams.createBitcoinParams(10L, "usd", "abc@def.ghi");
+        Map<String, String> metaData = new HashMap<>();
+        metaData.put("custom1", "value1");
+        metaData.put("custom2", "value2");
+        params.setMetaData(metaData);
+
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("type", "bitcoin");
+        expectedMap.put("currency", "usd");
+        expectedMap.put("amount", 10L);
+        expectedMap.put("owner", new HashMap<String, Object>() {{ put("email", "abc@def.ghi"); }});
+        expectedMap.put("metadata", new HashMap<String, Object>() {{
+            put("custom1", "value1");
+            put("custom2", "value2");
+        }});
+
+        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+    }
+
+    @Test
     public void createCardParams_hasBothExpectedMaps() {
         SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
 
@@ -119,7 +140,8 @@ public class SourceParamsTest {
         assertEquals("123", apiMap.get("cvc"));
 
         assertNotNull(params.getOwner());
-        assertEquals(1, params.getOwner().size());
+        assertEquals("Captain Cardholder", params.getOwner().get("name"));
+        assertEquals(2, params.getOwner().size());
         Map<String, Object> addressMap = getMapFromOwner(params, "address");
         assertEquals("1 ABC Street", addressMap.get("line1"));
         assertEquals("Apt. 123", addressMap.get("line2"));
@@ -151,7 +173,10 @@ public class SourceParamsTest {
         totalExpectedMap.put("type", "card");
         totalExpectedMap.put("card", expectedCardMap);
         totalExpectedMap.put("owner",
-                new HashMap<String, Object>() {{ put("address", expectedAddressMap); }});
+                new HashMap<String, Object>() {{
+                    put("address", expectedAddressMap);
+                    put("name", "Captain Cardholder");
+                }});
 
         JsonTestUtils.assertMapEquals(totalExpectedMap, params.toParamMap());
     }
