@@ -86,7 +86,8 @@ public class JsonTestUtils {
      * @param first the first map
      * @param second the second map
      */
-    public static void assertMapEquals(Map<String, Object> first, Map<String, Object> second) {
+    public static void assertMapEquals(Map<String, ? extends Object> first,
+                                       Map<String, ? extends Object> second) {
         if (assertSameNullity(first, second)) {
             return;
         }

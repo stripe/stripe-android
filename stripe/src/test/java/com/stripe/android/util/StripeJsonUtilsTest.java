@@ -279,6 +279,24 @@ public class StripeJsonUtilsTest {
     }
 
     @Test
+    public void jsonObjectToStringMap_forSimpleObjects_returnsExpectedMap() {
+        Map<String, String> expectedMap = new HashMap<>();
+        expectedMap.put("akey", "avalue");
+        expectedMap.put("bkey", "bvalue");
+        expectedMap.put("boolkey", "true");
+        expectedMap.put("numkey", "123");
+
+        try {
+            JSONObject testJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
+            Map<String, String> mappedObject =
+                    StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
+            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
+        } catch (JSONException jsonException) {
+            fail("Test data failure " + jsonException.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void jsonObjectToMap_forNestedObjects_returnsExpectedMap() {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("top_key",
@@ -298,6 +316,24 @@ public class StripeJsonUtilsTest {
         try {
             JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
             Map<String, Object> mappedObject = StripeJsonUtils.jsonObjectToMap(testJsonObject);
+            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
+        } catch (JSONException jsonException) {
+            fail("Test data failure " + jsonException.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void jsonObjectToStringMap_forNestedObjects_returnsExpectedFlatMap() {
+        Map<String, String> expectedMap = new HashMap<>();
+        expectedMap.put("top_key", "{\"first_inner_key\":{\"innermost_key\":1000," +
+                "\"second_innermost_key\":\"second_inner_value\"}," +
+                "\"second_inner_key\":\"just a value\"}");
+        expectedMap.put("second_outer_key", "{\"another_inner_key\":false}");
+
+        try {
+            JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
+            Map<String, String> mappedObject =
+                    StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
             JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
         } catch (JSONException jsonException) {
             fail("Test data failure " + jsonException.getLocalizedMessage());

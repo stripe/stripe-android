@@ -7,10 +7,9 @@ import android.support.annotation.Size;
 
 import com.stripe.android.util.StripeNetworkUtils;
 
+import java.security.acl.Owner;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static com.stripe.android.model.Source.SourceType;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
@@ -22,6 +21,7 @@ public class SourceParams {
 
     static final String API_PARAM_AMOUNT = "amount";
     static final String API_PARAM_CURRENCY = "currency";
+    static final String API_PARAM_METADATA = "metadata";
     static final String API_PARAM_OWNER = "owner";
     static final String API_PARAM_REDIRECT = "redirect";
     static final String API_PARAM_TYPE = "type";
@@ -49,6 +49,7 @@ public class SourceParams {
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
     private Map<String, Object> mOwner;
+    private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
     @SourceType private String mType;
 
@@ -136,8 +137,14 @@ public class SourceParams {
         removeNullParams(addressMap);
 
         // If there are any keys left...
+        Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put(FIELD_NAME, card.getName());
         if (addressMap.keySet().size() > 0) {
-            params.setOwner(createSimpleMap(FIELD_ADDRESS, addressMap));
+            ownerMap.put(FIELD_ADDRESS, addressMap);
+        }
+        removeNullParams(ownerMap);
+        if (ownerMap.keySet().size() > 0) {
+            params.setOwner(ownerMap);
         }
 
         return params;
@@ -349,6 +356,22 @@ public class SourceParams {
     }
 
     /**
+     * @return the custom metadata set on these params
+     */
+    public Map<String, String> getMetaData() {
+        return mMetaData;
+    }
+
+    /**
+     * Set custom metadata on the parameters.
+     *
+     * @param metaData
+     */
+    public void setMetaData(@NonNull Map<String, String> metaData) {
+        mMetaData = metaData;
+    }
+
+    /**
      * Create a string-keyed map representing this object that is
      * ready to be sent over the network.
      *
@@ -357,12 +380,13 @@ public class SourceParams {
     @NonNull
     public Map<String, Object> toParamMap() {
         Map<String, Object> networkReadyMap = new HashMap<>();
-        networkReadyMap.put(API_PARAM_TYPE, getType());
-        networkReadyMap.put(getType(), getApiParameterMap());
-        networkReadyMap.put(API_PARAM_AMOUNT, getAmount());
-        networkReadyMap.put(API_PARAM_CURRENCY, getCurrency());
-        networkReadyMap.put(API_PARAM_OWNER, getOwner());
-        networkReadyMap.put(API_PARAM_REDIRECT, getRedirect());
+        networkReadyMap.put(API_PARAM_TYPE, mType);
+        networkReadyMap.put(mType, mApiParameterMap);
+        networkReadyMap.put(API_PARAM_AMOUNT, mAmount);
+        networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
+        networkReadyMap.put(API_PARAM_OWNER, mOwner);
+        networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
+        networkReadyMap.put(API_PARAM_METADATA, mMetaData);
         StripeNetworkUtils.removeNullParams(networkReadyMap);
         return networkReadyMap;
     }

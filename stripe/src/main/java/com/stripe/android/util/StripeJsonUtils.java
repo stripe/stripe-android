@@ -129,7 +129,7 @@ public class StripeJsonUtils {
         while(keyIterator.hasNext()) {
             String key = keyIterator.next();
             Object value = jsonObject.opt(key);
-            if (NULL.equals(value)) {
+            if (NULL.equals(value) || value == null) {
                 continue;
             }
 
@@ -141,6 +141,34 @@ public class StripeJsonUtils {
                 map.put(key, value);
             }
         }
+        return map;
+    }
+
+    /**
+     * Convert a {@link JSONObject} to a flat, string-keyed and string-valued map. All values
+     * are recorded as strings.
+     *
+     * @param jsonObject the input {@link JSONObject} to be converted
+     * @return a {@link Map} representing the input, or {@code null} if the input is {@code null}
+     */
+    @Nullable
+    public static Map<String, String> jsonObjectToStringMap(@Nullable JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+
+        Map<String, String> map = new HashMap<>();
+        Iterator<String> keyIterator = jsonObject.keys();
+        while (keyIterator.hasNext()) {
+            String key = keyIterator.next();
+            Object value = jsonObject.opt(key);
+            if (NULL.equals(value) || value == null) {
+                continue;
+            }
+
+            map.put(key, value.toString());
+        }
+
         return map;
     }
 
@@ -190,7 +218,7 @@ public class StripeJsonUtils {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public static JSONObject mapToJsonObject(@Nullable Map<String, Object> mapObject) {
+    public static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
         if (mapObject == null) {
             return null;
         }
