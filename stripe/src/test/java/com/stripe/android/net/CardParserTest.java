@@ -113,7 +113,8 @@ public class CardParserTest {
                 null,
                 Card.FUNDING_CREDIT,
                 "US",
-                null);
+                null,
+                "card_189fi32eZvKYlo2CHK8NPRME");
         try {
             Card cardFromJson = CardParser.parseCard(JSON_CARD);
             assertEquals(expectedCard.getBrand(), cardFromJson.getBrand());
@@ -124,6 +125,7 @@ public class CardParserTest {
             assertEquals(expectedCard.getExpYear(), cardFromJson.getExpYear());
             assertNull(cardFromJson.getAddressCity());
             assertNull(cardFromJson.getFingerprint());
+            assertEquals(expectedCard.getId(), cardFromJson.getId());
         } catch (JSONException jex) {
             fail();
         }
