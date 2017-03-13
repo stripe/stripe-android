@@ -26,6 +26,8 @@ public class SourceParams {
     static final String API_PARAM_REDIRECT = "redirect";
     static final String API_PARAM_TYPE = "type";
 
+    static final String API_PARAM_CLIENT_SECRET = "client_secret";
+
     static final String FIELD_ADDRESS = "address";
     static final String FIELD_BANK = "bank";
     static final String FIELD_CARD = "card";
@@ -305,6 +307,22 @@ public class SourceParams {
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
         params.setApiParameterMap(createSimpleMap(FIELD_CARD, cardID));
+        return params;
+    }
+
+    /**
+     * Create parameters needed to retrieve a source.
+     *
+     * @param clientSecret the client secret for the source, needed because the Android SDK uses
+     *                     a public key
+     * @return a {@link Map} matching the parameter name to the client secret, ready to send to
+     * the server.
+     */
+    @NonNull
+    public static Map<String, Object> createRetrieveSourceParams(
+            @NonNull @Size(min = 1) String clientSecret) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(API_PARAM_CLIENT_SECRET, clientSecret);
         return params;
     }
 

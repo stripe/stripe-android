@@ -102,6 +102,44 @@ public class StripeApiHandler {
     }
 
     /**
+     * Retrieve an existing {@link Source} object from the server.
+     *
+     * @param sourceId the {@link Source#mId} field for the Source to query
+     * @param clientSecret the {@link Source#mClientSecret} field for the Source to query
+     * @param publishableKey an API key
+     * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    public static Source retrieveSource(
+            @NonNull String sourceId,
+            @NonNull String clientSecret,
+            @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+
+        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+        try {
+            return Source.fromString(
+                    requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
+    }
+
+    /**
      * Create a {@link Token} using the input card parameters.
      *
      * @param cardParams a mapped set of parameters representing the object for which this token
@@ -235,6 +273,11 @@ public class StripeApiHandler {
     @VisibleForTesting
     static String getSourcesUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    }
+
+    @VisibleForTesting
+    static String getRetrieveSourceApiUrl(@NonNull String sourceId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getSourcesUrl(), sourceId);
     }
 
     @VisibleForTesting
