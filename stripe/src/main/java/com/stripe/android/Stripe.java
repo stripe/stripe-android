@@ -419,8 +419,7 @@ public class Stripe {
     }
 
     /**
-     * Retrieve an existing {@link Source} on the server. This is useful for checking the status
-     * of a source requiring redirect authentication, such as 3DS cards. Note that this is a
+     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
      * to crash. This method uses the default publishable key for this {@link Stripe} instance.
      *
@@ -447,8 +446,7 @@ public class Stripe {
     }
 
     /**
-     * Retrieve an existing {@link Source} on the server. This is useful for checking the status
-     * of a source requiring redirect authentication, such as 3DS cards. Note that this is a
+     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
      * to crash.
      *
