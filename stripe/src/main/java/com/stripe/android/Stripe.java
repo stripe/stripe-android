@@ -419,6 +419,68 @@ public class Stripe {
     }
 
     /**
+     * Retrieve an existing {@link Source} on the server. This is useful for checking the status
+     * of a source requiring redirect authentication, such as 3DS cards. Note that this is a
+     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
+     * to crash. This method uses the default publishable key for this {@link Stripe} instance.
+     *
+     * @param sourceId the {@link Source#mId} field of the desired Source object
+     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Source retrieveSourceSynchronous(
+            @NonNull @Size(min = 1) String sourceId,
+            @NonNull @Size(min = 1) String clientSecret)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return retrieveSourceSynchronous(sourceId, clientSecret, null);
+    }
+
+    /**
+     * Retrieve an existing {@link Source} on the server. This is useful for checking the status
+     * of a source requiring redirect authentication, such as 3DS cards. Note that this is a
+     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
+     * to crash.
+     *
+     * @param sourceId the {@link Source#mId} field of the desired Source object
+     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @param publishableKey a publishable API key to use
+     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Source retrieveSourceSynchronous(
+            @NonNull @Size(min = 1) String sourceId,
+            @NonNull @Size(min = 1) String clientSecret,
+            @Nullable String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+        return StripeApiHandler.retrieveSource(sourceId, clientSecret, apiKey);
+    }
+
+    /**
      * Set the default publishable key to use with this {@link Stripe} instance.
      *
      * @param publishableKey the key to be set

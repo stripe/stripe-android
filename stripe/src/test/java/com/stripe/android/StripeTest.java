@@ -528,6 +528,51 @@ public class StripeTest {
     }
 
     @Test
+    public void retrieveSourceSynchronous_withValidData_passesIntegrationTest() {
+        Stripe stripe = new Stripe(mContext);
+        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        SourceParams params = SourceParams.createCardParams(card);
+        try {
+            Source cardSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+
+            assertNotNull(cardSource);
+            assertNotNull(cardSource.getId());
+            SourceParams threeDParams = SourceParams.createThreeDSecureParams(
+                    50L,
+                    "brl",
+                    "example://return",
+                    cardSource.getId());
+
+            Map<String, String> metamap = new HashMap<String, String>() {{
+                put("dimensions", "three");
+                put("type", "beach ball");
+            }};
+            threeDParams.setMetaData(metamap);
+            Source threeDSource =
+                    stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+
+            String sourceId = threeDSource.getId();
+            String clientSecret = threeDSource.getClientSecret();
+
+            assertNotNull(sourceId);
+            assertNotNull(clientSecret);
+
+            Source retrievedSource =
+                    stripe.retrieveSourceSynchronous(
+                            sourceId,
+                            clientSecret,
+                            FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+
+            // We aren't actually updating the source on the server, so the two sources should
+            // be identical.
+            JsonTestUtils.assertMapEquals(threeDSource.toMap(), retrievedSource.toMap());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
         try {
             // This key won't work for a real connection to the api.
