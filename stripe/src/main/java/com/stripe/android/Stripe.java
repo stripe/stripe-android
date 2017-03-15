@@ -23,6 +23,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.PollingResponseHandler;
 import com.stripe.android.net.RequestOptions;
 import com.stripe.android.net.StripeApiHandler;
 
@@ -416,6 +417,19 @@ public class Stripe {
                 hashMapFromCard(mContext, card),
                 requestOptions,
                 mLoggingResponseListener);
+    }
+
+    public void pollSource(@NonNull @Size(min = 1) String sourceId,
+                           @NonNull @Size(min = 1) String clientSecret,
+                           @Nullable String publishableKey,
+                           @NonNull PollingResponseHandler callback,
+                           int timeoutMillis) {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return;
+        }
+
+        StripeApiHandler.pollSource(sourceId, clientSecret, apiKey, callback, timeoutMillis);
     }
 
     /**

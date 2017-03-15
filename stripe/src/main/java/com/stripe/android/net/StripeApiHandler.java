@@ -1,6 +1,12 @@
 package com.stripe.android.net;
 
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -13,10 +19,12 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
+import com.stripe.android.exception.PollingFailedException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.SourceRedirect;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
 
@@ -39,6 +47,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -137,6 +147,23 @@ public class StripeApiHandler {
                     unexpected.getStatusCode(),
                     unexpected);
         }
+    }
+
+    public static void pollSource(
+            @NonNull final String sourceId,
+            @NonNull final String clientSecret,
+            @NonNull final String publishableKey,
+            @NonNull final PollingResponseHandler callback,
+            @Nullable Integer timeOutMs) {
+
+        PollingNetworkHandler networkHandler =
+                new PollingNetworkHandler(
+                        sourceId,
+                        clientSecret,
+                        publishableKey,
+                        callback,
+                        timeOutMs);
+        networkHandler.start();
     }
 
     /**
