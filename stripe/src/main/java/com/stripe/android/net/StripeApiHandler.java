@@ -149,12 +149,22 @@ public class StripeApiHandler {
         }
     }
 
+    /**
+     * Poll for changes in a {@link Source} using a background thread with an exponential backoff.
+     *
+     * @param sourceId the {@link Source#mId} to check on
+     * @param clientSecret the {@link Source#mClientSecret} to check on
+     * @param publishableKey an API key
+     * @param callback a {@link PollingResponseHandler} to use as a callback
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     */
     public static void pollSource(
             @NonNull final String sourceId,
             @NonNull final String clientSecret,
             @NonNull final String publishableKey,
             @NonNull final PollingResponseHandler callback,
-            @Nullable Integer timeOutMs) {
+            @Nullable Integer timeoutMs) {
 
         PollingNetworkHandler networkHandler =
                 new PollingNetworkHandler(
@@ -162,7 +172,7 @@ public class StripeApiHandler {
                         clientSecret,
                         publishableKey,
                         callback,
-                        timeOutMs,
+                        timeoutMs,
                         null);
         networkHandler.start();
     }
