@@ -15,9 +15,10 @@ import com.stripe.android.model.SourceRedirect;
 /**
  * Class to handle polling on a background thread.
  */
-public class PollingNetworkHandler {
+class PollingNetworkHandler {
 
     private static final String AUTHORIZATION_FAILED = "The redirect authorization request failed.";
+    private static final long DEFAULT_TIMEOUT_MS = 10000L;
     private static final int INITIAL_DELAY_MS = 100;
     private static final String POLLING_EXPIRED = "The polling request has expired.";
     private static final int POLLING_MULTIPLIER = 2;
@@ -96,7 +97,7 @@ public class PollingNetworkHandler {
                 }
                 : sourceRetriever;
 
-        mTimeoutMs = timeOutMs == null ? 10000L : timeOutMs.longValue();
+        mTimeoutMs = timeOutMs == null ? DEFAULT_TIMEOUT_MS : timeOutMs.longValue();
 
         mUiHandler = new Handler(Looper.getMainLooper()) {
             int delayMs = INITIAL_DELAY_MS;
@@ -171,7 +172,7 @@ public class PollingNetworkHandler {
         };
     }
 
-    public void start() {
+    void start() {
         mNetworkHandler.post(pollRunnable);
         mNetworkHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
         mUiHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
