@@ -180,6 +180,7 @@ public class RxTokenController {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mAppCompatActivity);
         dialogBuilder.setMessage("Go to the site in the console and approve to succeed");
         dialogBuilder.setNeutralButton("I'm ready", new DialogInterface.OnClickListener() {
+            int recount = 0;
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mStripe.pollSource(
@@ -193,8 +194,8 @@ public class RxTokenController {
                             }
 
                             @Override
-                            public void onRetry(int retryCount) {
-                                Log.d("chewie", "Retry number " + retryCount);
+                            public void onRetry(int millis) {
+                                Log.d("chewie", "Retry number " + ++recount + " delay " + millis);
                             }
 
                             @Override

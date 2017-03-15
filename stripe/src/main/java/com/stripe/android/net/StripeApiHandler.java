@@ -162,7 +162,8 @@ public class StripeApiHandler {
                         clientSecret,
                         publishableKey,
                         callback,
-                        timeOutMs);
+                        timeOutMs,
+                        null);
         networkHandler.start();
     }
 

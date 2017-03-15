@@ -7,6 +7,6 @@ import com.stripe.android.exception.StripeException;
  */
 public interface PollingResponseHandler {
     void onSuccess();
-    void onRetry(int retryCount);
+    void onRetry(int millis);
     void onError(StripeException stripeEx);
 }

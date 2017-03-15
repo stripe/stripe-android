@@ -7,73 +7,65 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.APIException;
-import com.stripe.android.exception.AuthenticationException;
-import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PollingFailedException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceRedirect;
-
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 
 /**
  * Class to handle polling on a background thread.
  */
 public class PollingNetworkHandler {
 
+    private static final String AUTHORIZATION_FAILED = "The redirect authorization request failed.";
     private static final int INITIAL_DELAY_MS = 100;
+    private static final String POLLING_EXPIRED = "The polling request has expired.";
+    private static final int POLLING_MULTIPLIER = 2;
 
-    private final PollingResponseHandler mCallback;
+    private static final int SUCCESS = 1;
+    private static final int PENDING = 2;
+    private static final int FAILURE = 3;
+    private static final int ERROR = -1;
+    private static final int EXPIRED = -2;
+
     private final String mClientSecret;
     private final String mPublishableKey;
     private final String mSourceId;
 
     private final long mTimeoutMs;
+    private final boolean mIsInSingleThreadMode;
+    @NonNull private final SourceRetriever mSourceRetriever;
 
     private Handler mNetworkHandler;
     private Handler mUiHandler;
 
-    private boolean mIsPaused;
-    private Queue<Message> mMessageQueue = new LinkedBlockingQueue<>();
-
-    final Runnable pollRunnable = new Runnable() {
+    private final Runnable pollRunnable = new Runnable() {
         @Override
         public void run() {
             Message message = null;
             try {
-                Source source = StripeApiHandler.retrieveSource(
-                        mSourceId, mClientSecret, mPublishableKey);
+                Source source = mSourceRetriever.retrieveSource(
+                        mSourceId,
+                        mClientSecret,
+                        mPublishableKey);
                 if (source.getRedirect() != null) {
                     switch (source.getRedirect().getStatus()) {
                         case SourceRedirect.SUCCEEDED:
-                            message = mUiHandler.obtainMessage(1);
+                            message = mUiHandler.obtainMessage(SUCCESS);
                             break;
                         case SourceRedirect.PENDING:
-                            message = mUiHandler.obtainMessage(2);
+                            message = mUiHandler.obtainMessage(PENDING);
                             break;
                         case SourceRedirect.FAILED:
-                            message = mUiHandler.obtainMessage(3);
+                            message = mUiHandler.obtainMessage(FAILURE);
                             break;
                     }
                 }
-            } catch (AuthenticationException authEx) {
-                message = mUiHandler.obtainMessage(-1, authEx);
-            } catch (InvalidRequestException invalidEx) {
-                message = mUiHandler.obtainMessage(-2, invalidEx);
-            } catch (APIConnectionException apiConnectionException) {
-                message = mUiHandler.obtainMessage(-3, apiConnectionException);
-            } catch (APIException apiException) {
-                message = mUiHandler.obtainMessage(-4, apiException);
+            } catch (StripeException stripeEx) {
+                message = mUiHandler.obtainMessage(ERROR, stripeEx);
             } finally {
                 if (message != null) {
-                    if (mIsPaused) {
-                        mMessageQueue.add(message);
-                    } else {
-                        mUiHandler.sendMessage(message);
-                    }
+                    mUiHandler.sendMessage(message);
                 }
             }
         }
@@ -83,42 +75,60 @@ public class PollingNetworkHandler {
                           @NonNull final String clientSecret,
                           @NonNull final String publishableKey,
                           @NonNull final PollingResponseHandler callback,
-                          @Nullable Integer timeOutMs) {
+                          @Nullable Integer timeOutMs,
+                          @Nullable SourceRetriever sourceRetriever) {
         mSourceId = sourceId;
         mClientSecret = clientSecret;
         mPublishableKey = publishableKey;
-        mCallback = callback;
+        mIsInSingleThreadMode = sourceRetriever != null;
+        mSourceRetriever = sourceRetriever == null
+                ? new SourceRetriever() {
+                    @Override
+                    public Source retrieveSource(
+                            @NonNull String sourceId,
+                            @NonNull String clientSecret,
+                            @NonNull String publishableKey) throws StripeException {
+                        return StripeApiHandler.retrieveSource(
+                                sourceId,
+                                clientSecret,
+                                publishableKey);
+                    }
+                }
+                : sourceRetriever;
 
         mTimeoutMs = timeOutMs == null ? 10000L : timeOutMs.longValue();
 
-        HandlerThread handlerThread = new HandlerThread("Network Handler Thread");
-        handlerThread.start();
-
         mUiHandler = new Handler(Looper.getMainLooper()) {
-            int delayMs = 100;
-            int multiplier = 2;
+            int delayMs = INITIAL_DELAY_MS;
+            boolean terminated = false;
 
-            int retryCount = 0;
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
+                if (terminated) {
+                    return;
+                }
+
                 switch (msg.what) {
-                    case 0:
-                        mNetworkHandler.sendEmptyMessage(0);
-                        break;
-                    case 1:
+                    case SUCCESS:
                         callback.onSuccess();
                         break;
-                    case 2:
-                        delayMs *= multiplier;
-                        callback.onRetry(++retryCount);
+                    case PENDING:
+                        delayMs *= POLLING_MULTIPLIER;
+                        callback.onRetry(delayMs);
                         mNetworkHandler.sendEmptyMessage(delayMs);
                         break;
-                    case 3:
-                        callback.onError(new PollingFailedException("failed", false));
+                    case FAILURE:
+                        terminated = true;
+                        callback.onError(new PollingFailedException(AUTHORIZATION_FAILED, false));
                         break;
-                    case -55:
-                        callback.onError(new PollingFailedException("expired", true));
+                    case EXPIRED:
+                        terminated = true;
+                        callback.onError(new PollingFailedException(POLLING_EXPIRED, true));
+                        break;
+                    case ERROR:
+                        terminated = true;
+                        callback.onError((StripeException) msg.obj);
                         break;
                     default:
                         break;
@@ -126,32 +136,52 @@ public class PollingNetworkHandler {
             }
         };
 
-        mNetworkHandler = new Handler(handlerThread.getLooper()) {
+        HandlerThread handlerThread = null;
+        if (!mIsInSingleThreadMode) {
+            handlerThread = new HandlerThread("Network Handler Thread");
+            handlerThread.start();
+        }
+
+        final Looper looper = mIsInSingleThreadMode
+                ? Looper.getMainLooper()
+                : handlerThread.getLooper();
+        mNetworkHandler = new Handler(looper) {
+            boolean terminated = false;
+
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
+                if (terminated) {
+                    return;
+                }
+
                 if (msg.what >= 0) {
                     postDelayed(pollRunnable, msg.what);
                 } else {
+                    terminated = true;
+                    if (!mIsInSingleThreadMode) {
+                        looper.quit();
+                    }
+                    mUiHandler.removeMessages(SUCCESS);
+                    mUiHandler.removeMessages(PENDING);
+                    mUiHandler.removeMessages(FAILURE);
                     removeCallbacks(pollRunnable);
                 }
             }
         };
-
     }
 
     public void start() {
         mNetworkHandler.post(pollRunnable);
+        mNetworkHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
+        mUiHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
     }
 
-    public void pause() {
-        mIsPaused = true;
-    }
-
-    public void resume() {
-        mIsPaused = false;
-        if (!mMessageQueue.isEmpty()) {
-            mUiHandler.sendMessage(mMessageQueue.poll());
-        }
+    interface SourceRetriever {
+        Source retrieveSource(
+                @NonNull String sourceId,
+                @NonNull String clientSecret,
+                @NonNull String publishableKey)
+                throws StripeException;
     }
 }
