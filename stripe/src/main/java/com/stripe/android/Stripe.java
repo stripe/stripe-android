@@ -433,7 +433,7 @@ public class Stripe {
                            @NonNull @Size(min = 1) String clientSecret,
                            @Nullable String publishableKey,
                            @NonNull PollingResponseHandler callback,
-                           int timeoutMs) {
+                           @Nullable Integer timeoutMs) {
         String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
         if (apiKey == null) {
             return;
