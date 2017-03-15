@@ -28,7 +28,6 @@ public class DependencyHandler {
      */
     private static final String PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
 
-    private AppCompatActivity mAppCompatActivity;
     private AsyncTaskTokenController mAsyncTaskController;
     private CardInputWidget mCardInputWidget;
     private Context mContext;
@@ -43,7 +42,6 @@ public class DependencyHandler {
             CardInputWidget cardInputWidget,
             ListView outputListView) {
 
-        mAppCompatActivity = activity;
         mCardInputWidget = cardInputWidget;
         mContext = activity.getBaseContext();
 
@@ -117,7 +115,6 @@ public class DependencyHandler {
         if (mRxTokenController == null) {
             mRxTokenController = new RxTokenController(
                     button,
-                    mAppCompatActivity,
                     mCardInputWidget,
                     mContext,
                     mErrorDialogHandler,
