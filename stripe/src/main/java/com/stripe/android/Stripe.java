@@ -428,9 +428,6 @@ public class Stripe {
      *  `pending`. If polling stops due to an error, the callback will be fired with the latest
      *  retrieved source and the error.
      *
-     *  Note that if a poll is already running for a source, subsequent calls to `pollSource`
-     *  with the same source ID will do nothing.
-     *
      * @param sourceId the {@link Source#mId} to check on
      * @param clientSecret the {@link Source#mClientSecret} to check on
      * @param publishableKey an API key

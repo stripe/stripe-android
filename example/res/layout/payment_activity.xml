@@ -41,6 +41,15 @@
         android:text="@string/saveService"
         style="@style/Save"/>
 
+    <Button
+        android:id="@+id/three_d_secure"
+        android:layout_height="wrap_content"
+        android:layout_width="160dp"
+        android:text="@string/tryThreeDSecure"
+        style="@style/Save"
+        >
+
+    </Button>
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
               android:layout_marginTop="12dp"

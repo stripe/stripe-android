@@ -19,11 +19,11 @@ public class ProgressDialogController {
         mProgressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
     }
 
-    void startProgress() {
+    public void startProgress() {
         mProgressFragment.show(mFragmentManager, "progress");
     }
 
-    void finishProgress() {
+    public void finishProgress() {
         mProgressFragment.dismiss();
     }
 }
