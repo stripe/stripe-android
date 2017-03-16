@@ -29,9 +29,9 @@ public class SourceRedirect extends StripeJsonModel {
             FAILED
     })
     @interface Status { }
-    static final String PENDING = "pending";
-    static final String SUCCEEDED = "succeeded";
-    static final String FAILED = "failed";
+    public static final String PENDING = "pending";
+    public static final String SUCCEEDED = "succeeded";
+    public static final String FAILED = "failed";
 
     static final String FIELD_RETURN_URL = "return_url";
     static final String FIELD_STATUS = "status";
