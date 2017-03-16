@@ -1,17 +1,16 @@
 package com.stripe.android.net;
 
-import com.stripe.android.exception.PollingFailedException;
-import com.stripe.android.exception.StripeException;
-
 /**
  * Represents a callback for the response of a polling operation.
  */
 public interface PollingResponseHandler {
 
     /**
-     * Called when the update has come back as a success.
+     * Called when polling is complete.
+     *
+     * @param pollingResponse the {@link PollingResponse} of this operation
      */
-    void onSuccess();
+    void onPollingResponse(PollingResponse pollingResponse);
 
     /**
      * Called when the polling process is going to check again after a delay.
@@ -20,11 +19,4 @@ public interface PollingResponseHandler {
      */
     void onRetry(int millis);
 
-    /**
-     * Called when the polling process has returned some kind of failure.
-     *
-     * @param stripeEx an {@link StripeException} resulting from the polling process, which may
-     *                 include a {@link PollingFailedException} for timeout or failure response
-     */
-    void onError(StripeException stripeEx);
 }

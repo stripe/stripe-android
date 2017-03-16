@@ -6,21 +6,21 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.exception.PollingFailedException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceRedirect;
 
 /**
  * Class to handle polling on a background thread.
  */
 class PollingNetworkHandler {
 
-    private static final String AUTHORIZATION_FAILED = "The redirect authorization request failed.";
     private static final long DEFAULT_TIMEOUT_MS = 10000L;
-    private static final int INITIAL_DELAY_MS = 100;
-    private static final String POLLING_EXPIRED = "The polling request has expired.";
+    private static final int MAX_RETRY_COUNT = 5;
+    private static final long MAX_TIMEOUT_MS = 5L * 60L * 1000L;
+    private static final int INITIAL_DELAY_MS = 1000;
+    private static final int MAX_DELAY_MS = 15000;
     private static final int POLLING_MULTIPLIER = 2;
 
     private static final int SUCCESS = 1;
@@ -35,10 +35,13 @@ class PollingNetworkHandler {
 
     private final long mTimeoutMs;
     private final boolean mIsInSingleThreadMode;
-    @NonNull private final SourceRetriever mSourceRetriever;
 
     private Handler mNetworkHandler;
     private Handler mUiHandler;
+
+    @Nullable private Source mLatestRetrievedSource;
+    private int mRetryCount;
+    @NonNull private SourceRetriever mSourceRetriever;
 
     private final Runnable pollRunnable = new Runnable() {
         @Override
@@ -49,16 +52,20 @@ class PollingNetworkHandler {
                         mSourceId,
                         mClientSecret,
                         mPublishableKey);
-                if (source.getRedirect() != null) {
-                    switch (source.getRedirect().getStatus()) {
-                        case SourceRedirect.SUCCEEDED:
-                            message = mUiHandler.obtainMessage(SUCCESS);
-                            break;
-                        case SourceRedirect.PENDING:
+                mLatestRetrievedSource = source;
+                if (source.getStatus() != null) {
+                    switch (source.getStatus()) {
+                        case Source.PENDING:
                             message = mUiHandler.obtainMessage(PENDING);
                             break;
-                        case SourceRedirect.FAILED:
-                            message = mUiHandler.obtainMessage(FAILURE);
+                        case Source.CHARGEABLE:
+                            message = mUiHandler.obtainMessage(SUCCESS, source);
+                            break;
+                        case Source.CONSUMED:
+                            message = mUiHandler.obtainMessage(SUCCESS, source);
+                            break;
+                        case Source.CANCELED:
+                            message = mUiHandler.obtainMessage(FAILURE, source);
                             break;
                     }
                 }
@@ -97,7 +104,11 @@ class PollingNetworkHandler {
                 }
                 : sourceRetriever;
 
-        mTimeoutMs = timeOutMs == null ? DEFAULT_TIMEOUT_MS : timeOutMs.longValue();
+        mTimeoutMs = timeOutMs == null
+                ? DEFAULT_TIMEOUT_MS
+                : Math.min(timeOutMs.longValue(), MAX_TIMEOUT_MS);
+
+        mRetryCount = 0;
 
         mUiHandler = new Handler(Looper.getMainLooper()) {
             int delayMs = INITIAL_DELAY_MS;
@@ -112,24 +123,38 @@ class PollingNetworkHandler {
 
                 switch (msg.what) {
                     case SUCCESS:
-                        callback.onSuccess();
+                        callback.onPollingResponse(
+                                new PollingResponse((Source) msg.obj, true, false));
                         break;
                     case PENDING:
-                        delayMs *= POLLING_MULTIPLIER;
+                        mRetryCount = 0;
+                        delayMs = INITIAL_DELAY_MS;
                         callback.onRetry(delayMs);
                         mNetworkHandler.sendEmptyMessage(delayMs);
                         break;
                     case FAILURE:
                         terminated = true;
-                        callback.onError(new PollingFailedException(AUTHORIZATION_FAILED, false));
+                        callback.onPollingResponse(
+                                new PollingResponse((Source) msg.obj, false, false));
                         break;
                     case EXPIRED:
                         terminated = true;
-                        callback.onError(new PollingFailedException(POLLING_EXPIRED, true));
+                        callback.onPollingResponse(
+                                new PollingResponse(mLatestRetrievedSource, false, true));
                         break;
                     case ERROR:
-                        terminated = true;
-                        callback.onError((StripeException) msg.obj);
+                        mRetryCount++;
+                        if (mRetryCount >= MAX_RETRY_COUNT) {
+                            terminated = true;
+                            callback.onPollingResponse(
+                                    new PollingResponse(mLatestRetrievedSource,
+                                            (StripeException) msg.obj));
+                        } else {
+                            // We get this case for 500-errors
+                            delayMs = Math.min(delayMs * POLLING_MULTIPLIER, MAX_DELAY_MS);
+                            callback.onRetry(delayMs);
+                            mNetworkHandler.sendEmptyMessage(delayMs);
+                        }
                         break;
                     default:
                         break;
@@ -170,6 +195,21 @@ class PollingNetworkHandler {
                 }
             }
         };
+    }
+
+    @VisibleForTesting
+    long getTimeoutMs() {
+        return mTimeoutMs;
+    }
+
+    @VisibleForTesting
+    int getRetryCount() {
+        return mRetryCount;
+    }
+
+    @VisibleForTesting
+    void setSourceRetriever(@NonNull SourceRetriever sourceRetriever) {
+        mSourceRetriever = sourceRetriever;
     }
 
     void start() {

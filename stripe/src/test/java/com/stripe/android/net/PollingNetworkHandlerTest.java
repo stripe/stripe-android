@@ -1,10 +1,8 @@
 package com.stripe.android.net;
 
 import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.PollingFailedException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceRedirect;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +20,12 @@ import java.util.concurrent.TimeUnit;
 import static com.stripe.android.net.PollingNetworkHandler.SourceRetriever;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,9 +40,10 @@ public class PollingNetworkHandlerTest {
     private static final String DUMMY_CLIENT_SECRET = "clientSecret";
     private static final String DUMMY_PUBLISHABLE_KEY = "pubKey";
 
-    @Mock Source mFailedSource;
+    @Mock Source mCancelledSource;
+    @Mock Source mChargeableSource;
+    @Mock Source mConsumedSource;
     @Mock Source mPendingSource;
-    @Mock Source mSucceedSource;
 
     @Mock SourceRetriever mSourceRetriever;
     @Mock PollingResponseHandler mPollingResponseHandler;
@@ -54,18 +56,42 @@ public class PollingNetworkHandlerTest {
 
         mPollingNetworkHandler = initializeHandler(
                 mPollingResponseHandler,
-                700,
+                3000,
                 mSourceRetriever);
-        SourceRedirect failedSourceRedirect = mock(SourceRedirect.class);
-        SourceRedirect pendingSourceRedirect = mock(SourceRedirect.class);
-        SourceRedirect succeedSourceRedirect = mock(SourceRedirect.class);
-        when(failedSourceRedirect.getStatus()).thenReturn(SourceRedirect.FAILED);
-        when(pendingSourceRedirect.getStatus()).thenReturn(SourceRedirect.PENDING);
-        when(succeedSourceRedirect.getStatus()).thenReturn(SourceRedirect.SUCCEEDED);
 
-        when(mFailedSource.getRedirect()).thenReturn(failedSourceRedirect);
-        when(mPendingSource.getRedirect()).thenReturn(pendingSourceRedirect);
-        when(mSucceedSource.getRedirect()).thenReturn(succeedSourceRedirect);
+        when(mConsumedSource.getStatus()).thenReturn(Source.CONSUMED);
+        when(mChargeableSource.getStatus()).thenReturn(Source.CHARGEABLE);
+        when(mPendingSource.getStatus()).thenReturn(Source.PENDING);
+        when(mCancelledSource.getStatus()).thenReturn(Source.CANCELED);
+    }
+
+    @Test
+    public void createHandler_withNullTimeout_usesDefault() {
+        PollingNetworkHandler handler = initializeHandler(
+                mPollingResponseHandler,
+                null,
+                mSourceRetriever);
+        assertEquals(10000L, handler.getTimeoutMs());
+    }
+
+    @Test
+    public void createHandler_withNonNullTimeoutBelowMax_usesSetValue() {
+        PollingNetworkHandler handler = initializeHandler(
+                mPollingResponseHandler,
+                12345,
+                mSourceRetriever);
+        assertEquals(12345L, handler.getTimeoutMs());
+    }
+
+    @Test
+    public void createHandler_withTimeoutGreaterThanMax_usesMax() {
+        long fiveMinutesInMillis = 5L * 60L * 1000L;
+        Integer tenMinutesInMillis = 10 * 60 *1000;
+        PollingNetworkHandler handler = initializeHandler(
+                mPollingResponseHandler,
+                tenMinutesInMillis,
+                mSourceRetriever);
+        assertEquals(fiveMinutesInMillis, handler.getTimeoutMs());
     }
 
     @Test
@@ -74,78 +100,214 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        ArgumentCaptor<StripeException> exceptionArgumentCaptor =
-                ArgumentCaptor.forClass(StripeException.class);
 
-        verify(mPollingResponseHandler).onRetry(200);
 
-        advanceMainLooperBy(200);
+        advanceMainLooperBy(2999);
+        verify(mPollingResponseHandler, times(3)).onRetry(1000);
+        // This is simulating normal 200-type responses
+        assertEquals(0, mPollingNetworkHandler.getRetryCount());
+        advanceMainLooperBy(1);
 
-        verify(mPollingResponseHandler).onRetry(400);
-
-        advanceMainLooperBy(500);
-
-        verify(mPollingResponseHandler).onError(exceptionArgumentCaptor.capture());
-        StripeException expectedArgument = exceptionArgumentCaptor.getValue();
-        assertTrue(expectedArgument instanceof PollingFailedException);
-        assertTrue(((PollingFailedException) expectedArgument).isExpired());
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertTrue(response.isExpired());
+        assertFalse(response.isSuccess());
+        assertEquals(mPendingSource, response.getSource());
     }
 
     @Test
-    public void startPolling_whenSuccess_sendsSuccess() {
+    public void startPolling_whenChargeable_sendsSuccess() {
 
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(200);
+        verify(mPollingResponseHandler).onRetry(1000);
 
-        setSourceResponse(mSourceRetriever, mSucceedSource);
-        advanceMainLooperBy(200);
+        setSourceResponse(mSourceRetriever, mChargeableSource);
+        advanceMainLooperBy(1000);
 
-        verify(mPollingResponseHandler).onSuccess();
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertTrue(response.isSuccess());
+        assertFalse(response.isExpired());
+        // They're mocks, but they should theoretically be equal.
+        assertEquals(mChargeableSource, response.getSource());
     }
 
     @Test
-    public void startPolling_whenFailure_sendsFailure() {
+    public void startPolling_whenConsumed_sendsSuccess() {
+
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(200);
+        verify(mPollingResponseHandler).onRetry(1000);
 
-        setSourceResponse(mSourceRetriever, mFailedSource);
-        advanceMainLooperBy(200);
+        setSourceResponse(mSourceRetriever, mConsumedSource);
+        advanceMainLooperBy(1000);
 
-        ArgumentCaptor<StripeException> exceptionArgumentCaptor =
-                ArgumentCaptor.forClass(StripeException.class);
-        verify(mPollingResponseHandler).onError(exceptionArgumentCaptor.capture());
-        StripeException expectedArgument = exceptionArgumentCaptor.getValue();
-        assertTrue(expectedArgument instanceof PollingFailedException);
-        // This one just failed -- it didn't expire.
-        assertFalse(((PollingFailedException) expectedArgument).isExpired());
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertTrue(response.isSuccess());
+        assertFalse(response.isExpired());
+        // They're mocks, but they should theoretically be equal.
+        assertEquals(mConsumedSource, response.getSource());
     }
 
     @Test
-    public void startPolling_whenExceptionThrownInApi_passesExceptionToHandler() {
+    public void startPolling_whenCancelled_sendsFailureResponse() {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(200);
+        verify(mPollingResponseHandler).onRetry(1000);
+
+        setSourceResponse(mSourceRetriever, mCancelledSource);
+        advanceMainLooperBy(1000);
+
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertFalse(response.isSuccess());
+        assertFalse(response.isExpired());
+        // They're mocks, but they should theoretically be equal.
+        assertEquals(mCancelledSource, response.getSource());
+    }
+
+    @Test
+    public void startPolling_whenExceptionThrownInApi_retriesAfterDecayingDelay() {
+        setSourceResponse(mSourceRetriever, mPendingSource);
+
+        mPollingNetworkHandler.start();
+        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceException(mSourceRetriever, new APIConnectionException("expected error"));
 
-        advanceMainLooperBy(200);
+        advanceMainLooperBy(1000);
+        assertEquals(1, mPollingNetworkHandler.getRetryCount());
+        verify(mPollingResponseHandler).onRetry(2000);
+    }
 
-        ArgumentCaptor<StripeException> exceptionArgumentCaptor =
-                ArgumentCaptor.forClass(StripeException.class);
-        verify(mPollingResponseHandler).onError(exceptionArgumentCaptor.capture());
-        StripeException expectedArgument = exceptionArgumentCaptor.getValue();
-        assertTrue(expectedArgument instanceof APIConnectionException);
-        assertEquals("expected error", expectedArgument.getMessage());
+    @Test
+    public void startPolling_whenExceptionThrownInApiFollowedByPending_setsRetryCountToZero() {
+        PollingNetworkHandler pollingNetworkHandler = initializeHandler(
+                mPollingResponseHandler,
+                30000,
+                mSourceRetriever);
+        setSourceResponse(mSourceRetriever, mPendingSource);
+
+        pollingNetworkHandler.start();
+
+        SourceRetriever exceptionRetriever = mock(SourceRetriever.class);
+        setSourceException(exceptionRetriever, new APIConnectionException("expected error"));
+        pollingNetworkHandler.setSourceRetriever(exceptionRetriever);
+
+        advanceMainLooperBy(1000);
+        assertEquals(1, pollingNetworkHandler.getRetryCount());
+        verify(mPollingResponseHandler).onRetry(2000);
+
+        pollingNetworkHandler.setSourceRetriever(mSourceRetriever);
+        advanceMainLooperBy(2000);
+        // This call is made once after invoking start, and once when we advance the main looper
+        // for the final time.
+        verify(mPollingResponseHandler, times(2)).onRetry(1000);
+        assertEquals(0, pollingNetworkHandler.getRetryCount());
+    }
+
+    @Test
+    public void startPolling_whenExceptionThrownTooManyTimes_sendsErrorResponse() {
+        PollingNetworkHandler pollingNetworkHandler = initializeHandler(
+                mPollingResponseHandler,
+                50000,
+                mSourceRetriever);
+        setSourceException(mSourceRetriever, new APIConnectionException("expected error"));
+
+        pollingNetworkHandler.start();
+        verify(mPollingResponseHandler).onRetry(2000);
+        assertEquals(1, pollingNetworkHandler.getRetryCount());
+
+        advanceMainLooperBy(2000);
+        verify(mPollingResponseHandler).onRetry(4000);
+        assertEquals(2, pollingNetworkHandler.getRetryCount());
+
+        advanceMainLooperBy(4000);
+        verify(mPollingResponseHandler).onRetry(8000);
+        assertEquals(3, pollingNetworkHandler.getRetryCount());
+
+        advanceMainLooperBy(8000);
+        // Note that this is hitting the max value, so the next delay isn't 16000ms.
+        verify(mPollingResponseHandler).onRetry(15000);
+        assertEquals(4, pollingNetworkHandler.getRetryCount());
+
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+
+        advanceMainLooperBy(15000);
+        assertEquals(5, pollingNetworkHandler.getRetryCount());
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertNotNull(response.getStripeException());
+        assertEquals("expected error", response.getStripeException().getMessage());
+        assertFalse(response.isSuccess());
+        assertFalse(response.isExpired());
+        // This value is null because we never got a valid source back.
+        assertNull(response.getSource());
+    }
+
+    @Test
+    public void startPolling_whenTooManyErrorsAfterPendingOnce_sendsErrorResponseWithSource() {
+        PollingNetworkHandler pollingNetworkHandler = initializeHandler(
+                mPollingResponseHandler,
+                50000,
+                mSourceRetriever);
+        setSourceResponse(mSourceRetriever, mPendingSource);
+
+        pollingNetworkHandler.start();
+        verify(mPollingResponseHandler).onRetry(1000);
+
+        SourceRetriever exceptionRetriever = mock(SourceRetriever.class);
+        setSourceException(exceptionRetriever, new APIConnectionException("expected error"));
+        pollingNetworkHandler.setSourceRetriever(exceptionRetriever);
+
+        advanceMainLooperBy(1000);
+        verify(mPollingResponseHandler).onRetry(2000);
+
+        advanceMainLooperBy(2000);
+        verify(mPollingResponseHandler).onRetry(4000);
+
+        advanceMainLooperBy(4000);
+        verify(mPollingResponseHandler).onRetry(8000);
+
+        advanceMainLooperBy(8000);
+        verify(mPollingResponseHandler).onRetry(15000);
+
+        SourceRetriever otherExceptionRetriever = mock(SourceRetriever.class);
+        setSourceException(otherExceptionRetriever, new APIConnectionException("next error"));
+        pollingNetworkHandler.setSourceRetriever(otherExceptionRetriever);
+
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+
+        advanceMainLooperBy(15000);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertNotNull(response.getStripeException());
+        assertEquals("next error", response.getStripeException().getMessage());
+        assertFalse(response.isSuccess());
+        assertFalse(response.isExpired());
+        assertEquals(mPendingSource, response.getSource());
     }
 
     private static PollingNetworkHandler initializeHandler(
             PollingResponseHandler pollingResponseHandler,
-            int timeout,
+            Integer timeout,
             SourceRetriever sourceRetriever) {
         return new PollingNetworkHandler(
                 DUMMY_SOURCE_ID,

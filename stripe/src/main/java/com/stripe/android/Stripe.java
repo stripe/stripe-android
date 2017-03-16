@@ -420,7 +420,16 @@ public class Stripe {
     }
 
     /**
-     * Poll for changes in a {@link Source} using a background thread with an exponential backoff.
+     *  Starts polling the {@link Source} object with the given ID. For payment methods that require
+     *  additional customer action (e.g. authorizing a payment with their bank), polling
+     *  allows you to determine if the action was successful. Polling will stop and the
+     *  provided callback will be called once the source's status is no longer
+     *  {@link Source#PENDING}, or if the given timeout is reached and the source is still
+     *  `pending`. If polling stops due to an error, the callback will be fired with the latest
+     *  retrieved source and the error.
+     *
+     *  Note that if a poll is already running for a source, subsequent calls to `pollSource`
+     *  with the same source ID will do nothing.
      *
      * @param sourceId the {@link Source#mId} to check on
      * @param clientSecret the {@link Source#mClientSecret} to check on
