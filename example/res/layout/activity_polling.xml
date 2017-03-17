@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.stripe.example.activity.PollingActivity">
+
+    <TextView android:id="@+id/payment_form_title"
+              android:text="@string/addThreeDSecureCard"
+              style="@style/Header.Light" />
+
+    <com.stripe.android.view.CardInputWidget
+        android:id="@+id/card_widget_three_d"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        />
+
+    <Button
+        android:id="@+id/btn_three_d_secure"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/addThreeDSecureCard"/>
+
+    <TextView android:text="@string/updatedSources"
+              style="@style/Header.Light" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="8dp"/>
+
+</LinearLayout>

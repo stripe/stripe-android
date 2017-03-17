@@ -1,6 +1,7 @@
 package com.stripe.example.controller;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentManager;
 
 import com.stripe.example.R;
@@ -19,11 +20,19 @@ public class ProgressDialogController {
         mProgressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
     }
 
-    void startProgress() {
+    public void setMessageResource(@StringRes int resId) {
+        if (mProgressFragment.isVisible()) {
+            mProgressFragment.dismiss();
+            mProgressFragment = null;
+        }
+        mProgressFragment = ProgressDialogFragment.newInstance(resId);
+    }
+
+    public void startProgress() {
         mProgressFragment.show(mFragmentManager, "progress");
     }
 
-    void finishProgress() {
+    public void finishProgress() {
         mProgressFragment.dismiss();
     }
 }
