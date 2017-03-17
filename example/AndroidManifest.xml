@@ -24,7 +24,15 @@
             android:exported="false"/>
 
         <activity android:name=".activity.PollingActivity"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.AppCompat.Light"
+            android:launchMode="singleTask">
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="stripe"
+                      android:host="example" />
+            </intent-filter>
         </activity>
     </application>
 
