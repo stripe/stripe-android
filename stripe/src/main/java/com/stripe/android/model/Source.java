@@ -53,13 +53,15 @@ public class Source extends StripeJsonModel {
             PENDING,
             CHARGEABLE,
             CONSUMED,
-            CANCELED
+            CANCELED,
+            FAILED
     })
     public @interface SourceStatus { }
     public static final String PENDING = "pending";
     public static final String CHARGEABLE = "chargeable";
     public static final String CONSUMED = "consumed";
     public static final String CANCELED = "canceled";
+    public static final String FAILED = "failed";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -457,6 +459,8 @@ public class Source extends StripeJsonModel {
             return CONSUMED;
         } else if (CANCELED.equals(sourceStatus)) {
             return CANCELED;
+        } else if (FAILED.equals(sourceStatus)) {
+            return FAILED;
         }
         return null;
     }

@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +44,7 @@ public class PollingNetworkHandlerTest {
     @Mock Source mCancelledSource;
     @Mock Source mChargeableSource;
     @Mock Source mConsumedSource;
+    @Mock Source mFailedSource;
     @Mock Source mPendingSource;
 
     @Mock SourceRetriever mSourceRetriever;
@@ -63,6 +65,7 @@ public class PollingNetworkHandlerTest {
         when(mChargeableSource.getStatus()).thenReturn(Source.CHARGEABLE);
         when(mPendingSource.getStatus()).thenReturn(Source.PENDING);
         when(mCancelledSource.getStatus()).thenReturn(Source.CANCELED);
+        when(mFailedSource.getStatus()).thenReturn(Source.FAILED);
     }
 
     @Test
@@ -136,6 +139,10 @@ public class PollingNetworkHandlerTest {
         assertFalse(response.isExpired());
         // They're mocks, but they should theoretically be equal.
         assertEquals(mChargeableSource, response.getSource());
+
+        // Get to the timeout
+        advanceMainLooperBy(2000);
+        verifyNoMoreInteractions(mPollingResponseHandler);
     }
 
     @Test
@@ -177,6 +184,26 @@ public class PollingNetworkHandlerTest {
         assertFalse(response.isExpired());
         // They're mocks, but they should theoretically be equal.
         assertEquals(mCancelledSource, response.getSource());
+    }
+
+    @Test
+    public void startPolling_whenFailed_sendsFailureResponse() {
+        setSourceResponse(mSourceRetriever, mPendingSource);
+
+        mPollingNetworkHandler.start();
+        verify(mPollingResponseHandler).onRetry(1000);
+
+        setSourceResponse(mSourceRetriever, mFailedSource);
+        advanceMainLooperBy(1000);
+
+        ArgumentCaptor<PollingResponse> pollingResponseCaptor =
+                ArgumentCaptor.forClass(PollingResponse.class);
+        verify(mPollingResponseHandler).onPollingResponse(pollingResponseCaptor.capture());
+        PollingResponse response = pollingResponseCaptor.getValue();
+        assertFalse(response.isSuccess());
+        assertFalse(response.isExpired());
+        // They're mocks, but they should theoretically be equal.
+        assertEquals(mFailedSource, response.getSource());
     }
 
     @Test
