@@ -50,6 +50,7 @@ public class PollingActivity extends AppCompatActivity {
     private PollingAdapter mPollingAdapter;
     private ErrorDialogHandler mErrorDialogHandler;
     private PollingDialogController mPollingDialogController;
+    private Source mPollingSource;
     private ProgressDialogController mProgressDialogController;
     private Stripe mStripe;
 
@@ -91,7 +92,10 @@ public class PollingActivity extends AppCompatActivity {
             // that of the source used to get the redirect URL.
             String clientSecret = intent.getData().getQueryParameter(QUERY_CLIENT_SECRET);
             String sourceId = intent.getData().getQueryParameter(QUERY_SOURCE_ID);
-            if (clientSecret != null && sourceId != null) {
+            if (clientSecret != null
+                    && sourceId != null
+                    && clientSecret.equals(mPollingSource.getClientSecret())
+                    && sourceId.equals(mPollingSource.getId())) {
                 pollForSourceChanges(sourceId, clientSecret);
             }
             mPollingDialogController.dismissDialog();
@@ -219,6 +223,8 @@ public class PollingActivity extends AppCompatActivity {
      * @param source the {@link Source} to verify
      */
     void showDialog(final Source source) {
+        // Caching the source object here because this app makes a lot of them.
+        mPollingSource = source;
         mPollingDialogController.showDialog(source.getRedirect().getUrl());
     }
 
@@ -229,7 +235,7 @@ public class PollingActivity extends AppCompatActivity {
      * @param sourceId the {@link Source#mId} being polled
      * @param clientSecret the {@link Source#mClientSecret}
      */
-    void pollForSourceChanges(String sourceId, String clientSecret) {
+    void pollForSourceChanges(final String sourceId, String clientSecret) {
         mProgressDialogController.setMessageResource(R.string.pollingSource);
         mProgressDialogController.startProgress();
         mStripe.pollSource(
@@ -258,8 +264,8 @@ public class PollingActivity extends AppCompatActivity {
                         } else if (pollingResponse.isExpired()){
                             mPollingAdapter.addItem(
                                     getCountString(count),
-                                    source.getStatus(),
-                                    "Polling Expired");
+                                    "Expired",
+                                    source.getId());
                         } else {
                             StripeException stripeEx = pollingResponse.getStripeException();
                             if (stripeEx != null) {
