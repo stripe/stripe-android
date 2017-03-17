@@ -67,6 +67,9 @@ class PollingNetworkHandler {
                         case Source.CANCELED:
                             message = mUiHandler.obtainMessage(FAILURE, source);
                             break;
+                        case Source.FAILED:
+                            message = mUiHandler.obtainMessage(FAILURE, source);
+                            break;
                     }
                 }
             } catch (StripeException stripeEx) {
@@ -123,8 +126,10 @@ class PollingNetworkHandler {
 
                 switch (msg.what) {
                     case SUCCESS:
+                        terminated = true;
                         callback.onPollingResponse(
                                 new PollingResponse((Source) msg.obj, true, false));
+                        removeCallbacksAndMessages(null);
                         break;
                     case PENDING:
                         mRetryCount = 0;
@@ -136,11 +141,13 @@ class PollingNetworkHandler {
                         terminated = true;
                         callback.onPollingResponse(
                                 new PollingResponse((Source) msg.obj, false, false));
+                        removeCallbacksAndMessages(null);
                         break;
                     case EXPIRED:
                         terminated = true;
                         callback.onPollingResponse(
                                 new PollingResponse(mLatestRetrievedSource, false, true));
+                        removeCallbacksAndMessages(null);
                         break;
                     case ERROR:
                         mRetryCount++;
@@ -149,6 +156,7 @@ class PollingNetworkHandler {
                             callback.onPollingResponse(
                                     new PollingResponse(mLatestRetrievedSource,
                                             (StripeException) msg.obj));
+                            removeCallbacksAndMessages(null);
                         } else {
                             // We get this case for 500-errors
                             delayMs = Math.min(delayMs * POLLING_MULTIPLIER, MAX_DELAY_MS);
