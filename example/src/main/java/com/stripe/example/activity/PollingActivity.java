@@ -30,7 +30,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -88,10 +87,12 @@ public class PollingActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.getData() != null && intent.getData().getQuery() != null) {
+            // The client secret and source ID found here is identical to
+            // that of the source used to get the redirect URL.
             String clientSecret = intent.getData().getQueryParameter(QUERY_CLIENT_SECRET);
             String sourceId = intent.getData().getQueryParameter(QUERY_SOURCE_ID);
             if (clientSecret != null && sourceId != null) {
-                addNewSource(sourceId, clientSecret);
+                pollForSourceChanges(sourceId, clientSecret);
             }
             mPollingDialogController.dismissDialog();
         }
@@ -111,12 +112,13 @@ public class PollingActivity extends AppCompatActivity {
         createCardSource(displayCard);
     }
 
+    /**
+     * To start the 3DS cycle, create a {@link Source} out of the user-entered {@link Card}.
+     *
+     * @param card the {@link Card} used to create a source
+     */
     void createCardSource(@NonNull Card card) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
-        if (cardSourceParams == null) {
-            return;
-        }
-
         final Observable<Source> cardSourceObservable =
                 Observable.fromCallable(
                         new Callable<Source>() {
@@ -130,6 +132,7 @@ public class PollingActivity extends AppCompatActivity {
 
         mCompositeSubscription.add(cardSourceObservable
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
@@ -137,46 +140,67 @@ public class PollingActivity extends AppCompatActivity {
                         mProgressDialogController.startProgress();
                     }
                 })
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mProgressDialogController.finishProgress();
-                    }
-                })
-                .flatMap(
-                        new Func1<Source, Observable<Source>>() {
-                            // This mapping converts the card source into a 3DS source
-                            @Override
-                            public Observable<Source> call(Source source) {
-                                if (source == null || !Source.CARD.equals(source.getType())) {
-                                    return null;
-                                }
-
-                                // This represents a request for a 3DS purchase of 10.00 euro.
-                                final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                                        1000L,
-                                        "EUR",
-                                        RETURN_URL,
-                                        source.getId());
-
-                                return Observable.fromCallable(
-                                        new Callable<Source>() {
-                                            @Override
-                                            public Source call() throws Exception {
-                                                return mStripe.createSourceSynchronous(
-                                                        threeDParams,
-                                                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
-                                            }
-                                        });
-                            }
-                        })
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         // Because we've made the mapping above, we're now subscribing
                         // to the result of creating a 3DS Source
                         new Action1<Source>() {
                             @Override
                             public void call(Source source) {
+                                // The card Source can be used to create a 3DS Source
+                                createThreeDSecureSource(source.getId());
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                mErrorDialogHandler.showError(throwable.getMessage());
+                            }
+                        }
+                ));
+    }
+
+    /**
+     * Create the 3DS Source as a separate call to the API. This is what is needed
+     * to verify the third-party approval. The only information from the Card source
+     * that is used is the ID field.
+     *
+     * @param sourceId the {@link Source#mId} from the {@link Card}-created {@link Source}.
+     */
+    void createThreeDSecureSource(String sourceId) {
+        // This represents a request for a 3DS purchase of 10.00 euro.
+        final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
+                1000L,
+                "EUR",
+                RETURN_URL,
+                sourceId);
+
+        Observable<Source> threeDSecureObservable = Observable.fromCallable(
+                new Callable<Source>() {
+                    @Override
+                    public Source call() throws Exception {
+                        return mStripe.createSourceSynchronous(
+                                threeDParams,
+                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                    }
+                });
+
+        mCompositeSubscription.add(threeDSecureObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        mProgressDialogController.finishProgress();
+                    }
+                })
+                .subscribe(
+                        // Because we've made the mapping above, we're now subscribing
+                        // to the result of creating a 3DS Source
+                        new Action1<Source>() {
+                            @Override
+                            public void call(Source source) {
+                                // Once a 3DS Source is created, that is used
+                                // to initiate the third-party verification
                                 showDialog(source);
                             }
                         },
@@ -189,11 +213,23 @@ public class PollingActivity extends AppCompatActivity {
                 ));
     }
 
+    /**
+     * Show a dialog with a link to the external verification site.
+     *
+     * @param source the {@link Source} to verify
+     */
     void showDialog(final Source source) {
         mPollingDialogController.showDialog(source.getRedirect().getUrl());
     }
 
-    void addNewSource(String sourceId, String clientSecret) {
+    /**
+     * Start polling for changes to the {@link Source#mStatus status} after
+     * coming back from the redirect.
+     *
+     * @param sourceId the {@link Source#mId} being polled
+     * @param clientSecret the {@link Source#mClientSecret}
+     */
+    void pollForSourceChanges(String sourceId, String clientSecret) {
         mProgressDialogController.setMessageResource(R.string.pollingSource);
         mProgressDialogController.startProgress();
         mStripe.pollSource(
@@ -206,24 +242,26 @@ public class PollingActivity extends AppCompatActivity {
                     public void onPollingResponse(PollingResponse pollingResponse) {
                         count++;
                         mProgressDialogController.finishProgress();
+                        Source source = pollingResponse.getSource();
+                        if (source == null) {
+                            mPollingAdapter.addItem(
+                                    getCountString(count),
+                                    "No source found",
+                                    "Error");
+                            return;
+                        }
                         if (pollingResponse.isSuccess()) {
-                            Source source = pollingResponse.getSource();
-                            if (source == null) {
-                                return;
-                            }
                             mPollingAdapter.addItem(
                                     getCountString(count),
                                     source.getStatus(),
                                     source.getId());
                         } else if (pollingResponse.isExpired()){
-                            Source source = pollingResponse.getSource();
                             mPollingAdapter.addItem(
                                     getCountString(count),
                                     source.getStatus(),
                                     "Polling Expired");
                         } else {
                             StripeException stripeEx = pollingResponse.getStripeException();
-                            Source source = pollingResponse.getSource();
                             if (stripeEx != null) {
                                 mPollingAdapter.addItem(
                                         getCountString(count),
