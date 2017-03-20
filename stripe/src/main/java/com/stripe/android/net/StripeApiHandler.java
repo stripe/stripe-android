@@ -87,28 +87,7 @@ public class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        Map<String, Object> paramMap = sourceParams.toParamMap();
-        RequestOptions options = RequestOptions.builder(publishableKey).build();
-
-        try {
-            String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
-            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
-                    apiKey,
-                    sourceParams.getType());
-            logTokenRequest(loggingParams, options, null);
-            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
-        } catch (CardException unexpected) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
-        }
+        return createSourceOnServer(sourceParams, publishableKey, null);
     }
 
     /**
