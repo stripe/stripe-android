@@ -369,6 +369,8 @@ public class SourceParams {
     /**
      * @return the {@link SourceType Type} of this source
      */
+    @NonNull
+    @SourceType
     public String getType() {
         return mType;
     }
