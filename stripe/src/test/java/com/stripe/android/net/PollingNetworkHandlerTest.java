@@ -17,7 +17,6 @@ import org.robolectric.shadows.ShadowLooper;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.stripe.android.net.PollingNetworkHandler.SourceRetriever;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -342,7 +341,8 @@ public class PollingNetworkHandlerTest {
                 DUMMY_PUBLISHABLE_KEY,
                 pollingResponseHandler,
                 timeout,
-                sourceRetriever);
+                sourceRetriever,
+                PollingParameters.generateDefaultParameters());
     }
 
     private static void advanceMainLooperBy(int millis) {

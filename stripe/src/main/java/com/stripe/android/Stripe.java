@@ -23,6 +23,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.PollingResponse;
 import com.stripe.android.net.PollingResponseHandler;
 import com.stripe.android.net.RequestOptions;
 import com.stripe.android.net.StripeApiHandler;
@@ -446,6 +447,35 @@ public class Stripe {
         }
 
         StripeApiHandler.pollSource(sourceId, clientSecret, apiKey, callback, timeoutMs);
+    }
+
+    /**
+     *  Starts polling the {@link Source} object with the given ID on the current thread. If called
+     *  on the main thread, this method will crash the application.
+     *
+     *  For payment methods that require additional customer action
+     *  (e.g. authorizing a payment with their bank), polling
+     *  allows you to determine if the action was successful. Polling will stop once the
+     *  Source's status is no longer {@link Source#PENDING}, or if the given timeout is reached and
+     *  the Source is still `pending`. If polling stops due to an error, the latest retrieved Source
+     *  and latest thrown {@link StripeException} will be returned in the {@link PollingResponse}.
+     *
+     * @param sourceId the {@link Source#mId} to check on
+     * @param clientSecret the {@link Source#mClientSecret} to check on
+     * @param publishableKey an API key
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     */
+    public PollingResponse pollSourceSynchronous(@NonNull @Size(min = 1) String sourceId,
+                                                 @NonNull @Size(min = 1) String clientSecret,
+                                                 @Nullable String publishableKey,
+                                                 @Nullable Integer timeoutMs) {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+
+        return StripeApiHandler.pollSourceSynchronous(sourceId, clientSecret, apiKey, timeoutMs);
     }
 
     /**

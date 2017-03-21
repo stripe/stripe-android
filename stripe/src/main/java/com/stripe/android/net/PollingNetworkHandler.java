@@ -16,13 +16,6 @@ import com.stripe.android.model.Source;
  */
 class PollingNetworkHandler {
 
-    private static final long DEFAULT_TIMEOUT_MS = 10000L;
-    private static final int MAX_RETRY_COUNT = 5;
-    private static final long MAX_TIMEOUT_MS = 5L * 60L * 1000L;
-    private static final int INITIAL_DELAY_MS = 1000;
-    private static final int MAX_DELAY_MS = 15000;
-    private static final int POLLING_MULTIPLIER = 2;
-
     private static final int SUCCESS = 1;
     private static final int PENDING = 2;
     private static final int FAILURE = 3;
@@ -35,6 +28,7 @@ class PollingNetworkHandler {
 
     private final long mTimeoutMs;
     private final boolean mIsInSingleThreadMode;
+    private final PollingParameters mPollingParameters;
 
     private Handler mNetworkHandler;
     private Handler mUiHandler;
@@ -87,11 +81,14 @@ class PollingNetworkHandler {
                           @NonNull final String publishableKey,
                           @NonNull final PollingResponseHandler callback,
                           @Nullable Integer timeOutMs,
-                          @Nullable SourceRetriever sourceRetriever) {
+                          @Nullable SourceRetriever sourceRetriever,
+                          @NonNull final PollingParameters pollingParameters) {
+
         mSourceId = sourceId;
         mClientSecret = clientSecret;
         mPublishableKey = publishableKey;
         mIsInSingleThreadMode = sourceRetriever != null;
+        mPollingParameters = pollingParameters;
         mSourceRetriever = sourceRetriever == null
                 ? new SourceRetriever() {
                     @Override
@@ -108,13 +105,13 @@ class PollingNetworkHandler {
                 : sourceRetriever;
 
         mTimeoutMs = timeOutMs == null
-                ? DEFAULT_TIMEOUT_MS
-                : Math.min(timeOutMs.longValue(), MAX_TIMEOUT_MS);
+                ? mPollingParameters.getDefaultTimeoutMs()
+                : Math.min(timeOutMs.longValue(), mPollingParameters.getMaxTimeoutMs());
 
         mRetryCount = 0;
 
         mUiHandler = new Handler(Looper.getMainLooper()) {
-            int delayMs = INITIAL_DELAY_MS;
+            int delayMs = mPollingParameters.getInitialDelayMsInt();
             boolean terminated = false;
 
             @Override
@@ -133,7 +130,7 @@ class PollingNetworkHandler {
                         break;
                     case PENDING:
                         mRetryCount = 0;
-                        delayMs = INITIAL_DELAY_MS;
+                        delayMs = mPollingParameters.getInitialDelayMsInt();
                         callback.onRetry(delayMs);
                         mNetworkHandler.sendEmptyMessage(delayMs);
                         break;
@@ -151,7 +148,7 @@ class PollingNetworkHandler {
                         break;
                     case ERROR:
                         mRetryCount++;
-                        if (mRetryCount >= MAX_RETRY_COUNT) {
+                        if (mRetryCount >= mPollingParameters.getMaxRetryCount()) {
                             terminated = true;
                             callback.onPollingResponse(
                                     new PollingResponse(mLatestRetrievedSource,
@@ -159,7 +156,9 @@ class PollingNetworkHandler {
                             removeCallbacksAndMessages(null);
                         } else {
                             // We get this case for 500-errors
-                            delayMs = Math.min(delayMs * POLLING_MULTIPLIER, MAX_DELAY_MS);
+                            delayMs = Math.min(
+                                    delayMs * mPollingParameters.getPollingMultiplier(),
+                                    (int) mPollingParameters.getMaxDelayMs());
                             callback.onRetry(delayMs);
                             mNetworkHandler.sendEmptyMessage(delayMs);
                         }
@@ -224,13 +223,5 @@ class PollingNetworkHandler {
         mNetworkHandler.post(pollRunnable);
         mNetworkHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
         mUiHandler.sendEmptyMessageDelayed(EXPIRED, mTimeoutMs);
-    }
-
-    interface SourceRetriever {
-        Source retrieveSource(
-                @NonNull String sourceId,
-                @NonNull String clientSecret,
-                @NonNull String publishableKey)
-                throws StripeException;
     }
 }
