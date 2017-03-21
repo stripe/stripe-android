@@ -34,7 +34,6 @@ class PollingParameters {
         mPollingMultiplier = pollingMultiplier;
     }
 
-
     long getDefaultTimeoutMs() {
         return mDefaultTimeoutMs;
     }
