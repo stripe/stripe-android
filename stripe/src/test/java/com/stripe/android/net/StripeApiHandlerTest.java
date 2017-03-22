@@ -1,8 +1,15 @@
 package com.stripe.android.net;
 
 import com.stripe.android.BuildConfig;
+import com.stripe.android.Stripe;
+import com.stripe.android.StripeTest;
+import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 
@@ -20,6 +27,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,6 +37,9 @@ import static org.junit.Assert.fail;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23)
 public class StripeApiHandlerTest {
+
+    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
+            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
 
     @Test
     public void testGetApiUrl() {
@@ -130,6 +141,47 @@ public class StripeApiHandlerTest {
         } catch (InvalidRequestException invalidRequest) {
             fail("Invalid request error when encoding card query: "
                     + invalidRequest.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSource_shouldLogSourceCreation_andReturnSource() {
+        try {
+            TestLoggingListener testLoggingListener = new TestLoggingListener();
+
+            Card card = new Card("4242424242424242", 1, 2050, "123");
+            Source source = StripeApiHandler.createSourceOnServer(
+                    SourceParams.createCardParams(card),
+                    FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
+                    testLoggingListener);
+
+            // Check that we get a token back; we don't care about its fields for this test.
+            assertNotNull(source);
+
+            assertNull(testLoggingListener.mStripeException);
+            assertNotNull(testLoggingListener.mStripeResponse);
+            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
+        StripeResponse mStripeResponse;
+        StripeException mStripeException;
+
+        @Override
+        public void onLoggingResponse(StripeResponse response) {
+            mStripeResponse = response;
+        }
+
+        @Override
+        public void onStripeException(StripeException exception) {
+            mStripeException = exception;
         }
     }
 }

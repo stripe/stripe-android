@@ -603,31 +603,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_shouldLogTokenCreation_andReturnToken() {
-        try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener testLoggingListener = new TestLoggingListener();
-            stripe.setLoggingResponseListener(testLoggingListener);
-
-            // Pretend that this one was created by the CardInputView
-            mCard.addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
-
-            Token token = stripe.createTokenSynchronous(mCard);
-            // Check that we get a token back; we don't care about its fields for this test.
-            assertNotNull(token);
-
-            assertNull(testLoggingListener.mStripeException);
-            assertNotNull(testLoggingListener.mStripeResponse);
-            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
-
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }    }
-
-    @Test
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
         try {
             // This card is missing quite a few numbers.

@@ -19,6 +19,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,10 +87,44 @@ public class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
+        return createSourceOnServer(sourceParams, publishableKey, null);
+    }
+
+    /**
+     * Create a {@link Source} using the input {@link SourceParams}.
+     *
+     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
+     * @param publishableKey an API key
+     * @param loggingResponseListener a {@link LoggingResponseListener} to verify logging
+     * @return a {@link Source} if one could be created from the input params,
+     * or {@code null} if not
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Nullable
+    static Source createSourceOnServer(
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey,
+            @Nullable LoggingResponseListener loggingResponseListener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
         Map<String, Object> paramMap = sourceParams.toParamMap();
         RequestOptions options = RequestOptions.builder(publishableKey).build();
 
         try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    apiKey,
+                    sourceParams.getType());
+            logTokenRequest(loggingParams, options, loggingResponseListener);
             return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -227,10 +262,16 @@ public class StripeApiHandler {
         // Only fires if the card params contain logging information.
         if (cardParams.containsKey(LoggingUtils.FIELD_PRODUCT_USAGE)) {
             try {
+                String apiKey = options.getPublishableApiKey();
+                if (StripeTextUtils.isBlank(apiKey)) {
+                    return null;
+                }
                 List<String> loggingTokens =
                         (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
-                logTokenRequest(loggingTokens, options, listener);
+
+                Map<String, Object> loggingParams = LoggingUtils.getTokenCreationParams(loggingTokens, apiKey);
+                logTokenRequest(loggingParams, options, listener);
             } catch (ClassCastException classCastEx) {
                 // This can only happen if someone puts a weird object in the map.
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -405,7 +446,7 @@ public class StripeApiHandler {
     }
 
     private static void logTokenRequest(
-            @NonNull List<String> loggingTokens,
+            @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
             @Nullable LoggingResponseListener listener) {
         if (options == null) {
@@ -435,7 +476,7 @@ public class StripeApiHandler {
             StripeResponse response = getStripeResponse(
                     GET,
                     LIVE_LOGGING_BASE,
-                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey),
+                    loggingMap,
                     options);
 
             if (listener != null) {
