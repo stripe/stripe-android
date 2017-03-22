@@ -163,8 +163,37 @@ public class StripeApiHandler {
                         publishableKey,
                         callback,
                         timeoutMs,
-                        null);
+                        null,
+                        PollingParameters.generateDefaultParameters());
         networkHandler.start();
+    }
+
+    /**
+     * Polls for source updates synchronously. If called on the main thread,
+     * this will crash the application.
+     *
+     * @param sourceId the {@link Source#mId ID} of the Source being polled
+     * @param clientSecret the {@link Source#mClientSecret client_secret} of the Source
+     * @param publishableKey a public API key
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     * @return a {@link PollingResponse} that will indicate success or failure
+     */
+    public static PollingResponse pollSourceSynchronous(
+            @NonNull final String sourceId,
+            @NonNull final String clientSecret,
+            @NonNull final String publishableKey,
+            @Nullable Integer timeoutMs) {
+        PollingSyncNetworkHandler pollingSyncNetworkHandler =
+                new PollingSyncNetworkHandler(
+                        sourceId,
+                        clientSecret,
+                        publishableKey,
+                        timeoutMs,
+                        null,
+                        null,
+                        PollingParameters.generateDefaultParameters());
+        return pollingSyncNetworkHandler.pollForSourceUpdate();
     }
 
     /**
