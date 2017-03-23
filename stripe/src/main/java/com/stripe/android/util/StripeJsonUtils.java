@@ -40,6 +40,24 @@ public class StripeJsonUtils {
     }
 
     /**
+     * Calls through to {@link JSONObject#optInt(String)} only in the case that the
+     * key exists. This returns {@code null} if the key is not in the object.
+     *
+     * @param jsonObject the input object
+     * @param fieldName the required field name
+     * @return the value stored in the requested field, or {@code null} if the key is not present
+     */
+    @Nullable
+    public static Integer optInteger(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        if (!jsonObject.has(fieldName)) {
+            return null;
+        }
+        return jsonObject.optInt(fieldName);
+    }
+
+    /**
      * Calls through to {@link JSONObject#optLong(String)} only in the case that the
      * key exists. This returns {@code null} if the key is not in the object.
      *
@@ -306,9 +324,29 @@ public class StripeJsonUtils {
         }
     }
 
+    /**
+     * Util function for putting an integer value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown
+     * due to insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putIntegerIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Integer value) {
+        if (value == null) {
+            return;
+        }
+        try {
+            jsonObject.put(fieldName, value.intValue());
+        } catch (JSONException ignored) { }
+    }
+
     @Nullable
-    @VisibleForTesting
-    static String nullIfNullOrEmpty(@Nullable String possibleNull) {
+    public static String nullIfNullOrEmpty(@Nullable String possibleNull) {
         return NULL.equals(possibleNull) || EMPTY.equals(possibleNull)
                 ? null
                 : possibleNull;

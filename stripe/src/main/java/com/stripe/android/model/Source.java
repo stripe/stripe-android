@@ -13,7 +13,9 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.stripe.android.util.StripeJsonUtils.optLong;
 import static com.stripe.android.util.StripeJsonUtils.optString;
@@ -47,6 +49,12 @@ public class Source extends StripeJsonModel {
     public static final String IDEAL = "ideal";
     public static final String SOFORT = "sofort";
     public static final String BANCONTACT = "bancontact";
+
+    public static final Set<String> MODELED_TYPES = new HashSet<>();
+    static {
+        MODELED_TYPES.add(CARD);
+        MODELED_TYPES.add(SEPA_DEBIT);
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -120,6 +128,7 @@ public class Source extends StripeJsonModel {
     private SourceRedirect mRedirect;
     private @SourceStatus String mStatus;
     private Map<String, Object> mSourceTypeData;
+    private StripeSourceTypeModel mSourceTypeModel;
     private @SourceType String mType;
     private @Usage String mUsage;
 
@@ -138,6 +147,7 @@ public class Source extends StripeJsonModel {
             SourceRedirect redirect,
             @SourceStatus String status,
             Map<String, Object> sourceTypeData,
+            StripeSourceTypeModel sourceTypeModel,
             @SourceType String type,
             @Usage String usage
     ) {
@@ -155,6 +165,7 @@ public class Source extends StripeJsonModel {
         mRedirect = redirect;
         mStatus = status;
         mSourceTypeData = sourceTypeData;
+        mSourceTypeModel = sourceTypeModel;
         mType = type;
         mUsage = usage;
     }
@@ -215,6 +226,10 @@ public class Source extends StripeJsonModel {
 
     public Map<String, Object> getSourceTypeData() {
         return mSourceTypeData;
+    }
+
+    public StripeSourceTypeModel getSourceTypeModel() {
+        return mSourceTypeModel;
     }
 
     @SourceType
@@ -396,8 +411,14 @@ public class Source extends StripeJsonModel {
                 SourceRedirect.class);
         @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
         @SourceType String type = asSourceType(optString(jsonObject, FIELD_TYPE));
+
+        // Until we have models for all types, keep the original hash and the
+        // model object.
         Map<String, Object> sourceTypeData =
                 StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(type));
+        StripeSourceTypeModel sourceTypeModel = type != null && MODELED_TYPES.contains(type)
+                ? optStripeJsonModel(jsonObject, type, StripeSourceTypeModel.class)
+                : null;
 
         @Usage String usage = asUsage(optString(jsonObject, FIELD_USAGE));
 
@@ -416,6 +437,7 @@ public class Source extends StripeJsonModel {
                 redirect,
                 status,
                 sourceTypeData,
+                sourceTypeModel,
                 type,
                 usage);
     }
@@ -443,6 +465,12 @@ public class Source extends StripeJsonModel {
             case FIELD_REDIRECT:
                 return type.cast(
                         SourceRedirect.fromJson(jsonObject.optJSONObject(FIELD_REDIRECT)));
+            case CARD:
+                return type.cast(
+                        SourceCardData.fromJson(jsonObject.optJSONObject(CARD)));
+            case SEPA_DEBIT:
+                return type.cast(
+                        SourceSepaDebitData.fromJson(jsonObject.optJSONObject(SEPA_DEBIT)));
             default:
                 return null;
         }
