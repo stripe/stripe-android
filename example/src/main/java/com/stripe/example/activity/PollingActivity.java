@@ -306,6 +306,7 @@ public class PollingActivity extends AppCompatActivity {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
+                        mProgressDialogController.setMessageResource(R.string.pollingSource);
                         mProgressDialogController.startProgress();
                     }
                 })
