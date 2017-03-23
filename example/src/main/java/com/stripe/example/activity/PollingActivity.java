@@ -41,7 +41,7 @@ public class PollingActivity extends AppCompatActivity {
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
             "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
     private static final String RETURN_SCHEMA = "stripe://";
-    private static final String RETURN_HOST = "example";
+    private static final String RETURN_HOST_ASYNC = "async";
     private static final String RETURN_HOST_SYNC = "sync";
 
     private static final String QUERY_CLIENT_SECRET = "client_secret";
@@ -380,7 +380,7 @@ public class PollingActivity extends AppCompatActivity {
         if (isSync) {
             return RETURN_SCHEMA + RETURN_HOST_SYNC;
         } else {
-            return RETURN_SCHEMA + RETURN_HOST;
+            return RETURN_SCHEMA + RETURN_HOST_ASYNC;
         }
     }
 }

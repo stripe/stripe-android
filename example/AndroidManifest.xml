@@ -34,7 +34,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:host="example"
+                    android:host="async"
                     android:scheme="stripe"/>
             </intent-filter>
 
