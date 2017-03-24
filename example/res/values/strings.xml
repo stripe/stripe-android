@@ -11,12 +11,15 @@
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
+    <string name="createCardTokens">Create Card Tokens</string>
+    <string name="createThreeDSecure">Create 3DS Sources</string>
     <string name="cardNumber">Card Number</string>
     <string name="createSource">Creating source&#8230;</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
     <string name="saveService">Save with Service</string>
+    <string name="selectSampleActivity">Select sample activity</string>
     <string name="startPolling">Start polling</string>
     <string name="tryThreeDSecure">Try 3DS</string>
     <string name="verify">Verify</string>

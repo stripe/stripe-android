@@ -35,14 +35,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         Button saveIntentServiceButton = (Button) findViewById(R.id.saveWithService);
         mDependencyHandler.attachIntentServiceTokenController(this, saveIntentServiceButton);
-
-        RxView.clicks(findViewById(R.id.three_d_secure)).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                Intent intent = new Intent(PaymentActivity.this, PollingActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
