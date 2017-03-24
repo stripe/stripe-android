@@ -24,18 +24,12 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
     // you provide access to all the views for a data item in a view holder
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        private TextView mPollingCountView;
         private TextView mFinalStatusView;
         private TextView mSourceIdView;
         ViewHolder(LinearLayout pollingLayout) {
             super(pollingLayout);
-            mPollingCountView = (TextView) pollingLayout.findViewById(R.id.tv_poll_count);
             mFinalStatusView = (TextView) pollingLayout.findViewById(R.id.tv_ending_status);
             mSourceIdView = (TextView) pollingLayout.findViewById(R.id.tv_source_id);
-        }
-
-        public void setPollingCount(String pollingCount) {
-            mPollingCountView.setText(pollingCount);
         }
 
         public void setFinalStatus(String finalStatus) {
@@ -48,12 +42,10 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
     }
 
     public static class ViewModel {
-        public final String mPollingCount;
         public final String mFinalStatus;
         public final String mSourceId;
 
-        public ViewModel(String pollingCount, String finalStatus, String sourceId) {
-            mPollingCount = pollingCount;
+        public ViewModel(String finalStatus, String sourceId) {
             mFinalStatus = finalStatus;
             mSourceId = sourceId;
         }
@@ -82,7 +74,6 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         ViewModel model = mDataset.get(position);
-        holder.setPollingCount(model.mPollingCount);
         holder.setFinalStatus(model.mFinalStatus);
         holder.setSourceId(model.mSourceId);
     }
@@ -93,8 +84,8 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
         return mDataset.size();
     }
 
-    public void addItem(String pollingCount, String finalStatus, String sourceId) {
-        mDataset.add(new ViewModel(pollingCount, finalStatus, sourceId));
+    public void addItem(String finalStatus, String sourceId) {
+        mDataset.add(new ViewModel(finalStatus, sourceId));
         notifyDataSetChanged();
     }
 }

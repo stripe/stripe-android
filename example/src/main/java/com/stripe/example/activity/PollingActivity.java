@@ -40,7 +40,9 @@ public class PollingActivity extends AppCompatActivity {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
             "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
-    private static final String RETURN_URL = "stripe://example";
+    private static final String RETURN_SCHEMA = "stripe://";
+    private static final String RETURN_HOST_ASYNC = "async";
+    private static final String RETURN_HOST_SYNC = "sync";
 
     private static final String QUERY_CLIENT_SECRET = "client_secret";
     private static final String QUERY_SOURCE_ID = "source";
@@ -71,7 +73,16 @@ public class PollingActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        beginSequence();
+                        beginSequence(false);
+                    }
+                });
+
+        Button threeDSyncButton = (Button) findViewById(R.id.btn_three_d_secure_sync);
+        threeDSyncButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        beginSequence(true);
                     }
                 });
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -90,13 +101,19 @@ public class PollingActivity extends AppCompatActivity {
         if (intent.getData() != null && intent.getData().getQuery() != null) {
             // The client secret and source ID found here is identical to
             // that of the source used to get the redirect URL.
+
+            String host = intent.getData().getHost();
             String clientSecret = intent.getData().getQueryParameter(QUERY_CLIENT_SECRET);
             String sourceId = intent.getData().getQueryParameter(QUERY_SOURCE_ID);
             if (clientSecret != null
                     && sourceId != null
                     && clientSecret.equals(mPollingSource.getClientSecret())
                     && sourceId.equals(mPollingSource.getId())) {
-                pollForSourceChanges(sourceId, clientSecret);
+                if (RETURN_HOST_SYNC.equals(host)) {
+                    pollSynchronouslyForSourceChanges(sourceId, clientSecret);
+                } else {
+                    pollForSourceChanges(sourceId, clientSecret);
+                }
             }
             mPollingDialogController.dismissDialog();
         }
@@ -108,12 +125,12 @@ public class PollingActivity extends AppCompatActivity {
         mCompositeSubscription.unsubscribe();
     }
 
-    void beginSequence() {
+    void beginSequence(boolean shouldPollWithBlockingMethod) {
         Card displayCard = mCardInputWidget.getCard();
         if (displayCard == null) {
             return;
         }
-        createCardSource(displayCard);
+        createCardSource(displayCard, shouldPollWithBlockingMethod);
     }
 
     /**
@@ -121,7 +138,7 @@ public class PollingActivity extends AppCompatActivity {
      *
      * @param card the {@link Card} used to create a source
      */
-    void createCardSource(@NonNull Card card) {
+    void createCardSource(@NonNull Card card, final boolean shouldPollWithBlockingMethod) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
         final Observable<Source> cardSourceObservable =
                 Observable.fromCallable(
@@ -151,7 +168,8 @@ public class PollingActivity extends AppCompatActivity {
                             @Override
                             public void call(Source source) {
                                 // The card Source can be used to create a 3DS Source
-                                createThreeDSecureSource(source.getId());
+                                createThreeDSecureSource(source.getId(),
+                                        shouldPollWithBlockingMethod);
                             }
                         },
                         new Action1<Throwable>() {
@@ -170,12 +188,12 @@ public class PollingActivity extends AppCompatActivity {
      *
      * @param sourceId the {@link Source#mId} from the {@link Card}-created {@link Source}.
      */
-    void createThreeDSecureSource(String sourceId) {
+    void createThreeDSecureSource(String sourceId, boolean shouldPollWithBlockingMethod) {
         // This represents a request for a 3DS purchase of 10.00 euro.
         final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
                 1000L,
                 "EUR",
-                RETURN_URL,
+                getUrl(shouldPollWithBlockingMethod),
                 sourceId);
 
         Observable<Source> threeDSecureObservable = Observable.fromCallable(
@@ -230,7 +248,8 @@ public class PollingActivity extends AppCompatActivity {
 
     /**
      * Start polling for changes to the {@link Source#mStatus status} after
-     * coming back from the redirect.
+     * coming back from the redirect. This method generates a background thread to handle
+     * the IO necessary for the transaction automatically.
      *
      * @param sourceId the {@link Source#mId} being polled
      * @param clientSecret the {@link Source#mClientSecret}
@@ -243,54 +262,125 @@ public class PollingActivity extends AppCompatActivity {
                 clientSecret,
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                 new PollingResponseHandler() {
-                    int count = 0;
                     @Override
                     public void onPollingResponse(PollingResponse pollingResponse) {
-                        count++;
                         mProgressDialogController.finishProgress();
-                        Source source = pollingResponse.getSource();
-                        if (source == null) {
-                            mPollingAdapter.addItem(
-                                    getCountString(count),
-                                    "No source found",
-                                    "Error");
-                            return;
-                        }
-                        if (pollingResponse.isSuccess()) {
-                            mPollingAdapter.addItem(
-                                    getCountString(count),
-                                    source.getStatus(),
-                                    source.getId());
-                        } else if (pollingResponse.isExpired()){
-                            mPollingAdapter.addItem(
-                                    getCountString(count),
-                                    "Expired",
-                                    source.getId());
-                        } else {
-                            StripeException stripeEx = pollingResponse.getStripeException();
-                            if (stripeEx != null) {
-                                mPollingAdapter.addItem(
-                                        getCountString(count),
-                                        "error",
-                                        stripeEx.getMessage());
-                            } else {
-                                mPollingAdapter.addItem(
-                                        getCountString(count),
-                                        source.getStatus(),
-                                        source.getId());
-                            }
-                        }
+                        updatePollingSourceList(pollingResponse);
                     }
 
                     @Override
                     public void onRetry(int millis) {
-                        count++;
+                        // Unused. Log to know when retries happen.
                     }
                 },
                 null);
     }
 
+    /**
+     * Start polling for changes to the {@link Source#mStatus status} after
+     * coming back from the redirect. This method requires additional code to handle
+     * the threading for the IO. Below is an example using RxJava.
+     *
+     * @param sourceId the {@link Source#mId} being polled
+     * @param clientSecret the {@link Source#mClientSecret}
+     */
+    private void pollSynchronouslyForSourceChanges(
+            final String sourceId,
+            final String clientSecret) {
+
+        Observable<PollingResponse> sourceUpdateObservable = Observable.fromCallable(
+                new Callable<PollingResponse>() {
+                    @Override
+                    public PollingResponse call() throws Exception {
+                        return mStripe.pollSourceSynchronous(
+                                sourceId,
+                                clientSecret,
+                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
+                                null);
+                    }
+                });
+
+        mCompositeSubscription.add(sourceUpdateObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        mProgressDialogController.setMessageResource(R.string.pollingSource);
+                        mProgressDialogController.startProgress();
+                    }
+                })
+                .doOnUnsubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        mProgressDialogController.finishProgress();
+                    }
+                })
+                .subscribe(
+                        new Action1<PollingResponse>() {
+                            @Override
+                            public void call(PollingResponse pollingResponse) {
+                                updatePollingSourceList(pollingResponse);
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
+                            }
+                        })
+        );
+    }
+
+    private void updatePollingSourceList(PollingResponse pollingResponse) {
+        Source source = pollingResponse.getSource();
+        if (source == null) {
+            mPollingAdapter.addItem(
+                    "No source found",
+                    "Error");
+            return;
+        }
+
+        if (pollingResponse.isSuccess()) {
+            mPollingAdapter.addItem(
+                    source.getStatus(),
+                    source.getId());
+        } else if (pollingResponse.isExpired()){
+            mPollingAdapter.addItem(
+                    "Expired",
+                    source.getId());
+        } else {
+            StripeException stripeEx = pollingResponse.getStripeException();
+            if (stripeEx != null) {
+                mPollingAdapter.addItem(
+                        "error",
+                        stripeEx.getMessage());
+            } else {
+                mPollingAdapter.addItem(
+                        source.getStatus(),
+                        source.getId());
+            }
+        }
+    }
+
     private static String getCountString(int count) {
         return String.format(Locale.ENGLISH, "API Queries: %d", count);
+    }
+
+    /**
+     * Helper method to determine the return URL we use. This is how we know
+     * from the callback whether to use the Synchronous or Asynchronous polling method,
+     * which is purely a matter of preference.
+     *
+     * @param isSync whether or not to use a URL that tells us to use a sync method when we come
+     *               back to the application
+     * @return a return url to be sent to the vendor
+     */
+    private static String getUrl(boolean isSync) {
+        if (isSync) {
+            return RETURN_SCHEMA + RETURN_HOST_SYNC;
+        } else {
+            return RETURN_SCHEMA + RETURN_HOST_ASYNC;
+        }
     }
 }
