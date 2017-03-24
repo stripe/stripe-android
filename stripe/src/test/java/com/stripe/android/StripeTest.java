@@ -8,13 +8,14 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.JsonTestUtils;
-import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -273,6 +274,7 @@ public class StripeTest {
             assertEquals(1000L, bitcoinSource.getAmount().longValue());
             assertNotNull(bitcoinSource.getSourceTypeData());
             assertNotNull(bitcoinSource.getOwner());
+            assertNull(bitcoinSource.getSourceTypeModel());
             assertEquals("abc@def.com", bitcoinSource.getOwner().getEmail());
             assertEquals("usd", bitcoinSource.getCurrency());
             JsonTestUtils.assertMapEquals(metamap, bitcoinSource.getMetaData());
@@ -300,6 +302,7 @@ public class StripeTest {
             assertEquals(Source.BANCONTACT, bancontactSource.getType());
             assertEquals(1000L, bancontactSource.getAmount().longValue());
             assertNotNull(bancontactSource.getSourceTypeData());
+            assertNull(bancontactSource.getSourceTypeModel());
             assertNotNull(bancontactSource.getOwner());
             assertNotNull(bancontactSource.getRedirect());
             assertEquals("John Doe", bancontactSource.getOwner().getName());
@@ -336,7 +339,8 @@ public class StripeTest {
             assertNotNull(cardSource.getId());
             assertEquals(Source.CARD, cardSource.getType());
             assertNotNull(cardSource.getSourceTypeData());
-
+            assertNotNull(cardSource.getSourceTypeModel());
+            assertTrue(cardSource.getSourceTypeModel() instanceof SourceCardData);
             assertNotNull(cardSource.getOwner());
             assertNotNull(cardSource.getOwner().getAddress());
             assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
@@ -381,6 +385,7 @@ public class StripeTest {
             assertEquals("brl", threeDSource.getCurrency());
             assertNotNull(threeDSource.getClientSecret());
             assertNotNull(threeDSource.getId());
+            assertNull(threeDSource.getSourceTypeModel());
             assertEquals(Source.THREE_D_SECURE, threeDSource.getType());
             assertNotNull(threeDSource.getSourceTypeData());
             JsonTestUtils.assertMapEquals(metamap, threeDSource.getMetaData());
@@ -412,6 +417,7 @@ public class StripeTest {
             assertEquals(2000L, giropaySource.getAmount().longValue());
             assertEquals(Source.GIROPAY, giropaySource.getType());
             assertNotNull(giropaySource.getSourceTypeData());
+            assertNull(giropaySource.getSourceTypeModel());
             assertNotNull(giropaySource.getOwner());
             assertNotNull(giropaySource.getRedirect());
             assertEquals("Mr. X", giropaySource.getOwner().getName());
@@ -449,6 +455,8 @@ public class StripeTest {
             assertNotNull(sepaDebitSource.getSourceTypeData());
             assertNotNull(sepaDebitSource.getOwner());
             assertNotNull(sepaDebitSource.getOwner().getAddress());
+            assertNotNull(sepaDebitSource.getSourceTypeModel());
+            assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceSepaDebitData);
             assertEquals("eur", sepaDebitSource.getCurrency());
             assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
             assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
@@ -487,6 +495,7 @@ public class StripeTest {
             assertEquals("eur", idealSource.getCurrency());
             assertNotNull(idealSource.getSourceTypeData());
             assertNotNull(idealSource.getOwner());
+            assertNull(idealSource.getSourceTypeModel());
             assertEquals("Bond", idealSource.getOwner().getName());
             assertNotNull(idealSource.getRedirect());
             assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
@@ -518,6 +527,7 @@ public class StripeTest {
             assertEquals(Source.SOFORT, sofortSource.getType());
             assertEquals("eur", sofortSource.getCurrency());
             assertNotNull(sofortSource.getSourceTypeData());
+            assertNull(sofortSource.getSourceTypeModel());
             assertEquals(70000L, sofortSource.getAmount().longValue());
             assertNotNull(sofortSource.getRedirect());
             assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
