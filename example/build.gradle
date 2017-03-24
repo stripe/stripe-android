@@ -12,9 +12,9 @@ dependencies {
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
     /* Needed for RxAndroid */
+    /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
-    /* Needed for Rx Bindings on views */
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 }
 
