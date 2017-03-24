@@ -267,11 +267,6 @@ public class PollingActivity extends AppCompatActivity {
                         mProgressDialogController.finishProgress();
                         updatePollingSourceList(pollingResponse);
                     }
-
-                    @Override
-                    public void onRetry(int millis) {
-                        // Unused. Log to know when retries happen.
-                    }
                 },
                 null);
     }

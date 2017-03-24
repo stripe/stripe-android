@@ -93,9 +93,12 @@ public class StripeEditText extends AppCompatEditText {
         return mShouldShowError;
     }
 
+    /**
+     * @return the color used for error text.
+     */
     @ColorInt
     @SuppressWarnings("deprecation")
-    int getDefaultErrorColorInt() {
+    public int getDefaultErrorColorInt() {
         @ColorInt int errorColor;
         // It's possible that we need to verify this value again
         // in case the user programmatically changes the text color.
@@ -111,7 +114,12 @@ public class StripeEditText extends AppCompatEditText {
         return errorColor;
     }
 
-    void setErrorColor(@ColorInt int errorColor) {
+    /**
+     * Sets the error text color on this {@link StripeEditText}.
+     *
+     * @param errorColor a {@link ColorInt}
+     */
+    public void setErrorColor(@ColorInt int errorColor) {
         mErrorColor = errorColor;
     }
 
