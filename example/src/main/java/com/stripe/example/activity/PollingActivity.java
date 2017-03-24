@@ -13,6 +13,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.net.PollingResponse;
 import com.stripe.android.net.PollingResponseHandler;
@@ -167,9 +168,27 @@ public class PollingActivity extends AppCompatActivity {
                         new Action1<Source>() {
                             @Override
                             public void call(Source source) {
-                                // The card Source can be used to create a 3DS Source
-                                createThreeDSecureSource(source.getId(),
-                                        shouldPollWithBlockingMethod);
+                                SourceCardData sourceCardData =
+                                        (SourceCardData) source.getSourceTypeModel();
+
+                                // Making a note of the Card Source in our list.
+                                mPollingAdapter.addItem(
+                                        source.getStatus(),
+                                        sourceCardData.getThreeDSecureStatus(),
+                                        source.getId(),
+                                        source.getType());
+                                // If we need to get 3DS verification for this card, we
+                                // first create a 3DS Source.
+                                if (SourceCardData.REQUIRED.equals(
+                                        sourceCardData.getThreeDSecureStatus())) {
+
+                                    // The card Source can be used to create a 3DS Source
+                                    createThreeDSecureSource(source.getId(),
+                                            shouldPollWithBlockingMethod);
+                                } else {
+                                    mProgressDialogController.finishProgress();
+                                }
+
                             }
                         },
                         new Action1<Throwable>() {
@@ -332,28 +351,38 @@ public class PollingActivity extends AppCompatActivity {
         if (source == null) {
             mPollingAdapter.addItem(
                     "No source found",
-                    "Error");
+                    "Stopped",
+                    "Error",
+                    "None");
             return;
         }
 
         if (pollingResponse.isSuccess()) {
             mPollingAdapter.addItem(
                     source.getStatus(),
-                    source.getId());
+                    "complete",
+                    source.getId(),
+                    source.getType());
         } else if (pollingResponse.isExpired()){
             mPollingAdapter.addItem(
                     "Expired",
-                    source.getId());
+                    "Stopped",
+                    source.getId(),
+                    source.getType());
         } else {
             StripeException stripeEx = pollingResponse.getStripeException();
             if (stripeEx != null) {
                 mPollingAdapter.addItem(
                         "error",
-                        stripeEx.getMessage());
+                        "ERR",
+                        stripeEx.getMessage(),
+                        source.getType());
             } else {
                 mPollingAdapter.addItem(
                         source.getStatus(),
-                        source.getId());
+                        "failed",
+                        source.getId(),
+                        source.getType());
             }
         }
     }

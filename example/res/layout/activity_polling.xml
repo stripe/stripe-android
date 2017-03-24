@@ -37,6 +37,8 @@
     <TextView android:text="@string/updatedSources"
               style="@style/Header.Light" />
 
+    <include layout="@layout/polling_list_headers"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

@@ -1,13 +1,12 @@
 package com.stripe.example.adapter;
 
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.stripe.android.model.Source;
 import com.stripe.example.R;
 
 import java.util.ArrayList;
@@ -25,11 +24,15 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         private TextView mFinalStatusView;
+        private TextView mRedirectStatusView;
         private TextView mSourceIdView;
+        private TextView mSourceTypeView;
         ViewHolder(LinearLayout pollingLayout) {
             super(pollingLayout);
             mFinalStatusView = (TextView) pollingLayout.findViewById(R.id.tv_ending_status);
+            mRedirectStatusView = (TextView) pollingLayout.findViewById(R.id.tv_redirect_status);
             mSourceIdView = (TextView) pollingLayout.findViewById(R.id.tv_source_id);
+            mSourceTypeView = (TextView) pollingLayout.findViewById(R.id.tv_source_type);
         }
 
         public void setFinalStatus(String finalStatus) {
@@ -37,17 +40,36 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
         }
 
         public void setSourceId(String sourceId) {
-            mSourceIdView.setText(sourceId);
+            String last6 = sourceId == null || sourceId.length() < 6
+                    ? sourceId
+                    : sourceId.substring(sourceId.length() - 6);
+            mSourceIdView.setText(last6);
+        }
+
+        public void setSourceType(String sourceType) {
+            String viewableType = sourceType;
+            if (Source.THREE_D_SECURE.equals(sourceType)) {
+                viewableType = "3DS";
+            }
+            mSourceTypeView.setText(viewableType);
+        }
+
+        public void setRedirectStatus(String redirectStatus) {
+            mRedirectStatusView.setText(redirectStatus);
         }
     }
 
     public static class ViewModel {
         public final String mFinalStatus;
+        public final String mRedirectStatus;
         public final String mSourceId;
+        public final String mSourceType;
 
-        public ViewModel(String finalStatus, String sourceId) {
+        public ViewModel(String finalStatus, String redirectStatus, String sourceId, String sourceType) {
             mFinalStatus = finalStatus;
+            mRedirectStatus = redirectStatus;
             mSourceId = sourceId;
+            mSourceType = sourceType;
         }
     }
 
@@ -75,7 +97,9 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
         // - replace the contents of the view with that element
         ViewModel model = mDataset.get(position);
         holder.setFinalStatus(model.mFinalStatus);
+        holder.setRedirectStatus(model.mRedirectStatus);
         holder.setSourceId(model.mSourceId);
+        holder.setSourceType(model.mSourceType);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -84,8 +108,8 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
         return mDataset.size();
     }
 
-    public void addItem(String finalStatus, String sourceId) {
-        mDataset.add(new ViewModel(finalStatus, sourceId));
+    public void addItem(String finalStatus, String redirectStatus, String sourceId, String sourceType) {
+        mDataset.add(new ViewModel(finalStatus, redirectStatus, sourceId, sourceType));
         notifyDataSetChanged();
     }
 }
