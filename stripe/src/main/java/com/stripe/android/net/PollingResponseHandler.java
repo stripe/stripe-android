@@ -12,11 +12,4 @@ public interface PollingResponseHandler {
      */
     void onPollingResponse(PollingResponse pollingResponse);
 
-    /**
-     * Called when the polling process is going to check again after a delay.
-     *
-     * @param millis the amount of delay until the next network check
-     */
-    void onRetry(int millis);
-
 }

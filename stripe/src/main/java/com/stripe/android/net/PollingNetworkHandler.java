@@ -131,7 +131,6 @@ class PollingNetworkHandler {
                     case PENDING:
                         mRetryCount = 0;
                         delayMs = mPollingParameters.getInitialDelayMsInt();
-                        callback.onRetry(delayMs);
                         mNetworkHandler.sendEmptyMessage(delayMs);
                         break;
                     case FAILURE:
@@ -159,7 +158,6 @@ class PollingNetworkHandler {
                             delayMs = Math.min(
                                     delayMs * mPollingParameters.getPollingMultiplier(),
                                     (int) mPollingParameters.getMaxDelayMs());
-                            callback.onRetry(delayMs);
                             mNetworkHandler.sendEmptyMessage(delayMs);
                         }
                         break;

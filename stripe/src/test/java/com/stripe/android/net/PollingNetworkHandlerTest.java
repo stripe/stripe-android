@@ -105,7 +105,6 @@ public class PollingNetworkHandlerTest {
 
 
         advanceMainLooperBy(2999);
-        verify(mPollingResponseHandler, times(3)).onRetry(1000);
         // This is simulating normal 200-type responses
         assertEquals(0, mPollingNetworkHandler.getRetryCount());
         advanceMainLooperBy(1);
@@ -125,7 +124,6 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceResponse(mSourceRetriever, mChargeableSource);
         advanceMainLooperBy(1000);
@@ -150,7 +148,6 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceResponse(mSourceRetriever, mConsumedSource);
         advanceMainLooperBy(1000);
@@ -170,7 +167,6 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceResponse(mSourceRetriever, mCancelledSource);
         advanceMainLooperBy(1000);
@@ -190,7 +186,6 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceResponse(mSourceRetriever, mFailedSource);
         advanceMainLooperBy(1000);
@@ -210,13 +205,11 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         mPollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         setSourceException(mSourceRetriever, new APIConnectionException("expected error"));
 
         advanceMainLooperBy(1000);
         assertEquals(1, mPollingNetworkHandler.getRetryCount());
-        verify(mPollingResponseHandler).onRetry(2000);
     }
 
     @Test
@@ -235,13 +228,9 @@ public class PollingNetworkHandlerTest {
 
         advanceMainLooperBy(1000);
         assertEquals(1, pollingNetworkHandler.getRetryCount());
-        verify(mPollingResponseHandler).onRetry(2000);
 
         pollingNetworkHandler.setSourceRetriever(mSourceRetriever);
         advanceMainLooperBy(2000);
-        // This call is made once after invoking start, and once when we advance the main looper
-        // for the final time.
-        verify(mPollingResponseHandler, times(2)).onRetry(1000);
         assertEquals(0, pollingNetworkHandler.getRetryCount());
     }
 
@@ -254,20 +243,15 @@ public class PollingNetworkHandlerTest {
         setSourceException(mSourceRetriever, new APIConnectionException("expected error"));
 
         pollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(2000);
         assertEquals(1, pollingNetworkHandler.getRetryCount());
 
         advanceMainLooperBy(2000);
-        verify(mPollingResponseHandler).onRetry(4000);
         assertEquals(2, pollingNetworkHandler.getRetryCount());
 
         advanceMainLooperBy(4000);
-        verify(mPollingResponseHandler).onRetry(8000);
         assertEquals(3, pollingNetworkHandler.getRetryCount());
 
         advanceMainLooperBy(8000);
-        // Note that this is hitting the max value, so the next delay isn't 16000ms.
-        verify(mPollingResponseHandler).onRetry(15000);
         assertEquals(4, pollingNetworkHandler.getRetryCount());
 
         ArgumentCaptor<PollingResponse> pollingResponseCaptor =
@@ -295,23 +279,18 @@ public class PollingNetworkHandlerTest {
         setSourceResponse(mSourceRetriever, mPendingSource);
 
         pollingNetworkHandler.start();
-        verify(mPollingResponseHandler).onRetry(1000);
 
         SourceRetriever exceptionRetriever = mock(SourceRetriever.class);
         setSourceException(exceptionRetriever, new APIConnectionException("expected error"));
         pollingNetworkHandler.setSourceRetriever(exceptionRetriever);
 
         advanceMainLooperBy(1000);
-        verify(mPollingResponseHandler).onRetry(2000);
 
         advanceMainLooperBy(2000);
-        verify(mPollingResponseHandler).onRetry(4000);
 
         advanceMainLooperBy(4000);
-        verify(mPollingResponseHandler).onRetry(8000);
 
         advanceMainLooperBy(8000);
-        verify(mPollingResponseHandler).onRetry(15000);
 
         SourceRetriever otherExceptionRetriever = mock(SourceRetriever.class);
         setSourceException(otherExceptionRetriever, new APIConnectionException("next error"));
