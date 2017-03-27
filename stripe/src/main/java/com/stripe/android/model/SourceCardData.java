@@ -135,6 +135,7 @@ public class SourceCardData extends StripeSourceTypeModel {
         return mLast4;
     }
 
+    @ThreeDSecureStatus
     @Nullable
     public String getThreeDSecureStatus() {
         return mThreeDSecureStatus;

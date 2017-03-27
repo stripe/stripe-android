@@ -6,20 +6,45 @@
               android:layout_margin="4dp">
 
     <TextView
+        android:id="@+id/tv_source_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_marginRight="3dp"
+        android:layout_marginEnd="3dp"
+        />
+
+    <TextView
+        android:id="@+id/tv_redirect_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        />
+
+    <TextView
         android:id="@+id/tv_ending_status"
         android:layout_width="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:maxLines="2"
-        android:textAllCaps="true"
-        android:gravity="start"/>
+        android:maxLines="1"
+        android:gravity="center"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        />
 
     <TextView
         android:id="@+id/tv_source_id"
         android:layout_width="0dp"
-        android:layout_weight="3"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:maxLines="2"
-        android:gravity="end"/>
+        android:maxLines="1"
+        android:gravity="center"
+        android:layout_marginStart="3dp"
+        android:layout_marginLeft="3dp"
+        />
 
 </LinearLayout>
