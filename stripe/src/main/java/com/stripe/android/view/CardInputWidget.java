@@ -9,6 +9,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
@@ -81,6 +82,7 @@ public class CardInputWidget extends LinearLayout {
 
     private FrameLayout mFrameLayout;
 
+    private String mCardHintText;
     private @ColorInt int mErrorColorInt;
     private @ColorInt int mTintColorInt;
 
@@ -376,11 +378,16 @@ public class CardInputWidget extends LinearLayout {
                         a.getColor(R.styleable.CardInputView_cardTextErrorColor, mErrorColorInt);
                 mTintColorInt =
                         a.getColor(R.styleable.CardInputView_cardTint, mTintColorInt);
+                mCardHintText =
+                        a.getString(R.styleable.CardInputView_cardHintText);
             } finally {
                 a.recycle();
             }
         }
 
+        if (mCardHintText != null) {
+            mCardNumberEditText.setHint(mCardHintText);
+        }
         mCardNumberEditText.setErrorColor(mErrorColorInt);
         mExpiryDateEditText.setErrorColor(mErrorColorInt);
         mCvcNumberEditText.setErrorColor(mErrorColorInt);
