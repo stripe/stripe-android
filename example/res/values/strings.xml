@@ -33,6 +33,8 @@
     <string name="label_source_state">Status</string>
     <string name="label_source_id">ID Last 6</string>
 
+    <string name="sample_card_requiring_3ds">4000 0000 0000 3063</string>
+
     <string-array name="currency_array">
         <item>Currency (optional)</item>
         <item>Unspecified</item>
