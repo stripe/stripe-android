@@ -1,3 +1,8 @@
+3.1.0 2017-03-28
+    Added support for creating and retrieving Source objects
+    Added support for redirect flow and polling to update Source status
+    Restyled the example project, added secondary activity to demonstrate 3DS support
+
 3.0.1 2017-02-27
     Removed `@Deprecated` tag from most setters on the Card object
 
