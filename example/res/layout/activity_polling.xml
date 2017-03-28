@@ -6,7 +6,10 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
+    android:paddingLeft="8dp"
+    android:paddingStart="8dp"
+    android:paddingRight="8dp"
+    android:paddingEnd="8dp"
     tools:context="com.stripe.example.activity.PollingActivity">
 
     <TextView android:id="@+id/payment_form_title"
