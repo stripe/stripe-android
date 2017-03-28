@@ -20,7 +20,11 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.PollingResponse;
+import com.stripe.android.net.PollingResponseHandler;
 import com.stripe.android.net.RequestOptions;
 import com.stripe.android.net.StripeApiHandler;
 
@@ -31,6 +35,41 @@ import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
  * Class that handles {@link Token} creation from charges and {@link Card} models.
  */
 public class Stripe {
+
+    SourceCreator mSourceCreator = new SourceCreator() {
+        @Override
+        public void create(
+                @NonNull final SourceParams sourceParams,
+                @NonNull final String publishableKey,
+                @Nullable Executor executor,
+                @NonNull final SourceCallback sourceCallback) {
+            AsyncTask<Void, Void, ResponseWrapper> task =
+                    new AsyncTask<Void, Void, ResponseWrapper>() {
+                        @Override
+                        protected ResponseWrapper doInBackground(Void... params) {
+                            try {
+                                Source source = StripeApiHandler.createSourceOnServer(
+                                        sourceParams,
+                                        publishableKey);
+                                return new ResponseWrapper(source);
+                            } catch (StripeException stripeException) {
+                                return new ResponseWrapper(stripeException);
+                            }
+                        }
+
+                        @Override
+                        protected void onPostExecute(ResponseWrapper responseWrapper) {
+                            if (responseWrapper.source != null) {
+                                sourceCallback.onSuccess(responseWrapper.source);
+                            } else if (responseWrapper.error != null) {
+                                sourceCallback.onError(responseWrapper.error);
+                            }
+                        }
+                    };
+
+            executeTask(executor, task);
+        }
+    };
 
     @VisibleForTesting
     TokenCreator mTokenCreator = new TokenCreator() {
@@ -51,9 +90,9 @@ public class Stripe {
                                         tokenParams,
                                         requestOptions,
                                         mLoggingResponseListener);
-                                return new ResponseWrapper(token, null);
+                                return new ResponseWrapper(token);
                             } catch (StripeException e) {
-                                return new ResponseWrapper(null, e);
+                                return new ResponseWrapper(e);
                             }
                         }
 
@@ -63,7 +102,7 @@ public class Stripe {
                         }
             };
 
-            executeTokenTask(executor, task);
+            executeTask(executor, task);
         }
     };
 
@@ -184,6 +223,37 @@ public class Stripe {
     }
 
     /**
+     * Create a {@link Source} using an {@link AsyncTask} on the default {@link Executor} with a
+     * publishable api key that has already been set on this {@link Stripe} instance.
+     *
+     * @param sourceParams the {@link SourceParams} to be used
+     * @param callback a {@link SourceCallback} to receive a result or an error message
+     */
+    public void createSource(@NonNull SourceParams sourceParams, @NonNull SourceCallback callback) {
+        createSource(sourceParams, callback, null, null);
+    }
+
+    /**
+     * Create a {@link Source} using an {@link AsyncTask}.
+     *
+     * @param sourceParams the {@link SourceParams} to be used
+     * @param callback a {@link SourceCallback} to receive a result or an error message
+     * @param publishableKey the publishable api key to be used
+     * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
+     */
+    public void createSource(
+            @NonNull SourceParams sourceParams,
+            @NonNull SourceCallback callback,
+            @Nullable String publishableKey,
+            @Nullable Executor executor) {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return;
+        }
+        mSourceCreator.create(sourceParams, apiKey, executor, callback);
+    }
+
+    /**
      * The simplest way to create a token, using a {@link Card} and {@link TokenCallback}. This
      * runs on the default {@link Executor} and with the
      * currently set {@link #mDefaultPublishableKey}.
@@ -246,6 +316,59 @@ public class Stripe {
     }
 
     /**
+     * Blocking method to create a {@link Source} object using this object's
+     * {@link Stripe#mDefaultPublishableKey key}.
+     *
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param params a set of {@link SourceParams} with which to create the source
+     * @return a {@link Source}, or {@code null} if a problem occurred
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException the card cannot be charged for some reason
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    @Nullable
+    public Source createSourceSynchronous(@NonNull SourceParams params)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createSourceSynchronous(params, null);
+    }
+
+    /**
+     * Blocking method to create a {@link Source} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param params a set of {@link SourceParams} with which to create the source
+     * @param publishableKey a publishable API key to use
+     * @return a {@link Source}, or {@code null} if a problem occurred
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    public Source createSourceSynchronous(
+            @NonNull SourceParams params,
+            @Nullable String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+        return StripeApiHandler.createSourceOnServer(params, apiKey);
+    }
+
+    /**
      * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
      * will crash. This method uses the default publishable key for this {@link Stripe} instance.
      *
@@ -279,7 +402,6 @@ public class Stripe {
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
      */
@@ -296,6 +418,124 @@ public class Stripe {
                 hashMapFromCard(mContext, card),
                 requestOptions,
                 mLoggingResponseListener);
+    }
+
+    /**
+     *  Starts polling the {@link Source} object with the given ID. For payment methods that require
+     *  additional customer action (e.g. authorizing a payment with their bank), polling
+     *  allows you to determine if the action was successful. Polling will stop and the
+     *  provided callback will be called once the source's status is no longer
+     *  {@link Source#PENDING}, or if the given timeout is reached and the source is still
+     *  `pending`. If polling stops due to an error, the callback will be fired with the latest
+     *  retrieved source and the error.
+     *
+     * @param sourceId the {@link Source#mId} to check on
+     * @param clientSecret the {@link Source#mClientSecret} to check on
+     * @param publishableKey an API key
+     * @param callback a {@link PollingResponseHandler} to use as a callback
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     */
+    public void pollSource(@NonNull @Size(min = 1) String sourceId,
+                           @NonNull @Size(min = 1) String clientSecret,
+                           @Nullable String publishableKey,
+                           @NonNull PollingResponseHandler callback,
+                           @Nullable Integer timeoutMs) {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return;
+        }
+
+        StripeApiHandler.pollSource(sourceId, clientSecret, apiKey, callback, timeoutMs);
+    }
+
+    /**
+     *  Starts polling the {@link Source} object with the given ID on the current thread. If called
+     *  on the main thread, this method will crash the application.
+     *
+     *  For payment methods that require additional customer action
+     *  (e.g. authorizing a payment with their bank), polling
+     *  allows you to determine if the action was successful. Polling will stop once the
+     *  Source's status is no longer {@link Source#PENDING}, or if the given timeout is reached and
+     *  the Source is still `pending`. If polling stops due to an error, the latest retrieved Source
+     *  and latest thrown {@link StripeException} will be returned in the {@link PollingResponse}.
+     *
+     * @param sourceId the {@link Source#mId} to check on
+     * @param clientSecret the {@link Source#mClientSecret} to check on
+     * @param publishableKey an API key
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     */
+    public PollingResponse pollSourceSynchronous(@NonNull @Size(min = 1) String sourceId,
+                                                 @NonNull @Size(min = 1) String clientSecret,
+                                                 @Nullable String publishableKey,
+                                                 @Nullable Integer timeoutMs) {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+
+        return StripeApiHandler.pollSourceSynchronous(sourceId, clientSecret, apiKey, timeoutMs);
+    }
+
+    /**
+     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
+     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
+     * to crash. This method uses the default publishable key for this {@link Stripe} instance.
+     *
+     * @param sourceId the {@link Source#mId} field of the desired Source object
+     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Source retrieveSourceSynchronous(
+            @NonNull @Size(min = 1) String sourceId,
+            @NonNull @Size(min = 1) String clientSecret)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return retrieveSourceSynchronous(sourceId, clientSecret, null);
+    }
+
+    /**
+     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
+     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
+     * to crash.
+     *
+     * @param sourceId the {@link Source#mId} field of the desired Source object
+     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @param publishableKey a publishable API key to use
+     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Source retrieveSourceSynchronous(
+            @NonNull @Size(min = 1) String sourceId,
+            @NonNull @Size(min = 1) String clientSecret,
+            @Nullable String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+        return StripeApiHandler.retrieveSource(sourceId, clientSecret, apiKey);
     }
 
     /**
@@ -364,7 +604,7 @@ public class Stripe {
         }
     }
 
-    private void executeTokenTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
+    private void executeTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
         if (executor != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
             task.executeOnExecutor(executor);
         } else {
@@ -373,13 +613,35 @@ public class Stripe {
     }
 
     private class ResponseWrapper {
+        final Source source;
         final Token token;
         final Exception error;
 
-        private ResponseWrapper(Token token, Exception error) {
-            this.error = error;
+        private ResponseWrapper(Token token) {
             this.token = token;
+            this.source = null;
+            this.error = null;
         }
+
+        private ResponseWrapper(Source source) {
+            this.source = source;
+            this.error = null;
+            this.token = null;
+        }
+
+        private ResponseWrapper(Exception error) {
+            this.error = error;
+            this.source = null;
+            this.token = null;
+        }
+    }
+
+    interface SourceCreator {
+        void create(
+                @NonNull SourceParams params,
+                @NonNull String publishableKey,
+                @Nullable Executor executor,
+                @NonNull SourceCallback sourceCallback);
     }
 
     @VisibleForTesting

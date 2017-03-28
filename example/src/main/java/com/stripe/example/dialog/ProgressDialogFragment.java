@@ -15,7 +15,7 @@ public class ProgressDialogFragment extends DialogFragment {
         fragment.setArguments(args);
 
         return fragment;
-   }
+    }
 
     public ProgressDialogFragment() {
         // Empty constructor required for DialogFragment

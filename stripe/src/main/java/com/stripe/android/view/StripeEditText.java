@@ -7,24 +7,24 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
-import android.widget.EditText;
 
 import com.stripe.android.R;
 
 /**
- * Extension of {@link EditText} that listens for users pressing the delete key when there is
+ * Extension of {@link AppCompatEditText} that listens for users pressing the delete key when there is
  * no text present. Google has actually made this
  * <a href="https://code.google.com/p/android/issues/detail?id=42904">somewhat difficult</a>,
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-public class StripeEditText extends EditText {
+public class StripeEditText extends AppCompatEditText {
 
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
     @Nullable private ColorStateList mCachedColorStateList;
@@ -93,9 +93,12 @@ public class StripeEditText extends EditText {
         return mShouldShowError;
     }
 
+    /**
+     * @return the color used for error text.
+     */
     @ColorInt
     @SuppressWarnings("deprecation")
-    int getDefaultErrorColorInt() {
+    public int getDefaultErrorColorInt() {
         @ColorInt int errorColor;
         // It's possible that we need to verify this value again
         // in case the user programmatically changes the text color.
@@ -111,7 +114,12 @@ public class StripeEditText extends EditText {
         return errorColor;
     }
 
-    void setErrorColor(@ColorInt int errorColor) {
+    /**
+     * Sets the error text color on this {@link StripeEditText}.
+     *
+     * @param errorColor a {@link ColorInt}
+     */
+    public void setErrorColor(@ColorInt int errorColor) {
         mErrorColor = errorColor;
     }
 

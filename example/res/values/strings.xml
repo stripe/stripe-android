@@ -3,19 +3,37 @@
     <string name="appName">Stripe Payments Example</string>
 
     <string name="addPayment">Add Payment Method</string>
+    <string name="addThreeDSecureCard">Add Source</string>
+    <string name="addThreeDSecureCardSync">Add Source Rx</string>
     <string name="paymentMethods">Payment Methods</string>
 
     <string name="endingIn">Card ending in </string>
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
+    <string name="createCardTokens">Create Card Tokens</string>
+    <string name="createThreeDSecure">Create 3DS Sources</string>
     <string name="cardNumber">Card Number</string>
+    <string name="createSource">Creating source&#8230;</string>
+    <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
     <string name="saveService">Save with Service</string>
+    <string name="selectSampleActivity">Select sample activity</string>
+    <string name="startPolling">Start polling</string>
+    <string name="tryThreeDSecure">Try 3DS</string>
+    <string name="verify">Verify</string>
+    <string name="updatedSources">Source results</string>
     <string name="cvc">CVC</string>
 
     <string name="ok">OK</string>
+
+    <string name="label_source_type">Type</string>
+    <string name="label_3ds_status">3DS status</string>
+    <string name="label_source_state">Status</string>
+    <string name="label_source_id">ID Last 6</string>
+
+    <string name="sample_card_requiring_3ds">4000 0000 0000 3063</string>
 
     <string-array name="currency_array">
         <item>Currency (optional)</item>

@@ -12,7 +12,7 @@
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addPayment"
-              style="@style/Header" />
+              style="@style/Header.Light" />
 
     <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_input_widget"
@@ -25,26 +25,26 @@
         android:layout_height="wrap_content"
         android:layout_width="160dp"
         android:text="@string/save"
-        style="@style/Save"/>
+        />
 
     <Button
         android:id="@+id/saverx"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
         android:text="@string/saverx"
-        style="@style/Save"/>
+        />
 
     <Button
         android:id="@+id/saveWithService"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
         android:text="@string/saveService"
-        style="@style/Save"/>
+        />
 
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
               android:layout_marginTop="12dp"
-              style="@style/Header" />
+              style="@style/Header.Light" />
 
     <ListView
         android:id="@+id/listview"

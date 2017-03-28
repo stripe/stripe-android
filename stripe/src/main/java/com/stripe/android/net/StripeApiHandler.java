@@ -1,7 +1,6 @@
 package com.stripe.android.net;
 
 import android.os.Build;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -16,6 +15,8 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
@@ -36,12 +37,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-
 
 /**
  * Handler for calls to the Stripe API.
@@ -52,8 +53,7 @@ public class StripeApiHandler {
     public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     public static final String CHARSET = "UTF-8";
     public static final String TOKENS = "tokens";
-    public static final String MUID = "muid";
-    public static final String GUID = "guid";
+    public static final String SOURCES = "sources";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -66,6 +66,170 @@ public class StripeApiHandler {
 
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
+
+    /**
+     * Create a {@link Source} using the input {@link SourceParams}.
+     *
+     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
+     * @param publishableKey an API key
+     * @return a {@link Source} if one could be created from the input params,
+     * or {@code null} if not
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Nullable
+    public static Source createSourceOnServer(
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return createSourceOnServer(sourceParams, publishableKey, null);
+    }
+
+    /**
+     * Create a {@link Source} using the input {@link SourceParams}.
+     *
+     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
+     * @param publishableKey an API key
+     * @param loggingResponseListener a {@link LoggingResponseListener} to verify logging
+     * @return a {@link Source} if one could be created from the input params,
+     * or {@code null} if not
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Nullable
+    static Source createSourceOnServer(
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey,
+            @Nullable LoggingResponseListener loggingResponseListener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        Map<String, Object> paramMap = sourceParams.toParamMap();
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    apiKey,
+                    sourceParams.getType());
+            logTokenRequest(loggingParams, options, loggingResponseListener);
+            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
+    }
+
+    /**
+     * Retrieve an existing {@link Source} object from the server.
+     *
+     * @param sourceId the {@link Source#mId} field for the Source to query
+     * @param clientSecret the {@link Source#mClientSecret} field for the Source to query
+     * @param publishableKey an API key
+     * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
+     * no such Source could be found.
+     *
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    public static Source retrieveSource(
+            @NonNull String sourceId,
+            @NonNull String clientSecret,
+            @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+
+        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+        try {
+            return Source.fromString(
+                    requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
+    }
+
+    /**
+     * Poll for changes in a {@link Source} using a background thread with an exponential backoff.
+     *
+     * @param sourceId the {@link Source#mId} to check on
+     * @param clientSecret the {@link Source#mClientSecret} to check on
+     * @param publishableKey an API key
+     * @param callback a {@link PollingResponseHandler} to use as a callback
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     */
+    public static void pollSource(
+            @NonNull final String sourceId,
+            @NonNull final String clientSecret,
+            @NonNull final String publishableKey,
+            @NonNull final PollingResponseHandler callback,
+            @Nullable Integer timeoutMs) {
+
+        PollingNetworkHandler networkHandler =
+                new PollingNetworkHandler(
+                        sourceId,
+                        clientSecret,
+                        publishableKey,
+                        callback,
+                        timeoutMs,
+                        null,
+                        PollingParameters.generateDefaultParameters());
+        networkHandler.start();
+    }
+
+    /**
+     * Polls for source updates synchronously. If called on the main thread,
+     * this will crash the application.
+     *
+     * @param sourceId the {@link Source#mId ID} of the Source being polled
+     * @param clientSecret the {@link Source#mClientSecret client_secret} of the Source
+     * @param publishableKey a public API key
+     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
+     *                  in, 10000ms will be used.
+     * @return a {@link PollingResponse} that will indicate success or failure
+     */
+    public static PollingResponse pollSourceSynchronous(
+            @NonNull final String sourceId,
+            @NonNull final String clientSecret,
+            @NonNull final String publishableKey,
+            @Nullable Integer timeoutMs) {
+        PollingSyncNetworkHandler pollingSyncNetworkHandler =
+                new PollingSyncNetworkHandler(
+                        sourceId,
+                        clientSecret,
+                        publishableKey,
+                        timeoutMs,
+                        null,
+                        null,
+                        PollingParameters.generateDefaultParameters());
+        return pollingSyncNetworkHandler.pollForSourceUpdate();
+    }
 
     /**
      * Create a {@link Token} using the input card parameters.
@@ -98,10 +262,16 @@ public class StripeApiHandler {
         // Only fires if the card params contain logging information.
         if (cardParams.containsKey(LoggingUtils.FIELD_PRODUCT_USAGE)) {
             try {
+                String apiKey = options.getPublishableApiKey();
+                if (StripeTextUtils.isBlank(apiKey)) {
+                    return null;
+                }
                 List<String> loggingTokens =
                         (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
-                logTokenRequest(loggingTokens, options, listener);
+
+                Map<String, Object> loggingParams = LoggingUtils.getTokenCreationParams(loggingTokens, apiKey);
+                logTokenRequest(loggingParams, options, listener);
             } catch (ClassCastException classCastEx) {
                 // This can only happen if someone puts a weird object in the map.
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -195,7 +365,17 @@ public class StripeApiHandler {
 
     @VisibleForTesting
     static String getApiUrl() {
-        return String.format("%s/v1/%s", LIVE_API_BASE, TOKENS);
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
+    }
+
+    @VisibleForTesting
+    static String getSourcesUrl() {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    }
+
+    @VisibleForTesting
+    static String getRetrieveSourceApiUrl(@NonNull String sourceId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getSourcesUrl(), sourceId);
     }
 
     @VisibleForTesting
@@ -266,7 +446,7 @@ public class StripeApiHandler {
     }
 
     private static void logTokenRequest(
-            @NonNull List<String> loggingTokens,
+            @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
             @Nullable LoggingResponseListener listener) {
         if (options == null) {
@@ -296,7 +476,7 @@ public class StripeApiHandler {
             StripeResponse response = getStripeResponse(
                     GET,
                     LIVE_LOGGING_BASE,
-                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey),
+                    loggingMap,
                     options);
 
             if (listener != null) {
@@ -322,16 +502,18 @@ public class StripeApiHandler {
         }
     }
 
-    private static Token requestToken(
+    private static String requestData(
             @RestMethod String method,
             String url,
             Map<String, Object> params,
             RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
+
         if (options == null) {
             return null;
         }
+
         String originalDNSCacheTTL = null;
         Boolean allowedToSetTTL = true;
 
@@ -354,39 +536,47 @@ public class StripeApiHandler {
                     null, 0);
         }
 
+        StripeResponse response = getStripeResponse(method, url, params, options);
+
+        int rCode = response.getResponseCode();
+        String rBody = response.getResponseBody();
+
+        String requestId = null;
+        Map<String, List<String>> headers = response.getResponseHeaders();
+        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+        if (requestIdList != null && requestIdList.size() > 0) {
+            requestId = requestIdList.get(0);
+        }
+
+        if (rCode < 200 || rCode >= 300) {
+            handleAPIError(rBody, rCode, requestId);
+        }
+
+        if (allowedToSetTTL) {
+            if (originalDNSCacheTTL == null) {
+                // value unspecified by implementation
+                // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+            } else {
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
+            }
+        }
+        return rBody;
+    }
+
+    private static Token requestToken(
+            @RestMethod String method,
+            String url,
+            Map<String, Object> params,
+            RequestOptions options)
+            throws AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException, APIException {
         try {
-            StripeResponse response = getStripeResponse(method, url, params, options);
-
-            int rCode = response.getResponseCode();
-            String rBody = response.getResponseBody();
-
-            String requestId = null;
-            Map<String, List<String>> headers = response.getResponseHeaders();
-            List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
-            if (requestIdList != null && requestIdList.size() > 0) {
-                requestId = requestIdList.get(0);
-            }
-
-            if (rCode < 200 || rCode >= 300) {
-                handleAPIError(rBody, rCode, requestId);
-            }
-
-            // Note that the 'finally' block runs immediately prior to this return statement.
-            return TokenParser.parseToken(rBody);
-        } catch(JSONException jsonException) {
+            return TokenParser.parseToken(requestData(method, url, params, options));
+        } catch (JSONException ignored) {
             return null;
-        } finally {
-            if (allowedToSetTTL) {
-                if (originalDNSCacheTTL == null) {
-                    // value unspecified by implementation
-                    // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                    java.security.Security.setProperty(
-                            DNS_CACHE_TTL_PROPERTY_NAME, "-1");
-                } else {
-                    java.security.Security.setProperty(
-                            DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
-                }
-            }
         }
     }
 

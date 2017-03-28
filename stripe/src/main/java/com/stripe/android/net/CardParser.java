@@ -27,6 +27,7 @@ class CardParser {
     private static final String FIELD_EXP_YEAR = "exp_year";
     private static final String FIELD_FINGERPRINT = "fingerprint";
     private static final String FIELD_FUNDING = "funding";
+    private static final String FIELD_ID = "id";
     private static final String FIELD_LAST4 = "last4";
     private static final String FIELD_NAME = "name";
 
@@ -69,6 +70,7 @@ class CardParser {
                 StripeJsonUtils.optString(objectCard, FIELD_FINGERPRINT),
                 StripeTextUtils.asFundingType(StripeJsonUtils.optString(objectCard, FIELD_FUNDING)),
                 StripeJsonUtils.optString(objectCard, FIELD_COUNTRY),
-                StripeJsonUtils.optString(objectCard, FIELD_CURRENCY));
+                StripeJsonUtils.optString(objectCard, FIELD_CURRENCY),
+                StripeJsonUtils.optString(objectCard, FIELD_ID));
     }
 }

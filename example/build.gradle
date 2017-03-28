@@ -4,16 +4,17 @@ repositories {
     mavenCentral()
 }
 
-def android_support_version = '25.1.1'
+def android_support_version = '25.2.0'
 
 dependencies {
     compile project(':stripe')
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:support-v4:' + android_support_version
+    compile 'com.android.support:recyclerview-v7:' + android_support_version
     /* Needed for RxAndroid */
+    /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
-    /* Needed for Rx Bindings on views */
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 }
 
@@ -27,6 +28,10 @@ android {
     }
     packagingOptions {
         exclude 'LICENSE.txt'
+    }
+
+    lintOptions {
+        disable 'MissingTranslation'
     }
 
     sourceSets {

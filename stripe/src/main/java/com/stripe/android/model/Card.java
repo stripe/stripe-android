@@ -88,6 +88,7 @@ public class Card {
     private String fingerprint;
     private String country;
     private String currency;
+    private String id;
     @NonNull private List<String> loggingTokens = new ArrayList<>();
 
     /**
@@ -226,6 +227,7 @@ public class Card {
      * @param funding the funding type of the card
      * @param country ISO country code of the card itself
      * @param currency currency used by the card
+     * @param id the cardId
      */
     public Card(
             String number,
@@ -244,7 +246,8 @@ public class Card {
             String fingerprint,
             String funding,
             String country,
-            String currency) {
+            String currency,
+            String id) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
@@ -262,6 +265,7 @@ public class Card {
         this.funding = StripeTextUtils.asFundingType(funding);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);
+        this.id = StripeTextUtils.nullIfBlank(id);
     }
 
     /**
@@ -310,7 +314,8 @@ public class Card {
                 null,
                 null,
                 null,
-                currency);
+                currency,
+                null);
     }
 
     /**
@@ -331,6 +336,7 @@ public class Card {
                 expMonth,
                 expYear,
                 cvc,
+                null,
                 null,
                 null,
                 null,
@@ -701,6 +707,13 @@ public class Card {
      */
     public String getCountry() {
         return country;
+    }
+
+    /**
+     * @return the {@link #id} of this card
+     */
+    public String getId() {
+        return id;
     }
 
     private Card(Builder builder) {
