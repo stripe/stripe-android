@@ -232,7 +232,7 @@ public class SourceParams {
     public static SourceParams createSepaDebitParams(
             @NonNull String name,
             @NonNull String iban,
-            @NonNull String addressLine1,
+            @Nullable String addressLine1,
             @NonNull String city,
             @NonNull String postalCode,
             @NonNull @Size(2) String country) {
