@@ -7,24 +7,24 @@
     android:padding="@dimen/item_padding">
     
     <TextView
-    android:id="@+id/tv_emoji"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/emoji_left_margin"
-    android:layout_marginStart="@dimen/emoji_left_margin"
-    style="@style/EmojiStyle"
-    />
+        android:id="@+id/tv_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/emoji_left_margin"
+        android:layout_marginStart="@dimen/emoji_left_margin"
+        style="@style/EmojiStyle"
+        />
     
     <TextView
-    android:id="@+id/tv_price"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:gravity="end"
-    android:layout_gravity="center_vertical"
-    android:layout_marginEnd="@dimen/price_right_margin"
-    android:layout_marginRight="@dimen/price_right_margin"
-    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-    />
+        android:id="@+id/tv_price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="end"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/price_right_margin"
+        android:layout_marginRight="@dimen/price_right_margin"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        />
     
 </LinearLayout>
