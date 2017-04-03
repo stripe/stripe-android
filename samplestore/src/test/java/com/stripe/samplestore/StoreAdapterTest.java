@@ -1,13 +1,11 @@
 package com.stripe.samplestore;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Currency;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,10 +23,10 @@ public class StoreAdapterTest {
         String secondPrice = StoreAdapter.getPriceString(55, dollars);
         String tinyPrice = StoreAdapter.getPriceString(7, dollars);
         String bigPrice = StoreAdapter.getPriceString(1234567890, dollars);
-        assertEquals("$10.00", firstPrice);
-        assertEquals("$0.55", secondPrice);
-        assertEquals("$0.07", tinyPrice);
-        assertEquals("$12345678.90", bigPrice);
+        assertEquals("$ 10.00", firstPrice);
+        assertEquals("$ 0.55", secondPrice);
+        assertEquals("$ 0.07", tinyPrice);
+        assertEquals("$ 12345678.90", bigPrice);
     }
 
     @Test
@@ -37,8 +35,8 @@ public class StoreAdapterTest {
         String firstPrice = StoreAdapter.getPriceString(1000, yen);
         String secondPrice = StoreAdapter.getPriceString(55, yen);
         String bigPrice = StoreAdapter.getPriceString(1234567890, yen);
-        assertEquals("JPY1000", firstPrice);
-        assertEquals("JPY55", secondPrice);
-        assertEquals("JPY1234567890", bigPrice);
+        assertEquals("JPY 1000", firstPrice);
+        assertEquals("JPY 55", secondPrice);
+        assertEquals("JPY 1234567890", bigPrice);
     }
 }

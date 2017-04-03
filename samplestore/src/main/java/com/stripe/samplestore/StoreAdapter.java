@@ -106,6 +106,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         int totalLength = String.valueOf(price).length();
         StringBuilder builder = new StringBuilder();
         builder.append('\u00A4');
+        builder.append(' ');
 
         if (fractionDigits == 0) {
             for (int i = 0; i < totalLength; i++) {
