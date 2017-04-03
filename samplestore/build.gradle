@@ -31,5 +31,8 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:' + android_support_version
 
     testCompile 'junit:junit:4.12'
+<<<<<<< HEAD
     testCompile 'org.robolectric:robolectric:3.2.1'
+=======
+>>>>>>> adding boilerplate and constants for store application
 }
