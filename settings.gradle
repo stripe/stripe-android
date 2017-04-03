@@ -1,2 +1,2 @@
-include ':stripe'
+include ':stripe', ':samplestore'
 include ':example'
