@@ -31,4 +31,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:' + android_support_version
 
     testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:3.2.1'
 }
