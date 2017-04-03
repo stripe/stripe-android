@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
 public class StoreUtilsTest {
-    
+
     @Test
     public void getPriceString_withUSD_returnsExpectedValues() {
         Currency dollars = Currency.getInstance("USD");
@@ -28,7 +28,7 @@ public class StoreUtilsTest {
         assertEquals("$0.07", tinyPrice);
         assertEquals("$12345678.90", bigPrice);
     }
-    
+
     @Test
     public void getPriceString_withYen_returnsExpectedValues() {
         Currency yen = Currency.getInstance("JPY");
