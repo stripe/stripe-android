@@ -1,7 +1,9 @@
 package com.stripe.samplestore;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,11 +53,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         private TextView mEmojiTextView;
         private TextView mPriceTextView;
 
-        ViewHolder(LinearLayout pollingLayout, Currency currency) {
+        ViewHolder(final LinearLayout pollingLayout, Currency currency) {
             super(pollingLayout);
             mEmojiTextView = (TextView) pollingLayout.findViewById(R.id.tv_emoji);
             mPriceTextView = (TextView) pollingLayout.findViewById(R.id.tv_price);
             mCurrency = currency;
+            pollingLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.setPressed(true);
+                    launchPurchaseActivityForIndex(v.getContext(), getAdapterPosition());
+                }
+            });
         }
 
         void setEmoji(int emojiUnicode) {
@@ -95,6 +104,10 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
         ViewHolder vh = new ViewHolder(pollingView, mCurrency);
         return vh;
+    }
+
+    static void launchPurchaseActivityForIndex(Context context, int index) {
+        // TODO: complete
     }
 
     static String getEmojiByUnicode(int unicode){

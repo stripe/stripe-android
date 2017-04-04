@@ -3,6 +3,7 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@drawable/store_item_background"
               android:padding="@dimen/item_padding">
 
     <TextView
@@ -30,8 +31,10 @@
         android:layout_width="20dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:text="@string/right_chevron"
         android:textSize="40sp"
+        android:paddingBottom="8dp"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
