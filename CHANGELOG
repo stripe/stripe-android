@@ -1,3 +1,8 @@
+3.1.1 2017-04-04
+    Fixed design tab display bug on card input widget
+    Upgraded to Gradle version 3.4.1
+    SEPA Debit address is now optional
+
 3.1.0 2017-03-28
     Added support for creating and retrieving Source objects
     Added support for redirect flow and polling to update Source status
