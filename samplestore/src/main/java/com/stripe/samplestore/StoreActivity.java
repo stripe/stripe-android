@@ -13,11 +13,13 @@ public class StoreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_store);
 
         StoreAdapter adapter = new StoreAdapter("USD");
+        ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_store_items);
 
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(dividerDecoration);
 
         recyclerView.setAdapter(adapter);
     }
