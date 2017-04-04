@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/store_item_background"
-    android:padding="@dimen/item_padding">
-    
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/store_item_background"
+              android:padding="@dimen/item_padding">
+
     <TextView
         android:id="@+id/tv_emoji"
         android:layout_width="wrap_content"
@@ -14,7 +14,7 @@
         android:layout_marginStart="@dimen/emoji_left_margin"
         style="@style/EmojiStyle"
         />
-    
+
     <TextView
         android:id="@+id/tv_price"
         android:layout_width="0dp"
@@ -26,5 +26,5 @@
         android:layout_marginRight="@dimen/price_right_margin"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
-    
+
 </LinearLayout>

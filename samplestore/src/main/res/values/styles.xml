@@ -8,4 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="EmojiStyle" parent="TextAppearance.AppCompat.Headline">
+        <item name="android:textSize">36sp</item>
+    </style>
 </resources>

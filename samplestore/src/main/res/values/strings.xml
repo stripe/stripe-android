@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sample Store</string>
+    <string name="right_chevron">\u203A</string>
 </resources>
