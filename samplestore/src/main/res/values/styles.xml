@@ -6,7 +6,18 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Borderless.Colored</item>
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
+    </style>
+
+    <style name="CustomButton">
+        <item name="android:background">@drawable/button_background</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">88dip</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Widget.Button.Borderless.Colored</item>
     </style>
 
     <style name="EmojiStyle" parent="TextAppearance.AppCompat.Headline">
@@ -19,9 +30,8 @@
         <item name="android:background">@drawable/header_light</item>
         <item name="android:layout_marginBottom">5dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingLeft">3dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColor">@android:color/secondary_text_light</item>
     </style>
 </resources>
