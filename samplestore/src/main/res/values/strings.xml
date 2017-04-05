@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Sample Store</string>
+    <string name="confirm_purchase">Confirm Purchase</string>
+    <string name="enter_details">Enter Payment Details</string>
     <string name="right_chevron">\u203A</string>
+    <string name="your_emoji">Your Emoji</string>
 </resources>

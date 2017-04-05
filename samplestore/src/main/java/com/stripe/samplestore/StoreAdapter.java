@@ -1,6 +1,7 @@
 package com.stripe.samplestore;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,7 +108,11 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     static void launchPurchaseActivityForIndex(Context context, int index) {
-        // TODO: complete
+        Intent paymentLaunchIntent = PaymentActivity.createIntent(
+                context,
+                EMOJI_CLOTHES[index],
+                EMOJI_PRICES[index]);
+        context.startActivity(paymentLaunchIntent);
     }
 
     static String getEmojiByUnicode(int unicode){

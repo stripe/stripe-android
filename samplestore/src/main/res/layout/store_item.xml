@@ -28,13 +28,13 @@
         />
 
     <TextView
-        android:layout_width="20dp"
+        android:layout_width="@dimen/chevron_container_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:gravity="center_vertical"
         android:text="@string/right_chevron"
         android:textSize="40sp"
-        android:paddingBottom="8dp"
+        android:paddingBottom="@dimen/chevron_bottom_padding"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
