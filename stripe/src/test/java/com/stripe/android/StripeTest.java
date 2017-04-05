@@ -43,7 +43,6 @@ import static org.junit.Assert.fail;
 @Config(constants = BuildConfig.class, sdk = 22)
 public class StripeTest {
 
-
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
     private static final Card DEFAULT_CARD = new Card(null, null, null, null);
@@ -86,34 +85,34 @@ public class StripeTest {
                 TEST_BANK_ROUTING_NUMBER);
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void constructorShouldFailWithNullPublishableKey() throws AuthenticationException {
         new Stripe(mContext, null);
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void constructorShouldFailWithEmptyPublishableKey() throws AuthenticationException {
         new Stripe(mContext, "");
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void constructorShouldFailWithSecretKey() throws AuthenticationException {
         new Stripe(mContext, DEFAULT_SECRET_KEY);
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void setDefaultPublishableKeyShouldFailWhenNull() throws AuthenticationException {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(null);
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void setDefaultPublishableKeyShouldFailWhenEmpty() throws AuthenticationException {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey("");
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void setDefaultPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
@@ -132,15 +131,25 @@ public class StripeTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void createTokenShouldFailWithNullTokencallback() {
+    public void createTokenShouldFailWithNullTokenCallback() {
         Stripe stripe = new Stripe(mContext);
         stripe.createToken(DEFAULT_CARD, null);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void createTokenShouldFailWithNullPublishableKey() {
         Stripe stripe = new Stripe(mContext);
-        stripe.createToken(DEFAULT_CARD, new ErrorTokenCallback(AuthenticationException.class));
+        stripe.createToken(DEFAULT_CARD, new TokenCallback() {
+            @Override
+            public void onError(Exception error) {
+                fail("Should not call method");
+            }
+
+            @Override
+            public void onSuccess(Token token) {
+                fail("Should not call method");
+            }
+        });
     }
 
     @Test
@@ -639,7 +648,7 @@ public class StripeTest {
         try {
             stripe.createTokenSynchronous(mCard);
             fail("We shouldn't be able to make a token without a key.");
-        } catch (StripeException exception) {
+        } catch (Exception exception) {
             // Note: we're not testing the type of exception in this test.
             assertNull(listener.mStripeResponse);
             assertNull(listener.mStripeException);
@@ -693,24 +702,6 @@ public class StripeTest {
         @Override
         public void onStripeException(StripeException exception) {
             mStripeException = exception;
-        }
-    }
-
-    private static class ErrorTokenCallback implements TokenCallback {
-        final Class<?> expectedError;
-
-        public ErrorTokenCallback(Class<?> expectedError) {
-            this.expectedError = expectedError;
-        }
-
-        @Override
-        public void onError(Exception error) {
-            assertEquals(expectedError, error.getClass());
-        }
-
-        @Override
-        public void onSuccess(Token token) {
-            fail("onSuccess should not be called");
         }
     }
 }
