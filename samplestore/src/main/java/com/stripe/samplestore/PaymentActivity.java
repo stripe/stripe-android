@@ -14,12 +14,15 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
 
 import java.util.Currency;
 import java.util.concurrent.Callable;
 
+import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -152,12 +155,74 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void proceedWithPurchaseOrCheckFor3DS(Source source) {
-        if (source == null) {
+        if (source == null || !Source.CARD.equals(source.getType())) {
             Snackbar snackbar = Snackbar.make(
                     mTotalLayoutView,
                     "Something went wrong",
                     Snackbar.LENGTH_LONG);
             snackbar.show();
         }
+
+        SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
+        if (SourceCardData.REQUIRED.equals(cardData.getThreeDSecureStatus())) {
+            verifyThreeDSecure(source);
+        } else {
+            completePurchase(source);
+        }
+    }
+
+    private void verifyThreeDSecure(Source source) {
+
+    }
+
+    private void completePurchase(Source source) {
+        Retrofit retrofit = RetrofitFactory.getInstance();
+        StripeService stripeService = retrofit.create(StripeService.class);
+
+        final ProgressDialogFragment progressDialogFragment =
+                ProgressDialogFragment.newInstance(R.string.completing_purchase);
+        final FragmentManager fragmentManager = this.getSupportFragmentManager();
+
+        ChargeParams params = new ChargeParams(mPrice, source.getId());
+        Observable<String> stripeResponse = stripeService.createSimpleCharge(params);
+
+        mCompositeSubscription.add(stripeResponse
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                progressDialogFragment.show(fragmentManager, "progress");
+                            }
+                        })
+                .doOnUnsubscribe(
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                progressDialogFragment.dismiss();
+                            }
+                        })
+                .subscribe(
+                    new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            sendSnackBarMessage(s);
+                        }
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            sendSnackBarMessage(throwable.getLocalizedMessage());
+                        }
+                    }));
+    }
+
+    private void sendSnackBarMessage(String message) {
+        Snackbar snackbar = Snackbar.make(
+                mTotalLayoutView,
+                message,
+                Snackbar.LENGTH_LONG);
+        snackbar.show();
     }
 }
