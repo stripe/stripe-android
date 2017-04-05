@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,7 +17,6 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
-import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
 
 import java.util.Currency;
@@ -183,8 +183,7 @@ public class PaymentActivity extends AppCompatActivity {
                 ProgressDialogFragment.newInstance(R.string.completing_purchase);
         final FragmentManager fragmentManager = this.getSupportFragmentManager();
 
-        ChargeParams params = new ChargeParams(mPrice, source.getId());
-        Observable<String> stripeResponse = stripeService.createSimpleCharge(params);
+        Observable<Void> stripeResponse = stripeService.createQueryCharge(mPrice, source.getId());
 
         mCompositeSubscription.add(stripeResponse
                 .subscribeOn(Schedulers.io())
@@ -204,15 +203,17 @@ public class PaymentActivity extends AppCompatActivity {
                             }
                         })
                 .subscribe(
-                    new Action1<String>() {
+                    new Action1<Void>() {
                         @Override
-                        public void call(String s) {
-                            sendSnackBarMessage(s);
+                        public void call(Void aVoid) {
+                            Log.d("Http", "w00t w00t");
+                            sendSnackBarMessage("Charge Success!");
                         }
                     },
                     new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            Log.d("Http", throwable.getLocalizedMessage());
                             sendSnackBarMessage(throwable.getLocalizedMessage());
                         }
                     }));
