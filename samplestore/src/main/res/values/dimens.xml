@@ -3,7 +3,11 @@
     <dimen name="activity_padding">8dp</dimen>
     <dimen name="chevron_bottom_padding">8dp</dimen>
     <dimen name="chevron_container_width">20dp</dimen>
+    <dimen name="chevron_container_size">24dp</dimen>
+    <dimen name="emoji_display_bottom_margin">6dp</dimen>
+    <dimen name="emoji_display_top_margin">24dp</dimen>
     <dimen name="emoji_left_margin">24dp</dimen>
     <dimen name="item_padding">8dp</dimen>
+    <dimen name="price_display_bottom_margin">12dp</dimen>
     <dimen name="price_right_margin">24dp</dimen>
 </resources>

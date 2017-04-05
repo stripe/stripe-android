@@ -3,6 +3,7 @@
     <color name="colorPrimary">#5458DF</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="fadedBlue">#555458DF</color>
+    <color name="colorOtherAccent">#FF4081</color>
+    <color name="fadedBlue">#225458DF</color>
     <color name="semitransparentGray">#77DDDDDD</color>
 </resources>

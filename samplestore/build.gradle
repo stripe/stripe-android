@@ -30,7 +30,16 @@ dependencies {
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
 
+    /* Needed for RxAndroid */
+    /* Needed for Rx Bindings on views */
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
     compile 'com.stripe:stripe-android:3.1.1'
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.2.1'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
 }
