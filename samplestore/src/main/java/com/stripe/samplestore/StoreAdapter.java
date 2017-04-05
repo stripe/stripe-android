@@ -1,6 +1,6 @@
 package com.stripe.samplestore;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Currency;
-import java.util.Locale;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
 
@@ -48,7 +47,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             6000
     };
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         private Currency mCurrency;
         private TextView mEmojiTextView;
         private TextView mPriceTextView;
@@ -62,10 +61,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 @Override
                 public void onClick(View v) {
                     v.setPressed(true);
-                    launchPurchaseActivityForIndex(
-                            v.getContext(),
-                            getAdapterPosition(),
-                            mCurrency);
+                    launchPurchaseActivityForIndex(getAdapterPosition());
                 }
             });
         }
@@ -79,14 +75,13 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
     }
 
+    // Storing an activity here only so we can launch for result
+    private Activity mActivity;
     private Currency mCurrency;
 
-    public StoreAdapter(String currencyCode) {
-        try {
-            mCurrency = Currency.getInstance(currencyCode);
-        } catch (IllegalArgumentException badCurrencyCode) {
-            mCurrency = Currency.getInstance(Locale.US);
-        }
+    public StoreAdapter(Activity activity) {
+        mActivity = activity;
+        mCurrency = Currency.getInstance("USD");
     }
 
     @Override
@@ -109,15 +104,13 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         return vh;
     }
 
-    static void launchPurchaseActivityForIndex(
-            Context context,
-            int index,
-            Currency currency) {
+    private void launchPurchaseActivityForIndex(int index) {
         Intent paymentLaunchIntent = PaymentActivity.createIntent(
-                context,
+                mActivity,
                 EMOJI_CLOTHES[index],
                 EMOJI_PRICES[index],
-                currency);
-        context.startActivity(paymentLaunchIntent);
+                mCurrency);
+        mActivity.startActivityForResult(
+                paymentLaunchIntent, StoreActivity.PURCHASE_REQUEST);
     }
 }
