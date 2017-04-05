@@ -3,25 +3,34 @@ package com.stripe.samplestore;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.view.CardInputWidget;
 
 import java.util.Currency;
+import java.util.concurrent.Callable;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class PaymentActivity extends AppCompatActivity {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
 
     private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
     private static final String EXTRA_PRICE = "EXTRA_PRICE";
@@ -31,7 +40,9 @@ public class PaymentActivity extends AppCompatActivity {
     private CompositeSubscription mCompositeSubscription;
     private Currency mCurrency;
     private long mPrice;
+    private ProgressDialogFragment mProgressFragment;
     private Stripe mStripe;
+    private View mTotalLayoutView;
 
     public static Intent createIntent(
             @NonNull Context context,
@@ -54,6 +65,8 @@ public class PaymentActivity extends AppCompatActivity {
         TextView emojiDisplay = (TextView) findViewById(R.id.tv_emoji_display);
         emojiDisplay.setText(StoreUtils.getEmojiByUnicode(emojiUnicode));
 
+        mTotalLayoutView = findViewById(R.id.payment_main_layout);
+
         mPrice = getIntent().getExtras().getLong(EXTRA_PRICE);
         mCurrency = (Currency) getIntent().getExtras().getSerializable(EXTRA_CURRENCY);
         TextView priceDisplay = (TextView) findViewById(R.id.tv_price_display);
@@ -70,8 +83,7 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 });
 
-        mStripe = new Stripe(this)
-                .setDefaultPublishableKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        mStripe = new Stripe(this);
     }
 
     @Override
@@ -89,8 +101,63 @@ public class PaymentActivity extends AppCompatActivity {
             return;
         }
 
-        SourceParams cardParams = SourceParams.createCardParams(card);
+        final SourceParams cardParams = SourceParams.createCardParams(card);
+        Observable<Source> cardSourceObservable =
+                Observable.fromCallable(new Callable<Source>() {
+                    @Override
+                    public Source call() throws Exception {
+                        return mStripe.createSourceSynchronous(
+                                cardParams,
+                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                    }
+                });
 
+        final ProgressDialogFragment progressDialogFragment =
+                ProgressDialogFragment.newInstance(R.string.processing_purchase);
+        final FragmentManager fragmentManager = this.getSupportFragmentManager();
+        mCompositeSubscription.add(cardSourceObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(
+                    new Action0() {
+                        @Override
+                        public void call() {
+                            progressDialogFragment.show(fragmentManager, "progress");
+                        }
+                    })
+                .doOnUnsubscribe(
+                    new Action0() {
+                        @Override
+                        public void call() {
+                            progressDialogFragment.dismiss();
+                        }
+                    })
+                .subscribe(
+                    new Action1<Source>() {
+                        @Override
+                        public void call(Source source) {
+                            proceedWithPurchaseOrCheckFor3DS(source);
+                        }
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Snackbar snackbar = Snackbar.make(
+                                    mTotalLayoutView,
+                                    throwable.getLocalizedMessage(),
+                                    Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }
+                    }));
+    }
 
+    private void proceedWithPurchaseOrCheckFor3DS(Source source) {
+        if (source == null) {
+            Snackbar snackbar = Snackbar.make(
+                    mTotalLayoutView,
+                    "Something went wrong",
+                    Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
     }
 }
