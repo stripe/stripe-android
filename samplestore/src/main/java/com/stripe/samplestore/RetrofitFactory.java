@@ -14,7 +14,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class RetrofitFactory {
 
-    private static final String BASE_URL = "just add your item here";
+    // Put your Base URL here. Unless you customized it, the URL will be something like
+    // https://hidden-beach-12345.herokuapp.com
+    private static final String BASE_URL = "put your url here";
     private static Retrofit mInstance = null;
 
     public static Retrofit getInstance() {

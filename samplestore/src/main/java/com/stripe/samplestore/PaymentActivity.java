@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,8 +31,9 @@ import rx.subscriptions.CompositeSubscription;
 
 public class PaymentActivity extends AppCompatActivity {
 
-    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
+    // Put your publishable key here. It should start with "pk_test_"
+    private static final String PUBLISHABLE_KEY =
+            "put your key here";
 
     private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
     private static final String EXTRA_PRICE = "EXTRA_PRICE";
@@ -42,6 +42,7 @@ public class PaymentActivity extends AppCompatActivity {
     private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
     private Currency mCurrency;
+    private int mEmojiUnicode;
     private long mPrice;
     private ProgressDialogFragment mProgressFragment;
     private Stripe mStripe;
@@ -64,9 +65,9 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        int emojiUnicode = getIntent().getExtras().getInt(EXTRA_EMOJI_INT);
+        mEmojiUnicode = getIntent().getExtras().getInt(EXTRA_EMOJI_INT);
         TextView emojiDisplay = (TextView) findViewById(R.id.tv_emoji_display);
-        emojiDisplay.setText(StoreUtils.getEmojiByUnicode(emojiUnicode));
+        emojiDisplay.setText(StoreUtils.getEmojiByUnicode(mEmojiUnicode));
 
         mTotalLayoutView = findViewById(R.id.payment_main_layout);
 
@@ -111,7 +112,7 @@ public class PaymentActivity extends AppCompatActivity {
                     public Source call() throws Exception {
                         return mStripe.createSourceSynchronous(
                                 cardParams,
-                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                                PUBLISHABLE_KEY);
                     }
                 });
 
@@ -206,14 +207,12 @@ public class PaymentActivity extends AppCompatActivity {
                     new Action1<Void>() {
                         @Override
                         public void call(Void aVoid) {
-                            Log.d("Http", "w00t w00t");
-                            sendSnackBarMessage("Charge Success!");
+                            finishCharge();
                         }
                     },
                     new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Log.d("Http", throwable.getLocalizedMessage());
                             sendSnackBarMessage(throwable.getLocalizedMessage());
                         }
                     }));
@@ -225,5 +224,11 @@ public class PaymentActivity extends AppCompatActivity {
                 message,
                 Snackbar.LENGTH_LONG);
         snackbar.show();
+    }
+
+    private void finishCharge() {
+        Intent data = StoreActivity.createPurchaseCompleteIntent(mEmojiUnicode, mPrice);
+        setResult(RESULT_OK, data);
+        finish();
     }
 }

@@ -1,5 +1,7 @@
 package com.stripe.samplestore;
 
+import android.support.annotation.Nullable;
+
 import java.text.DecimalFormat;
 import java.util.Currency;
 
@@ -12,8 +14,12 @@ public class StoreUtils {
         return new String(Character.toChars(unicode));
     }
 
-    static String getPriceString(long price, Currency currency) {
-        int fractionDigits = currency.getDefaultFractionDigits();
+    static String getPriceString(long price, @Nullable Currency currency) {
+        Currency displayCurrency = currency == null
+                ? Currency.getInstance("USD")
+                : currency;
+
+        int fractionDigits = displayCurrency.getDefaultFractionDigits();
         int totalLength = String.valueOf(price).length();
         StringBuilder builder = new StringBuilder();
         builder.append('\u00A4');
@@ -23,7 +29,7 @@ public class StoreUtils {
                 builder.append('#');
             }
             DecimalFormat noDecimalCurrencyFormat = new DecimalFormat(builder.toString());
-            noDecimalCurrencyFormat.setCurrency(currency);
+            noDecimalCurrencyFormat.setCurrency(displayCurrency);
             return noDecimalCurrencyFormat.format(price);
         }
 
@@ -43,7 +49,7 @@ public class StoreUtils {
         double decimalPrice = price / modBreak;
 
         DecimalFormat decimalFormat = new DecimalFormat(builder.toString());
-        decimalFormat.setCurrency(currency);
+        decimalFormat.setCurrency(displayCurrency);
 
         return decimalFormat.format(decimalPrice);
     }
