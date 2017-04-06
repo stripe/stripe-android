@@ -81,6 +81,9 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     public StoreAdapter(Activity activity) {
         mActivity = activity;
+        // Note: our sample backend assumes USD as currency. This code would be
+        // otherwise functional if you switched that assumption on the backend and passed
+        // currency code as a parameter.
         mCurrency = Currency.getInstance("USD");
     }
 
