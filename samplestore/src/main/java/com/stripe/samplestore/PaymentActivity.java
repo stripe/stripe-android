@@ -33,7 +33,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "put your key here";
+            "put your publishable key here";
 
     private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
     private static final String EXTRA_PRICE = "EXTRA_PRICE";
@@ -44,7 +44,7 @@ public class PaymentActivity extends AppCompatActivity {
     private Currency mCurrency;
     private int mEmojiUnicode;
     private long mPrice;
-    private ProgressDialogFragment mProgressFragment;
+    private ProgressDialogFragment mProgressDialogFragment;
     private Stripe mStripe;
     private View mTotalLayoutView;
 
@@ -78,7 +78,8 @@ public class PaymentActivity extends AppCompatActivity {
         mCompositeSubscription = new CompositeSubscription();
 
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_input_widget);
-
+        mProgressDialogFragment =
+                ProgressDialogFragment.newInstance(R.string.completing_purchase);
         RxView.clicks(findViewById(R.id.btn_purchase))
                 .subscribe(new Action1<Void>() {
                     @Override
@@ -116,8 +117,6 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 });
 
-        final ProgressDialogFragment progressDialogFragment =
-                ProgressDialogFragment.newInstance(R.string.processing_purchase);
         final FragmentManager fragmentManager = this.getSupportFragmentManager();
         mCompositeSubscription.add(cardSourceObservable
                 .subscribeOn(Schedulers.io())
@@ -126,21 +125,14 @@ public class PaymentActivity extends AppCompatActivity {
                     new Action0() {
                         @Override
                         public void call() {
-                            progressDialogFragment.show(fragmentManager, "progress");
-                        }
-                    })
-                .doOnUnsubscribe(
-                    new Action0() {
-                        @Override
-                        public void call() {
-                            progressDialogFragment.dismiss();
+                            mProgressDialogFragment.show(fragmentManager, "progress");
                         }
                     })
                 .subscribe(
                     new Action1<Source>() {
                         @Override
                         public void call(Source source) {
-                            proceedWithPurchaseOrCheckFor3DS(source);
+                            proceedWithPurchaseIf3DSCheckIsNotNecessary(source);
                         }
                     },
                     new Action1<Throwable>() {
@@ -155,52 +147,42 @@ public class PaymentActivity extends AppCompatActivity {
                     }));
     }
 
-    private void proceedWithPurchaseOrCheckFor3DS(Source source) {
+    private void proceedWithPurchaseIf3DSCheckIsNotNecessary(Source source) {
         if (source == null || !Source.CARD.equals(source.getType())) {
             Snackbar snackbar = Snackbar.make(
                     mTotalLayoutView,
-                    "Something went wrong",
+                    "Something went wrong - this should be rare.",
                     Snackbar.LENGTH_LONG);
             snackbar.show();
+            return;
         }
 
         SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
         if (SourceCardData.REQUIRED.equals(cardData.getThreeDSecureStatus())) {
-            verifyThreeDSecure(source);
+            // In this case, you would need to ask the user to verify the purchase.
+            // You can see an example of how to do this in the 3DS example application.
+            // In stripe-android/example.
         } else {
+            // If 3DS is not required, you can charge the source.
             completePurchase(source);
         }
-    }
-
-    private void verifyThreeDSecure(Source source) {
-
     }
 
     private void completePurchase(Source source) {
         Retrofit retrofit = RetrofitFactory.getInstance();
         StripeService stripeService = retrofit.create(StripeService.class);
-
-        final ProgressDialogFragment progressDialogFragment =
-                ProgressDialogFragment.newInstance(R.string.completing_purchase);
-        final FragmentManager fragmentManager = this.getSupportFragmentManager();
-
         Observable<Void> stripeResponse = stripeService.createQueryCharge(mPrice, source.getId());
 
         mCompositeSubscription.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                progressDialogFragment.show(fragmentManager, "progress");
-                            }
-                        })
                 .doOnUnsubscribe(
                         new Action0() {
                             @Override
                             public void call() {
-                                progressDialogFragment.dismiss();
+                                if (mProgressDialogFragment != null) {
+                                    mProgressDialogFragment.dismiss();
+                                }
                             }
                         })
                 .subscribe(
