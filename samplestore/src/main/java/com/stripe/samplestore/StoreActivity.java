@@ -64,17 +64,6 @@ public class StoreActivity extends AppCompatActivity {
         priceView.setText(StoreUtils.getPriceString(price, null));
 
         builder.setView(dialogView);
-//        TextView linkView = (TextView) dialogView.findViewById(R.id.tv_link_redirect);
-//        linkView.setText(R.string.verify);
-//        linkView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//                mActivity.startActivity(browserIntent);
-//            }
-//        });
-//        builder.setView(dialogView);
-
         AlertDialog dialog = builder.create();
         dialog.show();
     }
