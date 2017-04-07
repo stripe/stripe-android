@@ -1,13 +1,14 @@
 package com.stripe.samplestore;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -33,7 +34,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "put your publishable key here";
+            "Put your publishable key here";
 
     private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
     private static final String EXTRA_PRICE = "EXTRA_PRICE";
@@ -43,10 +44,10 @@ public class PaymentActivity extends AppCompatActivity {
     private CompositeSubscription mCompositeSubscription;
     private Currency mCurrency;
     private int mEmojiUnicode;
+    private TextView mEmojiView;
     private long mPrice;
     private ProgressDialogFragment mProgressDialogFragment;
     private Stripe mStripe;
-    private View mTotalLayoutView;
 
     public static Intent createIntent(
             @NonNull Context context,
@@ -66,10 +67,8 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         mEmojiUnicode = getIntent().getExtras().getInt(EXTRA_EMOJI_INT);
-        TextView emojiDisplay = (TextView) findViewById(R.id.tv_emoji_display);
-        emojiDisplay.setText(StoreUtils.getEmojiByUnicode(mEmojiUnicode));
-
-        mTotalLayoutView = findViewById(R.id.payment_main_layout);
+        mEmojiView = (TextView) findViewById(R.id.tv_emoji_display);
+        mEmojiView.setText(StoreUtils.getEmojiByUnicode(mEmojiUnicode));
 
         mPrice = getIntent().getExtras().getLong(EXTRA_PRICE);
         mCurrency = (Currency) getIntent().getExtras().getSerializable(EXTRA_CURRENCY);
@@ -100,11 +99,19 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showKeyboard();
+    }
+
     private void attemptPurchase() {
         Card card = mCardInputWidget.getCard();
         if (card == null) {
+            displayError("Card Input Error");
             return;
         }
+        dismissKeyboard();
 
         final SourceParams cardParams = SourceParams.createCardParams(card);
         Observable<Source> cardSourceObservable =
@@ -138,22 +145,14 @@ public class PaymentActivity extends AppCompatActivity {
                     new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Snackbar snackbar = Snackbar.make(
-                                    mTotalLayoutView,
-                                    throwable.getLocalizedMessage(),
-                                    Snackbar.LENGTH_LONG);
-                            snackbar.show();
+                            displayError(throwable.getLocalizedMessage());
                         }
                     }));
     }
 
     private void proceedWithPurchaseIf3DSCheckIsNotNecessary(Source source) {
         if (source == null || !Source.CARD.equals(source.getType())) {
-            Snackbar snackbar = Snackbar.make(
-                    mTotalLayoutView,
-                    "Something went wrong - this should be rare.",
-                    Snackbar.LENGTH_LONG);
-            snackbar.show();
+            displayError("Something went wrong - this should be rare");
             return;
         }
 
@@ -195,22 +194,40 @@ public class PaymentActivity extends AppCompatActivity {
                     new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            sendSnackBarMessage(throwable.getLocalizedMessage());
+                            displayError(throwable.getLocalizedMessage());
                         }
                     }));
     }
 
-    private void sendSnackBarMessage(String message) {
-        Snackbar snackbar = Snackbar.make(
-                mTotalLayoutView,
-                message,
-                Snackbar.LENGTH_LONG);
-        snackbar.show();
+    private void displayError(String errorMessage) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage(errorMessage);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
     private void finishCharge() {
         Intent data = StoreActivity.createPurchaseCompleteIntent(mEmojiUnicode, mPrice);
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    private void dismissKeyboard() {
+        InputMethodManager inputManager =
+                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(0, 0);
+        mEmojiView.requestFocus();
+    }
+
+    private void showKeyboard() {
+        InputMethodManager inputManager =
+                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 }

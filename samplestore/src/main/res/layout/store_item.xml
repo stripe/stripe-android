@@ -27,10 +27,4 @@
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
-    <ImageView
-        android:layout_width="@dimen/chevron_container_size"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_chevron_right_black_24dp"
-        android:tint="@android:color/tertiary_text_light"/>
 </LinearLayout>
