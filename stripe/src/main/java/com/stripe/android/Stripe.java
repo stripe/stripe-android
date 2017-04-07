@@ -124,7 +124,6 @@ public class Stripe {
      *
      * @param context {@link Context} for resolving resources
      * @param publishableKey the client's publishable key
-     * @throws AuthenticationException if the key is invalid
      */
     public Stripe(@NonNull Context context, String publishableKey) throws AuthenticationException {
         mContext = context;
@@ -542,10 +541,8 @@ public class Stripe {
      * Set the default publishable key to use with this {@link Stripe} instance.
      *
      * @param publishableKey the key to be set
-     * @throws AuthenticationException if the key is null, empty, or a secret key
      */
-    public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey)
-            throws AuthenticationException {
+    public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey) {
         validateKey(publishableKey);
         this.mDefaultPublishableKey = publishableKey;
     }
@@ -560,34 +557,28 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-        try {
-            if (callback == null) {
-                throw new RuntimeException(
-                        "Required Parameter: 'callback' is required to use the created " +
-                                "token and handle errors");
-            }
+        if (callback == null) {
+            throw new RuntimeException(
+                    "Required Parameter: 'callback' is required to use the created " +
+                            "token and handle errors");
+        }
 
-            validateKey(publishableKey);
-            mTokenCreator.create(tokenParams, publishableKey, executor, callback);
-        }
-        catch (AuthenticationException e) {
-            callback.onError(e);
-        }
+        validateKey(publishableKey);
+        mTokenCreator.create(tokenParams, publishableKey, executor, callback);
     }
 
-    private void validateKey(@NonNull @Size(min = 1) String publishableKey)
-            throws AuthenticationException {
+    private void validateKey(@NonNull @Size(min = 1) String publishableKey) {
         if (publishableKey == null || publishableKey.length() == 0) {
-            throw new AuthenticationException("Invalid Publishable Key: " +
+            throw new IllegalArgumentException("Invalid Publishable Key: " +
                     "You must use a valid publishable key to create a token.  " +
-                    "For more info, see https://stripe.com/docs/stripe.js.", null, 0);
+                    "For more info, see https://stripe.com/docs/stripe.js.");
         }
 
         if (publishableKey.startsWith("sk_")) {
-            throw new AuthenticationException("Invalid Publishable Key: " +
+            throw new IllegalArgumentException("Invalid Publishable Key: " +
                     "You are using a secret key to create a token, " +
                     "instead of the publishable one. For more info, " +
-                    "see https://stripe.com/docs/stripe.js", null, 0);
+                    "see https://stripe.com/docs/stripe.js");
         }
     }
 
