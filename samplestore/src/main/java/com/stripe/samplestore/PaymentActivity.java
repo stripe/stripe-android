@@ -99,12 +99,6 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        showKeyboard();
-    }
-
     private void attemptPurchase() {
         Card card = mCardInputWidget.getCard();
         if (card == null) {
@@ -225,9 +219,4 @@ public class PaymentActivity extends AppCompatActivity {
         mEmojiView.requestFocus();
     }
 
-    private void showKeyboard() {
-        InputMethodManager inputManager =
-                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-    }
 }
