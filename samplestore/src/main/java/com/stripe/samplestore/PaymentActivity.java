@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -20,6 +21,7 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.view.CardInputWidget;
 
 import java.util.Currency;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import retrofit2.Retrofit;
@@ -79,7 +81,10 @@ public class PaymentActivity extends AppCompatActivity {
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_input_widget);
         mProgressDialogFragment =
                 ProgressDialogFragment.newInstance(R.string.completing_purchase);
-        RxView.clicks(findViewById(R.id.btn_purchase))
+        Button payButton = (Button) findViewById(R.id.btn_purchase);
+        payButton.setText(String.format(Locale.ENGLISH,
+                "Pay %s", StoreUtils.getPriceString(mPrice, null)));
+        RxView.clicks(payButton)
                 .subscribe(new Action1<Void>() {
                     @Override
                     public void call(Void aVoid) {
@@ -139,6 +144,9 @@ public class PaymentActivity extends AppCompatActivity {
                     new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            if (mProgressDialogFragment != null) {
+                                mProgressDialogFragment.dismiss();
+                            }
                             displayError(throwable.getLocalizedMessage());
                         }
                     }));

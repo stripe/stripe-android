@@ -2,7 +2,7 @@
     <string name="app_name">Emoji Apparel</string>
     <string name="confirm_purchase">Confirm Purchase</string>
     <string name="completing_purchase">Completing Purchase&#8230;</string>
-    <string name="enter_details">Enter Payment Details</string>
+    <string name="enter_details">Payment Details</string>
     <string name="processing_purchase">Processing purchase&#8230;</string>
     <string name="purchase_successful">Your purchase was a success!</string>
     <string name="right_chevron">\u203A</string>

@@ -3,7 +3,10 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:padding="@dimen/activity_padding"
+              android:paddingTop="@dimen/purchase_confirm_verical_margin"
+              android:paddingBottom="@dimen/purchase_confirm_verical_margin"
+              android:paddingLeft="@dimen/activity_padding"
+              android:paddingRight="@dimen/activity_padding"
               android:gravity="center_horizontal">
 
     <TextView
