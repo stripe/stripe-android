@@ -10,4 +10,5 @@
     <dimen name="item_padding">8dp</dimen>
     <dimen name="price_display_bottom_margin">12dp</dimen>
     <dimen name="price_right_margin">24dp</dimen>
+    <dimen name="purchase_confirm_verical_margin">24dp</dimen>
 </resources>
