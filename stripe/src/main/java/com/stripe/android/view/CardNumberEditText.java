@@ -210,7 +210,8 @@ public class CardNumberEditText extends StripeEditText {
                         mCardNumberCompleteListener.onCardNumberComplete();
                     }
                 } else {
-                    mIsCardNumberValid = false;
+                    mIsCardNumberValid = getText() != null
+                            && CardUtils.isValidCardNumber(getText().toString());
                     // Don't show errors if we aren't full-length.
                     setShouldShowError(false);
                 }
