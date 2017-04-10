@@ -130,6 +130,14 @@ public class CardNumberEditTextTest {
     }
 
     @Test
+    public void setText_whenTextIsSpacelessValidNumber_changesToSpaceNumberAndValidates() {
+        mCardNumberEditText.setText(VALID_VISA_NO_SPACES);
+
+        assertTrue(mCardNumberEditText.isCardNumberValid());
+        verify(mCardNumberCompleteListener, times(1)).onCardNumberComplete();
+    }
+
+    @Test
     public void setText_whenTextIsValidAmExDinersClubLengthNumber_changesCardValidState() {
         mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
 
