@@ -155,20 +155,16 @@ public class StripeTest {
     @Test
     public void createTokenShouldCallTokenCreator() {
         final boolean[] tokenCreatorCalled = { false };
-        try {
-            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
-            stripe.mTokenCreator = new Stripe.TokenCreator() {
-                @Override
-                public void create(Map<String, Object> tokenParams, String publishableKey,
-                                   Executor executor, TokenCallback callback) {
-                    tokenCreatorCalled[0] = true;
-                }
-            };
-            stripe.createToken(DEFAULT_CARD, DEFAULT_TOKEN_CALLBACK);
-            assertTrue(tokenCreatorCalled[0]);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
+        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        stripe.mTokenCreator = new Stripe.TokenCreator() {
+            @Override
+            public void create(Map<String, Object> tokenParams, String publishableKey,
+                               Executor executor, TokenCallback callback) {
+                tokenCreatorCalled[0] = true;
+            }
+        };
+        stripe.createToken(DEFAULT_CARD, DEFAULT_TOKEN_CALLBACK);
+        assertTrue(tokenCreatorCalled[0]);
     }
 
     @Test
@@ -178,42 +174,33 @@ public class StripeTest {
             public void execute(Runnable command) {
             }
         };
-
-        try {
-            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
-            stripe.mTokenCreator = new Stripe.TokenCreator() {
-                @Override
-                public void create(Map<String, Object> tokenParams, String publishableKey,
-                                   Executor executor, TokenCallback callback) {
-                    assertEquals(expectedExecutor, executor);
-                    assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
-                    assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                }
-            };
-            stripe.createToken(DEFAULT_CARD, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
+        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        stripe.mTokenCreator = new Stripe.TokenCreator() {
+            @Override
+            public void create(Map<String, Object> tokenParams, String publishableKey,
+                               Executor executor, TokenCallback callback) {
+                assertEquals(expectedExecutor, executor);
+                assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
+                assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
+            }
+        };
+        stripe.createToken(DEFAULT_CARD, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test
     public void createTokenShouldUseProvidedKey() {
         final String expectedPublishableKey = "pk_this_one";
-        try {
-            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
-            stripe.mTokenCreator = new Stripe.TokenCreator() {
-                @Override
-                public void create(Map<String, Object> tokenParams, String publishableKey,
-                                   Executor executor, TokenCallback callback) {
-                    assertEquals(expectedPublishableKey, publishableKey);
-                    assertNull(executor);
-                    assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                }
-            };
-            stripe.createToken(DEFAULT_CARD, expectedPublishableKey, DEFAULT_TOKEN_CALLBACK);
-        } catch (AuthenticationException e) {
-            fail("Unexpected error: " + e.getMessage());
-        }
+        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        stripe.mTokenCreator = new Stripe.TokenCreator() {
+            @Override
+            public void create(Map<String, Object> tokenParams, String publishableKey,
+                               Executor executor, TokenCallback callback) {
+                assertEquals(expectedPublishableKey, publishableKey);
+                assertNull(executor);
+                assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
+            }
+        };
+        stripe.createToken(DEFAULT_CARD, expectedPublishableKey, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test

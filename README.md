@@ -12,7 +12,7 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:3.1.1'
+    compile 'com.stripe:stripe-android:4.0.0'
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
@@ -293,3 +293,7 @@ The example application ships with a sample publishable key, but if you want to 
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
+
+## Migrating from older versions
+
+See `MIGRATING.md`

@@ -1,0 +1,23 @@
+## Migration Guides
+
+### Migrating from versions < 4.0.0
+
+- Instantiation of a Stripe object can no longer throw an `AuthenticationException`.
+    - Any time you were instantiating a Stripe object in a try/catch block will be simplified.
+    ```java
+    Stripe stripe;
+    try {
+       stripe = new Stripe(mContext, MY_PUBLISHABLE_KEY);
+    } catch (AuthenticationException authEx) {
+       // This never happens because you check your key.
+    }
+    ```
+    now becomes
+    ```java
+    Stripe stripe = new Stripe(mContext, MY_PUBLISHABLE_KEY);
+    ```
+- `Stripe#setDefaultPublishableKey(String key)` has similarly been changed, and no longer needs to be wrapped.
+- Both methods can still throw an `IllegalArgumentException` if an invalid key is used, but as a
+runtime exception, that does not need to be wrapped.
+- `AuthenticationException` will now only be thrown if you attempt to create a `Token` or `Source`
+with an invalid key.
