@@ -16,21 +16,21 @@
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/emoji_display_top_margin"
         android:layout_marginBottom="@dimen/emoji_display_bottom_margin"
-        android:textSize="100sp"
+        android:textSize="75sp"
         />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/payment_screen_spacing">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/total"
-            android:textColor="@android:color/tertiary_text_light"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             />
 
         <TextView
@@ -39,8 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/price_display_bottom_margin"
             android:layout_marginLeft="@dimen/item_padding"
-            android:textColor="@android:color/tertiary_text_light"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             />
 
     </LinearLayout>
@@ -61,7 +60,7 @@
 
     <Button
         android:id="@+id/btn_purchase"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="@dimen/payment_screen_spacing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
