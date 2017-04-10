@@ -125,7 +125,7 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      * @param publishableKey the client's publishable key
      */
-    public Stripe(@NonNull Context context, String publishableKey) throws AuthenticationException {
+    public Stripe(@NonNull Context context, String publishableKey) {
         mContext = context;
         setDefaultPublishableKey(publishableKey);
     }

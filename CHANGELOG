@@ -1,3 +1,7 @@
+4.0.0 2017-04-10
+    Fixed issue #179, where certain pasted in credit cards would be incorrectly read as invalid
+    *breaking* Removed the try/catch required around Stripe instance creation.
+
 3.1.1 2017-04-04
     Fixed design tab display bug on card input widget
     Upgraded to Gradle version 3.4.1
