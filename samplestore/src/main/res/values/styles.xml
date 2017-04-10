@@ -11,7 +11,8 @@
 
     <style name="CustomButton" parent="Widget.AppCompat.Button.Colored">
         <item name="android:minHeight">64dip</item>
-        <item name="android:minWidth">256dip</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:paddingLeft">24dp</item>
     </style>
 
     <style name="EmojiStyle" parent="TextAppearance.AppCompat.Headline">
