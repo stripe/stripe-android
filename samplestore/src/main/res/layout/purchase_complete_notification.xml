@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingTop="@dimen/purchase_confirm_verical_margin"
+              android:paddingBottom="@dimen/purchase_confirm_verical_margin"
+              android:paddingLeft="@dimen/activity_padding"
+              android:paddingRight="@dimen/activity_padding"
+              android:gravity="center_horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/purchase_successful"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        />
+
+    <TextView
+        android:id="@+id/dlg_emoji_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="100sp"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/tertiary_text_light"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:layout_marginRight="@dimen/item_padding"
+            android:layout_marginEnd="@dimen/item_padding"
+            android:text="@string/total"
+            />
+
+        <TextView
+            android:id="@+id/dlg_price_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/tertiary_text_light"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
