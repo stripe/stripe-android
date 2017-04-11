@@ -36,7 +36,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
+            "Put your test key here";
 
     private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
     private static final String EXTRA_PRICE = "EXTRA_PRICE";
