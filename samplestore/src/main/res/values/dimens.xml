@@ -2,8 +2,6 @@
 <resources>
     <dimen name="activity_padding">16dp</dimen>
     <dimen name="chevron_bottom_padding">8dp</dimen>
-    <dimen name="chevron_container_width">20dp</dimen>
-    <dimen name="chevron_container_size">24dp</dimen>
     <dimen name="emoji_display_bottom_margin">6dp</dimen>
     <dimen name="emoji_display_top_margin">24dp</dimen>
     <dimen name="emoji_left_margin">24dp</dimen>

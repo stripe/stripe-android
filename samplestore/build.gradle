@@ -16,6 +16,12 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
+
+    lintOptions {
+        disable 'MissingTranslation'
+        disable 'InvalidPackage'
+    }
+
     buildTypes {
         release {
             minifyEnabled false
