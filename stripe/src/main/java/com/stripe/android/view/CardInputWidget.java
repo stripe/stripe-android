@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IdRes;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.util.CardUtils;
+import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
@@ -132,6 +134,42 @@ public class CardInputWidget extends LinearLayout {
 
         return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
                 .addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
+    }
+
+    /**
+     * Set the card number. Method does not change text field focus.
+     *
+     * @param cardNumber card number to be set
+     */
+    public void setCardNumber(String cardNumber) {
+        mCardNumberEditText.setText(cardNumber);
+        setCardNumberIsViewed(!mCardNumberEditText.isCardNumberValid());
+    }
+
+    /**
+     * Set the expiration date. Method does not change text field focus.
+     * Note that while a four-digit and two-digit year will both work, information
+     * beyond the tens digit of a year will be truncated. Logic elsewhere in the SDK
+     * makes assumptions about what century is implied by various two-digit years, and
+     * will override any information provided here.
+     *
+     * @param month a month of the year, represented as a number between 1 and 12
+     * @param year a year number, either in two-digit form or four-digit form
+     */
+    public void setExpiryDate(
+            @IntRange(from = 1, to = 12) int month,
+            @IntRange(from = 0) int year) {
+        mExpiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year));
+    }
+
+    /**
+     * Set the CVC value for the card. Note that the maximum length is assumed to
+     * be 3, unless the brand of the card has already been set (by setting the card number).
+     *
+     * @param cvcCode the CVC value to be set
+     */
+    public void setCvcCode(String cvcCode) {
+        mCvcNumberEditText.setText(cvcCode);
     }
 
     @Override
@@ -460,7 +498,7 @@ public class CardInputWidget extends LinearLayout {
     }
 
     private void scrollLeft() {
-        if (mCardNumberIsViewed) {
+        if (mCardNumberIsViewed || !mInitFlag) {
             return;
         }
 
@@ -538,7 +576,7 @@ public class CardInputWidget extends LinearLayout {
     }
 
     private void scrollRight() {
-        if (!mCardNumberIsViewed) {
+        if (!mCardNumberIsViewed || !mInitFlag) {
             return;
         }
 
