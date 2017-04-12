@@ -147,7 +147,9 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
-     * Set the expiration date. Method does not change text field focus.
+     * Set the expiration date. Method invokes completion listener and changes focus
+     * to the CVC field if a valid date is entered.
+     *
      * Note that while a four-digit and two-digit year will both work, information
      * beyond the tens digit of a year will be truncated. Logic elsewhere in the SDK
      * makes assumptions about what century is implied by various two-digit years, and
