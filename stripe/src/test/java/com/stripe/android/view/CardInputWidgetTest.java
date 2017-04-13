@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
@@ -33,10 +34,12 @@ import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link CardInputWidget}. Note that we have to test against SDK 22
@@ -44,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  * Robolectric.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 22)
 public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
@@ -546,6 +549,58 @@ public class CardInputWidgetTest {
         assertEquals(50, shiftedParameters.dateWidth);
         assertEquals(195, shiftedParameters.dateCvcSeparation);
         assertEquals(30, shiftedParameters.cvcWidth);
+    }
+
+    @Test
+    public void setCardNumber_withIncompleteNumber_doesNotValidateCard() {
+        mCardInputWidget.setCardNumber("123456");
+        assertFalse(mCardNumberEditText.isCardNumberValid());
+        assertTrue(mCardNumberEditText.hasFocus());
+    }
+
+    @Test
+    public void setExpirationDate_withValidData_setsCorrectValues() {
+        mCardInputWidget.setExpiryDate(12, 79);
+        assertEquals("12/79", mExpiryEditText.getText().toString());
+    }
+
+    @Test
+    public void setCvcCode_withValidData_setsValue() {
+        mCardInputWidget.setCvcCode("123");
+        assertEquals("123", mCvcEditText.getText().toString());
+    }
+
+    @Test
+    public void setCvcCode_withLongString_truncatesValue() {
+        mCardInputWidget.setCvcCode("1234");
+        assertEquals("123", mCvcEditText.getText().toString());
+    }
+
+    @Test
+    public void setCvcCode_whenCardBrandIsAmericanExpress_allowsFourDigits() {
+        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setCvcCode("1234");
+        assertEquals("1234", mCvcEditText.getText().toString());
+    }
+
+    @Test
+    public void setAllCardFields_whenValidValues_allowsGetCardWithExpectedValues() {
+        if (Calendar.getInstance().get(Calendar.YEAR) > 2079) {
+            fail("Update the code with a date that is still valid. Also, hello from the past.");
+        }
+
+        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setExpiryDate(12, 2079);
+        mCardInputWidget.setCvcCode("1234");
+        Card card = mCardInputWidget.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_AMEX_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, (int) card.getExpMonth());
+        assertEquals(2079, (int) card.getExpYear());
+        assertEquals("1234", card.getCVC());
+        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
     }
 
     class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusChangeListener {

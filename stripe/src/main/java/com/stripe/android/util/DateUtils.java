@@ -129,6 +129,42 @@ public class DateUtils {
     }
 
     /**
+     * Creates a string value to be entered into an expiration date text field
+     * without a divider. For instance, (1, 2020) => "0120". It doesn't matter if
+     * the year is two-digit or four. (1, 20) => "0120".
+     *
+     * Note: A four-digit year will be truncated, so (1, 2720) => "0120". If the year
+     * date is 3 digits, the data will be considered invalid and the empty string will be returned.
+     * A one-digit date is valid (represents 2001, for instance).
+     *
+     * @param month a month of the year, represented as a number between 1 and 12
+     * @param year a year number, either in two-digit form or four-digit form
+     * @return a length-four string representing the date, or an empty string if input is invalid
+     */
+    public static String createDateStringFromIntegerInput(
+            @IntRange(from = 1, to = 12) int month,
+            @IntRange(from = 0, to = 9999) int year) {
+        String monthString = String.valueOf(month);
+        if (monthString.length() == 1) {
+            monthString = "0" + monthString;
+        }
+
+        String yearString = String.valueOf(year);
+        // Three-digit years are invalid.
+        if (yearString.length() == 3) {
+            return "";
+        }
+
+        if (yearString.length() > 2) {
+            yearString = yearString.substring(yearString.length() - 2);
+        } else if (yearString.length() == 1) {
+            yearString = "0" + yearString;
+        }
+
+        return monthString + yearString;
+    }
+
+    /**
      * Converts a two-digit input year to a four-digit year. As the current calendar year
      * approaches a century, we assume small values to mean the next century. For instance, if
      * the current year is 2090, and the input value is "18", the user probably means 2118,

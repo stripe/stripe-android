@@ -60,6 +60,26 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void createDateStringFromIntegerInput_whenDateHasOneDigitMonthAndYear_addsZero() {
+        assertEquals("0102", DateUtils.createDateStringFromIntegerInput(1, 2));
+    }
+
+    @Test
+    public void createDateStringFromIntegerInput_whenDateHasTwoDigitValues_returnsExpectedValue() {
+        assertEquals("1132", DateUtils.createDateStringFromIntegerInput(11, 32));
+    }
+
+    @Test
+    public void createDateStringFromIntegerInput_whenDateHasFullYear_truncatesYear() {
+        assertEquals("0132", DateUtils.createDateStringFromIntegerInput(1, 2032));
+    }
+
+    @Test
+    public void createDateStringFromIntegerInput_whenDateHasThreeDigitYear_returnsEmpty() {
+        assertEquals("", DateUtils.createDateStringFromIntegerInput(12, 101));
+    }
+
+    @Test
     public void isExpiryDataValid_whenDateIsAfterCalendarYear_returnsTrue() {
         Calendar testCalendar = Calendar.getInstance();
         testCalendar.set(Calendar.YEAR, 2018);
