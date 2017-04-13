@@ -552,8 +552,6 @@ public class CardInputWidgetTest {
     }
 
     @Test
-<<<<<<< HEAD
-<<<<<<< HEAD
     public void setCardNumber_withIncompleteNumber_doesNotValidateCard() {
         mCardInputWidget.setCardNumber("123456");
         assertFalse(mCardNumberEditText.isCardNumberValid());
