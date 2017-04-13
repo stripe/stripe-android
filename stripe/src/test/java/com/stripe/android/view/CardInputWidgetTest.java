@@ -26,6 +26,7 @@ import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
+import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
@@ -35,7 +36,6 @@ import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WI
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -552,6 +552,7 @@ public class CardInputWidgetTest {
     }
 
     @Test
+<<<<<<< HEAD
     public void setCardNumber_withIncompleteNumber_doesNotValidateCard() {
         mCardInputWidget.setCardNumber("123456");
         assertFalse(mCardNumberEditText.isCardNumberValid());
@@ -601,6 +602,49 @@ public class CardInputWidgetTest {
         assertEquals(2079, (int) card.getExpYear());
         assertEquals("1234", card.getCVC());
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+    }
+
+    @Test
+    public void shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
+        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, "1234"));
+        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, ""));
+        assertTrue(shouldIconShowBrand(Card.VISA, false, "333"));
+        assertTrue(shouldIconShowBrand(Card.DINERS_CLUB, false, "12"));
+        assertTrue(shouldIconShowBrand(Card.DISCOVER, false, null));
+        assertTrue(shouldIconShowBrand(Card.JCB, false, "7"));
+    }
+
+    @Test
+    public void shouldIconShowBrand_whenAmexAndLengthNotFour_isFalse() {
+        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, ""));
+        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1"));
+        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "22"));
+        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "333"));
+    }
+
+    @Test
+    public void shouldIconShowBrand_whenAmexAndLengthIsFour_isTrue() {
+        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1234"));
+    }
+
+    @Test
+    public void shouldIconShowBrand_whenNotAmexAndLengthIsNotThree_isFalse() {
+        assertFalse(shouldIconShowBrand(Card.VISA, true, ""));
+        assertFalse(shouldIconShowBrand(Card.DISCOVER, true, "12"));
+        assertFalse(shouldIconShowBrand(Card.JCB, true, "55"));
+        assertFalse(shouldIconShowBrand(Card.MASTERCARD, true, "9"));
+        assertFalse(shouldIconShowBrand(Card.DINERS_CLUB, true, null));
+        assertFalse(shouldIconShowBrand(Card.UNKNOWN, true, "12"));
+    }
+
+    @Test
+    public void shouldIconShowBrand_whenNotAmexAndLengthIsThree_isTrue() {
+        assertTrue(shouldIconShowBrand(Card.VISA, true, "999"));
+        assertTrue(shouldIconShowBrand(Card.DISCOVER, true, "123"));
+        assertTrue(shouldIconShowBrand(Card.JCB, true, "555"));
+        assertTrue(shouldIconShowBrand(Card.MASTERCARD, true, "919"));
+        assertTrue(shouldIconShowBrand(Card.DINERS_CLUB, true, "415"));
+        assertTrue(shouldIconShowBrand(Card.UNKNOWN, true, "212"));
     }
 
     class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusChangeListener {
