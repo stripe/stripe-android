@@ -75,6 +75,11 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void createDateStringFromIntegerInput_whenDateHasThreeDigitYear_returnsEmpty() {
+        assertEquals("", DateUtils.createDateStringFromIntegerInput(12, 101));
+    }
+
+    @Test
     public void isExpiryDataValid_whenDateIsAfterCalendarYear_returnsTrue() {
         Calendar testCalendar = Calendar.getInstance();
         testCalendar.set(Calendar.YEAR, 2018);
