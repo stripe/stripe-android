@@ -467,7 +467,20 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                updateIconCvc(mCardNumberEditText.getCardBrand(), hasFocus);
+                updateIconCvc(
+                        mCardNumberEditText.getCardBrand(),
+                        hasFocus,
+                        mCvcNumberEditText.getText().toString());
+            }
+        });
+
+        mCvcNumberEditText.setAfterTextChangedListener(new StripeEditText.AfterTextChangedListener() {
+            @Override
+            public void onTextChanged(String text) {
+                updateIconCvc(
+                        mCardNumberEditText.getCardBrand(),
+                        mCvcNumberEditText.hasFocus(),
+                        text);
             }
         });
 
@@ -757,17 +770,40 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private void updateIconCvc(@NonNull @Card.CardBrand String brand, boolean isEntering) {
-        if (isEntering) {
-            if (Card.AMERICAN_EXPRESS.equals(brand)) {
-                mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
-            } else {
-                mCardIconImageView.setImageResource(R.drawable.ic_cvc);
+    private void updateIconCvc(
+            @NonNull @Card.CardBrand String brand,
+            boolean hasFocus,
+            @Nullable String cvcText) {
+        if (hasFocus) {
+            int length = cvcText == null ? 0 : cvcText.length();
+            boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
+            switch (length) {
+                case Card.CVC_LENGTH_AMERICAN_EXPRESS:
+                    updateIcon(brand);
+                    break;
+                case Card.CVC_LENGTH_COMMON:
+                    if (isAmex) {
+                        updateIconForCvcEntry(isAmex);
+                    } else {
+                        updateIcon(brand);
+                    }
+                    break;
+                default:
+                    updateIconForCvcEntry(isAmex);
+                    break;
             }
-            applyTint(true);
         } else {
             updateIcon(brand);
         }
+    }
+
+    private void updateIconForCvcEntry(boolean isAmEx) {
+        if (isAmEx) {
+            mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
+        } else {
+            mCardIconImageView.setImageResource(R.drawable.ic_cvc);
+        }
+        applyTint(true);
     }
 
     /**
