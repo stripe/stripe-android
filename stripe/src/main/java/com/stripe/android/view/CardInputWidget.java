@@ -641,6 +641,27 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    @VisibleForTesting
+    static boolean shouldIconShowBrand(
+            @NonNull @Card.CardBrand String brand,
+            boolean cvcHasFocus,
+            @Nullable String cvcText) {
+        if (!cvcHasFocus) {
+            return true;
+        }
+
+        int length = cvcText == null ? 0 : cvcText.length();
+        boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
+        switch (length) {
+            case Card.CVC_LENGTH_AMERICAN_EXPRESS:
+                return true;
+            case Card.CVC_LENGTH_COMMON:
+                return !isAmex;
+            default:
+                return false;
+        }
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -734,26 +755,10 @@ public class CardInputWidget extends LinearLayout {
             @NonNull @Card.CardBrand String brand,
             boolean hasFocus,
             @Nullable String cvcText) {
-        if (hasFocus) {
-            int length = cvcText == null ? 0 : cvcText.length();
-            boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
-            switch (length) {
-                case Card.CVC_LENGTH_AMERICAN_EXPRESS:
-                    updateIcon(brand);
-                    break;
-                case Card.CVC_LENGTH_COMMON:
-                    if (isAmex) {
-                        updateIconForCvcEntry(isAmex);
-                    } else {
-                        updateIcon(brand);
-                    }
-                    break;
-                default:
-                    updateIconForCvcEntry(isAmex);
-                    break;
-            }
-        } else {
+        if (shouldIconShowBrand(brand, hasFocus, cvcText)) {
             updateIcon(brand);
+        } else {
+            updateIconForCvcEntry(Card.AMERICAN_EXPRESS.equals(brand));
         }
     }
 
