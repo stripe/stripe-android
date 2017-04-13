@@ -8,6 +8,8 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,6 +28,7 @@ import com.stripe.android.R;
  */
 public class StripeEditText extends AppCompatEditText {
 
+    @Nullable private AfterTextChangedListener mAfterTextChangedListener;
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
     @Nullable private ColorStateList mCachedColorStateList;
     private boolean mShouldShowError;
@@ -50,6 +53,16 @@ public class StripeEditText extends AppCompatEditText {
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
+    }
+
+    /**
+     * Sets a listener that can react to changes in text, but only by reflecting the new
+     * text in the field.
+     *
+     * @param afterTextChangedListener the {@link AfterTextChangedListener} to attach to this view
+     */
+    public void setAfterTextChangedListener(AfterTextChangedListener afterTextChangedListener) {
+        mAfterTextChangedListener = afterTextChangedListener;
     }
 
     /**
@@ -152,6 +165,7 @@ public class StripeEditText extends AppCompatEditText {
     }
 
     private void initView() {
+        listenForTextChanges();
         listenForDeleteEmpty();
         determineDefaultErrorColor();
         mCachedColorStateList = getTextColors();
@@ -167,6 +181,27 @@ public class StripeEditText extends AppCompatEditText {
         } else {
             mDefaultErrorColorResId = R.color.error_text_dark_theme;
         }
+    }
+
+    private void listenForTextChanges() {
+        addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // purposefully not implemented.
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // purposefully not implemented.
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mAfterTextChangedListener != null) {
+                    mAfterTextChangedListener.onTextChanged(s.toString());
+                }
+            }
+        });
     }
 
     private void listenForDeleteEmpty() {
@@ -190,6 +225,10 @@ public class StripeEditText extends AppCompatEditText {
      */
     public interface DeleteEmptyListener {
         void onDeleteEmpty();
+    }
+
+    public interface AfterTextChangedListener {
+        void onTextChanged(String text);
     }
 
     private class SoftDeleteInputConnection extends InputConnectionWrapper {
