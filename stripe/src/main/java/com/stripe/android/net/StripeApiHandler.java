@@ -453,6 +453,10 @@ public class StripeApiHandler {
             return;
         }
 
+        if (listener != null && !listener.shouldLogTest()) {
+            return;
+        }
+
         String apiKey = options.getPublishableApiKey();
         if (apiKey.trim().isEmpty()) {
             // if there is no apiKey associated with the request, we don't need to react here.
@@ -794,6 +798,7 @@ public class StripeApiHandler {
     }
 
     public interface LoggingResponseListener {
+        boolean shouldLogTest();
         void onLoggingResponse(StripeResponse response);
         void onStripeException(StripeException exception);
     }
