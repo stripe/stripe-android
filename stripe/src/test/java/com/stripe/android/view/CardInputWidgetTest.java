@@ -614,7 +614,7 @@ public class CardInputWidgetTest {
     }
 
     @Test
-    public void shouldIconShowBrand_whenAmexAndLengthNotFour_isFalse() {
+    public void shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
         assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, ""));
         assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1"));
         assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "22"));
@@ -622,12 +622,12 @@ public class CardInputWidgetTest {
     }
 
     @Test
-    public void shouldIconShowBrand_whenAmexAndLengthIsFour_isTrue() {
+    public void shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
         assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1234"));
     }
 
     @Test
-    public void shouldIconShowBrand_whenNotAmexAndLengthIsNotThree_isFalse() {
+    public void shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
         assertFalse(shouldIconShowBrand(Card.VISA, true, ""));
         assertFalse(shouldIconShowBrand(Card.DISCOVER, true, "12"));
         assertFalse(shouldIconShowBrand(Card.JCB, true, "55"));
@@ -637,7 +637,7 @@ public class CardInputWidgetTest {
     }
 
     @Test
-    public void shouldIconShowBrand_whenNotAmexAndLengthIsThree_isTrue() {
+    public void shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
         assertTrue(shouldIconShowBrand(Card.VISA, true, "999"));
         assertTrue(shouldIconShowBrand(Card.DISCOVER, true, "123"));
         assertTrue(shouldIconShowBrand(Card.JCB, true, "555"));

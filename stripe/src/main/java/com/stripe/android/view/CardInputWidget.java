@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.stripe.android.model.Card.CardBrand;
+
 /**
  * A card input widget that handles all animation on its own.
  */
@@ -681,6 +683,16 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    /**
+     * Determines whether or not the icon should show the card brand instead of the
+     * CVC helper icon.
+     *
+     * @param brand the {@link CardBrand} in question, used for determining max length
+     * @param cvcHasFocus {@code true} if the CVC entry field has focus, {@code false} otherwise
+     * @param cvcText the current content of {@link #mCvcNumberEditText}
+     * @return {@code true} if we should show the brand of the card, or {@code false} if we
+     * should show the CVC helper icon instead
+     */
     @VisibleForTesting
     static boolean shouldIconShowBrand(
             @NonNull @Card.CardBrand String brand,
