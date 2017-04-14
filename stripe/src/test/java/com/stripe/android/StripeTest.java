@@ -16,7 +16,6 @@ import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.StripeResponse;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.JsonTestUtils;
-import com.stripe.android.util.DateUtils;
 
 import org.junit.Before;
 import org.junit.Test;
