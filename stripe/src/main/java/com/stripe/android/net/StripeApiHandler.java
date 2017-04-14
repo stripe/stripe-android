@@ -124,9 +124,7 @@ public class StripeApiHandler {
             Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
                     apiKey,
                     sourceParams.getType());
-            if (!loggingParams.isEmpty()) {
-                logTokenRequest(loggingParams, options, loggingResponseListener);
-            }
+            logTokenRequest(loggingParams, options, loggingResponseListener);
             return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -273,9 +271,7 @@ public class StripeApiHandler {
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
                 Map<String, Object> loggingParams = LoggingUtils.getTokenCreationParams(loggingTokens, apiKey);
-                if (!loggingParams.isEmpty()) {
-                    logTokenRequest(loggingParams, options, listener);
-                }
+                logTokenRequest(loggingParams, options, listener);
             } catch (ClassCastException classCastEx) {
                 // This can only happen if someone puts a weird object in the map.
                 cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -454,7 +450,7 @@ public class StripeApiHandler {
             @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
             @Nullable LoggingResponseListener listener) {
-        if (options == null) {
+        if (options == null || loggingMap.isEmpty()) {
             return;
         }
 

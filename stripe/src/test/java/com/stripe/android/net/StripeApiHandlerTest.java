@@ -23,6 +23,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -160,6 +161,18 @@ public class StripeApiHandlerTest {
         assertNull(testLoggingListener.mStripeException);
         assertNotNull(testLoggingListener.mStripeResponse);
         assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+    }
+
+    @Test
+    public void logTokenRequest_whenMapIsEmpty_shouldNotMakeNetworkCall() {
+        RequestOptions options = RequestOptions.builder(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY).build();
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
+        Map<String, Object> emptyParams = new HashMap<>();
+        StripeApiHandler.logTokenRequest(emptyParams, options, testLoggingListener);
+
+
+        assertNull(testLoggingListener.mStripeException);
+        assertNull(testLoggingListener.mStripeResponse);
     }
 
     @Test
