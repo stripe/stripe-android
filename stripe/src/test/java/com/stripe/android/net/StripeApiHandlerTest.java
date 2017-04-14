@@ -147,7 +147,9 @@ public class StripeApiHandlerTest {
     @Test
     public void createSource_shouldLogSourceCreation_andReturnSource() {
         try {
-            TestLoggingListener testLoggingListener = new TestLoggingListener();
+            // This is the one and only test where we actually log something, because
+            // we are testing whether or not we log.
+            TestLoggingListener testLoggingListener = new TestLoggingListener(true);
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSourceOnServer(
@@ -170,9 +172,43 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Test
+    public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource() {
+        try {
+            TestLoggingListener testLoggingListener = new TestLoggingListener(false);
+
+            Card card = new Card("4242424242424242", 1, 2050, "123");
+            Source source = StripeApiHandler.createSourceOnServer(
+                    SourceParams.createCardParams(card),
+                    FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
+                    testLoggingListener);
+
+            // Check that we get a token back; we don't care about its fields for this test.
+            assertNotNull(source);
+
+            assertNull(testLoggingListener.mStripeException);
+            assertNull(testLoggingListener.mStripeResponse);
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
+        boolean mShouldLogTest;
         StripeResponse mStripeResponse;
         StripeException mStripeException;
+
+        public TestLoggingListener(boolean shouldLogTest) {
+            mShouldLogTest = shouldLogTest;
+        }
+
+        @Override
+        public boolean shouldLogTest() {
+            return mShouldLogTest;
+        }
 
         @Override
         public void onLoggingResponse(StripeResponse response) {

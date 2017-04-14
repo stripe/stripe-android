@@ -155,7 +155,7 @@ public class StripeTest {
     @Test
     public void createTokenShouldCallTokenCreator() {
         final boolean[] tokenCreatorCalled = { false };
-        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
             public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -174,7 +174,7 @@ public class StripeTest {
             public void execute(Runnable command) {
             }
         };
-        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
             public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -190,7 +190,7 @@ public class StripeTest {
     @Test
     public void createTokenShouldUseProvidedKey() {
         final String expectedPublishableKey = "pk_this_one";
-        Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+        Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
             public void create(Map<String, Object> tokenParams, String publishableKey,
@@ -206,7 +206,7 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidData_returnsToken() {
         try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(mCard);
 
             assertNotNull(token);
@@ -230,7 +230,7 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
         try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createBankAccountTokenSynchronous(mBankAccount);
             assertNotNull(token);
             assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
@@ -253,7 +253,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withBitcoinParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams bitcoinParams = SourceParams.createBitcoinParams(1000L, "usd", "abc@def.com");
         Map<String, String> metamap = new HashMap<String, String>() {{
             put("site", "google");
@@ -281,7 +281,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withBancontactParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams bancontactParams = SourceParams.createBancontactParams(
                 1000L, "John Doe", "example://path", "a statement described");
         Map<String, String> metamap = new HashMap<String, String>() {{
@@ -311,7 +311,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         card.setAddressCity("Sheboygan");
         card.setAddressCountry("US");
@@ -354,7 +354,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
         try {
@@ -392,7 +392,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams params = SourceParams.createGiropayParams(
                 2000L,
                 "Mr. X",
@@ -426,7 +426,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withSepaDebitParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -467,7 +467,7 @@ public class StripeTest {
 
     @Test
     public void createSepaDebitSource_withNoAddress_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -501,7 +501,7 @@ public class StripeTest {
 
         @Test
     public void createSourceSynchronous_withIDealParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams params = SourceParams.createIdealParams(
                 5500L,
                 "Bond",
@@ -537,7 +537,7 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withSofortParams_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams params = SourceParams.createSofortParams(
                 70000L,
                 "example://return",
@@ -569,7 +569,7 @@ public class StripeTest {
 
     @Test
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest() {
-        Stripe stripe = new Stripe(mContext);
+        Stripe stripe = getNonLoggingStripe(mContext);
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
         try {
@@ -616,7 +616,7 @@ public class StripeTest {
     public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
         try {
             // This key won't work for a real connection to the api.
-            Stripe stripe = new Stripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+            Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
             stripe.createTokenSynchronous(mCard);
             fail("Expecting an error, but did not get one.");
         } catch (AuthenticationException authEx) {
@@ -630,7 +630,8 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withoutKey_shouldNotLogAnything() {
         Stripe stripe = new Stripe(mContext);
-        TestLoggingListener listener = new TestLoggingListener();
+        // This test should not log anything, so we set it to be theoretically capable of logging
+        TestLoggingListener listener = new TestLoggingListener(true);
         stripe.setLoggingResponseListener(listener);
         try {
             stripe.createTokenSynchronous(mCard);
@@ -647,7 +648,7 @@ public class StripeTest {
         try {
             // This card is missing quite a few numbers.
             Card card = new Card("42424242", 12, mYear, "123");
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(card);
             fail("Expecting an exception, but created a token instead: " + token.toString());
         } catch (AuthenticationException authEx) {
@@ -664,7 +665,7 @@ public class StripeTest {
         try {
             // This card is missing quite a few numbers.
             Card card = new Card("4242424242424242", 11, 2015, "123");
-            Stripe stripe = new Stripe(mContext);
+            Stripe stripe = getNonLoggingStripe(mContext);
             Token token = stripe.createTokenSynchronous(card, FUNCTIONAL_PUBLISHABLE_KEY);
             fail("Expecting an exception, but created a token instead: " + token.toString());
         } catch (AuthenticationException authEx) {
@@ -677,17 +678,45 @@ public class StripeTest {
         }
     }
 
+    private static Stripe getNonLoggingStripe(Context context) {
+        Stripe nonLoggingStripe = new Stripe(context);
+        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
+        return nonLoggingStripe;
+    }
+
+    private static Stripe getNonLoggingStripe(Context context, String key) {
+        Stripe nonLoggingStripe = new Stripe(context, key);
+        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
+        return nonLoggingStripe;
+    }
+
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
+        boolean mShouldLogTest;
         StripeResponse mStripeResponse;
         StripeException mStripeException;
 
+        public TestLoggingListener(boolean shouldLogTest) {
+            mShouldLogTest = shouldLogTest;
+        }
+
+        @Override
+        public boolean shouldLogTest() {
+            return mShouldLogTest;
+        }
+
         @Override
         public void onLoggingResponse(StripeResponse response) {
+            if (!mShouldLogTest) {
+                fail("Test should not be logged.");
+            }
             mStripeResponse = response;
         }
 
         @Override
         public void onStripeException(StripeException exception) {
+            if (!mShouldLogTest) {
+                fail("Test should not be logged.");
+            }
             mStripeException = exception;
         }
     }
