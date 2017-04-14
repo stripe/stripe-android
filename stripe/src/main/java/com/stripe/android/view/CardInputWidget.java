@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.stripe.android.model.Card.CardBrand;
+
 /**
  * A card input widget that handles all animation on its own.
  */
@@ -467,7 +469,20 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                updateIconCvc(mCardNumberEditText.getCardBrand(), hasFocus);
+                updateIconCvc(
+                        mCardNumberEditText.getCardBrand(),
+                        hasFocus,
+                        mCvcNumberEditText.getText().toString());
+            }
+        });
+
+        mCvcNumberEditText.setAfterTextChangedListener(new StripeEditText.AfterTextChangedListener() {
+            @Override
+            public void onTextChanged(String text) {
+                updateIconCvc(
+                        mCardNumberEditText.getCardBrand(),
+                        mCvcNumberEditText.hasFocus(),
+                        text);
             }
         });
 
@@ -668,6 +683,37 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
+    /**
+     * Determines whether or not the icon should show the card brand instead of the
+     * CVC helper icon.
+     *
+     * @param brand the {@link CardBrand} in question, used for determining max length
+     * @param cvcHasFocus {@code true} if the CVC entry field has focus, {@code false} otherwise
+     * @param cvcText the current content of {@link #mCvcNumberEditText}
+     * @return {@code true} if we should show the brand of the card, or {@code false} if we
+     * should show the CVC helper icon instead
+     */
+    @VisibleForTesting
+    static boolean shouldIconShowBrand(
+            @NonNull @Card.CardBrand String brand,
+            boolean cvcHasFocus,
+            @Nullable String cvcText) {
+        if (!cvcHasFocus) {
+            return true;
+        }
+
+        int length = cvcText == null ? 0 : cvcText.length();
+        boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
+        switch (length) {
+            case Card.CVC_LENGTH_AMERICAN_EXPRESS:
+                return true;
+            case Card.CVC_LENGTH_COMMON:
+                return !isAmex;
+            default:
+                return false;
+        }
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -757,17 +803,24 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private void updateIconCvc(@NonNull @Card.CardBrand String brand, boolean isEntering) {
-        if (isEntering) {
-            if (Card.AMERICAN_EXPRESS.equals(brand)) {
-                mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
-            } else {
-                mCardIconImageView.setImageResource(R.drawable.ic_cvc);
-            }
-            applyTint(true);
-        } else {
+    private void updateIconCvc(
+            @NonNull @Card.CardBrand String brand,
+            boolean hasFocus,
+            @Nullable String cvcText) {
+        if (shouldIconShowBrand(brand, hasFocus, cvcText)) {
             updateIcon(brand);
+        } else {
+            updateIconForCvcEntry(Card.AMERICAN_EXPRESS.equals(brand));
         }
+    }
+
+    private void updateIconForCvcEntry(boolean isAmEx) {
+        if (isAmEx) {
+            mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
+        } else {
+            mCardIconImageView.setImageResource(R.drawable.ic_cvc);
+        }
+        applyTint(true);
     }
 
     /**

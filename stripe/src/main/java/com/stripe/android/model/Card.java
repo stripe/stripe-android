@@ -40,6 +40,9 @@ public class Card {
     public static final String MASTERCARD = "MasterCard";
     public static final String UNKNOWN = "Unknown";
 
+    public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
+    public static final int CVC_LENGTH_COMMON = 3;
+
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             FUNDING_CREDIT,

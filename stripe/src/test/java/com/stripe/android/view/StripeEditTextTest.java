@@ -21,8 +21,10 @@ import org.robolectric.util.ActivityController;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 @Config(sdk = 22)
 public class StripeEditTextTest {
 
+    @Mock StripeEditText.AfterTextChangedListener mAfterTextChangedListener;
     @Mock StripeEditText.DeleteEmptyListener mDeleteEmptyListener;
     private ActivityController<CardInputTestActivity> mActivityController;
     private StripeEditText mEditText;
@@ -45,33 +48,41 @@ public class StripeEditTextTest {
         mEditText =  mActivityController.get().getCvcEditText();
         mEditText.setText("");
         mEditText.setDeleteEmptyListener(mDeleteEmptyListener);
+        mEditText.setAfterTextChangedListener(mAfterTextChangedListener);
     }
 
     @Test
-    public void deleteText_whenZeroLength_callsListener() {
+    public void deleteText_whenZeroLength_callsDeleteListener() {
         ViewTestUtils.sendDeleteKeyEvent(mEditText);
         verify(mDeleteEmptyListener, times(1)).onDeleteEmpty();
+        verifyZeroInteractions(mAfterTextChangedListener);
     }
 
     @Test
-    public void addText_doesNotCallListener() {
+    public void addText_callsAppropriateListeners() {
         mEditText.append("1");
         verifyZeroInteractions(mDeleteEmptyListener);
+        verify(mAfterTextChangedListener, times(1)).onTextChanged("1");
     }
 
     @Test
-    public void deleteText_whenNonZeroLength_doesNotCallListener() {
+    public void deleteText_whenNonZeroLength_callsAppropriateListeners() {
         mEditText.append("1");
+        reset(mAfterTextChangedListener);
+
         ViewTestUtils.sendDeleteKeyEvent(mEditText);
         verifyZeroInteractions(mDeleteEmptyListener);
+        verify(mAfterTextChangedListener, times(1)).onTextChanged("");
     }
 
     @Test
     public void deleteText_whenSelectionAtBeginningButLengthNonZero_doesNotCallListener() {
         mEditText.append("12");
+        verify(mAfterTextChangedListener).onTextChanged("12");
         mEditText.setSelection(0);
         ViewTestUtils.sendDeleteKeyEvent(mEditText);
         verifyZeroInteractions(mDeleteEmptyListener);
+        verifyNoMoreInteractions(mAfterTextChangedListener);
     }
 
     @Test
