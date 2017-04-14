@@ -1,7 +1,5 @@
 package com.stripe.android.util;
 
-import android.util.Log;
-
 import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Source;
 
@@ -15,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link LoggingUtils}.
@@ -28,6 +28,22 @@ public class LoggingUtilsTest {
     private static final List<String> EXPECTED_SINGLE_TOKEN_LIST = new ArrayList<>();
     static {
         EXPECTED_SINGLE_TOKEN_LIST.add(LoggingUtils.CARD_WIDGET_TOKEN);
+    }
+
+    @Test
+    public void isTestKey_withTestKey_returnsTrue() {
+        assertTrue(LoggingUtils.isTestKey("pk_test_anything"));
+    }
+
+    @Test
+    public void isTestKey_withLiveKey_returnsFalse() {
+        assertFalse(LoggingUtils.isTestKey("pk_live_somethingelse"));
+    }
+
+    @Test
+    public void isTestKey_withOtherInput_returnsFalse() {
+        assertFalse(LoggingUtils.isTestKey(null));
+        assertFalse(LoggingUtils.isTestKey("This is invalid, but still not a test key"));
     }
 
     @Test
@@ -45,6 +61,19 @@ public class LoggingUtilsTest {
     }
 
     @Test
+    public void getTokenCreationParams_withTestKey_returnsEmptyMap() {
+        List<String> tokensList = new ArrayList<>();
+        tokensList.add(LoggingUtils.CARD_WIDGET_TOKEN);
+        // Correctness of these methods will be tested elsewhere. Assume validity for this test.
+        final String expectedTokenName =
+                LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
+
+        Map<String, Object> params = LoggingUtils.getTokenCreationParams(tokensList, "pk_test_123");
+        // Size is SIZE-1 because tokens don't have a source_type field
+        assertTrue(params.isEmpty());
+    }
+
+    @Test
     public void getSourceCreationParams_withValidInput_createsCorrectMap() {
         // We don't use any product usage fields for sources yet.
         final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
@@ -57,6 +86,13 @@ public class LoggingUtilsTest {
                 loggingParams.get(LoggingUtils.FIELD_EVENT));
         assertEquals(LoggingUtils.getAnalyticsUa(),
                 loggingParams.get(LoggingUtils.FIELD_ANALYTICS_UA));
+    }
+
+    @Test
+    public void getSourceCreationParams_withTestKey_reaturnsEmptyMap() {
+        Map<String, Object> loggingParams =
+                LoggingUtils.getSourceCreationParams("pk_test_123", Source.SEPA_DEBIT);
+        assertTrue(loggingParams.isEmpty());
     }
 
     @Test

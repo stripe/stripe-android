@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Test class for {@link StripeApiHandler}.
@@ -145,7 +147,23 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void createSource_shouldLogSourceCreation_andReturnSource() {
+    public void logTokenRequest_shouldLogCorrectInformation() {
+        final String apiKey = "pk_live_LZs63vDVYuOP5ucl00vPFTL1";
+        RequestOptions options = RequestOptions.builder(apiKey).build();
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
+        Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                apiKey,
+                Source.CARD);
+        StripeApiHandler.logTokenRequest(loggingParams, options, testLoggingListener);
+
+
+        assertNull(testLoggingListener.mStripeException);
+        assertNotNull(testLoggingListener.mStripeResponse);
+        assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+    }
+
+    @Test
+    public void createSource_withTestKey_shouldNotLogSourceCreationButShouldCreateSource() {
         try {
             TestLoggingListener testLoggingListener = new TestLoggingListener();
 
@@ -159,9 +177,7 @@ public class StripeApiHandlerTest {
             assertNotNull(source);
 
             assertNull(testLoggingListener.mStripeException);
-            assertNotNull(testLoggingListener.mStripeResponse);
-            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
-
+            assertNull(testLoggingListener.mStripeResponse);
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
