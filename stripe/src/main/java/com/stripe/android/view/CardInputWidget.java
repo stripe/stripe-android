@@ -508,12 +508,9 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setAfterTextChangedListener(new StripeEditText.AfterTextChangedListener() {
             @Override
             public void onTextChanged(String text) {
-                if (mCardInputListener != null) {
-                    boolean isAmex = Card.AMERICAN_EXPRESS.equals(
-                            mCardNumberEditText.getCardBrand());
-                    if (isCvcMaximalLength(isAmex, text)) {
-                        mCardInputListener.onCvcComplete();
-                    }
+                if (mCardInputListener != null
+                        && isCvcMaximalLength(mCardNumberEditText.getCardBrand(), text)) {
+                    mCardInputListener.onCvcComplete();
                 }
                 updateIconCvc(
                         mCardNumberEditText.getCardBrand(),
@@ -743,9 +740,7 @@ public class CardInputWidget extends LinearLayout {
         if (!cvcHasFocus) {
             return true;
         }
-
-        boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
-        return isCvcMaximalLength(isAmex, cvcText);
+        return isCvcMaximalLength(brand, cvcText);
     }
 
     @Override
@@ -777,12 +772,14 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private static boolean isCvcMaximalLength(boolean isAmex, @Nullable String cvcText) {
+    private static boolean isCvcMaximalLength(
+            @NonNull @CardBrand String cardBrand,
+            @Nullable String cvcText) {
         if (cvcText == null) {
             return false;
         }
 
-        if (isAmex) {
+        if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
             return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
         } else {
             return cvcText.length() == CVC_LENGTH_COMMON;
