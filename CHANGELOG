@@ -1,3 +1,9 @@
+4.0.1 2017-04-17
+    Added setters for the card number, expiration date, and cvc fields in the CardInputWidget
+    Added a new example project with back end integration
+    Added the ability to set a listener on the CardInputWidget for various events
+    Made the card brand icon show in the widget when the CVC entry is complete
+
 4.0.0 2017-04-10
     Fixed issue #179, where certain pasted in credit cards would be incorrectly read as invalid
     *breaking* Removed the try/catch required around Stripe instance creation.
