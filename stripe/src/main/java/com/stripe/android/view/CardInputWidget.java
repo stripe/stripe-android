@@ -10,6 +10,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
@@ -32,16 +33,31 @@ import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
+import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 import static com.stripe.android.model.Card.CardBrand;
 
 /**
  * A card input widget that handles all animation on its own.
  */
 public class CardInputWidget extends LinearLayout {
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            FOCUS_CARD,
+            FOCUS_EXPIRY,
+            FOCUS_CVC
+    })
+    public @interface FocusField { }
+    public static final String FOCUS_CARD = "focus_card";
+    public static final String FOCUS_EXPIRY = "focus_expiry";
+    public static final String FOCUS_CVC = "focus_cvc";
 
     public static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
@@ -78,6 +94,7 @@ public class CardInputWidget extends LinearLayout {
     private static final long ANIMATION_LENGTH = 150L;
 
     private ImageView mCardIconImageView;
+    @Nullable private CardInputListener mCardInputListener;
     private CardNumberEditText mCardNumberEditText;
     private boolean mCardNumberIsViewed = true;
     private StripeEditText mCvcNumberEditText;
@@ -136,6 +153,15 @@ public class CardInputWidget extends LinearLayout {
 
         return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
                 .addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
+    }
+
+    /**
+     * Set a {@link CardInputListener} to be notified of card input events.
+     *
+     * @param listener the listener
+     */
+    public void setCardInputListener(@Nullable CardInputListener listener) {
+        mCardInputListener = listener;
     }
 
     /**
@@ -438,6 +464,9 @@ public class CardInputWidget extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     scrollLeft();
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CARD);
+                    }
                 }
             }
         });
@@ -447,15 +476,9 @@ public class CardInputWidget extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     scrollRight();
-                }
-            }
-        });
-
-        mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    scrollRight();
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                    }
                 }
             }
         });
@@ -469,6 +492,12 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    scrollRight();
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CVC);
+                    }
+                }
                 updateIconCvc(
                         mCardNumberEditText.getCardBrand(),
                         hasFocus,
@@ -479,6 +508,13 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setAfterTextChangedListener(new StripeEditText.AfterTextChangedListener() {
             @Override
             public void onTextChanged(String text) {
+                if (mCardInputListener != null) {
+                    boolean isAmex = Card.AMERICAN_EXPRESS.equals(
+                            mCardNumberEditText.getCardBrand());
+                    if (isCvcMaximalLength(isAmex, text)) {
+                        mCardInputListener.onCvcComplete();
+                    }
+                }
                 updateIconCvc(
                         mCardNumberEditText.getCardBrand(),
                         mCvcNumberEditText.hasFocus(),
@@ -491,6 +527,9 @@ public class CardInputWidget extends LinearLayout {
                     @Override
                     public void onCardNumberComplete() {
                         scrollRight();
+                        if (mCardInputListener != null) {
+                            mCardInputListener.onCardComplete();
+                        }
                     }
                 });
 
@@ -508,6 +547,9 @@ public class CardInputWidget extends LinearLayout {
             @Override
             public void onExpiryDateComplete() {
                 mCvcNumberEditText.requestFocus();
+                if (mCardInputListener != null) {
+                    mCardInputListener.onExpirationComplete();
+                }
             }
         });
 
@@ -702,16 +744,8 @@ public class CardInputWidget extends LinearLayout {
             return true;
         }
 
-        int length = cvcText == null ? 0 : cvcText.length();
         boolean isAmex = Card.AMERICAN_EXPRESS.equals(brand);
-        switch (length) {
-            case Card.CVC_LENGTH_AMERICAN_EXPRESS:
-                return true;
-            case Card.CVC_LENGTH_COMMON:
-                return !isAmex;
-            default:
-                return false;
-        }
+        return isCvcMaximalLength(isAmex, cvcText);
     }
 
     @Override
@@ -740,6 +774,18 @@ public class CardInputWidget extends LinearLayout {
                     + mPlacementParameters.dateWidth
                     + mPlacementParameters.dateCvcSeparation;
             setLayoutValues(mPlacementParameters.cvcWidth, cvcMargin, mCvcNumberEditText);
+        }
+    }
+
+    private static boolean isCvcMaximalLength(boolean isAmex, @Nullable String cvcText) {
+        if (cvcText == null) {
+            return false;
+        }
+
+        if (isAmex) {
+            return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
+        } else {
+            return cvcText.length() == CVC_LENGTH_COMMON;
         }
     }
 
@@ -821,6 +867,41 @@ public class CardInputWidget extends LinearLayout {
             mCardIconImageView.setImageResource(R.drawable.ic_cvc);
         }
         applyTint(true);
+    }
+
+    /**
+     * Represents a listener for card input events. Note that events are
+     * not one-time events. For instance, a user can "complete" the CVC many times
+     * by deleting and re-entering the value.
+     */
+    public interface CardInputListener {
+
+        /**
+         * Called whenever the field of focus within the widget changes.
+         *
+         * @param focusField a {@link FocusField} to which the focus has just changed.
+         */
+        void onFocusChange(@FocusField String focusField);
+
+        /**
+         * Called when a potentially valid card number has been completed in the
+         * {@link CardNumberEditText}. May be called multiple times if the user edits
+         * the field.
+         */
+        void onCardComplete();
+
+        /**
+         * Called when a expiration date (one that has not yet passed) has been entered.
+         * May be called multiple times, if the user edits the date.
+         */
+        void onExpirationComplete();
+
+        /**
+         * Called when a potentially valid CVC has been entered. The only verification performed
+         * on the number is that it is the correct length. May be called multiple times, if
+         * the user edits the CVC.
+         */
+        void onCvcComplete();
     }
 
     /**

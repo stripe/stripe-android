@@ -18,6 +18,8 @@ import com.stripe.android.util.LoggingUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -40,6 +42,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test class for {@link CardInputWidget}. Note that we have to test against SDK 22
@@ -60,6 +65,8 @@ public class CardInputWidgetTest {
     private TestFocusChangeListener mOnGlobalFocusChangeListener;
 
     private CardInputWidget.DimensionOverrideSettings mDimensionOverrides;
+
+    @Mock CardInputWidget.CardInputListener mCardInputListener;
 
     @Before
     public void setup() {
@@ -84,7 +91,6 @@ public class CardInputWidgetTest {
 
         mCardInputWidget = ((CardInputTestActivity) activityController.get()).getCardInputWidget();
         mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
-
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
@@ -246,17 +252,27 @@ public class CardInputWidgetTest {
 
     @Test
     public void onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() {
+        mCardInputWidget.setCardInputListener(mCardInputListener);
+
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+
+        verify(mCardInputListener, times(1)).onCardComplete();
+        verify(mCardInputListener, times(1)).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
     }
 
     @Test
     public void onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
+        mCardInputWidget.setCardInputListener(mCardInputListener);
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
         assertTrue(mExpiryEditText.hasFocus());
 
+        // The above functionality is tested elsewhere, so we reset this listener.
+        reset(mCardInputListener);
+
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
+        verify(mCardInputListener, times(1)).onFocusChange(CardInputWidget.FOCUS_CARD);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
 
@@ -282,12 +298,24 @@ public class CardInputWidgetTest {
         // This test will be invalid if run between 2080 and 2112. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080);
 
+        mCardInputWidget.setCardInputListener(mCardInputListener);
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+
+        verify(mCardInputListener).onCardComplete();
+        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
 
         mExpiryEditText.append("12");
         mExpiryEditText.append("79");
+
+        verify(mCardInputListener).onExpirationComplete();
+        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_CVC);
         assertTrue(mCvcEditText.hasFocus());
+
+        // Clearing already-verified data.
+        reset(mCardInputListener);
+
         ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
+        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
         assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
 
