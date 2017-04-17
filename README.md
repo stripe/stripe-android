@@ -280,7 +280,20 @@ The bindings for retrieving information about a token has been removed from the 
     compile 'com.stripe:stripe-android:1.1.1'
 ```
 
-## Building the example project
+
+## Example apps
+
+There are 2 example apps included in the repository:
+- Example project is a simple example of different ways to connect our components, including how to make tokens and sources, how to connect the synchronous and asynchronous methods, and how to use the CardInputWidget.
+- SampleStore project is a full walk-through of building a shop activity, including connecting to a back end.
+
+To build and run the example apps, clone the repository and open the project. Running "example" will run the Example application, and running "samplestore" will run the shop activity.
+
+### Getting started with the Android example apps
+
+Note: both example apps require an [Android SDK](https://developer.android.com/studio/index.html) and [Gradle](https://gradle.org/) to build and run.
+
+### Building the example project
 
 1. Clone the git repository.
 2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_. This is only a requirement for development. Our bindings require the API Level 7 as a minimum at runtime which would work on almost any modern version of Android.
@@ -293,6 +306,17 @@ The example application ships with a sample publishable key, but if you want to 
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
+
+### Building and Running the samplestore project
+
+Before you can run the SampleStore application, you need to provide it with your Stripe publishable key.
+
+1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to https://dashboard.stripe.com/account/apikeys.
+2. Replace the `PUBLISHABLE_KEY` constant in PaymentActivity.java (where it says "Put your test key here.") with your Test Publishable Key.
+3. Head to https://github.com/stripe/example-ios-backend and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the STRIPE_TEST_SECRET_KEY field under 'Env'. Click "Deploy for Free".
+4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in the RetrofitFactory.java file with the app URL Heroku provides you with (e.g. "https://my-example-app.herokuapp.com")
+
+After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to https://stripe.com/docs/testing#cards for a list of test card numbers.
 
 ## Migrating from older versions
 
