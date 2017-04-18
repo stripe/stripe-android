@@ -6,6 +6,7 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.util.StripeJsonUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +39,8 @@ public class Source extends StripeJsonModel {
             SEPA_DEBIT,
             IDEAL,
             SOFORT,
-            BANCONTACT
+            BANCONTACT,
+            UNKNOWN
     })
     public @interface SourceType { }
     public static final String BITCOIN = "bitcoin";
@@ -49,6 +51,7 @@ public class Source extends StripeJsonModel {
     public static final String IDEAL = "ideal";
     public static final String SOFORT = "sofort";
     public static final String BANCONTACT = "bancontact";
+    public static final String UNKNOWN = "unknown";
 
     public static final Set<String> MODELED_TYPES = new HashSet<>();
     static {
@@ -120,6 +123,7 @@ public class Source extends StripeJsonModel {
     private SourceCodeVerification mCodeVerification;
     private Long mCreated;
     private String mCurrency;
+    private String mCustomType;
     private @SourceFlow String mFlow;
     private Boolean mLiveMode;
     private Map<String, String> mMetaData;
@@ -149,6 +153,7 @@ public class Source extends StripeJsonModel {
             Map<String, Object> sourceTypeData,
             StripeSourceTypeModel sourceTypeModel,
             @SourceType String type,
+            String customType,
             @Usage String usage
     ) {
         mId = id;
@@ -167,6 +172,7 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
         mSourceTypeModel = sourceTypeModel;
         mType = type;
+        mCustomType = customType;
         mUsage = usage;
     }
 
@@ -237,6 +243,10 @@ public class Source extends StripeJsonModel {
         return mType;
     }
 
+    public String getCustomType() {
+        return mCustomType;
+    }
+
     @Usage
     public String getUsage() {
         return mUsage;
@@ -298,6 +308,11 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
     }
 
+    public void setCustomType(@NonNull @Size(min = 1) String customType) {
+        mCustomType = customType;
+        setType(UNKNOWN);
+    }
+
     public void setType(@SourceType String type) {
         mType = type;
     }
@@ -326,12 +341,11 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
-        if (mType != null) {
-            hashMap.put(mType, mSourceTypeData);
-        }
+        String usableType = toUsableType(mType, mCustomType);
+        hashMap.put(usableType, mSourceTypeData);
 
         hashMap.put(FIELD_STATUS, mStatus);
-        hashMap.put(FIELD_TYPE, mType);
+        hashMap.put(FIELD_TYPE, usableType);
         hashMap.put(FIELD_USAGE, mUsage);
         removeNullParams(hashMap);
         return hashMap;
@@ -358,14 +372,17 @@ public class Source extends StripeJsonModel {
             }
 
             JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
-            if (mType != null && sourceTypeJsonObject != null) {
-                jsonObject.put(mType, sourceTypeJsonObject);
+
+            String usableType = toUsableType(mType, mCustomType);
+            if (sourceTypeJsonObject != null) {
+                jsonObject.put(usableType, sourceTypeJsonObject);
             }
+
             putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
             putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-            putStringIfNotNull(jsonObject, FIELD_TYPE, mType);
+            putStringIfNotNull(jsonObject, FIELD_TYPE, usableType);
             putStringIfNotNull(jsonObject, FIELD_USAGE, mUsage);
 
         } catch (JSONException ignored) { }
@@ -410,13 +427,19 @@ public class Source extends StripeJsonModel {
                 FIELD_REDIRECT,
                 SourceRedirect.class);
         @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
-        @SourceType String type = asSourceType(optString(jsonObject, FIELD_TYPE));
+        String customType = optString(jsonObject, FIELD_TYPE);
+        @SourceType String type = asSourceType(customType);
+        if (type == null) {
+            type = UNKNOWN;
+        }
 
         // Until we have models for all types, keep the original hash and the
-        // model object.
+        // model object. The customType variable can be any field, and is not altered by
+        // trying to force it to be a type that we know of.
         Map<String, Object> sourceTypeData =
-                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(type));
-        StripeSourceTypeModel sourceTypeModel = type != null && MODELED_TYPES.contains(type)
+                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(customType));
+        StripeSourceTypeModel sourceTypeModel =
+                !UNKNOWN.equals(type) && MODELED_TYPES.contains(type)
                 ? optStripeJsonModel(jsonObject, type, StripeSourceTypeModel.class)
                 : null;
 
@@ -439,6 +462,7 @@ public class Source extends StripeJsonModel {
                 sourceTypeData,
                 sourceTypeModel,
                 type,
+                customType,
                 usage);
     }
 
@@ -512,8 +536,22 @@ public class Source extends StripeJsonModel {
             return SOFORT;
         } else if (BANCONTACT.equals(sourceType)) {
             return BANCONTACT;
+        } else if (UNKNOWN.equals(sourceType)) {
+            return UNKNOWN;
         }
+
         return null;
+    }
+
+    @NonNull
+    static String toUsableType(@NonNull @SourceType String type, @Nullable String customType) {
+        if (Source.UNKNOWN.equals(type)) {
+            if (StripeTextUtils.isBlank(customType)) {
+                return Source.UNKNOWN;
+            }
+            return customType;
+        }
+        return type;
     }
 
     @Nullable

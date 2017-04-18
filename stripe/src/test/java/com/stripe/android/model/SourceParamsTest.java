@@ -457,6 +457,53 @@ public class SourceParamsTest {
         JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
     }
 
+    @Test
+    public void createCustomParamsWithSourceTypeParameters_toParamMap_createsExpectedMap() {
+        // Using the Giropay constructor to add some free params and expected values,
+        // including a source type params
+        final String DOGECOIN = "dogecoin";
+        SourceParams params = SourceParams.createGiropayParams(
+                150L,
+                "Stripe",
+                "stripe://return",
+                "stripe descriptor");
+        params.setCustomType(DOGECOIN);
+
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("type", DOGECOIN);
+        expectedMap.put("currency", Source.EURO);
+        expectedMap.put("amount", 150L);
+        expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
+        expectedMap.put("redirect",
+                new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
+        expectedMap.put(DOGECOIN,
+                new HashMap<String, Object>() {{
+                    put("statement_descriptor", "stripe descriptor");
+                }});
+
+        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+    }
+
+    @Test
+    public void setCustomType_forEmptyParams_setsTypeToUnknown() {
+        SourceParams params = SourceParams.createCustomParams();
+        params.setCustomType("dogecoin");
+        assertEquals(Source.UNKNOWN, params.getType());
+        assertEquals("dogecoin", params.getCustomType());
+    }
+
+    @Test
+    public void setCustomType_forStandardParams_overridesStandardType() {
+        SourceParams params = SourceParams.createThreeDSecureParams(
+                99000L,
+                "brl",
+                "stripe://returnaddress",
+                "card_id_123");
+        params.setCustomType("bar_tab");
+        assertEquals(Source.UNKNOWN, params.getType());
+        assertEquals("bar_tab", params.getCustomType());
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getMapFromOwner(
             @NonNull SourceParams params,
