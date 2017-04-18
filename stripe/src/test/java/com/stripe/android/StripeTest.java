@@ -280,6 +280,47 @@ public class StripeTest {
     }
 
     @Test
+    public void createSourceSynchronous_withCustomBitcoinParams_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+
+        // This causes us to go through a different code path for the source creation,
+        // since the strict "getType" method on bitcoinParams now returns "unknown".
+        // Using bitcoin to test full integration, since that is a source type that we
+        // accept.
+        SourceParams customParams = SourceParams.createCustomParams();
+        Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put("email", "abc@def.com");
+        customParams.setCustomType("bitcoin")
+                .setAmount(1000L)
+                .setCurrency("usd")
+                .setOwner(ownerMap);
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("site", "google");
+            put("mood", "sad");
+        }};
+        customParams.setMetaData(metamap);
+
+        try {
+            Source bitcoinSource =
+                    stripe.createSourceSynchronous(customParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(bitcoinSource);
+            assertNotNull(bitcoinSource.getId());
+            assertNotNull(bitcoinSource.getClientSecret());
+            // We'll still get a bitcoin type back, because we'll recognize the string.
+            assertEquals(Source.BITCOIN, bitcoinSource.getType());
+            assertEquals(1000L, bitcoinSource.getAmount().longValue());
+            assertNotNull(bitcoinSource.getSourceTypeData());
+            assertNotNull(bitcoinSource.getOwner());
+            assertNull(bitcoinSource.getSourceTypeModel());
+            assertEquals("abc@def.com", bitcoinSource.getOwner().getEmail());
+            assertEquals("usd", bitcoinSource.getCurrency());
+            JsonTestUtils.assertMapEquals(metamap, bitcoinSource.getMetaData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void createSourceSynchronous_withBancontactParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams bancontactParams = SourceParams.createBancontactParams(

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.Source.SourceType;
+import static com.stripe.android.model.Source.toUsableType;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
 
 /**
@@ -49,6 +50,7 @@ public class SourceParams {
     @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
+    @Nullable private String mCustomType;
     private Map<String, Object> mOwner;
     private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
@@ -85,6 +87,17 @@ public class SourceParams {
         }
 
         return params;
+    }
+
+    /**
+     * Create a custom {@link SourceParams} object. Incorrect attributes may result in errors
+     * when connecting to Stripe's API.
+     *
+     * @return an empty {@link SourceParams} object.
+     */
+    @NonNull
+    public static SourceParams createCustomParams() {
+        return new SourceParams();
     }
 
     /**
@@ -375,10 +388,104 @@ public class SourceParams {
     }
 
     /**
+     * @return a custom type of this source, if one has been set
+     */
+    @Nullable
+    public String getCustomType() {
+        return mCustomType;
+    }
+
+    /**
      * @return the custom metadata set on these params
      */
     public Map<String, String> getMetaData() {
         return mMetaData;
+    }
+
+    /*---- Setters ----*/
+
+    /**
+     * @param amount currency amount for this source, in the lowest denomination.
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setAmount(long amount) {
+        mAmount = amount;
+        return this;
+    }
+
+    /**
+     * @param apiParameterMap a map of parameters specific for this type of source
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setApiParameterMap(
+            @NonNull Map<String, Object> apiParameterMap) {
+        mApiParameterMap = apiParameterMap;
+        return this;
+    }
+
+    /**
+     * @param currency currency code for this source (i.e. "EUR")
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setCurrency(String currency) {
+        mCurrency = currency;
+        return this;
+    }
+
+    /**
+     * @param owner an {@link SourceOwner} object for this source
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setOwner(Map<String, Object> owner) {
+        mOwner = owner;
+        return this;
+    }
+
+    /**
+     * Sets a redirect property map for this source object. If you only want to
+     * set a return url, use {@link #setSimpleRedirect(String)}.
+     *
+     * @param redirect a set of redirect parameters
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setRedirect(Map<String, Object> redirect) {
+        mRedirect = redirect;
+        return this;
+    }
+
+
+    /**
+     * @param returnUrl a redirect URL for this source.
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setSimpleRedirect(@NonNull @Size(min = 1) String returnUrl) {
+        setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+        return this;
+    }
+
+    /**
+     * Sets the {@link SourceType} for this source. If you are creating a custom type,
+     * use {@link #setCustomType(String)}.
+     *
+     * @param type the {@link SourceType}
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setType(@Source.SourceType String type) {
+        mType = type;
+        return this;
+    }
+
+    /**
+     * Sets a custom type for the source, and sets the {@link #mType type} for these parameters
+     * to be {@link Source#UNKNOWN}.
+     *
+     * @param customType the name of the source type
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setCustomType(@NonNull String customType) {
+        mType = Source.UNKNOWN;
+        mCustomType = customType;
+        return this;
     }
 
     /**
@@ -386,8 +493,9 @@ public class SourceParams {
      *
      * @param metaData
      */
-    public void setMetaData(@NonNull Map<String, String> metaData) {
+    public SourceParams setMetaData(@NonNull Map<String, String> metaData) {
         mMetaData = metaData;
+        return this;
     }
 
     /**
@@ -399,8 +507,11 @@ public class SourceParams {
     @NonNull
     public Map<String, Object> toParamMap() {
         Map<String, Object> networkReadyMap = new HashMap<>();
-        networkReadyMap.put(API_PARAM_TYPE, mType);
-        networkReadyMap.put(mType, mApiParameterMap);
+
+        String usableType = toUsableType(mType, mCustomType);
+
+        networkReadyMap.put(API_PARAM_TYPE, usableType);
+        networkReadyMap.put(usableType, mApiParameterMap);
         networkReadyMap.put(API_PARAM_AMOUNT, mAmount);
         networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
         networkReadyMap.put(API_PARAM_OWNER, mOwner);
@@ -427,38 +538,4 @@ public class SourceParams {
         simpleMap.put(key2, value2);
         return simpleMap;
     }
-
-    /*---- Setters ----*/
-
-    private SourceParams setAmount(long amount) {
-        mAmount = amount;
-        return this;
-    }
-
-    private SourceParams setApiParameterMap(
-            @NonNull Map<String, Object> apiParameterMap) {
-        mApiParameterMap = apiParameterMap;
-        return this;
-    }
-
-    private SourceParams setCurrency(String currency) {
-        mCurrency = currency;
-        return this;
-    }
-
-    private SourceParams setOwner(Map<String, Object> owner) {
-        mOwner = owner;
-        return this;
-    }
-
-    private SourceParams setRedirect(Map<String, Object> redirect) {
-        mRedirect = redirect;
-        return this;
-    }
-
-    private SourceParams setType(@Source.SourceType String type) {
-        mType = type;
-        return this;
-    }
-
 }

@@ -19,7 +19,9 @@ import static com.stripe.android.model.SourceRedirectTest.EXAMPLE_JSON_REDIRECT;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -28,6 +30,8 @@ import static org.junit.Assert.fail;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
 public class SourceTest {
+
+    private static final String DOGE_COIN = "dogecoin";
 
     private static final String EXAMPLE_JSON_SOURCE_WITH_NULLS = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
@@ -110,6 +114,39 @@ public class SourceTest {
             "}" +
             "}";
 
+    private static final String EXAMPLE_JSON_SOURCE_CUSTOM_TYPE = "{\n"+
+            "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
+            "\"object\": \"source\",\n"+
+            "\"amount\": 1000,\n"+
+            "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
+            "\"code_verification\": " + EXAMPLE_JSON_CODE_VERIFICATION + ",\n"+
+            "\"created\": 1488499654,\n"+
+            "\"currency\": \"usd\",\n"+
+            "\"flow\": \"receiver\",\n"+
+            "\"livemode\": false,\n"+
+            "\"metadata\": {\n"+
+            "},\n"+
+            "\"owner\": " + EXAMPLE_JSON_OWNER_WITHOUT_NULLS +",\n"+
+            "\"redirect\": " + EXAMPLE_JSON_REDIRECT + ",\n"+
+            "\"receiver\": {\n"+
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
+            "\"amount_charged\": 0,\n"+
+            "\"amount_received\": 0,\n"+
+            "\"amount_returned\": 0\n"+
+            "},\n"+
+            "\"status\": \"pending\",\n"+
+            "\"type\": \"dogecoin\",\n"+
+            "\"usage\": \"single_use\",\n"+
+            "\"dogecoin\": {\n" +
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
+            "\"amount\": 2371000,\n" +
+            "\"amount_charged\": 0,\n" +
+            "\"amount_received\": 0,\n" +
+            "\"amount_returned\": 0,\n" +
+            "\"uri\": \"dogecoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
+            "}" +
+            "}";
+
     private Source mSource;
 
     @Before
@@ -136,4 +173,31 @@ public class SourceTest {
         assertMapEquals(EXAMPLE_SOURCE_MAP, sourceWithNulls.toMap());
     }
 
+    @Test
+    public void fromJsonString_withCustomType_createsSourceWithCustomType() {
+        Source customSource = Source.fromString(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE);
+        assertNotNull("Parsing failure", customSource);
+        assertEquals(Source.UNKNOWN, customSource.getType());
+        assertEquals(DOGE_COIN, customSource.getCustomType());
+        assertNull(customSource.getSourceTypeModel());
+        assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
+    }
+
+    @Test
+    public void toUsableSource_whenKnownSourceType_returnsSameType() {
+        String usableType = Source.toUsableType(Source.CARD, "wrong answer");
+        assertEquals(Source.CARD, usableType);
+    }
+
+    @Test
+    public void toUsableSource_whenUnknownSourceType_returnsCustomType() {
+        String usableType = Source.toUsableType(Source.UNKNOWN, DOGE_COIN);
+        assertEquals(DOGE_COIN, usableType);
+    }
+
+    @Test
+    public void toUsableSource_whenUnknownSourceTypeAndNullCustomType_returnsUnknown() {
+        String usableType = Source.toUsableType(Source.UNKNOWN, null);
+        assertEquals(Source.UNKNOWN, usableType);
+    }
 }
