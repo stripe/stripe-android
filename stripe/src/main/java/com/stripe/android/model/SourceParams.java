@@ -443,7 +443,7 @@ public class SourceParams {
 
     /**
      * Sets a redirect property map for this source object. If you only want to
-     * set a return url, use {@link #setSimpleRedirect(String)}.
+     * set a return url, use {@link #setReturnUrl(String)}.
      *
      * @param redirect a set of redirect parameters
      * @return {@code this}, for chaining purposes
@@ -458,7 +458,7 @@ public class SourceParams {
      * @param returnUrl a redirect URL for this source.
      * @return {@code this}, for chaining purposes
      */
-    public SourceParams setSimpleRedirect(@NonNull @Size(min = 1) String returnUrl) {
+    public SourceParams setReturnUrl(@NonNull @Size(min = 1) String returnUrl) {
         setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
         return this;
     }

@@ -178,7 +178,7 @@ public class SourceTest {
         Source customSource = Source.fromString(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE);
         assertNotNull("Parsing failure", customSource);
         assertEquals(Source.UNKNOWN, customSource.getType());
-        assertEquals(DOGE_COIN, customSource.getCustomType());
+        assertEquals(DOGE_COIN, customSource.getTypeRaw());
         assertNull(customSource.getSourceTypeModel());
         assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
     }

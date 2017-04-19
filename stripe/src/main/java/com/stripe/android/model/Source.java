@@ -123,7 +123,7 @@ public class Source extends StripeJsonModel {
     private SourceCodeVerification mCodeVerification;
     private Long mCreated;
     private String mCurrency;
-    private String mCustomType;
+    private String mTypeRaw;
     private @SourceFlow String mFlow;
     private Boolean mLiveMode;
     private Map<String, String> mMetaData;
@@ -153,7 +153,7 @@ public class Source extends StripeJsonModel {
             Map<String, Object> sourceTypeData,
             StripeSourceTypeModel sourceTypeModel,
             @SourceType String type,
-            String customType,
+            String rawType,
             @Usage String usage
     ) {
         mId = id;
@@ -172,7 +172,7 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
         mSourceTypeModel = sourceTypeModel;
         mType = type;
-        mCustomType = customType;
+        mTypeRaw = rawType;
         mUsage = usage;
     }
 
@@ -238,13 +238,27 @@ public class Source extends StripeJsonModel {
         return mSourceTypeModel;
     }
 
+    /**
+     * Gets the {@link SourceType} of this Source, as one of the enumerated values.
+     * If a custom source type has been created, this returns {@link #UNKNOWN}. To get
+     * the raw value of an {@link #UNKNOWN} type, use {@link #getTypeRaw()}.
+     *
+     * @return the {@link SourceType} of this Source
+     */
     @SourceType
     public String getType() {
         return mType;
     }
 
-    public String getCustomType() {
-        return mCustomType;
+    /**
+     * Gets the type of this source as a String. If it is a known type, this will return
+     * a string equal to the {@link SourceType} returned from {@link #getType()}. This
+     * method is not restricted to known types
+     *
+     * @return the type of this Source as a string
+     */
+    public String getTypeRaw() {
+        return mTypeRaw;
     }
 
     @Usage
@@ -308,8 +322,8 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
     }
 
-    public void setCustomType(@NonNull @Size(min = 1) String customType) {
-        mCustomType = customType;
+    public void setTypeRaw(@NonNull @Size(min = 1) String typeRaw) {
+        mTypeRaw = typeRaw;
         setType(UNKNOWN);
     }
 
@@ -341,7 +355,7 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
-        String usableType = toUsableType(mType, mCustomType);
+        String usableType = toUsableType(mType, mTypeRaw);
         hashMap.put(usableType, mSourceTypeData);
 
         hashMap.put(FIELD_STATUS, mStatus);
@@ -373,7 +387,7 @@ public class Source extends StripeJsonModel {
 
             JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
 
-            String usableType = toUsableType(mType, mCustomType);
+            String usableType = toUsableType(mType, mTypeRaw);
             if (sourceTypeJsonObject != null) {
                 jsonObject.put(usableType, sourceTypeJsonObject);
             }
