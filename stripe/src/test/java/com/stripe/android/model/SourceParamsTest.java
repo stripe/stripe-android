@@ -467,7 +467,7 @@ public class SourceParamsTest {
                 "Stripe",
                 "stripe://return",
                 "stripe descriptor");
-        params.setCustomType(DOGECOIN);
+        params.setTypeRaw(DOGECOIN);
 
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", DOGECOIN);
@@ -487,9 +487,9 @@ public class SourceParamsTest {
     @Test
     public void setCustomType_forEmptyParams_setsTypeToUnknown() {
         SourceParams params = SourceParams.createCustomParams();
-        params.setCustomType("dogecoin");
+        params.setTypeRaw("dogecoin");
         assertEquals(Source.UNKNOWN, params.getType());
-        assertEquals("dogecoin", params.getCustomType());
+        assertEquals("dogecoin", params.getTypeRaw());
     }
 
     @Test
@@ -499,9 +499,9 @@ public class SourceParamsTest {
                 "brl",
                 "stripe://returnaddress",
                 "card_id_123");
-        params.setCustomType("bar_tab");
+        params.setTypeRaw("bar_tab");
         assertEquals(Source.UNKNOWN, params.getType());
-        assertEquals("bar_tab", params.getCustomType());
+        assertEquals("bar_tab", params.getTypeRaw());
     }
 
     @SuppressWarnings("unchecked")

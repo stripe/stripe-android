@@ -50,7 +50,7 @@ public class SourceParams {
     @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
-    @Nullable private String mCustomType;
+    @Nullable private String mTypeRaw;
     private Map<String, Object> mOwner;
     private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
@@ -391,8 +391,8 @@ public class SourceParams {
      * @return a custom type of this source, if one has been set
      */
     @Nullable
-    public String getCustomType() {
-        return mCustomType;
+    public String getTypeRaw() {
+        return mTypeRaw;
     }
 
     /**
@@ -459,13 +459,17 @@ public class SourceParams {
      * @return {@code this}, for chaining purposes
      */
     public SourceParams setReturnUrl(@NonNull @Size(min = 1) String returnUrl) {
-        setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+        if (mRedirect == null) {
+            setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+        } else {
+            mRedirect.put(FIELD_RETURN_URL, returnUrl);
+        }
         return this;
     }
 
     /**
      * Sets the {@link SourceType} for this source. If you are creating a custom type,
-     * use {@link #setCustomType(String)}.
+     * use {@link #setTypeRaw(String)}.
      *
      * @param type the {@link SourceType}
      * @return {@code this}, for chaining purposes
@@ -479,12 +483,12 @@ public class SourceParams {
      * Sets a custom type for the source, and sets the {@link #mType type} for these parameters
      * to be {@link Source#UNKNOWN}.
      *
-     * @param customType the name of the source type
+     * @param typeRaw the name of the source type
      * @return {@code this}, for chaining purposes
      */
-    public SourceParams setCustomType(@NonNull String customType) {
+    public SourceParams setTypeRaw(@NonNull String typeRaw) {
         mType = Source.UNKNOWN;
-        mCustomType = customType;
+        mTypeRaw = typeRaw;
         return this;
     }
 
@@ -508,7 +512,7 @@ public class SourceParams {
     public Map<String, Object> toParamMap() {
         Map<String, Object> networkReadyMap = new HashMap<>();
 
-        String usableType = toUsableType(mType, mCustomType);
+        String usableType = toUsableType(mType, mTypeRaw);
 
         networkReadyMap.put(API_PARAM_TYPE, usableType);
         networkReadyMap.put(usableType, mApiParameterMap);

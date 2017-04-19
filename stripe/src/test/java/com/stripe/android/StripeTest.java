@@ -290,7 +290,7 @@ public class StripeTest {
         SourceParams customParams = SourceParams.createCustomParams();
         Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put("email", "abc@def.com");
-        customParams.setCustomType("bitcoin")
+        customParams.setTypeRaw("bitcoin")
                 .setAmount(1000L)
                 .setCurrency("usd")
                 .setOwner(ownerMap);
