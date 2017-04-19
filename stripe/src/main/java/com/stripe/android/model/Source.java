@@ -6,6 +6,7 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.util.StripeJsonUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +39,8 @@ public class Source extends StripeJsonModel {
             SEPA_DEBIT,
             IDEAL,
             SOFORT,
-            BANCONTACT
+            BANCONTACT,
+            UNKNOWN
     })
     public @interface SourceType { }
     public static final String BITCOIN = "bitcoin";
@@ -49,6 +51,7 @@ public class Source extends StripeJsonModel {
     public static final String IDEAL = "ideal";
     public static final String SOFORT = "sofort";
     public static final String BANCONTACT = "bancontact";
+    public static final String UNKNOWN = "unknown";
 
     public static final Set<String> MODELED_TYPES = new HashSet<>();
     static {
@@ -120,6 +123,7 @@ public class Source extends StripeJsonModel {
     private SourceCodeVerification mCodeVerification;
     private Long mCreated;
     private String mCurrency;
+    private String mTypeRaw;
     private @SourceFlow String mFlow;
     private Boolean mLiveMode;
     private Map<String, String> mMetaData;
@@ -149,6 +153,7 @@ public class Source extends StripeJsonModel {
             Map<String, Object> sourceTypeData,
             StripeSourceTypeModel sourceTypeModel,
             @SourceType String type,
+            String rawType,
             @Usage String usage
     ) {
         mId = id;
@@ -167,6 +172,7 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
         mSourceTypeModel = sourceTypeModel;
         mType = type;
+        mTypeRaw = rawType;
         mUsage = usage;
     }
 
@@ -232,9 +238,27 @@ public class Source extends StripeJsonModel {
         return mSourceTypeModel;
     }
 
+    /**
+     * Gets the {@link SourceType} of this Source, as one of the enumerated values.
+     * If a custom source type has been created, this returns {@link #UNKNOWN}. To get
+     * the raw value of an {@link #UNKNOWN} type, use {@link #getTypeRaw()}.
+     *
+     * @return the {@link SourceType} of this Source
+     */
     @SourceType
     public String getType() {
         return mType;
+    }
+
+    /**
+     * Gets the type of this source as a String. If it is a known type, this will return
+     * a string equal to the {@link SourceType} returned from {@link #getType()}. This
+     * method is not restricted to known types
+     *
+     * @return the type of this Source as a string
+     */
+    public String getTypeRaw() {
+        return mTypeRaw;
     }
 
     @Usage
@@ -298,6 +322,11 @@ public class Source extends StripeJsonModel {
         mSourceTypeData = sourceTypeData;
     }
 
+    public void setTypeRaw(@NonNull @Size(min = 1) String typeRaw) {
+        mTypeRaw = typeRaw;
+        setType(UNKNOWN);
+    }
+
     public void setType(@SourceType String type) {
         mType = type;
     }
@@ -326,12 +355,10 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
-        if (mType != null) {
-            hashMap.put(mType, mSourceTypeData);
-        }
+        hashMap.put(mTypeRaw, mSourceTypeData);
 
         hashMap.put(FIELD_STATUS, mStatus);
-        hashMap.put(FIELD_TYPE, mType);
+        hashMap.put(FIELD_TYPE, mTypeRaw);
         hashMap.put(FIELD_USAGE, mUsage);
         removeNullParams(hashMap);
         return hashMap;
@@ -358,14 +385,16 @@ public class Source extends StripeJsonModel {
             }
 
             JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
-            if (mType != null && sourceTypeJsonObject != null) {
-                jsonObject.put(mType, sourceTypeJsonObject);
+
+            if (sourceTypeJsonObject != null) {
+                jsonObject.put(mTypeRaw, sourceTypeJsonObject);
             }
+
             putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
             putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-            putStringIfNotNull(jsonObject, FIELD_TYPE, mType);
+            putStringIfNotNull(jsonObject, FIELD_TYPE, mTypeRaw);
             putStringIfNotNull(jsonObject, FIELD_USAGE, mUsage);
 
         } catch (JSONException ignored) { }
@@ -410,14 +439,27 @@ public class Source extends StripeJsonModel {
                 FIELD_REDIRECT,
                 SourceRedirect.class);
         @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
-        @SourceType String type = asSourceType(optString(jsonObject, FIELD_TYPE));
+
+        String typeRaw = optString(jsonObject, FIELD_TYPE);
+        if (typeRaw == null) {
+            // We can't allow this type to be null, as we are using it for a key
+            // on the JSON object later.
+            typeRaw = UNKNOWN;
+        }
+
+        @SourceType String type = asSourceType(typeRaw);
+        if (type == null) {
+            type = UNKNOWN;
+        }
 
         // Until we have models for all types, keep the original hash and the
-        // model object.
+        // model object. The customType variable can be any field, and is not altered by
+        // trying to force it to be a type that we know of.
         Map<String, Object> sourceTypeData =
-                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(type));
-        StripeSourceTypeModel sourceTypeModel = type != null && MODELED_TYPES.contains(type)
-                ? optStripeJsonModel(jsonObject, type, StripeSourceTypeModel.class)
+                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(typeRaw));
+        StripeSourceTypeModel sourceTypeModel =
+                MODELED_TYPES.contains(typeRaw)
+                ? optStripeJsonModel(jsonObject, typeRaw, StripeSourceTypeModel.class)
                 : null;
 
         @Usage String usage = asUsage(optString(jsonObject, FIELD_USAGE));
@@ -439,6 +481,7 @@ public class Source extends StripeJsonModel {
                 sourceTypeData,
                 sourceTypeModel,
                 type,
+                typeRaw,
                 usage);
     }
 
@@ -512,7 +555,10 @@ public class Source extends StripeJsonModel {
             return SOFORT;
         } else if (BANCONTACT.equals(sourceType)) {
             return BANCONTACT;
+        } else if (UNKNOWN.equals(sourceType)) {
+            return UNKNOWN;
         }
+
         return null;
     }
 
