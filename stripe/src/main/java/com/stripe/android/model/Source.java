@@ -355,11 +355,10 @@ public class Source extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
         putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
 
-        String usableType = toUsableType(mType, mTypeRaw);
-        hashMap.put(usableType, mSourceTypeData);
+        hashMap.put(mTypeRaw, mSourceTypeData);
 
         hashMap.put(FIELD_STATUS, mStatus);
-        hashMap.put(FIELD_TYPE, usableType);
+        hashMap.put(FIELD_TYPE, mTypeRaw);
         hashMap.put(FIELD_USAGE, mUsage);
         removeNullParams(hashMap);
         return hashMap;
@@ -387,16 +386,15 @@ public class Source extends StripeJsonModel {
 
             JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
 
-            String usableType = toUsableType(mType, mTypeRaw);
             if (sourceTypeJsonObject != null) {
-                jsonObject.put(usableType, sourceTypeJsonObject);
+                jsonObject.put(mTypeRaw, sourceTypeJsonObject);
             }
 
             putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
             putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
             putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-            putStringIfNotNull(jsonObject, FIELD_TYPE, usableType);
+            putStringIfNotNull(jsonObject, FIELD_TYPE, mTypeRaw);
             putStringIfNotNull(jsonObject, FIELD_USAGE, mUsage);
 
         } catch (JSONException ignored) { }
@@ -442,14 +440,14 @@ public class Source extends StripeJsonModel {
                 SourceRedirect.class);
         @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
 
-        String customType = optString(jsonObject, FIELD_TYPE);
-        if (customType == null) {
+        String typeRaw = optString(jsonObject, FIELD_TYPE);
+        if (typeRaw == null) {
             // We can't allow this type to be null, as we are using it for a key
             // on the JSON object later.
-            customType = UNKNOWN;
+            typeRaw = UNKNOWN;
         }
 
-        @SourceType String type = asSourceType(customType);
+        @SourceType String type = asSourceType(typeRaw);
         if (type == null) {
             type = UNKNOWN;
         }
@@ -458,10 +456,10 @@ public class Source extends StripeJsonModel {
         // model object. The customType variable can be any field, and is not altered by
         // trying to force it to be a type that we know of.
         Map<String, Object> sourceTypeData =
-                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(customType));
+                StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(typeRaw));
         StripeSourceTypeModel sourceTypeModel =
-                !UNKNOWN.equals(type) && MODELED_TYPES.contains(type)
-                ? optStripeJsonModel(jsonObject, type, StripeSourceTypeModel.class)
+                MODELED_TYPES.contains(typeRaw)
+                ? optStripeJsonModel(jsonObject, typeRaw, StripeSourceTypeModel.class)
                 : null;
 
         @Usage String usage = asUsage(optString(jsonObject, FIELD_USAGE));
@@ -483,7 +481,7 @@ public class Source extends StripeJsonModel {
                 sourceTypeData,
                 sourceTypeModel,
                 type,
-                customType,
+                typeRaw,
                 usage);
     }
 
@@ -562,17 +560,6 @@ public class Source extends StripeJsonModel {
         }
 
         return null;
-    }
-
-    @NonNull
-    static String toUsableType(@NonNull @SourceType String type, @Nullable String customType) {
-        if (Source.UNKNOWN.equals(type)) {
-            if (StripeTextUtils.isBlank(customType)) {
-                return Source.UNKNOWN;
-            }
-            return customType;
-        }
-        return type;
     }
 
     @Nullable

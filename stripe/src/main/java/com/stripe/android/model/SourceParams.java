@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.Source.SourceType;
-import static com.stripe.android.model.Source.toUsableType;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
 
 /**
@@ -476,6 +475,7 @@ public class SourceParams {
      */
     public SourceParams setType(@Source.SourceType String type) {
         mType = type;
+        mTypeRaw = type;
         return this;
     }
 
@@ -487,7 +487,10 @@ public class SourceParams {
      * @return {@code this}, for chaining purposes
      */
     public SourceParams setTypeRaw(@NonNull String typeRaw) {
-        mType = Source.UNKNOWN;
+        mType = Source.asSourceType(typeRaw);
+        if (mType == null) {
+            mType = Source.UNKNOWN;
+        }
         mTypeRaw = typeRaw;
         return this;
     }
@@ -512,10 +515,8 @@ public class SourceParams {
     public Map<String, Object> toParamMap() {
         Map<String, Object> networkReadyMap = new HashMap<>();
 
-        String usableType = toUsableType(mType, mTypeRaw);
-
-        networkReadyMap.put(API_PARAM_TYPE, usableType);
-        networkReadyMap.put(usableType, mApiParameterMap);
+        networkReadyMap.put(API_PARAM_TYPE, mTypeRaw);
+        networkReadyMap.put(mTypeRaw, mApiParameterMap);
         networkReadyMap.put(API_PARAM_AMOUNT, mAmount);
         networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
         networkReadyMap.put(API_PARAM_OWNER, mOwner);

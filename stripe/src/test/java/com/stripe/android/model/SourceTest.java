@@ -182,22 +182,4 @@ public class SourceTest {
         assertNull(customSource.getSourceTypeModel());
         assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
     }
-
-    @Test
-    public void toUsableSource_whenKnownSourceType_returnsSameType() {
-        String usableType = Source.toUsableType(Source.CARD, "wrong answer");
-        assertEquals(Source.CARD, usableType);
-    }
-
-    @Test
-    public void toUsableSource_whenUnknownSourceType_returnsCustomType() {
-        String usableType = Source.toUsableType(Source.UNKNOWN, DOGE_COIN);
-        assertEquals(DOGE_COIN, usableType);
-    }
-
-    @Test
-    public void toUsableSource_whenUnknownSourceTypeAndNullCustomType_returnsUnknown() {
-        String usableType = Source.toUsableType(Source.UNKNOWN, null);
-        assertEquals(Source.UNKNOWN, usableType);
-    }
 }
