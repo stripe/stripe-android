@@ -74,6 +74,9 @@ public class LoggingUtils {
     public static Map<String, Object> getTokenCreationParams(
             @NonNull List<String> productUsageTokens,
             @NonNull String publishableApiKey) {
+        if (isTestKey(publishableApiKey)) {
+            return new HashMap<>();
+        }
         return getEventLoggingParams(
                 productUsageTokens,
                 null,
@@ -85,11 +88,22 @@ public class LoggingUtils {
     public static Map<String, Object> getSourceCreationParams(
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
+        if (isTestKey(publishableApiKey)) {
+            return new HashMap<>();
+        }
         return getEventLoggingParams(
                 null,
                 sourceType,
                 publishableApiKey,
                 EVENT_SOURCE_CREATION);
+    }
+
+    public static boolean isTestKey(@Nullable String stripeKey) {
+        if (stripeKey == null) {
+            return false;
+        }
+
+        return stripeKey.startsWith("pk_test");
     }
 
     static Map<String, Object> getEventLoggingParams(

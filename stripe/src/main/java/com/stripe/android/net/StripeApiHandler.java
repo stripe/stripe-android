@@ -445,11 +445,12 @@ public class StripeApiHandler {
         return conn;
     }
 
-    private static void logTokenRequest(
+    @VisibleForTesting
+    static void logTokenRequest(
             @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
             @Nullable LoggingResponseListener listener) {
-        if (options == null) {
+        if (options == null || loggingMap.isEmpty()) {
             return;
         }
 

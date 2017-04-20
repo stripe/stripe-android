@@ -17,11 +17,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Test class for {@link StripeApiHandler}.
@@ -145,7 +148,35 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void createSource_shouldLogSourceCreation_andReturnSource() {
+    public void logTokenRequest_shouldLogCorrectInformation() {
+        final String apiKey = "pk_live_LZs63vDVYuOP5ucl00vPFTL1";
+        RequestOptions options = RequestOptions.builder(apiKey).build();
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
+        Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                apiKey,
+                Source.CARD);
+        StripeApiHandler.logTokenRequest(loggingParams, options, testLoggingListener);
+
+
+        assertNull(testLoggingListener.mStripeException);
+        assertNotNull(testLoggingListener.mStripeResponse);
+        assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+    }
+
+    @Test
+    public void logTokenRequest_whenMapIsEmpty_shouldNotMakeNetworkCall() {
+        RequestOptions options = RequestOptions.builder(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY).build();
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
+        Map<String, Object> emptyParams = new HashMap<>();
+        StripeApiHandler.logTokenRequest(emptyParams, options, testLoggingListener);
+
+
+        assertNull(testLoggingListener.mStripeException);
+        assertNull(testLoggingListener.mStripeResponse);
+    }
+
+    @Test
+    public void createSource_withTestKey_shouldNotLogSourceCreationButShouldCreateSource() {
         try {
             // This is the one and only test where we actually log something, because
             // we are testing whether or not we log.
@@ -161,9 +192,7 @@ public class StripeApiHandlerTest {
             assertNotNull(source);
 
             assertNull(testLoggingListener.mStripeException);
-            assertNotNull(testLoggingListener.mStripeResponse);
-            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
-
+            assertNull(testLoggingListener.mStripeResponse);
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
