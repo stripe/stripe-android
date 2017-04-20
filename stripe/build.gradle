@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-def android_support_version = '25.2.0'
+def android_support_version = '25.3.1'
 
 configurations {
     javadocDeps
@@ -11,6 +11,7 @@ dependencies {
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:appcompat-v7:' + android_support_version
 
+    compile()
     javadocDeps 'com.android.support:support-annotations:' + android_support_version
     javadocDeps 'com.android.support:support-v4:' + android_support_version
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
