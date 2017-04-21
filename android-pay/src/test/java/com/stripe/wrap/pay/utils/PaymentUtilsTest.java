@@ -8,12 +8,16 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
+import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemListValid;
 import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemValid;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesCurrencyPatternOrEmpty;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesQuantityPatternOrEmpty;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -162,5 +166,50 @@ public class PaymentUtilsTest {
         assertTrue(isLineItemValid(LineItem.newBuilder()
                 .setTotalPrice("10.00")
                 .build()));
+    }
+
+    @Test
+    public void getPriceString_whenCurrencyWithDecimals_returnsExpectedValue() {
+        String priceString = getPriceString(100L, Currency.getInstance("USD"));
+        assertEquals("1.00", priceString);
+        assertTrue(matchesCurrencyPatternOrEmpty(priceString));
+
+        String littlePrice = getPriceString(8L, Currency.getInstance("EUR"));
+        assertEquals("0.08", littlePrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(littlePrice));
+
+        String bigPrice = getPriceString(20000000L, Currency.getInstance("GBP"));
+        assertEquals("200000.00", bigPrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(bigPrice));
+    }
+
+    @Test
+    public void getPriceString_whenCurrencyWithoutDecimals_returnsExpectedValue() {
+        String priceString = getPriceString(250L, Currency.getInstance("JPY"));
+        assertEquals("250", priceString);
+        assertTrue(matchesCurrencyPatternOrEmpty(priceString));
+
+        String bigPrice = getPriceString(250000L, Currency.getInstance("KRW"));
+        assertEquals("250000", bigPrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(bigPrice));
+
+        String littlePrice = getPriceString(7L, Currency.getInstance("CLP"));
+        assertEquals("7", littlePrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(littlePrice));
+    }
+
+    @Test
+    public void getPriceString_whenNoCurrencyProvided_usesDefault() {
+        Locale.setDefault(Locale.US);
+
+        String dollarString = getPriceString(499L);
+        assertEquals("4.99", dollarString);
+        assertTrue(matchesCurrencyPatternOrEmpty(dollarString));
+
+        Locale.setDefault(Locale.JAPAN);
+
+        String yenString = getPriceString(499L);
+        assertEquals("499", yenString);
+        assertTrue(matchesCurrencyPatternOrEmpty(yenString));
     }
 }

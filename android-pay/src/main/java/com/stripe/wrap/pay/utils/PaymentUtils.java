@@ -1,9 +1,13 @@
 package com.stripe.wrap.pay.utils;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import java.text.DecimalFormat;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.LineItem;
@@ -90,5 +94,60 @@ public class PaymentUtils {
                 && matchesCurrencyPatternOrEmpty(lineItem.getTotalPrice())
                 && matchesQuantityPatternOrEmpty(lineItem.getQuantity())
                 && matchesCurrencyPatternOrEmpty(lineItem.getUnitPrice());
+    }
+
+    /**
+     * Converts an integer price in the lowest currency denomination to a Google string value.
+     * The currency is assumed to be from {@link Locale#getDefault()}.
+     *
+     * @param price the price in the lowest available currency denomination
+     * @return a String that can be used as an Android Pay price string
+     */
+    public static String getPriceString(long price) {
+        return getPriceString(price, Currency.getInstance(Locale.getDefault()));
+    }
+
+    /**
+     * Converts an integer price in the lowest currency denomination to a Google string value.
+     * For instance (100, USD) -> "1.00", but (100, JPY) -> "100"
+     * @param price the price in the lowest available currency denomination
+     * @param currency the {@link Currency} used to determine how many digits after the decimal
+     * @return a String that can be used as an Android Pay price string
+     */
+    public static String getPriceString(long price, @NonNull Currency currency) {
+
+        int fractionDigits = currency.getDefaultFractionDigits();
+        int totalLength = String.valueOf(price).length();
+        StringBuilder builder = new StringBuilder();
+
+        if (fractionDigits == 0) {
+            for (int i = 0; i < totalLength; i++) {
+                builder.append('#');
+            }
+            DecimalFormat noDecimalCurrencyFormat = new DecimalFormat(builder.toString());
+            noDecimalCurrencyFormat.setCurrency(currency);
+            return noDecimalCurrencyFormat.format(price);
+        }
+
+        int beforeDecimal = totalLength - fractionDigits;
+        for (int i = 0; i < beforeDecimal; i++) {
+            builder.append('#');
+        }
+
+        // So we display "0.55" instead of ".55"
+        if (totalLength <= fractionDigits) {
+            builder.append('0');
+        }
+        builder.append('.');
+        for (int i = 0; i < fractionDigits; i++) {
+            builder.append('0');
+        }
+        double modBreak = Math.pow(10, fractionDigits);
+        double decimalPrice = price / modBreak;
+
+        DecimalFormat decimalFormat = new DecimalFormat(builder.toString());
+        decimalFormat.setCurrency(currency);
+
+        return decimalFormat.format(decimalPrice);
     }
 }
