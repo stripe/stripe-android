@@ -117,7 +117,7 @@ public class LineItemBuilderTest {
     }
 
     @Test
-    public void isWholeNumber_whenBigDecimalDoubleWithoutDecimalPart_returnsFalse() {
+    public void isWholeNumber_whenBigDecimalDoubleWithoutDecimalPart_returnsTrue() {
         assertTrue(LineItemBuilder.isWholeNumber(BigDecimal.valueOf(1.0000)));
     }
 
