@@ -57,6 +57,23 @@ public class LineItemBuilderTest {
     }
 
     @Test
+    public void setHighPrice_thenBuild_createsExpectedLineItem() {
+        LineItemBuilder lineItemBuilder = new LineItemBuilder(LineItem.Role.REGULAR, "USD");
+        LineItem lineItem = lineItemBuilder
+                .setUnitPrice(1000000L)
+                .setQuantity(2)
+                .setTotalPrice(2000000L)
+                .setDescription("Best smart watch ever")
+                .build();
+        assertEquals(LineItem.Role.REGULAR, lineItem.getRole());
+        assertEquals("USD", lineItem.getCurrencyCode());
+        assertEquals("Best smart watch ever", lineItem.getDescription());
+        assertEquals("2", lineItem.getQuantity());
+        assertEquals("10000.00", lineItem.getUnitPrice());
+        assertEquals("20000.00", lineItem.getTotalPrice());
+    }
+
+    @Test
     public void setCurrency_withLowerCaseString_stillSetsCurrency() {
         // If you try to create a Currency object with a lower-case code, it throws
         // an IllegalArgumentException.
@@ -102,8 +119,9 @@ public class LineItemBuilderTest {
         Locale.setDefault(Locale.JAPAN);
 
         LineItem item = new LineItemBuilder(LineItem.Role.REGULAR, "notacurrency").build();
-        String expectedWarning = "Could not create currency with code notacurrency";
-        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(LineItemBuilder.TAG);
+        String expectedWarning = "Could not create currency with code \"notacurrency\". Using " +
+                "currency JPY by default.";
+        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(PaymentUtils.TAG);
         assertEquals("JPY", item.getCurrencyCode());
         assertEquals(1, logItems.size());
         assertEquals(Log.WARN, logItems.get(0).type);

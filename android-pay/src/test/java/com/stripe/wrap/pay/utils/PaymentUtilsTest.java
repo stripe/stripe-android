@@ -12,13 +12,18 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
+import static com.stripe.wrap.pay.utils.PaymentUtils.getCurrencyByCodeOrDefault;
+import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceLong;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
+import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemListValid;
 import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemValid;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesCurrencyPatternOrEmpty;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesQuantityPatternOrEmpty;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -67,18 +72,31 @@ public class PaymentUtilsTest {
 
     @Test
     public void isLineItemListValid_whenEmptyList_returnsTrue() {
-        assertTrue(isLineItemListValid(new ArrayList<LineItem>()));
+        assertTrue(isLineItemListValid(new ArrayList<LineItem>(), "USD"));
     }
 
     @Test
     public void isLineItemListValid_whenNull_returnsFalse() {
-        assertFalse(isLineItemListValid(null));
+        assertFalse(isLineItemListValid(null, "JPY"));
+    }
+
+    @Test
+    public void isLineItemListValid_whenEmptyCurrencyCode_returnsFalse() {
+        assertFalse(isLineItemListValid(new ArrayList<LineItem>(), ""));
+    }
+
+    @Test
+    public void isLineItemListValid_whenInvalidCurrencyCode_returnsFalse() {
+        assertFalse(isLineItemListValid(new ArrayList<LineItem>(), "fakebucks"));
     }
 
     @Test
     public void isLineItemListValid_whenOneOrZeroTaxItems_returnsTrue() {
-        LineItem item0 = LineItem.newBuilder().setRole(LineItem.Role.REGULAR).build();
-        LineItem item1 = LineItem.newBuilder().setRole(LineItem.Role.TAX).build();
+        Locale.setDefault(Locale.US);
+        LineItem item0 = new LineItemBuilder().setTotalPrice(1000L).build();
+        LineItem item1 = new LineItemBuilder().setTotalPrice(2000L)
+                .setRole(LineItem.Role.TAX).build();
+
 
         List<LineItem> noTaxList = new ArrayList<>();
         List<LineItem> oneTaxList = new ArrayList<>();
@@ -86,16 +104,22 @@ public class PaymentUtilsTest {
         oneTaxList.add(item0);
         oneTaxList.add(item1);
 
-        assertTrue(isLineItemListValid(noTaxList));
-        assertTrue(isLineItemListValid(oneTaxList));
+        assertTrue(isLineItemListValid(noTaxList, "USD"));
+        assertTrue(isLineItemListValid(oneTaxList, "USD"));
     }
 
     @Test
     public void isLineItemListValid_whenTwoTaxItems_returnsFalse() {
-        LineItem item0 = LineItem.newBuilder().setRole(LineItem.Role.REGULAR).build();
-        LineItem item1 = LineItem.newBuilder().setRole(LineItem.Role.TAX).build();
-        LineItem item2 = LineItem.newBuilder().setRole(LineItem.Role.TAX).build();
-        LineItem item3 = LineItem.newBuilder().setRole(LineItem.Role.REGULAR).build();
+        Locale.setDefault(Locale.US);
+
+        LineItem item0 = LineItem.newBuilder().setCurrencyCode("USD")
+                .setRole(LineItem.Role.REGULAR).build();
+        LineItem item1 = LineItem.newBuilder().setCurrencyCode("USD")
+                .setRole(LineItem.Role.TAX).build();
+        LineItem item2 = LineItem.newBuilder().setCurrencyCode("USD")
+                .setRole(LineItem.Role.TAX).build();
+        LineItem item3 = LineItem.newBuilder().setCurrencyCode("USD")
+                .setRole(LineItem.Role.REGULAR).build();
 
         List<LineItem> tooMuchTaxList = new ArrayList<>();
         tooMuchTaxList.add(item0);
@@ -103,21 +127,61 @@ public class PaymentUtilsTest {
         tooMuchTaxList.add(item2);
         tooMuchTaxList.add(item3);
 
-        assertFalse(isLineItemListValid(tooMuchTaxList));
+        assertFalse(isLineItemListValid(tooMuchTaxList, "USD"));
     }
 
     @Test
     public void isLineItemListValid_withOneBadItem_returnsFalse() {
-        LineItem badItem = LineItem.newBuilder().setTotalPrice("10.999").build();
-        LineItem goodItem0 = LineItem.newBuilder().setTotalPrice("10.00").build();
-        LineItem goodItem1 = LineItem.newBuilder().setTotalPrice("10.00").build();
+        LineItem badItem = LineItem.newBuilder().setTotalPrice("10.999")
+                .setCurrencyCode("USD").build();
+        LineItem goodItem0 = LineItem.newBuilder().setTotalPrice("10.00")
+                .setCurrencyCode("USD").build();
+        LineItem goodItem1 = LineItem.newBuilder().setTotalPrice("10.00")
+                .setCurrencyCode("USD").build();
 
         List<LineItem> oneBadAppleList = new ArrayList<>();
         oneBadAppleList.add(goodItem0);
         oneBadAppleList.add(badItem);
         oneBadAppleList.add(goodItem1);
 
-        assertFalse(isLineItemListValid(oneBadAppleList));
+        assertFalse(isLineItemListValid(oneBadAppleList, "USD"));
+    }
+
+    @Test
+    public void isLineItemListValid_whenOneItemHasNoCurrency_returnsFalse() {
+        LineItem badItem = LineItem.newBuilder().setTotalPrice("10.99").build();
+        LineItem goodItem0 = LineItem.newBuilder().setTotalPrice("10.00")
+                .setCurrencyCode("USD").build();
+        LineItem goodItem1 = LineItem.newBuilder().setTotalPrice("10.00")
+                .setCurrencyCode("USD").build();
+
+        List<LineItem> mixedList = new ArrayList<>();
+        mixedList.add(goodItem0);
+        mixedList.add(badItem);
+        mixedList.add(goodItem1);
+        assertFalse(isLineItemListValid(mixedList, "USD"));
+
+        List<LineItem> badItemFirstList = new ArrayList<>();
+        badItemFirstList.add(badItem);
+        badItemFirstList.add(goodItem0);
+        badItemFirstList.add(goodItem1);
+        assertFalse(isLineItemListValid(badItemFirstList, "USD"));
+    }
+
+    @Test
+    public void isLineItemListValid_whenMixedCurrencies_returnsFalse() {
+        LineItem euroItem = LineItem.newBuilder().setTotalPrice("10.99")
+                .setCurrencyCode("EUR").build();
+        LineItem dollarItem = LineItem.newBuilder().setTotalPrice("10.00")
+                .setCurrencyCode("USD").build();
+        LineItem yenItem = LineItem.newBuilder().setTotalPrice("1000")
+                .setCurrencyCode("JPY").build();
+
+        List<LineItem> mixedList = new ArrayList<>();
+        mixedList.add(euroItem);
+        mixedList.add(dollarItem);
+        mixedList.add(yenItem);
+        assertFalse(isLineItemListValid(mixedList, "EUR"));
     }
 
     @Test
@@ -211,5 +275,149 @@ public class PaymentUtilsTest {
         String yenString = getPriceString(499L);
         assertEquals("499", yenString);
         assertTrue(matchesCurrencyPatternOrEmpty(yenString));
+    }
+
+    @Test
+    public void getPriceLong_whenDecimalValueGiven_correctlyParsesResult() {
+        assertEquals(Long.valueOf(1000L), getPriceLong("10.00", Currency.getInstance("USD")));
+        assertEquals(Long.valueOf(55555555L),
+                getPriceLong("555555.55", Currency.getInstance("EUR")));
+        assertEquals(Long.valueOf(99L), getPriceLong("0.99", Currency.getInstance("AUD")));
+    }
+
+    @Test
+    public void getPriceLong_whenNonDecimalValueGivenInNonDecimalCurrency_correctlyParsesResult() {
+        assertEquals(Long.valueOf(999L), getPriceLong("999", Currency.getInstance("JPY")));
+        assertEquals(Long.valueOf(1L), getPriceLong("1", Currency.getInstance("KRW")));
+    }
+
+    @Test
+    public void getPriceLong_whenNonDecimalValueGivenInDecimalCurrency_correctlyMovesUpResult() {
+        assertEquals(Long.valueOf(1000L), getPriceLong("10", Currency.getInstance("USD")));
+        // The Rial Omani has 3 decimal places
+        assertEquals(Long.valueOf(30000L), getPriceLong("30", Currency.getInstance("OMR")));
+    }
+
+    @Test(expected = NumberFormatException.class)
+    public void getPriceLong_whenDecimalValueInNonDecimalCurrency_throwsNumberFormatException() {
+        getPriceLong("100.00", Currency.getInstance("JPY"));
+        fail("Should throw NumberFormatException when trying to convert decimal amounts of Yen");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getPriceLong_whenPriceStringHasAlphaCharacters_throwsIllegalArgumentException() {
+        getPriceLong("55 bucks", Currency.getInstance("USD"));
+        fail("Should throw IllegalArgumentException when trying to convert illegal characters");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getPriceLong_whenPriceStringHasNoLeadingZero_throwsIllegalArgumentException() {
+        getPriceLong(".88", Currency.getInstance("USD"));
+        fail("Should throw IllegalArgumentException when trying to parse bad Strings");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getPriceLong_whenPriceStringHasSeparators_throwsIllegalArgumentException() {
+        getPriceLong("1,000", Currency.getInstance("USD"));
+        fail("Should throw IllegalArgumentException when trying to parse bad Strings");
+    }
+
+    @Test
+    public void getPriceLong_whenPriceStringIsNegative_correctlyParsesValue() {
+        assertEquals(Long.valueOf(-15L), getPriceLong("-15", Currency.getInstance("JPY")));
+        assertEquals(Long.valueOf(-1500L), getPriceLong("-15", Currency.getInstance("USD")));
+        assertEquals(Long.valueOf(-9999L), getPriceLong("-99.99", Currency.getInstance("EUR")));
+    }
+
+    @Test
+    public void getPriceLong_whenPriceStringIsEmpty_returnsNull() {
+        assertNull(getPriceLong("", Currency.getInstance("USD")));
+        assertNull(getPriceLong(null, Currency.getInstance("KRW")));
+    }
+
+    @Test
+    public void getTotalPriceString_forGroupOfStandardLineItemsInUsd_returnsExpectedValue() {
+        Locale.setDefault(Locale.US);
+        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder().setTotalPrice(2000L).build();
+        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        List<LineItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        assertEquals("60.00", getTotalPriceString(items, Currency.getInstance("USD")));
+    }
+
+    @Test
+    public void getTotalPriceString_forGroupOfStandardLineItemsInKrw_returnsExpectedValue() {
+        Locale.setDefault(Locale.KOREA);
+        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder().setTotalPrice(2000L).build();
+        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        List<LineItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        assertEquals("6000", getTotalPriceString(items, Currency.getInstance("KRW")));
+    }
+
+    @Test
+    public void getTotalPriceString_whenOneItemHasNoPrice_returnsExpectedValue() {
+        Locale.setDefault(Locale.US);
+        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder().build();
+        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        List<LineItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        assertEquals("40.00", getTotalPriceString(items, Currency.getInstance("USD")));
+    }
+
+    @Test
+    public void getTotalPriceString_whenNoItemHasPrice_returnsEmptyString() {
+        Locale.setDefault(Locale.CANADA);
+        LineItem item1 = new LineItemBuilder().build();
+        LineItem item2 = new LineItemBuilder().build();
+        List<LineItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+
+        assertEquals("", getTotalPriceString(items, Currency.getInstance("CAD")));
+    }
+
+    @Test
+    public void getTotalPriceString_whenEmptyList_returnsEmptyString() {
+        assertEquals("", getTotalPriceString(
+                new ArrayList<LineItem>(), Currency.getInstance("OMR")));
+    }
+
+    @Test
+    public void getCurrencyByCodeOrDefault_forValidCurrencyCode_returnsCorrectCurrency() {
+        Currency foundCurrency = getCurrencyByCodeOrDefault("CAD");
+        assertEquals(Currency.getInstance(Locale.CANADA), foundCurrency);
+    }
+
+    @Test
+    public void getCurrencyByCodeOrDefault_forNull_returnsDefault() {
+        Locale.setDefault(Locale.KOREA);
+        assertEquals(Currency.getInstance(Locale.KOREA),
+                getCurrencyByCodeOrDefault(null));
+    }
+
+    @Test
+    public void getCurrencyByCodeOrDefault_forInvalid_returnsDefault() {
+        Locale.setDefault(Locale.UK);
+        assertEquals(Currency.getInstance(Locale.UK),
+                getCurrencyByCodeOrDefault("tea and crumpets"));
+    }
+
+    @Test
+    public void getCurrencyByCodeOrDefault_forLowercase_stillReturnsCorrectCurrency() {
+        assertEquals(Currency.getInstance(Locale.US),
+                getCurrencyByCodeOrDefault("usd"));
     }
 }
