@@ -1,6 +1,5 @@
 package com.stripe.wrap.pay.utils;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -21,7 +20,7 @@ public class CartManager {
 
     static final String TAG = "Stripe:CartManager";
 
-    private Currency mCurrency;
+    private final Currency mCurrency;
     private List<LineItem> mLineItemsRegular = new ArrayList<>();
     private List<LineItem> mLineItemsShipping = new ArrayList<>();
     private LineItem mLineItemTax;
@@ -31,19 +30,7 @@ public class CartManager {
     }
 
     public CartManager(String currencyCode) {
-        setCurrencyCode(currencyCode);
-    }
-
-    /**
-     * Sets the ISO 4217 currency code of the line item. If the input currency is invalid,
-     * currency is set to the default for the phone's locale.
-     *
-     * @param currencyCode the currency code to set
-     * @return {@code this}, for chaining purposes
-     */
-    public CartManager setCurrencyCode(String currencyCode) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
-        return this;
     }
 
     /**
