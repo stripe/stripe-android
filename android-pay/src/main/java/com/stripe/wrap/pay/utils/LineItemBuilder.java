@@ -54,13 +54,7 @@ public class LineItemBuilder {
      * @return {@code this}, for chaining purposes
      */
     public LineItemBuilder setCurrencyCode(String currencyCode) {
-        try {
-            mCurrency = Currency.getInstance(currencyCode.toUpperCase());
-        } catch (IllegalArgumentException illegalArgumentException) {
-            Log.w(TAG, String.format(Locale.ENGLISH,
-                    "Could not create currency with code %s", currencyCode));
-            mCurrency = Currency.getInstance(Locale.getDefault());
-        }
+        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
         return this;
     }
 
