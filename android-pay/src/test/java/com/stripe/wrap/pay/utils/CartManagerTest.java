@@ -213,9 +213,13 @@ public class CartManagerTest {
             assertTrue(message.startsWith(CartContentException.CART_ERROR_MESSAGE_START));
 
             assertEquals(CartError.LINE_ITEM_CURRENCY, errors.get(0).getErrorType());
+            assertEquals(dollarItem, errors.get(0).getLineItem());
             assertEquals(CartError.LINE_ITEM_CURRENCY, errors.get(1).getErrorType());
+            assertEquals(wonItem, errors.get(1).getLineItem());
             assertEquals(CartError.LINE_ITEM_PRICE, errors.get(2).getErrorType());
+            assertEquals(badPriceStringItem, errors.get(2).getLineItem());
             assertEquals(CartError.LINE_ITEM_QUANTITY, errors.get(3).getErrorType());
+            assertEquals(badQuantityStringItem, errors.get(3).getLineItem());
 
             String[] messageLines = message.split("\n");
             assertEquals(5, messageLines.length);
