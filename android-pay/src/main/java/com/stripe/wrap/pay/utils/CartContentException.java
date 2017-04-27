@@ -1,13 +1,9 @@
 package com.stripe.wrap.pay.utils;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
+import android.support.annotation.Size;
 
-import com.google.android.gms.wallet.LineItem;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Class representing an error that will prevent a {@link com.google.android.gms.wallet.Cart} from
@@ -15,57 +11,25 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class CartContentException extends Exception {
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            CART_CURRENCY,
-            DUPLICATE_TAX,
-            INVALID_PRICE,
-            INVALID_CHARACTERS,
-            LINE_ITEM_CURRENCY,
-            LINE_ITEM_PRICE,
-            LINE_ITEM_QUANTITY
-    })
-    @interface CartErrorType { }
-    public static final String CART_CURRENCY = "cart_currency";
-    public static final String DUPLICATE_TAX = "duplicate_tax";
-    public static final String INVALID_PRICE = "invalid_price";
-    public static final String INVALID_CHARACTERS = "invalid_characters";
-    public static final String LINE_ITEM_CURRENCY = "line_item_currency";
-    public static final String LINE_ITEM_PRICE = "line_item_price";
-    public static final String LINE_ITEM_QUANTITY = "line_item_quantity";
+    static final String CART_ERROR_MESSAGE_START = "Cart Content Error Found:\n";
 
-    @NonNull private final String mErrorMessage;
-    @NonNull private final @CartErrorType String mErrorType;
-    @Nullable private final LineItem mLineItem;
+    @NonNull private final List<CartError> mCartErrors;
 
-    public CartContentException(
-            @NonNull @CartErrorType String errorType,
-            @NonNull String errorMessage) {
-        this(errorType, errorMessage, null);
-    }
-
-    public CartContentException(
-            @NonNull @CartErrorType String errorType,
-            @NonNull String errorMessage,
-            @Nullable LineItem errorLineItem) {
-        mErrorType = errorType;
-        mErrorMessage = errorMessage;
-        mLineItem = errorLineItem;
+    CartContentException(@NonNull @Size(min = 1) List<CartError> cartErrors) {
+        mCartErrors = cartErrors;
     }
 
     @Override
     public String getMessage() {
-        return mErrorMessage;
+        StringBuilder builder = new StringBuilder();
+        builder.append(CART_ERROR_MESSAGE_START);
+        for (CartError error : mCartErrors) {
+            builder.append(error.getMessage()).append('\n');
+        }
+        return builder.toString();
     }
 
-    @NonNull
-    @CartErrorType
-    public String getErrorType() {
-        return mErrorType;
-    }
-
-    @Nullable
-    public LineItem getLineItem() {
-        return mLineItem;
+    public List<CartError> getCartErrors() {
+        return mCartErrors;
     }
 }

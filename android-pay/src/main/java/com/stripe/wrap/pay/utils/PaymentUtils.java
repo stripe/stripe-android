@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -145,58 +146,59 @@ public class PaymentUtils {
      * @param lineItems a list of {@link LineItem} objects
      * @param currencyCode the currency code used to evaluate the list
      * @return {@code true} if the list could be put into a {@link Cart}, false otherwise
-     * @throws CartContentException if the list of {@link LineItem LineItems} cannot be put in
-     * a {@link Cart} with the given currency
      */
-    public static void validateLineItemList(
+    @NonNull
+    public static List<CartError> validateLineItemList(
             List<LineItem> lineItems,
-            @NonNull String currencyCode) throws CartContentException {
+            @NonNull String currencyCode) {
+        List<CartError> cartErrors = new ArrayList<>();
         if (lineItems == null) {
-            return;
+            return cartErrors;
         }
 
         try {
             Currency.getInstance(currencyCode);
         } catch (IllegalArgumentException illegalArgumentException) {
-            throw new CartContentException(
-                    CartContentException.CART_CURRENCY,
+            cartErrors.add(new CartError(CartError.CART_CURRENCY,
                     String.format(Locale.ENGLISH,
                             "Cart does not have a valid currency code. " +
                                     "%s was used, but not recognized.",
                             TextUtils.isEmpty(currencyCode)
-                                    ? "[empty]": currencyCode));
+                                    ? "[empty]": currencyCode)));
+
         }
 
         boolean hasTax = false;
         for (LineItem item : lineItems) {
             if (!currencyCode.equals(item.getCurrencyCode())) {
-                throw new CartContentException(
-                        CartContentException.LINE_ITEM_CURRENCY,
+                cartErrors.add(new CartError(
+                        CartError.LINE_ITEM_CURRENCY,
                         String.format(Locale.ENGLISH,
                                 "Line item currency of %s does not match cart currency of %s.",
                                 TextUtils.isEmpty(item.getCurrencyCode())
                                         ? "[empty]": item.getCurrencyCode(),
                                 currencyCode),
-                        item);
+                        item));
             }
 
             if (LineItem.Role.TAX == item.getRole()) {
                 if (hasTax) {
-                    throw new CartContentException(
-                            CartContentException.DUPLICATE_TAX,
+                    cartErrors.add(new CartError(
+                            CartError.DUPLICATE_TAX,
                             "A cart may only have one item with a role of " +
                                     "LineItem.Role.TAX, but more than one was found.",
-                            item);
+                            item));
                 } else {
                     hasTax = true;
                 }
             }
 
-            CartContentException cartContentException = searchLineItemForErrors(item);
-            if (cartContentException != null) {
-                throw cartContentException;
+            CartError lineItemError = searchLineItemForErrors(item);
+            if (lineItemError != null) {
+                cartErrors.add(lineItemError);
             }
         }
+        return cartErrors;
     }
 
     /**
@@ -206,13 +208,13 @@ public class PaymentUtils {
      * @param lineItem a {@link LineItem} to check
      * @return {@code true} if this item is valid to be added to a {@link Cart}
      */
-    public static CartContentException searchLineItemForErrors(LineItem lineItem) {
+    public static CartError searchLineItemForErrors(LineItem lineItem) {
         if (lineItem == null) {
             return null;
         }
 
         if (!matchesCurrencyPatternOrEmpty(lineItem.getUnitPrice())) {
-            return new CartContentException(CartContentException.LINE_ITEM_PRICE,
+            return new CartError(CartError.LINE_ITEM_PRICE,
                     String.format(Locale.ENGLISH,
                             "Invalid price string: %s does not match required pattern of %s",
                             lineItem.getUnitPrice(),
@@ -221,7 +223,7 @@ public class PaymentUtils {
         }
 
         if (!matchesQuantityPatternOrEmpty(lineItem.getQuantity())) {
-            return new CartContentException(CartContentException.LINE_ITEM_QUANTITY,
+            return new CartError(CartError.LINE_ITEM_QUANTITY,
                     String.format(Locale.ENGLISH,
                             "Invalid quantity string: %s does not match required pattern of %s",
                             lineItem.getQuantity(),
@@ -230,7 +232,7 @@ public class PaymentUtils {
         }
 
         if (!matchesCurrencyPatternOrEmpty(lineItem.getTotalPrice())) {
-            return new CartContentException(CartContentException.LINE_ITEM_PRICE,
+            return new CartError(CartError.LINE_ITEM_PRICE,
                     String.format(Locale.ENGLISH,
                             "Invalid price string: %s does not match required pattern of %s",
                             lineItem.getTotalPrice(),

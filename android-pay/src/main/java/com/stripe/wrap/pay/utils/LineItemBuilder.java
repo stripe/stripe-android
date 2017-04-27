@@ -41,9 +41,9 @@ public class LineItemBuilder {
         mRole = LineItem.Role.REGULAR;
     }
 
-    LineItemBuilder(int role, String currencyCode) {
+    LineItemBuilder(String currencyCode) {
         setCurrencyCode(currencyCode);
-        mRole = role;
+        mRole = LineItem.Role.REGULAR;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.stripe.wrap.pay.utils;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 import android.util.Log;
 
 import com.google.android.gms.wallet.Cart;
@@ -27,10 +28,10 @@ public class CartManager {
 
     private final Currency mCurrency;
 
-    private LinkedHashMap<String, LineItem> mLineItemsRegular = new LinkedHashMap<>();
-    private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
+    @NonNull private LinkedHashMap<String, LineItem> mLineItemsRegular = new LinkedHashMap<>();
+    @NonNull private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
 
-    private LineItem mLineItemTax;
+    @Nullable private LineItem mLineItemTax;
 
     public CartManager() {
         mCurrency = Currency.getInstance(Locale.getDefault());
@@ -38,6 +39,77 @@ public class CartManager {
 
     public CartManager(String currencyCode) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
+    }
+
+    /**
+     * Adds a {@link LineItem.Role#REGULAR} item to the cart with a description
+     * and total price value. Currency matches the currency of the {@link CartManager}.
+     *
+     * @param description a line item description
+     * @param totalPrice the total price of the line item, in the smallest denomination
+     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
+     */
+    @NonNull
+    public String addLineItem(@NonNull @Size(min = 1) String description, long totalPrice) {
+        String itemId = generateUuidForRole(LineItem.Role.REGULAR);
+        mLineItemsRegular.put(itemId,
+                new LineItemBuilder(mCurrency.getCurrencyCode())
+                        .setDescription(description)
+                        .setTotalPrice(totalPrice)
+                        .build());
+        return itemId;
+    }
+
+    /**
+     * Adds a {@link LineItem.Role#SHIPPING} item to the cart with a description
+     * and total price value. Currency matches the currency of the {@link CartManager}.
+     *
+     * @param description a line item description
+     * @param totalPrice the total price of the line item, in the smallest denomination
+     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
+     */
+    @NonNull
+    public String addShippingLineItem(@NonNull @Size(min = 1) String description, long totalPrice) {
+        String itemId = generateUuidForRole(LineItem.Role.REGULAR);
+        mLineItemsRegular.put(itemId,
+                new LineItemBuilder(mCurrency.getCurrencyCode())
+                        .setDescription(description)
+                        .setTotalPrice(totalPrice)
+                        .setRole(LineItem.Role.SHIPPING)
+                        .build());
+        return itemId;
+    }
+
+    /**
+     * Adds a {@link LineItem.Role#TAX} item to the cart with a description
+     * and total price value. Currency matches the currency of the {@link CartManager}.
+     *
+     * @param description a line item description
+     * @param totalPrice the total price of the line item, in the smallest denomination
+     */
+    @NonNull
+    public void setTaxLineItem(@NonNull @Size(min = 1) String description, long totalPrice) {
+        LineItem taxLineItem = new LineItemBuilder(mCurrency.getCurrencyCode())
+                .setDescription(description)
+                .setTotalPrice(totalPrice)
+                .setRole(LineItem.Role.TAX)
+                .build();
+        addLineItem(taxLineItem);
+    }
+
+    /**
+     * Remove an item from the {@link CartManager}.
+     *
+     * @param itemId the UUID associated with the cart item to be removed
+     * @return the {@link LineItem} removed, or {@code null} if no item was found
+     */
+    @Nullable
+    public LineItem removeItem(@NonNull @Size(min = 1) String itemId) {
+        LineItem removed = mLineItemsRegular.remove(itemId);
+        if (removed == null) {
+            removed = mLineItemsShipping.remove(itemId);
+        }
+        return removed;
     }
 
     /**
@@ -81,23 +153,37 @@ public class CartManager {
     }
 
     /**
-     * Build the {@link Cart}. Returns {@code null} if the item set is invalid.
+     * Build the {@link Cart}. Returns {@code null} if the item set is empty.
      *
-     * @return a {@link Cart}, or {@code null} if any of the items are invalid
+     * @return a {@link Cart}, or {@code null} if there are no line items
+     * @throws CartContentException if there are invalid line items or invalid cart parameters. The
+     * exception will contain a list of CartError objects specifying the problems.
      */
     @Nullable
-    public Cart build() throws CartContentException {
+    public Cart buildCart() throws CartContentException {
         List<LineItem> totalLineItems = new ArrayList<>();
         totalLineItems.addAll(mLineItemsRegular.values());
         totalLineItems.addAll(mLineItemsShipping.values());
-        totalLineItems.add(mLineItemTax);
+        if (mLineItemTax != null) {
+            totalLineItems.add(mLineItemTax);
+        }
 
-        PaymentUtils.validateLineItemList(totalLineItems, mCurrency.getCurrencyCode());
-        return Cart.newBuilder()
-                .setCurrencyCode(mCurrency.getCurrencyCode())
-                .setLineItems(totalLineItems)
-                .setTotalPrice(PaymentUtils.getTotalPriceString(totalLineItems, mCurrency))
-                .build();
+        if (totalLineItems.isEmpty()) {
+            return null;
+        }
+
+        List<CartError> errors = PaymentUtils.validateLineItemList(
+                totalLineItems,
+                mCurrency.getCurrencyCode());
+        if (errors.isEmpty()) {
+            return Cart.newBuilder()
+                    .setCurrencyCode(mCurrency.getCurrencyCode())
+                    .setLineItems(totalLineItems)
+                    .setTotalPrice(PaymentUtils.getTotalPriceString(totalLineItems, mCurrency))
+                    .build();
+        } else {
+            throw new CartContentException(errors);
+        }
     }
 
     @NonNull
