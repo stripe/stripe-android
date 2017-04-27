@@ -9,8 +9,11 @@ import com.google.android.gms.wallet.LineItem;
 
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * A wrapper for {@link Cart.Builder} that aids in the generation of new {@link LineItem}
@@ -18,11 +21,15 @@ import java.util.Locale;
  */
 public class CartManager {
 
+    static final String REGULAR_ID = "REG";
+    static final String SHIPPING_ID = "SHIP";
     static final String TAG = "Stripe:CartManager";
 
     private final Currency mCurrency;
-    private List<LineItem> mLineItemsRegular = new ArrayList<>();
-    private List<LineItem> mLineItemsShipping = new ArrayList<>();
+
+    private LinkedHashMap<String, LineItem> mLineItemsRegular = new LinkedHashMap<>();
+    private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
+
     private LineItem mLineItemTax;
 
     public CartManager() {
@@ -37,14 +44,19 @@ public class CartManager {
      * Add a {@link LineItem} to the cart.
      *
      * @param item the {@link LineItem} to be added
+     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
      */
-    public CartManager addLineItem(@NonNull LineItem item) {
+    @Nullable
+    public String addLineItem(@NonNull LineItem item) {
+        String itemId = null;
         switch (item.getRole()) {
             case LineItem.Role.REGULAR:
-                mLineItemsRegular.add(item);
+                itemId = generateUuidForRole(LineItem.Role.REGULAR);
+                mLineItemsRegular.put(itemId, item);
                 break;
             case LineItem.Role.SHIPPING:
-                mLineItemsShipping.add(item);
+                itemId = generateUuidForRole(LineItem.Role.SHIPPING);
+                mLineItemsShipping.put(itemId, item);
                 break;
             case LineItem.Role.TAX:
                 if (mLineItemTax != null) {
@@ -61,10 +73,11 @@ public class CartManager {
                         "Line item with unknown role added to cart. Treated as regular. " +
                         "Unknown role is of code %d",
                         item.getRole()));
-                mLineItemsRegular.add(item);
+                itemId = generateUuidForRole(LineItem.Role.REGULAR);
+                mLineItemsRegular.put(itemId, item);
                 break;
         }
-        return this;
+        return itemId;
     }
 
     /**
@@ -73,37 +86,52 @@ public class CartManager {
      * @return a {@link Cart}, or {@code null} if any of the items are invalid
      */
     @Nullable
-    public Cart build() {
+    public Cart build() throws CartContentException {
         List<LineItem> totalLineItems = new ArrayList<>();
-        totalLineItems.addAll(mLineItemsRegular);
-        totalLineItems.addAll(mLineItemsShipping);
+        totalLineItems.addAll(mLineItemsRegular.values());
+        totalLineItems.addAll(mLineItemsShipping.values());
         totalLineItems.add(mLineItemTax);
 
-        if (PaymentUtils.isLineItemListValid(
-                totalLineItems,
-                mCurrency.getCurrencyCode())) {
-            return Cart.newBuilder()
-                    .setCurrencyCode(mCurrency.getCurrencyCode())
-                    .setLineItems(totalLineItems)
-                    .setTotalPrice(PaymentUtils.getTotalPriceString(totalLineItems, mCurrency))
-                    .build();
-        } else {
-            return null;
-        }
+        PaymentUtils.validateLineItemList(totalLineItems, mCurrency.getCurrencyCode());
+        return Cart.newBuilder()
+                .setCurrencyCode(mCurrency.getCurrencyCode())
+                .setLineItems(totalLineItems)
+                .setTotalPrice(PaymentUtils.getTotalPriceString(totalLineItems, mCurrency))
+                .build();
     }
 
     @NonNull
-    public List<LineItem> getLineItemsRegular() {
+    public Map<String, LineItem> getLineItemsRegular() {
         return mLineItemsRegular;
     }
 
     @NonNull
-    public List<LineItem> getLineItemsShipping() {
+    public Map<String, LineItem> getLineItemsShipping() {
         return mLineItemsShipping;
     }
 
     @Nullable
     public LineItem getLineItemTax() {
         return mLineItemTax;
+    }
+
+    @NonNull
+    static String generateUuidForRole(int role) {
+        String baseId = UUID.randomUUID().toString();
+        String base = null;
+        if (role == LineItem.Role.REGULAR) {
+            base = REGULAR_ID;
+        } else if (role == LineItem.Role.SHIPPING) {
+            base = SHIPPING_ID;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        if (base != null) {
+            return builder.append(base)
+                    .append('-')
+                    .append(baseId.substring(base.length()))
+                    .toString();
+        }
+        return baseId;
     }
 }

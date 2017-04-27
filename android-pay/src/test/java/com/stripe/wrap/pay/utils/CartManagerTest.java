@@ -12,6 +12,7 @@ import org.robolectric.shadows.ShadowLog;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,8 +33,8 @@ public class CartManagerTest {
         LineItem regularItem = LineItem.newBuilder().setRole(LineItem.Role.REGULAR).build();
         cartManager.addLineItem(regularItem);
 
-        List<LineItem> regularItems = cartManager.getLineItemsRegular();
-        List<LineItem> shippingItems = cartManager.getLineItemsShipping();
+        Map<String, LineItem> regularItems = cartManager.getLineItemsRegular();
+        Map<String, LineItem> shippingItems = cartManager.getLineItemsShipping();
         LineItem taxItem = cartManager.getLineItemTax();
 
         assertEquals(1, regularItems.size());
@@ -47,8 +48,8 @@ public class CartManagerTest {
         LineItem shippingItem = LineItem.newBuilder().setRole(LineItem.Role.SHIPPING).build();
         cartManager.addLineItem(shippingItem);
 
-        List<LineItem> regularItems = cartManager.getLineItemsRegular();
-        List<LineItem> shippingItems = cartManager.getLineItemsShipping();
+        Map<String, LineItem> regularItems = cartManager.getLineItemsRegular();
+        Map<String, LineItem> shippingItems = cartManager.getLineItemsShipping();
         LineItem taxItem = cartManager.getLineItemTax();
 
         assertEquals(1, shippingItems.size());
@@ -62,8 +63,8 @@ public class CartManagerTest {
         LineItem taxItem = LineItem.newBuilder().setRole(LineItem.Role.TAX).build();
         cartManager.addLineItem(taxItem);
 
-        List<LineItem> regularItems = cartManager.getLineItemsRegular();
-        List<LineItem> shippingItems = cartManager.getLineItemsShipping();
+        Map<String, LineItem> regularItems = cartManager.getLineItemsRegular();
+        Map<String, LineItem> shippingItems = cartManager.getLineItemsShipping();
         LineItem cartTaxItem = cartManager.getLineItemTax();
 
         assertTrue(regularItems.isEmpty());

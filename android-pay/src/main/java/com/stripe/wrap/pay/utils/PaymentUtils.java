@@ -19,6 +19,8 @@ import com.google.android.gms.wallet.LineItem;
 public class PaymentUtils {
 
     static final String TAG = "Stripe:PaymentUtils";
+    static final String CURRENCY_REGEX = "\"^-?[0-9]+(\\.[0-9][0-9])?\"";
+    static final String QUANTITY_REGEX = "\"[0-9]+(\\.[0-9])?\"";
 
     static String getTotalPriceString(@NonNull List<LineItem> lineItems,
                                       @NonNull Currency currency) {
@@ -143,39 +145,58 @@ public class PaymentUtils {
      * @param lineItems a list of {@link LineItem} objects
      * @param currencyCode the currency code used to evaluate the list
      * @return {@code true} if the list could be put into a {@link Cart}, false otherwise
+     * @throws CartContentException if the list of {@link LineItem LineItems} cannot be put in
+     * a {@link Cart} with the given currency
      */
-    public static boolean isLineItemListValid(List<LineItem> lineItems,
-                                              @NonNull String currencyCode) {
-        if (lineItems == null || TextUtils.isEmpty(currencyCode)) {
-            return false;
+    public static void validateLineItemList(
+            List<LineItem> lineItems,
+            @NonNull String currencyCode) throws CartContentException {
+        if (lineItems == null) {
+            return;
         }
 
         try {
             Currency.getInstance(currencyCode);
         } catch (IllegalArgumentException illegalArgumentException) {
-            return false;
+            throw new CartContentException(
+                    CartContentException.CART_CURRENCY,
+                    String.format(Locale.ENGLISH,
+                            "Cart does not have a valid currency code. " +
+                                    "%s was used, but not recognized.",
+                            TextUtils.isEmpty(currencyCode)
+                                    ? "[empty]": currencyCode));
         }
 
         boolean hasTax = false;
         for (LineItem item : lineItems) {
             if (!currencyCode.equals(item.getCurrencyCode())) {
-                return false;
+                throw new CartContentException(
+                        CartContentException.LINE_ITEM_CURRENCY,
+                        String.format(Locale.ENGLISH,
+                                "Line item currency of %s does not match cart currency of %s.",
+                                TextUtils.isEmpty(item.getCurrencyCode())
+                                        ? "[empty]": item.getCurrencyCode(),
+                                currencyCode),
+                        item);
             }
 
             if (LineItem.Role.TAX == item.getRole()) {
                 if (hasTax) {
-                    return false;
+                    throw new CartContentException(
+                            CartContentException.DUPLICATE_TAX,
+                            "A cart may only have one item with a role of " +
+                                    "LineItem.Role.TAX, but more than one was found.",
+                            item);
                 } else {
                     hasTax = true;
                 }
             }
 
-            if (!isLineItemValid(item)) {
-                return false;
+            CartContentException cartContentException = searchLineItemForErrors(item);
+            if (cartContentException != null) {
+                throw cartContentException;
             }
         }
-
-        return true;
     }
 
     /**
@@ -185,11 +206,39 @@ public class PaymentUtils {
      * @param lineItem a {@link LineItem} to check
      * @return {@code true} if this item is valid to be added to a {@link Cart}
      */
-    public static boolean isLineItemValid(LineItem lineItem) {
-        return lineItem != null
-                && matchesCurrencyPatternOrEmpty(lineItem.getTotalPrice())
-                && matchesQuantityPatternOrEmpty(lineItem.getQuantity())
-                && matchesCurrencyPatternOrEmpty(lineItem.getUnitPrice());
+    public static CartContentException searchLineItemForErrors(LineItem lineItem) {
+        if (lineItem == null) {
+            return null;
+        }
+
+        if (!matchesCurrencyPatternOrEmpty(lineItem.getUnitPrice())) {
+            return new CartContentException(CartContentException.LINE_ITEM_PRICE,
+                    String.format(Locale.ENGLISH,
+                            "Invalid price string: %s does not match required pattern of %s",
+                            lineItem.getUnitPrice(),
+                            CURRENCY_REGEX),
+                    lineItem);
+        }
+
+        if (!matchesQuantityPatternOrEmpty(lineItem.getQuantity())) {
+            return new CartContentException(CartContentException.LINE_ITEM_QUANTITY,
+                    String.format(Locale.ENGLISH,
+                            "Invalid quantity string: %s does not match required pattern of %s",
+                            lineItem.getQuantity(),
+                            QUANTITY_REGEX),
+                    lineItem);
+        }
+
+        if (!matchesCurrencyPatternOrEmpty(lineItem.getTotalPrice())) {
+            return new CartContentException(CartContentException.LINE_ITEM_PRICE,
+                    String.format(Locale.ENGLISH,
+                            "Invalid price string: %s does not match required pattern of %s",
+                            lineItem.getTotalPrice(),
+                            CURRENCY_REGEX),
+                    lineItem);
+        }
+
+        return null;
     }
 
     /**
