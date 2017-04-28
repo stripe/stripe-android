@@ -1,5 +1,7 @@
 package com.stripe.wrap.pay.utils;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.wallet.LineItem;
 
 import org.junit.Test;
@@ -12,16 +14,18 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
+import static com.stripe.wrap.pay.testutils.AssertUtils.assertEmpty;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getCurrencyByCodeOrDefault;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceLong;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPriceString;
-import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemListValid;
-import static com.stripe.wrap.pay.utils.PaymentUtils.isLineItemValid;
+import static com.stripe.wrap.pay.utils.PaymentUtils.validateLineItemList;
+import static com.stripe.wrap.pay.utils.PaymentUtils.searchLineItemForErrors;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesCurrencyPatternOrEmpty;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesQuantityPatternOrEmpty;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertTrue;
@@ -71,27 +75,41 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void isLineItemListValid_whenEmptyList_returnsTrue() {
-        assertTrue(isLineItemListValid(new ArrayList<LineItem>(), "USD"));
+    public void validateLineItemList_whenEmptyList_returnsNoErrors() {
+        assertEmpty(validateLineItemList(new ArrayList<LineItem>(), "USD"));
     }
 
     @Test
-    public void isLineItemListValid_whenNull_returnsFalse() {
-        assertFalse(isLineItemListValid(null, "JPY"));
+    public void validateLineItemList_whenNull_returnsNoErrors() {
+        assertEmpty(validateLineItemList(null, "JPY"));
     }
 
     @Test
-    public void isLineItemListValid_whenEmptyCurrencyCode_returnsFalse() {
-        assertFalse(isLineItemListValid(new ArrayList<LineItem>(), ""));
+    public void validateLineItemList_whenEmptyCurrencyCode_hasExpectedCartError() {
+        List<CartError> errors = validateLineItemList(new ArrayList<LineItem>(), "");
+
+        assertEquals(1, errors.size());
+        CartError error = errors.get(0);
+        assertEquals(CartError.CART_CURRENCY, error.getErrorType());
+        assertEquals("Cart does not have a valid currency code. " +
+                "[empty] was used, but not recognized.", error.getMessage());
+        assertNull(error.getLineItem());
     }
 
     @Test
-    public void isLineItemListValid_whenInvalidCurrencyCode_returnsFalse() {
-        assertFalse(isLineItemListValid(new ArrayList<LineItem>(), "fakebucks"));
+    public void validateLineItemList_whenInvalidCurrencyCode_hasExpectedCartError() {
+        List<CartError> errors = validateLineItemList(new ArrayList<LineItem>(), "fakebucks");
+
+        assertEquals(1, errors.size());
+        CartError error = errors.get(0);
+        assertEquals(CartError.CART_CURRENCY, error.getErrorType());
+        assertEquals("Cart does not have a valid currency code. " +
+                "fakebucks was used, but not recognized.", error.getMessage());
+        assertNull(error.getLineItem());
     }
 
     @Test
-    public void isLineItemListValid_whenOneOrZeroTaxItems_returnsTrue() {
+    public void validateLineItems_whenOneOrZeroTaxItems_returnsNoErrors() {
         Locale.setDefault(Locale.US);
         LineItem item0 = new LineItemBuilder().setTotalPrice(1000L).build();
         LineItem item1 = new LineItemBuilder().setTotalPrice(2000L)
@@ -104,12 +122,12 @@ public class PaymentUtilsTest {
         oneTaxList.add(item0);
         oneTaxList.add(item1);
 
-        assertTrue(isLineItemListValid(noTaxList, "USD"));
-        assertTrue(isLineItemListValid(oneTaxList, "USD"));
+        assertEmpty(validateLineItemList(noTaxList, "USD"));
+        assertEmpty(validateLineItemList(oneTaxList, "USD"));
     }
 
     @Test
-    public void isLineItemListValid_whenTwoTaxItems_returnsFalse() {
+    public void validateLineItems_whenTwoTaxItems_hasExpectedCartError() {
         Locale.setDefault(Locale.US);
 
         LineItem item0 = LineItem.newBuilder().setCurrencyCode("USD")
@@ -127,11 +145,18 @@ public class PaymentUtilsTest {
         tooMuchTaxList.add(item2);
         tooMuchTaxList.add(item3);
 
-        assertFalse(isLineItemListValid(tooMuchTaxList, "USD"));
+        List<CartError> cartErrors = validateLineItemList(tooMuchTaxList, "USD");
+        assertEquals(1, cartErrors.size());
+        CartError error = cartErrors.get(0);
+        assertEquals(CartError.DUPLICATE_TAX, error.getErrorType());
+        assertEquals("A cart may only have one item with a role of " +
+                        "LineItem.Role.TAX, but more than one was found.",
+                error.getMessage());
+        assertEquals(item2, error.getLineItem());
     }
 
     @Test
-    public void isLineItemListValid_withOneBadItem_returnsFalse() {
+    public void validateLineItemList_withOneBadItem_hasExpectedCartError() {
         LineItem badItem = LineItem.newBuilder().setTotalPrice("10.999")
                 .setCurrencyCode("USD").build();
         LineItem goodItem0 = LineItem.newBuilder().setTotalPrice("10.00")
@@ -144,11 +169,16 @@ public class PaymentUtilsTest {
         oneBadAppleList.add(badItem);
         oneBadAppleList.add(goodItem1);
 
-        assertFalse(isLineItemListValid(oneBadAppleList, "USD"));
+        List<CartError> cartErrors = validateLineItemList(oneBadAppleList, "USD");
+        assertEquals(1, cartErrors.size());
+        CartError error = cartErrors.get(0);
+        assertEquals(CartError.LINE_ITEM_PRICE, error.getErrorType());
+        assertEquals(getExpectedErrorStringForPrice("10.999"), error.getMessage());
+        assertEquals(badItem, error.getLineItem());
     }
 
     @Test
-    public void isLineItemListValid_whenOneItemHasNoCurrency_returnsFalse() {
+    public void validateLineItemList_whenOneItemHasNoCurrency_hasExpectedCartError() {
         LineItem badItem = LineItem.newBuilder().setTotalPrice("10.99").build();
         LineItem goodItem0 = LineItem.newBuilder().setTotalPrice("10.00")
                 .setCurrencyCode("USD").build();
@@ -159,17 +189,18 @@ public class PaymentUtilsTest {
         mixedList.add(goodItem0);
         mixedList.add(badItem);
         mixedList.add(goodItem1);
-        assertFalse(isLineItemListValid(mixedList, "USD"));
 
-        List<LineItem> badItemFirstList = new ArrayList<>();
-        badItemFirstList.add(badItem);
-        badItemFirstList.add(goodItem0);
-        badItemFirstList.add(goodItem1);
-        assertFalse(isLineItemListValid(badItemFirstList, "USD"));
+        List<CartError> cartErrors = validateLineItemList(mixedList, "USD");
+        assertEquals(1, cartErrors.size());
+        CartError error = cartErrors.get(0);
+        assertEquals(CartError.LINE_ITEM_CURRENCY, error.getErrorType());
+        assertEquals("Line item currency of [empty] does not match cart currency of USD.",
+                error.getMessage());
+        assertEquals(badItem, error.getLineItem());
     }
 
     @Test
-    public void isLineItemListValid_whenMixedCurrencies_returnsFalse() {
+    public void validateLineItemList_whenMixedCurrencies_hasExpectedCartErrors() {
         LineItem euroItem = LineItem.newBuilder().setTotalPrice("10.99")
                 .setCurrencyCode("EUR").build();
         LineItem dollarItem = LineItem.newBuilder().setTotalPrice("10.00")
@@ -181,23 +212,37 @@ public class PaymentUtilsTest {
         mixedList.add(euroItem);
         mixedList.add(dollarItem);
         mixedList.add(yenItem);
-        assertFalse(isLineItemListValid(mixedList, "EUR"));
+
+        List<CartError> cartErrors = validateLineItemList(mixedList, "EUR");
+        assertEquals(2, cartErrors.size());
+
+        CartError dollarError = cartErrors.get(0);
+        assertEquals(CartError.LINE_ITEM_CURRENCY, dollarError.getErrorType());
+        assertEquals("Line item currency of USD does not match cart currency of EUR.",
+                dollarError.getMessage());
+        assertEquals(dollarItem, dollarError.getLineItem());
+
+        CartError yenError = cartErrors.get(1);
+        assertEquals(CartError.LINE_ITEM_CURRENCY, yenError.getErrorType());
+        assertEquals("Line item currency of JPY does not match cart currency of EUR.",
+                yenError.getMessage());
+        assertEquals(yenItem, yenError.getLineItem());
     }
 
     @Test
-    public void isLineItemValid_whenNoFieldsEntered_returnsTrue() {
-        assertTrue(isLineItemValid(LineItem.newBuilder().build()));
+    public void searchLineItemForErrors_whenNoFieldsEntered_returnsNull() {
+        assertNull(searchLineItemForErrors(LineItem.newBuilder().build()));
     }
 
     @Test
-    public void isLineItemValid_whenNull_returnsFalse() {
-        assertFalse(isLineItemValid(null));
+    public void searchLineItemForErrors_whenNull_returnsNull() {
+        assertNull(searchLineItemForErrors(null));
     }
 
     @Test
-    public void isLineItemValid_withAllNumericFieldsCorrect_returnsTrue() {
+    public void searchLineItemForErrors_withAllNumericFieldsCorrect_returnsNull() {
         // Note that we don't assert that unitPrice * quantity ==  totalPrice
-        assertTrue(isLineItemValid(LineItem.newBuilder()
+        assertNull(searchLineItemForErrors(LineItem.newBuilder()
                 .setTotalPrice("10.00")
                 .setQuantity("1.3")
                 .setUnitPrice("1.50")
@@ -205,29 +250,44 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void isLineItemValid_whenJustOneIncorrectField_returnsFalse() {
-        assertFalse(isLineItemValid(LineItem.newBuilder()
+    public void searchLineItemForErrors_whenJustOneIncorrectField_returnsExpectedError() {
+        LineItem badTotalPriceItem = LineItem.newBuilder()
                 .setTotalPrice("10.999")
                 .setQuantity("1.3")
                 .setUnitPrice("1.50")
-                .build()));
+                .build();
+        CartError totalPriceError = searchLineItemForErrors(badTotalPriceItem);
+        assertNotNull(totalPriceError);
+        assertEquals(CartError.LINE_ITEM_PRICE, totalPriceError.getErrorType());
+        assertEquals(getExpectedErrorStringForPrice("10.999"), totalPriceError.getMessage());
+        assertEquals(badTotalPriceItem, totalPriceError.getLineItem());
 
-        assertFalse(isLineItemValid(LineItem.newBuilder()
+        LineItem badQuantityItem = LineItem.newBuilder()
                 .setTotalPrice("10.99")
                 .setQuantity("1.33")
                 .setUnitPrice("1.50")
-                .build()));
+                .build();
+        CartError quantityError = searchLineItemForErrors(badQuantityItem);
+        assertNotNull(quantityError);
+        assertEquals(CartError.LINE_ITEM_QUANTITY, quantityError.getErrorType());
+        assertEquals(getExpectedErrorStringForQuantity("1.33"), quantityError.getMessage());
+        assertEquals(badQuantityItem, quantityError.getLineItem());
 
-        assertFalse(isLineItemValid(LineItem.newBuilder()
+        LineItem badUnitPriceItem = LineItem.newBuilder()
                 .setTotalPrice("10.99")
                 .setQuantity("1.3")
                 .setUnitPrice(".50")
-                .build()));
+                .build();
+        CartError unitPriceError = searchLineItemForErrors(badUnitPriceItem);
+        assertNotNull(unitPriceError);
+        assertEquals(CartError.LINE_ITEM_PRICE, unitPriceError.getErrorType());
+        assertEquals(getExpectedErrorStringForPrice(".50"), unitPriceError.getMessage());
+        assertEquals(badUnitPriceItem, unitPriceError.getLineItem());
     }
 
     @Test
-    public void isLineItemValid_withOneCorrectFieldAndOthersNull_returnsTrue() {
-        assertTrue(isLineItemValid(LineItem.newBuilder()
+    public void searchLineItemForErrors_withOneCorrectFieldAndOthersNull_returnsNull() {
+        assertNull(searchLineItemForErrors(LineItem.newBuilder()
                 .setTotalPrice("10.00")
                 .build()));
     }
@@ -419,5 +479,23 @@ public class PaymentUtilsTest {
     public void getCurrencyByCodeOrDefault_forLowercase_stillReturnsCorrectCurrency() {
         assertEquals(Currency.getInstance(Locale.US),
                 getCurrencyByCodeOrDefault("usd"));
+    }
+
+    // ************ Test Helper Methods ************ //
+
+    @NonNull
+    private static String getExpectedErrorStringForPrice(String price) {
+        return String.format(Locale.ENGLISH,
+                "Invalid price string: %s does not match required pattern of " +
+                        "\"^-?[0-9]+(\\.[0-9][0-9])?\"",
+                price);
+    }
+
+    @NonNull
+    private static String getExpectedErrorStringForQuantity(String quantity) {
+        return String.format(Locale.ENGLISH,
+                "Invalid quantity string: %s does not match required pattern of " +
+                        "\"[0-9]+(\\.[0-9])?\"",
+                quantity);
     }
 }

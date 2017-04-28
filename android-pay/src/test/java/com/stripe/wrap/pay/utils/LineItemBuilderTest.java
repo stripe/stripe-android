@@ -42,7 +42,7 @@ public class LineItemBuilderTest {
         final String currencyCode = "EUR";
         final String description = "a test item";
 
-        LineItemBuilder lineItemBuilder = new LineItemBuilder(LineItem.Role.REGULAR, currencyCode);
+        LineItemBuilder lineItemBuilder = new LineItemBuilder(currencyCode);
         LineItem lineItem = lineItemBuilder.setDescription(description)
                 .setUnitPrice(100)
                 .setQuantity(2)
@@ -58,7 +58,7 @@ public class LineItemBuilderTest {
 
     @Test
     public void setHighPrice_thenBuild_createsExpectedLineItem() {
-        LineItemBuilder lineItemBuilder = new LineItemBuilder(LineItem.Role.REGULAR, "USD");
+        LineItemBuilder lineItemBuilder = new LineItemBuilder("USD");
         LineItem lineItem = lineItemBuilder
                 .setUnitPrice(1000000L)
                 .setQuantity(2)
@@ -77,14 +77,14 @@ public class LineItemBuilderTest {
     public void setCurrency_withLowerCaseString_stillSetsCurrency() {
         // If you try to create a Currency object with a lower-case code, it throws
         // an IllegalArgumentException.
-        LineItemBuilder builder = new LineItemBuilder(LineItem.Role.TAX, "eur");
+        LineItemBuilder builder = new LineItemBuilder("eur");
         LineItem item = builder.build();
         assertEquals("EUR", item.getCurrencyCode());
     }
 
     @Test
     public void setQuantityAndUnitPrice_whenNoTotalPriceSet_createsTotalPrice() {
-        LineItemBuilder builder = new LineItemBuilder(LineItem.Role.REGULAR, "usd");
+        LineItemBuilder builder = new LineItemBuilder("usd");
         LineItem item = builder.setQuantity(1.5)
                 .setUnitPrice(399)
                 .build();
@@ -118,7 +118,7 @@ public class LineItemBuilderTest {
         ShadowLog.stream = System.out;
         Locale.setDefault(Locale.JAPAN);
 
-        LineItem item = new LineItemBuilder(LineItem.Role.REGULAR, "notacurrency").build();
+        LineItem item = new LineItemBuilder("notacurrency").build();
         String expectedWarning = "Could not create currency with code \"notacurrency\". Using " +
                 "currency JPY by default.";
         List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(PaymentUtils.TAG);
@@ -172,7 +172,7 @@ public class LineItemBuilderTest {
         ShadowLog.stream = System.out;
         Locale.setDefault(Locale.JAPAN);
 
-        LineItem item = new LineItemBuilder(LineItem.Role.REGULAR, "USD")
+        LineItem item = new LineItemBuilder("USD")
                 .setQuantity(1.0)
                 .setUnitPrice(1500L)
                 .setTotalPrice(2000L).build();
