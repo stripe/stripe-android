@@ -3,6 +3,7 @@ package com.stripe.wrap.pay;
 import android.os.Bundle;
 
 import com.google.android.gms.wallet.Cart;
+import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentMethodTokenizationType;
@@ -12,6 +13,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.Currency;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,6 +40,13 @@ public class AndroidPayConfigurationTest {
     }
 
     @Test
+    public void instantiate_andDoNothingElse_setsCurrencyToDefaultLocale() {
+        Locale.setDefault(Locale.JAPAN);
+        AndroidPayConfiguration testConfig = new AndroidPayConfiguration();
+        assertEquals("JPY", testConfig.getCurrencyCode());
+    }
+
+    @Test
     public void getPaymentMethodTokenizationParameters_whenApiKeyIsNull_returnsNull() {
         assertNull(mAndroidPayConfiguration.getPaymentMethodTokenizationParameters());
     }
@@ -54,6 +65,15 @@ public class AndroidPayConfigurationTest {
         assertEquals("stripe", bundle.getString("gateway"));
         assertEquals(com.stripe.android.BuildConfig.VERSION_NAME,
                 bundle.getString("stripe:version"));
+    }
+
+    @Test
+    public void generateFullWalletRequest_createsExpectedFullWalletRequest() {
+        FullWalletRequest request =
+                AndroidPayConfiguration.generateFullWalletRequest("123abc", mCart);
+        assertEquals("123abc", request.getGoogleTransactionId());
+        assertNotNull(request.getCart());
+        assertEquals("10.00", request.getCart().getTotalPrice());
     }
 
     @Test
@@ -117,16 +137,6 @@ public class AndroidPayConfigurationTest {
     public void generateMaskedWalletRequest_whenCartHasNoTotalPrice_returnsNull() {
         Cart noPriceCart = Cart.newBuilder().build();
         assertNull(mAndroidPayConfiguration.generateMaskedWalletRequest(noPriceCart));
-    }
-
-    @Test
-    public void generateMaskedWalletRequest_whenNoCurrencyIsSet_returnsNull() {
-        // Need to instantiate a new Android Pay Configuration to avoid conflicts with other
-        // tests.
-        AndroidPayConfiguration testPayConfiguration = new AndroidPayConfiguration();
-        testPayConfiguration.setPublicApiKey("pk_test_123");
-        // In this case, we haven't set a currency yet.
-        assertNull(testPayConfiguration.generateMaskedWalletRequest(mCart));
     }
 
     @Test

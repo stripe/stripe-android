@@ -2,7 +2,9 @@ package com.stripe.wrap.pay.utils;
 
 import android.support.annotation.NonNull;
 
+import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.LineItem;
+import com.google.android.gms.wallet.WalletConstants;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,13 +13,16 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static com.stripe.wrap.pay.testutils.AssertUtils.assertEmpty;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getCurrencyByCodeOrDefault;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceLong;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
+import static com.stripe.wrap.pay.utils.PaymentUtils.getStripeIsReadyToPayRequest;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.validateLineItemList;
 import static com.stripe.wrap.pay.utils.PaymentUtils.searchLineItemForErrors;
@@ -479,6 +484,20 @@ public class PaymentUtilsTest {
     public void getCurrencyByCodeOrDefault_forLowercase_stillReturnsCorrectCurrency() {
         assertEquals(Currency.getInstance(Locale.US),
                 getCurrencyByCodeOrDefault("usd"));
+    }
+
+    @Test
+    public void getIsReadyToPayRequest_hasExpectedCardNetworks() {
+        IsReadyToPayRequest isReadyToPayRequest = getStripeIsReadyToPayRequest();
+        Set<Integer> allowedNetworks = new HashSet<>();
+        allowedNetworks.addAll(isReadyToPayRequest.getAllowedCardNetworks());
+
+        assertEquals(5, allowedNetworks.size());
+        assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.VISA));
+        assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.AMEX));
+        assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.MASTERCARD));
+        assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.JCB));
+        assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.DISCOVER));
     }
 
     // ************ Test Helper Methods ************ //
