@@ -1,5 +1,6 @@
 package com.stripe.wrap.pay.utils;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.wallet.Cart;
@@ -11,6 +12,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -148,6 +151,53 @@ public class CartManagerTest {
     }
 
     @Test
+    public void createCartManager_fromExistingCart_copiesRegularLineItemsAndCurrencyCode() {
+        Cart oldCart = generateCartWithAllItems("USD");
+
+        CartManager copyCartManager = new CartManager(oldCart);
+        assertEquals("USD", copyCartManager.getCurrencyCode());
+        assertEmpty(copyCartManager.getLineItemsShipping());
+        assertNull(copyCartManager.getLineItemTax());
+        assertNotNull(copyCartManager.getLineItemsRegular());
+
+        Map<String, String> expectedItemMap = new HashMap<>();
+        expectedItemMap.put("Llama Food", "20.00");
+        expectedItemMap.put("Llama Bow-tie", "50.00");
+
+        List<LineItem> copiedLineItems = new ArrayList<>();
+        copiedLineItems.addAll(copyCartManager.getLineItemsRegular().values());
+
+        verifyLineItemsHaveExpectedValues(expectedItemMap, copiedLineItems);
+    }
+
+    @Test
+    public void createCartManagerAndSetTrue_fromExistingCart_copiesAllItemsAndCurrencyCode() {
+        Cart oldCart = generateCartWithAllItems("KRW");
+
+        CartManager copyCartManager = new CartManager(oldCart, true, true);
+        assertEquals("KRW", copyCartManager.getCurrencyCode());
+
+        Map<String, String> expectedItemMap = new HashMap<>();
+        expectedItemMap.put("Llama Food", "2000");
+        expectedItemMap.put("Llama Bow-tie", "5000");
+        Map<String, String> shippingMap = new HashMap<>();
+        shippingMap.put("Domestic Shipping", "500");
+        shippingMap.put("Next Day Shipping", "3000");
+
+        List<LineItem> copiedLineItems = new ArrayList<>();
+        copiedLineItems.addAll(copyCartManager.getLineItemsRegular().values());
+        verifyLineItemsHaveExpectedValues(expectedItemMap, copiedLineItems);
+
+        List<LineItem> copiedShippingItems = new ArrayList<>();
+        copiedShippingItems.addAll(copyCartManager.getLineItemsShipping().values());
+        verifyLineItemsHaveExpectedValues(shippingMap, copiedShippingItems);
+
+        assertNotNull(copyCartManager.getLineItemTax());
+        assertEquals("Tax", copyCartManager.getLineItemTax().getDescription());
+        assertEquals("333", copyCartManager.getLineItemTax().getTotalPrice());
+    }
+
+    @Test
     public void buildCart_withValidCart_createsExpectedCart() {
         CartManager manager = new CartManager("USD");
         manager.addLineItem("llama food", 10000L);
@@ -227,6 +277,33 @@ public class CartManagerTest {
             assertTrue(messageLines[2].contains("KRW"));
             assertTrue(messageLines[3].contains("$70.00"));
             assertTrue(messageLines[4].contains("1.75"));
+        }
+    }
+
+    private static void verifyLineItemsHaveExpectedValues(
+            @NonNull Map<String, String> expectedDescriptionPriceMap,
+            @NonNull List<LineItem> lineItems) {
+        assertEquals(expectedDescriptionPriceMap.size(), lineItems.size());
+        for (LineItem item : lineItems) {
+            assertTrue(expectedDescriptionPriceMap.containsKey(item.getDescription()));
+            assertEquals(expectedDescriptionPriceMap.get(item.getDescription()),
+                    item.getTotalPrice());
+        }
+    }
+
+    @NonNull
+    private static Cart generateCartWithAllItems(String currencyCode) {
+        CartManager manager = new CartManager(currencyCode);
+        manager.addLineItem("Llama Food", 2000L);
+        manager.addLineItem("Llama Bow-tie", 5000L);
+        manager.addShippingLineItem("Domestic Shipping", 500L);
+        manager.addShippingLineItem("Next Day Shipping", 3000L);
+        manager.setTaxLineItem("Tax", 333L);
+        try {
+            return manager.buildCart();
+        } catch (CartContentException unexpected) {
+            fail("Failed to automatically build a cart.");
+            return Cart.newBuilder().build();
         }
     }
 }

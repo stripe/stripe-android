@@ -6,8 +6,12 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import com.google.android.gms.wallet.Cart;
+import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
+
+import java.util.Currency;
+import java.util.Locale;
 
 import static com.google.android.gms.wallet.PaymentMethodTokenizationType.PAYMENT_GATEWAY;
 
@@ -33,7 +37,9 @@ public class AndroidPayConfiguration {
     }
 
     @VisibleForTesting
-    AndroidPayConfiguration() {}
+    AndroidPayConfiguration() {
+        setCurrencyCode(Currency.getInstance(Locale.getDefault()).getCurrencyCode());
+    }
 
     @Nullable
     public PaymentMethodTokenizationParameters getPaymentMethodTokenizationParameters() {
@@ -55,6 +61,16 @@ public class AndroidPayConfiguration {
                 mIsPhoneNumberRequired,
                 mIsShippingAddressRequired,
                 mCurrencyCode);
+    }
+
+    @NonNull
+    public static FullWalletRequest generateFullWalletRequest(
+            @NonNull String googleTransactionId,
+            @NonNull Cart cart) {
+        return FullWalletRequest.newBuilder()
+                .setGoogleTransactionId(googleTransactionId)
+                .setCart(cart)
+                .build();
     }
 
     @Nullable

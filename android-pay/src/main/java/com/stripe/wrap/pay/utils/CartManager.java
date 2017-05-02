@@ -42,6 +42,58 @@ public class CartManager {
     }
 
     /**
+     * Create a {@link CartManager} from an old {@link Cart} instance. Can be used to
+     * alter old {@link Cart} instances that need to update shipping or tax information.
+     * By default, {@link LineItem LineItems} in this cart are only copied over if their
+     * role is {@link LineItem.Role#REGULAR}.
+     *
+     * @param oldCart a {@link Cart} from which to copy the regular {@link LineItem LineItems} and
+     *                currency code.
+     */
+    public CartManager(@NonNull Cart oldCart) {
+        this(oldCart, false, false);
+    }
+
+    /**
+     * Create a {@link CartManager} from an old {@link Cart} instance. Can be used to
+     * alter old {@link Cart} instances that need to update shipping or tax information.
+     * By default, {@link LineItem LineItems} in this cart are only copied over if their
+     * role is {@link LineItem.Role#REGULAR}.
+     *
+     * @param oldCart a {@link Cart} from which to copy the currency code and line items
+     * @param shouldKeepShipping {@code true} if items with role {@link LineItem.Role#SHIPPING}
+     *                           should be copied, {@code false} if not
+     * @param shouldKeepTax {@code true} if items with role {@link LineItem.Role#TAX} should be
+     *                      should be copied. Note: constructor does not check to see if the input
+     *                      {@link Cart} is valid, so multiple tax items will overwrite each other,
+     *                      and only the last one will be kept
+     */
+    public CartManager(@NonNull Cart oldCart, boolean shouldKeepShipping, boolean shouldKeepTax) {
+        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(oldCart.getCurrencyCode());
+        for (LineItem item : oldCart.getLineItems()) {
+            switch (item.getRole()) {
+                case LineItem.Role.REGULAR:
+                    addLineItem(item);
+                    break;
+                case LineItem.Role.SHIPPING:
+                    if (shouldKeepShipping) {
+                        addLineItem(item);
+                    }
+                    break;
+                case LineItem.Role.TAX:
+                    if (shouldKeepTax) {
+                        setTaxLineItem(item);
+                    }
+                    break;
+                default:
+                    // Unknown type. Treating as REGULAR. Will trigger log warning in additem.
+                    addLineItem(item);
+                    break;
+            }
+        }
+    }
+
+    /**
      * Adds a {@link LineItem.Role#REGULAR} item to the cart with a description
      * and total price value. Currency matches the currency of the {@link CartManager}.
      *
@@ -87,7 +139,6 @@ public class CartManager {
      * @param description a line item description
      * @param totalPrice the total price of the line item, in the smallest denomination
      */
-    @NonNull
     public void setTaxLineItem(@NonNull @Size(min = 1) String description, long totalPrice) {
         LineItem taxLineItem = new LineItemBuilder(mCurrency.getCurrencyCode())
                 .setDescription(description)
@@ -95,6 +146,19 @@ public class CartManager {
                 .setRole(LineItem.Role.TAX)
                 .build();
         addLineItem(taxLineItem);
+    }
+
+    /**
+     * Sets the tax line item in this cart manager. Can be used to clear the tax item by using
+     * {@code null} input. If the input {@link LineItem} has a role other than
+     * {@link LineItem.Role#TAX}, the input is ignored.
+     *
+     * @param item a {@link LineItem} with role {@link LineItem.Role#TAX}, or {@code null}
+     */
+    public void setTaxLineItem(@Nullable LineItem item) {
+        if (item == null || item.getRole() == LineItem.Role.TAX) {
+            mLineItemTax = item;
+        }
     }
 
     /**
@@ -184,6 +248,11 @@ public class CartManager {
         } else {
             throw new CartContentException(errors);
         }
+    }
+
+    @NonNull
+    public String getCurrencyCode() {
+        return mCurrency.getCurrencyCode();
     }
 
     @NonNull
