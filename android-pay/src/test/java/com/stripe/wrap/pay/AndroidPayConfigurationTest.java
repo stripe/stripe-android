@@ -140,16 +140,6 @@ public class AndroidPayConfigurationTest {
     }
 
     @Test
-    public void generateMaskedWalletRequest_whenNoCurrencyIsSet_returnsNull() {
-        // Need to instantiate a new Android Pay Configuration to avoid conflicts with other
-        // tests.
-        AndroidPayConfiguration testPayConfiguration = new AndroidPayConfiguration();
-        testPayConfiguration.setPublicApiKey("pk_test_123");
-        // In this case, we haven't set a currency yet.
-        assertNull(testPayConfiguration.generateMaskedWalletRequest(mCart));
-    }
-
-    @Test
     public void generateMaskedWalletRequest_whenApiKeyIsSet_returnsNull() {
         // Need to instantiate a new Android Pay Configuration to avoid conflicts with other
         // tests.
