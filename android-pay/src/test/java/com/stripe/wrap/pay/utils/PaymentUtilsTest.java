@@ -116,8 +116,8 @@ public class PaymentUtilsTest {
     @Test
     public void validateLineItems_whenOneOrZeroTaxItems_returnsNoErrors() {
         Locale.setDefault(Locale.US);
-        LineItem item0 = new LineItemBuilder().setTotalPrice(1000L).build();
-        LineItem item1 = new LineItemBuilder().setTotalPrice(2000L)
+        LineItem item0 = new LineItemBuilder("USD").setTotalPrice(1000L).build();
+        LineItem item1 = new LineItemBuilder("USD").setTotalPrice(2000L)
                 .setRole(LineItem.Role.TAX).build();
 
 
@@ -403,9 +403,9 @@ public class PaymentUtilsTest {
     @Test
     public void getTotalPriceString_forGroupOfStandardLineItemsInUsd_returnsExpectedValue() {
         Locale.setDefault(Locale.US);
-        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
-        LineItem item2 = new LineItemBuilder().setTotalPrice(2000L).build();
-        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        LineItem item1 = new LineItemBuilder("USD").setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder("USD").setTotalPrice(2000L).build();
+        LineItem item3 = new LineItemBuilder("USD").setTotalPrice(3000L).build();
         List<LineItem> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);
@@ -417,9 +417,9 @@ public class PaymentUtilsTest {
     @Test
     public void getTotalPriceString_forGroupOfStandardLineItemsInKrw_returnsExpectedValue() {
         Locale.setDefault(Locale.KOREA);
-        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
-        LineItem item2 = new LineItemBuilder().setTotalPrice(2000L).build();
-        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        LineItem item1 = new LineItemBuilder("KRW").setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder("KRW").setTotalPrice(2000L).build();
+        LineItem item3 = new LineItemBuilder("KRW").setTotalPrice(3000L).build();
         List<LineItem> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);
@@ -431,9 +431,9 @@ public class PaymentUtilsTest {
     @Test
     public void getTotalPriceString_whenOneItemHasNoPrice_returnsExpectedValue() {
         Locale.setDefault(Locale.US);
-        LineItem item1 = new LineItemBuilder().setTotalPrice(1000L).build();
-        LineItem item2 = new LineItemBuilder().build();
-        LineItem item3 = new LineItemBuilder().setTotalPrice(3000L).build();
+        LineItem item1 = new LineItemBuilder("USD").setTotalPrice(1000L).build();
+        LineItem item2 = new LineItemBuilder("USD").build();
+        LineItem item3 = new LineItemBuilder("USD").setTotalPrice(3000L).build();
         List<LineItem> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);
@@ -445,8 +445,8 @@ public class PaymentUtilsTest {
     @Test
     public void getTotalPriceString_whenNoItemHasPrice_returnsEmptyString() {
         Locale.setDefault(Locale.CANADA);
-        LineItem item1 = new LineItemBuilder().build();
-        LineItem item2 = new LineItemBuilder().build();
+        LineItem item1 = new LineItemBuilder("CAD").build();
+        LineItem item2 = new LineItemBuilder("CAD").build();
         List<LineItem> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);
@@ -498,6 +498,53 @@ public class PaymentUtilsTest {
         assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.MASTERCARD));
         assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.JCB));
         assertTrue(allowedNetworks.contains(WalletConstants.CardNetwork.DISCOVER));
+    }
+
+    @Test
+    public void removeErrorType_whenListContainsErrorsOfType_returnsListWithoutThoseErrors() {
+        final CartError error1 = new CartError(CartError.DUPLICATE_TAX, "Dupe Tax");
+        final CartError error2 = new CartError(CartError.LINE_ITEM_CURRENCY, "Bad line item");
+        final CartError error3 = new CartError(CartError.LINE_ITEM_PRICE, "Bad price on line item");
+        final CartError error4 = new CartError(CartError.LINE_ITEM_QUANTITY, "Bad quantity");
+        final CartError error5 = new CartError(CartError.DUPLICATE_TAX, "Dupe Tax");
+
+        List<CartError> errorList = new ArrayList<CartError>() {{
+            add(error1);
+            add(error2);
+            add(error3);
+            add(error4);
+            add(error5);
+        }};
+
+        List<CartError> filteredErrorList = PaymentUtils.removeErrorType(errorList,
+                CartError.DUPLICATE_TAX);
+        assertEquals(3, filteredErrorList.size());
+        assertEquals(CartError.LINE_ITEM_CURRENCY, filteredErrorList.get(0).getErrorType());
+        assertEquals(CartError.LINE_ITEM_PRICE, filteredErrorList.get(1).getErrorType());
+        assertEquals(CartError.LINE_ITEM_QUANTITY, filteredErrorList.get(2).getErrorType());
+    }
+
+    @Test
+    public void removeErrorType_whenListHasNoErrorsOfType_returnsOriginalList() {
+        final CartError error1 = new CartError(CartError.DUPLICATE_TAX, "Dupe Tax");
+        final CartError error2 = new CartError(CartError.CART_CURRENCY, "Bad line item");
+
+        List<CartError> errorList = new ArrayList<CartError>() {{
+            add(error1);
+            add(error2);
+        }};
+
+        List<CartError> filteredErrorList = PaymentUtils.removeErrorType(errorList,
+                CartError.LINE_ITEM_CURRENCY);
+        assertEquals(2, filteredErrorList.size());
+        assertEquals(CartError.DUPLICATE_TAX, filteredErrorList.get(0).getErrorType());
+        assertEquals(CartError.CART_CURRENCY, filteredErrorList.get(1).getErrorType());
+    }
+
+    @Test
+    public void removeErrorType_onEmptyList_returnsEmptyList() {
+        assertEmpty(PaymentUtils.removeErrorType(new ArrayList<CartError>(),
+                CartError.LINE_ITEM_QUANTITY));
     }
 
     // ************ Test Helper Methods ************ //

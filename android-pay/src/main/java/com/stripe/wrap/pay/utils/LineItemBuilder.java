@@ -36,11 +36,6 @@ public class LineItemBuilder {
     private String mDescription;
     private int mRole;
 
-    LineItemBuilder() {
-        mCurrency = Currency.getInstance(Locale.getDefault());
-        mRole = LineItem.Role.REGULAR;
-    }
-
     LineItemBuilder(String currencyCode) {
         setCurrencyCode(currencyCode);
         mRole = LineItem.Role.REGULAR;
@@ -65,6 +60,28 @@ public class LineItemBuilder {
 
     public LineItemBuilder setTotalPrice(long totalPrice) {
         mTotalPrice = totalPrice;
+        return this;
+    }
+
+    /**
+     * Sets the quantity for this line item. Note: the quantity may have at most one number
+     * after the decimal place. Further precision will be rounded away.
+     *
+     * @param quantity the quantity of this line item
+     * @return {@code this}, for chaining purposes
+     */
+    public LineItemBuilder setQuantity(BigDecimal quantity) {
+        if (quantity.scale() > 1) {
+            mQuantity = quantity.setScale(1, BigDecimal.ROUND_HALF_EVEN);
+            Log.w(TAG, String.format(
+                    Locale.ENGLISH,
+                    "Tried to create quantity %.2f, but Android Pay quantity" +
+                            " may only have one digit after decimal. Value was rounded to %s",
+                    quantity,
+                    mQuantity.toString()));
+        } else {
+            mQuantity = quantity;
+        }
         return this;
     }
 

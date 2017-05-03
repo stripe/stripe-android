@@ -25,10 +25,15 @@ public class PaymentUtils {
     static final String CURRENCY_REGEX = "\"^-?[0-9]+(\\.[0-9][0-9])?\"";
     static final String QUANTITY_REGEX = "\"[0-9]+(\\.[0-9])?\"";
 
+    @Nullable
     static String getTotalPriceString(@NonNull List<LineItem> lineItems,
                                       @NonNull Currency currency) {
         Long totalPrice = null;
         for (LineItem lineItem : lineItems) {
+            if (!currency.getCurrencyCode().equals(lineItem.getCurrencyCode())) {
+                return null;
+            }
+
             Long itemPrice = getPriceLong(lineItem.getTotalPrice(), currency);
             if (itemPrice != null) {
                 if (totalPrice == null) {
@@ -255,6 +260,27 @@ public class PaymentUtils {
     @NonNull
     public static String getPriceString(long price) {
         return getPriceString(price, Currency.getInstance(Locale.getDefault()));
+    }
+
+    /**
+     * Filter a list of {@link CartError} objects to remove all of a given type.
+     *
+     * @param errors the original list of {@link CartError CartErrors}
+     * @param errorType the {@link CartError.CartErrorType} to remove from the list
+     * @return the original list, minus any of the errors that were of the filtered type
+     */
+    @NonNull
+    public static List<CartError> removeErrorType(
+            @NonNull List<CartError> errors,
+            @NonNull @CartError.CartErrorType String errorType) {
+        List<CartError> filteredErrors = new ArrayList<>();
+        for (CartError error : errors) {
+            if (errorType.equals(error.getErrorType())) {
+                continue;
+            }
+            filteredErrors.add(error);
+        }
+        return filteredErrors;
     }
 
     /**

@@ -28,16 +28,6 @@ import static org.junit.Assert.assertTrue;
 public class LineItemBuilderTest {
 
     @Test
-    public void emptyLineItemBuilder_createsEmptyLineItemWithDefaults() {
-        Locale.setDefault(Locale.US);
-
-        LineItemBuilder lineItemBuilder = new LineItemBuilder();
-        LineItem item = lineItemBuilder.build();
-        assertEquals(LineItem.Role.REGULAR, item.getRole());
-        assertEquals(Currency.getInstance(Locale.US).getCurrencyCode(), item.getCurrencyCode());
-    }
-
-    @Test
     public void setAllAttributes_thenBuild_createsExpectedLineItem() {
         final String currencyCode = "EUR";
         final String description = "a test item";
@@ -98,7 +88,7 @@ public class LineItemBuilderTest {
     public void setQuantity_whenMoreThanOneDigitAfterDecimal_getsRoundedAndLogsWarning() {
         ShadowLog.stream = System.out;
         Locale.setDefault(Locale.US);
-        LineItem item = new LineItemBuilder().setQuantity(1.71).build();
+        LineItem item = new LineItemBuilder("USD").setQuantity(1.71).build();
 
         String expectedWarning = String.format(
                 Locale.ENGLISH,
