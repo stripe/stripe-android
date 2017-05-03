@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -40,6 +41,10 @@ import org.json.JSONException;
 
 import java.util.Locale;
 
+/**
+ * A class that handles the Google API callbacks for the purchase flow and {@link GoogleApiClient}
+ * connection states, simplifying the required work to display and complete an Android Pay purchase.
+ */
 public abstract class StripeAndroidPayActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -216,6 +221,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         });
     }
 
+    /**
+     * Call to make a final payment request to Google Play Services.
+     *
+     * @param fullWalletRequest
+     */
     protected void loadFullWallet(@NonNull FullWalletRequest fullWalletRequest) {
         Wallet.Payments.loadFullWallet(
                 mGoogleApiClient,
@@ -274,6 +284,15 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                 .build();
     }
 
+    /**
+     * Creates the confirmation wallet fragment and calls
+     * {@link #addConfirmationWalletFragment(SupportWalletFragment)}. Override this method to
+     * launch a new activity as a confirmation screen, or to otherwise avoid creating a
+     * confirmation fragment. This method is never automatically invoked, so it can be avoided
+     * without an override if desired.
+     *
+     * @param maskedWallet a {@link MaskedWallet} whose details the user needs to confirm
+     */
     protected void createAndAddConfirmationWalletFragment(@NonNull MaskedWallet maskedWallet) {
         SupportWalletFragment supportWalletFragment = SupportWalletFragment.newInstance(
                 getWalletFragmentOptions(WalletFragmentMode.SELECTION_DETAILS));
@@ -291,6 +310,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         addConfirmationWalletFragment(supportWalletFragment);
     }
 
+    /**
+     * Creates the Buy Button WalletFragment and calls
+     * {@link #addBuyButtonWalletFragment(SupportWalletFragment)}. Override this method to
+     * avoid displaying or instantiating a Buy Button at all.
+     */
     protected void createAndAddBuyButtonWalletFragment() {
         SupportWalletFragment supportWalletFragment = SupportWalletFragment.newInstance(
                 getWalletFragmentOptions(WalletFragmentMode.BUY_BUTTON));
@@ -310,21 +334,29 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         addBuyButtonWalletFragment(supportWalletFragment);
     }
 
-    protected void onFullWalletRetrieved(FullWallet fullWallet) {
+    /**
+     * Handles receipt of a {@link FullWallet} from Google Play Services. This wallet includes
+     * the Stripe {@link Token}. If that token exists, this method calls through to
+     * {@link #onTokenReturned(FullWallet, Token)}. If the object returned is a {@link Source},
+     * this function passes the result through to {@link #onSourceReturned(FullWallet, Source)}.
+     *
+     * @param fullWallet the {@link FullWallet} returned from Google Play Services
+     */
+    protected void onFullWalletRetrieved(@Nullable FullWallet fullWallet) {
         if (fullWallet == null || fullWallet.getPaymentMethodToken() == null) {
             return;
         }
 
         String rawPurchaseToken = fullWallet.getPaymentMethodToken().getToken();
         if (rawPurchaseToken == null) {
-            Log.w(TAG, "Null token returned with full wallet");
+            Log.w(TAG, "Null token returned with non-null full wallet");
         }
 
         try {
             Token token = TokenParser.parseToken(rawPurchaseToken);
             onTokenReturned(fullWallet, token);
         } catch (JSONException jsonException) {
-            Log.w(TAG,
+            Log.i(TAG,
                     String.format(Locale.ENGLISH,
                             "Could not parse object as Stripe token. Trying as Source.\n%s",
                             rawPurchaseToken),

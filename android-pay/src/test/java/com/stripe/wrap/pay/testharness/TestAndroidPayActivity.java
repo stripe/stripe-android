@@ -1,6 +1,7 @@
 package com.stripe.wrap.pay.testharness;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -76,6 +77,10 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
             mListener.getWalletFragmentOptions(options);
         }
         return options;
+    }
+
+    public WalletFragmentOptions accessWalletFragmentOptions(int walletFragmentMode) {
+        return getWalletFragmentOptions(walletFragmentMode);
     }
 
     @Override
@@ -194,6 +199,14 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
     }
 
     @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        super.onConnected(bundle);
+        if (mListener != null) {
+            mListener.onConnected(bundle);
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {
         super.onConnectionSuspended(i);
         if (mListener != null) {
@@ -218,6 +231,7 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
         void onAndroidPayNotAvailable();
         void onBeforeAndroidPayAvailable();
         void onConfirmedMaskedWalletRetrieved(MaskedWallet maskedWallet);
+        void onConnected(Bundle bundle);
         void onConnectionFailed(@NonNull ConnectionResult connectionResult);
         void onConnectionSuspended(int i);
         void onMaskedWalletRetrieved(MaskedWallet maskedWallet);
