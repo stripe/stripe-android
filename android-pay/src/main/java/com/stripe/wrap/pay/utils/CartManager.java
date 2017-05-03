@@ -31,8 +31,6 @@ public class CartManager {
 
     private final Currency mCurrency;
 
-    private boolean mHasMixedCurrencies = false;
-
     @NonNull private LinkedHashMap<String, LineItem> mLineItemsRegular = new LinkedHashMap<>();
     @NonNull private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
 
@@ -384,14 +382,13 @@ public class CartManager {
 
     @VisibleForTesting
     void updateRunningPrice(@Nullable LineItem itemAdded, @Nullable LineItem itemRemoved) {
-        if (mHasMixedCurrencies) {
+        if (mRunningTotalPrice == null) {
             return;
         }
 
         if (itemAdded != null && !mCurrency.getCurrencyCode().equals(itemAdded.getCurrencyCode())) {
             // Note: if we add a different currency item to our cart, this puts the cart in a
             // permanent error state with regards to calculating the running total.
-            mHasMixedCurrencies = true;
             mRunningTotalPrice = null;
             return;
         }
