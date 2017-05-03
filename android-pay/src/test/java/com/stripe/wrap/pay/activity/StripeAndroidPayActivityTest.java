@@ -9,12 +9,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
-import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.fragment.SupportWalletFragment;
 import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
-import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.BuildConfig;
 import com.stripe.wrap.pay.testharness.TestAndroidPayActivity;
@@ -51,8 +49,7 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = 22)
 public class StripeAndroidPayActivityTest {
 
-    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+    private static final String TEST_KEY = "pk_test_willnotreallywork";
 
     @Mock TestAndroidPayActivity.AndroidPayAvailabilityChooser mAndroidPayAvailabilityChooser;
     @Mock GoogleApiClient mGoogleApiClient;
@@ -72,7 +69,7 @@ public class StripeAndroidPayActivityTest {
         mCartManager.addLineItem("Second item", 200L);
 
         AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
-        androidPayConfiguration.setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        androidPayConfiguration.setPublicApiKey(TEST_KEY);
         when(mAndroidPayAvailabilityChooser.doesAndroidPayCheckSucceed()).thenReturn(
                 new BooleanResult(new Status(CommonStatusCodes.SUCCESS), true));
 
@@ -93,7 +90,7 @@ public class StripeAndroidPayActivityTest {
     }
 
     @Test
-    public void onCreate_listenerHitsExpectedMethods() {
+    public void onCreate_whenGooglePlaySucceedsAndIsAvailable_listenerHitsExpectedMethods() {
         mActivityController.create().start();
 
         ArgumentCaptor<WalletFragmentOptions> walletFragmentOptionsCaptor =
@@ -110,6 +107,38 @@ public class StripeAndroidPayActivityTest {
 
         WalletFragmentOptions optionsUsed = walletFragmentOptionsCaptor.getValue();
         assertEquals(WalletFragmentMode.BUY_BUTTON, optionsUsed.getMode());
+
+        verify(mGoogleApiClient).connect();
+    }
+
+    @Test
+    public void onCreate_whenGooglePlaySucceedsAndIsNotAvailable_listenerHitsExpectedMethods() {
+        reset(mAndroidPayAvailabilityChooser);
+        when(mAndroidPayAvailabilityChooser.doesAndroidPayCheckSucceed()).thenReturn(
+                new BooleanResult(new Status(CommonStatusCodes.SUCCESS), false));
+        mActivityController.create().start();
+
+        verify(mListener).onBeforeAndroidPayAvailable();
+        verify(mListener).verifyAndPrepareAndroidPayControls(any(IsReadyToPayRequest.class));
+        verify(mListener).onAfterAndroidPayCheckComplete();
+        verify(mListener).onAndroidPayNotAvailable();
+        verifyNoMoreInteractions(mListener);
+
+        verify(mGoogleApiClient).connect();
+    }
+
+    @Test
+    public void onCreate_whenGooglePlayFails_listenerHitsExpectedMethods() {
+        reset(mAndroidPayAvailabilityChooser);
+        when(mAndroidPayAvailabilityChooser.doesAndroidPayCheckSucceed()).thenReturn(
+                new BooleanResult(new Status(CommonStatusCodes.ERROR), false));
+        mActivityController.create().start();
+
+        verify(mListener).onBeforeAndroidPayAvailable();
+        verify(mListener).verifyAndPrepareAndroidPayControls(any(IsReadyToPayRequest.class));
+        verify(mListener).onAfterAndroidPayCheckComplete();
+        verify(mListener).onAndroidPayNotAvailable();
+        verifyNoMoreInteractions(mListener);
 
         verify(mGoogleApiClient).connect();
     }
@@ -170,8 +199,5 @@ public class StripeAndroidPayActivityTest {
         assertEquals(WalletFragmentMode.SELECTION_DETAILS, options.getMode());
         assertEquals(WalletConstants.ENVIRONMENT_TEST, options.getEnvironment());
         assertEquals(WalletConstants.THEME_LIGHT, options.getTheme());
-
     }
-
-
 }
