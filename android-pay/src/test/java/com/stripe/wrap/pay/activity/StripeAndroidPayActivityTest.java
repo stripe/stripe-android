@@ -64,7 +64,7 @@ public class StripeAndroidPayActivityTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mGoogleApiClientMockBuilder.getMockGoogleApiClient()).thenReturn(mGoogleApiClient);
-        mCartManager = new CartManager();
+        mCartManager = new CartManager("USD");
         mCartManager.addLineItem("First item", 100L);
         mCartManager.addLineItem("Second item", 200L);
 
