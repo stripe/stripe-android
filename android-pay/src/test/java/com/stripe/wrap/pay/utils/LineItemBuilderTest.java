@@ -11,13 +11,13 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
 import static com.stripe.wrap.pay.utils.LineItemBuilder.isPriceBreakdownConsistent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -26,16 +26,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
 public class LineItemBuilderTest {
-
-    @Test
-    public void emptyLineItemBuilder_createsEmptyLineItemWithDefaults() {
-        Locale.setDefault(Locale.US);
-
-        LineItemBuilder lineItemBuilder = new LineItemBuilder();
-        LineItem item = lineItemBuilder.build();
-        assertEquals(LineItem.Role.REGULAR, item.getRole());
-        assertEquals(Currency.getInstance(Locale.US).getCurrencyCode(), item.getCurrencyCode());
-    }
 
     @Test
     public void setAllAttributes_thenBuild_createsExpectedLineItem() {
@@ -98,7 +88,7 @@ public class LineItemBuilderTest {
     public void setQuantity_whenMoreThanOneDigitAfterDecimal_getsRoundedAndLogsWarning() {
         ShadowLog.stream = System.out;
         Locale.setDefault(Locale.US);
-        LineItem item = new LineItemBuilder().setQuantity(1.71).build();
+        LineItem item = new LineItemBuilder("USD").setQuantity(1.71).build();
 
         String expectedWarning = String.format(
                 Locale.ENGLISH,
@@ -111,6 +101,48 @@ public class LineItemBuilderTest {
         assertEquals(expectedWarning, logItems.get(0).msg);
         assertEquals(Log.WARN, logItems.get(0).type);
         assertEquals("1.7", item.getQuantity());
+    }
+
+    @Test
+    public void setQuantity_withBigDecimalWithIncorrectScale_getsRoundedAndLogsWarning() {
+        ShadowLog.stream = System.out;
+        BigDecimal bigDecimal = BigDecimal.valueOf(1.71);
+        bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_DOWN);
+        LineItem item = new LineItemBuilder("USD").setQuantity(bigDecimal).build();
+
+        String expectedWarning = String.format(
+                Locale.ENGLISH,
+                "Tried to create quantity %.2f, but Android Pay quantity" +
+                        " may only have one digit after decimal. Value was rounded to 1.7",
+                1.71);
+        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(LineItemBuilder.TAG);
+        assertFalse(logItems.isEmpty());
+        assertEquals(1, logItems.size());
+        assertEquals(expectedWarning, logItems.get(0).msg);
+        assertEquals(Log.WARN, logItems.get(0).type);
+        assertEquals("1.7", item.getQuantity());
+    }
+
+    @Test
+    public void setQuantity_withBigDecimalWithLowerScale_setsExpectedValue() {
+        ShadowLog.stream = System.out;
+        BigDecimal bigDecimal = BigDecimal.valueOf(2);
+        bigDecimal = bigDecimal.setScale(0, BigDecimal.ROUND_DOWN);
+        LineItem item = new LineItemBuilder("USD").setQuantity(bigDecimal).build();
+
+        assertNull(ShadowLog.getLogsForTag(LineItemBuilder.TAG));
+        assertEquals("2", item.getQuantity());
+    }
+
+    @Test
+    public void setQuantity_withBigDecimalWithCorrectScale_setsExpectedValue() {
+        ShadowLog.stream = System.out;
+        BigDecimal bigDecimal = BigDecimal.valueOf(2.5);
+        bigDecimal = bigDecimal.setScale(1, BigDecimal.ROUND_DOWN);
+        LineItem item = new LineItemBuilder("USD").setQuantity(bigDecimal).build();
+
+        assertNull(ShadowLog.getLogsForTag(LineItemBuilder.TAG));
+        assertEquals("2.5", item.getQuantity());
     }
 
     @Test
