@@ -23,7 +23,7 @@ import static com.stripe.wrap.pay.utils.PaymentUtils.getCurrencyByCodeOrDefault;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceLong;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getStripeIsReadyToPayRequest;
-import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPriceString;
+import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPrice;
 import static com.stripe.wrap.pay.utils.PaymentUtils.validateLineItemList;
 import static com.stripe.wrap.pay.utils.PaymentUtils.searchLineItemForErrors;
 import static com.stripe.wrap.pay.utils.PaymentUtils.matchesCurrencyPatternOrEmpty;
@@ -328,21 +328,6 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void getPriceString_whenNoCurrencyProvided_usesDefault() {
-        Locale.setDefault(Locale.US);
-
-        String dollarString = getPriceString(499L);
-        assertEquals("4.99", dollarString);
-        assertTrue(matchesCurrencyPatternOrEmpty(dollarString));
-
-        Locale.setDefault(Locale.JAPAN);
-
-        String yenString = getPriceString(499L);
-        assertEquals("499", yenString);
-        assertTrue(matchesCurrencyPatternOrEmpty(yenString));
-    }
-
-    @Test
     public void getPriceLong_whenDecimalValueGiven_correctlyParsesResult() {
         assertEquals(Long.valueOf(1000L), getPriceLong("10.00", Currency.getInstance("USD")));
         assertEquals(Long.valueOf(55555555L),
@@ -401,7 +386,7 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void getTotalPriceString_forGroupOfStandardLineItemsInUsd_returnsExpectedValue() {
+    public void getTotalPrice_forGroupOfStandardLineItemsInUsd_returnsExpectedValue() {
         Locale.setDefault(Locale.US);
         LineItem item1 = new LineItemBuilder("USD").setTotalPrice(1000L).build();
         LineItem item2 = new LineItemBuilder("USD").setTotalPrice(2000L).build();
@@ -411,11 +396,11 @@ public class PaymentUtilsTest {
         items.add(item2);
         items.add(item3);
 
-        assertEquals("60.00", getTotalPriceString(items, Currency.getInstance("USD")));
+        assertEquals(Long.valueOf(6000L), getTotalPrice(items, Currency.getInstance("USD")));
     }
 
     @Test
-    public void getTotalPriceString_forGroupOfStandardLineItemsInKrw_returnsExpectedValue() {
+    public void getTotalPrice_forGroupOfStandardLineItemsInKrw_returnsExpectedValue() {
         Locale.setDefault(Locale.KOREA);
         LineItem item1 = new LineItemBuilder("KRW").setTotalPrice(1000L).build();
         LineItem item2 = new LineItemBuilder("KRW").setTotalPrice(2000L).build();
@@ -425,7 +410,7 @@ public class PaymentUtilsTest {
         items.add(item2);
         items.add(item3);
 
-        assertEquals("6000", getTotalPriceString(items, Currency.getInstance("KRW")));
+        assertEquals(Long.valueOf(6000L), getTotalPrice(items, Currency.getInstance("KRW")));
     }
 
     @Test
@@ -439,11 +424,11 @@ public class PaymentUtilsTest {
         items.add(item2);
         items.add(item3);
 
-        assertEquals("40.00", getTotalPriceString(items, Currency.getInstance("USD")));
+        assertEquals(Long.valueOf(4000L), getTotalPrice(items, Currency.getInstance("USD")));
     }
 
     @Test
-    public void getTotalPriceString_whenNoItemHasPrice_returnsEmptyString() {
+    public void getTotalPrice_whenNoItemHasPrice_returnsZero() {
         Locale.setDefault(Locale.CANADA);
         LineItem item1 = new LineItemBuilder("CAD").build();
         LineItem item2 = new LineItemBuilder("CAD").build();
@@ -451,12 +436,12 @@ public class PaymentUtilsTest {
         items.add(item1);
         items.add(item2);
 
-        assertEquals("", getTotalPriceString(items, Currency.getInstance("CAD")));
+        assertEquals(Long.valueOf(0L), getTotalPrice(items, Currency.getInstance("CAD")));
     }
 
     @Test
-    public void getTotalPriceString_whenEmptyList_returnsEmptyString() {
-        assertEquals("", getTotalPriceString(
+    public void getTotalPriceString_whenEmptyList_returnsZero() {
+        assertEquals(Long.valueOf(0L), getTotalPrice(
                 new ArrayList<LineItem>(), Currency.getInstance("OMR")));
     }
 

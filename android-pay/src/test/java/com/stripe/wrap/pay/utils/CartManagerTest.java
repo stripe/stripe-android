@@ -13,6 +13,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -107,7 +108,8 @@ public class CartManagerTest {
 
         assertNotNull(cartTaxItem);
         assertEquals(Long.valueOf(200L), cartManager.getRunningTotalPrice());
-        assertEquals(PaymentUtils.getPriceString(200L), cartTaxItem.getTotalPrice());
+        assertEquals(PaymentUtils.getPriceString(200L, Currency.getInstance("USD")),
+                cartTaxItem.getTotalPrice());
     }
 
     @Test
@@ -370,7 +372,7 @@ public class CartManagerTest {
 
     }
 
-        @Test
+    @Test
     public void buildCart_withItemCurrencyErrorsButTotalValueIsManuallySet_doesNotThrowErrors() {
         CartManager cartManager = new CartManager("CAD");
         LineItem dollarItem = new LineItemBuilder("USD").setTotalPrice(100L).build();

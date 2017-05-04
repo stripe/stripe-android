@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,7 @@ public class PaymentUtils {
     static final String QUANTITY_REGEX = "\"[0-9]+(\\.[0-9])?\"";
 
     @Nullable
-    static String getTotalPriceString(@NonNull List<LineItem> lineItems,
+    static Long getTotalPrice(@NonNull Collection<LineItem> lineItems,
                                       @NonNull Currency currency) {
         Long totalPrice = null;
         for (LineItem lineItem : lineItems) {
@@ -44,11 +45,12 @@ public class PaymentUtils {
             }
         }
 
+        // In this case, the values were simply all empty, not invalid. The total price is zero.
         if (totalPrice == null) {
-            return "";
-        } else {
-            return getPriceString(totalPrice, currency);
+            return 0L;
         }
+
+        return totalPrice;
     }
 
     @NonNull

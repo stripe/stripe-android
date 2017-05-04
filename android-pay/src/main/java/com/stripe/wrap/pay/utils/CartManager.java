@@ -19,6 +19,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
+import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPrice;
+
 /**
  * A wrapper for {@link Cart.Builder} that aids in the generation of new {@link LineItem}
  * objects.
@@ -201,6 +204,16 @@ public class CartManager {
                 .build());
     }
 
+    @Nullable
+    public Long calculateRegularItemTotal() {
+        return PaymentUtils.getTotalPrice(mLineItemsRegular.values(), mCurrency);
+    }
+
+    @Nullable
+    public Long calculateShippingItemTotal() {
+        return PaymentUtils.getTotalPrice(mLineItemsShipping.values(), mCurrency);
+    }
+
     /**
      * Adds a {@link LineItem.Role#TAX} item to the cart with a description
      * and total price value. Currency matches the currency of the {@link CartManager}.
@@ -222,9 +235,9 @@ public class CartManager {
      * from the sum of the prices of the items within the cart.
      *
      * @param totalPrice a number representing the price, in the lowest possible denomination
-     *                   of the cart's currency, or {@code null} to clear the manually set price
+     *                   of the cart's currency
      */
-    public void setTotalPrice(@Nullable Long totalPrice) {
+    public void setTotalPrice(@NonNull Long totalPrice) {
         mManualTotalPrice = totalPrice;
     }
 
@@ -330,9 +343,11 @@ public class CartManager {
                 totalLineItems,
                 mCurrency.getCurrencyCode());
 
-        String totalPriceString = mManualTotalPrice == null
-                ? PaymentUtils.getTotalPriceString(totalLineItems, mCurrency)
-                : PaymentUtils.getPriceString(mManualTotalPrice, mCurrency);
+        Long totalPrice = mManualTotalPrice == null
+                ? getTotalPrice(totalLineItems, mCurrency)
+                : mManualTotalPrice;
+
+        String totalPriceString = totalPrice == null ? null : getPriceString(totalPrice, mCurrency);
 
         if (!TextUtils.isEmpty(totalPriceString)) {
             // If a manual value has been set for the total price string, then we don't need
