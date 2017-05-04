@@ -414,7 +414,7 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void getTotalPriceString_whenOneItemHasNoPrice_returnsExpectedValue() {
+    public void getTotalPrice_whenOneItemHasNoPrice_returnsExpectedValue() {
         Locale.setDefault(Locale.US);
         LineItem item1 = new LineItemBuilder("USD").setTotalPrice(1000L).build();
         LineItem item2 = new LineItemBuilder("USD").build();
@@ -440,7 +440,18 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void getTotalPriceString_whenEmptyList_returnsZero() {
+    public void getTotalPrice_whenOneItemHasInvalidCurrency_returnsNull() {
+        LineItem item1 = new LineItemBuilder("USD").setTotalPrice(100L).build();
+        LineItem item2 = new LineItemBuilder("CAD").setTotalPrice(100L).build();
+        List<LineItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+
+        assertNull(getTotalPrice(items, Currency.getInstance("USD")));
+    }
+
+    @Test
+    public void getTotalPrice_whenEmptyList_returnsZero() {
         assertEquals(Long.valueOf(0L), getTotalPrice(
                 new ArrayList<LineItem>(), Currency.getInstance("OMR")));
     }
