@@ -39,11 +39,9 @@ public class CartManager {
 
     @Nullable private LineItem mLineItemTax;
     @Nullable private Long mManualTotalPrice;
-    @Nullable private Long mRunningTotalPrice;
 
     public CartManager(String currencyCode) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
-        mRunningTotalPrice = 0L;
     }
 
     /**
@@ -75,7 +73,6 @@ public class CartManager {
      */
     public CartManager(@NonNull Cart oldCart, boolean shouldKeepShipping, boolean shouldKeepTax) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(oldCart.getCurrencyCode());
-        mRunningTotalPrice = 0L;
         for (LineItem item : oldCart.getLineItems()) {
             switch (item.getRole()) {
                 case LineItem.Role.REGULAR:
@@ -204,11 +201,25 @@ public class CartManager {
                 .build());
     }
 
+    /**
+     * Calculate the total price of all {@link LineItem.Role#REGULAR}
+     * line items, if possible.
+     *
+     * @return the total price of regular items, or {@code null} if that cannot
+     * be calculated because of mixed currencies.
+     */
     @Nullable
     public Long calculateRegularItemTotal() {
         return PaymentUtils.getTotalPrice(mLineItemsRegular.values(), mCurrency);
     }
 
+    /**
+     * Calculate the total price of all {@link LineItem.Role#SHIPPING}
+     * line items, if possible.
+     *
+     * @return the total price of shipping items, or {@code null} if that cannot
+     * be calculated because of mixed currencies.
+     */
     @Nullable
     public Long calculateShippingItemTotal() {
         return PaymentUtils.getTotalPrice(mLineItemsShipping.values(), mCurrency);
@@ -269,7 +280,6 @@ public class CartManager {
             removed = mLineItemsShipping.remove(itemId);
         }
 
-        updateRunningPrice(null, removed);
         return removed;
     }
 
@@ -287,12 +297,10 @@ public class CartManager {
             case LineItem.Role.REGULAR:
                 itemId = generateUuidForRole(LineItem.Role.REGULAR);
                 mLineItemsRegular.put(itemId, item);
-                updateRunningPrice(item, null);
                 break;
             case LineItem.Role.SHIPPING:
                 itemId = generateUuidForRole(LineItem.Role.SHIPPING);
                 mLineItemsShipping.put(itemId, item);
-                updateRunningPrice(item, null);
                 break;
             case LineItem.Role.TAX:
                 if (mLineItemTax != null) {
@@ -303,7 +311,6 @@ public class CartManager {
                             mLineItemTax.getTotalPrice()));
                 }
                 // We're swapping out the tax item, so we have to remove the old one.
-                updateRunningPrice(item, mLineItemTax);
                 mLineItemTax = item;
                 break;
             default:
@@ -313,7 +320,6 @@ public class CartManager {
                         item.getRole()));
                 itemId = generateUuidForRole(LineItem.Role.REGULAR);
                 mLineItemsRegular.put(itemId, item);
-                updateRunningPrice(item, null);
                 break;
         }
         return itemId;
@@ -381,47 +387,9 @@ public class CartManager {
         return mLineItemsShipping;
     }
 
-    /**
-     * @return The current total price of the items in the cart, or {@code null} if no total price
-     * can be computed.
-     */
-    @Nullable
-    public Long getRunningTotalPrice() {
-        return mRunningTotalPrice;
-    }
-
     @Nullable
     public LineItem getLineItemTax() {
         return mLineItemTax;
-    }
-
-    @VisibleForTesting
-    void updateRunningPrice(@Nullable LineItem itemAdded, @Nullable LineItem itemRemoved) {
-        if (mRunningTotalPrice == null) {
-            return;
-        }
-
-        if (itemAdded != null && !mCurrency.getCurrencyCode().equals(itemAdded.getCurrencyCode())) {
-            // Note: if we add a different currency item to our cart, this puts the cart in a
-            // permanent error state with regards to calculating the running total.
-            mRunningTotalPrice = null;
-            return;
-        }
-
-        Long itemAddedPrice = itemAdded == null
-                ? null
-                : PaymentUtils.getPriceLong(itemAdded.getTotalPrice(), mCurrency);
-        Long itemRemovedPrice = itemRemoved == null
-                ? null
-                : PaymentUtils.getPriceLong(itemRemoved.getTotalPrice(), mCurrency);
-
-        if (itemAddedPrice != null) {
-            mRunningTotalPrice += itemAddedPrice;
-        }
-
-        if (itemRemovedPrice != null) {
-            mRunningTotalPrice -= itemRemovedPrice;
-        }
     }
 
     @NonNull

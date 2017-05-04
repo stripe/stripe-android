@@ -107,7 +107,6 @@ public class CartManagerTest {
         LineItem cartTaxItem = cartManager.getLineItemTax();
 
         assertNotNull(cartTaxItem);
-        assertEquals(Long.valueOf(200L), cartManager.getRunningTotalPrice());
         assertEquals(PaymentUtils.getPriceString(200L, Currency.getInstance("USD")),
                 cartTaxItem.getTotalPrice());
     }
@@ -133,7 +132,7 @@ public class CartManagerTest {
         assertEquals("llama food", item.getDescription());
         assertEquals("100.00", item.getTotalPrice());
 
-        assertEquals(Long.valueOf(0L), manager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(0L), manager.calculateRegularItemTotal());
         assertEmpty(manager.getLineItemsRegular());
         assertEmpty(manager.getLineItemsShipping());
     }
@@ -151,33 +150,35 @@ public class CartManagerTest {
         assertEquals("2 Day Guaranteed", item.getDescription());
         assertEquals("2099", item.getTotalPrice());
 
-        assertEquals(Long.valueOf(0L), manager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(0L), manager.calculateShippingItemTotal());
         assertEmpty(manager.getLineItemsRegular());
         assertEmpty(manager.getLineItemsShipping());
     }
 
     @Test
-    public void addTaxLineItem_whenTaxItemExists_updatesRunningTotalProperly() {
-        CartManager manager = new CartManager("JPY");
-        manager.addLineItem("Regular Item", 100L);
-        manager.addLineItem("Another Regular Thing", 100L);
-        manager.addLineItem("Shipping Item", 50L, LineItem.Role.SHIPPING);
-        manager.addLineItem("Tax", 50L, LineItem.Role.TAX);
+    public void addTaxItem_doesNotAffectRegularOrShippingTotals() {
+        CartManager manager = new CartManager("KRW");
+        manager.addLineItem("Regular", 10L);
+        manager.addLineItem("Regular Again", 20L);
+        manager.addShippingLineItem("Shipping 1", 30L);
+        manager.addShippingLineItem("Shipping 2", 40L);
 
-        assertEquals(Long.valueOf(300L), manager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(30L), manager.calculateRegularItemTotal());
+        assertEquals(Long.valueOf(70L), manager.calculateShippingItemTotal());
 
-        manager.addLineItem("Alternate Tax", 100L, LineItem.Role.TAX);
+        manager.setTaxLineItem("Taxes", 10000L);
 
-        assertEquals(Long.valueOf(350L), manager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(30L), manager.calculateRegularItemTotal());
+        assertEquals(Long.valueOf(70L), manager.calculateShippingItemTotal());
     }
 
     @Test
-    public void addLineItem_whenDifferentCurrencyFromCart_changesRunningTotalPriceToNull() {
+    public void addLineItem_whenDifferentCurrencyFromCart_returnsNullForTotalCalculation() {
         CartManager manager = new CartManager("JPY");
         manager.addLineItem("Regular Item", 100L);
         manager.addLineItem("Another Regular Thing", 100L);
 
-        assertEquals(Long.valueOf(200L), manager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(200L), manager.calculateRegularItemTotal());
 
         LineItem wonItem = new LineItemBuilder("KRW")
                 .setDescription("Imported Item")
@@ -186,11 +187,7 @@ public class CartManagerTest {
         manager.addLineItem(wonItem);
 
         // We can't add prices in different currencies
-        assertNull(manager.getRunningTotalPrice());
-
-        manager.addLineItem("A Yen Item", 100L);
-        // Once we've gone null, we shouldn't go back
-        assertNull(manager.getRunningTotalPrice());
+        assertNull(manager.calculateRegularItemTotal());
     }
 
     @Test
@@ -210,7 +207,7 @@ public class CartManagerTest {
         List<LineItem> copiedLineItems = new ArrayList<>();
         copiedLineItems.addAll(copyCartManager.getLineItemsRegular().values());
 
-        assertEquals(Long.valueOf(7000L), copyCartManager.getRunningTotalPrice());
+        assertEquals(Long.valueOf(7000L), copyCartManager.calculateRegularItemTotal());
         verifyLineItemsHaveExpectedValues(expectedItemMap, copiedLineItems);
     }
 
