@@ -37,7 +37,7 @@ public class ListViewController {
         addToList(token.getCard().getLast4(), token.getId());
     }
 
-    void addToList(@NonNull String last4, @NonNull String tokenId) {
+    public void addToList(@NonNull String last4, @NonNull String tokenId) {
         String endingIn = mContext.getString(R.string.endingIn);
         Map<String, String> map = new HashMap<>();
         map.put("last4", endingIn + " " + last4);

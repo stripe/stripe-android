@@ -7,7 +7,6 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -32,6 +31,7 @@ import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
 import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.TokenParser;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
@@ -76,6 +76,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     protected Cart mCart;
     protected GoogleApiClient mGoogleApiClient;
     protected String mGoogleTransactionId;
+    protected SupportWalletFragment mBuyButtonFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,9 +138,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                             MaskedWallet maskedWallet =
                                     data.getParcelableExtra(WalletConstants.EXTRA_MASKED_WALLET);
                             if (maskedWallet != null) {
-                                mGoogleTransactionId = maskedWallet.getGoogleTransactionId();
+                                onMaskedWalletRetrieved(maskedWallet);
+                                if (mBuyButtonFragment != null) {
+                                    mBuyButtonFragment.updateMaskedWallet(maskedWallet);
+                                }
                             }
-                            onMaskedWalletRetrieved(maskedWallet);
                         }
                         break;
                     case RESULT_CANCELED:
@@ -156,10 +159,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                             MaskedWallet maskedWallet =
                                     data.getParcelableExtra(WalletConstants.EXTRA_MASKED_WALLET);
                             if (maskedWallet != null) {
-                                // Update the google transaction id
-                                mGoogleTransactionId = maskedWallet.getGoogleTransactionId();
+                                onChangedMaskedWalletRetrieved(maskedWallet);
+                                if (mBuyButtonFragment != null) {
+                                    mBuyButtonFragment.updateMaskedWallet(maskedWallet);
+                                }
                             }
-                            onConfirmedMaskedWalletRetrieved(maskedWallet);
                         }
                         break;
                     case RESULT_CANCELED:
@@ -252,18 +256,31 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     }
 
     /**
-     * Creates the {@link WalletFragmentStyle} for this Activity. Override to change
-     * the appearance of the Wallet Fragment itself. The results of this method
+     * Creates the {@link WalletFragmentStyle} for the buy button for this Activity.
+     * Override to change the appearance of the button. The results of this method
      * are used to build the {@link WalletFragmentOptions}.
      *
      * @return a {@link WalletFragmentStyle} used to display Android Pay options to the user
      */
     @NonNull
-    protected WalletFragmentStyle getWalletFragmentStyle() {
+    protected WalletFragmentStyle getWalletFragmentButtonStyle() {
         return new WalletFragmentStyle()
                 .setBuyButtonText(WalletFragmentStyle.BuyButtonText.BUY_WITH)
                 .setBuyButtonAppearance(WalletFragmentStyle.BuyButtonAppearance.ANDROID_PAY_DARK)
                 .setBuyButtonWidth(WalletFragmentStyle.Dimension.MATCH_PARENT);
+    }
+
+    /**
+     * Creates the {@link WalletFragmentStyle} for the confirmation fragment. Override to change
+     * the appearance of the selection details screen. The results of this method
+     * are used to build the {@link WalletFragmentOptions}.
+     *
+     * @return a {@link WalletFragmentStyle} used to display Android Pay options to the user
+     */
+    @NonNull
+    protected WalletFragmentStyle getWalletFragmentConfirmationStyle() {
+        return new WalletFragmentStyle()
+                .setMaskedWalletDetailsLogoImageType(WalletFragmentStyle.LogoImageType.ANDROID_PAY);
     }
 
     @NonNull
@@ -276,9 +293,15 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                             walletFragmentMode));
         }
 
+        WalletFragmentStyle style;
+        if (walletFragmentMode == WalletFragmentMode.BUY_BUTTON) {
+            style = getWalletFragmentButtonStyle();
+        } else {
+            style = getWalletFragmentConfirmationStyle();
+        }
         return WalletFragmentOptions.newBuilder()
                 .setEnvironment(getWalletEnvironment())
-                .setFragmentStyle(getWalletFragmentStyle())
+                .setFragmentStyle(style)
                 .setTheme(getWalletTheme())
                 .setMode(walletFragmentMode)
                 .build();
@@ -331,14 +354,15 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         }
 
         supportWalletFragment.initialize(startParamsBuilder.build());
-        addBuyButtonWalletFragment(supportWalletFragment);
+        mBuyButtonFragment = supportWalletFragment;
+        addBuyButtonWalletFragment(mBuyButtonFragment);
     }
 
     /**
      * Handles receipt of a {@link FullWallet} from Google Play Services. This wallet includes
-     * the Stripe {@link Token}. If that token exists, this method calls through to
-     * {@link #onTokenReturned(FullWallet, Token)}. If the object returned is a {@link Source},
-     * this function passes the result through to {@link #onSourceReturned(FullWallet, Source)}.
+     * the {@link StripePaymentSource} (usually a {@link Token}). If that payment source is not
+     * {@code null}, it calls through to
+     * {@link #onStripePaymentSourceReturned(FullWallet, StripePaymentSource)}.
      *
      * @param fullWallet the {@link FullWallet} returned from Google Play Services
      */
@@ -354,7 +378,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
         try {
             Token token = TokenParser.parseToken(rawPurchaseToken);
-            onTokenReturned(fullWallet, token);
+            onStripePaymentSourceReturned(fullWallet, token);
         } catch (JSONException jsonException) {
             Log.i(TAG,
                     String.format(Locale.ENGLISH,
@@ -371,7 +395,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         jsonException);
                 return;
             }
-            onSourceReturned(fullWallet, source);
+            onStripePaymentSourceReturned(fullWallet, source);
         }
     }
 
@@ -480,7 +504,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
      *
      * @param maskedWallet the {@link MaskedWallet} returned from the {@link GoogleApiClient}
      */
-    protected void onConfirmedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) { }
+    protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) { }
 
     /**
      * Override this method to react to a {@link MaskedWallet} being returned from
@@ -511,25 +535,16 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     }
 
     /**
-     * Called when a Stripe {@link Source} is returned from Google's servers.
-     * Send the token in this method to your server to make a charge.
-     *
-     * Note: this feature is not yet implemented, but to be future-proof, a returned
-     * {@link Source} should still be handled.
+     * Called when a {@link StripePaymentSource} is returned from Google's servers.
+     * Send the ID of this payment source to your server to make a charge. This payment source will
+     * either be a {@link Token} or {@link Source}, but both use the ID field to create payments.
      *
      * @param wallet the final {@link FullWallet} object
-     * @param source a Stripe {@link Source} that can be used to make a charge
+     * @param paymentSource a {@link StripePaymentSource} that has an ID field that can be used
+     *                      to make a charge
      */
-    protected void onSourceReturned(FullWallet wallet, Source source) { }
-
-    /**
-     * Called when a Stripe {@link Token} is returned from Google's servers.
-     * Send the token in this method to your server to make a charge.
-     *
-     * @param wallet the final {@link FullWallet} object
-     * @param token a Stripe {@link Token} that can be used to make a charge
-     */
-    protected void onTokenReturned(FullWallet wallet, Token token) { }
+    protected void onStripePaymentSourceReturned(
+            FullWallet wallet, StripePaymentSource paymentSource) { }
 
     /*------ End Overrides ------*/
 

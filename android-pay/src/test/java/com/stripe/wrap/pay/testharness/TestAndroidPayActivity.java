@@ -15,8 +15,7 @@ import com.google.android.gms.wallet.MaskedWallet;
 import com.google.android.gms.wallet.fragment.SupportWalletFragment;
 
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.Token;
+import com.stripe.android.model.StripePaymentSource;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
 
 public class TestAndroidPayActivity extends StripeAndroidPayActivity {
@@ -143,8 +142,8 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
     }
 
     @Override
-    protected void onConfirmedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
-        super.onConfirmedMaskedWalletRetrieved(maskedWallet);
+    protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
+        super.onChangedMaskedWalletRetrieved(maskedWallet);
         if (mListener != null) {
             mListener.onConfirmedMaskedWalletRetrieved(maskedWallet);
         }
@@ -158,18 +157,10 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
     }
 
     @Override
-    protected void onTokenReturned(FullWallet wallet, Token token) {
-        super.onTokenReturned(wallet, token);
+    protected void onStripePaymentSourceReturned(
+            FullWallet wallet, StripePaymentSource paymentSource) {
         if (mListener != null) {
-            mListener.onTokenReturned(wallet, token);
-        }
-    }
-
-    @Override
-    protected void onSourceReturned(FullWallet wallet, Source source) {
-        super.onSourceReturned(wallet, source);
-        if (mListener != null) {
-            mListener.onSourceReturned(wallet, source);
+            mListener.onStripePaymentSourceReturned(wallet, paymentSource);
         }
     }
 
@@ -235,8 +226,7 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
         void onConnectionFailed(@NonNull ConnectionResult connectionResult);
         void onConnectionSuspended(int i);
         void onMaskedWalletRetrieved(MaskedWallet maskedWallet);
-        void onTokenReturned(FullWallet fullWallet, Token token);
-        void onSourceReturned(FullWallet fullWallet, Source source);
+        void onStripePaymentSourceReturned(FullWallet fullWallet, StripePaymentSource paySource);
         void verifyAndPrepareAndroidPayControls(@NonNull IsReadyToPayRequest payRequest);
     }
 

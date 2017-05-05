@@ -293,7 +293,10 @@ public class PaymentUtils {
      * @return a String that can be used as an Android Pay price string
      */
     @NonNull
-    public static String getPriceString(long price, @NonNull Currency currency) {
+    public static String getPriceString(Long price, @NonNull Currency currency) {
+        if (price == null) {
+            return "";
+        }
 
         int fractionDigits = currency.getDefaultFractionDigits();
         int totalLength = String.valueOf(price).length();
