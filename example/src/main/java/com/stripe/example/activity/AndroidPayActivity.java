@@ -5,10 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.text.TextUtils;
-<<<<<<< HEAD
-=======
-import android.util.Log;
->>>>>>> adding an example project and tweaking the code
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
