@@ -5,6 +5,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.text.TextUtils;
+<<<<<<< HEAD
+=======
+import android.util.Log;
+>>>>>>> adding an example project and tweaking the code
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -56,6 +60,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_android_pay);
+
         mFragmentContainer = (ViewGroup) findViewById(R.id.container_android_pay_button);
         mChangeDetailsContainer = (ViewGroup) findViewById(R.id.confirmation_total_container);
         mConfirmDetailsContainer = (ViewGroup) findViewById(R.id.proceed_container);
@@ -146,6 +151,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         if (maskedWallet == null) {
             return;
         }
+
         mPossibleConfirmedMaskedWallet = maskedWallet;
         mChangeDetailsContainer.setVisibility(View.GONE);
         mConfirmDetailsContainer.setVisibility(View.VISIBLE);

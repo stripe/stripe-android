@@ -6,5 +6,5 @@
     <dimen name="card_cvc_initial_margin">1000dp</dimen>
     <dimen name="android_pay_button_layout_margin">24dp</dimen>
     <dimen name="android_pay_confirmation_margin">8dp</dimen>
-    <dimen name="android_pay_button_separation">8dp</dimen>
+    <dimen name="android_pay_button_separation">4dp</dimen>
 </resources>

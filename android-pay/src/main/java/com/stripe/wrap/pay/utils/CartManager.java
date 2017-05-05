@@ -225,6 +225,13 @@ public class CartManager {
         return PaymentUtils.getTotalPrice(mLineItemsShipping.values(), mCurrency);
     }
 
+    public Long calculateTax() {
+        if (mLineItemTax == null) {
+            return null;
+        }
+        return PaymentUtils.getPriceLong(mLineItemTax.getTotalPrice(), mCurrency);
+    }
+
     /**
      * Gets the price of the {@link LineItem.Role#TAX} item, if it exists and
      * has the same currency as the cart.
