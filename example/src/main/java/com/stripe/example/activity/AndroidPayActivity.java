@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -39,7 +38,6 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     private static final Locale LOC = Locale.US;
     private static final Currency DOLLARS = Currency.getInstance("USD");
 
-    private CartManager mCartManager;
     private ViewGroup mChangeDetailsContainer;
     private ViewGroup mConfirmDetailsContainer;
     private ViewGroup mFragmentContainer;
@@ -55,22 +53,18 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     private TextView mSelectedCardDisplay;
     private TextView mSelectedShippingAddressDisplay;
 
-    private Button mConfirmDetailsButton;
-    private Button mConfirmDialogButton;
-    private Button mChangeDetailsButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_android_pay);
-        mFragmentContainer = (ViewGroup) findViewById(R.id.container_android_pay);
+        mFragmentContainer = (ViewGroup) findViewById(R.id.container_android_pay_button);
         mChangeDetailsContainer = (ViewGroup) findViewById(R.id.confirmation_total_container);
         mConfirmDetailsContainer = (ViewGroup) findViewById(R.id.proceed_container);
         ListView tokenListView = (ListView) findViewById(R.id.android_pay_listview);
         mListViewController = new ListViewController(tokenListView);
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager());
 
-        Button confirmButton = (Button) findViewById(R.id.button_confirm);
+        Button confirmButton = (Button) findViewById(R.id.btn_okay);
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +119,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     @Override
     protected void addBuyButtonWalletFragment(@NonNull SupportWalletFragment walletFragment) {
         FragmentTransaction buttonTransaction = getSupportFragmentManager().beginTransaction();
-        buttonTransaction.add(R.id.container_android_pay, walletFragment).commit();
+        buttonTransaction.add(R.id.container_android_pay_button, walletFragment).commit();
     }
 
     @Override
@@ -151,13 +145,8 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
         super.onChangedMaskedWalletRetrieved(maskedWallet);
         if (maskedWallet == null) {
-            Log.i(TAG, "Confirmed masked wallet was null");
             return;
-        } else {
-            Log.i(TAG, "Confirmed masked wallet was not null");
         }
-
-        Log.i(TAG, "Proceeding with changed wallet");
         mPossibleConfirmedMaskedWallet = maskedWallet;
         mChangeDetailsContainer.setVisibility(View.GONE);
         mConfirmDetailsContainer.setVisibility(View.VISIBLE);
@@ -166,7 +155,6 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
 
     @Override
     protected void onMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
-        mCartManager = new CartManager(mCart);
         if (maskedWallet != null) {
             mPossibleConfirmedMaskedWallet = maskedWallet;
 
@@ -242,7 +230,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
 
         CartManager copyCart = new CartManager(mCart);
         long shippingUpdate = calculateShipping(maskedWallet.getBuyerShippingAddress());
-        long taxUpdate = calculateShipping(maskedWallet.getBuyerBillingAddress());
+        long taxUpdate = calculateTaxes(maskedWallet.getBuyerBillingAddress());
         copyCart.addShippingLineItem("Shipping", shippingUpdate);
         copyCart.setTaxLineItem("Tax", taxUpdate);
 
