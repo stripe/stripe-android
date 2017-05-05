@@ -225,10 +225,22 @@ public class CartManager {
         return PaymentUtils.getTotalPrice(mLineItemsShipping.values(), mCurrency);
     }
 
+    /**
+     * Gets the price of the {@link LineItem.Role#TAX} item, if it exists and
+     * has the same currency as the cart.
+     *
+     * @return the value of the tax item, zero if it doesn't exist, or {@code null} if
+     * the value is in the wrong currency or is not given
+     */
     public Long calculateTax() {
         if (mLineItemTax == null) {
+            return 0L;
+        }
+
+        if (!mCurrency.getCurrencyCode().equals(mLineItemTax.getCurrencyCode())) {
             return null;
         }
+
         return PaymentUtils.getPriceLong(mLineItemTax.getTotalPrice(), mCurrency);
     }
 
