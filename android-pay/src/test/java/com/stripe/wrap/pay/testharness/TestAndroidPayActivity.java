@@ -159,6 +159,7 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
     @Override
     protected void onStripePaymentSourceReturned(
             FullWallet wallet, StripePaymentSource paymentSource) {
+        super.onStripePaymentSourceReturned(wallet, paymentSource);
         if (mListener != null) {
             mListener.onStripePaymentSourceReturned(wallet, paymentSource);
         }
@@ -189,22 +190,6 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
         }
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        super.onConnected(bundle);
-        if (mListener != null) {
-            mListener.onConnected(bundle);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        super.onConnectionSuspended(i);
-        if (mListener != null) {
-            mListener.onConnectionSuspended(i);
-        }
-    }
-
     /**
      * Listener that acts as a shadow of this Activity
      */
@@ -222,9 +207,7 @@ public class TestAndroidPayActivity extends StripeAndroidPayActivity {
         void onAndroidPayNotAvailable();
         void onBeforeAndroidPayAvailable();
         void onConfirmedMaskedWalletRetrieved(MaskedWallet maskedWallet);
-        void onConnected(Bundle bundle);
         void onConnectionFailed(@NonNull ConnectionResult connectionResult);
-        void onConnectionSuspended(int i);
         void onMaskedWalletRetrieved(MaskedWallet maskedWallet);
         void onStripePaymentSourceReturned(FullWallet fullWallet, StripePaymentSource paySource);
         void verifyAndPrepareAndroidPayControls(@NonNull IsReadyToPayRequest payRequest);

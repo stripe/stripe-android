@@ -24,12 +24,15 @@ public class LoggingUtils {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            CARD_WIDGET_TOKEN,
+            ANDROID_PAY_TOKEN,
+            CARD_WIDGET_TOKEN
     })
     public @interface LoggingToken { }
+    public static final String ANDROID_PAY_TOKEN = "AndroidPay";
     public static final String CARD_WIDGET_TOKEN = "CardInputView";
     public static final Set<String> VALID_LOGGING_TOKENS = new HashSet<>();
     static {
+        VALID_LOGGING_TOKENS.add(ANDROID_PAY_TOKEN);
         VALID_LOGGING_TOKENS.add(CARD_WIDGET_TOKEN);
     }
 
@@ -92,7 +95,8 @@ public class LoggingUtils {
                 EVENT_SOURCE_CREATION);
     }
 
-    static Map<String, Object> getEventLoggingParams(
+    @NonNull
+    public static Map<String, Object> getEventLoggingParams(
             @Nullable List<String> productUsageTokens,
             @Nullable @Source.SourceType String sourceType,
             @NonNull String publishableApiKey,
