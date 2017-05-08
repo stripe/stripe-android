@@ -34,7 +34,6 @@ import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 
 public class AndroidPayActivity extends StripeAndroidPayActivity {
 
-    private static final String TAG = "chewie";
     private static final Locale LOC = Locale.US;
     private static final Currency DOLLARS = Currency.getInstance("USD");
 
@@ -258,15 +257,15 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         }
 
         if (!TextUtils.isEmpty(userAddress.getAdministrativeArea())) {
-            char[] adminAreaAray = userAddress.getAdministrativeArea().toCharArray();
-            for (char c : adminAreaAray) {
+            char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
+            for (char c : adminAreaArray) {
                 runningTotal += 5L * (long) c;
             }
         }
 
         if (!TextUtils.isEmpty(userAddress.getCountryCode())) {
-            char[] adminAreaAray = userAddress.getAdministrativeArea().toCharArray();
-            for (char c : adminAreaAray) {
+            char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
+            for (char c : adminAreaArray) {
                 runningTotal += 8L * (long) c;
             }
         }
