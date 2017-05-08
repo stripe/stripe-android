@@ -35,7 +35,7 @@ import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 public class AndroidPayActivity extends StripeAndroidPayActivity {
 
     private static final Locale LOC = Locale.US;
-    private static final Currency DOLLARS = Currency.getInstance("USD");
+    private static final Currency USD = Currency.getInstance("USD");
 
     private ViewGroup mChangeDetailsContainer;
     private ViewGroup mConfirmDetailsContainer;
@@ -177,6 +177,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
             cardDetails = info.getInstrumentDetails();
         }
 
+        // This ID is what you would send to your server to create a charge.
         String id = paymentSource.getId();
 
         if (cardDetails == null) {
@@ -208,16 +209,16 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         mItemsPriceDisplay.setText(
                 String.format(LOC,
                         "Item Total: %s",
-                        getPriceString(itemTotal, DOLLARS)));
+                        getPriceString(itemTotal, USD)));
         mShippingDisplay.setText(
                 String.format(LOC,
                         "Shipping: %s",
-                        getPriceString(shippingTotal, DOLLARS)));
-        mTaxesDisplay.setText(String.format(LOC, "Tax: %s", getPriceString(tax, DOLLARS)));
+                        getPriceString(shippingTotal, USD)));
+        mTaxesDisplay.setText(String.format(LOC, "Tax: %s", getPriceString(tax, USD)));
         mTotalPaymentDisplay.setText(String.format(
                 LOC,
                 "Total: %s",
-                getPriceString(addIfNotNull(itemTotal, shippingTotal, tax), DOLLARS)));
+                getPriceString(addIfNotNull(itemTotal, shippingTotal, tax), USD)));
     }
 
     private void updatePaymentInformation(@NonNull MaskedWallet maskedWallet) {
@@ -245,6 +246,18 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         }
     }
 
+    /**
+     * When the user changes or confirms an address in the Android Pay fragment, you can
+     * use that information to calculate shipping and tax information based on the location.
+     *
+     * Below we do a dummy calculation based on the length of the String elements to show how one
+     * might update the screen, but you can use the geographic data to determine what
+     * the cost of shipping your product will be.
+     *
+     * @param userAddress a {@link UserAddress} returned from Android Pay
+     * @return the total cost of shipping, as an integer unit of the smallest denomination in the
+     * currency
+     */
     private long calculateShipping(UserAddress userAddress) {
         if (userAddress == null) {
             // It's hard to ship to literally nowhere!
@@ -272,27 +285,38 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         return runningTotal;
     }
 
+    /**
+     * When the user changes or confirms an address in the Android Pay fragment, you can
+     * use that information to calculate shipping and tax information based on the location.
+     *
+     * Below we do a dummy calculation based on the length of the String elements to show how one
+     * might update the screen, but you can use the geographic data to determine what
+     * the cost of shipping your product will be.
+     *
+     * @param userAddress a {@link UserAddress} returned from Android Pay
+     * @return the total cost of shipping, as an integer unit of the smallest denomination in the
+     * currency
+     */
     private long calculateTaxes(UserAddress userAddress) {
         if (userAddress == null) {
-            // Taxes are cheap in a null zone.
-            return 3L;
+            throw new IllegalArgumentException("User billing address must not be null " +
+                    "due to tax requirements.");
         }
 
+        // This calculation is for sample purposes only. No actual jurisdiction uses this method.
+        // Changing states or countries for the user billing address with this will show updates
+        // on the screen in the Example Application.
         long runningTotal = 0L;
-        if (!TextUtils.isEmpty(userAddress.getAddress1())) {
-            runningTotal += 2 * userAddress.getAddress1().length();
-        }
-
         if (!TextUtils.isEmpty(userAddress.getAdministrativeArea())) {
-            char[] adminAreaAray = userAddress.getAdministrativeArea().toCharArray();
-            for (char c : adminAreaAray) {
+            char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
+            for (char c : adminAreaArray) {
                 runningTotal += 99L * (long) c;
             }
         }
 
         if (!TextUtils.isEmpty(userAddress.getCountryCode())) {
-            char[] adminAreaAray = userAddress.getAdministrativeArea().toCharArray();
-            for (char c : adminAreaAray) {
+            char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
+            for (char c : adminAreaArray) {
                 runningTotal += 199L * (long) c;
             }
         }
