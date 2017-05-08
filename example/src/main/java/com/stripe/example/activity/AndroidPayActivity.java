@@ -301,7 +301,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
      */
     private long calculateTaxes(UserAddress userAddress) {
         if (userAddress == null) {
-            throw new IllegalArgumentException("User billing address must not be null " +
+            throw new IllegalArgumentException("User shipping address must not be null " +
                     "due to tax requirements.");
         }
 
@@ -312,14 +312,14 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         if (!TextUtils.isEmpty(userAddress.getAdministrativeArea())) {
             char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
             for (char c : adminAreaArray) {
-                runningTotal += 99L * (long) c;
+                runningTotal += 3L * (long) c;
             }
         }
 
         if (!TextUtils.isEmpty(userAddress.getCountryCode())) {
-            char[] adminAreaArray = userAddress.getAdministrativeArea().toCharArray();
+            char[] adminAreaArray = userAddress.getCountryCode().toCharArray();
             for (char c : adminAreaArray) {
-                runningTotal += 199L * (long) c;
+                runningTotal += 7L * (long) c;
             }
         }
         return runningTotal;
