@@ -191,6 +191,45 @@ public class CartManagerTest {
     }
 
     @Test
+    public void calculateTax_whenItemHasCorrectFormat_returnsValue() {
+        CartManager manager = new CartManager("USD");
+        manager.setTaxLineItem("Tax", 1000L);
+
+        assertEquals(Long.valueOf(1000L), manager.calculateTax());
+    }
+
+    @Test
+    public void calculateTax_whenItemNotPresent_returnsZero() {
+        CartManager manager = new CartManager("KRW");
+        assertEquals(Long.valueOf(0L), manager.calculateTax());
+    }
+
+    @Test
+    public void calculateTax_whenItemHasWrongCurrency_returnsNull() {
+        CartManager manager = new CartManager("USD");
+        LineItem taxItem = new LineItemBuilder("AUD")
+                .setTotalPrice(5000L)
+                .setDescription("Australian Taxes")
+                .setRole(LineItem.Role.TAX)
+                .build();
+        manager.setTaxLineItem(taxItem);
+
+        assertNull(manager.calculateTax());
+    }
+
+    @Test
+    public void calculateTax_whenItemHasNoPrice_returnsNull() {
+        CartManager manager = new CartManager("JPY");
+        LineItem taxItem = new LineItemBuilder("JPY")
+                .setDescription("Tax")
+                .setRole(LineItem.Role.TAX)
+                .build();
+        manager.setTaxLineItem(taxItem);
+
+        assertNull(manager.calculateTax());
+    }
+
+    @Test
     public void createCartManager_fromExistingCart_copiesRegularLineItemsAndCurrencyCode() {
         Cart oldCart = generateCartWithAllItems("USD");
 

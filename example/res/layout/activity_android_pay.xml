@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.stripe.example.activity.AndroidPayActivity"
+    >
+
+    <TextView
+        android:id="@+id/tv_item_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/android_pay_button_separation"
+        android:layout_marginLeft="@dimen/android_pay_button_separation"
+        android:layout_marginStart="@dimen/android_pay_button_separation"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        />
+
+    <TextView
+        android:id="@+id/tv_shipping_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/android_pay_button_separation"
+        android:layout_marginStart="@dimen/android_pay_button_separation"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        />
+
+    <TextView
+        android:id="@+id/tv_tax_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/android_pay_button_separation"
+        android:layout_marginStart="@dimen/android_pay_button_separation"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        />
+
+    <TextView
+        android:id="@+id/tv_payment_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_marginLeft="@dimen/android_pay_button_separation"
+        android:layout_marginStart="@dimen/android_pay_button_separation"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        />
+
+    <FrameLayout
+        android:id="@+id/container_android_pay_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/android_pay_button_layout_margin"
+        />
+
+    <LinearLayout
+        android:id="@+id/proceed_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/android_pay_button_layout_margin"
+        >
+
+        <TextView
+            android:id="@+id/tv_card_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:maxLines="1"
+            android:ellipsize="end"
+            />
+
+        <TextView
+            android:id="@+id/tv_shipping_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:maxLines="1"
+            android:ellipsize="end"
+            />
+
+        <Button
+            android:id="@+id/btn_change"
+            android:text="@string/changeDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/android_pay_button_layout_margin"
+            android:layout_marginRight="@dimen/android_pay_button_layout_margin"
+            />
+
+        <Button
+            android:id="@+id/btn_proceed"
+            android:text="@string/confirmPayment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/android_pay_button_separation"
+            android:layout_marginLeft="@dimen/android_pay_button_layout_margin"
+            android:layout_marginRight="@dimen/android_pay_button_layout_margin"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/confirmation_total_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btn_okay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            android:layout_margin="@dimen/android_pay_button_layout_margin"
+            />
+
+        <FrameLayout
+            android:id="@+id/container_fragment_confirmation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/android_pay_confirmation_margin"
+            />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/android_pay_listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/android_pay_confirmation_margin"
+        android:layout_weight="1"
+        />
+
+</LinearLayout>

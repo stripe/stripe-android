@@ -28,7 +28,7 @@ import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
  * A model class representing a source in the Android SDK. More detailed information
  * and interaction can be seen at {@url https://stripe.com/docs/api/java#source_object}.
  */
-public class Source extends StripeJsonModel {
+public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -176,6 +176,7 @@ public class Source extends StripeJsonModel {
         mUsage = usage;
     }
 
+    @Override
     public String getId() {
         return mId;
     }
