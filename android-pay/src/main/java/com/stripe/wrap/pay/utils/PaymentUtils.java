@@ -54,8 +54,8 @@ public class PaymentUtils {
     }
 
     @NonNull
-    static Currency getCurrencyByCodeOrDefault(@Nullable String currencyCode) {
-        Currency defaultCurrency = Currency.getInstance(Locale.getDefault());
+    public static Currency getCurrencyByCodeOrDefault(@Nullable String currencyCode) {
+        Currency defaultCurrency = Currency.getInstance(Locale.US);
         if (currencyCode == null) {
             return defaultCurrency;
         }

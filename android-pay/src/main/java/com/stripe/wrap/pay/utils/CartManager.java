@@ -3,12 +3,12 @@ package com.stripe.wrap.pay.utils;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
-import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.LineItem;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class CartManager {
 
     static final String REGULAR_ID = "REG";
     static final String SHIPPING_ID = "SHIP";
-    static final String TAG = "Stripe:CartManager";
+    static final String TAG = CartManager.class.getName();
 
     private final Currency mCurrency;
 
@@ -40,8 +40,13 @@ public class CartManager {
     @Nullable private LineItem mLineItemTax;
     @Nullable private Long mManualTotalPrice;
 
+    public CartManager() {
+        mCurrency = AndroidPayConfiguration.getInstance().getCurrency();
+    }
+
     public CartManager(String currencyCode) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
+        synchronizeCartCurrencyWithConfiguration(mCurrency);
     }
 
     /**
@@ -73,6 +78,8 @@ public class CartManager {
      */
     public CartManager(@NonNull Cart oldCart, boolean shouldKeepShipping, boolean shouldKeepTax) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(oldCart.getCurrencyCode());
+        synchronizeCartCurrencyWithConfiguration(mCurrency);
+
         for (LineItem item : oldCart.getLineItems()) {
             switch (item.getRole()) {
                 case LineItem.Role.REGULAR:
@@ -345,23 +352,21 @@ public class CartManager {
     }
 
     /**
-     * Build the {@link Cart}. Returns {@code null} if the item set is empty.
+     * Build the {@link Cart}. Uses the manually set price if one is set, or attempts to calculate
+     * the price if no manual price is set. Calculation will fail if line item currencies do not
+     * match cart currency.
      *
-     * @return a {@link Cart}, or {@code null} if there are no line items
+     * @return a {@link Cart}
      * @throws CartContentException if there are invalid line items or invalid cart parameters. The
      * exception will contain a list of CartError objects specifying the problems.
      */
-    @Nullable
+    @NonNull
     public Cart buildCart() throws CartContentException {
         List<LineItem> totalLineItems = new ArrayList<>();
         totalLineItems.addAll(mLineItemsRegular.values());
         totalLineItems.addAll(mLineItemsShipping.values());
         if (mLineItemTax != null) {
             totalLineItems.add(mLineItemTax);
-        }
-
-        if (totalLineItems.isEmpty()) {
-            return null;
         }
 
         List<CartError> errors = PaymentUtils.validateLineItemList(
@@ -429,5 +434,24 @@ public class CartManager {
                     .toString();
         }
         return baseId;
+    }
+
+    private void synchronizeCartCurrencyWithConfiguration(@NonNull Currency currency) {
+        if (currency.getCurrencyCode().equals(
+                AndroidPayConfiguration.getInstance().getCurrencyCode())) {
+            return;
+        }
+
+        String updatedCurrencyCode = currency.getCurrencyCode();
+        String oldCurrencyCode = AndroidPayConfiguration.getInstance().getCurrencyCode();
+        Log.w(TAG,
+                String.format(Locale.ENGLISH,
+                        "Cart created with currency code %s, which differs from current " +
+                                "AndroidPayConfiguration currency, %s. Changing configuration " +
+                                "to %s",
+                        updatedCurrencyCode,
+                        oldCurrencyCode,
+                        updatedCurrencyCode));
+        AndroidPayConfiguration.getInstance().setCurrency(currency);
     }
 }

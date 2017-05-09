@@ -152,9 +152,9 @@ public class LineItemBuilderTest {
 
         LineItem item = new LineItemBuilder("notacurrency").build();
         String expectedWarning = "Could not create currency with code \"notacurrency\". Using " +
-                "currency JPY by default.";
+                "currency USD by default.";
         List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(PaymentUtils.TAG);
-        assertEquals("JPY", item.getCurrencyCode());
+        assertEquals("USD", item.getCurrencyCode());
         assertEquals(1, logItems.size());
         assertEquals(Log.WARN, logItems.get(0).type);
         assertEquals(expectedWarning, logItems.get(0).msg);

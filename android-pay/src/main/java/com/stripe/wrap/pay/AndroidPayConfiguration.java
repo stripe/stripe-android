@@ -9,6 +9,7 @@ import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
+import com.stripe.wrap.pay.utils.PaymentUtils;
 
 import java.util.Currency;
 import java.util.Locale;
@@ -22,7 +23,7 @@ public class AndroidPayConfiguration {
 
     private static AndroidPayConfiguration mInstance;
 
-    private String mCurrencyCode;
+    @NonNull private Currency mCurrency;
     private boolean mIsPhoneNumberRequired;
     private boolean mIsShippingAddressRequired;
     private String mMerchantName;
@@ -38,7 +39,8 @@ public class AndroidPayConfiguration {
 
     @VisibleForTesting
     AndroidPayConfiguration() {
-        setCurrencyCode(Currency.getInstance(Locale.getDefault()).getCurrencyCode());
+        // Default is set to dollars until otherwise specified.
+        mCurrency = Currency.getInstance(Locale.US);
     }
 
     @Nullable
@@ -60,7 +62,7 @@ public class AndroidPayConfiguration {
                 cart,
                 mIsPhoneNumberRequired,
                 mIsShippingAddressRequired,
-                mCurrencyCode);
+                mCurrency.getCurrencyCode());
     }
 
     @NonNull
@@ -100,12 +102,25 @@ public class AndroidPayConfiguration {
                 .build();
     }
 
-    public String getCurrencyCode() {
-        return mCurrencyCode;
+    @NonNull
+    public Currency getCurrency() {
+        return mCurrency;
     }
 
+    @NonNull
+    public String getCurrencyCode() {
+        return mCurrency.getCurrencyCode();
+    }
+
+    @NonNull
+    public AndroidPayConfiguration setCurrency(@NonNull Currency currency) {
+        mCurrency = currency;
+        return this;
+    }
+
+    @NonNull
     public AndroidPayConfiguration setCurrencyCode(String currencyCode) {
-        mCurrencyCode = currencyCode;
+        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
         return this;
     }
 
