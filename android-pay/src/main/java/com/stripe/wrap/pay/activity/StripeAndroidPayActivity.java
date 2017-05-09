@@ -5,8 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -33,21 +35,28 @@ import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
+import com.stripe.android.net.RequestOptions;
+import com.stripe.android.net.StripeApiHandler;
 import com.stripe.android.net.TokenParser;
+import com.stripe.android.util.LoggingUtils;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.utils.PaymentUtils;
 
 import org.json.JSONException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * A class that handles the Google API callbacks for the purchase flow and {@link GoogleApiClient}
  * connection states, simplifying the required work to display and complete an Android Pay purchase.
  */
 public abstract class StripeAndroidPayActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        implements GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = StripeAndroidPayActivity.class.getName();
 
@@ -68,14 +77,15 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     // Unique tag for the error dialog fragment
     private static final String DIALOG_ERROR = "dialog_error";
     private static final String STATE_RESOLVING_ERROR = "resolving_error";
+
     // Bool to track whether the app is already resolving an error
     private boolean mResolvingError = false;
+    @NonNull private Executor mExecutor = Executors.newFixedThreadPool(3);
 
     protected String mAccountName;
     protected AndroidPayConfiguration mAndroidPayConfiguration;
     protected Cart mCart;
     protected GoogleApiClient mGoogleApiClient;
-    protected String mGoogleTransactionId;
     protected SupportWalletFragment mBuyButtonFragment;
 
     @Override
@@ -113,6 +123,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         mGoogleApiClient.disconnect();
     }
 
+    @CallSuper
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // retrieve the error code, if available
@@ -250,8 +261,8 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         .setEnvironment(getWalletEnvironment())
                         .setTheme(getWalletTheme())
                         .build())
-                .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
+                .enableAutoManage(this, this)
                 .build();
     }
 
@@ -399,20 +410,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         }
     }
 
-    /*------ Begin GoogleApiClient.ConnectionCallbacks ------*/
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        onAndroidPayAvailable();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        onAndroidPayNotAvailable();
-    }
-
-    /*------ End GoogleApiClient.ConnectionCallbacks ------*/
-
     /*------ Begin GoogleApiClient.OnConnectionFailedListener ------*/
 
     /**
@@ -543,10 +540,49 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
      * @param paymentSource a {@link StripePaymentSource} that has an ID field that can be used
      *                      to make a charge
      */
+    @CallSuper
     protected void onStripePaymentSourceReturned(
-            FullWallet wallet, StripePaymentSource paymentSource) { }
+            FullWallet wallet, StripePaymentSource paymentSource) {
+        logApiCallOnNewThread(paymentSource, null);
+    }
 
     /*------ End Overrides ------*/
+
+    @VisibleForTesting
+    void setExecutor(@NonNull Executor executor) {
+        mExecutor = executor;
+    }
+
+    @VisibleForTesting
+    void logApiCallOnNewThread(@NonNull StripePaymentSource paymentSource,
+                               @Nullable final StripeApiHandler.LoggingResponseListener listener) {
+        @LoggingUtils.LoggingEventName String eventName =
+                paymentSource instanceof Token
+                        ? LoggingUtils.EVENT_TOKEN_CREATION
+                        : LoggingUtils.EVENT_SOURCE_CREATION;
+
+        List<String> loggingTokens = Arrays.asList(LoggingUtils.ANDROID_PAY_TOKEN);
+        String publishableKey = mAndroidPayConfiguration.getPublicApiKey();
+
+        final Map<String, Object> loggingParams = LoggingUtils.getEventLoggingParams(
+                loggingTokens,
+                null,
+                publishableKey,
+                eventName);
+        final RequestOptions options = RequestOptions.builder(publishableKey).build();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                StripeApiHandler.logApiCall(
+                        loggingParams,
+                        options,
+                        listener);
+            }
+        };
+
+        mExecutor.execute(runnable);
+    }
 
     /* A fragment to display an error dialog */
     public static class ErrorDialogFragment extends DialogFragment {
