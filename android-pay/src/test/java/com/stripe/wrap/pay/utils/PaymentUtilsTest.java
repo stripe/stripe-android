@@ -463,16 +463,21 @@ public class PaymentUtilsTest {
     }
 
     @Test
-    public void getCurrencyByCodeOrDefault_forNull_returnsDefault() {
-        Locale.setDefault(Locale.KOREA);
-        assertEquals(Currency.getInstance(Locale.KOREA),
+    public void getCurrencyByCodeOrDefault_forNull_returnsDefaultUsd() {
+        assertEquals(Currency.getInstance(Locale.US),
                 getCurrencyByCodeOrDefault(null));
     }
 
     @Test
-    public void getCurrencyByCodeOrDefault_forInvalid_returnsDefault() {
-        Locale.setDefault(Locale.UK);
-        assertEquals(Currency.getInstance(Locale.UK),
+    public void getCurrencyByCodeOrDefault_forNullWhenLocaleIsNotUs_returnsDefaultUsd() {
+        Locale.setDefault(Locale.JAPAN);
+        assertEquals(Currency.getInstance(Locale.US),
+                getCurrencyByCodeOrDefault(null));
+    }
+
+    @Test
+    public void getCurrencyByCodeOrDefault_forInvalid_returnsDefaultUsd() {
+        assertEquals(Currency.getInstance(Locale.US),
                 getCurrencyByCodeOrDefault("tea and crumpets"));
     }
 

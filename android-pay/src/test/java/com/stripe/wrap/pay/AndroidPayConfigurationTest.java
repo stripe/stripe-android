@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.Currency;
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
@@ -40,10 +39,10 @@ public class AndroidPayConfigurationTest {
     }
 
     @Test
-    public void instantiate_andDoNothingElse_setsCurrencyToDefaultLocale() {
+    public void instantiate_andDoNothingElse_setsCurrencyToDefaultCurrency() {
         Locale.setDefault(Locale.JAPAN);
         AndroidPayConfiguration testConfig = new AndroidPayConfiguration();
-        assertEquals("JPY", testConfig.getCurrencyCode());
+        assertEquals("USD", testConfig.getCurrencyCode());
     }
 
     @Test
@@ -90,7 +89,7 @@ public class AndroidPayConfigurationTest {
         assertNotNull(maskedWalletRequest);
         assertTrue(maskedWalletRequest.isPhoneNumberRequired());
         assertFalse(maskedWalletRequest.isShippingAddressRequired());
-        assertEquals("usd", maskedWalletRequest.getCurrencyCode());
+        assertEquals("USD", maskedWalletRequest.getCurrencyCode());
         assertEquals(llamaName, maskedWalletRequest.getMerchantName());
         assertEquals(mCart.getTotalPrice(), maskedWalletRequest.getEstimatedTotalPrice());
         assertNotNull(maskedWalletRequest.getPaymentMethodTokenizationParameters());
@@ -140,12 +139,16 @@ public class AndroidPayConfigurationTest {
     }
 
     @Test
-    public void generateMaskedWalletRequest_whenApiKeyIsSet_returnsNull() {
+    public void generateMaskedWalletRequest_whenApiKeyIsSetButNotCurrency_usesUsd() {
         // Need to instantiate a new Android Pay Configuration to avoid conflicts with other
         // tests.
         AndroidPayConfiguration testPayConfiguration = new AndroidPayConfiguration();
+        testPayConfiguration.setPublicApiKey("pk_test_abc123");
 
         // In this case, we haven't set a currency yet.
-        assertNull(testPayConfiguration.generateMaskedWalletRequest(mCart));
+        MaskedWalletRequest maskedWalletRequest =
+                testPayConfiguration.generateMaskedWalletRequest(mCart);
+        assertNotNull(maskedWalletRequest);
+        assertEquals("USD", maskedWalletRequest.getCurrencyCode());
     }
 }

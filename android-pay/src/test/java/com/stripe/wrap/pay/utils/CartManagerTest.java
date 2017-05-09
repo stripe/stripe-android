@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.LineItem;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,52 @@ import static org.junit.Assert.fail;
 public class CartManagerTest {
 
     @Test
+    public void createCartManager_withoutCurrencyArgument_usesAndroidPayConfiguration() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
+        CartManager cartManager = new CartManager();
+        assertEquals("JPY", cartManager.getCurrencyCode());
+    }
+
+    @Test
+    public void createCartManager_withCurrencyDifferentFromConfiguration_changesConfigAndLogs() {
+        ShadowLog.stream = System.out;
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
+
+        String expectedWarning = "Cart created with currency code GBP, which differs from " +
+                "current AndroidPayConfiguration currency, KRW. Changing configuration to GBP";
+
+        new CartManager("GBP");
+        assertEquals("GBP", AndroidPayConfiguration.getInstance().getCurrencyCode());
+
+        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(CartManager.TAG);
+        assertFalse(logItems.isEmpty());
+        assertEquals(1, logItems.size());
+        assertEquals(expectedWarning, logItems.get(0).msg);
+        assertEquals(Log.WARN, logItems.get(0).type);
+    }
+
+    @Test
+    public void createCartManager_fromOldCartWithDifferentCurrency_changesConfigAndLogsWarning() {
+        ShadowLog.stream = System.out;
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
+
+        String expectedWarning = "Cart created with currency code EUR, which differs from " +
+                "current AndroidPayConfiguration currency, JPY. Changing configuration to EUR";
+
+        Cart oldCart = Cart.newBuilder().setCurrencyCode("EUR").setTotalPrice("10.00").build();
+        new CartManager(oldCart);
+        assertEquals("EUR", AndroidPayConfiguration.getInstance().getCurrencyCode());
+
+        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(CartManager.TAG);
+        assertFalse(logItems.isEmpty());
+        assertEquals(1, logItems.size());
+        assertEquals(expectedWarning, logItems.get(0).msg);
+        assertEquals(Log.WARN, logItems.get(0).type);
+    }
+
+    @Test
     public void addItem_whenRegularItem_addsOnlyRegularItem() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager cartManager = new CartManager("USD");
         LineItem regularItem = LineItem.newBuilder().setRole(LineItem.Role.REGULAR).build();
         cartManager.addLineItem(regularItem);
@@ -51,6 +97,7 @@ public class CartManagerTest {
 
     @Test
     public void addItem_whenShippingItem_addsOnlyShippingItem() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager cartManager = new CartManager("USD");
         LineItem shippingItem = LineItem.newBuilder().setRole(LineItem.Role.SHIPPING).build();
         cartManager.addLineItem(shippingItem);
@@ -66,6 +113,7 @@ public class CartManagerTest {
 
     @Test
     public void addItem_whenTaxItem_addsOnlyTaxItem() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
         CartManager cartManager = new CartManager("JPY");
         LineItem taxItem = LineItem.newBuilder().setRole(LineItem.Role.TAX).build();
         cartManager.addLineItem(taxItem);
@@ -83,6 +131,7 @@ public class CartManagerTest {
     public void addTaxItem_whenTaxItemExists_overwritesAndLogsWarning() {
         ShadowLog.stream = System.out;
         Locale.setDefault(Locale.US);
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
 
         String expectedWarning = "Adding a tax line item, but a tax line item " +
                 "already exists. Old tax of 1.00 is being overwritten " +
@@ -122,6 +171,7 @@ public class CartManagerTest {
 
     @Test
     public void addItem_thenRemoveItem_leavesNoItems() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager manager = new CartManager("USD");
         String id = manager.addLineItem("llama food", 10000L);
 
@@ -139,6 +189,7 @@ public class CartManagerTest {
 
     @Test
     public void addShippingItem_thenRemoveItem_leavesNoShippingItems() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
         CartManager manager = new CartManager("KRW");
         String id = manager.addShippingLineItem("2 Day Guaranteed", 2099);
         assertNotNull(id);
@@ -157,6 +208,7 @@ public class CartManagerTest {
 
     @Test
     public void addTaxItem_doesNotAffectRegularOrShippingTotals() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
         CartManager manager = new CartManager("KRW");
         manager.addLineItem("Regular", 10L);
         manager.addLineItem("Regular Again", 20L);
@@ -174,6 +226,7 @@ public class CartManagerTest {
 
     @Test
     public void addLineItem_whenDifferentCurrencyFromCart_returnsNullForTotalCalculation() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
         CartManager manager = new CartManager("JPY");
         manager.addLineItem("Regular Item", 100L);
         manager.addLineItem("Another Regular Thing", 100L);
@@ -192,6 +245,7 @@ public class CartManagerTest {
 
     @Test
     public void calculateTax_whenItemHasCorrectFormat_returnsValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager manager = new CartManager("USD");
         manager.setTaxLineItem("Tax", 1000L);
 
@@ -200,12 +254,14 @@ public class CartManagerTest {
 
     @Test
     public void calculateTax_whenItemNotPresent_returnsZero() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
         CartManager manager = new CartManager("KRW");
         assertEquals(Long.valueOf(0L), manager.calculateTax());
     }
 
     @Test
     public void calculateTax_whenItemHasWrongCurrency_returnsNull() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager manager = new CartManager("USD");
         LineItem taxItem = new LineItemBuilder("AUD")
                 .setTotalPrice(5000L)
@@ -219,6 +275,7 @@ public class CartManagerTest {
 
     @Test
     public void calculateTax_whenItemHasNoPrice_returnsNull() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
         CartManager manager = new CartManager("JPY");
         LineItem taxItem = new LineItemBuilder("JPY")
                 .setDescription("Tax")
@@ -231,6 +288,7 @@ public class CartManagerTest {
 
     @Test
     public void createCartManager_fromExistingCart_copiesRegularLineItemsAndCurrencyCode() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         Cart oldCart = generateCartWithAllItems("USD");
 
         CartManager copyCartManager = new CartManager(oldCart);
@@ -252,6 +310,7 @@ public class CartManagerTest {
 
     @Test
     public void createCartManagerAndSetTrue_fromExistingCart_copiesAllItemsAndCurrencyCode() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
         Cart oldCart = generateCartWithAllItems("KRW");
 
         CartManager copyCartManager = new CartManager(oldCart, true, true);
@@ -279,6 +338,7 @@ public class CartManagerTest {
 
     @Test
     public void buildCart_withValidCart_createsExpectedCart() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager manager = new CartManager("USD");
         manager.addLineItem("llama food", 10000L);
         manager.addLineItem("llama scarf", 2000L);
@@ -297,11 +357,14 @@ public class CartManagerTest {
     }
 
     @Test
-    public void buildCart_whenLineItemsEmpty_returnsNull() {
+    public void buildCart_whenLineItemsEmptyAndNoPriceSet_createsZeroPriceCart() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
         CartManager manager = new CartManager("USD");
 
         try {
-            assertNull(manager.buildCart());
+            Cart cart = manager.buildCart();
+            assertNotNull(cart);
+            assertEquals("0.00", cart.getTotalPrice());
         } catch (CartContentException cartEx) {
             fail("Unexpected error: " + cartEx.getMessage());
         }
@@ -309,6 +372,7 @@ public class CartManagerTest {
 
     @Test
     public void buildCart_whenHasErrors_throwsExpectedException() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
         CartManager manager = new CartManager("JPY");
 
         LineItem dollarItem = new LineItemBuilder("USD").setTotalPrice(100L).build();
@@ -361,6 +425,7 @@ public class CartManagerTest {
 
     @Test
     public void buildCart_withManyErrorsButTotalValueSet_doesRemovesLineItemCurrencyErrors() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
         CartManager manager = new CartManager("JPY");
 
         LineItem dollarItem = new LineItemBuilder("USD").setTotalPrice(100L).build();
@@ -410,6 +475,7 @@ public class CartManagerTest {
 
     @Test
     public void buildCart_withItemCurrencyErrorsButTotalValueIsManuallySet_doesNotThrowErrors() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("CAD");
         CartManager cartManager = new CartManager("CAD");
         LineItem dollarItem = new LineItemBuilder("USD").setTotalPrice(100L).build();
         LineItem wonItem = new LineItemBuilder("KRW").setTotalPrice(5000L).build();
@@ -447,6 +513,7 @@ public class CartManagerTest {
 
     @NonNull
     private static Cart generateCartWithAllItems(String currencyCode) {
+        AndroidPayConfiguration.getInstance().setCurrencyCode(currencyCode);
         CartManager manager = new CartManager(currencyCode);
         manager.addLineItem("Llama Food", 2000L);
         manager.addLineItem("Llama Bow-tie", 5000L);

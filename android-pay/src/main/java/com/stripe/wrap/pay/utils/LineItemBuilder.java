@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.wallet.LineItem;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -36,6 +37,20 @@ public class LineItemBuilder {
     private String mDescription;
     private int mRole;
 
+    /**
+     * Construct a {@link LineItem} using {@link LineItem.Role#REGULAR} and the currency code
+     * from {@link AndroidPayConfiguration#getCurrencyCode()}.
+     */
+    LineItemBuilder() {
+        this(AndroidPayConfiguration.getInstance().getCurrencyCode());
+    }
+
+    /**
+     * Construct a {@link LineItem} using a customized currency code. Role is initially set to
+     * {@link LineItem.Role#REGULAR}.
+     *
+     * @param currencyCode
+     */
     LineItemBuilder(String currencyCode) {
         setCurrencyCode(currencyCode);
         mRole = LineItem.Role.REGULAR;
