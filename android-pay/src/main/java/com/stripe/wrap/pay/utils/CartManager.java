@@ -16,11 +16,9 @@ import java.util.Currency;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
-import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPrice;
 
 /**
  * A wrapper for {@link Cart.Builder} that aids in the generation of new {@link LineItem}
@@ -38,12 +36,22 @@ public class CartManager {
     @NonNull private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
 
     @Nullable private LineItem mLineItemTax;
-    @Nullable private Long mManualTotalPrice;
+    @Nullable private Long mCachedTotalPrice;
 
+    /**
+     * Create a new CartManager. Currency will be set to {@link AndroidPayConfiguration#mCurrency}.
+     */
     public CartManager() {
         mCurrency = AndroidPayConfiguration.getInstance().getCurrency();
     }
 
+    /**
+     * Create a new CartManager with the specified currency code. Note that if this differs from
+     * the value contained in the singleton {@link AndroidPayConfiguration}, the configuration
+     * currency will change.
+     *
+     * @param currencyCode a currency code used for this cart, and the rest of the application
+     */
     public CartManager(String currencyCode) {
         mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
         synchronizeCartCurrencyWithConfiguration(mCurrency);
@@ -101,6 +109,11 @@ public class CartManager {
                     break;
             }
         }
+
+        if (shouldKeepShipping && shouldKeepTax && !TextUtils.isEmpty(oldCart.getTotalPrice())) {
+            Long oldTotal = PaymentUtils.getPriceLong(oldCart.getTotalPrice(), mCurrency);
+            setTotalPrice(oldTotal);
+        }
     }
 
     /**
@@ -114,60 +127,14 @@ public class CartManager {
      */
     @Nullable
     public String addLineItem(@NonNull @Size(min = 1) String description, long totalPrice) {
-        return addLineItem(description, totalPrice, LineItem.Role.REGULAR);
-    }
-
-    /**
-     * Adds a {@link LineItem.Role#REGULAR} item to the cart with a description
-     * and total price value. Currency matches the currency of the {@link CartManager}.
-     *
-     * @param description a line item description
-     * @param totalPrice the total price of the line item, in the smallest denomination
-     * @param role the {@link LineItem.Role} for this item
-     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
-     * or {@code null} if this is a {@link LineItem.Role#TAX} item
-     */
-    @Nullable
-    public String addLineItem(
-            @NonNull @Size(min = 1) String description,
-            long totalPrice,
-            int role) {
         return addLineItem(new LineItemBuilder(mCurrency.getCurrencyCode())
                 .setDescription(description)
                 .setTotalPrice(totalPrice)
-                .setRole(role)
                 .build());
     }
 
     /**
-     * Adds a line item with unit price and quantity. Total price is calculated and added to the
-     * line item.
-     *
-     * @param description a line item description
-     * @param quantity the quantity of the line item
-     * @param unitPrice the unit price of the line item
-     * @param role the {@link LineItem.Role} of the added item
-     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
-     */
-    @Nullable
-    public String addLineItem(@NonNull @Size(min = 1) String description,
-                              double quantity,
-                              long unitPrice,
-                              int role) {
-        BigDecimal roundedQuantity = new BigDecimal(quantity).setScale(1, BigDecimal.ROUND_DOWN);
-        long totalPrice = roundedQuantity.multiply(new BigDecimal(unitPrice)).longValue();
-
-        return addLineItem(new LineItemBuilder(mCurrency.getCurrencyCode())
-                .setDescription(description)
-                .setTotalPrice(totalPrice)
-                .setUnitPrice(unitPrice)
-                .setQuantity(roundedQuantity)
-                .setRole(role)
-                .build());
-    }
-
-    /**
-     * Adds a line item with unit price and quantity. Total price is calculated and added to the
+     * Adds a line item with quantity and unit price. Total price is calculated and added to the
      * line item.
      *
      * @param description a line item description
@@ -204,6 +171,31 @@ public class CartManager {
         return addLineItem(new LineItemBuilder(mCurrency.getCurrencyCode())
                 .setDescription(description)
                 .setTotalPrice(totalPrice)
+                .setRole(LineItem.Role.SHIPPING)
+                .build());
+    }
+
+    /**
+     * Adds a shipping line item with quantity and unit price.
+     * Total price is calculated and added to the line item.
+     *
+     * @param description a line item description
+     * @param quantity the quantity of the line item
+     * @param unitPrice the unit price of the line item
+     * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
+     */
+    @Nullable
+    public String addShippingLineItem(@NonNull @Size(min = 1) String description,
+                              double quantity,
+                              long unitPrice) {
+        BigDecimal roundedQuantity = new BigDecimal(quantity).setScale(1, BigDecimal.ROUND_DOWN);
+        long totalPrice = roundedQuantity.multiply(new BigDecimal(unitPrice)).longValue();
+
+        return addLineItem(new LineItemBuilder(mCurrency.getCurrencyCode())
+                .setDescription(description)
+                .setTotalPrice(totalPrice)
+                .setUnitPrice(unitPrice)
+                .setQuantity(roundedQuantity)
                 .setRole(LineItem.Role.SHIPPING)
                 .build());
     }
@@ -272,10 +264,10 @@ public class CartManager {
      * from the sum of the prices of the items within the cart.
      *
      * @param totalPrice a number representing the price, in the lowest possible denomination
-     *                   of the cart's currency
+     *                   of the cart's currency, or {@code null} to clear the value
      */
-    public void setTotalPrice(@NonNull Long totalPrice) {
-        mManualTotalPrice = totalPrice;
+    public void setTotalPrice(@Nullable Long totalPrice) {
+        mCachedTotalPrice = totalPrice;
     }
 
     /**
@@ -287,6 +279,9 @@ public class CartManager {
      */
     public void setTaxLineItem(@Nullable LineItem item) {
         if (item == null) {
+            if (mLineItemTax != null && !TextUtils.isEmpty(mLineItemTax.getTotalPrice())) {
+                setTotalPrice(null);
+            }
             mLineItemTax = item;
         } else {
             addLineItem(item);
@@ -294,23 +289,28 @@ public class CartManager {
     }
 
     /**
-     * Remove an item from the {@link CartManager}.
+     * Remove an item from the {@link CartManager}. Clears any currently set manual total price if
+     * an item is removed.
      *
      * @param itemId the UUID associated with the cart item to be removed
      * @return the {@link LineItem} removed, or {@code null} if no item was found
      */
     @Nullable
-    public LineItem removeItem(@NonNull @Size(min = 1) String itemId) {
+    public LineItem removeLineItem(@NonNull @Size(min = 1) String itemId) {
         LineItem removed = mLineItemsRegular.remove(itemId);
         if (removed == null) {
             removed = mLineItemsShipping.remove(itemId);
         }
 
+        if (removed != null && !TextUtils.isEmpty(removed.getTotalPrice())) {
+            setTotalPrice(null);
+        }
         return removed;
     }
 
     /**
-     * Add a {@link LineItem} to the cart.
+     * Add a {@link LineItem} to the cart. Removes any currently set or calculated total price value
+     * if the item being added has a nonempty total price.
      *
      * @param item the {@link LineItem} to be added
      * @return a {@link String} UUID that can be used to access the item in this {@link CartManager}
@@ -318,6 +318,10 @@ public class CartManager {
     @Nullable
     public String addLineItem(@NonNull LineItem item) {
         String itemId = null;
+
+        if (!TextUtils.isEmpty(item.getTotalPrice())) {
+            setTotalPrice(null);
+        }
 
         switch (item.getRole()) {
             case LineItem.Role.REGULAR:
@@ -373,10 +377,7 @@ public class CartManager {
                 totalLineItems,
                 mCurrency.getCurrencyCode());
 
-        Long totalPrice = mManualTotalPrice == null
-                ? getTotalPrice(totalLineItems, mCurrency)
-                : mManualTotalPrice;
-
+        Long totalPrice = getTotalPrice();
         String totalPriceString = totalPrice == null ? null : getPriceString(totalPrice, mCurrency);
 
         if (!TextUtils.isEmpty(totalPriceString)) {
@@ -396,18 +397,57 @@ public class CartManager {
         }
     }
 
+    /**
+     * Get the current total price for the cart. If the value has been manually set or previously
+     * calculated, the cached value is returned. If no such value has been set (or the value
+     * has been invalidated by the addition or removal of items), then a new value is calculated,
+     * cached, and returned.
+     *
+     * @return the total price of the items in this CartManager, or {@code null} if that value
+     * is neither set nor able to be calculated
+     */
+    @Nullable
+    public Long getTotalPrice() {
+        if (mCachedTotalPrice != null) {
+            return mCachedTotalPrice;
+        }
+
+        // Regular, Shipping, and Tax
+        Long[] sectionPrices = new Long[3];
+        sectionPrices[0] = calculateRegularItemTotal();
+        sectionPrices[1] = calculateShippingItemTotal();
+        sectionPrices[2] = calculateTax();
+
+        Long totalPrice = null;
+        for (int i = 0 ; i < sectionPrices.length; i++) {
+            if (sectionPrices[i] == null) {
+                return null;
+            }
+
+            if (totalPrice == null) {
+                totalPrice = sectionPrices[i];
+            } else {
+                totalPrice += sectionPrices[i];
+            }
+        }
+
+        // There is no need to repeat this calculation until items are added or removed.
+        mCachedTotalPrice = totalPrice;
+        return totalPrice;
+    }
+
     @NonNull
     public String getCurrencyCode() {
         return mCurrency.getCurrencyCode();
     }
 
     @NonNull
-    public Map<String, LineItem> getLineItemsRegular() {
+    public LinkedHashMap<String, LineItem> getLineItemsRegular() {
         return mLineItemsRegular;
     }
 
     @NonNull
-    public Map<String, LineItem> getLineItemsShipping() {
+    public LinkedHashMap<String, LineItem> getLineItemsShipping() {
         return mLineItemsShipping;
     }
 

@@ -16,6 +16,7 @@ import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.LineItem;
 import com.google.android.gms.wallet.WalletConstants;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 /**
  * Utility class for easily generating Android Pay items.
@@ -254,14 +255,14 @@ public class PaymentUtils {
 
     /**
      * Converts an integer price in the lowest currency denomination to a Google string value.
-     * The currency is assumed to be from {@link Locale#getDefault()}.
+     * The currency is assumed to be from the current {@link AndroidPayConfiguration} singleton.
      *
      * @param price the price in the lowest available currency denomination
      * @return a String that can be used as an Android Pay price string
      */
     @NonNull
     public static String getPriceString(long price) {
-        return getPriceString(price, Currency.getInstance(Locale.getDefault()));
+        return getPriceString(price, AndroidPayConfiguration.getInstance().getCurrency());
     }
 
     /**

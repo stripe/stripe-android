@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static com.stripe.wrap.pay.testutils.AssertUtils.assertEmpty;
 import static org.junit.Assert.assertEquals;
@@ -175,7 +176,7 @@ public class CartManagerTest {
         CartManager manager = new CartManager("USD");
         String id = manager.addLineItem("llama food", 10000L);
 
-        LineItem item = manager.removeItem(id);
+        LineItem item = manager.removeLineItem(id);
 
         assertNotNull(item);
         assertEquals(LineItem.Role.REGULAR, item.getRole());
@@ -194,7 +195,7 @@ public class CartManagerTest {
         String id = manager.addShippingLineItem("2 Day Guaranteed", 2099);
         assertNotNull(id);
 
-        LineItem item = manager.removeItem(id);
+        LineItem item = manager.removeLineItem(id);
 
         assertNotNull(item);
         assertEquals(LineItem.Role.SHIPPING, item.getRole());
@@ -498,6 +499,105 @@ public class CartManagerTest {
         } catch (CartContentException unexpected) {
             fail("Should not have found any cart content exceptions.");
         }
+    }
+
+    @Test
+    public void getTotalPrice_whenAllSectionsPresent_returnsExpectedValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("KRW");
+        Cart oldCart = generateCartWithAllItems("KRW");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(null);
+
+        assertEquals(Long.valueOf(10833L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenManualOverride_returnsManualValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("USD");
+        Cart oldCart = generateCartWithAllItems("USD");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(15L);
+
+        assertEquals(Long.valueOf(15L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenManualOverrideButItemAdded_returnsNewValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("AUD");
+        Cart oldCart = generateCartWithAllItems("AUD");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(15L);
+
+        manager.addShippingLineItem("New Shipping Addition", 100L);
+
+        assertEquals(Long.valueOf(10933L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenManualOverrideButItemRemoved_returnsNewValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("AUD");
+        Cart oldCart = generateCartWithAllItems("AUD");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(15L);
+
+        Set<String> keys = manager.getLineItemsRegular().keySet();
+        String[] keyArray = new String[keys.size()];
+        keys.toArray(keyArray);
+        manager.removeLineItem(keyArray[0]);
+
+        assertEquals(Long.valueOf(8833L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenManualOverrideButTaxChanged_returnsNewValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("GBP");
+        Cart oldCart = generateCartWithAllItems("GBP");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(15L);
+
+        manager.setTaxLineItem("New Taxes", 200L);
+
+        assertEquals(Long.valueOf(10700L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenManualOverrideAndItemUpdatedWithNoPrice_returnsManualValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("AUD");
+        Cart oldCart = generateCartWithAllItems("AUD");
+        CartManager manager = new CartManager(oldCart, true, true);
+        manager.setTotalPrice(15L);
+
+        LineItem noPriceItem = new LineItemBuilder().build();
+        String noPriceKey = manager.addLineItem(noPriceItem);
+        assertNotNull(noPriceKey);
+
+        assertEquals(Long.valueOf(15L), manager.getTotalPrice());
+
+        LineItem removed = manager.removeLineItem(noPriceKey);
+        assertNotNull(removed);
+        assertEquals(Long.valueOf(15L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenSomeSectionsAreNull_returnsExpectedValue() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");
+        Cart oldCart = generateCartWithAllItems("JPY");
+        // This will drop the shipping and tax items
+        CartManager manager = new CartManager(oldCart);
+
+        assertEquals(Long.valueOf(7000L), manager.getTotalPrice());
+    }
+
+    @Test
+    public void getTotalPrice_whenTotalCannotBeCalculated_returnsNull() {
+        AndroidPayConfiguration.getInstance().setCurrencyCode("CAD");
+        Cart oldCart = generateCartWithAllItems("CAD");
+        CartManager manager = new CartManager(oldCart);
+
+        LineItem yenItem = new LineItemBuilder("JPY").setTotalPrice(100L).build();
+        manager.addLineItem(yenItem);
+
+        assertNull(manager.getTotalPrice());
     }
 
     private static void verifyLineItemsHaveExpectedValues(
