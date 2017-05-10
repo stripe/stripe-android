@@ -176,7 +176,7 @@ public class CartManagerTest {
         CartManager manager = new CartManager("USD");
         String id = manager.addLineItem("llama food", 10000L);
 
-        LineItem item = manager.removeItem(id);
+        LineItem item = manager.removeLineItem(id);
 
         assertNotNull(item);
         assertEquals(LineItem.Role.REGULAR, item.getRole());
@@ -195,7 +195,7 @@ public class CartManagerTest {
         String id = manager.addShippingLineItem("2 Day Guaranteed", 2099);
         assertNotNull(id);
 
-        LineItem item = manager.removeItem(id);
+        LineItem item = manager.removeLineItem(id);
 
         assertNotNull(item);
         assertEquals(LineItem.Role.SHIPPING, item.getRole());
@@ -543,7 +543,7 @@ public class CartManagerTest {
         Set<String> keys = manager.getLineItemsRegular().keySet();
         String[] keyArray = new String[keys.size()];
         keys.toArray(keyArray);
-        manager.removeItem(keyArray[0]);
+        manager.removeLineItem(keyArray[0]);
 
         assertEquals(Long.valueOf(8833L), manager.getTotalPrice());
     }
@@ -573,7 +573,7 @@ public class CartManagerTest {
 
         assertEquals(Long.valueOf(15L), manager.getTotalPrice());
 
-        LineItem removed = manager.removeItem(noPriceKey);
+        LineItem removed = manager.removeLineItem(noPriceKey);
         assertNotNull(removed);
         assertEquals(Long.valueOf(15L), manager.getTotalPrice());
     }

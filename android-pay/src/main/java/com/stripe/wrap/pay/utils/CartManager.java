@@ -36,7 +36,7 @@ public class CartManager {
     @NonNull private LinkedHashMap<String, LineItem> mLineItemsShipping = new LinkedHashMap<>();
 
     @Nullable private LineItem mLineItemTax;
-    @Nullable private Long mManualTotalPrice;
+    @Nullable private Long mCachedTotalPrice;
 
     /**
      * Create a new CartManager. Currency will be set to {@link AndroidPayConfiguration#mCurrency}.
@@ -267,7 +267,7 @@ public class CartManager {
      *                   of the cart's currency, or {@code null} to clear the value
      */
     public void setTotalPrice(@Nullable Long totalPrice) {
-        mManualTotalPrice = totalPrice;
+        mCachedTotalPrice = totalPrice;
     }
 
     /**
@@ -296,7 +296,7 @@ public class CartManager {
      * @return the {@link LineItem} removed, or {@code null} if no item was found
      */
     @Nullable
-    public LineItem removeItem(@NonNull @Size(min = 1) String itemId) {
+    public LineItem removeLineItem(@NonNull @Size(min = 1) String itemId) {
         LineItem removed = mLineItemsRegular.remove(itemId);
         if (removed == null) {
             removed = mLineItemsShipping.remove(itemId);
@@ -408,8 +408,8 @@ public class CartManager {
      */
     @Nullable
     public Long getTotalPrice() {
-        if (mManualTotalPrice != null) {
-            return mManualTotalPrice;
+        if (mCachedTotalPrice != null) {
+            return mCachedTotalPrice;
         }
 
         // Regular, Shipping, and Tax
@@ -432,7 +432,7 @@ public class CartManager {
         }
 
         // There is no need to repeat this calculation until items are added or removed.
-        mManualTotalPrice = totalPrice;
+        mCachedTotalPrice = totalPrice;
         return totalPrice;
     }
 
