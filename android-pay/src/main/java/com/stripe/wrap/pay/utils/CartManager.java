@@ -16,11 +16,9 @@ import java.util.Currency;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
-import static com.stripe.wrap.pay.utils.PaymentUtils.getTotalPrice;
 
 /**
  * A wrapper for {@link Cart.Builder} that aids in the generation of new {@link LineItem}
