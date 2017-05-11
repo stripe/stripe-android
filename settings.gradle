@@ -1,3 +1,4 @@
 include ':stripe'
+include ':android-pay'
 include ':example'
 include ':samplestore'

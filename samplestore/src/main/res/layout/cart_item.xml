@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_cart_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/item_padding"
+        android:textSize="26sp"
+        />
+
+    <TextView
+        android:id="@+id/tv_cart_quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/shopping_cart_margin"
+        android:layout_marginLeft="@dimen/shopping_cart_margin"
+        android:gravity="center_vertical"
+        android:textSize="18sp"
+        />
+
+    <TextView
+        android:id="@+id/tv_cart_unit_price"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/item_padding"
+        android:layout_marginLeft="@dimen/item_padding"
+        android:gravity="center_vertical"
+        android:textSize="18sp"
+        />
+
+    <TextView
+        android:id="@+id/tv_cart_total_price"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="end|center_vertical"
+        android:layout_marginRight="@dimen/shopping_cart_margin"
+        android:layout_marginEnd="@dimen/shopping_cart_margin"
+        android:textSize="22sp"
+        android:textAppearance="@android:style/TextAppearance.Holo.Widget.ActionMode.Title"
+        />
+
+</LinearLayout>
