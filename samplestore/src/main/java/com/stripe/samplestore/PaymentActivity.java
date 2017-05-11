@@ -8,10 +8,19 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.wallet.Cart;
+import com.google.android.gms.wallet.LineItem;
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
@@ -19,6 +28,9 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.view.CardInputWidget;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
+import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
+import com.stripe.wrap.pay.utils.CartManager;
 
 import java.util.Currency;
 import java.util.Locale;
@@ -32,35 +44,33 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class PaymentActivity extends AppCompatActivity {
+public class PaymentActivity extends StripeAndroidPayActivity {
 
-    // Put your publishable key here. It should start with "pk_test_"
-    private static final String PUBLISHABLE_KEY =
-            "Put your test key here";
+    private static final String EXTRA_CART = "EXTRA_CART";
 
-    private static final String EXTRA_EMOJI_INT = "EXTRA_EMOJI_INT";
-    private static final String EXTRA_PRICE = "EXTRA_PRICE";
-    private static final String EXTRA_CURRENCY = "EXTRA_CURRENCY";
-
+    private CartManager mCartManager;
     private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
-    private Currency mCurrency;
-    private int mEmojiUnicode;
-    private TextView mEmojiView;
-    private long mPrice;
     private ProgressDialogFragment mProgressDialogFragment;
+    private ShoppingCartAdapter mShoppingCartAdapter;
     private Stripe mStripe;
 
-    public static Intent createIntent(
-            @NonNull Context context,
-            int emojiUnicode,
-            long price,
-            @NonNull Currency currency) {
+    private LinearLayout mCartItemLayout;
+
+    public static Intent createIntent(@NonNull Context context, @NonNull Cart cart) {
         Intent intent = new Intent(context, PaymentActivity.class);
-        intent.putExtra(EXTRA_EMOJI_INT, emojiUnicode);
-        intent.putExtra(EXTRA_PRICE, price);
-        intent.putExtra(EXTRA_CURRENCY, currency);
+        intent.putExtra(EXTRA_CART, cart);
         return intent;
+    }
+
+    @Override
+    protected void onAndroidPayAvailable() {
+
+    }
+
+    @Override
+    protected void onAndroidPayNotAvailable() {
+
     }
 
     @Override
@@ -68,22 +78,37 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        mEmojiUnicode = getIntent().getExtras().getInt(EXTRA_EMOJI_INT);
-        mEmojiView = (TextView) findViewById(R.id.tv_emoji_display);
-        mEmojiView.setText(StoreUtils.getEmojiByUnicode(mEmojiUnicode));
+        Bundle extras = getIntent().getExtras();
+        Cart cart = extras.getParcelable(EXTRA_CART);
+        mCartManager = new CartManager(cart);
 
-        mPrice = getIntent().getExtras().getLong(EXTRA_PRICE);
-        mCurrency = (Currency) getIntent().getExtras().getSerializable(EXTRA_CURRENCY);
-        TextView priceDisplay = (TextView) findViewById(R.id.tv_price_display);
-        priceDisplay.setText(StoreUtils.getPriceString(mPrice, mCurrency));
+        mCartItemLayout = (LinearLayout) findViewById(R.id.cart_list_items);
+//        ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
+//        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
+//        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_payment);
+////        recyclerView.setHasFixedSize(true);
+//        recyclerView.setNestedScrollingEnabled(false);
+//        recyclerView.setLayoutManager(linearLayoutManager);
+//        recyclerView.addItemDecoration(dividerDecoration);
+//        mShoppingCartAdapter = new ShoppingCartAdapter(cart);
+//        recyclerView.setAdapter(mShoppingCartAdapter);
+
+        addCartItems();
         mCompositeSubscription = new CompositeSubscription();
 
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_input_widget);
         mProgressDialogFragment =
                 ProgressDialogFragment.newInstance(R.string.completing_purchase);
         Button payButton = (Button) findViewById(R.id.btn_purchase);
-        payButton.setText(String.format(Locale.ENGLISH,
-                "Pay %s", StoreUtils.getPriceString(mPrice, null)));
+//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
+
+        Long price = mCartManager.getTotalPrice();
+
+        if (price != null) {
+            payButton.setText(String.format(Locale.ENGLISH,
+                    "Pay %s", StoreUtils.getPriceString(price, null)));
+        }
+
         RxView.clicks(payButton)
                 .subscribe(new Action1<Void>() {
                     @Override
@@ -93,6 +118,40 @@ public class PaymentActivity extends AppCompatActivity {
                 });
 
         mStripe = new Stripe(this);
+    }
+
+    private void addCartItems() {
+        mCartItemLayout.removeAllViewsInLayout();
+        String currencySymbol = AndroidPayConfiguration.getInstance()
+                .getCurrency().getSymbol(Locale.US);
+        for (LineItem item : mCartManager.getLineItemsRegular().values()) {
+            View view = LayoutInflater.from(this).inflate(
+                    R.layout.cart_item, mCartItemLayout, false);
+            fillOutCartItemView(item, view, currencySymbol);
+            mCartItemLayout.addView(view);
+        }
+    }
+
+    private void fillOutCartItemView(LineItem item, View view, String currencySymbol) {
+        TextView labelView = (TextView) view.findViewById(R.id.tv_cart_emoji);
+        TextView quantityView = (TextView) view.findViewById(R.id.tv_cart_quantity);
+        TextView unitPriceView = (TextView) view.findViewById(R.id.tv_cart_unit_price);
+        TextView totalPriceView = (TextView) view.findViewById(R.id.tv_cart_total_price);
+        labelView.setText(item.getDescription());
+        if (!TextUtils.isEmpty(item.getQuantity())) {
+            String quantityPriceString = "X " + item.getQuantity() + " @";
+            quantityView.setText(quantityPriceString);
+        }
+
+        if (!TextUtils.isEmpty(item.getUnitPrice())) {
+            String unitPriceString = currencySymbol + item.getUnitPrice();
+            unitPriceView.setText(unitPriceString);
+        }
+
+        if (!TextUtils.isEmpty(item.getTotalPrice())) {
+            String totalPriceString = currencySymbol + item.getTotalPrice();
+            totalPriceView.setText(totalPriceString);
+        }
     }
 
     @Override
@@ -119,7 +178,7 @@ public class PaymentActivity extends AppCompatActivity {
                     public Source call() throws Exception {
                         return mStripe.createSourceSynchronous(
                                 cardParams,
-                                PUBLISHABLE_KEY);
+                                AndroidPayConfiguration.getInstance().getPublicApiKey());
                     }
                 });
 
@@ -128,28 +187,28 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                    new Action0() {
-                        @Override
-                        public void call() {
-                            mProgressDialogFragment.show(fragmentManager, "progress");
-                        }
-                    })
-                .subscribe(
-                    new Action1<Source>() {
-                        @Override
-                        public void call(Source source) {
-                            proceedWithPurchaseIf3DSCheckIsNotNecessary(source);
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            if (mProgressDialogFragment != null) {
-                                mProgressDialogFragment.dismiss();
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                mProgressDialogFragment.show(fragmentManager, "progress");
                             }
-                            displayError(throwable.getLocalizedMessage());
-                        }
-                    }));
+                        })
+                .subscribe(
+                        new Action1<Source>() {
+                            @Override
+                            public void call(Source source) {
+                                proceedWithPurchaseIf3DSCheckIsNotNecessary(source);
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                if (mProgressDialogFragment != null) {
+                                    mProgressDialogFragment.dismiss();
+                                }
+                                displayError(throwable.getLocalizedMessage());
+                            }
+                        }));
     }
 
     private void proceedWithPurchaseIf3DSCheckIsNotNecessary(Source source) {
@@ -172,7 +231,13 @@ public class PaymentActivity extends AppCompatActivity {
     private void completePurchase(Source source) {
         Retrofit retrofit = RetrofitFactory.getInstance();
         StripeService stripeService = retrofit.create(StripeService.class);
-        Observable<Void> stripeResponse = stripeService.createQueryCharge(mPrice, source.getId());
+//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
+        Long price = mCartManager.getTotalPrice();
+
+        if (price == null) {
+            return;
+        }
+        Observable<Void> stripeResponse = stripeService.createQueryCharge(price, source.getId());
 
         mCompositeSubscription.add(stripeResponse
                 .subscribeOn(Schedulers.io())
@@ -215,7 +280,13 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void finishCharge() {
-        Intent data = StoreActivity.createPurchaseCompleteIntent(mEmojiUnicode, mPrice);
+//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
+        Long price = mCartManager.getTotalPrice();
+
+        if (price == null) {
+            return;
+        }
+        Intent data = StoreActivity.createPurchaseCompleteIntent(0x1F458, price);
         setResult(RESULT_OK, data);
         finish();
     }
@@ -224,7 +295,8 @@ public class PaymentActivity extends AppCompatActivity {
         InputMethodManager inputManager =
                 (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.toggleSoftInput(0, 0);
-        mEmojiView.requestFocus();
+
+//        mEmojiView.requestFocus();
     }
 
 }

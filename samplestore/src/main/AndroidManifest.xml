@@ -11,13 +11,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StoreActivity">
+
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
+        <activity android:name=".StoreActivity"
+                  android:theme="@style/AppTheme.NoActionBar">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
+
         <activity
             android:name=".PaymentActivity"
             android:windowSoftInputMode = "stateVisible"
@@ -26,6 +34,7 @@
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
