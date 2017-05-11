@@ -70,14 +70,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             mRemoveButton = (ImageButton) pollingLayout.findViewById(R.id.tv_minus);
 
             mCurrency = currency;
-//            pollingLayout.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    v.setPressed(true);
-//                    launchPurchaseActivityForIndex(getAdapterPosition());
-//                }
-//            });
-
             mAddButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

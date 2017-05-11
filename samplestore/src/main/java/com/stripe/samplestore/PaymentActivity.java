@@ -306,12 +306,12 @@ public class PaymentActivity extends StripeAndroidPayActivity {
     }
 
     private void finishCharge() {
-//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
         Long price = mCartManager.getTotalPrice();
 
         if (price == null) {
             return;
         }
+
         Intent data = StoreActivity.createPurchaseCompleteIntent(0x1F458, price);
         setResult(RESULT_OK, data);
         finish();
@@ -321,8 +321,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         InputMethodManager inputManager =
                 (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.toggleSoftInput(0, 0);
-
-//        mEmojiView.requestFocus();
     }
 
 }
