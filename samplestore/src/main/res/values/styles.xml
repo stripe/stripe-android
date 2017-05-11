@@ -9,6 +9,18 @@
         <item name="android:buttonStyle">@style/CustomButton</item>
     </style>
 
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:buttonStyle">@style/CustomButton</item>
+    </style>
+
+    <style name="WhiteTextTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">#fff</item>
+    </style>
+
     <style name="CustomButton" parent="Widget.AppCompat.Button.Colored">
         <item name="android:minHeight">64dip</item>
         <item name="android:paddingRight">24dp</item>

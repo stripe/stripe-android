@@ -1,70 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="@dimen/activity_padding"
     tools:context="com.stripe.samplestore.PaymentActivity">
-
-    <TextView
-        android:id="@+id/tv_emoji_display"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/emoji_display_top_margin"
-        android:layout_marginBottom="@dimen/emoji_display_bottom_margin"
-        android:textSize="75sp"
-        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/payment_screen_spacing">
+        android:orientation="vertical"
+        >
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!--<android.support.v7.widget.RecyclerView-->
+            <!--android:id="@+id/rv_payment"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"/>-->
+
+        <LinearLayout
+            android:id="@+id/cart_list_items"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/total"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:orientation="vertical"
             />
 
         <TextView
-            android:id="@+id/tv_price_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/enter_details"
+            android:textSize="14sp"
+            android:layout_marginBottom="0dp"
+            android:textColor="@android:color/secondary_text_light"
+            />
+
+        <com.stripe.android.view.CardInputWidget
+            android:id="@+id/card_input_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_purchase"
+            android:layout_marginTop="@dimen/payment_screen_spacing"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/price_display_bottom_margin"
-            android:layout_marginLeft="@dimen/item_padding"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:layout_gravity="center"
+            android:text="@string/confirm_purchase"
             />
 
     </LinearLayout>
+</ScrollView>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/enter_details"
-        android:textSize="14sp"
-        android:layout_marginBottom="0dp"
-        android:textColor="@android:color/secondary_text_light"
-        />
-
-    <com.stripe.android.view.CardInputWidget
-        android:id="@+id/card_input_widget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button
-        android:id="@+id/btn_purchase"
-        android:layout_marginTop="@dimen/payment_screen_spacing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/confirm_purchase"
-        />
-
-</LinearLayout>

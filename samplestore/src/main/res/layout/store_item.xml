@@ -8,11 +8,48 @@
 
     <TextView
         android:id="@+id/tv_emoji"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/emoji_left_margin"
         android:layout_marginStart="@dimen/emoji_left_margin"
         style="@style/EmojiStyle"
+        />
+
+    <ImageButton
+        android:id="@+id/tv_minus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/button_padding"
+        android:layout_gravity="center_vertical"
+        android:background="?attr/selectableItemBackground"
+        android:src="@drawable/ic_remove_black_24dp"
+        android:tint="@color/semitransparentGray"
+        />
+
+    <TextView
+        android:id="@+id/tv_quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/emoji_left_margin"
+        android:layout_marginStart="@dimen/emoji_left_margin"
+        android:layout_gravity="center_vertical"
+        android:textSize="36dp"
+        android:text="0"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        />
+
+    <ImageButton
+        android:id="@+id/tv_plus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/button_padding"
+        android:layout_marginLeft="@dimen/emoji_left_margin"
+        android:layout_marginStart="@dimen/emoji_left_margin"
+        android:layout_gravity="center_vertical"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_add_black_24dp"
+        android:tint="@color/semitransparentGray"
         />
 
     <TextView
