@@ -1,21 +1,34 @@
 package com.stripe.samplestore;
 
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-public class StoreActivity extends AppCompatActivity {
+import com.stripe.wrap.pay.AndroidPayConfiguration;
+
+public class StoreActivity
+        extends AppCompatActivity
+        implements StoreAdapter.TotalItemsChangedListener{
+
+    // Put your publishable key here. It should start with "pk_test_"
+    private static final String PUBLISHABLE_KEY =
+            "put your publishable key here";
 
     static final int PURCHASE_REQUEST = 37;
 
     private static final String EXTRA_EMOJI_PURCHASED = "EXTRA_EMOJI_PURCHASED";
     private static final String EXTRA_PRICE_PAID = "EXTRA_PRICE_PAID";
+
+    private FloatingActionButton mGoToCartButton;
+    private StoreAdapter mStoreAdapter;
 
     public static Intent createPurchaseCompleteIntent(int emojiUnicode, long amount) {
         Intent returnIntent = new Intent();
@@ -29,15 +42,29 @@ public class StoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
 
-        StoreAdapter adapter = new StoreAdapter(this);
+        initAndroidPay();
+
+        mGoToCartButton = (FloatingActionButton) findViewById(R.id.fab_checkout);
+        mStoreAdapter = new StoreAdapter(this);
         ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_store_items);
 
+
+        mGoToCartButton.hide();
+        Toolbar myToolBar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolBar);
+
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(dividerDecoration);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(mStoreAdapter);
+
+        mGoToCartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStoreAdapter.launchPurchaseActivityWithCart();
+            }
+        });
     }
 
     @Override
@@ -50,7 +77,25 @@ public class StoreActivity extends AppCompatActivity {
             if (emojiUnicode != -1 && price != -1L) {
                 displayPurchase(emojiUnicode, price);
             }
+            mStoreAdapter.clearItemSelections();
         }
+    }
+
+    @Override
+    public void onTotalItemsChanged(int totalItems) {
+        if (totalItems > 0) {
+            mGoToCartButton.show();
+        } else {
+            mGoToCartButton.hide();
+        }
+    }
+
+    private void initAndroidPay() {
+        AndroidPayConfiguration payConfiguration = AndroidPayConfiguration.getInstance();
+        payConfiguration.setCurrencyCode("USD");
+        payConfiguration.setPhoneNumberRequired(false);
+        payConfiguration.setShippingAddressRequired(true);
+        payConfiguration.setPublicApiKey(PUBLISHABLE_KEY);
     }
 
     private void displayPurchase(int emojiUnicode, long price) {

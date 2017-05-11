@@ -16,7 +16,7 @@ public class RetrofitFactory {
 
     // Put your Base URL here. Unless you customized it, the URL will be something like
     // https://hidden-beach-12345.herokuapp.com/
-    private static final String BASE_URL = "Put your backend URL here";
+    private static final String BASE_URL = "put your base url here";
     private static Retrofit mInstance = null;
 
     public static Retrofit getInstance() {

@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * The model of a Stripe card token.
  */
-public class Token {
+public class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT})
@@ -73,6 +73,7 @@ public class Token {
     /**
      * @return the {@link #mId} of this token
      */
+    @Override
     public String getId() {
         return mId;
     }

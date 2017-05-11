@@ -6,9 +6,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.wallet.Cart;
 import com.stripe.example.R;
+import com.stripe.wrap.pay.AndroidPayConfiguration;
+import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
+import com.stripe.wrap.pay.utils.CartContentException;
+import com.stripe.wrap.pay.utils.CartManager;
 
 public class LauncherActivity extends AppCompatActivity {
+
+    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
+            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,5 +40,32 @@ public class LauncherActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Button androidPayButton = (Button) findViewById(R.id.btn_android_pay_launch);
+        androidPayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createSampleCartAndLaunchAndroidPayActivity();
+            }
+        });
+    }
+
+    private void createSampleCartAndLaunchAndroidPayActivity() {
+        AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
+        androidPayConfiguration.setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        androidPayConfiguration.setShippingAddressRequired(true);
+        CartManager cartManager = new CartManager("USD");
+        cartManager.addLineItem("Llama Food", 5000L);
+        cartManager.addLineItem("Llama Shoes", 4, 2000L);
+        cartManager.addShippingLineItem("Domestic shipping estimate", 1000L);
+
+        try {
+            Cart cart = cartManager.buildCart();
+            Intent intent = new Intent(this, AndroidPayActivity.class)
+                    .putExtra(StripeAndroidPayActivity.EXTRA_CART, cart);
+            startActivity(intent);
+        } catch (CartContentException unexpected) {
+            // Ignore for now.
+        }
     }
 }

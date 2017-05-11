@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 
-def android_support_version = '25.2.0'
+def android_support_version = '25.3.1'
 
 android {
     compileSdkVersion 25
@@ -31,13 +31,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
+    compile 'com.android.support:design:' + android_support_version
 
     /* This line is all you need for the stripe-android bindings */
-    compile 'com.stripe:stripe-android:4.0.1'
+    compile project(':stripe')
+    compile project(':android-pay')
 
     /* Needed for RxAndroid */
     compile 'io.reactivex:rxandroid:1.2.1'
