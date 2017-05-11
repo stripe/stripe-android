@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +32,10 @@ import com.stripe.android.view.CardInputWidget;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
 import com.stripe.wrap.pay.utils.CartManager;
+import com.stripe.wrap.pay.utils.PaymentUtils;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -47,12 +51,12 @@ import rx.subscriptions.CompositeSubscription;
 public class PaymentActivity extends StripeAndroidPayActivity {
 
     private static final String EXTRA_CART = "EXTRA_CART";
+    private static final String TOTAL_LABEL = "Total:";
 
     private CartManager mCartManager;
     private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
     private ProgressDialogFragment mProgressDialogFragment;
-    private ShoppingCartAdapter mShoppingCartAdapter;
     private Stripe mStripe;
 
     private LinearLayout mCartItemLayout;
@@ -83,15 +87,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         mCartManager = new CartManager(cart);
 
         mCartItemLayout = (LinearLayout) findViewById(R.id.cart_list_items);
-//        ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
-//        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
-//        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_payment);
-////        recyclerView.setHasFixedSize(true);
-//        recyclerView.setNestedScrollingEnabled(false);
-//        recyclerView.setLayoutManager(linearLayoutManager);
-//        recyclerView.addItemDecoration(dividerDecoration);
-//        mShoppingCartAdapter = new ShoppingCartAdapter(cart);
-//        recyclerView.setAdapter(mShoppingCartAdapter);
 
         addCartItems();
         mCompositeSubscription = new CompositeSubscription();
@@ -99,9 +94,8 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_input_widget);
         mProgressDialogFragment =
                 ProgressDialogFragment.newInstance(R.string.completing_purchase);
-        Button payButton = (Button) findViewById(R.id.btn_purchase);
-//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
 
+        Button payButton = (Button) findViewById(R.id.btn_purchase);
         Long price = mCartManager.getTotalPrice();
 
         if (price != null) {
@@ -130,28 +124,57 @@ public class PaymentActivity extends StripeAndroidPayActivity {
             fillOutCartItemView(item, view, currencySymbol);
             mCartItemLayout.addView(view);
         }
+
+        View totalView = LayoutInflater.from(this).inflate(
+                R.layout.cart_item, mCartItemLayout, false);
+        boolean shouldDisplayTotal = fillOutTotalView(totalView, currencySymbol);
+        if (shouldDisplayTotal) {
+            mCartItemLayout.addView(totalView);
+        }
+    }
+
+    private boolean fillOutTotalView(View view, String currencySymbol) {
+        TextView[] itemViews = getItemViews(view);
+        Long totalPrice = mCartManager.getTotalPrice();
+        if (totalPrice != null) {
+            itemViews[0].setText(TOTAL_LABEL);
+            String priceString = PaymentUtils.getPriceString(totalPrice,
+                    AndroidPayConfiguration.getInstance().getCurrency());
+            priceString = currencySymbol + priceString;
+            itemViews[3].setText(priceString);
+            return true;
+        }
+        return false;
     }
 
     private void fillOutCartItemView(LineItem item, View view, String currencySymbol) {
-        TextView labelView = (TextView) view.findViewById(R.id.tv_cart_emoji);
-        TextView quantityView = (TextView) view.findViewById(R.id.tv_cart_quantity);
-        TextView unitPriceView = (TextView) view.findViewById(R.id.tv_cart_unit_price);
-        TextView totalPriceView = (TextView) view.findViewById(R.id.tv_cart_total_price);
-        labelView.setText(item.getDescription());
+        TextView[] itemViews = getItemViews(view);
+
+        itemViews[0].setText(item.getDescription());
         if (!TextUtils.isEmpty(item.getQuantity())) {
             String quantityPriceString = "X " + item.getQuantity() + " @";
-            quantityView.setText(quantityPriceString);
+            itemViews[1].setText(quantityPriceString);
         }
 
         if (!TextUtils.isEmpty(item.getUnitPrice())) {
             String unitPriceString = currencySymbol + item.getUnitPrice();
-            unitPriceView.setText(unitPriceString);
+            itemViews[2].setText(unitPriceString);
         }
 
         if (!TextUtils.isEmpty(item.getTotalPrice())) {
             String totalPriceString = currencySymbol + item.getTotalPrice();
-            totalPriceView.setText(totalPriceString);
+            itemViews[3].setText(totalPriceString);
         }
+    }
+
+    @Size(value = 4)
+    private TextView[] getItemViews(View view) {
+        TextView labelView = (TextView) view.findViewById(R.id.tv_cart_emoji);
+        TextView quantityView = (TextView) view.findViewById(R.id.tv_cart_quantity);
+        TextView unitPriceView = (TextView) view.findViewById(R.id.tv_cart_unit_price);
+        TextView totalPriceView = (TextView) view.findViewById(R.id.tv_cart_total_price);
+        TextView[] itemViews = { labelView, quantityView, unitPriceView, totalPriceView };
+        return itemViews;
     }
 
     @Override
@@ -231,14 +254,17 @@ public class PaymentActivity extends StripeAndroidPayActivity {
     private void completePurchase(Source source) {
         Retrofit retrofit = RetrofitFactory.getInstance();
         StripeService stripeService = retrofit.create(StripeService.class);
-//        Long price = mShoppingCartAdapter.getCartManager().getTotalPrice();
         Long price = mCartManager.getTotalPrice();
 
         if (price == null) {
+            // This should be rare, and only occur if there is somehow a mix of currencies in
+            // the CartManager (only possible if those are put in as LineItem objects manually).
+            // If this is the case, you can put in a cart total price manually by calling
+            // CartManager.setTotalPrice.
             return;
         }
-        Observable<Void> stripeResponse = stripeService.createQueryCharge(price, source.getId());
 
+        Observable<Void> stripeResponse = stripeService.createQueryCharge(price, source.getId());
         mCompositeSubscription.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

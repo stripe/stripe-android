@@ -20,7 +20,7 @@ public class StoreActivity
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
+            "put your publishable key here";
 
     static final int PURCHASE_REQUEST = 37;
 
@@ -77,6 +77,7 @@ public class StoreActivity
             if (emojiUnicode != -1 && price != -1L) {
                 displayPurchase(emojiUnicode, price);
             }
+            mStoreAdapter.clearItemSelections();
         }
     }
 

@@ -199,6 +199,11 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
     }
 
+    public void clearItemSelections() {
+        mQuantityOrdered = new int[EMOJI_CLOTHES.length];
+        notifyDataSetChanged();
+    }
+
     public interface TotalItemsChangedListener {
         void onTotalItemsChanged(int totalItems);
     }
