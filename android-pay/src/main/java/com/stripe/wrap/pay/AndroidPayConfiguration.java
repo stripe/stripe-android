@@ -33,25 +33,30 @@ public class AndroidPayConfiguration {
     public static AndroidPayConfiguration getInstance() {
         if (mInstance == null) {
             throw new RuntimeException(
-                    "Attempted to get instance of AndroidPayConfiguration " +
-                            "without specified currency");
+                    "Attempted to get instance of AndroidPayConfiguration without initialization.");
         }
         return mInstance;
     }
 
-    @NonNull
-    public static AndroidPayConfiguration getInstance(@NonNull String currencyCode) {
-        Currency currency = Currency.getInstance(currencyCode.toUpperCase());
-        return getInstance(currency);
+    /**
+     * Initialize the AndroidPayConfiguration instance with a currency code. If the currency
+     * code is invalid, this will throw an {@link IllegalArgumentException}
+     *
+     * @param currencyCode the code for the starting {@link Currency} for android pay configuration
+     * @return the instance of the AndroidPayConfiguration singleton
+     */
+    public static AndroidPayConfiguration init(@NonNull String currencyCode) {
+        return init(Currency.getInstance(currencyCode.toUpperCase()));
     }
 
-    @NonNull
-    public static AndroidPayConfiguration getInstance(@NonNull Currency currency) {
-        if (mInstance == null) {
-            mInstance = new AndroidPayConfiguration(currency);
-        } else {
-            mInstance.setCurrency(currency);
-        }
+    /**
+     * Initialize the AndroidPayConfiguration instance with a {@link Currency}.
+     *
+     * @param currency the starting {@link Currency} for android pay configuration
+     * @return the instance of the AndroidPayConfiguration singleton
+     */
+    public static AndroidPayConfiguration init(@NonNull Currency currency) {
+        mInstance = new AndroidPayConfiguration(currency);
         return mInstance;
     }
 
