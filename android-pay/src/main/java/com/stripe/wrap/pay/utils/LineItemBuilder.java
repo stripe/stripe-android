@@ -64,7 +64,7 @@ public class LineItemBuilder {
      * @return {@code this}, for chaining purposes
      */
     public LineItemBuilder setCurrencyCode(String currencyCode) {
-        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
+        mCurrency = Currency.getInstance(currencyCode.toUpperCase());
         return this;
     }
 

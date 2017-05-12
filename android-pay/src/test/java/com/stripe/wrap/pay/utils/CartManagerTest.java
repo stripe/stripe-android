@@ -36,6 +36,12 @@ import static org.junit.Assert.fail;
 @Config(sdk = 23)
 public class CartManagerTest {
 
+    @Test(expected = RuntimeException.class)
+    public void createCartManager_withBadCurrencyString_throwsRuntimeException() {
+        new CartManager("cookies");
+        fail("Should not be able to build cart manager with an invalid currency.");
+    }
+
     @Test
     public void createCartManager_withoutCurrencyArgument_usesAndroidPayConfiguration() {
         AndroidPayConfiguration.getInstance().setCurrencyCode("JPY");

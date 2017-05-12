@@ -548,11 +548,9 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     @CallSuper
     protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
         if (maskedWallet == null) {
+            // A null value for the changed masked wallet means that nothing changed, not that
+            // there is no wallet.
             return;
-        }
-
-        if (mBuyButtonFragment != null) {
-            mBuyButtonFragment.updateMaskedWallet(maskedWallet);
         }
         mMaskedWallet = maskedWallet;
     }
@@ -567,9 +565,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
      */
     @CallSuper
     protected void onMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
-        if (mBuyButtonFragment != null) {
-            mBuyButtonFragment.updateMaskedWallet(maskedWallet);
-        }
         mMaskedWallet = maskedWallet;
     }
 

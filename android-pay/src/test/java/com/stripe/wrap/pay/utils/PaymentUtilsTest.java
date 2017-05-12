@@ -19,7 +19,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import static com.stripe.wrap.pay.testutils.AssertUtils.assertEmpty;
-import static com.stripe.wrap.pay.utils.PaymentUtils.getCurrencyByCodeOrDefault;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceLong;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getPriceString;
 import static com.stripe.wrap.pay.utils.PaymentUtils.getStripeIsReadyToPayRequest;
@@ -454,37 +453,6 @@ public class PaymentUtilsTest {
     public void getTotalPrice_whenEmptyList_returnsZero() {
         assertEquals(Long.valueOf(0L), getTotalPrice(
                 new ArrayList<LineItem>(), Currency.getInstance("OMR")));
-    }
-
-    @Test
-    public void getCurrencyByCodeOrDefault_forValidCurrencyCode_returnsCorrectCurrency() {
-        Currency foundCurrency = getCurrencyByCodeOrDefault("CAD");
-        assertEquals(Currency.getInstance(Locale.CANADA), foundCurrency);
-    }
-
-    @Test
-    public void getCurrencyByCodeOrDefault_forNull_returnsDefaultUsd() {
-        assertEquals(Currency.getInstance(Locale.US),
-                getCurrencyByCodeOrDefault(null));
-    }
-
-    @Test
-    public void getCurrencyByCodeOrDefault_forNullWhenLocaleIsNotUs_returnsDefaultUsd() {
-        Locale.setDefault(Locale.JAPAN);
-        assertEquals(Currency.getInstance(Locale.US),
-                getCurrencyByCodeOrDefault(null));
-    }
-
-    @Test
-    public void getCurrencyByCodeOrDefault_forInvalid_returnsDefaultUsd() {
-        assertEquals(Currency.getInstance(Locale.US),
-                getCurrencyByCodeOrDefault("tea and crumpets"));
-    }
-
-    @Test
-    public void getCurrencyByCodeOrDefault_forLowercase_stillReturnsCorrectCurrency() {
-        assertEquals(Currency.getInstance(Locale.US),
-                getCurrencyByCodeOrDefault("usd"));
     }
 
     @Test

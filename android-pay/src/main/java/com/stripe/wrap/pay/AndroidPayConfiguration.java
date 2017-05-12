@@ -32,15 +32,33 @@ public class AndroidPayConfiguration {
     @NonNull
     public static AndroidPayConfiguration getInstance() {
         if (mInstance == null) {
-            mInstance = new AndroidPayConfiguration();
+            throw new RuntimeException(
+                    "Attempted to get instance of AndroidPayConfiguration " +
+                            "without specified currency");
+        }
+        return mInstance;
+    }
+
+    @NonNull
+    public static AndroidPayConfiguration getInstance(@NonNull String currencyCode) {
+        Currency currency = Currency.getInstance(currencyCode.toUpperCase());
+        return getInstance(currency);
+    }
+
+    @NonNull
+    public static AndroidPayConfiguration getInstance(@NonNull Currency currency) {
+        if (mInstance == null) {
+            mInstance = new AndroidPayConfiguration(currency);
+        } else {
+            mInstance.setCurrency(currency);
         }
         return mInstance;
     }
 
     @VisibleForTesting
-    AndroidPayConfiguration() {
+    AndroidPayConfiguration(@NonNull Currency currency) {
         // Default is set to dollars until otherwise specified.
-        mCurrency = Currency.getInstance(Locale.US);
+        mCurrency = currency;
     }
 
     @Nullable
@@ -120,7 +138,7 @@ public class AndroidPayConfiguration {
 
     @NonNull
     public AndroidPayConfiguration setCurrencyCode(String currencyCode) {
-        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
+        mCurrency = Currency.getInstance(currencyCode.toUpperCase());
         return this;
     }
 
