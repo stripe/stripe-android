@@ -454,6 +454,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         mCart = cart;
     }
 
+    @Nullable
+    protected MaskedWallet getMaskedWallet() {
+        return mMaskedWallet;
+    }
+
     /*------ Begin GoogleApiClient.OnConnectionFailedListener ------*/
 
     /**
