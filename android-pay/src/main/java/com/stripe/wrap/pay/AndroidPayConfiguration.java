@@ -57,7 +57,6 @@ public class AndroidPayConfiguration {
 
     @VisibleForTesting
     AndroidPayConfiguration(@NonNull Currency currency) {
-        // Default is set to dollars until otherwise specified.
         mCurrency = currency;
     }
 
