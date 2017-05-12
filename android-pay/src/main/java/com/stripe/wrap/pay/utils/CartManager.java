@@ -186,8 +186,8 @@ public class CartManager {
      */
     @Nullable
     public String addShippingLineItem(@NonNull @Size(min = 1) String description,
-                              double quantity,
-                              long unitPrice) {
+                                      double quantity,
+                                      long unitPrice) {
         BigDecimal roundedQuantity = new BigDecimal(quantity).setScale(1, BigDecimal.ROUND_DOWN);
         long totalPrice = roundedQuantity.multiply(new BigDecimal(unitPrice)).longValue();
 
@@ -336,8 +336,8 @@ public class CartManager {
                 if (mLineItemTax != null) {
                     Log.w(TAG, String.format(Locale.ENGLISH,
                             "Adding a tax line item, but a tax line item " +
-                            "already exists. Old tax of %s is being overwritten " +
-                            "to maintain a valid cart.",
+                                    "already exists. Old tax of %s is being overwritten " +
+                                    "to maintain a valid cart.",
                             mLineItemTax.getTotalPrice()));
                 }
                 // We're swapping out the tax item, so we have to remove the old one.
@@ -346,7 +346,7 @@ public class CartManager {
             default:
                 Log.w(TAG, String.format(Locale.ENGLISH,
                         "Line item with unknown role added to cart. Treated as regular. " +
-                        "Unknown role is of code %d",
+                                "Unknown role is of code %d",
                         item.getRole()));
                 itemId = generateUuidForRole(LineItem.Role.REGULAR);
                 mLineItemsRegular.put(itemId, item);
@@ -434,6 +434,11 @@ public class CartManager {
         // There is no need to repeat this calculation until items are added or removed.
         mCachedTotalPrice = totalPrice;
         return totalPrice;
+    }
+
+    @NonNull
+    public Currency getCurrency() {
+        return mCurrency;
     }
 
     @NonNull

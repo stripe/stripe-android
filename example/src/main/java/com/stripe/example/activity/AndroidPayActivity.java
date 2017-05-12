@@ -102,7 +102,9 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         mSelectedCardDisplay = (TextView) findViewById(R.id.tv_card_info);
         mSelectedShippingAddressDisplay = (TextView) findViewById(R.id.tv_shipping_info);
 
-        updateCartTotals(new CartManager(mCart, true, true));
+        if (getCart() != null) {
+            updateCartTotals(new CartManager(getCart(), true, true));
+        }
     }
 
     @Override
@@ -156,6 +158,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
 
     @Override
     protected void onMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
+        super.onMaskedWalletRetrieved(maskedWallet);
         if (maskedWallet != null) {
             mPossibleConfirmedMaskedWallet = maskedWallet;
 
@@ -196,10 +199,13 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     private void proceedWithWallet(@NonNull MaskedWallet maskedWallet) {
         mChangeDetailsContainer.setVisibility(View.GONE);
 
+        if (getCart() == null) {
+            return;
+        }
         FullWalletRequest walletRequest =
                 AndroidPayConfiguration.generateFullWalletRequest(
                         maskedWallet.getGoogleTransactionId(),
-                        mCart);
+                        getCart());
         mProgressDialogController.startProgress();
         loadFullWallet(walletRequest);
     }
@@ -230,7 +236,11 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
             mSelectedCardDisplay.setText(cardText);
         }
 
-        CartManager copyCart = new CartManager(mCart);
+        if (getCart() == null) {
+            return;
+        }
+
+        CartManager copyCart = new CartManager(getCart());
         long shippingUpdate = calculateShipping(maskedWallet.getBuyerShippingAddress());
         long taxUpdate = calculateTaxes(maskedWallet.getBuyerBillingAddress());
         copyCart.addShippingLineItem("Shipping", shippingUpdate);
@@ -241,7 +251,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
         }
 
         try {
-            mCart = copyCart.buildCart();
+            setCart(copyCart.buildCart());
             updateCartTotals(copyCart);
         } catch (CartContentException unexpected) {
             // ignore for now
