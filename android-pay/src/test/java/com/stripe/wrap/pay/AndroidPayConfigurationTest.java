@@ -27,12 +27,13 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = 23)
 public class AndroidPayConfigurationTest {
 
-    Cart mCart;
-    AndroidPayConfiguration mAndroidPayConfiguration;
+    private Cart mCart;
+    private AndroidPayConfiguration mAndroidPayConfiguration;
 
     @Before
     public void setup() {
-        mAndroidPayConfiguration = AndroidPayConfiguration.getInstance("USD");
+        AndroidPayConfiguration.init("USD");
+        mAndroidPayConfiguration = AndroidPayConfiguration.getInstance();
         mCart = Cart.newBuilder().setTotalPrice("10.00").build();
     }
 

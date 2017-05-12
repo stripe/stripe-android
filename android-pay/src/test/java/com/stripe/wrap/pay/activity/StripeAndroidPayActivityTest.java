@@ -111,11 +111,10 @@ public class StripeAndroidPayActivityTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mGoogleApiClientMockBuilder.getMockGoogleApiClient()).thenReturn(mGoogleApiClient);
-        AndroidPayConfiguration androidPayConfiguration =
-                AndroidPayConfiguration.getInstance("USD");
-        androidPayConfiguration.setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        AndroidPayConfiguration.init("USD");
+        AndroidPayConfiguration.getInstance().setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
 
-        mCartManager = new CartManager("USD");
+        mCartManager = new CartManager();
         mCartManager.addLineItem("First item", 100L);
         mCartManager.addLineItem("Second item", 200L);
 
