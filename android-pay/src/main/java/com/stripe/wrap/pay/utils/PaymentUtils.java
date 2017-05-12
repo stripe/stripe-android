@@ -54,23 +54,6 @@ public class PaymentUtils {
         return totalPrice;
     }
 
-    @NonNull
-    public static Currency getCurrencyByCodeOrDefault(@Nullable String currencyCode) {
-        Currency defaultCurrency = Currency.getInstance(Locale.US);
-        if (currencyCode == null) {
-            return defaultCurrency;
-        }
-        try {
-            return Currency.getInstance(currencyCode.toUpperCase());
-        } catch (IllegalArgumentException illegalArgumentException) {
-            Log.w(TAG, String.format(Locale.ENGLISH,
-                    "Could not create currency with code \"%s\". " +
-                            "Using currency %s by default.",
-                    currencyCode, defaultCurrency.getCurrencyCode()));
-            return defaultCurrency;
-        }
-    }
-
     /**
      * Utility function to convert the already-valid price String obtained from a {@link LineItem}
      * into a {@link Long} value that can be used for calculations.

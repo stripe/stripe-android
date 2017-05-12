@@ -14,8 +14,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.Locale;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -34,15 +32,8 @@ public class AndroidPayConfigurationTest {
 
     @Before
     public void setup() {
-        mAndroidPayConfiguration = AndroidPayConfiguration.getInstance();
+        mAndroidPayConfiguration = AndroidPayConfiguration.getInstance("USD");
         mCart = Cart.newBuilder().setTotalPrice("10.00").build();
-    }
-
-    @Test
-    public void instantiate_andDoNothingElse_setsCurrencyToDefaultCurrency() {
-        Locale.setDefault(Locale.JAPAN);
-        AndroidPayConfiguration testConfig = new AndroidPayConfiguration();
-        assertEquals("USD", testConfig.getCurrencyCode());
     }
 
     @Test
@@ -136,19 +127,5 @@ public class AndroidPayConfigurationTest {
     public void generateMaskedWalletRequest_whenCartHasNoTotalPrice_returnsNull() {
         Cart noPriceCart = Cart.newBuilder().build();
         assertNull(mAndroidPayConfiguration.generateMaskedWalletRequest(noPriceCart));
-    }
-
-    @Test
-    public void generateMaskedWalletRequest_whenApiKeyIsSetButNotCurrency_usesUsd() {
-        // Need to instantiate a new Android Pay Configuration to avoid conflicts with other
-        // tests.
-        AndroidPayConfiguration testPayConfiguration = new AndroidPayConfiguration();
-        testPayConfiguration.setPublicApiKey("pk_test_abc123");
-
-        // In this case, we haven't set a currency yet.
-        MaskedWalletRequest maskedWalletRequest =
-                testPayConfiguration.generateMaskedWalletRequest(mCart);
-        assertNotNull(maskedWalletRequest);
-        assertEquals("USD", maskedWalletRequest.getCurrencyCode());
     }
 }

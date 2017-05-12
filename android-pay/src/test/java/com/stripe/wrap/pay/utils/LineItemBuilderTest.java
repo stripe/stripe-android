@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link LineItemBuilder}.
@@ -145,19 +146,10 @@ public class LineItemBuilderTest {
         assertEquals("2.5", item.getQuantity());
     }
 
-    @Test
-    public void setCurrencyCode_whenInvalid_setsToLocaleDefaultAndLogsWarning() {
-        ShadowLog.stream = System.out;
-        Locale.setDefault(Locale.JAPAN);
-
-        LineItem item = new LineItemBuilder("notacurrency").build();
-        String expectedWarning = "Could not create currency with code \"notacurrency\". Using " +
-                "currency USD by default.";
-        List<ShadowLog.LogItem> logItems = ShadowLog.getLogsForTag(PaymentUtils.TAG);
-        assertEquals("USD", item.getCurrencyCode());
-        assertEquals(1, logItems.size());
-        assertEquals(Log.WARN, logItems.get(0).type);
-        assertEquals(expectedWarning, logItems.get(0).msg);
+    @Test(expected = RuntimeException.class)
+    public void setCurrencyCode_whenInvalid_throwsRuntimeException() {
+        new LineItemBuilder("notacurrency").build();
+        fail("Can't create a LineItemBuilder with an illegal currency.");
     }
 
     @Test

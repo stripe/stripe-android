@@ -51,7 +51,8 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private void createSampleCartAndLaunchAndroidPayActivity() {
-        AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
+        AndroidPayConfiguration androidPayConfiguration =
+                AndroidPayConfiguration.getInstance("USD");
         androidPayConfiguration.setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
         androidPayConfiguration.setShippingAddressRequired(true);
         CartManager cartManager = new CartManager("USD");

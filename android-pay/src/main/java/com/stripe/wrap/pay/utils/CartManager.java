@@ -40,6 +40,8 @@ public class CartManager {
 
     /**
      * Create a new CartManager. Currency will be set to {@link AndroidPayConfiguration#mCurrency}.
+     * Note that this will throw a {@link RuntimeException} if a currency has not been set on
+     * the {@link AndroidPayConfiguration}.
      */
     public CartManager() {
         mCurrency = AndroidPayConfiguration.getInstance().getCurrency();
@@ -53,7 +55,7 @@ public class CartManager {
      * @param currencyCode a currency code used for this cart, and the rest of the application
      */
     public CartManager(String currencyCode) {
-        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(currencyCode);
+        mCurrency = Currency.getInstance(currencyCode.toUpperCase());
         synchronizeCartCurrencyWithConfiguration(mCurrency);
     }
 
@@ -85,7 +87,7 @@ public class CartManager {
      *                      and only the last one will be kept
      */
     public CartManager(@NonNull Cart oldCart, boolean shouldKeepShipping, boolean shouldKeepTax) {
-        mCurrency = PaymentUtils.getCurrencyByCodeOrDefault(oldCart.getCurrencyCode());
+        mCurrency = Currency.getInstance(oldCart.getCurrencyCode());
         synchronizeCartCurrencyWithConfiguration(mCurrency);
 
         for (LineItem item : oldCart.getLineItems()) {
