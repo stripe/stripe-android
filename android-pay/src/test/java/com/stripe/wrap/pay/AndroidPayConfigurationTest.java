@@ -32,19 +32,13 @@ public class AndroidPayConfigurationTest {
 
     @Before
     public void setup() {
-        AndroidPayConfiguration.init("USD");
+        AndroidPayConfiguration.init("pk_test_abc123", "USD");
         mAndroidPayConfiguration = AndroidPayConfiguration.getInstance();
         mCart = Cart.newBuilder().setTotalPrice("10.00").build();
     }
 
     @Test
-    public void getPaymentMethodTokenizationParameters_whenApiKeyIsNull_returnsNull() {
-        assertNull(mAndroidPayConfiguration.getPaymentMethodTokenizationParameters());
-    }
-
-    @Test
     public void getPaymentMethodTokenizationParameters_whenApiKeyIsNotNull_returnsExpectedObject() {
-        mAndroidPayConfiguration.setPublicApiKey("pk_test_abc123");
         PaymentMethodTokenizationParameters params =
                 mAndroidPayConfiguration.getPaymentMethodTokenizationParameters();
         assertNotNull(params);

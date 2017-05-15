@@ -51,9 +51,8 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private void createSampleCartAndLaunchAndroidPayActivity() {
-        AndroidPayConfiguration.init("USD");
+        AndroidPayConfiguration.init(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, "USD");
         AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
-        androidPayConfiguration.setPublicApiKey(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
         androidPayConfiguration.setShippingAddressRequired(true);
         CartManager cartManager = new CartManager("USD");
         cartManager.addLineItem("Llama Food", 5000L);
