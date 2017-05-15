@@ -88,10 +88,10 @@ public class StoreActivity
     }
 
     private void initAndroidPay() {
-        AndroidPayConfiguration payConfiguration = AndroidPayConfiguration.init("USD");
+        AndroidPayConfiguration payConfiguration =
+                AndroidPayConfiguration.init(PUBLISHABLE_KEY, "USD");
         payConfiguration.setPhoneNumberRequired(false);
         payConfiguration.setShippingAddressRequired(true);
-        payConfiguration.setPublicApiKey(PUBLISHABLE_KEY);
     }
 
     private void displayPurchase(long price) {

@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.identity.intents.model.UserAddress;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWallet;
@@ -151,6 +152,15 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         mAndroidPayChangeDetailsContainer.setVisibility(View.GONE);
     }
 
+    /**
+     * This is where you would handle the various google api errors.
+     * @param errorCode the error code returned from the {@link GoogleApiClient}
+     */
+    @Override
+    protected void handleError(int errorCode) {
+        super.handleError(errorCode);
+    }
+
     @Override
     protected void onAndroidPayAvailable() {
         mAndroidPayGroupContainer.setVisibility(View.VISIBLE);
@@ -240,7 +250,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
 
     private void updateCartTotals() {
         addCartItems();
-
     }
 
     private void updateConfirmPaymentButton() {
@@ -306,6 +315,13 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         }
     }
 
+    /**
+     * This is just a toy way to determine a fake shipping cost. You would apply
+     * your genuine costs here.
+     *
+     * @param address the {@link UserAddress} object returned from Android Pay
+     * @return a shipping cost in the currency used, in its lowest denomination
+     */
     private long determineShippingCost(UserAddress address) {
         if (address == null) {
             return 200L;
@@ -313,6 +329,14 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         return address.getAddress1().length() * 7L;
     }
 
+    /**
+     * Again, this is a toy way to determine a fake tax amount. You may need to determine
+     * taxes based on the shipping address, billing address, cost of the
+     * {@link LineItem.Role#REGULAR} items in your cart, or some combination of the three.
+     *
+     * @param address the {@link UserAddress} object returned from Android Pay
+     * @return a tax amount in the currency used, in its lowest denomination
+     */
     private long determineTax(UserAddress address) {
         if (address == null) {
             return 200L;
