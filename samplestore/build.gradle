@@ -35,6 +35,8 @@ dependencies {
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
     compile 'com.android.support:design:' + android_support_version
+    // Needed to make android pay work
+    compile 'com.google.android.gms:play-services-wallet:10.2.4'
 
     /* This line is all you need for the stripe-android bindings */
     compile 'com.stripe:stripe-android:4.0.2'
