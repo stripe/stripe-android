@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.identity.intents.model.UserAddress;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWallet;
@@ -152,7 +151,7 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         mAndroidPayChangeDetailsContainer.setVisibility(View.GONE);
     }
 
-    /**
+    /*
      * This is where you would handle the various google api errors.
      * @param errorCode the error code returned from the {@link GoogleApiClient}
      */
@@ -161,6 +160,9 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         super.handleError(errorCode);
     }
 
+    /*
+     * Make sure your Android Pay container is visible in this method.
+     */
     @Override
     protected void onAndroidPayAvailable() {
         mAndroidPayGroupContainer.setVisibility(View.VISIBLE);
@@ -168,18 +170,32 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         mTvOr.requestFocus();
     }
 
+    /*
+     * Here is where you want to turn off your Android Pay options if the user does not have that
+     * on their phone. You can show a button to enable Android Pay if you so choose.
+     */
     @Override
     protected void onAndroidPayNotAvailable() {
         mAndroidPayGroupContainer.setVisibility(View.GONE);
         mTvOr.setVisibility(View.GONE);
     }
 
+    /*
+     * Here is where you tell your activity where to display the Buy Button Fragment. You can
+     * override this to be a no-op or ignore this method entirely if you don't intend to show
+     * the buy button.
+     */
     @Override
     protected void addBuyButtonWalletFragment(@NonNull SupportWalletFragment walletFragment) {
         FragmentTransaction buttonTransaction = getSupportFragmentManager().beginTransaction();
         buttonTransaction.add(R.id.android_pay_button_container, walletFragment).commit();
     }
 
+    /*
+     * Here is where you tell your activity where to display the Confirmation Fragment. You can
+     * ignore this method entirely if you don't intend to show the change details / confirmation
+     * fragment with this activity.
+     */
     @Override
     protected void addConfirmationWalletFragment(@NonNull SupportWalletFragment walletFragment) {
         mAndroidPayChangeDetailsContainer.setVisibility(View.VISIBLE);
@@ -190,6 +206,10 @@ public class PaymentActivity extends StripeAndroidPayActivity {
                 .commit();
     }
 
+    /*
+     * A default confirmation wallet fragment style is provided by the API, but you can change
+     * the style by overriding this method.
+     */
     @NonNull
     @Override
     protected WalletFragmentStyle getWalletFragmentConfirmationStyle() {
@@ -202,6 +222,10 @@ public class PaymentActivity extends StripeAndroidPayActivity {
                         android.R.style.TextAppearance_DeviceDefault_Large);
     }
 
+    /*
+     * This method is called when a masked wallet is first retrieved. You can use the shipping
+     * information contained here to calculate shipping costs and taxes.
+     */
     @Override
     protected void onMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
         super.onMaskedWalletRetrieved(maskedWallet);
@@ -220,6 +244,59 @@ public class PaymentActivity extends StripeAndroidPayActivity {
             updateConfirmPaymentButton();
         } catch (CartContentException unexpected) {
             // ignore for now
+        }
+    }
+
+    /*
+     * This method is called when a masked wallet update is retrieved from the confirmation
+     * fragment. Note that if this method has a null argument, that indicates that no changes were
+     * made, not that the wallet is now null.
+     */
+    @Override
+    protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
+        super.onChangedMaskedWalletRetrieved(maskedWallet);
+        mAndroidPayChangeDetailsContainer.setVisibility(View.GONE);
+        mAndroidPayDetailsContainer.setVisibility(View.VISIBLE);
+
+        if (maskedWallet == null) {
+            return;
+        }
+
+        updatePaymentInformation(maskedWallet);
+        updateShippingAndTax(maskedWallet);
+
+        try {
+            setCart(mCartManager.buildCart());
+            updateCartTotals();
+            updateConfirmPaymentButton();
+        } catch (CartContentException unexpected) {
+            // ignore for now
+        }
+    }
+
+    /**
+     * This is where the chargeable Stripe object is returned. You can send the ID of the
+     * {@link StripePaymentSource} to your server to make a charge.
+     *
+     * @param wallet the {@link FullWallet} returned from Google.
+     * @param paymentSource the {@link StripePaymentSource} with chargeable ID
+     */
+    @Override
+    protected void onStripePaymentSourceReturned(FullWallet wallet,
+                                                 StripePaymentSource paymentSource) {
+        super.onStripePaymentSourceReturned(wallet, paymentSource);
+        completePurchase(paymentSource.getId());
+    }
+
+    /*
+     * Cleaning up all Rx subscriptions in onDestroy.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCompositeSubscription != null) {
+            mCompositeSubscription.unsubscribe();
+            mCompositeSubscription = null;
         }
     }
 
@@ -258,28 +335,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         if (price != null) {
             mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
                     "Pay %s", StoreUtils.getPriceString(price, null)));
-        }
-    }
-
-    @Override
-    protected void onChangedMaskedWalletRetrieved(@Nullable MaskedWallet maskedWallet) {
-        super.onChangedMaskedWalletRetrieved(maskedWallet);
-        mAndroidPayChangeDetailsContainer.setVisibility(View.GONE);
-        mAndroidPayDetailsContainer.setVisibility(View.VISIBLE);
-
-        if (maskedWallet == null) {
-            return;
-        }
-
-        updatePaymentInformation(maskedWallet);
-        updateShippingAndTax(maskedWallet);
-
-        try {
-            setCart(mCartManager.buildCart());
-            updateCartTotals();
-            updateConfirmPaymentButton();
-        } catch (CartContentException unexpected) {
-            // ignore for now
         }
     }
 
@@ -388,15 +443,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         return itemViews;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
-            mCompositeSubscription = null;
-        }
-    }
-
     private void attemptPurchaseWithAndroidPay() {
         MaskedWallet maskedWallet = getMaskedWallet();
         Cart cart = getCart();
@@ -407,13 +453,6 @@ public class PaymentActivity extends StripeAndroidPayActivity {
         FullWalletRequest fullWalletRequest = AndroidPayConfiguration.generateFullWalletRequest(
                 maskedWallet.getGoogleTransactionId(), cart);
         loadFullWallet(fullWalletRequest);
-    }
-
-    @Override
-    protected void onStripePaymentSourceReturned(FullWallet wallet,
-                                                 StripePaymentSource paymentSource) {
-        super.onStripePaymentSourceReturned(wallet, paymentSource);
-        completePurchase(paymentSource.getId());
     }
 
     private void attemptPurchase() {
