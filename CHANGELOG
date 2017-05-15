@@ -1,6 +1,7 @@
-4.0.2 2017-05-11
+4.0.2 2017-05-15
     Added StripePaymentSource interface, extended by both Source and Token
-    Upgraded for compatibility with stripe:android-pay
+    Upgraded for compatibility with stripe:stripe-android-pay
+    Released stripe:stripe-android-pay library, dependent on stripe:stripe-android
 
 4.0.1 2017-04-17
     Added setters for the card number, expiration date, and cvc fields in the CardInputWidget
