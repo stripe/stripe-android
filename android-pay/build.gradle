@@ -31,7 +31,6 @@ android {
 }
 
 dependencies {
-    compile project(':stripe')
     compile 'com.android.support:support-annotations:' + android_support_version
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:appcompat-v7:' + android_support_version
@@ -41,6 +40,7 @@ dependencies {
     javadocDeps 'com.android.support:support-v4:' + android_support_version
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
+    provided 'com.stripe:stripe-android:4.0.2'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.7.22'

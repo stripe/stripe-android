@@ -37,7 +37,7 @@ dependencies {
     compile 'com.android.support:design:' + android_support_version
 
     /* This line is all you need for the stripe-android bindings */
-    compile project(':stripe')
+    compile 'com.stripe:stripe-android:4.0.2'
     compile project(':android-pay')
 
     /* Needed for RxAndroid */
