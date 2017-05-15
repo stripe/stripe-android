@@ -20,19 +20,17 @@ public class StoreActivity
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "put your publishable key here";
+            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
 
     static final int PURCHASE_REQUEST = 37;
 
-    private static final String EXTRA_EMOJI_PURCHASED = "EXTRA_EMOJI_PURCHASED";
     private static final String EXTRA_PRICE_PAID = "EXTRA_PRICE_PAID";
 
     private FloatingActionButton mGoToCartButton;
     private StoreAdapter mStoreAdapter;
 
-    public static Intent createPurchaseCompleteIntent(int emojiUnicode, long amount) {
+    public static Intent createPurchaseCompleteIntent(long amount) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra(EXTRA_EMOJI_PURCHASED, emojiUnicode);
         returnIntent.putExtra(EXTRA_PRICE_PAID, amount);
         return returnIntent;
     }
@@ -72,10 +70,9 @@ public class StoreActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PURCHASE_REQUEST && resultCode == RESULT_OK) {
-            int emojiUnicode = data.getExtras().getInt(EXTRA_EMOJI_PURCHASED, -1);
             long price = data.getExtras().getLong(EXTRA_PRICE_PAID, -1L);
-            if (emojiUnicode != -1 && price != -1L) {
-                displayPurchase(emojiUnicode, price);
+            if (price != -1L) {
+                displayPurchase(price);
             }
             mStoreAdapter.clearItemSelections();
         }
@@ -91,20 +88,20 @@ public class StoreActivity
     }
 
     private void initAndroidPay() {
-        AndroidPayConfiguration payConfiguration = AndroidPayConfiguration.getInstance();
-        payConfiguration.setCurrencyCode("USD");
+        AndroidPayConfiguration payConfiguration =
+                AndroidPayConfiguration.init(PUBLISHABLE_KEY, "USD");
         payConfiguration.setPhoneNumberRequired(false);
         payConfiguration.setShippingAddressRequired(true);
-        payConfiguration.setPublicApiKey(PUBLISHABLE_KEY);
     }
 
-    private void displayPurchase(int emojiUnicode, long price) {
+    private void displayPurchase(long price) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.purchase_complete_notification, null);
 
         TextView emojiView = (TextView) dialogView.findViewById(R.id.dlg_emoji_display);
-        emojiView.setText(StoreUtils.getEmojiByUnicode(emojiUnicode));
+        // Show a smiley face!
+        emojiView.setText(StoreUtils.getEmojiByUnicode(0x1F642));
         TextView priceView = (TextView) dialogView.findViewById(R.id.dlg_price_display);
         priceView.setText(StoreUtils.getPriceString(price, null));
 

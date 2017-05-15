@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,47 +7,166 @@
     android:padding="@dimen/activity_padding"
     tools:context="com.stripe.samplestore.PaymentActivity">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
         >
 
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:id="@+id/rv_payment"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"/>-->
-
         <LinearLayout
-            android:id="@+id/cart_list_items"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            />
+            >
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/enter_details"
-            android:textSize="14sp"
-            android:layout_marginBottom="0dp"
-            android:textColor="@android:color/secondary_text_light"
-            />
+            <LinearLayout
+                android:id="@+id/cart_list_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                />
 
-        <com.stripe.android.view.CardInputWidget
-            android:id="@+id/card_input_widget"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:id="@+id/group_android_pay"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btn_purchase"
-            android:layout_marginTop="@dimen/payment_screen_spacing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/confirm_purchase"
-            />
+                <FrameLayout
+                    android:id="@+id/android_pay_button_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/payment_screen_spacing"
+                    android:layout_gravity="center"
+                    />
 
-    </LinearLayout>
-</ScrollView>
+                <LinearLayout
+                    android:id="@+id/group_android_pay_details"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    >
 
+                    <TextView
+                        android:id="@+id/tv_android_pay_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/item_padding"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        />
+
+                    <TextView
+                        android:id="@+id/tv_android_pay_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/item_padding"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_android_pay_change"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/change_card"
+                            />
+
+                        <Button
+                            android:id="@+id/btn_android_pay_confirm"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginLeft="@dimen/payment_screen_spacing"
+                            android:layout_marginStart="@dimen/payment_screen_spacing"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:text="@string/confirm_purchase"
+                            />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/android_pay_change_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    >
+
+                    <FrameLayout
+                        android:id="@+id/android_pay_confirmation_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/activity_padding"
+                        android:background="@android:color/white"
+                        />
+
+                    <Button
+                        android:id="@+id/btn_android_pay_change_cancel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/activity_padding"
+                        android:layout_gravity="center"
+                        android:text="@android:string/cancel"
+                        style="@style/Widget.AppCompat.Button.Small"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_cart_or"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/or"
+                android:layout_margin="@dimen/item_padding"
+                android:layout_gravity="center"
+                android:textAppearance="@android:style/TextAppearance.Large"
+                />
+
+            <LinearLayout
+                android:id="@+id/group_manual_entry"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enter_details"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="0dp"
+                    android:textColor="@android:color/secondary_text_light"
+                    />
+
+                <com.stripe.android.view.CardInputWidget
+                    android:id="@+id/card_input_widget"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_purchase"
+                android:layout_marginTop="@dimen/payment_screen_spacing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/confirm_purchase"
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>
