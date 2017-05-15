@@ -2,6 +2,7 @@ package com.stripe.wrap.pay;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
@@ -42,27 +43,34 @@ public class AndroidPayConfiguration {
      * Initialize the AndroidPayConfiguration instance with a currency code. If the currency
      * code is invalid, this will throw an {@link IllegalArgumentException}
      *
+     * @param publicApiKey the Stripe api public key
      * @param currencyCode the code for the starting {@link Currency} for android pay configuration
      * @return the instance of the AndroidPayConfiguration singleton
      */
-    public static AndroidPayConfiguration init(@NonNull String currencyCode) {
-        return init(Currency.getInstance(currencyCode.toUpperCase()));
+    public static AndroidPayConfiguration init(
+            @NonNull @Size(min = 5) String publicApiKey,
+            @NonNull String currencyCode) {
+        return init(publicApiKey, Currency.getInstance(currencyCode.toUpperCase()));
     }
 
     /**
      * Initialize the AndroidPayConfiguration instance with a {@link Currency}.
      *
+     * @param publicApiKey the Stripe public api key
      * @param currency the starting {@link Currency} for android pay configuration
      * @return the instance of the AndroidPayConfiguration singleton
      */
-    public static AndroidPayConfiguration init(@NonNull Currency currency) {
-        mInstance = new AndroidPayConfiguration(currency);
+    public static AndroidPayConfiguration init(
+            @NonNull @Size(min = 5) String publicApiKey,
+            @NonNull Currency currency) {
+        mInstance = new AndroidPayConfiguration(publicApiKey, currency);
         return mInstance;
     }
 
     @VisibleForTesting
-    AndroidPayConfiguration(@NonNull Currency currency) {
+    AndroidPayConfiguration(@NonNull String publicApiKey, @NonNull Currency currency) {
         mCurrency = currency;
+        mPublicApiKey = publicApiKey;
     }
 
     @Nullable
