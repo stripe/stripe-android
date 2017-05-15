@@ -20,7 +20,7 @@ public class StoreActivity
 
     // Put your publishable key here. It should start with "pk_test_"
     private static final String PUBLISHABLE_KEY =
-            "put your test key here";
+            "put your publishable key here";
 
     static final int PURCHASE_REQUEST = 37;
 
