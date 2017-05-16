@@ -214,6 +214,8 @@ public class StripeTextUtils {
             return Token.TYPE_CARD;
         } else if (Token.TYPE_BANK_ACCOUNT.equals(possibleTokenType)) {
             return Token.TYPE_BANK_ACCOUNT;
+        } else if (Token.TYPE_PII.equals(possibleTokenType)) {
+            return Token.TYPE_PII;
         }
 
         return null;

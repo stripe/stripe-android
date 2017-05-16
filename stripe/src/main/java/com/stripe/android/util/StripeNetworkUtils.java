@@ -10,6 +10,7 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 
+import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +35,16 @@ public class StripeNetworkUtils {
     @NonNull
     public static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
         return hashMapFromCard(null, context, card);
+    }
+
+    @NonNull
+    public static Map<String, Object> hashMapFromPersonalId(@NonNull Context context,
+                                                            @NonNull String personalId) {
+        Map<String, Object> tokenParams = new HashMap<>();
+        tokenParams.put("personal_id_number", personalId);
+        Map<String, Object> piiParams = new HashMap<>();
+        piiParams.put(Token.TYPE_PII, tokenParams);
+        return piiParams;
     }
 
     @NonNull
