@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -158,7 +160,9 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams, String publishableKey,
+            public void create(Map<String, Object> tokenParams,
+                               String publishableKey,
+                               @NonNull @Token.TokenType String tokenType,
                                Executor executor, TokenCallback callback) {
                 tokenCreatorCalled[0] = true;
             }
@@ -177,8 +181,11 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams, String publishableKey,
-                               Executor executor, TokenCallback callback) {
+            public void create(Map<String, Object> tokenParams,
+                               String publishableKey,
+                               @NonNull @Token.TokenType String tokenType,
+                               Executor executor,
+                               TokenCallback callback) {
                 assertEquals(expectedExecutor, executor);
                 assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
                 assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -193,8 +200,11 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams, String publishableKey,
-                               Executor executor, TokenCallback callback) {
+            public void create(Map<String, Object> tokenParams,
+                               String publishableKey,
+                               @NonNull @Token.TokenType String tokenType,
+                               Executor executor,
+                               TokenCallback callback) {
                 assertEquals(expectedPublishableKey, publishableKey);
                 assertNull(executor);
                 assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -650,6 +660,21 @@ public class StripeTest {
             JsonTestUtils.assertMapEquals(threeDSource.toMap(), retrievedSource.toMap());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest() {
+        try {
+            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Token token = stripe.createPiiTokenSynchronous("0123456789");
+            assertNotNull(token);
+            assertEquals(Token.TYPE_PII, token.getType());
+            assertFalse(token.getLivemode());
+            assertFalse(token.getUsed());
+            assertNotNull(token.getId());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected exception making PII token");
         }
     }
 

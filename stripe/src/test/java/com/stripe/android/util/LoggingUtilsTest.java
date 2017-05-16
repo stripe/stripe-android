@@ -1,9 +1,8 @@
 package com.stripe.android.util;
 
-import android.util.Log;
-
 import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.Token;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,16 +37,21 @@ public class LoggingUtilsTest {
         final String expectedTokenName =
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
 
-        Map<String, Object> params = LoggingUtils.getTokenCreationParams(tokensList, DUMMY_API_KEY);
+        Map<String, Object> params = LoggingUtils.getTokenCreationParams(
+                tokensList,
+                DUMMY_API_KEY,
+                Token.TYPE_PII);
         // Size is SIZE-1 because tokens don't have a source_type field
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
         assertEquals(expectedTokenName, params.get(LoggingUtils.FIELD_EVENT));
+        assertEquals(Token.TYPE_PII, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
     }
 
     @Test
     public void getSourceCreationParams_withValidInput_createsCorrectMap() {
-        // We don't use any product usage fields for sources yet.
-        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
+        // We don't use any product usage fields for sources yet, and we are also missing
+        // the TOKEN_TYPE logging field.
+        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 2;
         Map<String, Object> loggingParams =
                 LoggingUtils.getSourceCreationParams(DUMMY_API_KEY, Source.SEPA_DEBIT);
         assertEquals(expectedSize, loggingParams.size());
@@ -72,11 +76,13 @@ public class LoggingUtilsTest {
                 LoggingUtils.getEventLoggingParams(
                         tokensList,
                         null,
+                        Token.TYPE_CARD,
                         DUMMY_API_KEY,
                         LoggingUtils.EVENT_TOKEN_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
         assertEquals(DUMMY_API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(EXPECTED_SINGLE_TOKEN_LIST, params.get(LoggingUtils.FIELD_PRODUCT_USAGE));
+        assertEquals(Token.TYPE_CARD, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
         // Expected value is 23 because that's the number in the @Config for this test class.
         assertEquals(23, params.get(LoggingUtils.FIELD_OS_VERSION));
         assertNotNull(params.get(LoggingUtils.FIELD_OS_RELEASE));
@@ -102,10 +108,12 @@ public class LoggingUtilsTest {
                 LoggingUtils.getEventLoggingParams(
                         null,
                         null,
+                        Token.TYPE_BANK_ACCOUNT,
                         DUMMY_API_KEY,
                         LoggingUtils.EVENT_SOURCE_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 2, params.size());
         assertEquals(DUMMY_API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(Token.TYPE_BANK_ACCOUNT, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
 
         // Expected value is 23 because that's the number in the @Config for this test class.
         assertEquals(23, params.get(LoggingUtils.FIELD_OS_VERSION));

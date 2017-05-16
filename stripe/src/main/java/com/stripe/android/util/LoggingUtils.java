@@ -7,6 +7,7 @@ import android.support.annotation.StringDef;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.Token;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,6 +30,7 @@ public class LoggingUtils {
     })
     public @interface LoggingToken { }
     public static final String ANDROID_PAY_TOKEN = "AndroidPay";
+    public static final String PII_TOKEN = "PII";
     public static final String CARD_WIDGET_TOKEN = "CardInputView";
     public static final Set<String> VALID_LOGGING_TOKENS = new HashSet<>();
     static {
@@ -55,6 +57,7 @@ public class LoggingUtils {
     static final String FIELD_OS_VERSION = "os_version";
     static final String FIELD_PUBLISHABLE_KEY = "publishable_key";
     static final String FIELD_SOURCE_TYPE = "source_type";
+    static final String FIELD_TOKEN_TYPE = "token_type";
     static final Set<String> VALID_PARAM_FIELDS = new HashSet<>();
     static {
         VALID_PARAM_FIELDS.add(FIELD_ANALYTICS_UA);
@@ -67,6 +70,7 @@ public class LoggingUtils {
         VALID_PARAM_FIELDS.add(FIELD_PRODUCT_USAGE);
         VALID_PARAM_FIELDS.add(FIELD_PUBLISHABLE_KEY);
         VALID_PARAM_FIELDS.add(FIELD_SOURCE_TYPE);
+        VALID_PARAM_FIELDS.add(FIELD_TOKEN_TYPE);
     }
 
     private static final String ANALYTICS_PREFIX = "analytics";
@@ -76,10 +80,12 @@ public class LoggingUtils {
     @NonNull
     public static Map<String, Object> getTokenCreationParams(
             @NonNull List<String> productUsageTokens,
-            @NonNull String publishableApiKey) {
+            @NonNull String publishableApiKey,
+            @Nullable String tokenType) {
         return getEventLoggingParams(
                 productUsageTokens,
                 null,
+                tokenType,
                 publishableApiKey,
                 EVENT_TOKEN_CREATION);
     }
@@ -91,6 +97,7 @@ public class LoggingUtils {
         return getEventLoggingParams(
                 null,
                 sourceType,
+                null,
                 publishableApiKey,
                 EVENT_SOURCE_CREATION);
     }
@@ -99,6 +106,7 @@ public class LoggingUtils {
     public static Map<String, Object> getEventLoggingParams(
             @Nullable List<String> productUsageTokens,
             @Nullable @Source.SourceType String sourceType,
+            @Nullable @Token.TokenType String tokenType,
             @NonNull String publishableApiKey,
             @NonNull @LoggingEventName String eventName) {
         Map<String, Object> paramsObject = new HashMap<>();
@@ -117,6 +125,15 @@ public class LoggingUtils {
         if (sourceType != null) {
             paramsObject.put(FIELD_SOURCE_TYPE, sourceType);
         }
+
+        if (tokenType != null) {
+            paramsObject.put(FIELD_TOKEN_TYPE, tokenType);
+        } else if (sourceType == null) {
+            // This is not a source event, so to match iOS we log a token without type
+            // as type "unknown"
+            paramsObject.put(FIELD_TOKEN_TYPE, "unknown");
+        }
+
         return paramsObject;
     }
 

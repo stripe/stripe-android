@@ -12,10 +12,11 @@ import java.util.Date;
 public class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT})
+    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII})
     public @interface TokenType {}
     public static final String TYPE_CARD = "card";
     public static final String TYPE_BANK_ACCOUNT = "bank_account";
+    public static final String TYPE_PII = "pii";
 
     private final String mId;
     private final String mType;
@@ -61,6 +62,25 @@ public class Token implements StripePaymentSource {
         mCard = null;
         mUsed = used;
         mBankAccount = bankAccount;
+    }
+
+    /**
+     * Constructor that should not be invoked in your code.  This is used by Stripe to
+     * create tokens using a Stripe API response.
+     */
+    public Token(
+            String id,
+            boolean livemode,
+            Date created,
+            Boolean used
+    ) {
+        mId = id;
+        mType = TYPE_PII;
+        mCreated = created;
+        mCard = null;
+        mBankAccount = null;
+        mUsed = used;
+        mLivemode = livemode;
     }
 
     /***

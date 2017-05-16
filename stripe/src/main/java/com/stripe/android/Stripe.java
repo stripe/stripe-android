@@ -30,6 +30,7 @@ import com.stripe.android.net.StripeApiHandler;
 
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
+import static com.stripe.android.util.StripeNetworkUtils.hashMapFromPersonalId;
 
 /**
  * Class that handles {@link Token} creation from charges and {@link Card} models.
@@ -77,6 +78,7 @@ public class Stripe {
         public void create(
                 final Map<String, Object> tokenParams,
                 final String publishableKey,
+                final @NonNull @Token.TokenType String tokenType,
                 final Executor executor,
                 final TokenCallback callback) {
             AsyncTask<Void, Void, ResponseWrapper> task =
@@ -89,6 +91,7 @@ public class Stripe {
                                 Token token = StripeApiHandler.createTokenOnServer(
                                         tokenParams,
                                         requestOptions,
+                                        tokenType,
                                         mLoggingResponseListener);
                                 return new ResponseWrapper(token);
                             } catch (StripeException e) {
@@ -163,7 +166,48 @@ public class Stripe {
                     "Required parameter: 'bankAccount' is requred to create a token");
         }
 
-        createTokenFromParams(hashMapFromBankAccount(mContext, bankAccount), publishableKey, executor, callback);
+        createTokenFromParams(
+                hashMapFromBankAccount(mContext, bankAccount),
+                publishableKey,
+                Token.TYPE_BANK_ACCOUNT,
+                executor,
+                callback);
+    }
+
+    /**
+     * The simplest way to create a PII token. This runs on the default
+     * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
+     *
+     * @param personalId the personal id used to create this token
+     * @param callback a {@link TokenCallback} to receive either the token or an error
+     */
+    public void createPiiToken(
+            @NonNull final String personalId,
+            @NonNull final TokenCallback callback) {
+        createPiiToken(personalId, mDefaultPublishableKey, null, callback);
+    }
+
+    /**
+     * Call to create a {@link Token} for PII with the publishable key and
+     * {@link Executor} specified.
+     *
+     * @param personalId the personal id used to create this token
+     * @param publishableKey the publishable key to use
+     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
+     *                 default non-ui executor
+     * @param callback a {@link TokenCallback} to receive the result or error message
+     */
+    public void createPiiToken(
+            @NonNull final String personalId,
+            @NonNull @Size(min = 1) final String publishableKey,
+            @Nullable final Executor executor,
+            @NonNull final TokenCallback callback) {
+        createTokenFromParams(
+                hashMapFromPersonalId(mContext, personalId),
+                publishableKey,
+                Token.TYPE_PII,
+                executor,
+                callback);
     }
 
     /**
@@ -218,7 +262,10 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
-                hashMapFromBankAccount(mContext, bankAccount), requestOptions, mLoggingResponseListener);
+                hashMapFromBankAccount(mContext, bankAccount),
+                requestOptions,
+                Token.TYPE_BANK_ACCOUNT,
+                mLoggingResponseListener);
     }
 
     /**
@@ -311,7 +358,12 @@ public class Stripe {
                     "Required Parameter: 'card' is required to create a token");
         }
 
-        createTokenFromParams(hashMapFromCard(mContext, card), publishableKey, executor, callback);
+        createTokenFromParams(
+                hashMapFromCard(mContext, card),
+                publishableKey,
+                Token.TYPE_CARD,
+                executor,
+                callback);
     }
 
     /**
@@ -416,6 +468,31 @@ public class Stripe {
         return StripeApiHandler.createTokenOnServer(
                 hashMapFromCard(mContext, card),
                 requestOptions,
+                Token.TYPE_CARD,
+                mLoggingResponseListener);
+    }
+
+    public Token createPiiTokenSynchronous(@NonNull String personalId)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createPiiTokenSynchronous(personalId, mDefaultPublishableKey);
+    }
+
+    public Token createPiiTokenSynchronous(@NonNull String personalId, String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        validateKey(publishableKey);
+        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        return StripeApiHandler.createTokenOnServer(
+                hashMapFromPersonalId(mContext, personalId),
+                requestOptions,
+                Token.TYPE_PII,
                 mLoggingResponseListener);
     }
 
@@ -555,6 +632,7 @@ public class Stripe {
     private void createTokenFromParams(
             @NonNull final Map<String, Object> tokenParams,
             @NonNull @Size(min = 1) final String publishableKey,
+            @NonNull @Token.TokenType final String tokenType,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
         if (callback == null) {
@@ -564,7 +642,12 @@ public class Stripe {
         }
 
         validateKey(publishableKey);
-        mTokenCreator.create(tokenParams, publishableKey, executor, callback);
+        mTokenCreator.create(
+                tokenParams,
+                publishableKey,
+                tokenType,
+                executor,
+                callback);
     }
 
     private void validateKey(@NonNull @Size(min = 1) String publishableKey) {
@@ -639,6 +722,7 @@ public class Stripe {
     interface TokenCreator {
         void create(Map<String, Object> params,
                     String publishableKey,
+                    @NonNull @Token.TokenType String tokenType,
                     Executor executor,
                     TokenCallback callback);
     }

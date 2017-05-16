@@ -252,6 +252,7 @@ public class StripeApiHandler {
     public static Token createTokenOnServer(
             @NonNull Map<String, Object> cardParams,
             @NonNull RequestOptions options,
+            @NonNull @Token.TokenType String tokenType,
             @Nullable LoggingResponseListener listener)
             throws AuthenticationException,
             InvalidRequestException,
@@ -259,23 +260,22 @@ public class StripeApiHandler {
             CardException,
             APIException {
 
-        // Only fires if the card params contain logging information.
-        if (cardParams.containsKey(LoggingUtils.FIELD_PRODUCT_USAGE)) {
-            try {
-                String apiKey = options.getPublishableApiKey();
-                if (StripeTextUtils.isBlank(apiKey)) {
-                    return null;
-                }
-                List<String> loggingTokens =
-                        (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
-                cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
-
-                Map<String, Object> loggingParams = LoggingUtils.getTokenCreationParams(loggingTokens, apiKey);
-                logApiCall(loggingParams, options, listener);
-            } catch (ClassCastException classCastEx) {
-                // This can only happen if someone puts a weird object in the map.
-                cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
             }
+
+            List<String> loggingTokens =
+                    (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
+            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+
+            Map<String, Object> loggingParams =
+                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
+            logApiCall(loggingParams, options, listener);
+        } catch (ClassCastException classCastEx) {
+            // This can only happen if someone puts a weird object in the map.
+            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
         }
 
         return requestToken(POST, getApiUrl(), cardParams, options);

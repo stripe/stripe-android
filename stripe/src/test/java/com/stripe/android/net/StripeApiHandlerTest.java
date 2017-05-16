@@ -1,16 +1,12 @@
 package com.stripe.android.net;
 
 import com.stripe.android.BuildConfig;
-import com.stripe.android.Stripe;
-import com.stripe.android.StripeTest;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
-import com.stripe.android.model.Token;
-import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
