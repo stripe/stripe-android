@@ -214,7 +214,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createBankAccountTokenSynchronous_withValidData_returnsToken() {
+    public void createCardTokenSynchronous_withValidData_returnsToken() {
         try {
             Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(mCard);
@@ -666,13 +666,19 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest() {
         try {
-            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            TestLoggingListener listener = new TestLoggingListener(true);
+            stripe.setLoggingResponseListener(listener);
+
             Token token = stripe.createPiiTokenSynchronous("0123456789");
             assertNotNull(token);
             assertEquals(Token.TYPE_PII, token.getType());
             assertFalse(token.getLivemode());
             assertFalse(token.getUsed());
             assertNotNull(token.getId());
+            assertNotNull(listener.mStripeResponse);
+            assertEquals(200, listener.mStripeResponse.getResponseCode());
+            assertNull(listener.mStripeException);
         } catch (StripeException stripeEx) {
             fail("Unexpected exception making PII token");
         }
