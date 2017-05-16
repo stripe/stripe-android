@@ -472,6 +472,19 @@ public class Stripe {
                 mLoggingResponseListener);
     }
 
+    /**
+     * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
+     * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
+     *
+     * @param personalId the personal ID to use for this token
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
     public Token createPiiTokenSynchronous(@NonNull String personalId)
             throws AuthenticationException,
             InvalidRequestException,
@@ -481,6 +494,20 @@ public class Stripe {
         return createPiiTokenSynchronous(personalId, mDefaultPublishableKey);
     }
 
+    /**
+     * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param personalId the personal ID to use for this token
+     * @param publishableKey the publishable key to use with this request
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
     public Token createPiiTokenSynchronous(@NonNull String personalId, String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
