@@ -10,7 +10,7 @@ configurations {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
     defaultConfig {
         // Min SDK of 14 a requirement of play-services-wallet dependency
         minSdkVersion 14
