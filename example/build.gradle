@@ -12,7 +12,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
-    compile 'com.google.android.gms:play-services-wallet:10.2.4'
+    compile 'com.google.android.gms:play-services-wallet:10.2.6'
     /* Needed for RxAndroid */
     /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
@@ -22,7 +22,7 @@ dependencies {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         minSdkVersion 14
