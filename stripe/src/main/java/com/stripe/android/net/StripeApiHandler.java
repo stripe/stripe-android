@@ -1,5 +1,6 @@
 package com.stripe.android.net;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
@@ -70,6 +72,33 @@ public class StripeApiHandler {
     /**
      * Create a {@link Source} using the input {@link SourceParams}.
      *
+     * @deprecated As of v4.0.3 - will not be carried into 5+ and beyond
+     *
+     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
+     * @param publishableKey an API key
+     * @return a {@link Source} if one could be created from the input params,
+     * or {@code null} if not
+     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
+     * @throws InvalidRequestException if one or more of the parameters is incorrect
+     * @throws APIConnectionException if there is a problem connecting to the Stripe API
+     * @throws APIException for unknown Stripe API errors. These should be rare.
+     */
+    @Deprecated
+    @Nullable
+    public static Source createSourceOnServer(
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return createSourceOnServer(sourceParams, publishableKey, null);
+    }
+
+    /**
+     * Create a {@link Source} using the input {@link SourceParams}.
+     *
+     * @param context a {@link Context} object for aquiring resources
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
      * @param publishableKey an API key
      * @return a {@link Source} if one could be created from the input params,
@@ -81,13 +110,50 @@ public class StripeApiHandler {
      */
     @Nullable
     public static Source createSourceOnServer(
+            @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createSourceOnServer(sourceParams, publishableKey, null);
+        return createSourceOnServer(null, context, sourceParams, publishableKey, null);
+    }
+
+    @Nullable
+    static Source createSourceOnServer(
+            @Nullable StripeNetworkUtils.UidProvider uidProvider,
+            @NonNull Context context,
+            @NonNull SourceParams sourceParams,
+            @NonNull String publishableKey,
+            @Nullable LoggingResponseListener loggingResponseListener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        Map<String, Object> paramMap = sourceParams.toParamMap();
+        StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    apiKey,
+                    sourceParams.getType());
+            logApiCall(loggingParams, options, loggingResponseListener);
+            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
     }
 
     /**
@@ -103,6 +169,7 @@ public class StripeApiHandler {
      * @throws APIConnectionException if there is a problem connecting to the Stripe API
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
+    @Deprecated
     @Nullable
     static Source createSourceOnServer(
             @NonNull SourceParams sourceParams,

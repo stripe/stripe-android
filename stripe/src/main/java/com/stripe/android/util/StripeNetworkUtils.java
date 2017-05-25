@@ -109,7 +109,7 @@ public class StripeNetworkUtils {
     }
 
     @SuppressWarnings("HardwareIds")
-    static void addUidParams(
+    public static void addUidParams(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull Map<String, Object> params) {
@@ -166,7 +166,7 @@ public class StripeNetworkUtils {
     }
 
     @VisibleForTesting
-    interface UidProvider {
+    public interface UidProvider {
         String getUid();
         String getPackageName();
     }

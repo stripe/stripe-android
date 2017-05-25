@@ -147,8 +147,22 @@ public class StripeApiHandlerTest {
             // we are testing whether or not we log.
             TestLoggingListener testLoggingListener = new TestLoggingListener(true);
 
+            StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+                @Override
+                public String getUid() {
+                    return "abc123";
+                }
+
+                @Override
+                public String getPackageName() {
+                    return "com.example.main";
+                }
+
+            };
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSourceOnServer(
+                    provider,
+                    RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     testLoggingListener);
@@ -175,6 +189,8 @@ public class StripeApiHandlerTest {
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSourceOnServer(
+                    null,
+                    RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     testLoggingListener);
