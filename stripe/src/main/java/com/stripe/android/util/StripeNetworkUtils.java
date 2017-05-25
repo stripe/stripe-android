@@ -161,6 +161,7 @@ public class StripeNetworkUtils {
         removeNullParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        addUidParams(provider, context, tokenParams);
         return tokenParams;
     }
 
