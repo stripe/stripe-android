@@ -140,7 +140,8 @@ public class StripeNetworkUtils {
     }
 
     @NonNull
-    private static Map<String, Object> hashMapFromBankAccount(
+    @VisibleForTesting
+    static Map<String, Object> hashMapFromBankAccount(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull BankAccount bankAccount) {
@@ -161,6 +162,7 @@ public class StripeNetworkUtils {
         removeNullParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        addUidParams(provider, context, tokenParams);
         return tokenParams;
     }
 
