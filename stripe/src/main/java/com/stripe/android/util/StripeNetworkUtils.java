@@ -140,8 +140,7 @@ public class StripeNetworkUtils {
     }
 
     @NonNull
-    @VisibleForTesting
-    static Map<String, Object> hashMapFromBankAccount(
+    private static Map<String, Object> hashMapFromBankAccount(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull BankAccount bankAccount) {
