@@ -50,6 +50,7 @@ public class Stripe {
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
                                 Source source = StripeApiHandler.createSourceOnServer(
+                                        mContext,
                                         sourceParams,
                                         publishableKey);
                                 return new ResponseWrapper(source);
@@ -416,7 +417,7 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return StripeApiHandler.createSourceOnServer(params, apiKey);
+        return StripeApiHandler.createSourceOnServer(mContext, params, apiKey);
     }
 
     /**
