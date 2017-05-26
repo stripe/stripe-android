@@ -48,9 +48,7 @@ class TelemetryClientUtil {
             try {
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(packageName, 0);
                 secondMap.put("l", pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException nameNotFound) {
-                secondMap.put("l", "NF");
-            }
+            } catch (PackageManager.NameNotFoundException nameNotFound) { }
         }
 
         telemetryMap.put("b", secondMap);

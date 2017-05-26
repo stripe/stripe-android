@@ -57,7 +57,7 @@ public class StripeApiHandler {
     public static final String TOKENS = "tokens";
     public static final String SOURCES = "sources";
 
-    static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
+    private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -535,7 +535,6 @@ public class StripeApiHandler {
             String url, String query, RequestOptions options) throws IOException {
         java.net.HttpURLConnection conn = createStripeConnection(url, options);
 
-        conn.setRequestProperty("guid", "abc123");
         conn.setDoOutput(true);
         conn.setRequestMethod(POST);
         conn.setRequestProperty("Content-Type", String.format(
