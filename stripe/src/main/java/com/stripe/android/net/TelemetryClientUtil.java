@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.util.StripeTextUtils;
@@ -19,9 +18,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-public class TelemetryClientUtil {
+class TelemetryClientUtil {
 
-    public static Map<String, Object> createTelemetryMap(@NonNull final Context context) {
+    static Map<String, Object> createTelemetryMap(@NonNull final Context context) {
         Map<String, Object> telemetryMap = new HashMap<>();
         Map<String, Object> firstMap = new HashMap<>();
         Map<String, Object> secondMap = new HashMap<>();
@@ -130,12 +129,6 @@ public class TelemetryClientUtil {
             return "";
         }
         return context.getApplicationContext().getPackageName();
-    }
-
-    interface ScreenProvider {
-        int getHeightPixels();
-        int getWidthPixels();
-        int getDensityDpi();
     }
 }
 
