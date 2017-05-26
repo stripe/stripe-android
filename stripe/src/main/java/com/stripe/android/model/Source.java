@@ -6,7 +6,6 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.util.StripeJsonUtils;
-import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +21,7 @@ import static com.stripe.android.util.StripeJsonUtils.optLong;
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information
@@ -361,7 +360,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
         hashMap.put(FIELD_STATUS, mStatus);
         hashMap.put(FIELD_TYPE, mTypeRaw);
         hashMap.put(FIELD_USAGE, mUsage);
-        removeNullParams(hashMap);
+        removeNullAndEmptyParams(hashMap);
         return hashMap;
     }
 

@@ -3,8 +3,6 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.util.StripeNetworkUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,7 +11,7 @@ import java.util.Map;
 
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
@@ -139,7 +137,7 @@ public class SourceOwner extends StripeJsonModel {
         hashMap.put(FIELD_VERIFIED_EMAIL, mVerifiedEmail);
         hashMap.put(FIELD_VERIFIED_NAME, mVerifiedName);
         hashMap.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
-        removeNullParams(hashMap);
+        removeNullAndEmptyParams(hashMap);
         return hashMap;
     }
 

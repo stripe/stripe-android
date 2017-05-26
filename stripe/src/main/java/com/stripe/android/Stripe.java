@@ -90,6 +90,7 @@ public class Stripe {
                                 RequestOptions requestOptions =
                                         RequestOptions.builder(publishableKey).build();
                                 Token token = StripeApiHandler.createTokenOnServer(
+                                        mContext,
                                         tokenParams,
                                         requestOptions,
                                         tokenType,
@@ -263,6 +264,7 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
+                mContext,
                 hashMapFromBankAccount(mContext, bankAccount),
                 requestOptions,
                 Token.TYPE_BANK_ACCOUNT,
@@ -417,7 +419,8 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return StripeApiHandler.createSourceOnServer(mContext, params, apiKey);
+        return StripeApiHandler.createSourceOnServer(
+                null, mContext, params, apiKey, mLoggingResponseListener);
     }
 
     /**
@@ -467,6 +470,7 @@ public class Stripe {
 
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
+                mContext,
                 hashMapFromCard(mContext, card),
                 requestOptions,
                 Token.TYPE_CARD,
@@ -518,6 +522,7 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
         return StripeApiHandler.createTokenOnServer(
+                mContext,
                 hashMapFromPersonalId(mContext, personalId),
                 requestOptions,
                 Token.TYPE_PII,

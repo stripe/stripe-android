@@ -57,6 +57,8 @@ public class StripeApiHandler {
     public static final String TOKENS = "tokens";
     public static final String SOURCES = "sources";
 
+    static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
+
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             GET,
@@ -121,7 +123,7 @@ public class StripeApiHandler {
     }
 
     @Nullable
-    static Source createSourceOnServer(
+    public static Source createSourceOnServer(
             @Nullable StripeNetworkUtils.UidProvider uidProvider,
             @NonNull Context context,
             @NonNull SourceParams sourceParams,
@@ -141,6 +143,7 @@ public class StripeApiHandler {
                 return null;
             }
 
+            setTelemetryData(context, loggingResponseListener);
             Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
                     apiKey,
                     sourceParams.getType());
@@ -154,6 +157,21 @@ public class StripeApiHandler {
                     unexpected.getStatusCode(),
                     unexpected);
         }
+    }
+
+    public static void setTelemetryData(@NonNull Context context,
+                                        @Nullable LoggingResponseListener listener) {
+        Map<String, Object> telemetry = TelemetryClientUtil.createTelemetryMap(context);
+        StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
+        if (listener != null && !listener.shouldLogTest()) {
+            return;
+        }
+
+        RequestOptions options =
+                RequestOptions.builder(null)
+                        .setGuid(TelemetryClientUtil.getHashedId(context))
+                        .build();
+        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
     }
 
     /**
@@ -315,6 +333,7 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static Token createTokenOnServer(
             @NonNull Map<String, Object> cardParams,
@@ -336,6 +355,43 @@ public class StripeApiHandler {
             List<String> loggingTokens =
                     (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+
+            Map<String, Object> loggingParams =
+                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
+            logApiCall(loggingParams, options, listener);
+        } catch (ClassCastException classCastEx) {
+            // This can only happen if someone puts a weird object in the map.
+            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+        }
+
+        return requestToken(POST, getApiUrl(), cardParams, options);
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static Token createTokenOnServer(
+            @NonNull Context context,
+            @NonNull Map<String, Object> cardParams,
+            @NonNull RequestOptions options,
+            @NonNull @Token.TokenType String tokenType,
+            @Nullable LoggingResponseListener listener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            List<String> loggingTokens =
+                    (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
+            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+
+            setTelemetryData(context, listener);
 
             Map<String, Object> loggingParams =
                     LoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
@@ -398,13 +454,15 @@ public class StripeApiHandler {
 
     static Map<String, String> getHeaders(RequestOptions options) {
         Map<String, String> headers = new HashMap<>();
-        String apiVersion = options.getApiVersion();
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
         headers.put("User-Agent",
                 String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME));
 
-        headers.put("Authorization", String.format("Bearer %s", options.getPublishableApiKey()));
+        if (options != null) {
+            headers.put("Authorization", String.format(Locale.ENGLISH,
+                    "Bearer %s", options.getPublishableApiKey()));
+        }
 
         // debug headers
         Map<String, String> propertyMap = new HashMap<>();
@@ -419,11 +477,15 @@ public class StripeApiHandler {
         JSONObject headerMappingObject = new JSONObject(propertyMap);
         headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
 
-        if (apiVersion != null) {
-            headers.put("Stripe-Version", apiVersion);
+        if (options != null && options.getApiVersion() != null) {
+            headers.put("Stripe-Version", options.getApiVersion());
         }
 
-        if (options.getIdempotencyKey() != null) {
+        if (options != null && options.getGuid() != null) {
+            headers.put("guid", options.getGuid());
+        }
+
+        if (options != null && options.getIdempotencyKey() != null) {
             headers.put("Idempotency-Key", options.getIdempotencyKey());
         }
 
@@ -473,6 +535,7 @@ public class StripeApiHandler {
             String url, String query, RequestOptions options) throws IOException {
         java.net.HttpURLConnection conn = createStripeConnection(url, options);
 
+        conn.setRequestProperty("guid", "abc123");
         conn.setDoOutput(true);
         conn.setRequestMethod(POST);
         conn.setRequestProperty("Content-Type", String.format(
@@ -530,6 +593,15 @@ public class StripeApiHandler {
             return;
         }
 
+        fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options, listener);
+    }
+
+    private static void fireAndForgetApiCall(
+            @NonNull Map<String, Object> paramMap,
+            @NonNull String url,
+            @NonNull @RestMethod String method,
+            @Nullable RequestOptions options,
+            @Nullable LoggingResponseListener listener) {
         String originalDNSCacheTTL = null;
         Boolean allowedToSetTTL = true;
 
@@ -545,9 +617,9 @@ public class StripeApiHandler {
 
         try {
             StripeResponse response = getStripeResponse(
-                    GET,
-                    LIVE_LOGGING_BASE,
-                    loggingMap,
+                    method,
+                    url,
+                    paramMap,
                     options);
 
             if (listener != null) {

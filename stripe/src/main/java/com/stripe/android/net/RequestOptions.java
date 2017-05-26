@@ -11,14 +11,17 @@ import com.stripe.android.util.StripeTextUtils;
 public class RequestOptions {
 
     @NonNull private final String mApiVersion;
+    @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
-    @NonNull private final String mPublishableApiKey;
+    @Nullable private final String mPublishableApiKey;
 
     private RequestOptions(
             @NonNull String apiVersion,
+            @Nullable String guid,
             @Nullable String idempotencyKey,
-            @NonNull String publishableApiKey) {
+            @Nullable String publishableApiKey) {
         mApiVersion = apiVersion;
+        mGuid = guid;
         mIdempotencyKey = idempotencyKey;
         mPublishableApiKey = publishableApiKey;
     }
@@ -32,6 +35,14 @@ public class RequestOptions {
     }
 
     /**
+     * @return the guid for this request
+     */
+    @Nullable
+    public String getGuid() {
+        return mGuid;
+    }
+
+    /**
      * @return the idempotency key for this request
      */
     @Nullable
@@ -42,7 +53,7 @@ public class RequestOptions {
     /**
      * @return the publishable API key for this request
      */
-    @NonNull
+    @Nullable
     public String getPublishableApiKey() {
         return mPublishableApiKey;
     }
@@ -53,7 +64,7 @@ public class RequestOptions {
      * @param publishableApiKey your publishable API key
      * @return a {@link RequestOptionsBuilder} instance
      */
-    public static RequestOptions.RequestOptionsBuilder builder(@NonNull String publishableApiKey) {
+    public static RequestOptions.RequestOptionsBuilder builder(@Nullable String publishableApiKey) {
         return new RequestOptions.RequestOptionsBuilder(publishableApiKey);
     }
 
@@ -63,6 +74,7 @@ public class RequestOptions {
     public static final class RequestOptionsBuilder {
 
         private String publishableApiKey;
+        private String guid;
         private String idempotencyKey;
         private String apiVersion;
 
@@ -71,7 +83,7 @@ public class RequestOptions {
          *
          * @param publishableApiKey your publishable API key
          */
-        public RequestOptionsBuilder(@NonNull String publishableApiKey) {
+        public RequestOptionsBuilder(@Nullable String publishableApiKey) {
             this.publishableApiKey = publishableApiKey;
         }
 
@@ -101,6 +113,18 @@ public class RequestOptions {
         }
 
         /**
+         * Setter for the optional guid value of the {@link RequestOptions}.
+         *
+         * @param guid the guid
+         * @return {@code this}, for chaining purposes
+         */
+        @NonNull
+        public RequestOptionsBuilder setGuid(@Nullable String guid) {
+            this.guid = guid;
+            return this;
+        }
+
+        /**
          * Setter for the API version for this set of {@link RequestOptions}. If not set,
          * your account default API version is used.
          *
@@ -121,7 +145,7 @@ public class RequestOptions {
          * @return the new {@link RequestOptions} object
          */
         public RequestOptions build() {
-            return new RequestOptions(this.apiVersion, this.idempotencyKey, this.publishableApiKey);
+            return new RequestOptions(this.apiVersion, this.guid, this.idempotencyKey, this.publishableApiKey);
         }
     }
 }

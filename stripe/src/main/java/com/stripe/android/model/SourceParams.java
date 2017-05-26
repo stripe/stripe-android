@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.Source.SourceType;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.
@@ -136,7 +136,7 @@ public class SourceParams {
         basicInfoMap.put(FIELD_EXP_MONTH, card.getExpMonth());
         basicInfoMap.put(FIELD_EXP_YEAR, card.getExpYear());
         basicInfoMap.put(FIELD_CVC, card.getCVC());
-        removeNullParams(basicInfoMap);
+        removeNullAndEmptyParams(basicInfoMap);
 
         params.setApiParameterMap(basicInfoMap);
 
@@ -147,7 +147,7 @@ public class SourceParams {
         addressMap.put(FIELD_COUNTRY, card.getAddressCountry());
         addressMap.put(FIELD_STATE, card.getAddressState());
         addressMap.put(FIELD_POSTAL_CODE, card.getAddressZip());
-        removeNullParams(addressMap);
+        removeNullAndEmptyParams(addressMap);
 
         // If there are any keys left...
         Map<String, Object> ownerMap = new HashMap<>();
@@ -155,7 +155,7 @@ public class SourceParams {
         if (addressMap.keySet().size() > 0) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
         }
-        removeNullParams(ownerMap);
+        removeNullAndEmptyParams(ownerMap);
         if (ownerMap.keySet().size() > 0) {
             params.setOwner(ownerMap);
         }
@@ -522,7 +522,7 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_OWNER, mOwner);
         networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
-        StripeNetworkUtils.removeNullParams(networkReadyMap);
+        StripeNetworkUtils.removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }
 
