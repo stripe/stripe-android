@@ -157,8 +157,8 @@ public class StripeApiHandlerTest {
                 public String getPackageName() {
                     return "com.example.main";
                 }
-
             };
+
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSourceOnServer(
                     provider,
