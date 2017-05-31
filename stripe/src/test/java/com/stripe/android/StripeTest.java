@@ -422,7 +422,7 @@ public class StripeTest {
             assertNotNull(cardSource);
             assertNotNull(cardSource.getId());
             SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                    50L,
+                    50000L,
                     "brl",
                     "example://return",
                     cardSource.getId());
@@ -435,7 +435,7 @@ public class StripeTest {
             Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(threeDSource);
-            assertEquals(50L, threeDSource.getAmount().longValue());
+            assertEquals(50000L, threeDSource.getAmount().longValue());
             assertEquals("brl", threeDSource.getCurrency());
             assertNotNull(threeDSource.getClientSecret());
             assertNotNull(threeDSource.getId());
@@ -640,7 +640,7 @@ public class StripeTest {
             assertNotNull(cardSource);
             assertNotNull(cardSource.getId());
             SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                    50L,
+                    5000L,
                     "brl",
                     "example://return",
                     cardSource.getId());

@@ -2,35 +2,48 @@ package com.stripe.android.net;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.stripe.android.util.StripeTextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Data class representing options for a Stripe API request.
  */
 public class RequestOptions {
 
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({TYPE_QUERY, TYPE_JSON})
+    public @interface RequestType {}
+    public static final String TYPE_QUERY = "source";
+    public static final String TYPE_JSON = "json_data";
+
     @NonNull private final String mApiVersion;
     @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
     @Nullable private final String mPublishableApiKey;
+    @NonNull @RequestType private final String mRequestType;
 
     private RequestOptions(
             @NonNull String apiVersion,
             @Nullable String guid,
             @Nullable String idempotencyKey,
-            @Nullable String publishableApiKey) {
+            @Nullable String publishableApiKey,
+            @NonNull @RequestType String requestType) {
         mApiVersion = apiVersion;
         mGuid = guid;
         mIdempotencyKey = idempotencyKey;
         mPublishableApiKey = publishableApiKey;
+        mRequestType = requestType;
     }
 
     /**
      * @return the API version for this request
      */
-    @Nullable
-    public String getApiVersion() {
+    @NonNull
+    String getApiVersion() {
         return mApiVersion;
     }
 
@@ -38,7 +51,7 @@ public class RequestOptions {
      * @return the guid for this request
      */
     @Nullable
-    public String getGuid() {
+    String getGuid() {
         return mGuid;
     }
 
@@ -46,7 +59,7 @@ public class RequestOptions {
      * @return the idempotency key for this request
      */
     @Nullable
-    public String getIdempotencyKey() {
+    String getIdempotencyKey() {
         return mIdempotencyKey;
     }
 
@@ -54,18 +67,40 @@ public class RequestOptions {
      * @return the publishable API key for this request
      */
     @Nullable
-    public String getPublishableApiKey() {
+    String getPublishableApiKey() {
         return mPublishableApiKey;
     }
 
+    @NonNull
+    @RequestType
+    String getRequestType() {
+        return mRequestType;
+    }
+
     /**
-     * Static accessor for the {@link RequestOptionsBuilder} class.
+     * Static accessor for the {@link RequestOptionsBuilder} class. Creates
+     * a builder for a {@link #TYPE_QUERY} options item
      *
      * @param publishableApiKey your publishable API key
      * @return a {@link RequestOptionsBuilder} instance
      */
     public static RequestOptions.RequestOptionsBuilder builder(@Nullable String publishableApiKey) {
-        return new RequestOptions.RequestOptionsBuilder(publishableApiKey);
+        return builder(publishableApiKey, TYPE_QUERY);
+    }
+
+    /**
+     * Static accessor for the {@link RequestOptionsBuilder} class with type.
+     *
+     * @param publishableApiKey your publishable API key
+     * @param requestType your {@link RequestType}
+     * @return a {@link RequestOptionsBuilder} instance
+     */
+    public static RequestOptions.RequestOptionsBuilder builder(
+            @Nullable String publishableApiKey,
+            @NonNull @RequestType String requestType) {
+        return new RequestOptions.RequestOptionsBuilder(
+                publishableApiKey,
+                requestType);
     }
 
     /**
@@ -73,18 +108,22 @@ public class RequestOptions {
      */
     public static final class RequestOptionsBuilder {
 
-        private String publishableApiKey;
+        private String apiVersion;
         private String guid;
         private String idempotencyKey;
-        private String apiVersion;
+        private String publishableApiKey;
+        private @RequestType String requestType;
 
         /**
          * Builder constructor requiring an API key.
          *
          * @param publishableApiKey your publishable API key
          */
-        public RequestOptionsBuilder(@Nullable String publishableApiKey) {
+        public RequestOptionsBuilder(
+                @Nullable String publishableApiKey,
+                @NonNull @RequestType String requestType) {
             this.publishableApiKey = publishableApiKey;
+            this.requestType = requestType;
         }
 
         /**
@@ -145,7 +184,12 @@ public class RequestOptions {
          * @return the new {@link RequestOptions} object
          */
         public RequestOptions build() {
-            return new RequestOptions(this.apiVersion, this.guid, this.idempotencyKey, this.publishableApiKey);
+            return new RequestOptions(
+                    this.apiVersion,
+                    this.guid,
+                    this.idempotencyKey,
+                    this.publishableApiKey,
+                    this.requestType);
         }
     }
 }
