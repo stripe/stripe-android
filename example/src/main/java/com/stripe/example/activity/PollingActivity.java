@@ -39,8 +39,13 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class PollingActivity extends AppCompatActivity {
 
+    /*
+     * Change this to your publishable key.
+     *
+     * You can get your key here: https://manage.stripe.com/account/apikeys
+     */
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+            "put your key here";
     private static final String RETURN_SCHEMA = "stripe://";
     private static final String RETURN_HOST_ASYNC = "async";
     private static final String RETURN_HOST_SYNC = "sync";

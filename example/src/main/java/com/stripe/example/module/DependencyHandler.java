@@ -26,7 +26,7 @@ public class DependencyHandler {
      *
      * You can get your key here: https://manage.stripe.com/account/apikeys
      */
-    private static final String PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
+    private static final String PUBLISHABLE_KEY = "put your key here";
 
     private AsyncTaskTokenController mAsyncTaskController;
     private CardInputWidget mCardInputWidget;
