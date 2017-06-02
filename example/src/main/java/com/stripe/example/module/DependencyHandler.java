@@ -24,7 +24,7 @@ public class DependencyHandler {
     /*
      * Change this to your publishable key.
      *
-     * You can get your key here: https://manage.stripe.com/account/apikeys
+     * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY = "put your key here";
 
