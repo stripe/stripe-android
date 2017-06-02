@@ -15,8 +15,13 @@ import com.stripe.wrap.pay.utils.CartManager;
 
 public class LauncherActivity extends AppCompatActivity {
 
+    /*
+     * Change this to your publishable key.
+     *
+     * You can get your key here: https://manage.stripe.com/account/apikeys
+     */
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+            "put your key here";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
