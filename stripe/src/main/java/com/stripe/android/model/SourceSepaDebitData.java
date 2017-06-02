@@ -128,7 +128,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
         objectMap.put(FIELD_MANDATE_URL, mMandateUrl);
 
         putAdditionalFieldsIntoMap(objectMap, mAdditionalFields);
-        StripeNetworkUtils.removeNullParams(objectMap);
+        StripeNetworkUtils.removeNullAndEmptyParams(objectMap);
         return objectMap;
     }
 

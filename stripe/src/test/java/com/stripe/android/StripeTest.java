@@ -26,8 +26,10 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -216,7 +218,10 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidData_returnsToken() {
         try {
-            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            TestLoggingListener listener = new TestLoggingListener(true);
+            stripe.setLoggingResponseListener(listener);
+
             Token token = stripe.createTokenSynchronous(mCard);
 
             assertNotNull(token);
@@ -229,6 +234,8 @@ public class StripeTest {
             assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
             assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
             assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
+
+            assertAllLogsAreValid(listener, 2);
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
@@ -415,7 +422,7 @@ public class StripeTest {
             assertNotNull(cardSource);
             assertNotNull(cardSource.getId());
             SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                    50L,
+                    50000L,
                     "brl",
                     "example://return",
                     cardSource.getId());
@@ -428,7 +435,7 @@ public class StripeTest {
             Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(threeDSource);
-            assertEquals(50L, threeDSource.getAmount().longValue());
+            assertEquals(50000L, threeDSource.getAmount().longValue());
             assertEquals("brl", threeDSource.getCurrency());
             assertNotNull(threeDSource.getClientSecret());
             assertNotNull(threeDSource.getId());
@@ -443,7 +450,9 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest() {
-        Stripe stripe = getNonLoggingStripe(mContext);
+        Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
         SourceParams params = SourceParams.createGiropayParams(
                 2000L,
                 "Mr. X",
@@ -456,7 +465,7 @@ public class StripeTest {
         params.setMetaData(metamap);
         try {
             Source giropaySource =
-                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                    stripe.createSourceSynchronous(params);
             assertNotNull(giropaySource);
             assertNotNull(giropaySource.getClientSecret());
             assertNotNull(giropaySource.getId());
@@ -469,6 +478,7 @@ public class StripeTest {
             assertNotNull(giropaySource.getRedirect());
             assertEquals("Mr. X", giropaySource.getOwner().getName());
             assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
+            assertAllLogsAreValid(listener, 2);
             JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
         } catch (StripeException stripeEx) {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
@@ -630,7 +640,7 @@ public class StripeTest {
             assertNotNull(cardSource);
             assertNotNull(cardSource.getId());
             SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                    50L,
+                    5000L,
                     "brl",
                     "example://return",
                     cardSource.getId());
@@ -676,9 +686,7 @@ public class StripeTest {
             assertFalse(token.getLivemode());
             assertFalse(token.getUsed());
             assertNotNull(token.getId());
-            assertNotNull(listener.mStripeResponse);
-            assertEquals(200, listener.mStripeResponse.getResponseCode());
-            assertNull(listener.mStripeException);
+            assertAllLogsAreValid(listener, 2);
         } catch (StripeException stripeEx) {
             fail("Unexpected exception making PII token");
         }
@@ -710,8 +718,8 @@ public class StripeTest {
             fail("We shouldn't be able to make a token without a key.");
         } catch (Exception exception) {
             // Note: we're not testing the type of exception in this test.
-            assertNull(listener.mStripeResponse);
-            assertNull(listener.mStripeException);
+            assertEquals(0, listener.responseList.size());
+            assertEquals(0, listener.exceptionList.size());
         }
     }
 
@@ -750,6 +758,14 @@ public class StripeTest {
         }
     }
 
+    private void assertAllLogsAreValid(@NonNull TestLoggingListener listener, int expectedLogs) {
+        assertEquals(expectedLogs, listener.responseList.size());
+        assertEquals(0, listener.exceptionList.size());
+        for(int i = 0; i < expectedLogs; i++) {
+            assertEquals(200, listener.responseList.get(i).getResponseCode());
+        }
+    }
+
     private static Stripe getNonLoggingStripe(Context context) {
         Stripe nonLoggingStripe = new Stripe(context);
         nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
@@ -764,8 +780,8 @@ public class StripeTest {
 
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
         boolean mShouldLogTest;
-        StripeResponse mStripeResponse;
-        StripeException mStripeException;
+        List<StripeResponse> responseList = new ArrayList<>();
+        List<StripeException> exceptionList = new ArrayList<>();
 
         public TestLoggingListener(boolean shouldLogTest) {
             mShouldLogTest = shouldLogTest;
@@ -781,7 +797,7 @@ public class StripeTest {
             if (!mShouldLogTest) {
                 fail("Test should not be logged.");
             }
-            mStripeResponse = response;
+            responseList.add(response);
         }
 
         @Override
@@ -789,7 +805,7 @@ public class StripeTest {
             if (!mShouldLogTest) {
                 fail("Test should not be logged.");
             }
-            mStripeException = exception;
+            exceptionList.add(exception);
         }
     }
 }

@@ -1,9 +1,7 @@
 package com.stripe.android.util;
 
-import android.animation.ObjectAnimator;
 import android.support.annotation.NonNull;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 
@@ -120,6 +118,54 @@ public class StripeNetworkUtilsTest {
         assertEquals("usd", bankAccountMap.get("currency"));
         assertFalse(bankAccountMap.containsKey("account_holder_name"));
         assertFalse(bankAccountMap.containsKey("account_holder_type"));
+    }
+
+    @Test
+    public void removeNullAndEmptyParams_removesNullParams() {
+        Map<String, Object> testMap = new HashMap<>();
+        testMap.put("a", null);
+        testMap.put("b", "not null");
+        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
+        assertEquals(1, testMap.size());
+        assertTrue(testMap.containsKey("b"));
+    }
+
+    @Test
+    public void removeNullAndEmptyParams_removesEmptyStringParams() {
+        Map<String, Object> testMap = new HashMap<>();
+        testMap.put("a", "fun param");
+        testMap.put("b", "not null");
+        testMap.put("c", "");
+        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
+        assertEquals(2, testMap.size());
+        assertTrue(testMap.containsKey("a"));
+        assertTrue(testMap.containsKey("b"));
+    }
+
+    @Test
+    public void removeNullAndEmptyParams_removesNestedEmptyParams() {
+        Map<String, Object> testMap = new HashMap<>();
+        Map<String, Object> firstNestedMap = new HashMap<>();
+        Map<String, Object> secondNestedMap = new HashMap<>();
+        testMap.put("a", "fun param");
+        testMap.put("b", "not null");
+        firstNestedMap.put("1a", "something");
+        firstNestedMap.put("1b", null);
+        secondNestedMap.put("2a", "");
+        secondNestedMap.put("2b", "hello world");
+        firstNestedMap.put("1c", secondNestedMap);
+        testMap.put("c", firstNestedMap);
+
+        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
+        assertEquals(3, testMap.size());
+        assertTrue(testMap.containsKey("a"));
+        assertTrue(testMap.containsKey("b"));
+        assertTrue(testMap.containsKey("c"));
+        assertEquals(2, firstNestedMap.size());
+        assertTrue(firstNestedMap.containsKey("1a"));
+        assertTrue(firstNestedMap.containsKey("1c"));
+        assertEquals(1, secondNestedMap.size());
+        assertTrue(secondNestedMap.containsKey("2b"));
     }
 
     @Test

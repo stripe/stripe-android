@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static com.stripe.android.util.StripeJsonUtils.optString;
 import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullParams;
+import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-redirect">redirect</a> object
@@ -79,7 +79,7 @@ public class SourceRedirect extends StripeJsonModel {
         hashMap.put(FIELD_RETURN_URL, mReturnUrl);
         hashMap.put(FIELD_STATUS, mStatus);
         hashMap.put(FIELD_URL, mUrl);
-        removeNullParams(hashMap);
+        removeNullAndEmptyParams(hashMap);
         return hashMap;
     }
 

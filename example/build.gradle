@@ -7,8 +7,8 @@ repositories {
 def android_support_version = '25.3.1'
 
 dependencies {
-    compile 'com.stripe:stripe-android-pay:4.0.2'
-    compile 'com.stripe:stripe-android:4.0.2'
+    compile project(':android-pay')
+    compile project(':stripe')
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version

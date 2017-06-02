@@ -5,12 +5,12 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 
-import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class StripeNetworkUtils {
         cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
 
         // Remove all null values; they cause validation errors
-        removeNullParams(cardParams);
+        removeNullAndEmptyParams(cardParams);
 
         // We store the logging items in this field, which is extracted from the parameters
         // sent to the API.
@@ -99,11 +99,24 @@ public class StripeNetworkUtils {
      *
      * @param mapToEdit a {@link Map} from which to remove the keys that have {@code null} values
      */
-    public static void removeNullParams(@NonNull Map<String, Object> mapToEdit) {
+    @SuppressWarnings("unchecked")
+    public static void removeNullAndEmptyParams(@NonNull Map<String, Object> mapToEdit) {
         // Remove all null values; they cause validation errors
         for (String key : new HashSet<>(mapToEdit.keySet())) {
             if (mapToEdit.get(key) == null) {
                 mapToEdit.remove(key);
+            }
+
+            if (mapToEdit.get(key) instanceof CharSequence) {
+                CharSequence sequence = (CharSequence) mapToEdit.get(key);
+                if (TextUtils.isEmpty(sequence)) {
+                    mapToEdit.remove(key);
+                }
+            }
+
+            if (mapToEdit.get(key) instanceof Map) {
+                Map<String, Object> stringObjectMap = (Map<String, Object>) mapToEdit.get(key);
+                removeNullAndEmptyParams(stringObjectMap);
             }
         }
     }
@@ -158,7 +171,7 @@ public class StripeNetworkUtils {
                 StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
 
         // Remove all null values; they cause validation errors
-        removeNullParams(accountParams);
+        removeNullAndEmptyParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
         addUidParams(provider, context, tokenParams);

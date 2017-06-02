@@ -183,7 +183,7 @@ public class SourceCardData extends StripeSourceTypeModel {
         objectMap.put(FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
 
         putAdditionalFieldsIntoMap(objectMap, mAdditionalFields);
-        StripeNetworkUtils.removeNullParams(objectMap);
+        StripeNetworkUtils.removeNullAndEmptyParams(objectMap);
         return objectMap;
     }
 
