@@ -624,6 +624,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         final Map<String, Object> loggingParams = LoggingUtils.getEventLoggingParams(
                 loggingTokens,
                 null,
+                null,
                 publishableKey,
                 eventName);
         final RequestOptions options = RequestOptions.builder(publishableKey).build();
