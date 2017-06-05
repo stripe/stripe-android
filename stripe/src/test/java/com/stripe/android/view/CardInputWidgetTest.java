@@ -639,6 +639,8 @@ public class CardInputWidgetTest {
         assertEquals("", mCardNumberEditText.getText().toString());
         assertEquals("", mExpiryEditText.getText().toString());
         assertEquals("", mCvcEditText.getText().toString());
+        assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
+        assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
     }
 
     @Test

@@ -206,6 +206,12 @@ public class CardInputWidget extends LinearLayout {
      * Clear all text fields in the CardInputWidget.
      */
     public void clear() {
+        if (mCardNumberEditText.hasFocus()
+                || mExpiryDateEditText.hasFocus()
+                || mCvcNumberEditText.hasFocus()
+                || this.hasFocus()) {
+            mCardNumberEditText.requestFocus();
+        }
         mCvcNumberEditText.setText("");
         mExpiryDateEditText.setText("");
         mCardNumberEditText.setText("");
