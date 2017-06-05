@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 import com.stripe.android.util.LoggingUtils;
@@ -628,6 +629,17 @@ public class CardInputWidgetTest {
         assertEquals(2079, (int) card.getExpYear());
         assertEquals("1234", card.getCVC());
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+    }
+
+    @Test
+    public void addValues_thenClear_leavesAllTextFieldsEmpty() {
+        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setExpiryDate(12, 2079);
+        mCardInputWidget.setCvcCode("1234");
+        mCardInputWidget.clear();
+        assertEquals("", mCardNumberEditText.getText().toString());
+        assertEquals("", mExpiryEditText.getText().toString());
+        assertEquals("", mCvcEditText.getText().toString());
     }
 
     @Test

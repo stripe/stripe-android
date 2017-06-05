@@ -202,6 +202,15 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText.setText(cvcCode);
     }
 
+    /**
+     * Clear all text fields in the CardInputWidget.
+     */
+    public void clear() {
+        mCvcNumberEditText.setText("");
+        mExpiryDateEditText.setText("");
+        mCardNumberEditText.setText("");
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() != MotionEvent.ACTION_DOWN) {
