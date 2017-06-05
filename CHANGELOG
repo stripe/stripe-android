@@ -1,3 +1,8 @@
+4.0.3 2017-06-05
+    Added support for PII tokens
+    Added ability to clear the card input widget
+    Upgraded fraud detection tools
+
 4.0.2 2017-05-15
     Added StripePaymentSource interface, extended by both Source and Token
     Upgraded for compatibility with stripe:stripe-android-pay
