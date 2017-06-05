@@ -631,6 +631,19 @@ public class CardInputWidgetTest {
     }
 
     @Test
+    public void addValues_thenClear_leavesAllTextFieldsEmpty() {
+        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setExpiryDate(12, 2079);
+        mCardInputWidget.setCvcCode("1234");
+        mCardInputWidget.clear();
+        assertEquals("", mCardNumberEditText.getText().toString());
+        assertEquals("", mExpiryEditText.getText().toString());
+        assertEquals("", mCvcEditText.getText().toString());
+        assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
+        assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
+    }
+
+    @Test
     public void shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
         assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, "1234"));
         assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, ""));
