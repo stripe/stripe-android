@@ -13,7 +13,6 @@ dependencies {
     compile 'com.android.support:support-v4:' + android_support_version
     compile 'com.android.support:appcompat-v7:' + android_support_version
 
-    compile()
     javadocDeps 'com.android.support:support-annotations:' + android_support_version
     javadocDeps 'com.android.support:support-v4:' + android_support_version
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
