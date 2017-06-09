@@ -297,7 +297,7 @@ public class Card extends StripeJsonModel {
     }
 
     @Nullable
-    private static Card fromJson(JSONObject jsonObject) {
+    public static Card fromJson(JSONObject jsonObject) {
         if (jsonObject == null || !VALUE_CARD.equals(jsonObject.optString(FIELD_OBJECT))) {
             return null;
         }
