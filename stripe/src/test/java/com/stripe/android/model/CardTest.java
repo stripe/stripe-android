@@ -13,6 +13,8 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -21,7 +23,35 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
 public class CardTest {
-    private static final int YEAR_IN_FUTURE = 2000;
+    private static final int YEAR_IN_FUTURE = 2100;
+
+    private static final String JSON_CARD = "{\n" +
+            "    \"id\": \"card_189fi32eZvKYlo2CHK8NPRME\",\n" +
+            "    \"object\": \"card\",\n" +
+            "    \"address_city\": null,\n" +
+            "    \"address_country\": null,\n" +
+            "    \"address_line1\": null,\n" +
+            "    \"address_line1_check\": null,\n" +
+            "    \"address_line2\": null,\n" +
+            "    \"address_state\": null,\n" +
+            "    \"address_zip\": null,\n" +
+            "    \"address_zip_check\": null,\n" +
+            "    \"brand\": \"Visa\",\n" +
+            "    \"country\": \"US\",\n" +
+            "    \"currency\": \"usd\",\n" +
+            "    \"cvc_check\": null,\n" +
+            "    \"dynamic_last4\": null,\n" +
+            "    \"exp_month\": 8,\n" +
+            "    \"exp_year\": 2017,\n" +
+            "    \"funding\": \"credit\",\n" +
+            "    \"last4\": \"4242\",\n" +
+            "    \"metadata\": {\n" +
+            "    },\n" +
+            "    \"name\": null,\n" +
+            "    \"tokenization_method\": null\n" +
+            "  }";
+
+    private static final String BAD_JSON = "{ \"id\": ";
 
     @Before
     public void setup() {
@@ -559,5 +589,35 @@ public class CardTest {
         assertEquals(Card.AMERICAN_EXPRESS, card.getType());
     }
 
+    @Test
+    public void fromString_whenStringIsValidJson_returnsExpectedCard() {
+        Card.Builder builder = new Card.Builder(null, 8, 2017, null);
+        builder.brand(Card.VISA);
+        builder.funding(Card.FUNDING_CREDIT);
+        builder.last4("4242");
+        builder.id("card_189fi32eZvKYlo2CHK8NPRME");
+        builder.country("US");
+        builder.currency("usd");
+        Card expectedCard = builder.build();
+
+        Card cardFromJson = Card.fromString(JSON_CARD);
+
+        assertNotNull(cardFromJson);
+        assertEquals(expectedCard.getBrand(), cardFromJson.getBrand());
+        assertEquals(expectedCard.getFunding(), cardFromJson.getFunding());
+        assertEquals(expectedCard.getCountry(), cardFromJson.getCountry());
+        assertEquals(expectedCard.getLast4(), cardFromJson.getLast4());
+        assertEquals(expectedCard.getExpMonth(), cardFromJson.getExpMonth());
+        assertEquals(expectedCard.getExpYear(), cardFromJson.getExpYear());
+        assertEquals(expectedCard.getCurrency(), cardFromJson.getCurrency());
+        assertNull(cardFromJson.getAddressCity());
+        assertNull(cardFromJson.getFingerprint());
+        assertEquals(expectedCard.getId(), cardFromJson.getId());
+    }
+
+    @Test
+    public void fromString_whenStringIsBadJson_returnsNull() {
+        assertNull(Card.fromString(BAD_JSON));
+    }
 }
 
