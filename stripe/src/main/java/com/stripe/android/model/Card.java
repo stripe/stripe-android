@@ -305,34 +305,37 @@ public class Card extends StripeJsonModel {
         Integer expMonth = optInteger(jsonObject, FIELD_EXP_MONTH);
         Integer expYear = optInteger(jsonObject, FIELD_EXP_YEAR);
 
-        //It's okay for the month to be missing, but not for it to be outside 1-12
+        // It's okay for the month to be missing, but not for it to be outside 1-12.
+        // We treat an invalid month the same way we would an invalid brand, by reading it as
+        // null.
         if (expMonth != null && (expMonth < 1 || expMonth > 12)) {
-            return null;
+            expMonth = null;
         }
 
         if (expYear != null && expYear < 0) {
-            return null;
+            expYear = null;
         }
 
         // Note that we'll never get the CVC or card number in JSON, so those values are null
         Builder builder = new Builder(null, expMonth, expYear, null);
-        builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
         builder.addressCity(optString(jsonObject, FIELD_ADDRESS_CITY));
         builder.addressLine1(optString(jsonObject, FIELD_ADDRESS_LINE1));
         builder.addressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK));
         builder.addressLine2(optString(jsonObject, FIELD_ADDRESS_LINE2));
+        builder.addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY));
+        builder.addressState(optString(jsonObject, FIELD_ADDRESS_STATE));
         builder.addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP));
         builder.addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK));
-        builder.addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY));
+        builder.brand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)));
         builder.country(optString(jsonObject, FIELD_COUNTRY));
         builder.customer(optString(jsonObject, FIELD_CUSTOMER));
         builder.currency(optString(jsonObject, FIELD_CURRENCY));
         builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
-        builder.brand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)));
         builder.funding(StripeTextUtils.asFundingType(optString(jsonObject, FIELD_FUNDING)));
         builder.fingerprint(optString(jsonObject, FIELD_FINGERPRINT));
         builder.id(optString(jsonObject, FIELD_ID));
         builder.last4(optString(jsonObject, FIELD_LAST4));
+        builder.name(optString(jsonObject, FIELD_NAME));
 
         return builder.build();
     }
@@ -925,6 +928,8 @@ public class Card extends StripeJsonModel {
         map.put(FIELD_CURRENCY, currency);
         map.put(FIELD_COUNTRY, country);
         map.put(FIELD_CUSTOMER, customerId);
+        map.put(FIELD_EXP_MONTH, expMonth);
+        map.put(FIELD_EXP_YEAR, expYear);
         map.put(FIELD_FINGERPRINT, fingerprint);
         map.put(FIELD_FUNDING, funding);
         map.put(FIELD_CVC_CHECK, cvcCheck);
