@@ -46,7 +46,7 @@ public class TokenParser {
             token = new Token(tokenId, liveMode, date, used, bankAccount);
         } else if (Token.TYPE_CARD.equals(tokenType)) {
             JSONObject cardObject = jsonObject.getJSONObject(FIELD_CARD);
-            Card card = CardParser.parseCard(cardObject);
+            Card card = Card.fromJson(cardObject);
             token = new Token(tokenId, liveMode, date, used, card);
         } else if (Token.TYPE_PII.equals(tokenType)) {
             token = new Token(tokenId, liveMode, date, used);

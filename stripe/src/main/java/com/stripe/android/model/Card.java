@@ -9,17 +9,28 @@ import android.support.annotation.StringDef;
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.stripe.android.util.StripeJsonUtils.optCurrency;
+import static com.stripe.android.util.StripeJsonUtils.optInteger;
+import static com.stripe.android.util.StripeJsonUtils.optString;
+import static com.stripe.android.util.StripeJsonUtils.putIntegerIfNotNull;
+import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 /**
  * A model object representing a Card in the Android SDK.
  */
-public class Card {
+public class Card extends StripeJsonModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -74,16 +85,42 @@ public class Card {
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_ADDRESS_CITY = "address_city";
+    private static final String FIELD_ADDRESS_COUNTRY = "address_country";
+    private static final String FIELD_ADDRESS_LINE1 = "address_line1";
+    private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
+    private static final String FIELD_ADDRESS_LINE2 = "address_line2";
+    private static final String FIELD_ADDRESS_STATE = "address_state";
+    private static final String FIELD_ADDRESS_ZIP = "address_zip";
+    private static final String FIELD_ADDRESS_ZIP_CHECK = "address_zip_check";
+    private static final String FIELD_BRAND = "brand";
+    private static final String FIELD_COUNTRY = "country";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_CUSTOMER = "customer";
+    private static final String FIELD_CVC_CHECK = "cvc_check";
+    private static final String FIELD_EXP_MONTH = "exp_month";
+    private static final String FIELD_EXP_YEAR = "exp_year";
+    private static final String FIELD_FINGERPRINT = "fingerprint";
+    private static final String FIELD_FUNDING = "funding";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_LAST4 = "last4";
+    private static final String FIELD_ID = "id";
+
+    private static final String VALUE_CARD = "card";
+
     private String number;
     private String cvc;
     private Integer expMonth;
     private Integer expYear;
     private String name;
     private String addressLine1;
+    private String addressLine1Check;
     private String addressLine2;
     private String addressCity;
     private String addressState;
     private String addressZip;
+    private String addressZipCheck;
     private String addressCountry;
     @Size(4) private String last4;
     @CardBrand private String brand;
@@ -91,6 +128,8 @@ public class Card {
     private String fingerprint;
     private String country;
     private String currency;
+    private String customerId;
+    private String cvcCheck;
     private String id;
     @NonNull private List<String> loggingTokens = new ArrayList<>();
 
@@ -104,10 +143,12 @@ public class Card {
         private final Integer expYear;
         private String name;
         private String addressLine1;
+        private String addressLine1Check;
         private String addressLine2;
         private String addressCity;
         private String addressState;
         private String addressZip;
+        private String addressZipCheck;
         private String addressCountry;
         private @CardBrand String brand;
         private @FundingType String funding;
@@ -115,6 +156,9 @@ public class Card {
         private String fingerprint;
         private String country;
         private String currency;
+        private String customer;
+        private String cvcCheck;
+        private String id;
 
         /**
          * Constructor with most common {@link Card} fields.
@@ -145,6 +189,11 @@ public class Card {
             return this;
         }
 
+        public Builder addressLine1Check(String addressLine1Check) {
+            this.addressLine1Check = addressLine1Check;
+            return this;
+        }
+
         public Builder addressLine2(String address) {
             this.addressLine2 = address;
             return this;
@@ -162,6 +211,11 @@ public class Card {
 
         public Builder addressZip(String zip) {
             this.addressZip = zip;
+            return this;
+        }
+
+        public Builder addressZipCheck(String zipCheck) {
+            this.addressZipCheck = zipCheck;
             return this;
         }
 
@@ -195,8 +249,23 @@ public class Card {
             return this;
         }
 
+        public Builder customer(String customer) {
+            this.customer = customer;
+            return this;
+        }
+
+        public Builder cvcCheck(String cvcCheck) {
+            this.cvcCheck = cvcCheck;
+            return this;
+        }
+
         public Builder last4(String last4) {
             this.last4 = last4;
+            return this;
+        }
+
+        public Builder id(String id) {
+            this.id = id;
             return this;
         }
 
@@ -208,6 +277,67 @@ public class Card {
         public Card build() {
             return new Card(this);
         }
+    }
+
+    /**
+     * Create a Card object from a raw JSON string.
+     *
+     * @param jsonString the JSON string representing the potential Card
+     * @return A Card if one can be made from the JSON, or {@code null} if one cannot be made
+     * or the JSON is invalid.
+     */
+    @Nullable
+    public static Card fromString(String jsonString) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return fromJson(jsonObject);
+        } catch (JSONException ignored) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Card fromJson(JSONObject jsonObject) {
+        if (jsonObject == null || !VALUE_CARD.equals(jsonObject.optString(FIELD_OBJECT))) {
+            return null;
+        }
+
+        Integer expMonth = optInteger(jsonObject, FIELD_EXP_MONTH);
+        Integer expYear = optInteger(jsonObject, FIELD_EXP_YEAR);
+
+        // It's okay for the month to be missing, but not for it to be outside 1-12.
+        // We treat an invalid month the same way we would an invalid brand, by reading it as
+        // null.
+        if (expMonth != null && (expMonth < 1 || expMonth > 12)) {
+            expMonth = null;
+        }
+
+        if (expYear != null && expYear < 0) {
+            expYear = null;
+        }
+
+        // Note that we'll never get the CVC or card number in JSON, so those values are null
+        Builder builder = new Builder(null, expMonth, expYear, null);
+        builder.addressCity(optString(jsonObject, FIELD_ADDRESS_CITY));
+        builder.addressLine1(optString(jsonObject, FIELD_ADDRESS_LINE1));
+        builder.addressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK));
+        builder.addressLine2(optString(jsonObject, FIELD_ADDRESS_LINE2));
+        builder.addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY));
+        builder.addressState(optString(jsonObject, FIELD_ADDRESS_STATE));
+        builder.addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP));
+        builder.addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK));
+        builder.brand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)));
+        builder.country(optString(jsonObject, FIELD_COUNTRY));
+        builder.customer(optString(jsonObject, FIELD_CUSTOMER));
+        builder.currency(optString(jsonObject, FIELD_CURRENCY));
+        builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
+        builder.funding(StripeTextUtils.asFundingType(optString(jsonObject, FIELD_FUNDING)));
+        builder.fingerprint(optString(jsonObject, FIELD_FINGERPRINT));
+        builder.id(optString(jsonObject, FIELD_ID));
+        builder.last4(optString(jsonObject, FIELD_LAST4));
+        builder.name(optString(jsonObject, FIELD_NAME));
+
+        return builder.build();
     }
 
     /**
@@ -719,6 +849,98 @@ public class Card {
         return id;
     }
 
+    /**
+     * @return If address_line1 was provided, results of the check:
+     * pass, fail, unavailable, or unchecked.
+     */
+    @Nullable
+    public String getAddressLine1Check() {
+        return addressLine1Check;
+    }
+
+    /**
+     * @return If address_zip was provided, results of the check:
+     * pass, fail, unavailable, or unchecked.
+     */
+    @Nullable
+    public String getAddressZipCheck() {
+        return addressZipCheck;
+    }
+
+    /**
+     * @return The ID of the customer that this card belongs to.
+     */
+    @Nullable
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    /**
+     * @return If a CVC was provided, results of the check:
+     * pass, fail, unavailable, or unchecked.
+     */
+    @Nullable
+    public String getCvcCheck() {
+        return cvcCheck;
+    }
+
+    @NonNull
+    @Override
+    public JSONObject toJson() {
+        JSONObject object = new JSONObject();
+        putStringIfNotNull(object, FIELD_NAME, name);
+        putStringIfNotNull(object, FIELD_ADDRESS_CITY, addressCity);
+        putStringIfNotNull(object, FIELD_ADDRESS_COUNTRY, addressCountry);
+        putStringIfNotNull(object, FIELD_ADDRESS_LINE1, addressLine1);
+        putStringIfNotNull(object, FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
+        putStringIfNotNull(object, FIELD_ADDRESS_LINE2, addressLine2);
+        putStringIfNotNull(object, FIELD_ADDRESS_STATE, addressState);
+        putStringIfNotNull(object, FIELD_ADDRESS_ZIP, addressZip);
+        putStringIfNotNull(object, FIELD_ADDRESS_ZIP_CHECK, addressZipCheck);
+        putStringIfNotNull(object, FIELD_BRAND, brand);
+        putStringIfNotNull(object, FIELD_CURRENCY, currency);
+        putStringIfNotNull(object, FIELD_COUNTRY, country);
+        putStringIfNotNull(object, FIELD_CUSTOMER, customerId);
+        putIntegerIfNotNull(object, FIELD_EXP_MONTH, expMonth);
+        putIntegerIfNotNull(object, FIELD_EXP_YEAR, expYear);
+        putStringIfNotNull(object, FIELD_FINGERPRINT, fingerprint);
+        putStringIfNotNull(object, FIELD_FUNDING, funding);
+        putStringIfNotNull(object, FIELD_CVC_CHECK, cvcCheck);
+        putStringIfNotNull(object, FIELD_LAST4, last4);
+        putStringIfNotNull(object, FIELD_ID, id);
+        putStringIfNotNull(object, FIELD_OBJECT, VALUE_CARD);
+        return object;
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put(FIELD_NAME, name);
+        map.put(FIELD_ADDRESS_CITY, addressCity);
+        map.put(FIELD_ADDRESS_COUNTRY, addressCountry);
+        map.put(FIELD_ADDRESS_LINE1, addressLine1);
+        map.put(FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
+        map.put(FIELD_ADDRESS_LINE2, addressLine2);
+        map.put(FIELD_ADDRESS_STATE, addressState);
+        map.put(FIELD_ADDRESS_ZIP, addressZip);
+        map.put(FIELD_ADDRESS_ZIP_CHECK, addressZipCheck);
+        map.put(FIELD_BRAND, brand);
+        map.put(FIELD_CURRENCY, currency);
+        map.put(FIELD_COUNTRY, country);
+        map.put(FIELD_CUSTOMER, customerId);
+        map.put(FIELD_CVC_CHECK, cvcCheck);
+        map.put(FIELD_EXP_MONTH, expMonth);
+        map.put(FIELD_EXP_YEAR, expYear);
+        map.put(FIELD_FINGERPRINT, fingerprint);
+        map.put(FIELD_FUNDING, funding);
+        map.put(FIELD_ID, id);
+        map.put(FIELD_LAST4, last4);
+        map.put(FIELD_OBJECT, VALUE_CARD);
+        StripeNetworkUtils.removeNullAndEmptyParams(map);
+        return map;
+    }
+
     private Card(Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
@@ -726,10 +948,12 @@ public class Card {
         this.cvc = StripeTextUtils.nullIfBlank(builder.cvc);
         this.name = StripeTextUtils.nullIfBlank(builder.name);
         this.addressLine1 = StripeTextUtils.nullIfBlank(builder.addressLine1);
+        this.addressLine1Check = StripeTextUtils.nullIfBlank(builder.addressLine1Check);
         this.addressLine2 = StripeTextUtils.nullIfBlank(builder.addressLine2);
         this.addressCity = StripeTextUtils.nullIfBlank(builder.addressCity);
         this.addressState = StripeTextUtils.nullIfBlank(builder.addressState);
         this.addressZip = StripeTextUtils.nullIfBlank(builder.addressZip);
+        this.addressZipCheck = StripeTextUtils.nullIfBlank(builder.addressZipCheck);
         this.addressCountry = StripeTextUtils.nullIfBlank(builder.addressCountry);
         this.last4 = StripeTextUtils.nullIfBlank(builder.last4) == null
                 ? getLast4()
@@ -741,6 +965,9 @@ public class Card {
         this.funding = StripeTextUtils.asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
+        this.customerId = StripeTextUtils.nullIfBlank(builder.customer);
+        this.cvcCheck = StripeTextUtils.nullIfBlank(builder.cvcCheck);
+        this.id = StripeTextUtils.nullIfBlank(builder.id);
     }
 
     private String normalizeCardNumber(String number) {

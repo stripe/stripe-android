@@ -154,7 +154,7 @@ public class TokenParserTest {
             assertEquals(partialExpectedToken.getUsed(), answerToken.getUsed());
             assertEquals(Token.TYPE_CARD, answerToken.getType());
 
-            // Note: we test the validity of the card object in CardParserTest
+            // Note: we test the validity of the card object in CardTest
             assertNotNull(answerToken.getCard());
             assertNull(answerToken.getBankAccount());
         } catch (JSONException jex) {
