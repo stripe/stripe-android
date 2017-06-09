@@ -907,6 +907,7 @@ public class Card extends StripeJsonModel {
         putStringIfNotNull(object, FIELD_FUNDING, funding);
         putStringIfNotNull(object, FIELD_CVC_CHECK, cvcCheck);
         putStringIfNotNull(object, FIELD_LAST4, last4);
+        putStringIfNotNull(object, FIELD_ID, id);
         putStringIfNotNull(object, FIELD_OBJECT, VALUE_CARD);
         return object;
     }
@@ -928,11 +929,12 @@ public class Card extends StripeJsonModel {
         map.put(FIELD_CURRENCY, currency);
         map.put(FIELD_COUNTRY, country);
         map.put(FIELD_CUSTOMER, customerId);
+        map.put(FIELD_CVC_CHECK, cvcCheck);
         map.put(FIELD_EXP_MONTH, expMonth);
         map.put(FIELD_EXP_YEAR, expYear);
         map.put(FIELD_FINGERPRINT, fingerprint);
         map.put(FIELD_FUNDING, funding);
-        map.put(FIELD_CVC_CHECK, cvcCheck);
+        map.put(FIELD_ID, id);
         map.put(FIELD_LAST4, last4);
         map.put(FIELD_OBJECT, VALUE_CARD);
         StripeNetworkUtils.removeNullAndEmptyParams(map);

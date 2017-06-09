@@ -1,7 +1,11 @@
 package com.stripe.android.model;
 
+import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.time.FrozenClock;
+import com.stripe.android.util.StripeJsonUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,12 +14,14 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link Card}.
@@ -28,27 +34,25 @@ public class CardTest {
     private static final String JSON_CARD = "{\n" +
             "    \"id\": \"card_189fi32eZvKYlo2CHK8NPRME\",\n" +
             "    \"object\": \"card\",\n" +
-            "    \"address_city\": null,\n" +
-            "    \"address_country\": null,\n" +
-            "    \"address_line1\": null,\n" +
-            "    \"address_line1_check\": null,\n" +
-            "    \"address_line2\": null,\n" +
-            "    \"address_state\": null,\n" +
-            "    \"address_zip\": null,\n" +
-            "    \"address_zip_check\": null,\n" +
+            "    \"address_city\": \"Des Moines\",\n" +
+            "    \"address_country\": \"US\",\n" +
+            "    \"address_line1\": \"123 Any Street\",\n" +
+            "    \"address_line1_check\": \"unavailable\",\n" +
+            "    \"address_line2\": \"456\",\n" +
+            "    \"address_state\": \"IA\",\n" +
+            "    \"address_zip\": \"50305\",\n" +
+            "    \"address_zip_check\": \"unavailable\",\n" +
             "    \"brand\": \"Visa\",\n" +
             "    \"country\": \"US\",\n" +
             "    \"currency\": \"usd\",\n" +
-            "    \"cvc_check\": null,\n" +
-            "    \"dynamic_last4\": null,\n" +
+            "    \"customer\": \"customer77\",\n" +
+            "    \"cvc_check\": \"unavailable\",\n" +
             "    \"exp_month\": 8,\n" +
             "    \"exp_year\": 2017,\n" +
             "    \"funding\": \"credit\",\n" +
+            "    \"fingerprint\": \"abc123\",\n" +
             "    \"last4\": \"4242\",\n" +
-            "    \"metadata\": {\n" +
-            "    },\n" +
-            "    \"name\": null,\n" +
-            "    \"tokenization_method\": null\n" +
+            "    \"name\": \"John Cardholder\"\n" +
             "  }";
 
     private static final String BAD_JSON = "{ \"id\": ";
@@ -591,14 +595,7 @@ public class CardTest {
 
     @Test
     public void fromString_whenStringIsValidJson_returnsExpectedCard() {
-        Card.Builder builder = new Card.Builder(null, 8, 2017, null);
-        builder.brand(Card.VISA);
-        builder.funding(Card.FUNDING_CREDIT);
-        builder.last4("4242");
-        builder.id("card_189fi32eZvKYlo2CHK8NPRME");
-        builder.country("US");
-        builder.currency("usd");
-        Card expectedCard = builder.build();
+        Card expectedCard = buildEquivalentJsonCard();
 
         Card cardFromJson = Card.fromString(JSON_CARD);
 
@@ -610,14 +607,69 @@ public class CardTest {
         assertEquals(expectedCard.getExpMonth(), cardFromJson.getExpMonth());
         assertEquals(expectedCard.getExpYear(), cardFromJson.getExpYear());
         assertEquals(expectedCard.getCurrency(), cardFromJson.getCurrency());
-        assertNull(cardFromJson.getAddressCity());
-        assertNull(cardFromJson.getFingerprint());
+        assertEquals(expectedCard.getAddressCity(), cardFromJson.getAddressCity());
+        assertEquals(expectedCard.getAddressCountry(), cardFromJson.getAddressCountry());
+        assertEquals(expectedCard.getAddressLine1(), cardFromJson.getAddressLine1());
+        assertEquals(expectedCard.getAddressLine1Check(), cardFromJson.getAddressLine1Check());
+        assertEquals(expectedCard.getAddressLine2(), cardFromJson.getAddressLine2());
+        assertEquals(expectedCard.getAddressState(), cardFromJson.getAddressState());
+        assertEquals(expectedCard.getAddressZip(), cardFromJson.getAddressZip());
+        assertEquals(expectedCard.getAddressZipCheck(), cardFromJson.getAddressZipCheck());
+        assertEquals(expectedCard.getCvcCheck(), cardFromJson.getCvcCheck());
+        assertEquals(expectedCard.getName(), cardFromJson.getName());
+        assertEquals(expectedCard.getCustomerId(), cardFromJson.getCustomerId());
+        assertEquals(expectedCard.getFingerprint(), cardFromJson.getFingerprint());
         assertEquals(expectedCard.getId(), cardFromJson.getId());
+    }
+
+    @Test
+    public void fromString_toJson_yieldsSameObject() {
+        Card cardFromJson = Card.fromString(JSON_CARD);
+        assertNotNull(cardFromJson);
+
+        JSONObject cycledCardObject = cardFromJson.toJson();
+        try {
+            JSONObject rawJsonObject = new JSONObject(JSON_CARD);
+            JsonTestUtils.assertJsonEquals(cycledCardObject, rawJsonObject);
+        } catch (JSONException unexpected) {
+            fail();
+        }
+    }
+
+    @Test
+    public void toMap_catchesAllFields_fromRawJson() {
+        try {
+            JSONObject rawJsonObject = new JSONObject(JSON_CARD);
+            Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
+            Card expectedCard = buildEquivalentJsonCard();
+            JsonTestUtils.assertMapEquals(rawMap, expectedCard.toMap());
+        } catch (JSONException unexpected) {
+            fail();
+        }
     }
 
     @Test
     public void fromString_whenStringIsBadJson_returnsNull() {
         assertNull(Card.fromString(BAD_JSON));
+    }
+
+    private static Card buildEquivalentJsonCard() {
+        Card.Builder builder = new Card.Builder(null, 8, 2017, null);
+        builder.brand(Card.VISA);
+        builder.funding(Card.FUNDING_CREDIT);
+        builder.last4("4242");
+        builder.id("card_189fi32eZvKYlo2CHK8NPRME");
+        builder.country("US");
+        builder.currency("usd");
+        builder.addressCountry("US");
+        builder.addressCity("Des Moines");
+        builder.addressState("IA").addressZip("50305").addressZipCheck("unavailable");
+        builder.addressLine1("123 Any Street").addressLine1Check("unavailable").addressLine2("456");
+        builder.name("John Cardholder");
+        builder.cvcCheck("unavailable");
+        builder.customer("customer77");
+        builder.fingerprint("abc123");
+        return builder.build();
     }
 }
 
