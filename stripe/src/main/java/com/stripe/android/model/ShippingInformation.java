@@ -31,26 +31,14 @@ public class ShippingInformation extends StripeJsonModel {
         return mAddress;
     }
 
-    public void setAddress(@Nullable SourceAddress address) {
-        mAddress = address;
-    }
-
     @Nullable
     public String getName() {
         return mName;
     }
 
-    public void setName(@Nullable String name) {
-        mName = name;
-    }
-
     @Nullable
     public String getPhone() {
         return mPhone;
-    }
-
-    public void setPhone(@Nullable String phone) {
-        mPhone = phone;
     }
 
     @Nullable
