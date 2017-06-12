@@ -31,6 +31,39 @@ import static org.junit.Assert.fail;
 @Config(sdk = 23)
 public class SourceTest {
 
+    static final String EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = "{\n"+
+            "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
+            "\"object\": \"source\",\n"+
+            "\"amount\": 1000,\n"+
+            "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
+            "\"code_verification\": " + EXAMPLE_JSON_CODE_VERIFICATION + ",\n"+
+            "\"created\": 1488499654,\n"+
+            "\"currency\": \"usd\",\n"+
+            "\"flow\": \"receiver\",\n"+
+            "\"livemode\": false,\n"+
+            "\"metadata\": {\n"+
+            "},\n"+
+            "\"owner\": " + EXAMPLE_JSON_OWNER_WITHOUT_NULLS +",\n"+
+            "\"redirect\": " + EXAMPLE_JSON_REDIRECT + ",\n"+
+            "\"receiver\": {\n"+
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
+            "\"amount_charged\": 0,\n"+
+            "\"amount_received\": 0,\n"+
+            "\"amount_returned\": 0\n"+
+            "},\n"+
+            "\"status\": \"pending\",\n"+
+            "\"type\": \"bitcoin\",\n"+
+            "\"usage\": \"single_use\",\n"+
+            "\"bitcoin\": {\n" +
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
+            "\"amount\": 2371000,\n" +
+            "\"amount_charged\": 0,\n" +
+            "\"amount_received\": 0,\n" +
+            "\"amount_returned\": 0,\n" +
+            "\"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
+            "}" +
+            "}";
+
     private static final String DOGE_COIN = "dogecoin";
 
     private static final String EXAMPLE_JSON_SOURCE_WITH_NULLS = "{\n"+
@@ -80,39 +113,6 @@ public class SourceTest {
         put("type", "bitcoin");
         put("usage", "single_use");
     }};
-
-    private static final String EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = "{\n"+
-            "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
-            "\"object\": \"source\",\n"+
-            "\"amount\": 1000,\n"+
-            "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
-            "\"code_verification\": " + EXAMPLE_JSON_CODE_VERIFICATION + ",\n"+
-            "\"created\": 1488499654,\n"+
-            "\"currency\": \"usd\",\n"+
-            "\"flow\": \"receiver\",\n"+
-            "\"livemode\": false,\n"+
-            "\"metadata\": {\n"+
-            "},\n"+
-            "\"owner\": " + EXAMPLE_JSON_OWNER_WITHOUT_NULLS +",\n"+
-            "\"redirect\": " + EXAMPLE_JSON_REDIRECT + ",\n"+
-            "\"receiver\": {\n"+
-            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
-            "\"amount_charged\": 0,\n"+
-            "\"amount_received\": 0,\n"+
-            "\"amount_returned\": 0\n"+
-            "},\n"+
-            "\"status\": \"pending\",\n"+
-            "\"type\": \"bitcoin\",\n"+
-            "\"usage\": \"single_use\",\n"+
-            "\"bitcoin\": {\n" +
-            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
-            "\"amount\": 2371000,\n" +
-            "\"amount_charged\": 0,\n" +
-            "\"amount_received\": 0,\n" +
-            "\"amount_returned\": 0,\n" +
-            "\"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
-            "}" +
-            "}";
 
     private static final String EXAMPLE_JSON_SOURCE_CUSTOM_TYPE = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+

@@ -35,6 +35,14 @@ public class StripeJsonUtilsTest {
             "    \"numkey\": 123\n" +
             "}";
 
+    private static final String SIMPLE_JSON_HASH_OBJECT =
+            "{\n" +
+                    "    \"akey\": \"avalue\",\n" +
+                    "    \"bkey\": \"bvalue\",\n" +
+                    "    \"ckey\": \"cvalue\",\n" +
+                    "    \"dkey\": \"dvalue\"\n" +
+                    "}";
+
     private static final String NESTED_JSON_TEST_OBJECT =
             "{\n" +
             "    \"top_key\": {\n" +
@@ -397,6 +405,23 @@ public class StripeJsonUtilsTest {
             Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
             JSONObject cycledObject = StripeJsonUtils.mapToJsonObject(convertedMap);
             JsonTestUtils.assertJsonEquals(cycledObject, testJsonObject);
+        } catch (JSONException jsonException) {
+            fail("Test data failure " + jsonException.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void stringHashToJsonObject_returnsExpectedObject() {
+        Map<String, String> stringHash = new HashMap<>();
+        stringHash.put("akey", "avalue");
+        stringHash.put("bkey", "bvalue");
+        stringHash.put("ckey", "cvalue");
+        stringHash.put("dkey", "dvalue");
+
+        try {
+            JSONObject expectedObject = new JSONObject(SIMPLE_JSON_HASH_OBJECT);
+            JsonTestUtils.assertJsonEquals(expectedObject,
+                    StripeJsonUtils.stringHashToJsonObject(stringHash));
         } catch (JSONException jsonException) {
             fail("Test data failure " + jsonException.getLocalizedMessage());
         }

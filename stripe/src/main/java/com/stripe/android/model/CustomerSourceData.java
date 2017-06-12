@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -40,6 +41,15 @@ public class CustomerSourceData extends StripeJsonModel {
             return (Card) mStripePaymentSource;
         }
         return null;
+    }
+
+    @Nullable
+    public static CustomerSourceData fromString(@Nullable String jsonString) {
+        try {
+            return fromJson(new JSONObject(jsonString));
+        } catch (JSONException ignored) {
+            return null;
+        }
     }
 
     @Nullable
