@@ -1,16 +1,11 @@
 package com.stripe.android.model;
 
-import com.stripe.android.testharness.JsonTestUtils;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.HashMap;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -29,7 +24,7 @@ public class CustomerTest {
                     "    \"url\": \"http://google.com\"\n" +
                     "}";
 
-    public static final String TEST_CUSTOMER_OBJECT =
+    private static final String TEST_CUSTOMER_OBJECT =
             "{\n" +
             "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
             "  \"object\": \"customer\",\n" +
@@ -66,15 +61,7 @@ public class CustomerTest {
         Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
         assertNotNull(customer);
         assertEquals("cus_AQsHpvKfKwJDrF", customer.getId());
-        assertEquals(Integer.valueOf(0), customer.getAccountBalance());
-        assertEquals(Long.valueOf(1491584731), customer.getCreated());
-        assertEquals("usd", customer.getCurrency());
         assertNull(customer.getDefaultSource());
-        assertFalse(customer.getDelinquent());
-        assertNull(customer.getDiscount());
-        assertEquals("abc@example.com", customer.getEmail());
-        assertFalse(customer.getLivemode());
-        JsonTestUtils.assertMapEquals(new HashMap<String, String>(), customer.getMetadata());
         assertNull(customer.getShippingInformation());
         assertNotNull(customer.getCustomerSources());
     }
