@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import android.support.annotation.Nullable;
 
-import com.stripe.android.net.RequestOptions;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONException;
