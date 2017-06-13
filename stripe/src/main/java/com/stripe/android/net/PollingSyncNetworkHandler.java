@@ -11,7 +11,11 @@ import com.stripe.android.model.Source;
 /**
  * A synchronous polling manager that does not manage which thread
  * it is run on.
+ *
+ * @deprecated Polling Stripe sources is deprecated, and not guaranteed to be supported beyond
+ * 4.X.X library updates.
  */
+@Deprecated
 class PollingSyncNetworkHandler {
 
     @NonNull private final String mSourceId;

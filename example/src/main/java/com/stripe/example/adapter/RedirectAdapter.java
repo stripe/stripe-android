@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * A simple {@link RecyclerView} implementation to hold our data.
  */
-public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHolder> {
+public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHolder> {
     private List<ViewModel> mDataset = new ArrayList<>();
 
     // Provide a reference to the views for each data item
@@ -74,12 +74,12 @@ public class PollingAdapter extends RecyclerView.Adapter<PollingAdapter.ViewHold
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public PollingAdapter() {}
+    public RedirectAdapter() {}
 
     // Create new views (invoked by the layout manager)
     @Override
-    public PollingAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+    public RedirectAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                         int viewType) {
         // create a new view
 
         LinearLayout pollingView = (LinearLayout) LayoutInflater.from(parent.getContext())

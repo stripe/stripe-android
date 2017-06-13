@@ -7,7 +7,10 @@ import com.stripe.android.model.Source;
 
 /**
  * A data model for a polling response.
+ * @deprecated Polling Stripe sources is deprecated, and not guaranteed to be supported beyond
+ * 4.X.X library updates.
  */
+@Deprecated
 public class PollingResponse {
 
     private boolean mIsExpired;

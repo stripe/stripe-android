@@ -2,7 +2,11 @@ package com.stripe.android.net;
 
 /**
  * Container class for polling parameters.
+ *
+ * @deprecated Polling Stripe sources is deprecated, and not guaranteed to be supported beyond
+ * 4.X.X library updates.
  */
+@Deprecated
 class PollingParameters {
 
     private static final long DEFAULT_TIMEOUT_MS = 10000L;

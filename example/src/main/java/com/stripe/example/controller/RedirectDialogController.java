@@ -11,14 +11,14 @@ import android.widget.TextView;
 import com.stripe.example.R;
 
 /**
- * Controller for the polling dialog used to direct users out of the application.
+ * Controller for the redirect dialog used to direct users out of the application.
  */
-public class PollingDialogController {
+public class RedirectDialogController {
 
     AppCompatActivity mActivity;
     AlertDialog mAlertDialog;
 
-    public PollingDialogController(AppCompatActivity appCompatActivity) {
+    public RedirectDialogController(AppCompatActivity appCompatActivity) {
         mActivity = appCompatActivity;
     }
 

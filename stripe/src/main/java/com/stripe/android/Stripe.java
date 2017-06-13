@@ -538,6 +538,9 @@ public class Stripe {
      *  `pending`. If polling stops due to an error, the callback will be fired with the latest
      *  retrieved source and the error.
      *
+     * @deprecated Polling is being phased out in favor of webhooks. This method is not guaranteed
+     * to be supported beyond 4.X.X
+     *
      * @param sourceId the {@link Source#mId} to check on
      * @param clientSecret the {@link Source#mClientSecret} to check on
      * @param publishableKey an API key
@@ -545,6 +548,7 @@ public class Stripe {
      * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
      *                  in, 10000ms will be used.
      */
+    @Deprecated
     public void pollSource(@NonNull @Size(min = 1) String sourceId,
                            @NonNull @Size(min = 1) String clientSecret,
                            @Nullable String publishableKey,
@@ -569,12 +573,16 @@ public class Stripe {
      *  the Source is still `pending`. If polling stops due to an error, the latest retrieved Source
      *  and latest thrown {@link StripeException} will be returned in the {@link PollingResponse}.
      *
+     * @deprecated Polling is being phased out in favor of webhooks. This method is not guaranteed
+     * to be supported beyond 4.X.X
+     *
      * @param sourceId the {@link Source#mId} to check on
      * @param clientSecret the {@link Source#mClientSecret} to check on
      * @param publishableKey an API key
      * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
      *                  in, 10000ms will be used.
      */
+    @Deprecated
     public PollingResponse pollSourceSynchronous(@NonNull @Size(min = 1) String sourceId,
                                                  @NonNull @Size(min = 1) String clientSecret,
                                                  @Nullable String publishableKey,

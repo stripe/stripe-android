@@ -13,7 +13,11 @@ import com.stripe.android.model.Source;
 
 /**
  * Class to handle polling on a background thread.
+ *
+ * @deprecated Polling Stripe sources is deprecated, and not guaranteed to be supported beyond
+ * 4.X.X library updates.
  */
+@Deprecated
 class PollingNetworkHandler {
 
     private static final int SUCCESS = 1;
