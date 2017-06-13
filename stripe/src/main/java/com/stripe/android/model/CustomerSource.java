@@ -14,17 +14,23 @@ import static com.stripe.android.util.StripeJsonUtils.optString;
 /**
  * Model of the "data" object inside a {@link Customer} "source" object.
  */
-public class CustomerSourceData extends StripeJsonModel {
+public class CustomerSource extends StripeJsonModel implements StripePaymentSource {
 
     private StripePaymentSource mStripePaymentSource;
 
-    private CustomerSourceData(StripePaymentSource paymentSource) {
+    private CustomerSource(StripePaymentSource paymentSource) {
         mStripePaymentSource = paymentSource;
     }
 
     @Nullable
     public StripePaymentSource getStripePaymentSource() {
         return mStripePaymentSource;
+    }
+
+    @Override
+    @Nullable
+    public String getId() {
+        return mStripePaymentSource == null ? null : mStripePaymentSource.getId();
     }
 
     @Nullable
@@ -44,7 +50,7 @@ public class CustomerSourceData extends StripeJsonModel {
     }
 
     @Nullable
-    public static CustomerSourceData fromString(@Nullable String jsonString) {
+    public static CustomerSource fromString(@Nullable String jsonString) {
         try {
             return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
@@ -53,7 +59,7 @@ public class CustomerSourceData extends StripeJsonModel {
     }
 
     @Nullable
-    public static CustomerSourceData fromJson(@Nullable JSONObject jsonObject) {
+    public static CustomerSource fromJson(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }
@@ -69,7 +75,7 @@ public class CustomerSourceData extends StripeJsonModel {
         if (sourceObject == null) {
             return null;
         } else {
-            return new CustomerSourceData(sourceObject);
+            return new CustomerSource(sourceObject);
         }
     }
 

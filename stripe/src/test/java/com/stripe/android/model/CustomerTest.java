@@ -1,13 +1,19 @@
 package com.stripe.android.model;
 
+import com.stripe.android.testharness.JsonTestUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link Customer} model object.
@@ -28,18 +34,7 @@ public class CustomerTest {
             "{\n" +
             "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
             "  \"object\": \"customer\",\n" +
-            "  \"account_balance\": 0,\n" +
-            "  \"created\": 1491584731,\n" +
-            "  \"currency\": \"usd\",\n" +
-            "  \"default_source\": null,\n" +
-            "  \"delinquent\": false,\n" +
-            "  \"description\": \"iOS SDK example customer\",\n" +
-            "  \"discount\": null,\n" +
-            "  \"email\": \"abc@example.com\",\n" +
-            "  \"livemode\": false,\n" +
-            "  \"metadata\": {\n" +
-            "  },\n" +
-            "  \"shipping\": null,\n" +
+            "  \"default_source\": \"abc123\",\n" +
             "  \"sources\": {\n" +
             "    \"object\": \"list\",\n" +
             "    \"data\": [\n" +
@@ -61,8 +56,23 @@ public class CustomerTest {
         Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
         assertNotNull(customer);
         assertEquals("cus_AQsHpvKfKwJDrF", customer.getId());
-        assertNull(customer.getDefaultSource());
+        assertEquals("abc123", customer.getDefaultSource());
         assertNull(customer.getShippingInformation());
-        assertNotNull(customer.getCustomerSources());
+        assertNotNull(customer.getCustomerSourceList());
+        assertEquals("/v1/customers/cus_AQsHpvKfKwJDrF/sources", customer.getUrl());
+        assertFalse(customer.getHasMore());
+        assertEquals(Integer.valueOf(0), customer.getTotalCount());
+    }
+
+    @Test
+    public void fromJson_toJson_createsSameObject() {
+        try {
+            JSONObject rawJsonCustomer = new JSONObject(TEST_CUSTOMER_OBJECT);
+            Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
+            assertNotNull(customer);
+            JsonTestUtils.assertJsonEquals(rawJsonCustomer, customer.toJson());
+        } catch (JSONException testDataException) {
+            fail("Test data failure: " + testDataException.getMessage());
+        }
     }
 }
