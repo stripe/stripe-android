@@ -31,7 +31,7 @@ import static org.junit.Assert.fail;
 public class CardTest {
     private static final int YEAR_IN_FUTURE = 2100;
 
-    private static final String JSON_CARD = "{\n" +
+    static final String JSON_CARD = "{\n" +
             "    \"id\": \"card_189fi32eZvKYlo2CHK8NPRME\",\n" +
             "    \"object\": \"card\",\n" +
             "    \"address_city\": \"Des Moines\",\n" +

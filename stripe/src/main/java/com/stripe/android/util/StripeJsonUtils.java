@@ -48,6 +48,24 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
+    public static Boolean optBoolean(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        if (!jsonObject.has(fieldName)) {
+            return null;
+        }
+        return jsonObject.optBoolean(fieldName);
+    }
+
+    /**
+     * Calls through to {@link JSONObject#optInt(String)} only in the case that the
+     * key exists. This returns {@code null} if the key is not in the object.
+     *
+     * @param jsonObject the input object
+     * @param fieldName the required field name
+     * @return the value stored in the requested field, or {@code null} if the key is not present
+     */
+    @Nullable
     public static Integer optInteger(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
@@ -129,6 +147,46 @@ public class StripeJsonUtils {
             return value;
         }
         return null;
+    }
+
+    /**
+     * Calls through to {@link JSONObject#optJSONObject(String)} and then
+     * uses {@link #jsonObjectToMap(JSONObject)} on the result.
+     *
+     * @param jsonObject the input object
+     * @param fieldName the required field name
+     * @return the value stored in the requested field, or {@code null} if the key is not present
+     */
+    @Nullable
+    public static Map<String, Object> optMap(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        JSONObject foundObject = jsonObject.optJSONObject(fieldName);
+        if (foundObject == null) {
+            return null;
+        }
+
+        return jsonObjectToMap(foundObject);
+    }
+
+    /**
+     * Calls through to {@link JSONObject#optJSONObject(String)} and then
+     * uses {@link #jsonObjectToStringMap(JSONObject)} on the result.
+     *
+     * @param jsonObject the input object
+     * @param fieldName the required field name
+     * @return the value stored in the requested field, or {@code null} if the key is not present
+     */
+    @Nullable
+    public static Map<String, String> optHash(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName) {
+        JSONObject foundObject = jsonObject.optJSONObject(fieldName);
+        if (foundObject == null) {
+            return null;
+        }
+
+        return jsonObjectToStringMap(foundObject);
     }
 
     /**
@@ -263,7 +321,30 @@ public class StripeJsonUtils {
                     jsonObject.put(key, value.toString());
                 }
             } catch (JSONException jsonException) {
-                continue;
+                // Simply skip this value
+            }
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Converts a String-String {@link Map} into a {@link JSONObject}.
+     *
+     * @param stringStringMap the input map
+     * @return a {@link JSONObject} with the same key-value pairings
+     */
+    @Nullable
+    public static JSONObject stringHashToJsonObject(@Nullable Map<String, String> stringStringMap) {
+        if (stringStringMap == null) {
+            return null;
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        for (String key : stringStringMap.keySet()) {
+            try {
+                jsonObject.put(key, stringStringMap.get(key));
+            } catch (JSONException jsonException) {
+                // simply skip this value
             }
         }
         return jsonObject;
@@ -342,6 +423,126 @@ public class StripeJsonUtils {
         }
         try {
             jsonObject.put(fieldName, value.intValue());
+        } catch (JSONException ignored) { }
+    }
+
+    /**
+     * Util function for putting an integer value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown
+     * due to insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putLongIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Long value) {
+        if (value == null) {
+            return;
+        }
+        try {
+            jsonObject.put(fieldName, value.longValue());
+        } catch (JSONException ignored) { }
+    }
+
+    /**
+     * Util function for putting a {@link Boolean} value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown due to
+     * insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putBooleanIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Boolean value) {
+        if (value == null) {
+            return;
+        }
+        try {
+            jsonObject.put(fieldName, value.booleanValue());
+        } catch (JSONException ignored) { }
+    }
+
+    /**
+     * Util function for putting a String-String map value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown due to
+     * insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putStringHashIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Map<String, String> value) {
+        if (value == null) {
+            return;
+        }
+        JSONObject jsonHash = stringHashToJsonObject(value);
+        if (jsonHash == null) {
+            return;
+        }
+
+        try {
+            jsonObject.put(fieldName, jsonHash);
+        } catch (JSONException ignored) { }
+    }
+
+    /**
+     * Util function for putting a String-Object map value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown due to
+     * insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putMapIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Map<String, Object> value
+    ) {
+        if (value == null) {
+            return;
+        }
+
+        JSONObject mapObject = mapToJsonObject(value);
+        if (mapObject == null) {
+            return;
+        }
+
+        try {
+            jsonObject.put(fieldName, mapObject);
+        } catch (JSONException ignored) { }
+
+    }
+
+    /**
+     * Util function for putting a {@link JSONObject} value into another JSONOBject if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown due to
+     * insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    public static void putObjectIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable JSONObject value
+    ) {
+        if (value == null) {
+            return;
+        }
+
+        try {
+            jsonObject.put(fieldName, value);
         } catch (JSONException ignored) { }
     }
 

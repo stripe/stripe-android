@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.stripe.android.util.StripeJsonUtils.optCountryCode;
 import static com.stripe.android.util.StripeJsonUtils.optCurrency;
 import static com.stripe.android.util.StripeJsonUtils.optInteger;
 import static com.stripe.android.util.StripeJsonUtils.optString;
@@ -30,7 +31,9 @@ import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 /**
  * A model object representing a Card in the Android SDK.
  */
-public class Card extends StripeJsonModel {
+public class Card extends StripeJsonModel implements StripePaymentSource {
+
+    public static final String VALUE_CARD = "card";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -106,8 +109,6 @@ public class Card extends StripeJsonModel {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_LAST4 = "last4";
     private static final String FIELD_ID = "id";
-
-    private static final String VALUE_CARD = "card";
 
     private String number;
     private String cvc;
@@ -327,9 +328,9 @@ public class Card extends StripeJsonModel {
         builder.addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP));
         builder.addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK));
         builder.brand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)));
-        builder.country(optString(jsonObject, FIELD_COUNTRY));
+        builder.country(optCountryCode(jsonObject, FIELD_COUNTRY));
         builder.customer(optString(jsonObject, FIELD_CUSTOMER));
-        builder.currency(optString(jsonObject, FIELD_CURRENCY));
+        builder.currency(optCurrency(jsonObject, FIELD_CURRENCY));
         builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
         builder.funding(StripeTextUtils.asFundingType(optString(jsonObject, FIELD_FUNDING)));
         builder.fingerprint(optString(jsonObject, FIELD_FINGERPRINT));
@@ -845,6 +846,7 @@ public class Card extends StripeJsonModel {
     /**
      * @return the {@link #id} of this card
      */
+    @Override
     public String getId() {
         return id;
     }

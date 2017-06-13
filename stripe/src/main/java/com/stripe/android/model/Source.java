@@ -29,6 +29,8 @@ import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParam
  */
 public class Source extends StripeJsonModel implements StripePaymentSource {
 
+    static final String VALUE_SOURCE = "source";
+
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             BITCOIN,
@@ -97,7 +99,6 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     static final String EURO = "eur";
     static final String USD = "usd";
-    static final String VALUE_SOURCE = "source";
 
     static final String FIELD_ID = "id";
     static final String FIELD_OBJECT = "object";

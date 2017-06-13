@@ -29,43 +29,51 @@ public class StripeJsonUtilsTest {
 
     private static final String SIMPLE_JSON_TEST_OBJECT =
             "{\n" +
-            "    \"akey\": \"avalue\",\n" +
-            "    \"bkey\": \"bvalue\",\n" +
-            "    \"boolkey\": true,\n" +
-            "    \"numkey\": 123\n" +
-            "}";
+                    "    \"akey\": \"avalue\",\n" +
+                    "    \"bkey\": \"bvalue\",\n" +
+                    "    \"boolkey\": true,\n" +
+                    "    \"numkey\": 123\n" +
+                    "}";
+
+    private static final String SIMPLE_JSON_HASH_OBJECT =
+            "{\n" +
+                    "    \"akey\": \"avalue\",\n" +
+                    "    \"bkey\": \"bvalue\",\n" +
+                    "    \"ckey\": \"cvalue\",\n" +
+                    "    \"dkey\": \"dvalue\"\n" +
+                    "}";
 
     private static final String NESTED_JSON_TEST_OBJECT =
             "{\n" +
-            "    \"top_key\": {\n" +
-            "        \"first_inner_key\": {\n" +
-            "            \"innermost_key\": 1000,\n" +
-            "            \"second_innermost_key\": \"second_inner_value\"\n" +
-            "        },\n" +
-            "        \"second_inner_key\": \"just a value\"\n" +
-            "    },\n" +
-            "    \"second_outer_key\": {\n" +
-            "        \"another_inner_key\": false\n" +
-            "    }\n" +
-            "}";
+                    "    \"top_key\": {\n" +
+                    "        \"first_inner_key\": {\n" +
+                    "            \"innermost_key\": 1000,\n" +
+                    "            \"second_innermost_key\": \"second_inner_value\"\n" +
+                    "        },\n" +
+                    "        \"second_inner_key\": \"just a value\"\n" +
+                    "    },\n" +
+                    "    \"second_outer_key\": {\n" +
+                    "        \"another_inner_key\": false\n" +
+                    "    }\n" +
+                    "}";
 
     private static final String SIMPLE_JSON_TEST_ARRAY = "[ 1, 2, 3, \"a\", true, \"cde\" ]";
 
     private static final String NESTED_MIXED_ARRAY_OBJECT =
             "{\n" +
-            "    \"outer_key\": {\n" +
-            "        \"items\": [\n" +
-            "            {\"id\": 123},\n" +
-            "            {\"id\": \"this time with letters\"},\n" +
-            "            \"a string item\",\n" +
-            "            256,\n" +
-            "            [ 1, 2, \"C\", 4],\n" +
-            "            [ {\"deep\": \"deepValue\"} ]\n" +
-            "        ],\n" +
-            "        \"another_key\": \"a simple value this time\"\n" +
-            "    },\n" +
-            "    \"other_outer_key\": false\n" +
-            "}";
+                    "    \"outer_key\": {\n" +
+                    "        \"items\": [\n" +
+                    "            {\"id\": 123},\n" +
+                    "            {\"id\": \"this time with letters\"},\n" +
+                    "            \"a string item\",\n" +
+                    "            256,\n" +
+                    "            [ 1, 2, \"C\", 4],\n" +
+                    "            [ {\"deep\": \"deepValue\"} ]\n" +
+                    "        ],\n" +
+                    "        \"another_key\": \"a simple value this time\"\n" +
+                    "    },\n" +
+                    "    \"other_outer_key\": false\n" +
+                    "}";
 
     @Test
     public void nullIfNullOrEmpty_returnsNullForNull() {
@@ -397,6 +405,23 @@ public class StripeJsonUtilsTest {
             Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
             JSONObject cycledObject = StripeJsonUtils.mapToJsonObject(convertedMap);
             JsonTestUtils.assertJsonEquals(cycledObject, testJsonObject);
+        } catch (JSONException jsonException) {
+            fail("Test data failure " + jsonException.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void stringHashToJsonObject_returnsExpectedObject() {
+        Map<String, String> stringHash = new HashMap<>();
+        stringHash.put("akey", "avalue");
+        stringHash.put("bkey", "bvalue");
+        stringHash.put("ckey", "cvalue");
+        stringHash.put("dkey", "dvalue");
+
+        try {
+            JSONObject expectedObject = new JSONObject(SIMPLE_JSON_HASH_OBJECT);
+            JsonTestUtils.assertJsonEquals(expectedObject,
+                    StripeJsonUtils.stringHashToJsonObject(stringHash));
         } catch (JSONException jsonException) {
             fail("Test data failure " + jsonException.getLocalizedMessage());
         }
