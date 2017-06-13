@@ -24,6 +24,7 @@ public class SourceParams {
     static final String API_PARAM_OWNER = "owner";
     static final String API_PARAM_REDIRECT = "redirect";
     static final String API_PARAM_TYPE = "type";
+    static final String API_PARAM_TOKEN = "token";
 
     static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
@@ -53,6 +54,7 @@ public class SourceParams {
     private Map<String, Object> mOwner;
     private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
+    private String mToken;
     @SourceType private String mType;
 
     private SourceParams() {}
@@ -499,9 +501,21 @@ public class SourceParams {
      * Set custom metadata on the parameters.
      *
      * @param metaData
+     * @return {@code this}, for chaining purposes
      */
     public SourceParams setMetaData(@NonNull Map<String, String> metaData) {
         mMetaData = metaData;
+        return this;
+    }
+
+    /**
+     * Sets a token ID on the parameters.
+     *
+     * @param token a token ID
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setToken(@NonNull String token) {
+        mToken = token;
         return this;
     }
 
@@ -522,6 +536,7 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_OWNER, mOwner);
         networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
+        networkReadyMap.put(API_PARAM_TOKEN, mToken);
         StripeNetworkUtils.removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }

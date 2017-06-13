@@ -245,6 +245,31 @@ public class StripeTest {
     }
 
     @Test
+    public void createToken_createSource_returnsSource() {
+        try {
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            TestLoggingListener listener = new TestLoggingListener(true);
+            stripe.setLoggingResponseListener(listener);
+
+            Token token = stripe.createTokenSynchronous(mCard);
+
+            assertNotNull(token);
+            SourceParams sourceParams = SourceParams.createCustomParams();
+            sourceParams.setType(Source.CARD);
+            sourceParams.setToken(token.getId());
+            Source source = stripe.createSourceSynchronous(sourceParams,
+                    FUNCTIONAL_PUBLISHABLE_KEY);
+            assertNotNull(source);
+            assertAllLogsAreValid(listener, 4);
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
         try {
             Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
