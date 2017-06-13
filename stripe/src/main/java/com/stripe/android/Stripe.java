@@ -573,8 +573,9 @@ public class Stripe {
      *  the Source is still `pending`. If polling stops due to an error, the latest retrieved Source
      *  and latest thrown {@link StripeException} will be returned in the {@link PollingResponse}.
      *
-     * @deprecated Polling is being phased out in favor of webhooks. This method is not guaranteed
-     * to be supported beyond 4.X.X
+     * @deprecated Polling is being deprecated. This method is not guaranteed
+     * to be supported beyond 4.X.X. You should poll your own backend to update based on
+     * source status change webhook events it may receive.
      *
      * @param sourceId the {@link Source#mId} to check on
      * @param clientSecret the {@link Source#mClientSecret} to check on
