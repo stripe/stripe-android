@@ -110,7 +110,7 @@ public class RedirectActivity extends AppCompatActivity {
                     && sourceId != null
                     && clientSecret.equals(mRedirectSource.getClientSecret())
                     && sourceId.equals(mRedirectSource.getId())) {
-                updatePollingSourceList(mRedirectSource);
+                updateSourceList(mRedirectSource);
                 mRedirectSource = null;
             }
             mRedirectDialogController.dismissDialog();
@@ -261,7 +261,7 @@ public class RedirectActivity extends AppCompatActivity {
         mRedirectDialogController.showDialog(source.getRedirect().getUrl());
     }
 
-    private void updatePollingSourceList(@Nullable Source source) {
+    private void updateSourceList(@Nullable Source source) {
         if (source == null) {
             mRedirectAdapter.addItem(
                     "No source found",
