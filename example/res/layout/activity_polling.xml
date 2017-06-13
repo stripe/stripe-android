@@ -10,7 +10,7 @@
     android:paddingStart="8dp"
     android:paddingRight="8dp"
     android:paddingEnd="8dp"
-    tools:context="com.stripe.example.activity.PollingActivity">
+    tools:context="com.stripe.example.activity.RedirectActivity">
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addThreeDSecureCard"

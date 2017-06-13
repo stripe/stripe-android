@@ -2,6 +2,7 @@ package com.stripe.example.activity;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,21 +11,17 @@ import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.Stripe;
-import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
-import com.stripe.android.net.PollingResponse;
-import com.stripe.android.net.PollingResponseHandler;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
-import com.stripe.example.adapter.PollingAdapter;
+import com.stripe.example.adapter.RedirectAdapter;
 import com.stripe.example.controller.ErrorDialogHandler;
-import com.stripe.example.controller.PollingDialogController;
+import com.stripe.example.controller.RedirectDialogController;
 import com.stripe.example.controller.ProgressDialogController;
 
-import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import rx.Observable;
@@ -35,9 +32,9 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 /**
- * Activity that lets you poll for a 3DS source update.
+ * Activity that lets you redirect for a 3DS source verification.
  */
-public class PollingActivity extends AppCompatActivity {
+public class RedirectActivity extends AppCompatActivity {
 
     /*
      * Change this to your publishable key.
@@ -55,10 +52,10 @@ public class PollingActivity extends AppCompatActivity {
 
     private CardInputWidget mCardInputWidget;
     private CompositeSubscription mCompositeSubscription;
-    private PollingAdapter mPollingAdapter;
+    private RedirectAdapter mRedirectAdapter;
     private ErrorDialogHandler mErrorDialogHandler;
-    private PollingDialogController mPollingDialogController;
-    private Source mPollingSource;
+    private RedirectDialogController mRedirectDialogController;
+    private Source mRedirectSource;
     private ProgressDialogController mProgressDialogController;
     private Stripe mStripe;
 
@@ -71,7 +68,7 @@ public class PollingActivity extends AppCompatActivity {
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_widget_three_d);
         mErrorDialogHandler = new ErrorDialogHandler(this.getSupportFragmentManager());
         mProgressDialogController = new ProgressDialogController(this.getSupportFragmentManager());
-        mPollingDialogController = new PollingDialogController(this);
+        mRedirectDialogController = new RedirectDialogController(this);
         mStripe = new Stripe(this);
 
         Button threeDSecureButton = (Button) findViewById(R.id.btn_three_d_secure);
@@ -79,7 +76,7 @@ public class PollingActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        beginSequence(false);
+                        beginSequence();
                     }
                 });
 
@@ -88,7 +85,7 @@ public class PollingActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        beginSequence(true);
+                        beginSequence();
                     }
                 });
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -96,8 +93,8 @@ public class PollingActivity extends AppCompatActivity {
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
-        mPollingAdapter = new PollingAdapter();
-        recyclerView.setAdapter(mPollingAdapter);
+        mRedirectAdapter = new RedirectAdapter();
+        recyclerView.setAdapter(mRedirectAdapter);
 
     }
 
@@ -107,21 +104,16 @@ public class PollingActivity extends AppCompatActivity {
         if (intent.getData() != null && intent.getData().getQuery() != null) {
             // The client secret and source ID found here is identical to
             // that of the source used to get the redirect URL.
-
-            String host = intent.getData().getHost();
             String clientSecret = intent.getData().getQueryParameter(QUERY_CLIENT_SECRET);
             String sourceId = intent.getData().getQueryParameter(QUERY_SOURCE_ID);
             if (clientSecret != null
                     && sourceId != null
-                    && clientSecret.equals(mPollingSource.getClientSecret())
-                    && sourceId.equals(mPollingSource.getId())) {
-                if (RETURN_HOST_SYNC.equals(host)) {
-                    pollSynchronouslyForSourceChanges(sourceId, clientSecret);
-                } else {
-                    pollForSourceChanges(sourceId, clientSecret);
-                }
+                    && clientSecret.equals(mRedirectSource.getClientSecret())
+                    && sourceId.equals(mRedirectSource.getId())) {
+                updateSourceList(mRedirectSource);
+                mRedirectSource = null;
             }
-            mPollingDialogController.dismissDialog();
+            mRedirectDialogController.dismissDialog();
         }
     }
 
@@ -131,12 +123,12 @@ public class PollingActivity extends AppCompatActivity {
         mCompositeSubscription.unsubscribe();
     }
 
-    void beginSequence(boolean shouldPollWithBlockingMethod) {
+    void beginSequence() {
         Card displayCard = mCardInputWidget.getCard();
         if (displayCard == null) {
             return;
         }
-        createCardSource(displayCard, shouldPollWithBlockingMethod);
+        createCardSource(displayCard);
     }
 
     /**
@@ -144,7 +136,7 @@ public class PollingActivity extends AppCompatActivity {
      *
      * @param card the {@link Card} used to create a source
      */
-    void createCardSource(@NonNull Card card, final boolean shouldPollWithBlockingMethod) {
+    void createCardSource(@NonNull Card card) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
         final Observable<Source> cardSourceObservable =
                 Observable.fromCallable(
@@ -177,7 +169,7 @@ public class PollingActivity extends AppCompatActivity {
                                         (SourceCardData) source.getSourceTypeModel();
 
                                 // Making a note of the Card Source in our list.
-                                mPollingAdapter.addItem(
+                                mRedirectAdapter.addItem(
                                         source.getStatus(),
                                         sourceCardData.getThreeDSecureStatus(),
                                         source.getId(),
@@ -188,8 +180,7 @@ public class PollingActivity extends AppCompatActivity {
                                         sourceCardData.getThreeDSecureStatus())) {
 
                                     // The card Source can be used to create a 3DS Source
-                                    createThreeDSecureSource(source.getId(),
-                                            shouldPollWithBlockingMethod);
+                                    createThreeDSecureSource(source.getId());
                                 } else {
                                     mProgressDialogController.finishProgress();
                                 }
@@ -212,12 +203,12 @@ public class PollingActivity extends AppCompatActivity {
      *
      * @param sourceId the {@link Source#mId} from the {@link Card}-created {@link Source}.
      */
-    void createThreeDSecureSource(String sourceId, boolean shouldPollWithBlockingMethod) {
+    void createThreeDSecureSource(String sourceId) {
         // This represents a request for a 3DS purchase of 10.00 euro.
         final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
                 1000L,
                 "EUR",
-                getUrl(shouldPollWithBlockingMethod),
+                getUrl(true),
                 sourceId);
 
         Observable<Source> threeDSecureObservable = Observable.fromCallable(
@@ -266,95 +257,13 @@ public class PollingActivity extends AppCompatActivity {
      */
     void showDialog(final Source source) {
         // Caching the source object here because this app makes a lot of them.
-        mPollingSource = source;
-        mPollingDialogController.showDialog(source.getRedirect().getUrl());
+        mRedirectSource = source;
+        mRedirectDialogController.showDialog(source.getRedirect().getUrl());
     }
 
-    /**
-     * Start polling for changes to the {@link Source#mStatus status} after
-     * coming back from the redirect. This method generates a background thread to handle
-     * the IO necessary for the transaction automatically.
-     *
-     * @param sourceId the {@link Source#mId} being polled
-     * @param clientSecret the {@link Source#mClientSecret}
-     */
-    void pollForSourceChanges(final String sourceId, String clientSecret) {
-        mProgressDialogController.setMessageResource(R.string.pollingSource);
-        mProgressDialogController.startProgress();
-        mStripe.pollSource(
-                sourceId,
-                clientSecret,
-                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                new PollingResponseHandler() {
-                    @Override
-                    public void onPollingResponse(PollingResponse pollingResponse) {
-                        mProgressDialogController.finishProgress();
-                        updatePollingSourceList(pollingResponse);
-                    }
-                },
-                null);
-    }
-
-    /**
-     * Start polling for changes to the {@link Source#mStatus status} after
-     * coming back from the redirect. This method requires additional code to handle
-     * the threading for the IO. Below is an example using RxJava.
-     *
-     * @param sourceId the {@link Source#mId} being polled
-     * @param clientSecret the {@link Source#mClientSecret}
-     */
-    private void pollSynchronouslyForSourceChanges(
-            final String sourceId,
-            final String clientSecret) {
-
-        Observable<PollingResponse> sourceUpdateObservable = Observable.fromCallable(
-                new Callable<PollingResponse>() {
-                    @Override
-                    public PollingResponse call() throws Exception {
-                        return mStripe.pollSourceSynchronous(
-                                sourceId,
-                                clientSecret,
-                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                                null);
-                    }
-                });
-
-        mCompositeSubscription.add(sourceUpdateObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mProgressDialogController.setMessageResource(R.string.pollingSource);
-                        mProgressDialogController.startProgress();
-                    }
-                })
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mProgressDialogController.finishProgress();
-                    }
-                })
-                .subscribe(
-                        new Action1<PollingResponse>() {
-                            @Override
-                            public void call(PollingResponse pollingResponse) {
-                                updatePollingSourceList(pollingResponse);
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
-                            }
-                        })
-        );
-    }
-
-    private void updatePollingSourceList(PollingResponse pollingResponse) {
-        Source source = pollingResponse.getSource();
+    private void updateSourceList(@Nullable Source source) {
         if (source == null) {
-            mPollingAdapter.addItem(
+            mRedirectAdapter.addItem(
                     "No source found",
                     "Stopped",
                     "Error",
@@ -362,44 +271,18 @@ public class PollingActivity extends AppCompatActivity {
             return;
         }
 
-        if (pollingResponse.isSuccess()) {
-            mPollingAdapter.addItem(
-                    source.getStatus(),
-                    "complete",
-                    source.getId(),
-                    source.getType());
-        } else if (pollingResponse.isExpired()){
-            mPollingAdapter.addItem(
-                    "Expired",
-                    "Stopped",
-                    source.getId(),
-                    source.getType());
-        } else {
-            StripeException stripeEx = pollingResponse.getStripeException();
-            if (stripeEx != null) {
-                mPollingAdapter.addItem(
-                        "error",
-                        "ERR",
-                        stripeEx.getMessage(),
-                        source.getType());
-            } else {
-                mPollingAdapter.addItem(
-                        source.getStatus(),
-                        "failed",
-                        source.getId(),
-                        source.getType());
-            }
-        }
-    }
-
-    private static String getCountString(int count) {
-        return String.format(Locale.ENGLISH, "API Queries: %d", count);
+        mRedirectAdapter.addItem(
+                source.getStatus(),
+                "complete",
+                source.getId(),
+                source.getType());
     }
 
     /**
-     * Helper method to determine the return URL we use. This is how we know
-     * from the callback whether to use the Synchronous or Asynchronous polling method,
-     * which is purely a matter of preference.
+     * Helper method to determine the return URL we use. This is one way to return basic information
+     * to the activity (via the return Intent's host field). Because polling has been deprecated,
+     * we no longer use this parameter in the example application, but it is used here to see the
+     * relationship with the returned value for any parameters you may want to send.
      *
      * @param isSync whether or not to use a URL that tells us to use a sync method when we come
      *               back to the application

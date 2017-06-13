@@ -27,7 +27,7 @@
             android:exported="false"/>
 
         <activity
-            android:name=".activity.PollingActivity"
+            android:name=".activity.RedirectActivity"
             android:launchMode="singleTask"
             android:theme="@style/SampleTheme">
             <intent-filter>

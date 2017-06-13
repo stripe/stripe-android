@@ -2,7 +2,11 @@ package com.stripe.android.net;
 
 /**
  * Represents a callback for the response of a polling operation.
+ *
+ * @deprecated Polling Stripe sources is deprecated, and not guaranteed to be supported beyond
+ * 4.X.X library updates.
  */
+@Deprecated
 public interface PollingResponseHandler {
 
     /**
