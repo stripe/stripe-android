@@ -58,7 +58,7 @@ public class CustomerTest {
         assertEquals("cus_AQsHpvKfKwJDrF", customer.getId());
         assertEquals("abc123", customer.getDefaultSource());
         assertNull(customer.getShippingInformation());
-        assertNotNull(customer.getCustomerSourceList());
+        assertNotNull(customer.getSources());
         assertEquals("/v1/customers/cus_AQsHpvKfKwJDrF/sources", customer.getUrl());
         assertFalse(customer.getHasMore());
         assertEquals(Integer.valueOf(0), customer.getTotalCount());

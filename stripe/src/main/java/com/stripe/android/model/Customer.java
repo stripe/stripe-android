@@ -45,7 +45,7 @@ public class Customer extends StripeJsonModel {
     private String mDefaultSource;
     private ShippingInformation mShippingInformation;
 
-    private List<CustomerSource> mCustomerSourceList = new ArrayList<>();
+    private List<CustomerSource> mSources = new ArrayList<>();
     private Boolean mHasMore;
     private Integer mTotalCount;
     private String mUrl;
@@ -64,8 +64,8 @@ public class Customer extends StripeJsonModel {
         return mShippingInformation;
     }
 
-    public List<CustomerSource> getCustomerSourceList() {
-        return mCustomerSourceList;
+    public List<CustomerSource> getSources() {
+        return mSources;
     }
 
     public Boolean getHasMore() {
@@ -94,7 +94,7 @@ public class Customer extends StripeJsonModel {
         putStringIfNotNull(sourcesObject, FIELD_OBJECT, VALUE_LIST);
         putBooleanIfNotNull(sourcesObject, FIELD_HAS_MORE, mHasMore);
         putIntegerIfNotNull(sourcesObject, FIELD_TOTAL_COUNT, mTotalCount);
-        putStripeJsonModelListIfNotNull(sourcesObject, FIELD_DATA, mCustomerSourceList);
+        putStripeJsonModelListIfNotNull(sourcesObject, FIELD_DATA, mSources);
         putStringIfNotNull(sourcesObject, FIELD_URL, mUrl);
 
         putObjectIfNotNull(jsonObject, FIELD_SOURCES, sourcesObject);
@@ -123,7 +123,7 @@ public class Customer extends StripeJsonModel {
         StripeJsonModel.putStripeJsonModelListIfNotNull(
                 sourcesObject,
                 FIELD_DATA,
-                mCustomerSourceList);
+                mSources);
         StripeNetworkUtils.removeNullAndEmptyParams(sourcesObject);
 
         mapObject.put(FIELD_SOURCES, sourcesObject);
@@ -167,7 +167,7 @@ public class Customer extends StripeJsonModel {
                     sourceDataList.add(sourceData);
                 } catch (JSONException ignored) { }
             }
-            customer.mCustomerSourceList = sourceDataList;
+            customer.mSources = sourceDataList;
         }
         return customer;
     }
