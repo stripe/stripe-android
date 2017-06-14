@@ -1,3 +1,7 @@
+4.1.0 2017-07-14
+    Added a token field to SourceParams. You can use this to create a source from an existing token.
+    https://stripe.com/docs/api#create_source-token
+
 4.0.3 2017-06-05
     Added support for PII tokens
     Added ability to clear the card input widget
