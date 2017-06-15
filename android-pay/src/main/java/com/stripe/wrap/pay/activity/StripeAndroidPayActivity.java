@@ -717,7 +717,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                     Message answerMessage = Message.obtain(mStripeUiHandler, answerNumber);
                     answerMessage.setData(answerData);
                     mStripeUiHandler.sendMessage(answerMessage);
-
                 }
             }
         };
