@@ -665,7 +665,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                     case MSG_SOURCE_COMPLETE:
                         mHandlerThread.quit();
                         mHandlerThread = null;
-                        String sourceString = bundle.getString("source", null);
+                        String sourceString = bundle.getString("source");
                         Source source = Source.fromString(sourceString);
                         if (source != null) {
                             logApiCallOnNewThread(source, null);
