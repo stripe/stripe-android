@@ -688,13 +688,14 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         };
 
         mStripeNetworkHandler = new Handler(mHandlerThread.getLooper()) {
+            private final Token originalToken = token;
+
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == MSG_GET_SOURCE && msg.getData() != null) {
-                    Bundle data = msg.getData();
+                if (msg.what == MSG_GET_SOURCE) {
                     SourceParams params = SourceParams.createCustomParams();
-                    params.setToken(data.getString("token", null));
+                    params.setToken(originalToken.getId());
                     params.setType(Source.CARD);
                     Source source = null;
                     StripeException stripeEx = null;
@@ -722,9 +723,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         };
 
         Message getSourceMessage = Message.obtain(mStripeNetworkHandler, MSG_GET_SOURCE);
-        Bundle dataBundle = new Bundle();
-        dataBundle.putString("token", token.getId());
-        getSourceMessage.setData(dataBundle);
         mStripeNetworkHandler.sendMessage(getSourceMessage);
     }
 
