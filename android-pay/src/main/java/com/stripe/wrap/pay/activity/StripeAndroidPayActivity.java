@@ -5,6 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,7 +36,11 @@ import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
 import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
+import com.stripe.android.SourceCallback;
+import com.stripe.android.Stripe;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.RequestOptions;
@@ -50,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A class that handles the Google API callbacks for the purchase flow and {@link GoogleApiClient}
@@ -79,6 +88,10 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     private static final String DIALOG_ERROR = "dialog_error";
     private static final String STATE_RESOLVING_ERROR = "resolving_error";
 
+    private static final int MSG_GET_SOURCE = 5005;
+    private static final int MSG_SOURCE_COMPLETE = 6006;
+    private static final int MSG_SOURCE_ERROR = 7007;
+
     // Bool to track whether the app is already resolving an error
     private boolean mResolvingError = false;
     @NonNull private Executor mExecutor = Executors.newFixedThreadPool(3);
@@ -88,6 +101,11 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private MaskedWallet mMaskedWallet;
     private SupportWalletFragment mBuyButtonFragment;
+    private Stripe mStripe;
+
+    private Handler mStripeUiHandler;
+    private Handler mStripeNetworkHandler;
+    private HandlerThread mHandlerThread;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -113,6 +131,8 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         onBeforeAndroidPayAvailable();
         verifyAndPrepareAndroidPayControls(mGoogleApiClient,
                 PaymentUtils.getStripeIsReadyToPayRequest());
+
+        mStripe = new Stripe(this, AndroidPayConfiguration.getInstance().getPublicApiKey());
     }
 
     @Override
@@ -125,6 +145,14 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+        if (mHandlerThread != null) {
+            try {
+                mHandlerThread.quit();
+            } catch (RejectedExecutionException threadException) {
+                Log.w(TAG, "Unable to kill networking thread; may run until termination.");
+            }
+            mHandlerThread = null;
+        }
     }
 
     @CallSuper
@@ -379,6 +407,79 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         addBuyButtonWalletFragment(mBuyButtonFragment);
     }
 
+    private void getStripeSource(@NonNull final FullWallet fullWallet, @NonNull Token token) {
+        mHandlerThread = new HandlerThread("Stripe networking");
+        mHandlerThread.start();
+        mStripeUiHandler = new Handler(Looper.getMainLooper()) {
+            private FullWallet wallet = fullWallet;
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case MSG_SOURCE_COMPLETE:
+                        Log.i(TAG, "Got a source!");
+                        Bundle bundle = msg.getData();
+                        mHandlerThread.quit();
+                        mHandlerThread = null;
+                        if (bundle != null) {
+                            String sourceString = bundle.getString("source", "shiiit");
+                            Source source = Source.fromString(sourceString);
+                            if (source != null && wallet != null) {
+                                logApiCallOnNewThread(source, null);
+                                onStripePaymentSourceReturned(wallet, source);
+                            }
+                        }
+                        break;
+                    case MSG_SOURCE_ERROR:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        mStripeNetworkHandler = new Handler(mHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == MSG_GET_SOURCE && msg.getData() != null) {
+                    Bundle data = msg.getData();
+                    SourceParams params = SourceParams.createCustomParams();
+                    params.setToken(data.getString("token", null));
+                    params.setType(Source.CARD);
+                    Source source = null;
+                    StripeException stripeEx = null;
+                    try {
+                        source = mStripe.createSourceSynchronous(params);
+                    } catch (StripeException exception) {
+                        stripeEx = exception;
+                    }
+
+                    Bundle answerData = new Bundle();
+                    int answerNumber = MSG_SOURCE_ERROR;
+                    if (source != null) {
+                        answerData.putString("source", source.toString());
+                        answerNumber = MSG_SOURCE_COMPLETE;
+                    } else if (stripeEx != null) {
+                        answerData.putString("error", stripeEx.getMessage());
+                    }
+
+                    Message answerMessage = Message.obtain(mStripeUiHandler, answerNumber);
+                    answerMessage.setData(answerData);
+                    mStripeUiHandler.sendMessage(answerMessage);
+
+                }
+            }
+        };
+
+        Message getSourceMessage = Message.obtain(mStripeNetworkHandler, MSG_GET_SOURCE);
+        Bundle dataBundle = new Bundle();
+        dataBundle.putString("token", token.getId());
+        getSourceMessage.setData(dataBundle);
+        mStripeNetworkHandler.sendMessage(getSourceMessage);
+    }
+
     /**
      * Handles receipt of a {@link FullWallet} from Google Play Services. This wallet includes
      * the {@link StripePaymentSource} (usually a {@link Token}). If that payment source is not
@@ -400,8 +501,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
         try {
             Token token = TokenParser.parseToken(rawPurchaseToken);
-            logApiCallOnNewThread(token, null);
-            onStripePaymentSourceReturned(fullWallet, token);
+            getStripeSource(fullWallet, token);
         } catch (JSONException jsonException) {
             Log.i(TAG,
                     String.format(Locale.ENGLISH,

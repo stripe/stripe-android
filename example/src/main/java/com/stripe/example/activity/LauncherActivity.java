@@ -20,7 +20,7 @@ public class LauncherActivity extends AppCompatActivity {
      *
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
-    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
+    private static final String PUBLISHABLE_KEY =
             "put your key here";
 
     @Override
@@ -56,7 +56,7 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private void createSampleCartAndLaunchAndroidPayActivity() {
-        AndroidPayConfiguration.init(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, "USD");
+        AndroidPayConfiguration.init(PUBLISHABLE_KEY, "USD");
         AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
         androidPayConfiguration.setShippingAddressRequired(true);
         CartManager cartManager = new CartManager("USD");
