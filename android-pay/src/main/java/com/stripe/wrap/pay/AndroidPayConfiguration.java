@@ -10,10 +10,11 @@ import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
-import com.stripe.wrap.pay.utils.PaymentUtils;
+
+import com.stripe.android.model.Source;
+import com.stripe.android.model.Token;
 
 import java.util.Currency;
-import java.util.Locale;
 
 import static com.google.android.gms.wallet.PaymentMethodTokenizationType.PAYMENT_GATEWAY;
 
@@ -46,8 +47,8 @@ public class AndroidPayConfiguration {
      *
      * @param publicApiKey the Stripe api public key
      * @param currencyCode the code for the starting {@link Currency} for android pay configuration
-     * @param shouldUseSources {@code false} if you prefer to use
-     * {@link com.stripe.android.model.Token} for payment processing. Defaults to {@code true}
+     * @param shouldUseSources {@code true} if you prefer to use {@link Source} objects
+     * for payment processing. Defaults to {@code false}, which uses {@link Token} objects.
      * @return the instance of the AndroidPayConfiguration singleton
      */
     public static AndroidPayConfiguration init(
