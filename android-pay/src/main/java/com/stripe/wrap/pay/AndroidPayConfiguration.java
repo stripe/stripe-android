@@ -27,6 +27,7 @@ public class AndroidPayConfiguration {
     @NonNull private Currency mCurrency;
     private boolean mIsPhoneNumberRequired;
     private boolean mIsShippingAddressRequired;
+    private boolean mUsesSources;
     private String mMerchantName;
     private String mPublicApiKey;
 
@@ -36,6 +37,25 @@ public class AndroidPayConfiguration {
             throw new RuntimeException(
                     "Attempted to get instance of AndroidPayConfiguration without initialization.");
         }
+        return mInstance;
+    }
+
+    /**
+     * Initialize the AndroidPayConfiguration instance with a currency code. If the currency
+     * code is invalid, this will throw an {@link IllegalArgumentException}
+     *
+     * @param publicApiKey the Stripe api public key
+     * @param currencyCode the code for the starting {@link Currency} for android pay configuration
+     * @param shouldUseSources {@code false} if you prefer to use
+     * {@link com.stripe.android.model.Token} for payment processing. Defaults to {@code true}
+     * @return the instance of the AndroidPayConfiguration singleton
+     */
+    public static AndroidPayConfiguration init(
+            @NonNull @Size(min = 5) String publicApiKey,
+            @NonNull String currencyCode,
+            boolean shouldUseSources) {
+        mInstance = init(publicApiKey, currencyCode);
+        mInstance.setUseSources(shouldUseSources);
         return mInstance;
     }
 
@@ -63,14 +83,18 @@ public class AndroidPayConfiguration {
     public static AndroidPayConfiguration init(
             @NonNull @Size(min = 5) String publicApiKey,
             @NonNull Currency currency) {
-        mInstance = new AndroidPayConfiguration(publicApiKey, currency);
+        mInstance = new AndroidPayConfiguration(publicApiKey, currency, true);
         return mInstance;
     }
 
     @VisibleForTesting
-    AndroidPayConfiguration(@NonNull String publicApiKey, @NonNull Currency currency) {
+    AndroidPayConfiguration(
+            @NonNull String publicApiKey,
+            @NonNull Currency currency,
+            boolean shouldUseSources) {
         mCurrency = currency;
         mPublicApiKey = publicApiKey;
+        mUsesSources = shouldUseSources;
     }
 
     @Nullable
@@ -188,5 +212,13 @@ public class AndroidPayConfiguration {
     public AndroidPayConfiguration setPublicApiKey(String publicApiKey) {
         mPublicApiKey = publicApiKey;
         return this;
+    }
+
+    public boolean getUsesSources() {
+        return mUsesSources;
+    }
+
+    private void setUseSources(boolean shouldUseSources) {
+        mUsesSources = shouldUseSources;
     }
 }
