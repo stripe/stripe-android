@@ -54,8 +54,10 @@ public class AndroidPayConfiguration {
             @NonNull @Size(min = 5) String publicApiKey,
             @NonNull String currencyCode,
             boolean shouldUseSources) {
-        mInstance = init(publicApiKey, currencyCode);
-        mInstance.setUseSources(shouldUseSources);
+        mInstance = new AndroidPayConfiguration(
+                publicApiKey,
+                Currency.getInstance(currencyCode.toUpperCase()),
+                shouldUseSources);
         return mInstance;
     }
 
@@ -83,7 +85,7 @@ public class AndroidPayConfiguration {
     public static AndroidPayConfiguration init(
             @NonNull @Size(min = 5) String publicApiKey,
             @NonNull Currency currency) {
-        mInstance = new AndroidPayConfiguration(publicApiKey, currency, true);
+        mInstance = new AndroidPayConfiguration(publicApiKey, currency, false);
         return mInstance;
     }
 
