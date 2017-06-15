@@ -428,7 +428,12 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
         try {
             Token token = TokenParser.parseToken(rawPurchaseToken);
-            getStripeSource(fullWallet, token);
+            if (AndroidPayConfiguration.getInstance().getUsesSources()) {
+                getStripeSource(fullWallet, token);
+            } else {
+                logApiCallOnNewThread(token, null);
+                onStripePaymentSourceReturned(fullWallet, token);
+            }
         } catch (JSONException jsonException) {
             Log.i(TAG,
                     String.format(Locale.ENGLISH,
@@ -556,6 +561,14 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     protected void handleError(int errorCode) { }
 
     /**
+     * Override to handle Stripe API errors
+     *
+     * @param errorCode the error code returned from Stripe
+     * @param errorMessage the error message returned from Stripe
+     */
+    protected void handleStripeError(@Nullable Integer errorCode, @Nullable String errorMessage) { }
+
+    /**
      * Override this method to display the Android Pay confirmation wallet fragment. Place
      * it in a container of your choice using a {@link android.support.v4.app.FragmentTransaction}.
      *
@@ -637,32 +650,36 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         mHandlerThread.start();
         mStripeUiHandler = new Handler(Looper.getMainLooper()) {
             private FullWallet wallet = fullWallet;
-            private Token originalToken = token;
 
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
+                Bundle bundle = msg.getData();
+                if (bundle == null) {
+                    // Something has called to this handler without giving it
+                    // any data, which should not be possible.
+                    return;
+                }
+
                 switch (msg.what) {
                     case MSG_SOURCE_COMPLETE:
-                        Bundle bundle = msg.getData();
                         mHandlerThread.quit();
                         mHandlerThread = null;
-                        if (bundle != null) {
-                            String sourceString = bundle.getString("source", "shiiit");
-                            Source source = Source.fromString(sourceString);
-                            if (source != null && wallet != null) {
-                                logApiCallOnNewThread(source, null);
-                                onStripePaymentSourceReturned(wallet, source);
-                                return;
-                            }
+                        String sourceString = bundle.getString("source", null);
+                        Source source = Source.fromString(sourceString);
+                        if (source != null) {
+                            logApiCallOnNewThread(source, null);
+                            onStripePaymentSourceReturned(wallet, source);
+                            return;
                         }
 
-                        logApiCallOnNewThread(originalToken, null);
-                        onStripePaymentSourceReturned(wallet, originalToken);
+                        handleStripeError(null, "Source object found cannot be used.");
                         break;
                     case MSG_SOURCE_ERROR:
-                        logApiCallOnNewThread(originalToken, null);
-                        onStripePaymentSourceReturned(wallet, originalToken);
+                        int errorCode = bundle.getInt("errorCode", -1);
+                        Integer checkedError = errorCode == -1 ? null : errorCode;
+                        String errorMessage = bundle.getString("error");
+                        handleStripeError(checkedError, errorMessage);
                         break;
                     default:
                         break;
@@ -693,6 +710,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         answerData.putString("source", source.toString());
                         answerNumber = MSG_SOURCE_COMPLETE;
                     } else if (stripeEx != null) {
+                        answerData.putInt("errorCode", stripeEx.getStatusCode());
                         answerData.putString("error", stripeEx.getMessage());
                     }
 
