@@ -4,5 +4,6 @@
         <attr name="cardHintText" format="string" />
         <attr name="cardTint" format="color"/>
         <attr name="cardTextErrorColor" format="color"/>
+        <attr name="showsPostalCode" format="boolean"/>
     </declare-styleable>
 </resources>

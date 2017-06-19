@@ -42,4 +42,11 @@
         android:text="@string/createAndroidPayTokens"
         />
 
+    <Button
+        android:id="@+id/btn_add_source_launch"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:text="Launch Fun Thing"/>
 </LinearLayout>

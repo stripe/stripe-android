@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
+import com.stripe.android.AddSourceActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -51,6 +52,15 @@ public class LauncherActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createSampleCartAndLaunchAndroidPayActivity();
+            }
+        });
+
+        Button otherActivityButton = (Button) findViewById(R.id.btn_add_source_launch);
+        otherActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = AddSourceActivity.newIntent(LauncherActivity.this);
+                startActivity(intent);
             }
         });
     }

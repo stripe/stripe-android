@@ -1,5 +1,7 @@
 <resources>
-    <string name="acc_label_card_number">"card number"</string>
-    <string name="acc_label_expiry_date">"expiration date"</string>
+    <string name="acc_label_card_number">"Card Number"</string>
+    <string name="acc_label_expiry_date">"Expiration Date"</string>
+    <string name="acc_label_cvc">CVC</string>
+    <string name="acc_label_zip">ZIP</string>
     <string name="expiry_date_hint">MM/YY</string>
 </resources>

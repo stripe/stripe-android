@@ -3,4 +3,8 @@
           package="com.stripe.android"
           android:versionCode="11"
           android:versionName="4.1.2">
+    <application>
+        <activity android:name=".AddSourceActivity">
+        </activity>
+    </application>
 </manifest>

@@ -91,11 +91,11 @@ public class CardNumberEditText extends StripeEditText {
         return mIsCardNumberValid;
     }
 
-    void setCardNumberCompleteListener(@NonNull CardNumberCompleteListener listener) {
+    public void setCardNumberCompleteListener(@NonNull CardNumberCompleteListener listener) {
         mCardNumberCompleteListener = listener;
     }
 
-    void setCardBrandChangeListener(@NonNull CardBrandChangeListener listener) {
+    public void setCardBrandChangeListener(@NonNull CardBrandChangeListener listener) {
         mCardBrandChangeListener = listener;
         // Immediately display the brand if known, in case this method is invoked when
         // partial data already exists.
@@ -230,12 +230,7 @@ public class CardNumberEditText extends StripeEditText {
             mCardBrandChangeListener.onCardBrandChanged(mCardBrand);
         }
 
-        int oldLength = mLengthMax;
         mLengthMax = getLengthForBrand(mCardBrand);
-        if (oldLength == mLengthMax) {
-            return;
-        }
-
         setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
     }
 
@@ -251,11 +246,11 @@ public class CardNumberEditText extends StripeEditText {
         }
     }
 
-    interface CardNumberCompleteListener {
+    public interface CardNumberCompleteListener {
         void onCardNumberComplete();
     }
 
-    interface CardBrandChangeListener {
+    public interface CardBrandChangeListener {
         void onCardBrandChanged(@NonNull @Card.CardBrand String brand);
     }
 }

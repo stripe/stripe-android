@@ -5,4 +5,11 @@
         <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
         <item name="colorAccent">@color/fadedBlue</item>
     </style>
+
+    <style name="SampleTheme.NoActionBar" parent="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
+        <item name="colorAccent">@color/fadedBlue</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>

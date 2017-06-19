@@ -26,16 +26,21 @@ public class LoggingUtils {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             ANDROID_PAY_TOKEN,
-            CARD_WIDGET_TOKEN
+            CARD_WIDGET_TOKEN,
+            CARD_MULTILINE_TOKEN,
+            PII_TOKEN
     })
     public @interface LoggingToken { }
     public static final String ANDROID_PAY_TOKEN = "AndroidPay";
     public static final String PII_TOKEN = "PII";
     public static final String CARD_WIDGET_TOKEN = "CardInputView";
+    public static final String CARD_MULTILINE_TOKEN = "CardMultilineView";
     public static final Set<String> VALID_LOGGING_TOKENS = new HashSet<>();
     static {
         VALID_LOGGING_TOKENS.add(ANDROID_PAY_TOKEN);
         VALID_LOGGING_TOKENS.add(CARD_WIDGET_TOKEN);
+        VALID_LOGGING_TOKENS.add(CARD_MULTILINE_TOKEN);
+        VALID_LOGGING_TOKENS.add(PII_TOKEN);
     }
 
     @Retention(RetentionPolicy.SOURCE)

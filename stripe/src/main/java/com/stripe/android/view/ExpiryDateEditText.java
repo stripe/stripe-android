@@ -255,7 +255,7 @@ public class ExpiryDateEditText extends StripeEditText {
         mIsDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear);
     }
 
-    interface ExpiryDateEditListener {
+    public interface ExpiryDateEditListener {
         void onExpiryDateComplete();
     }
 }

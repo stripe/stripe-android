@@ -10,7 +10,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
@@ -33,8 +32,6 @@ import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -42,22 +39,14 @@ import java.util.Map;
 import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
 import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 import static com.stripe.android.model.Card.CardBrand;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 
 /**
  * A card input widget that handles all animation on its own.
  */
 public class CardInputWidget extends LinearLayout {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            FOCUS_CARD,
-            FOCUS_EXPIRY,
-            FOCUS_CVC
-    })
-    public @interface FocusField { }
-    public static final String FOCUS_CARD = "focus_card";
-    public static final String FOCUS_EXPIRY = "focus_expiry";
-    public static final String FOCUS_CVC = "focus_cvc";
 
     public static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
@@ -879,41 +868,6 @@ public class CardInputWidget extends LinearLayout {
             mCardIconImageView.setImageResource(R.drawable.ic_cvc);
         }
         applyTint(true);
-    }
-
-    /**
-     * Represents a listener for card input events. Note that events are
-     * not one-time events. For instance, a user can "complete" the CVC many times
-     * by deleting and re-entering the value.
-     */
-    public interface CardInputListener {
-
-        /**
-         * Called whenever the field of focus within the widget changes.
-         *
-         * @param focusField a {@link FocusField} to which the focus has just changed.
-         */
-        void onFocusChange(@FocusField String focusField);
-
-        /**
-         * Called when a potentially valid card number has been completed in the
-         * {@link CardNumberEditText}. May be called multiple times if the user edits
-         * the field.
-         */
-        void onCardComplete();
-
-        /**
-         * Called when a expiration date (one that has not yet passed) has been entered.
-         * May be called multiple times, if the user edits the date.
-         */
-        void onExpirationComplete();
-
-        /**
-         * Called when a potentially valid CVC has been entered. The only verification performed
-         * on the number is that it is the correct length. May be called multiple times, if
-         * the user edits the CVC.
-         */
-        void onCvcComplete();
     }
 
     /**

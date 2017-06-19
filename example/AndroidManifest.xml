@@ -69,6 +69,10 @@
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
+
+        <activity android:name="com.stripe.android.AddSourceActivity"
+                  android:theme="@style/SampleTheme.NoActionBar"/>
+
     </application>
 
 </manifest>

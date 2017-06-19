@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.R;
 import com.stripe.android.util.CardUtils;
 import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
@@ -56,6 +57,17 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
 
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
     public static final int CVC_LENGTH_COMMON = 3;
+
+    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

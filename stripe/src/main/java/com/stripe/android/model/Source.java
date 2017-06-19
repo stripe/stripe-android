@@ -539,7 +539,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Nullable
     @SourceType
-    static String asSourceType(@Nullable String sourceType) {
+    public static String asSourceType(@Nullable String sourceType) {
         if (BITCOIN.equals(sourceType)) {
             return BITCOIN;
         } else if (CARD.equals(sourceType)) {
