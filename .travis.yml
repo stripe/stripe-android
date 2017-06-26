@@ -11,6 +11,8 @@ android:
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
-    - addon-google_apis-google-19
+    - extra-android-support
+    - addon-google_apis-google-26
+
 script:
   - ./gradlew clean test
