@@ -14,5 +14,9 @@ android:
     - extra-android-support
     - addon-google_apis-google-24
 
+licenses:
+  - android-sdk-license-.+
+  - '.+'
+
 script:
   - ./gradlew clean test
