@@ -1,7 +1,11 @@
-4.1.1 2017-07-15
+4.1.2 2017-06-27
+    Fixing a missing method call in android pay
+    Removing the android support V4 libraries
+
+4.1.1 2017-06-15
     Fixing a preference default in android pay
 
-4.1.0 2017-07-14
+4.1.0 2017-06-14
     Added a token field to SourceParams. You can use this to create a source from an existing token.
     https://stripe.com/docs/api#create_source-token
 
