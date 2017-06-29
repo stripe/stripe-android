@@ -22,12 +22,13 @@ public class ShippingInformation extends StripeJsonModel {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_PHONE = "phone";
 
-    private @Nullable SourceAddress mAddress;
+    private @Nullable
+    Address mAddress;
     private @Nullable String mName;
     private @Nullable String mPhone;
 
     @Nullable
-    public SourceAddress getAddress() {
+    public Address getAddress() {
         return mAddress;
     }
 
@@ -51,7 +52,7 @@ public class ShippingInformation extends StripeJsonModel {
         shippingInformation.mName = optString(jsonObject, FIELD_NAME);
         shippingInformation.mPhone = optString(jsonObject, FIELD_PHONE);
         shippingInformation.mAddress =
-                SourceAddress.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS));
+                Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS));
         return shippingInformation;
     }
 

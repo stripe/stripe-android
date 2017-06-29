@@ -17,11 +17,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
- * Test class for {@link SourceAddress}.
+ * Test class for {@link Address}.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23)
-public class SourceAddressTest {
+public class AddressTest {
 
     static final String EXAMPLE_JSON_ADDRESS = "{" +
             "\"city\": \"San Francisco\"," +
@@ -41,19 +41,19 @@ public class SourceAddressTest {
         put("state", "CA");
     }};
 
-    private SourceAddress mSourceAddress;
+    private Address mAddress;
 
     @Before
     public void setup() {
-        mSourceAddress = SourceAddress.fromString(EXAMPLE_JSON_ADDRESS);
-        assertNotNull(mSourceAddress);
+        mAddress = Address.fromString(EXAMPLE_JSON_ADDRESS);
+        assertNotNull(mAddress);
     }
 
     @Test
     public void fromJsonString_backToJson_createsIdenticalElement() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_ADDRESS);
-            assertJsonEquals(rawConversion, mSourceAddress.toJson());
+            assertJsonEquals(rawConversion, mAddress.toJson());
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }
@@ -61,6 +61,6 @@ public class SourceAddressTest {
 
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {
-        assertMapEquals(EXAMPLE_MAP_ADDRESS, mSourceAddress.toMap());
+        assertMapEquals(EXAMPLE_MAP_ADDRESS, mAddress.toMap());
     }
 }
