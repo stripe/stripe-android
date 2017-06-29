@@ -1,4 +1,4 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
