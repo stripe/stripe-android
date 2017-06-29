@@ -23,7 +23,7 @@ public class SourceReceiver extends StripeJsonModel {
     private static final String FIELD_AMOUNT_RECEIVED = "amount_received";
     private static final String FIELD_AMOUNT_RETURNED = "amount_returned";
 
-    // This is not to be confused with the SourceAddress object
+    // This is not to be confused with the Address object
     private String mAddress;
     private long mAmountCharged;
     private long mAmountReceived;

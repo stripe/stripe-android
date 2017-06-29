@@ -11,7 +11,7 @@ import org.robolectric.annotation.Config;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.model.SourceAddressTest.EXAMPLE_JSON_ADDRESS;
+import static com.stripe.android.model.AddressTest.EXAMPLE_JSON_ADDRESS;
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertNotNull;
