@@ -1,4 +1,4 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
 import android.content.Context;
 import android.os.Build;
@@ -8,7 +8,6 @@ import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
@@ -20,11 +19,8 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
-import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeJsonUtils;
-import com.stripe.android.util.StripeNetworkUtils;
-import com.stripe.android.util.StripeTextUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,15 +47,7 @@ import javax.net.ssl.SSLSocketFactory;
 /**
  * Handler for calls to the Stripe API.
  */
-public class StripeApiHandler {
-
-    public static final String LIVE_API_BASE = "https://api.stripe.com";
-    public static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
-    public static final String CHARSET = "UTF-8";
-    public static final String TOKENS = "tokens";
-    public static final String SOURCES = "sources";
-
-    private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
+class StripeApiHandler {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -70,80 +58,35 @@ public class StripeApiHandler {
     static final String GET = "GET";
     static final String POST = "POST";
 
+    private static final String LIVE_API_BASE = "https://api.stripe.com";
+    private static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
+    private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
+
+    private static final String CHARSET = "UTF-8";
+    private static final String TOKENS = "tokens";
+    private static final String SOURCES = "sources";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    /**
-     * Create a {@link Source} using the input {@link SourceParams}.
-     *
-     * @deprecated As of v4.0.3 - will not be carried into 5+ and beyond
-     *
-     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
-     * @param publishableKey an API key
-     * @return a {@link Source} if one could be created from the input params,
-     * or {@code null} if not
-     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
-     * @throws InvalidRequestException if one or more of the parameters is incorrect
-     * @throws APIConnectionException if there is a problem connecting to the Stripe API
-     * @throws APIException for unknown Stripe API errors. These should be rare.
-     */
-    @Deprecated
-    @Nullable
-    public static Source createSourceOnServer(
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return createSourceOnServer(sourceParams, publishableKey, null);
-    }
+    static void logApiCall(
+            @NonNull Map<String, Object> loggingMap,
+            @Nullable RequestOptions options,
+            @Nullable LoggingResponseListener listener) {
+        if (options == null) {
+            return;
+        }
 
-    /**
-     * Create a {@link Source} using the input {@link SourceParams}.
-     *
-     * @param context a {@link Context} object for aquiring resources
-     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
-     * @param publishableKey an API key
-     * @return a {@link Source} if one could be created from the input params,
-     * or {@code null} if not
-     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
-     * @throws InvalidRequestException if one or more of the parameters is incorrect
-     * @throws APIConnectionException if there is a problem connecting to the Stripe API
-     * @throws APIException for unknown Stripe API errors. These should be rare.
-     */
-    @Deprecated
-    @Nullable
-    public static Source createSourceOnServer(
-            @NonNull Context context,
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return createSourceOnServer(null, context, sourceParams, publishableKey, null);
-    }
+        if (listener != null && !listener.shouldLogTest()) {
+            return;
+        }
 
-    @Deprecated
-    @Nullable
-    public static Source createSourceOnServer(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey,
-            @Nullable LoggingResponseListener loggingResponseListener)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return createSourceOnServer(
-                uidProvider,
-                context,
-                sourceParams,
-                publishableKey,
-                null,
-                loggingResponseListener);
+        String apiKey = options.getPublishableApiKey();
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            // if there is no apiKey associated with the request, we don't need to react here.
+            return;
+        }
+
+        fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options, listener);
     }
 
     /**
@@ -163,28 +106,46 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    public static Source createSourceOnServer(
+    static Source createSourceOnServer(
             @Nullable StripeNetworkUtils.UidProvider uidProvider,
             @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
+            @NonNull String stripeAccount,
             @Nullable LoggingResponseListener loggingResponseListener)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createSourceOnServer(
-                uidProvider,
-                context,
-                sourceParams,
-                publishableKey,
-                stripeAccount,
-                loggingResponseListener,
-                null);
+        Map<String, Object> paramMap = sourceParams.toParamMap();
+        StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
+        RequestOptions options = RequestOptions.builder(publishableKey).build();
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            setTelemetryData(context, loggingResponseListener);
+            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    apiKey,
+                    sourceParams.getType());
+            RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
+            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
     }
 
     @VisibleForTesting
+    @Nullable
     static Source createSourceOnServer(
             @Nullable StripeNetworkUtils.UidProvider uidProvider,
             @NonNull Context context,
@@ -231,70 +192,6 @@ public class StripeApiHandler {
         }
     }
 
-    public static void setTelemetryData(@NonNull Context context,
-                                        @Nullable LoggingResponseListener listener) {
-        Map<String, Object> telemetry = TelemetryClientUtil.createTelemetryMap(context);
-        StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
-        if (listener != null && !listener.shouldLogTest()) {
-            return;
-        }
-
-        RequestOptions options =
-                RequestOptions.builder(null, RequestOptions.TYPE_JSON)
-                        .setGuid(TelemetryClientUtil.getHashedId(context))
-                        .build();
-        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
-    }
-
-    /**
-     * Create a {@link Source} using the input {@link SourceParams}.
-     *
-     * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
-     * @param publishableKey an API key
-     * @param loggingResponseListener a {@link LoggingResponseListener} to verify logging
-     * @return a {@link Source} if one could be created from the input params,
-     * or {@code null} if not
-     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
-     * @throws InvalidRequestException if one or more of the parameters is incorrect
-     * @throws APIConnectionException if there is a problem connecting to the Stripe API
-     * @throws APIException for unknown Stripe API errors. These should be rare.
-     */
-    @Deprecated
-    @Nullable
-    static Source createSourceOnServer(
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey,
-            @Nullable LoggingResponseListener loggingResponseListener)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        Map<String, Object> paramMap = sourceParams.toParamMap();
-        RequestOptions options = RequestOptions.builder(publishableKey).build();
-
-        try {
-            String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
-            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
-                    apiKey,
-                    sourceParams.getType());
-            RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
-            StripeResponse response = requestData(POST, getSourcesUrl(), paramMap, options);
-            return Source.fromString(response.getResponseBody());
-        } catch (CardException unexpected) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
-        }
-    }
-
     /**
      * Retrieve an existing {@link Source} object from the server.
      *
@@ -309,95 +206,40 @@ public class StripeApiHandler {
      * @throws APIConnectionException if there is a problem connecting to the Stripe API
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
-    public static Source retrieveSource(
-            @NonNull String sourceId,
-            @NonNull String clientSecret,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-
-        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
-        RequestOptions options = RequestOptions.builder(publishableKey).build();
-        try {
-            StripeResponse response =
-                    requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
-            return Source.fromString(response.getResponseBody());
-        } catch (CardException unexpected) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
-        }
-    }
-
-    /**
-     * Poll for changes in a {@link Source} using a background thread with an exponential backoff.
-     *
-     * @param sourceId the {@link Source#mId} to check on
-     * @param clientSecret the {@link Source#mClientSecret} to check on
-     * @param publishableKey an API key
-     * @param callback a {@link PollingResponseHandler} to use as a callback
-     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
-     *                  in, 10000ms will be used.
-     */
-    public static void pollSource(
-            @NonNull final String sourceId,
-            @NonNull final String clientSecret,
-            @NonNull final String publishableKey,
-            @NonNull final PollingResponseHandler callback,
-            @Nullable Integer timeoutMs) {
-
-        PollingNetworkHandler networkHandler =
-                new PollingNetworkHandler(
-                        sourceId,
-                        clientSecret,
-                        publishableKey,
-                        callback,
-                        timeoutMs,
-                        null,
-                        PollingParameters.generateDefaultParameters());
-        networkHandler.start();
-    }
-
-    /**
-     * Polls for source updates synchronously. If called on the main thread,
-     * this will crash the application.
-     *
-     * @param sourceId the {@link Source#mId ID} of the Source being polled
-     * @param clientSecret the {@link Source#mClientSecret client_secret} of the Source
-     * @param publishableKey a public API key
-     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
-     *                  in, 10000ms will be used.
-     * @return a {@link PollingResponse} that will indicate success or failure
-     */
-    public static PollingResponse pollSourceSynchronous(
-            @NonNull final String sourceId,
-            @NonNull final String clientSecret,
-            @NonNull final String publishableKey,
-            @Nullable Integer timeoutMs) {
-        PollingSyncNetworkHandler pollingSyncNetworkHandler =
-                new PollingSyncNetworkHandler(
-                        sourceId,
-                        clientSecret,
-                        publishableKey,
-                        timeoutMs,
-                        null,
-                        null,
-                        PollingParameters.generateDefaultParameters());
-        return pollingSyncNetworkHandler.pollForSourceUpdate();
+    @Nullable
+    static Source retrieveSource(
+           @NonNull String sourceId,
+           @NonNull String clientSecret,
+           @NonNull String publishableKey)
+           throws AuthenticationException,
+           InvalidRequestException,
+           APIConnectionException,
+           APIException {
+       Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+       RequestOptions options = RequestOptions.builder(publishableKey).build();
+       try {
+           StripeResponse response =
+                   requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
+           return Source.fromString(response.getResponseBody());
+       } catch (CardException unexpected) {
+           // This particular kind of exception should not be possible from a Source API endpoint.
+           throw new APIException(
+                   unexpected.getMessage(),
+                   unexpected.getRequestId(),
+                   unexpected.getStatusCode(),
+                   unexpected);
+       }
     }
 
     /**
      * Create a {@link Token} using the input card parameters.
      *
+     * @param context the {@link Context} in which this method is working
      * @param cardParams a mapped set of parameters representing the object for which this token
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
      *                key, api version, etc
+     * @param tokenType the {@link com.stripe.android.model.Token.TokenType} being created
      * @param listener a {@link LoggingResponseListener} useful for testing logging calls
      *
      * @return a {@link Token} that can be used to perform other operations with this card
@@ -408,43 +250,8 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    @Deprecated
     @SuppressWarnings("unchecked")
-    public static Token createTokenOnServer(
-            @NonNull Map<String, Object> cardParams,
-            @NonNull RequestOptions options,
-            @NonNull @Token.TokenType String tokenType,
-            @Nullable LoggingResponseListener listener)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-
-        try {
-            String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
-            List<String> loggingTokens =
-                    (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
-            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
-
-            Map<String, Object> loggingParams =
-                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
-            logApiCall(loggingParams, options, listener);
-        } catch (ClassCastException classCastEx) {
-            // This can only happen if someone puts a weird object in the map.
-            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
-        }
-
-        return requestToken(POST, getApiUrl(), cardParams, options);
-    }
-
-    @Nullable
-    @SuppressWarnings("unchecked")
-    public static Token createTokenOnServer(
+    static Token createTokenOnServer(
             @NonNull Context context,
             @NonNull Map<String, Object> cardParams,
             @NonNull RequestOptions options,
@@ -491,7 +298,7 @@ public class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    public static Token retrieveTokenFromServer(
+    static Token retrieveTokenFromServer(
             @NonNull RequestOptions options,
             @NonNull String tokenId)
             throws AuthenticationException,
@@ -556,12 +363,12 @@ public class StripeApiHandler {
             headers.put("Stripe-Version", options.getApiVersion());
         }
 
-        if (options != null && options.getIdempotencyKey() != null) {
-            headers.put("Idempotency-Key", options.getIdempotencyKey());
-        }
-
         if (options != null && options.getStripeAccount() != null) {
             headers.put("Stripe-Account", options.getStripeAccount());
+        }
+
+        if (options != null && options.getIdempotencyKey() != null) {
+            headers.put("Idempotency-Key", options.getIdempotencyKey());
         }
 
         return headers;
@@ -587,13 +394,88 @@ public class StripeApiHandler {
         return String.format("%s/%s", getApiUrl(), tokenId);
     }
 
-    private static String formatURL(String url, String query) {
-        if (query == null || query.isEmpty()) {
-            return url;
-        } else {
-            // In some cases, URL can already contain a question mark (eg, upcoming invoice lines)
-            String separator = url.contains("?") ? "&" : "?";
-            return String.format("%s%s%s", url, separator, query);
+    /**
+     * Converts a string-keyed {@link Map} into a {@link JSONObject}. This will cause a
+     * {@link ClassCastException} if any sub-map has keys that are not {@link String Strings}.
+     *
+     * @param mapObject the {@link Map} that you'd like in JSON form
+     * @return a {@link JSONObject} representing the input map, or {@code null} if the input
+     * object is {@code null}
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
+        if (mapObject == null) {
+            return null;
+        }
+        JSONObject jsonObject = new JSONObject();
+        for (String key : mapObject.keySet()) {
+            Object value = mapObject.get(key);
+            if (value == null) {
+                continue;
+            }
+
+            try {
+                if (value instanceof Map<?, ?>) {
+                    try {
+                        Map<String, Object> mapValue = (Map<String, Object>) value;
+                        jsonObject.put(key, mapToJsonObject(mapValue));
+                    } catch (ClassCastException classCastException) {
+                        // We don't include the item in the JSONObject if the keys are not Strings.
+                    }
+                } else if (value instanceof List<?>) {
+                    jsonObject.put(key, listToJsonArray((List<Object>) value));
+                } else if (value instanceof Number || value instanceof Boolean) {
+                    jsonObject.put(key, value);
+                } else {
+                    jsonObject.put(key, value.toString());
+                }
+            } catch (JSONException jsonException) {
+                // Simply skip this value
+            }
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Converts a {@link List} into a {@link JSONArray}. A {@link ClassCastException} will be
+     * thrown if any object in the list (or any sub-list or sub-map) is a {@link Map} whose keys
+     * are not {@link String Strings}.
+     *
+     * @param values a {@link List} of values to be put in a {@link JSONArray}
+     * @return a {@link JSONArray}, or {@code null} if the input was {@code null}
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static JSONArray listToJsonArray(@Nullable List values) {
+        if (values == null) {
+            return null;
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for (Object object : values) {
+            if (object instanceof Map<?, ?>) {
+                // We are ignoring type erasure here and crashing on bad input.
+                // Now that this method is not public, we have more control on what is
+                // passed to it.
+                Map<String, Object> mapObject = (Map<String, Object>) object;
+                jsonArray.put(mapToJsonObject(mapObject));
+            } else if (object instanceof List<?>) {
+                jsonArray.put(listToJsonArray((List) object));
+            } else if (object instanceof Number || object instanceof Boolean) {
+                jsonArray.put(object);
+            } else {
+                jsonArray.put(object.toString());
+            }
+        }
+        return jsonArray;
+    }
+
+    private static void attachPseudoCookie(
+            @NonNull HttpURLConnection connection,
+            @NonNull RequestOptions options) {
+        if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
+            connection.setRequestProperty("Cookie", "m=" + options.getGuid());
         }
     }
 
@@ -628,40 +510,6 @@ public class StripeApiHandler {
         return conn;
     }
 
-    private static String getContentType(@NonNull RequestOptions options) {
-        if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-            return String.format(
-                    "application/json; charset=%s", CHARSET);
-        } else {
-            return String.format(
-                    "application/x-www-form-urlencoded;charset=%s", CHARSET);
-        }
-    }
-
-    private static byte[] getOutputBytes(
-            @NonNull Map<String, Object> params,
-            @NonNull RequestOptions options) throws InvalidRequestException {
-        try {
-            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                JSONObject jsonData = StripeJsonUtils.mapToJsonObject(params);
-                if (jsonData == null) {
-                    throw new InvalidRequestException("Unable to create JSON data from parameters. "
-                            + "Please contact support@stripe.com for assistance.",
-                            null, null, 0, null);
-                }
-                return jsonData.toString().getBytes(CHARSET);
-            } else {
-                String query = createQuery(params);
-                return query.getBytes(CHARSET);
-            }
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidRequestException("Unable to encode parameters to "
-                    + CHARSET
-                    + ". Please contact support@stripe.com for assistance.",
-                    null, null, 0, e);
-        }
-    }
-
     private static java.net.HttpURLConnection createStripeConnection(
             String url,
             RequestOptions options)
@@ -689,43 +537,6 @@ public class StripeApiHandler {
         }
 
         return conn;
-    }
-
-    private static boolean urlNeedsHeaderData(@NonNull String url) {
-        return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
-    }
-
-    private static boolean urlNeedsPseudoCookie(@NonNull String url) {
-        return url.startsWith(LOGGING_ENDPOINT);
-    }
-
-    private static void attachPseudoCookie(
-            @NonNull HttpURLConnection connection,
-            @NonNull RequestOptions options) {
-        if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
-            connection.setRequestProperty("Cookie", "m=" + options.getGuid());
-        }
-    }
-
-    public static void logApiCall(
-            @NonNull Map<String, Object> loggingMap,
-            @Nullable RequestOptions options,
-            @Nullable LoggingResponseListener listener) {
-        if (options == null) {
-            return;
-        }
-
-        if (listener != null && !listener.shouldLogTest()) {
-            return;
-        }
-
-        String apiKey = options.getPublishableApiKey();
-        if (apiKey.trim().isEmpty()) {
-            // if there is no apiKey associated with the request, we don't need to react here.
-            return;
-        }
-
-        fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options, listener);
     }
 
     private static void fireAndForgetApiCall(
@@ -773,138 +584,6 @@ public class StripeApiHandler {
                     java.security.Security.setProperty(
                             DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
                 }
-            }
-        }
-    }
-
-    private static StripeResponse requestData(
-            @RestMethod String method,
-            String url,
-            Map<String, Object> params,
-            RequestOptions options)
-            throws AuthenticationException, InvalidRequestException,
-            APIConnectionException, CardException, APIException {
-
-        if (options == null) {
-            return null;
-        }
-
-        String originalDNSCacheTTL = null;
-        Boolean allowedToSetTTL = true;
-
-        try {
-            originalDNSCacheTTL = java.security.Security
-                    .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
-            // disable DNS cache
-            java.security.Security
-                    .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
-        } catch (SecurityException se) {
-            allowedToSetTTL = false;
-        }
-
-        String apiKey = options.getPublishableApiKey();
-        if (apiKey.trim().isEmpty()) {
-            throw new AuthenticationException(
-                    "No API key provided. (HINT: set your API key using 'Stripe.apiKey = <API-KEY>'. "
-                            + "You can generate API keys from the Stripe web interface. "
-                            + "See https://stripe.com/api for details or email support@stripe.com if you have questions.",
-                    null, 0);
-        }
-
-        StripeResponse response = getStripeResponse(method, url, params, options);
-
-        int rCode = response.getResponseCode();
-        String rBody = response.getResponseBody();
-
-        String requestId = null;
-        Map<String, List<String>> headers = response.getResponseHeaders();
-        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
-        if (requestIdList != null && requestIdList.size() > 0) {
-            requestId = requestIdList.get(0);
-        }
-
-        if (rCode < 200 || rCode >= 300) {
-            handleAPIError(rBody, rCode, requestId);
-        }
-
-        if (allowedToSetTTL) {
-            if (originalDNSCacheTTL == null) {
-                // value unspecified by implementation
-                // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                java.security.Security.setProperty(
-                        DNS_CACHE_TTL_PROPERTY_NAME, "-1");
-            } else {
-                java.security.Security.setProperty(
-                        DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
-            }
-        }
-        return response;
-    }
-
-    private static Token requestToken(
-            @RestMethod String method,
-            String url,
-            Map<String, Object> params,
-            RequestOptions options)
-            throws AuthenticationException, InvalidRequestException,
-            APIConnectionException, CardException, APIException {
-        try {
-            StripeResponse response = requestData(method, url, params, options);
-            return TokenParser.parseToken(response.getResponseBody());
-        } catch (JSONException ignored) {
-            return null;
-        }
-    }
-
-    private static StripeResponse getStripeResponse(
-            @RestMethod String method,
-            String url,
-            Map<String, Object> params,
-            RequestOptions options)
-            throws InvalidRequestException, APIConnectionException, APIException {
-        // HTTPSURLConnection verifies SSL cert by default
-        java.net.HttpURLConnection conn = null;
-        try {
-            switch (method) {
-                case GET:
-                    conn = createGetConnection(url, createQuery(params), options);
-                    break;
-                case POST:
-                    conn = createPostConnection(url, params, options);
-                    break;
-                default:
-                    throw new APIConnectionException(
-                            String.format(
-                                    "Unrecognized HTTP method %s. "
-                                            + "This indicates a bug in the Stripe bindings. "
-                                            + "Please contact support@stripe.com for assistance.",
-                                    method));
-            }
-            // trigger the request
-            int rCode = conn.getResponseCode();
-            String rBody;
-            Map<String, List<String>> headers;
-
-            if (rCode >= 200 && rCode < 300) {
-                rBody = getResponseBody(conn.getInputStream());
-            } else {
-                rBody = getResponseBody(conn.getErrorStream());
-            }
-            headers = conn.getHeaderFields();
-            return new StripeResponse(rCode, rBody, headers);
-
-        } catch (IOException e) {
-            throw new APIConnectionException(
-                    String.format(
-                            "IOException during API request to Stripe (%s): %s "
-                                    + "Please check your internet connection and try again. "
-                                    + "If this problem persists, you should check Stripe's "
-                                    + "service status at https://twitter.com/stripestatus, "
-                                    + "or let us know at support@stripe.com.",
-                            getApiUrl(), e.getMessage()), e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
             }
         }
     }
@@ -981,6 +660,115 @@ public class StripeApiHandler {
         return flatParams;
     }
 
+    private static String formatURL(String url, String query) {
+        if (query == null || query.isEmpty()) {
+            return url;
+        } else {
+            // In some cases, URL can already contain a question mark (eg, upcoming invoice lines)
+            String separator = url.contains("?") ? "&" : "?";
+            return String.format("%s%s%s", url, separator, query);
+        }
+    }
+
+    private static String getContentType(@NonNull RequestOptions options) {
+        if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
+            return String.format(
+                    "application/json; charset=%s", CHARSET);
+        } else {
+            return String.format(
+                    "application/x-www-form-urlencoded;charset=%s", CHARSET);
+        }
+    }
+
+    private static byte[] getOutputBytes(
+            @NonNull Map<String, Object> params,
+            @NonNull RequestOptions options) throws InvalidRequestException {
+        try {
+            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
+                JSONObject jsonData = mapToJsonObject(params);
+                if (jsonData == null) {
+                    throw new InvalidRequestException("Unable to create JSON data from parameters. "
+                            + "Please contact support@stripe.com for assistance.",
+                            null, null, 0, null);
+                }
+                return jsonData.toString().getBytes(CHARSET);
+            } else {
+                String query = createQuery(params);
+                return query.getBytes(CHARSET);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new InvalidRequestException("Unable to encode parameters to "
+                    + CHARSET
+                    + ". Please contact support@stripe.com for assistance.",
+                    null, null, 0, e);
+        }
+    }
+
+    private static String getResponseBody(InputStream responseStream)
+            throws IOException {
+        //\A is the beginning of
+        // the stream boundary
+        String rBody = new Scanner(responseStream, CHARSET)
+                .useDelimiter("\\A")
+                .next(); //
+
+        responseStream.close();
+        return rBody;
+    }
+
+    private static StripeResponse getStripeResponse(
+            @RestMethod String method,
+            String url,
+            Map<String, Object> params,
+            RequestOptions options)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        // HTTPSURLConnection verifies SSL cert by default
+        java.net.HttpURLConnection conn = null;
+        try {
+            switch (method) {
+                case GET:
+                    conn = createGetConnection(url, createQuery(params), options);
+                    break;
+                case POST:
+                    conn = createPostConnection(url, params, options);
+                    break;
+                default:
+                    throw new APIConnectionException(
+                            String.format(
+                                    "Unrecognized HTTP method %s. "
+                                            + "This indicates a bug in the Stripe bindings. "
+                                            + "Please contact support@stripe.com for assistance.",
+                                    method));
+            }
+            // trigger the request
+            int rCode = conn.getResponseCode();
+            String rBody;
+            Map<String, List<String>> headers;
+
+            if (rCode >= 200 && rCode < 300) {
+                rBody = getResponseBody(conn.getInputStream());
+            } else {
+                rBody = getResponseBody(conn.getErrorStream());
+            }
+            headers = conn.getHeaderFields();
+            return new StripeResponse(rCode, rBody, headers);
+
+        } catch (IOException e) {
+            throw new APIConnectionException(
+                    String.format(
+                            "IOException during API request to Stripe (%s): %s "
+                                    + "Please check your internet connection and try again. "
+                                    + "If this problem persists, you should check Stripe's "
+                                    + "service status at https://twitter.com/stripestatus, "
+                                    + "or let us know at support@stripe.com.",
+                            getApiUrl(), e.getMessage()), e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
     private static void handleAPIError(String rBody, int rCode, String requestId)
             throws InvalidRequestException, AuthenticationException,
             CardException, APIException {
@@ -1022,6 +810,109 @@ public class StripeApiHandler {
         }
     }
 
+    private static StripeResponse requestData(
+            @RestMethod String method,
+            String url,
+            Map<String, Object> params,
+            RequestOptions options)
+            throws AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException, APIException {
+
+        if (options == null) {
+            return null;
+        }
+
+        String originalDNSCacheTTL = null;
+        Boolean allowedToSetTTL = true;
+
+        try {
+            originalDNSCacheTTL = java.security.Security
+                    .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            // disable DNS cache
+            java.security.Security
+                    .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+        } catch (SecurityException se) {
+            allowedToSetTTL = false;
+        }
+
+        String apiKey = options.getPublishableApiKey();
+        if (apiKey.trim().isEmpty()) {
+            throw new AuthenticationException(
+                    "No API key provided. (HINT: set your API key using 'Stripe.apiKey = <API-KEY>'. "
+                            + "You can generate API keys from the Stripe web interface. "
+                            + "See https://stripe.com/api for details or email support@stripe.com if you have questions.",
+                    null, 0);
+        }
+
+        StripeResponse response = getStripeResponse(method, url, params, options);
+
+        int rCode = response.getResponseCode();
+        String rBody = response.getResponseBody();
+
+        String requestId = null;
+        Map<String, List<String>> headers = response.getResponseHeaders();
+        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+        if (requestIdList != null && requestIdList.size() > 0) {
+            requestId = requestIdList.get(0);
+        }
+
+        if (rCode < 200 || rCode >= 300) {
+            handleAPIError(rBody, rCode, requestId);
+        }
+
+        if (allowedToSetTTL) {
+            if (originalDNSCacheTTL == null) {
+                // value unspecified by implementation
+                // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+            } else {
+                java.security.Security.setProperty(
+                        DNS_CACHE_TTL_PROPERTY_NAME, originalDNSCacheTTL);
+            }
+        }
+        return response;
+    }
+
+    @Nullable
+    private static Token requestToken(
+            @RestMethod String method,
+            String url,
+            Map<String, Object> params,
+            RequestOptions options)
+            throws AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException, APIException {
+        try {
+            StripeResponse response = requestData(method, url, params, options);
+            return TokenParser.parseToken(response.getResponseBody());
+        } catch (JSONException ignored) {
+            return null;
+        }
+    }
+
+    private static void setTelemetryData(@NonNull Context context,
+                                         @Nullable LoggingResponseListener listener) {
+        Map<String, Object> telemetry = TelemetryClientUtil.createTelemetryMap(context);
+        StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
+        if (listener != null && !listener.shouldLogTest()) {
+            return;
+        }
+
+        RequestOptions options =
+                RequestOptions.builder(null, RequestOptions.TYPE_JSON)
+                        .setGuid(TelemetryClientUtil.getHashedId(context))
+                        .build();
+        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
+    }
+
+    private static boolean urlNeedsHeaderData(@NonNull String url) {
+        return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
+    }
+
+    private static boolean urlNeedsPseudoCookie(@NonNull String url) {
+        return url.startsWith(LOGGING_ENDPOINT);
+    }
+
     private static String urlEncodePair(String k, String v)
             throws UnsupportedEncodingException {
         return String.format("%s=%s", urlEncode(k), urlEncode(v));
@@ -1038,19 +929,7 @@ public class StripeApiHandler {
         }
     }
 
-    private static String getResponseBody(InputStream responseStream)
-            throws IOException {
-        //\A is the beginning of
-        // the stream boundary
-        String rBody = new Scanner(responseStream, CHARSET)
-                .useDelimiter("\\A")
-                .next(); //
-
-        responseStream.close();
-        return rBody;
-    }
-
-    public interface LoggingResponseListener {
+    interface LoggingResponseListener {
         boolean shouldLogTest();
         void onLoggingResponse(StripeResponse response);
         void onStripeException(StripeException exception);
@@ -1064,7 +943,7 @@ public class StripeApiHandler {
         public final String key;
         public final String value;
 
-        public Parameter(String key, String value) {
+        Parameter(String key, String value) {
             this.key = key;
             this.value = value;
         }
