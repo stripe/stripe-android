@@ -23,10 +23,6 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.PollingResponse;
-import com.stripe.android.net.PollingResponseHandler;
-import com.stripe.android.net.RequestOptions;
-import com.stripe.android.net.StripeApiHandler;
 
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;

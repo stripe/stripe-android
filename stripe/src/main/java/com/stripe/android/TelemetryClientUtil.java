@@ -1,4 +1,4 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
