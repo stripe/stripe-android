@@ -12,7 +12,7 @@ public class PaymentConfiguration {
 
     private @NonNull String mPublishableKey;
     private @Address.RequiredBillingAddressFields
-    int mRequiredAddressFields;
+    int mRequiredBillingAddressFields;
     private boolean mShouldUseSourcesForCards;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
@@ -30,7 +30,7 @@ public class PaymentConfiguration {
 
     public static void init(@NonNull String publishableKey) {
         mInstance = new PaymentConfiguration(publishableKey);
-        mInstance.mRequiredAddressFields = Address.RequiredBillingAddressFields.NONE;
+        mInstance.mRequiredBillingAddressFields = Address.RequiredBillingAddressFields.NONE;
         mInstance.mShouldUseSourcesForCards = true;
     }
 
@@ -40,14 +40,14 @@ public class PaymentConfiguration {
     }
 
     public @Address.RequiredBillingAddressFields
-    int getRequiredAddressFields() {
-        return mRequiredAddressFields;
+    int getRequiredBillingAddressFields() {
+        return mRequiredBillingAddressFields;
     }
 
     @NonNull
-    public PaymentConfiguration setRequiredAddressFields(
-            @Address.RequiredBillingAddressFields int requiredAddressFields) {
-        mRequiredAddressFields = requiredAddressFields;
+    public PaymentConfiguration setRequiredBillingAddressFields(
+            @Address.RequiredBillingAddressFields int requiredBillingAddressFields) {
+        mRequiredBillingAddressFields = requiredBillingAddressFields;
         return this;
     }
 
