@@ -37,20 +37,20 @@ public class PaymentConfigurationTest {
         PaymentConfiguration.init("pk_test_key");
         PaymentConfiguration payConfig = PaymentConfiguration.getInstance();
         assertEquals("pk_test_key", payConfig.getPublishableKey());
-        assertEquals(Address.RequiredAddressFields.NONE, payConfig.getRequiredAddressFields());
-        assertTrue(payConfig.getShouldUseSources());
+        assertEquals(Address.RequiredBillingAddressFields.NONE, payConfig.getRequiredAddressFields());
+        assertTrue(payConfig.getShouldUseSourcesForCards());
     }
 
     @Test
     public void setValues_setsForSingletonInstance() {
         PaymentConfiguration.init("pk_test_key");
         PaymentConfiguration.getInstance()
-                .setRequiredAddressFields(Address.RequiredAddressFields.FULL)
-                .setShouldUseSources(false);
+                .setRequiredAddressFields(Address.RequiredBillingAddressFields.FULL)
+                .setShouldUseSourcesForCards(false);
 
         assertEquals("pk_test_key", PaymentConfiguration.getInstance().getPublishableKey());
-        assertEquals(Address.RequiredAddressFields.FULL,
+        assertEquals(Address.RequiredBillingAddressFields.FULL,
                 PaymentConfiguration.getInstance().getRequiredAddressFields());
-        assertFalse(PaymentConfiguration.getInstance().getShouldUseSources());
+        assertFalse(PaymentConfiguration.getInstance().getShouldUseSourcesForCards());
     }
 }

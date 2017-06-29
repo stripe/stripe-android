@@ -23,7 +23,7 @@ import static com.stripe.android.util.StripeJsonUtils.optString;
  */
 public class SourceCodeVerification extends StripeJsonModel {
 
-    // Note: these are the same as the values for the @Redirect.RequiredAddressFields StringDef.
+    // Note: these are the same as the values for the @Redirect.Status StringDef.
     // They don't have to stay the same forever, so they are redefined here.
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

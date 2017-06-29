@@ -22,11 +22,11 @@ import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
 public class Address extends StripeJsonModel {
 
     @IntDef({
-            RequiredAddressFields.NONE,
-            RequiredAddressFields.ZIP,
-            RequiredAddressFields.FULL})
+            RequiredBillingAddressFields.NONE,
+            RequiredBillingAddressFields.ZIP,
+            RequiredBillingAddressFields.FULL})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface RequiredAddressFields {
+    public @interface RequiredBillingAddressFields {
         int NONE = 0;
         int ZIP = 1;
         int FULL = 2;

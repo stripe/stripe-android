@@ -11,8 +11,9 @@ public class PaymentConfiguration {
     private static PaymentConfiguration mInstance;
 
     private @NonNull String mPublishableKey;
-    private @Address.RequiredAddressFields int mRequiredAddressFields;
-    private boolean mShouldUseSources;
+    private @Address.RequiredBillingAddressFields
+    int mRequiredAddressFields;
+    private boolean mShouldUseSourcesForCards;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
         mPublishableKey = publishableKey;
@@ -29,8 +30,8 @@ public class PaymentConfiguration {
 
     public static void init(@NonNull String publishableKey) {
         mInstance = new PaymentConfiguration(publishableKey);
-        mInstance.mRequiredAddressFields = Address.RequiredAddressFields.NONE;
-        mInstance.mShouldUseSources = true;
+        mInstance.mRequiredAddressFields = Address.RequiredBillingAddressFields.NONE;
+        mInstance.mShouldUseSourcesForCards = true;
     }
 
     @NonNull
@@ -38,24 +39,25 @@ public class PaymentConfiguration {
         return mPublishableKey;
     }
 
-    public @Address.RequiredAddressFields int getRequiredAddressFields() {
+    public @Address.RequiredBillingAddressFields
+    int getRequiredAddressFields() {
         return mRequiredAddressFields;
     }
 
     @NonNull
     public PaymentConfiguration setRequiredAddressFields(
-            @Address.RequiredAddressFields int requiredAddressFields) {
+            @Address.RequiredBillingAddressFields int requiredAddressFields) {
         mRequiredAddressFields = requiredAddressFields;
         return this;
     }
 
-    public boolean getShouldUseSources() {
-        return mShouldUseSources;
+    public boolean getShouldUseSourcesForCards() {
+        return mShouldUseSourcesForCards;
     }
 
     @NonNull
-    public PaymentConfiguration setShouldUseSources(boolean shouldUseSources) {
-        mShouldUseSources = shouldUseSources;
+    public PaymentConfiguration setShouldUseSourcesForCards(boolean shouldUseSourcesForCards) {
+        mShouldUseSourcesForCards = shouldUseSourcesForCards;
         return this;
     }
 
