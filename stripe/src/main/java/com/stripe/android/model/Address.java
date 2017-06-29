@@ -1,11 +1,14 @@
 package com.stripe.android.model;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +19,18 @@ import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public class SourceAddress extends StripeJsonModel {
+public class Address extends StripeJsonModel {
+
+    @IntDef({
+            RequiredBillingAddressFields.NONE,
+            RequiredBillingAddressFields.ZIP,
+            RequiredBillingAddressFields.FULL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequiredBillingAddressFields {
+        int NONE = 0;
+        int ZIP = 1;
+        int FULL = 2;
+    }
 
     private static final String FIELD_CITY = "city";
     private static final String FIELD_COUNTRY = "country";
@@ -32,7 +46,7 @@ public class SourceAddress extends StripeJsonModel {
     private String mPostalCode;
     private String mState;
 
-    SourceAddress(
+    Address(
             String city,
             String country,
             String line1,
@@ -122,7 +136,7 @@ public class SourceAddress extends StripeJsonModel {
     }
 
     @Nullable
-    public static SourceAddress fromString(@Nullable String jsonString) {
+    public static Address fromString(@Nullable String jsonString) {
         try {
             return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
@@ -131,7 +145,7 @@ public class SourceAddress extends StripeJsonModel {
     }
 
     @Nullable
-    public static SourceAddress fromJson(@Nullable JSONObject jsonObject) {
+    public static Address fromJson(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }
@@ -143,6 +157,6 @@ public class SourceAddress extends StripeJsonModel {
         String postalCode = optString(jsonObject, FIELD_POSTAL_CODE);
         String state = optString(jsonObject, FIELD_STATE);
 
-        return new SourceAddress(city, country, line1, line2, postalCode, state);
+        return new Address(city, country, line1, line2, postalCode, state);
     }
 }
