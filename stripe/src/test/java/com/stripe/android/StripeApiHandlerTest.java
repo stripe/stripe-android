@@ -1,16 +1,17 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.net.StripeResponse;
 import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -172,7 +173,7 @@ public class StripeApiHandlerTest {
 
             assertNull(testLoggingListener.mStripeException);
             assertNotNull(testLoggingListener.mStripeResponse);
-            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+            Assert.assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
 
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
@@ -213,7 +214,7 @@ public class StripeApiHandlerTest {
         StripeResponse mStripeResponse;
         StripeException mStripeException;
 
-        public TestLoggingListener(boolean shouldLogTest) {
+        TestLoggingListener(boolean shouldLogTest) {
             mShouldLogTest = shouldLogTest;
         }
 

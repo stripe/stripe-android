@@ -23,10 +23,6 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.PollingResponse;
-import com.stripe.android.net.PollingResponseHandler;
-import com.stripe.android.net.RequestOptions;
-import com.stripe.android.net.StripeApiHandler;
 
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
@@ -527,73 +523,6 @@ public class Stripe {
                 requestOptions,
                 Token.TYPE_PII,
                 mLoggingResponseListener);
-    }
-
-    /**
-     *  Starts polling the {@link Source} object with the given ID. For payment methods that require
-     *  additional customer action (e.g. authorizing a payment with their bank), polling
-     *  allows you to determine if the action was successful. Polling will stop and the
-     *  provided callback will be called once the source's status is no longer
-     *  {@link Source#PENDING}, or if the given timeout is reached and the source is still
-     *  `pending`. If polling stops due to an error, the callback will be fired with the latest
-     *  retrieved source and the error.
-     *
-     * @deprecated Polling is being phased out in favor of webhooks. This method is not guaranteed
-     * to be supported beyond 4.X.X
-     *
-     * @param sourceId the {@link Source#mId} to check on
-     * @param clientSecret the {@link Source#mClientSecret} to check on
-     * @param publishableKey an API key
-     * @param callback a {@link PollingResponseHandler} to use as a callback
-     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
-     *                  in, 10000ms will be used.
-     */
-    @Deprecated
-    public void pollSource(@NonNull @Size(min = 1) String sourceId,
-                           @NonNull @Size(min = 1) String clientSecret,
-                           @Nullable String publishableKey,
-                           @NonNull PollingResponseHandler callback,
-                           @Nullable Integer timeoutMs) {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return;
-        }
-
-        StripeApiHandler.pollSource(sourceId, clientSecret, apiKey, callback, timeoutMs);
-    }
-
-    /**
-     *  Starts polling the {@link Source} object with the given ID on the current thread. If called
-     *  on the main thread, this method will crash the application.
-     *
-     *  For payment methods that require additional customer action
-     *  (e.g. authorizing a payment with their bank), polling
-     *  allows you to determine if the action was successful. Polling will stop once the
-     *  Source's status is no longer {@link Source#PENDING}, or if the given timeout is reached and
-     *  the Source is still `pending`. If polling stops due to an error, the latest retrieved Source
-     *  and latest thrown {@link StripeException} will be returned in the {@link PollingResponse}.
-     *
-     * @deprecated Polling is being deprecated. This method is not guaranteed
-     * to be supported beyond 4.X.X. You should poll your own backend to update based on
-     * source status change webhook events it may receive.
-     *
-     * @param sourceId the {@link Source#mId} to check on
-     * @param clientSecret the {@link Source#mClientSecret} to check on
-     * @param publishableKey an API key
-     * @param timeoutMs the amount of time before the polling expires. If {@code null} is passed
-     *                  in, 10000ms will be used.
-     */
-    @Deprecated
-    public PollingResponse pollSourceSynchronous(@NonNull @Size(min = 1) String sourceId,
-                                                 @NonNull @Size(min = 1) String clientSecret,
-                                                 @Nullable String publishableKey,
-                                                 @Nullable Integer timeoutMs) {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return null;
-        }
-
-        return StripeApiHandler.pollSourceSynchronous(sourceId, clientSecret, apiKey, timeoutMs);
     }
 
     /**
