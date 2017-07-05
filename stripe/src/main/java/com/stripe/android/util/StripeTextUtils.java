@@ -108,25 +108,6 @@ public class StripeTextUtils {
     }
 
     /**
-     * Converts a String value into the appropriate {@link BankAccountType}.
-     *
-     * @param possibleAccountType a String that might match a {@link BankAccountType} or be empty.
-     * @return {@code null} if the input is blank or of unknown type, else the appropriate
-     *         {@link BankAccountType}.
-     */
-    @Nullable
-    @BankAccountType
-    public static String asBankAccountType(@Nullable String possibleAccountType) {
-        if (BankAccount.TYPE_COMPANY.equals(possibleAccountType)) {
-            return BankAccount.TYPE_COMPANY;
-        } else if (BankAccount.TYPE_INDIVIDUAL.equals(possibleAccountType)) {
-            return BankAccount.TYPE_INDIVIDUAL;
-        }
-
-        return null;
-    }
-
-    /**
      * Converts a card number that may have spaces between the numbers into one without any spaces.
      * Note: method does not check that all characters are digits or spaces.
      *
@@ -140,85 +121,6 @@ public class StripeTextUtils {
             return null;
         }
         return cardNumberWithSpaces.replaceAll("\\s|-", "");
-    }
-
-    /**
-     * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
-     *
-     * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
-     * @return {@code null} if the input is blank, else the appropriate {@link CardBrand}.
-     */
-    @Nullable
-    @CardBrand
-    public static String asCardBrand(@Nullable String possibleCardType) {
-        if (isBlank(possibleCardType)) {
-            return null;
-        }
-
-        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
-            return Card.AMERICAN_EXPRESS;
-        } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
-            return Card.MASTERCARD;
-        } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
-            return Card.DINERS_CLUB;
-        } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
-            return Card.DISCOVER;
-        } else if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
-            return Card.JCB;
-        } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
-            return Card.VISA;
-        } else {
-            return Card.UNKNOWN;
-        }
-    }
-
-    /**
-     * Converts an unchecked String value to a {@link FundingType} or {@code null}.
-     *
-     * @param possibleFundingType a String that might match a {@link FundingType} or be empty
-     * @return {@code null} if the input is blank, else the appropriate {@link FundingType}
-     */
-    @Nullable
-    @FundingType
-    public static String asFundingType(@Nullable String possibleFundingType) {
-        if (isBlank(possibleFundingType)) {
-            return null;
-        }
-
-        if (Card.FUNDING_CREDIT.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_CREDIT;
-        } else if (Card.FUNDING_DEBIT.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_DEBIT;
-        } else if (Card.FUNDING_PREPAID.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_PREPAID;
-        } else {
-            return Card.FUNDING_UNKNOWN;
-        }
-    }
-
-    /**
-     * Converts an unchecked String value to a {@link TokenType} or {@code null}.
-     *
-     * @param possibleTokenType a String that might match a {@link TokenType} or be empty
-     * @return {@code null} if the input is blank or otherwise does not match a {@link TokenType},
-     * else the appropriate {@link TokenType}.
-     */
-    @Nullable
-    @TokenType
-    public static String asTokenType(@Nullable String possibleTokenType) {
-        if (isBlank(possibleTokenType)) {
-            return null;
-        }
-
-        if (Token.TYPE_CARD.equals(possibleTokenType)) {
-            return Token.TYPE_CARD;
-        } else if (Token.TYPE_BANK_ACCOUNT.equals(possibleTokenType)) {
-            return Token.TYPE_BANK_ACCOUNT;
-        } else if (Token.TYPE_PII.equals(possibleTokenType)) {
-            return Token.TYPE_PII;
-        }
-
-        return null;
     }
 
     /**

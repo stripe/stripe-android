@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.util.StripeJsonUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
 
@@ -17,10 +16,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optInteger;
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optInteger;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for data contained in the SourceTypeData of a Card Source.
@@ -256,13 +255,13 @@ public class SourceCardData extends StripeSourceTypeModel {
         SourceCardData cardData = new SourceCardData();
         cardData.setAddressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK))
                 .setAddressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK))
-                .setBrand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)))
+                .setBrand(Card.asCardBrand(optString(jsonObject, FIELD_BRAND)))
                 .setCountry(optString(jsonObject, FIELD_COUNTRY))
                 .setCvcCheck(optString(jsonObject, FIELD_CVC_CHECK))
                 .setDynamicLast4(optString(jsonObject, FIELD_DYNAMIC_LAST4))
                 .setExpiryMonth(optInteger(jsonObject, FIELD_EXP_MONTH))
                 .setExpiryYear(optInteger(jsonObject, FIELD_EXP_YEAR))
-                .setFunding(StripeTextUtils.asFundingType(optString(jsonObject, FIELD_FUNDING)))
+                .setFunding(Card.asFundingType(optString(jsonObject, FIELD_FUNDING)))
                 .setLast4(optString(jsonObject, FIELD_LAST4))
                 .setThreeDSecureStatus(asThreeDSecureStatus(optString(jsonObject,
                         FIELD_THREE_D_SECURE)))

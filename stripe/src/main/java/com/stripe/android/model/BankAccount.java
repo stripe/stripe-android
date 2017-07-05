@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -21,6 +24,15 @@ public class BankAccount {
     public @interface BankAccountType {}
     public static final String TYPE_COMPANY = "company";
     public static final String TYPE_INDIVIDUAL = "individual";
+
+    private static final String FIELD_ACCOUNT_HOLDER_NAME = "account_holder_name";
+    private static final String FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type";
+    private static final String FIELD_BANK_NAME = "bank_name";
+    private static final String FIELD_COUNTRY = "country";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_FINGERPRINT = "fingerprint";
+    private static final String FIELD_LAST4 = "last4";
+    private static final String FIELD_ROUTING_NUMBER = "routing_number";
 
     @Nullable private String mAccountHolderName;
     @Nullable @BankAccountType private String mAccountHolderType;
@@ -142,5 +154,52 @@ public class BankAccount {
     @Nullable
     public String getRoutingNumber() {
         return mRoutingNumber;
+    }
+
+    /**
+     * Converts a String value into the appropriate {@link BankAccountType}.
+     *
+     * @param possibleAccountType a String that might match a {@link BankAccountType} or be empty.
+     * @return {@code null} if the input is blank or of unknown type, else the appropriate
+     *         {@link BankAccountType}.
+     */
+    @Nullable
+    @BankAccountType
+    public static String asBankAccountType(@Nullable String possibleAccountType) {
+        if (BankAccount.TYPE_COMPANY.equals(possibleAccountType)) {
+            return BankAccount.TYPE_COMPANY;
+        } else if (BankAccount.TYPE_INDIVIDUAL.equals(possibleAccountType)) {
+            return BankAccount.TYPE_INDIVIDUAL;
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static BankAccount fromString(@Nullable String jsonString) {
+        try {
+            JSONObject accountObject = new JSONObject(jsonString);
+            return fromJson(accountObject);
+        } catch (JSONException jsonException) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static BankAccount fromJson(@Nullable JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+
+        return new BankAccount(
+                StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_NAME),
+                asBankAccountType(
+                        StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_TYPE)),
+                StripeJsonUtils.optString(jsonObject, FIELD_BANK_NAME),
+                StripeJsonUtils.optCountryCode(jsonObject, FIELD_COUNTRY),
+                StripeJsonUtils.optCurrency(jsonObject, FIELD_CURRENCY),
+                StripeJsonUtils.optString(jsonObject, FIELD_FINGERPRINT),
+                StripeJsonUtils.optString(jsonObject, FIELD_LAST4),
+                StripeJsonUtils.optString(jsonObject, FIELD_ROUTING_NUMBER));
     }
 }

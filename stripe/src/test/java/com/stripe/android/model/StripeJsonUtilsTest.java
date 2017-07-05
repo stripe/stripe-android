@@ -1,5 +1,6 @@
-package com.stripe.android.util;
+package com.stripe.android.model;
 
+import com.stripe.android.model.StripeJsonUtils;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONArray;

@@ -38,7 +38,7 @@ public class ErrorParserTest {
                 "Please see <https://stripe.com/docs> for more information.";
         assertEquals(errorMessage, parsedStripeError.message);
         assertEquals("invalid_request_error", parsedStripeError.type);
-        assertNull(parsedStripeError.param);
+        assertEquals("", parsedStripeError.param);
     }
 
     @Test
