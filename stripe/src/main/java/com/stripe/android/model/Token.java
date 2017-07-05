@@ -162,34 +162,41 @@ public class Token implements StripePaymentSource {
 
     @Nullable
     public static Token fromJson(@Nullable JSONObject jsonObject) {
-        try {
-            String tokenId = StripeJsonUtils.getString(jsonObject, FIELD_ID);
-            Long createdTimeStamp = jsonObject.getLong(FIELD_CREATED);
-            Boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
-            @TokenType String tokenType =
-                    asTokenType(StripeJsonUtils.getString(jsonObject, FIELD_TYPE));
-            Boolean used = jsonObject.getBoolean(FIELD_USED);
-
-            Date date = new Date(createdTimeStamp * 1000);
-
-            Token token = null;
-            if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
-                JSONObject bankAccountObject = jsonObject.getJSONObject(FIELD_BANK_ACCOUNT);
-                BankAccount bankAccount = BankAccount.fromJson(bankAccountObject);
-                token = new Token(tokenId, liveMode, date, used, bankAccount);
-            } else if (Token.TYPE_CARD.equals(tokenType)) {
-                JSONObject cardObject = jsonObject.getJSONObject(FIELD_CARD);
-                Card card = Card.fromJson(cardObject);
-                token = new Token(tokenId, liveMode, date, used, card);
-            } else if (Token.TYPE_PII.equals(tokenType)) {
-                token = new Token(tokenId, liveMode, date, used);
-            }
-
-            return token;
-        } catch (JSONException exception) {
-            // Failure to parse
+        if (jsonObject == null) {
             return null;
         }
+        String tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID);
+        Long createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED);
+        Boolean liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE);
+        @TokenType String tokenType =
+                asTokenType(StripeJsonUtils.optString(jsonObject, FIELD_TYPE));
+        Boolean used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED);
+
+        if (tokenId == null || createdTimeStamp == null || liveMode == null) {
+            return null;
+        }
+        Date date = new Date(createdTimeStamp * 1000);
+
+        Token token = null;
+        if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
+            JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
+            if (bankAccountObject == null) {
+                return null;
+            }
+            BankAccount bankAccount = BankAccount.fromJson(bankAccountObject);
+            token = new Token(tokenId, liveMode, date, used, bankAccount);
+        } else if (Token.TYPE_CARD.equals(tokenType)) {
+            JSONObject cardObject = jsonObject.optJSONObject(FIELD_CARD);
+            if (cardObject == null) {
+                return null;
+            }
+            Card card = Card.fromJson(cardObject);
+            token = new Token(tokenId, liveMode, date, used, card);
+        } else if (Token.TYPE_PII.equals(tokenType)) {
+            token = new Token(tokenId, liveMode, date, used);
+        }
+
+        return token;
     }
 
     /**

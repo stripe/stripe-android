@@ -364,7 +364,7 @@ public class StripeApiHandler {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
+    private static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
         if (mapObject == null) {
             return null;
         }
@@ -407,7 +407,7 @@ public class StripeApiHandler {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    static JSONArray listToJsonArray(@Nullable List values) {
+    private static JSONArray listToJsonArray(@Nullable List values) {
         if (values == null) {
             return null;
         }
@@ -415,12 +415,11 @@ public class StripeApiHandler {
         JSONArray jsonArray = new JSONArray();
         for (Object object : values) {
             if (object instanceof Map<?, ?>) {
-                try {
-                    Map<String, Object> mapObject = (Map<String, Object>) object;
-                    jsonArray.put(mapToJsonObject(mapObject));
-                } catch (ClassCastException classCastException) {
-                    // We don't include the item in the array if the keys are not Strings.
-                }
+                // We are ignoring type erasure here and crashing on bad input.
+                // Now that this method is not public, we have more control on what is
+                // passed to it.
+                Map<String, Object> mapObject = (Map<String, Object>) object;
+                jsonArray.put(mapToJsonObject(mapObject));
             } else if (object instanceof List<?>) {
                 jsonArray.put(listToJsonArray((List) object));
             } else if (object instanceof Number || object instanceof Boolean) {
