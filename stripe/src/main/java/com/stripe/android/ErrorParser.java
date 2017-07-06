@@ -3,8 +3,6 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.util.StripeJsonUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,12 +29,12 @@ class ErrorParser {
         try {
             JSONObject jsonError = new JSONObject(rawError);
             JSONObject errorObject = jsonError.getJSONObject(FIELD_ERROR);
-            stripeError.charge = StripeJsonUtils.optString(errorObject, FIELD_CHARGE);
-            stripeError.code = StripeJsonUtils.optString(errorObject, FIELD_CODE);
-            stripeError.decline_code = StripeJsonUtils.optString(errorObject, FIELD_DECLINE_CODE);
-            stripeError.message = StripeJsonUtils.optString(errorObject, FIELD_MESSAGE);
-            stripeError.param = StripeJsonUtils.optString(errorObject, FIELD_PARAM);
-            stripeError.type = StripeJsonUtils.optString(errorObject, FIELD_TYPE);
+            stripeError.charge = errorObject.optString(FIELD_CHARGE);
+            stripeError.code = errorObject.optString(FIELD_CODE);
+            stripeError.decline_code = errorObject.optString(FIELD_DECLINE_CODE);
+            stripeError.message = errorObject.optString(FIELD_MESSAGE);
+            stripeError.param = errorObject.optString(FIELD_PARAM);
+            stripeError.type = errorObject.optString(FIELD_TYPE);
         } catch (JSONException jsonException) {
             stripeError.message = MALFORMED_RESPONSE_MESSAGE;
         }

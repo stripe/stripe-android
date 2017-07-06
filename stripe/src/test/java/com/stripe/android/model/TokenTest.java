@@ -1,10 +1,5 @@
-package com.stripe.android.net;
+package com.stripe.android.model;
 
-import com.stripe.android.model.BankAccount;
-import com.stripe.android.model.Card;
-import com.stripe.android.model.Token;
-
-import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -13,18 +8,15 @@ import org.robolectric.annotation.Config;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
- * Test class for {@link TokenParser}.
+ * Test class for {@link Token}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
-public class TokenParserTest {
-
+@Config(sdk = 25)
+public class TokenTest {
     private static final String RAW_TOKEN = "{\n" +
             "  \"id\": \"tok_189fi32eZvKYlo2Ct0KZvU5Y\",\n" +
             "  \"object\": \"token\",\n" +
@@ -146,20 +138,17 @@ public class TokenParserTest {
                 createdDate,
                 false,
                 (Card) null);
-        try {
-            Token answerToken = TokenParser.parseToken(RAW_TOKEN);
-            assertEquals(partialExpectedToken.getId(), answerToken.getId());
-            assertEquals(partialExpectedToken.getLivemode(), answerToken.getLivemode());
-            assertEquals(partialExpectedToken.getCreated(), answerToken.getCreated());
-            assertEquals(partialExpectedToken.getUsed(), answerToken.getUsed());
-            assertEquals(Token.TYPE_CARD, answerToken.getType());
+        Token answerToken = Token.fromString(RAW_TOKEN);
+        assertNotNull(answerToken);
+        assertEquals(partialExpectedToken.getId(), answerToken.getId());
+        assertEquals(partialExpectedToken.getLivemode(), answerToken.getLivemode());
+        assertEquals(partialExpectedToken.getCreated(), answerToken.getCreated());
+        assertEquals(partialExpectedToken.getUsed(), answerToken.getUsed());
+        assertEquals(Token.TYPE_CARD, answerToken.getType());
 
-            // Note: we test the validity of the card object in CardTest
-            assertNotNull(answerToken.getCard());
-            assertNull(answerToken.getBankAccount());
-        } catch (JSONException jex) {
-            fail("Json Parsing failure");
-        }
+        // Note: we test the validity of the card object in CardTest
+        assertNotNull(answerToken.getCard());
+        assertNull(answerToken.getBankAccount());
     }
 
     @Test
@@ -171,30 +160,27 @@ public class TokenParserTest {
                 createdDate,
                 false,
                 (BankAccount) null);
-        try {
-            Token answerToken = TokenParser.parseToken(RAW_BANK_TOKEN);
-            assertEquals(expectedToken.getId(), answerToken.getId());
-            assertEquals(expectedToken.getLivemode(), answerToken.getLivemode());
-            assertEquals(expectedToken.getCreated(), answerToken.getCreated());
-            assertEquals(expectedToken.getUsed(), answerToken.getUsed());
-            assertEquals(Token.TYPE_BANK_ACCOUNT, answerToken.getType());
+        Token answerToken = Token.fromString(RAW_BANK_TOKEN);
+        assertNotNull(answerToken);
+        assertEquals(expectedToken.getId(), answerToken.getId());
+        assertEquals(expectedToken.getLivemode(), answerToken.getLivemode());
+        assertEquals(expectedToken.getCreated(), answerToken.getCreated());
+        assertEquals(expectedToken.getUsed(), answerToken.getUsed());
+        assertEquals(Token.TYPE_BANK_ACCOUNT, answerToken.getType());
 
-            assertNotNull(answerToken.getBankAccount());
-            assertNull(answerToken.getCard());
-        } catch (JSONException jex) {
-            fail("Json Parsing Failure");
-        }
+        assertNotNull(answerToken.getBankAccount());
+        assertNull(answerToken.getCard());
     }
 
-    @Test(expected = JSONException.class)
-    public void parseToken_withoutId_throwsException() throws JSONException {
-        TokenParser.parseToken(RAW_TOKEN_NO_ID);
-        fail("Expected an exception when parsing token without ID.");
+    @Test
+    public void parseToken_withoutId_returnsNull() {
+        Token token = Token.fromString(RAW_TOKEN_NO_ID);
+        assertNull(token);
     }
 
-    @Test(expected = JSONException.class)
-    public void parseToken_withoutType_throwsException() throws JSONException {
-        TokenParser.parseToken(RAW_BANK_TOKEN_NO_TYPE);
-        fail("Expected an exception when parsing token without type");
+    @Test
+    public void parseToken_withoutType_returnsNull() {
+        Token token = Token.fromString(RAW_BANK_TOKEN_NO_TYPE);
+        assertNull(token);
     }
- }
+}
