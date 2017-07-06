@@ -1,22 +1,19 @@
-package com.stripe.android.net;
+package com.stripe.android.model;
 
-import com.stripe.android.model.BankAccount;
-
-import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * Test class for {@link BankAccountParser}.
+ * Test class for {@link BankAccount}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
-public class BankAccountParserTest {
+@Config(sdk = 25)
+public class BankAccountTest {
 
     private static final String RAW_BANK_ACCOUNT = "{\n" +
             "    \"id\": \"ba_19d8Fh2eZvKYlo2C9qw8RwpV\",\n" +
@@ -44,20 +41,17 @@ public class BankAccountParserTest {
                 "6789",
                 "110000000");
 
-        try {
-            BankAccount actualAccount = BankAccountParser.parseBankAccount(RAW_BANK_ACCOUNT);
-            assertEquals(expectedAccount.getAccountHolderName(),
-                    actualAccount.getAccountHolderName());
-            assertEquals(expectedAccount.getAccountHolderType(),
-                    actualAccount.getAccountHolderType());
-            assertEquals(expectedAccount.getBankName(), actualAccount.getBankName());
-            assertEquals(expectedAccount.getCountryCode(), actualAccount.getCountryCode());
-            assertEquals(expectedAccount.getCurrency(), actualAccount.getCurrency());
-            assertEquals(expectedAccount.getFingerprint(), actualAccount.getFingerprint());
-            assertEquals(expectedAccount.getLast4(), actualAccount.getLast4());
-            assertEquals(expectedAccount.getRoutingNumber(), actualAccount.getRoutingNumber());
-        } catch (JSONException jex) {
-            fail("Json Parsing Failure");
-        }
+        BankAccount actualAccount = BankAccount.fromString(RAW_BANK_ACCOUNT);
+        assertNotNull(actualAccount);
+        assertEquals(expectedAccount.getAccountHolderName(),
+                actualAccount.getAccountHolderName());
+        assertEquals(expectedAccount.getAccountHolderType(),
+                actualAccount.getAccountHolderType());
+        assertEquals(expectedAccount.getBankName(), actualAccount.getBankName());
+        assertEquals(expectedAccount.getCountryCode(), actualAccount.getCountryCode());
+        assertEquals(expectedAccount.getCurrency(), actualAccount.getCurrency());
+        assertEquals(expectedAccount.getFingerprint(), actualAccount.getFingerprint());
+        assertEquals(expectedAccount.getLast4(), actualAccount.getLast4());
+        assertEquals(expectedAccount.getRoutingNumber(), actualAccount.getRoutingNumber());
     }
 }
