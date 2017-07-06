@@ -1,6 +1,11 @@
 package com.stripe.android.model;
 
+import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
+import android.text.TextUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -18,6 +23,16 @@ public class Token implements StripePaymentSource {
     public static final String TYPE_BANK_ACCOUNT = "bank_account";
     public static final String TYPE_PII = "pii";
 
+    // The key for these object fields is identical to their retrieved values
+    // from the Type field.
+    private static final String FIELD_BANK_ACCOUNT = Token.TYPE_BANK_ACCOUNT;
+    private static final String FIELD_CARD = Token.TYPE_CARD;
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_LIVEMODE = "livemode";
+
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_USED = "used";
     private final String mId;
     private final String mType;
     private final Date mCreated;
@@ -133,5 +148,79 @@ public class Token implements StripePaymentSource {
      */
     public BankAccount getBankAccount() {
         return mBankAccount;
+    }
+
+    @Nullable
+    public static Token fromString(@Nullable String jsonString) {
+        try {
+            JSONObject tokenObject = new JSONObject(jsonString);
+            return fromJson(tokenObject);
+        } catch (JSONException exception) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Token fromJson(@Nullable JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+        String tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID);
+        Long createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED);
+        Boolean liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE);
+        @TokenType String tokenType =
+                asTokenType(StripeJsonUtils.optString(jsonObject, FIELD_TYPE));
+        Boolean used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED);
+
+        if (tokenId == null || createdTimeStamp == null || liveMode == null) {
+            return null;
+        }
+        Date date = new Date(createdTimeStamp * 1000);
+
+        Token token = null;
+        if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
+            JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
+            if (bankAccountObject == null) {
+                return null;
+            }
+            BankAccount bankAccount = BankAccount.fromJson(bankAccountObject);
+            token = new Token(tokenId, liveMode, date, used, bankAccount);
+        } else if (Token.TYPE_CARD.equals(tokenType)) {
+            JSONObject cardObject = jsonObject.optJSONObject(FIELD_CARD);
+            if (cardObject == null) {
+                return null;
+            }
+            Card card = Card.fromJson(cardObject);
+            token = new Token(tokenId, liveMode, date, used, card);
+        } else if (Token.TYPE_PII.equals(tokenType)) {
+            token = new Token(tokenId, liveMode, date, used);
+        }
+
+        return token;
+    }
+
+    /**
+     * Converts an unchecked String value to a {@link TokenType} or {@code null}.
+     *
+     * @param possibleTokenType a String that might match a {@link TokenType} or be empty
+     * @return {@code null} if the input is blank or otherwise does not match a {@link TokenType},
+     * else the appropriate {@link TokenType}.
+     */
+    @Nullable
+    @TokenType
+    static String asTokenType(@Nullable String possibleTokenType) {
+        if (possibleTokenType == null || TextUtils.isEmpty(possibleTokenType.trim())) {
+            return null;
+        }
+
+        if (Token.TYPE_CARD.equals(possibleTokenType)) {
+            return Token.TYPE_CARD;
+        } else if (Token.TYPE_BANK_ACCOUNT.equals(possibleTokenType)) {
+            return Token.TYPE_BANK_ACCOUNT;
+        } else if (Token.TYPE_PII.equals(possibleTokenType)) {
+            return Token.TYPE_PII;
+        }
+
+        return null;
     }
 }
