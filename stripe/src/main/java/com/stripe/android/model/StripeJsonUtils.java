@@ -1,9 +1,10 @@
-package com.stripe.android.util;
+package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
-import android.support.annotation.VisibleForTesting;
+
+import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,10 +19,10 @@ import java.util.Map;
 /**
  * A set of JSON parsing utility functions.
  */
-public class StripeJsonUtils {
+class StripeJsonUtils {
 
-    static final String EMPTY = "";
-    static final String NULL = "null";
+    private static final String EMPTY = "";
+    private static final String NULL = "null";
 
     /**
      * Calls through to {@link JSONObject#getString(String)} while safely
@@ -33,7 +34,7 @@ public class StripeJsonUtils {
      * @throws JSONException if the field does not exist
      */
     @Nullable
-    public static String getString(
+    static String getString(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) throws JSONException {
         return nullIfNullOrEmpty(jsonObject.getString(fieldName));
@@ -48,7 +49,7 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
-    public static Boolean optBoolean(
+    static Boolean optBoolean(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         if (!jsonObject.has(fieldName)) {
@@ -66,7 +67,7 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
-    public static Integer optInteger(
+    static Integer optInteger(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         if (!jsonObject.has(fieldName)) {
@@ -84,7 +85,7 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
-    public static Long optLong(
+    static Long optLong(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         if (!jsonObject.has(fieldName)) {
@@ -103,7 +104,7 @@ public class StripeJsonUtils {
      * @return the value stored in the field, or {@code null} if the field isn't present
      */
     @Nullable
-    public static String optString(
+    static String optString(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         return nullIfNullOrEmpty(jsonObject.optString(fieldName));
@@ -119,7 +120,7 @@ public class StripeJsonUtils {
      */
     @Nullable
     @Size(2)
-    public static String optCountryCode(
+    static String optCountryCode(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         String value = nullIfNullOrEmpty(jsonObject.optString(fieldName));
@@ -139,7 +140,7 @@ public class StripeJsonUtils {
      */
     @Nullable
     @Size(3)
-    public static String optCurrency(
+    static String optCurrency(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         String value = nullIfNullOrEmpty(jsonObject.optString(fieldName));
@@ -158,7 +159,7 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
-    public static Map<String, Object> optMap(
+    static Map<String, Object> optMap(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         JSONObject foundObject = jsonObject.optJSONObject(fieldName);
@@ -178,7 +179,7 @@ public class StripeJsonUtils {
      * @return the value stored in the requested field, or {@code null} if the key is not present
      */
     @Nullable
-    public static Map<String, String> optHash(
+    static Map<String, String> optHash(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         JSONObject foundObject = jsonObject.optJSONObject(fieldName);
@@ -196,7 +197,7 @@ public class StripeJsonUtils {
      * @return a {@link Map} representing the input, or {@code null} if the input is {@code null}
      */
     @Nullable
-    public static Map<String, Object> jsonObjectToMap(@Nullable JSONObject jsonObject) {
+    static Map<String, Object> jsonObjectToMap(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }
@@ -228,7 +229,7 @@ public class StripeJsonUtils {
      * @return a {@link Map} representing the input, or {@code null} if the input is {@code null}
      */
     @Nullable
-    public static Map<String, String> jsonObjectToStringMap(@Nullable JSONObject jsonObject) {
+    static Map<String, String> jsonObjectToStringMap(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }
@@ -255,7 +256,7 @@ public class StripeJsonUtils {
      * @return a {@link List} representing the input, or {@code null} if said input is {@code null}
      */
     @Nullable
-    public static List<Object> jsonArrayToList(@Nullable JSONArray jsonArray) {
+    static List<Object> jsonArrayToList(@Nullable JSONArray jsonArray) {
         if (jsonArray == null) {
             return null;
         }
@@ -294,7 +295,7 @@ public class StripeJsonUtils {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
+    static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
         if (mapObject == null) {
             return null;
         }
@@ -334,7 +335,7 @@ public class StripeJsonUtils {
      * @return a {@link JSONObject} with the same key-value pairings
      */
     @Nullable
-    public static JSONObject stringHashToJsonObject(@Nullable Map<String, String> stringStringMap) {
+    static JSONObject stringHashToJsonObject(@Nullable Map<String, String> stringStringMap) {
         if (stringStringMap == null) {
             return null;
         }
@@ -360,7 +361,7 @@ public class StripeJsonUtils {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public static JSONArray listToJsonArray(@Nullable List values) {
+    static JSONArray listToJsonArray(@Nullable List values) {
         if (values == null) {
             return null;
         }
@@ -394,7 +395,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putStringIfNotNull(
+    static void putStringIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable String value) {
@@ -414,7 +415,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putIntegerIfNotNull(
+    static void putIntegerIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable Integer value) {
@@ -435,7 +436,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putLongIfNotNull(
+    static void putLongIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable Long value) {
@@ -456,7 +457,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putBooleanIfNotNull(
+    static void putBooleanIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable Boolean value) {
@@ -477,7 +478,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putStringHashIfNotNull(
+    static void putStringHashIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable Map<String, String> value) {
@@ -503,7 +504,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putMapIfNotNull(
+    static void putMapIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable Map<String, Object> value
@@ -532,7 +533,7 @@ public class StripeJsonUtils {
      * @param fieldName the field name
      * @param value the potential field value
      */
-    public static void putObjectIfNotNull(
+    static void putObjectIfNotNull(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable JSONObject value
@@ -547,7 +548,7 @@ public class StripeJsonUtils {
     }
 
     @Nullable
-    public static String nullIfNullOrEmpty(@Nullable String possibleNull) {
+    static String nullIfNullOrEmpty(@Nullable String possibleNull) {
         return NULL.equals(possibleNull) || EMPTY.equals(possibleNull)
                 ? null
                 : possibleNull;

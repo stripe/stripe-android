@@ -21,12 +21,11 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeResponse;
 import com.stripe.android.net.StripeSSLSocketFactory;
-import com.stripe.android.net.TokenParser;
 import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeJsonUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -355,6 +354,83 @@ public class StripeApiHandler {
         return String.format("%s/%s", getApiUrl(), tokenId);
     }
 
+    /**
+     * Converts a string-keyed {@link Map} into a {@link JSONObject}. This will cause a
+     * {@link ClassCastException} if any sub-map has keys that are not {@link String Strings}.
+     *
+     * @param mapObject the {@link Map} that you'd like in JSON form
+     * @return a {@link JSONObject} representing the input map, or {@code null} if the input
+     * object is {@code null}
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static JSONObject mapToJsonObject(@Nullable Map<String, ? extends Object> mapObject) {
+        if (mapObject == null) {
+            return null;
+        }
+        JSONObject jsonObject = new JSONObject();
+        for (String key : mapObject.keySet()) {
+            Object value = mapObject.get(key);
+            if (value == null) {
+                continue;
+            }
+
+            try {
+                if (value instanceof Map<?, ?>) {
+                    try {
+                        Map<String, Object> mapValue = (Map<String, Object>) value;
+                        jsonObject.put(key, mapToJsonObject(mapValue));
+                    } catch (ClassCastException classCastException) {
+                        // We don't include the item in the JSONObject if the keys are not Strings.
+                    }
+                } else if (value instanceof List<?>) {
+                    jsonObject.put(key, listToJsonArray((List<Object>) value));
+                } else if (value instanceof Number || value instanceof Boolean) {
+                    jsonObject.put(key, value);
+                } else {
+                    jsonObject.put(key, value.toString());
+                }
+            } catch (JSONException jsonException) {
+                // Simply skip this value
+            }
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Converts a {@link List} into a {@link JSONArray}. A {@link ClassCastException} will be
+     * thrown if any object in the list (or any sub-list or sub-map) is a {@link Map} whose keys
+     * are not {@link String Strings}.
+     *
+     * @param values a {@link List} of values to be put in a {@link JSONArray}
+     * @return a {@link JSONArray}, or {@code null} if the input was {@code null}
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static JSONArray listToJsonArray(@Nullable List values) {
+        if (values == null) {
+            return null;
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for (Object object : values) {
+            if (object instanceof Map<?, ?>) {
+                // We are ignoring type erasure here and crashing on bad input.
+                // Now that this method is not public, we have more control on what is
+                // passed to it.
+                Map<String, Object> mapObject = (Map<String, Object>) object;
+                jsonArray.put(mapToJsonObject(mapObject));
+            } else if (object instanceof List<?>) {
+                jsonArray.put(listToJsonArray((List) object));
+            } else if (object instanceof Number || object instanceof Boolean) {
+                jsonArray.put(object);
+            } else {
+                jsonArray.put(object.toString());
+            }
+        }
+        return jsonArray;
+    }
+
     private static void attachPseudoCookie(
             @NonNull HttpURLConnection connection,
             @NonNull RequestOptions options) {
@@ -569,7 +645,7 @@ public class StripeApiHandler {
             @NonNull RequestOptions options) throws InvalidRequestException {
         try {
             if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                JSONObject jsonData = StripeJsonUtils.mapToJsonObject(params);
+                JSONObject jsonData = mapToJsonObject(params);
                 if (jsonData == null) {
                     throw new InvalidRequestException("Unable to create JSON data from parameters. "
                             + "Please contact support@stripe.com for assistance.",
@@ -758,6 +834,7 @@ public class StripeApiHandler {
         return rBody;
     }
 
+    @Nullable
     private static Token requestToken(
             @RestMethod String method,
             String url,
@@ -765,11 +842,7 @@ public class StripeApiHandler {
             RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-        try {
-            return TokenParser.parseToken(requestData(method, url, params, options));
-        } catch (JSONException ignored) {
-            return null;
-        }
+        return Token.fromString(requestData(method, url, params, options));
     }
 
     private static void setTelemetryData(@NonNull Context context,

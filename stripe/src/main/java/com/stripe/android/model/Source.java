@@ -5,8 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
-import com.stripe.android.util.StripeJsonUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,10 +15,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.stripe.android.util.StripeJsonUtils.optLong;
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.mapToJsonObject;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optLong;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
