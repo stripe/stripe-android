@@ -14,13 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optBoolean;
-import static com.stripe.android.util.StripeJsonUtils.optInteger;
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putBooleanIfNotNull;
-import static com.stripe.android.util.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.util.StripeJsonUtils.putObjectIfNotNull;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optBoolean;
+import static com.stripe.android.model.StripeJsonUtils.optInteger;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putBooleanIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.putObjectIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for a Stripe Customer object

@@ -884,7 +884,7 @@ class StripeApiHandler {
             APIConnectionException, CardException, APIException {
         try {
             StripeResponse response = requestData(method, url, params, options);
-            return TokenParser.parseToken(response.getResponseBody());
+            return Token.fromString(response.getResponseBody());
         } catch (JSONException ignored) {
             return null;
         }

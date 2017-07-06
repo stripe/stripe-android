@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.time.FrozenClock;
-import com.stripe.android.util.StripeJsonUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +15,8 @@ import org.robolectric.annotation.Config;
 import java.util.Calendar;
 import java.util.Map;
 
+import static com.stripe.android.model.Card.asCardBrand;
+import static com.stripe.android.model.Card.asFundingType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -69,6 +70,88 @@ public class CardTest {
     @After
     public void teardown() {
         FrozenClock.unfreeze();
+    }
+
+
+    @Test
+    public void asCardBrand_whenBlank_returnsNull() {
+        assertNull(asCardBrand("   "));
+        assertNull(asCardBrand(null));
+    }
+
+    @Test
+    public void asCardBrand_whenNonemptyButWeird_returnsUnknown() {
+        assertEquals(Card.UNKNOWN, asCardBrand("Awesome New Brand"));
+    }
+
+    @Test
+    public void asCardBrand_whenMastercard_returnsMasterCard() {
+        assertEquals(Card.MASTERCARD, asCardBrand("MasterCard"));
+    }
+
+    @Test
+    public void asCardBrand_whenCapitalizedStrangely_stillRecognizesCard() {
+        assertEquals(Card.MASTERCARD, asCardBrand("Mastercard"));
+    }
+
+    @Test
+    public void asCardBrand_whenVisa_returnsVisa() {
+        assertEquals(Card.VISA, asCardBrand("visa"));
+    }
+
+    @Test
+    public void asCardBrand_whenJcb_returnsJcb() {
+        assertEquals(Card.JCB, asCardBrand("Jcb"));
+    }
+
+    @Test
+    public void asCardBrand_whenDiscover_returnsDiscover() {
+        assertEquals(Card.DISCOVER, asCardBrand("Discover"));
+    }
+
+    @Test
+    public void asCardBrand_whenDinersClub_returnsDinersClub() {
+        assertEquals(Card.DINERS_CLUB, asCardBrand("Diners Club"));
+    }
+
+    @Test
+    public void asCardBrand_whenAmericanExpress_returnsAmericanExpress() {
+        assertEquals(Card.AMERICAN_EXPRESS, asCardBrand("American express"));
+    }
+
+    @Test
+    public void asFundingType_whenDebit_returnsDebit() {
+        assertEquals(Card.FUNDING_DEBIT, asFundingType("debit"));
+    }
+
+    @Test
+    public void asFundingType_whenCredit_returnsCredit() {
+        assertEquals(Card.FUNDING_CREDIT, asFundingType("credit"));
+    }
+
+    @Test
+    public void asFundingType_whenCreditAndCapitalized_returnsCredit() {
+        assertEquals(Card.FUNDING_CREDIT, asFundingType("Credit"));
+    }
+
+    @Test
+    public void asFundingType_whenNull_returnsNull() {
+        assertNull(asFundingType(null));
+    }
+
+    @Test
+    public void asFundingType_whenBlank_returnsNull() {
+        assertNull(asFundingType("   \t"));
+    }
+
+    @Test
+    public void asFundingType_whenUnknown_returnsUnknown() {
+        assertEquals(Card.FUNDING_UNKNOWN, asFundingType("unknown"));
+    }
+
+    @Test
+    public void asFundingType_whenGobbledegook_returnsUnkown() {
+        assertEquals(Card.FUNDING_UNKNOWN, asFundingType("personal iou"));
     }
 
     @Test

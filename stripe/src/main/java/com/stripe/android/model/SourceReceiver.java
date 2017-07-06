@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.util.StripeJsonUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
