@@ -18,6 +18,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -66,10 +67,12 @@ public class StripeApiHandlerTest {
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
+        String stripeAccount = "acct_123abc";
         String apiVersion = "2011-11-11";
         RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
                 .setIdempotencyKey(idempotencyKey)
                 .setApiVersion(apiVersion)
+                .setStripeAccount(stripeAccount)
                 .build();
         Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
 
@@ -77,6 +80,7 @@ public class StripeApiHandlerTest {
         assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
         assertEquals(idempotencyKey, headerMap.get("Idempotency-Key"));
         assertEquals(apiVersion, headerMap.get("Stripe-Version"));
+        assertEquals(stripeAccount, headerMap.get("Stripe-Account"));
     }
 
     @Test
@@ -87,6 +91,7 @@ public class StripeApiHandlerTest {
         assertNotNull(headerMap);
         assertFalse(headerMap.containsKey("Idempotency-Key"));
         assertFalse(headerMap.containsKey("Stripe-Version"));
+        assertFalse(headerMap.containsKey("Stripe-Account"));
         assertTrue(headerMap.containsKey("Authorization"));
     }
 
@@ -165,6 +170,7 @@ public class StripeApiHandlerTest {
                     RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
+                    null,
                     testLoggingListener);
 
             // Check that we get a token back; we don't care about its fields for this test.
@@ -174,6 +180,60 @@ public class StripeApiHandlerTest {
             assertNotNull(testLoggingListener.mStripeResponse);
             assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
 
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSource_withConnectAccount_keepsHeaderInAccount() {
+        try {
+            // This is the one and only test where we actually log something, because
+            // we are testing whether or not we log.
+            TestLoggingListener testLoggingListener = new TestLoggingListener(true);
+            TestStripeResponseListener testStripeResponseListener =
+                    new TestStripeResponseListener();
+
+            StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+                @Override
+                public String getUid() {
+                    return "abc123";
+                }
+
+                @Override
+                public String getPackageName() {
+                    return "com.example.main";
+                }
+            };
+
+            final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
+            Card card = new Card("4242424242424242", 1, 2050, "123");
+            Source source = StripeApiHandler.createSourceOnServer(
+                    provider,
+                    RuntimeEnvironment.application.getApplicationContext(),
+                    SourceParams.createCardParams(card),
+                    "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
+                    connectAccountId,
+                    testLoggingListener,
+                    testStripeResponseListener);
+
+            // Check that we get a source back; we don't care about its fields for this test.
+            assertNotNull(source);
+
+            assertNull(testLoggingListener.mStripeException);
+            assertNotNull(testLoggingListener.mStripeResponse);
+            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+
+            StripeResponse response = testStripeResponseListener.mStripeResponse;
+            assertNotNull(response);
+            assertNotNull(response.getResponseHeaders());
+            assertTrue(response.getResponseHeaders().containsKey("Stripe-Account"));
+            List<String> accounts = response.getResponseHeaders().get("Stripe-Account");
+            assertEquals(1, accounts.size());
+            assertEquals(connectAccountId, accounts.get(0));
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
@@ -205,6 +265,16 @@ public class StripeApiHandlerTest {
         } catch (StripeException stripeEx) {
             fail("Unexpected error when connecting to Stripe API: "
                     + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    private static class TestStripeResponseListener
+            implements StripeApiHandler.StripeResponseListener {
+        StripeResponse mStripeResponse;
+
+        @Override
+        public void onStripeResponse(StripeResponse response) {
+            mStripeResponse = response;
         }
     }
 

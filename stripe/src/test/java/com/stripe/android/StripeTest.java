@@ -164,6 +164,7 @@ public class StripeTest {
             @Override
             public void create(Map<String, Object> tokenParams,
                                String publishableKey,
+                               String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
                                Executor executor, TokenCallback callback) {
                 tokenCreatorCalled[0] = true;
@@ -185,6 +186,7 @@ public class StripeTest {
             @Override
             public void create(Map<String, Object> tokenParams,
                                String publishableKey,
+                               String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
                                Executor executor,
                                TokenCallback callback) {
@@ -204,6 +206,7 @@ public class StripeTest {
             @Override
             public void create(Map<String, Object> tokenParams,
                                String publishableKey,
+                               String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
                                Executor executor,
                                TokenCallback callback) {
@@ -218,7 +221,37 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidData_returnsToken() {
         try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+            Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            TestLoggingListener listener = new TestLoggingListener(true);
+            stripe.setLoggingResponseListener(listener);
+
+            Token token = stripe.createTokenSynchronous(mCard);
+
+            assertNotNull(token);
+            Card returnedCard = token.getCard();
+            assertNotNull(returnedCard);
+            assertNull(token.getBankAccount());
+            assertEquals(Token.TYPE_CARD, token.getType());
+            assertEquals(mCard.getLast4(), returnedCard.getLast4());
+            assertEquals(Card.VISA, returnedCard.getBrand());
+            assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
+            assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
+            assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
+
+            assertAllLogsAreValid(listener, 2);
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken() {
+        try {
+            Stripe stripe = new Stripe(mContext, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
+            stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
             TestLoggingListener listener = new TestLoggingListener(true);
             stripe.setLoggingResponseListener(listener);
 
@@ -273,6 +306,7 @@ public class StripeTest {
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
         try {
             Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+
             Token token = stripe.createBankAccountTokenSynchronous(mBankAccount);
             assertNotNull(token);
             assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
@@ -395,6 +429,9 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
+        stripe.setDefaultPublishableKey("pk_test_dCyfhfyeO2CZkcvT5xyIDdJj");
+        stripe.setStripeAccount("acct_19YLYlE7cWSP2tMo");
+
         Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         card.setAddressCity("Sheboygan");
         card.setAddressCountry("US");
@@ -412,7 +449,7 @@ public class StripeTest {
 
         try {
             Source cardSource =
-                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                    stripe.createSourceSynchronous(params);
             assertNotNull(cardSource);
             assertNotNull(cardSource.getClientSecret());
             assertNotNull(cardSource.getId());
