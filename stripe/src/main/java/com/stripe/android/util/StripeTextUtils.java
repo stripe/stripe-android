@@ -1,39 +1,16 @@
 package com.stripe.android.util;
 
 import android.support.annotation.Nullable;
-import android.view.KeyEvent;
-
-import com.stripe.android.model.BankAccount;
-import com.stripe.android.model.Card;
-import com.stripe.android.model.Token;
+import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static com.stripe.android.model.BankAccount.BankAccountType;
-import static com.stripe.android.model.Card.CardBrand;
-import static com.stripe.android.model.Card.FundingType;
-import static com.stripe.android.model.Token.TokenType;
-
 /**
  * Utility class for common text-related operations on Stripe data coming from the server.
  */
 public class StripeTextUtils {
-
-    private static int[] NON_DELETE_KEYS = {
-            KeyEvent.KEYCODE_0,
-            KeyEvent.KEYCODE_1,
-            KeyEvent.KEYCODE_2,
-            KeyEvent.KEYCODE_3,
-            KeyEvent.KEYCODE_4,
-            KeyEvent.KEYCODE_5,
-            KeyEvent.KEYCODE_6,
-            KeyEvent.KEYCODE_7,
-            KeyEvent.KEYCODE_8,
-            KeyEvent.KEYCODE_9,
-            KeyEvent.KEYCODE_SLASH
-    };
 
     /**
      * Util Array for converting bytes to a hex string.
@@ -67,19 +44,8 @@ public class StripeTextUtils {
      * @param value the input string to test
      * @return {@code true} if the input value consists entirely of integers
      */
-    public static boolean isWholePositiveNumber(String value) {
-        if (value == null) {
-            return false;
-        }
-
-        // Refraining from using android's TextUtils in order to avoid
-        // depending on another package.
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isDigit(value.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
+    public static boolean isWholePositiveNumber(@Nullable String value) {
+        return value != null && TextUtils.isDigitsOnly(value);
     }
 
     /**
