@@ -42,6 +42,7 @@ public class Stripe {
         public void create(
                 @NonNull final SourceParams sourceParams,
                 @NonNull final String publishableKey,
+                @Nullable final String stripeAccount,
                 @Nullable Executor executor,
                 @NonNull final SourceCallback sourceCallback) {
             AsyncTask<Void, Void, ResponseWrapper> task =
@@ -50,9 +51,12 @@ public class Stripe {
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
                                 Source source = StripeApiHandler.createSourceOnServer(
+                                        null,
                                         mContext,
                                         sourceParams,
-                                        publishableKey);
+                                        publishableKey,
+                                        stripeAccount,
+                                        null);
                                 return new ResponseWrapper(source);
                             } catch (StripeException stripeException) {
                                 return new ResponseWrapper(stripeException);
@@ -79,6 +83,7 @@ public class Stripe {
         public void create(
                 final Map<String, Object> tokenParams,
                 final String publishableKey,
+                final String stripeAccount,
                 final @NonNull @Token.TokenType String tokenType,
                 final Executor executor,
                 final TokenCallback callback) {
@@ -88,7 +93,10 @@ public class Stripe {
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
                                 RequestOptions requestOptions =
-                                        RequestOptions.builder(publishableKey).build();
+                                        RequestOptions.builder(
+                                                publishableKey,
+                                                stripeAccount,
+                                                RequestOptions.TYPE_QUERY).build();
                                 Token token = StripeApiHandler.createTokenOnServer(
                                         mContext,
                                         tokenParams,
@@ -114,6 +122,7 @@ public class Stripe {
     private Context mContext;
     private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
+    private String mStripeAccount;
 
     /**
      * A constructor with only context, to set the key later.
@@ -262,7 +271,10 @@ public class Stripe {
             CardException,
             APIException {
         validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        RequestOptions requestOptions = RequestOptions.builder(
+                publishableKey,
+                mStripeAccount,
+                RequestOptions.TYPE_QUERY).build();
         return StripeApiHandler.createTokenOnServer(
                 mContext,
                 hashMapFromBankAccount(mContext, bankAccount),
@@ -299,7 +311,7 @@ public class Stripe {
         if (apiKey == null) {
             return;
         }
-        mSourceCreator.create(sourceParams, apiKey, executor, callback);
+        mSourceCreator.create(sourceParams, apiKey, mStripeAccount, executor, callback);
     }
 
     /**
@@ -420,7 +432,7 @@ public class Stripe {
             return null;
         }
         return StripeApiHandler.createSourceOnServer(
-                null, mContext, params, apiKey, mLoggingResponseListener);
+                null, mContext, params, apiKey, mStripeAccount, mLoggingResponseListener);
     }
 
     /**
@@ -468,7 +480,10 @@ public class Stripe {
             APIException {
         validateKey(publishableKey);
 
-        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        RequestOptions requestOptions = RequestOptions.builder(
+                publishableKey,
+                mStripeAccount,
+                RequestOptions.TYPE_QUERY).build();
         return StripeApiHandler.createTokenOnServer(
                 mContext,
                 hashMapFromCard(mContext, card),
@@ -520,7 +535,10 @@ public class Stripe {
             CardException,
             APIException {
         validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(publishableKey).build();
+        RequestOptions requestOptions = RequestOptions.builder(
+                publishableKey,
+                mStripeAccount,
+                RequestOptions.TYPE_QUERY).build();
         return StripeApiHandler.createTokenOnServer(
                 mContext,
                 hashMapFromPersonalId(mContext, personalId),
@@ -663,7 +681,18 @@ public class Stripe {
      */
     public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey) {
         validateKey(publishableKey);
-        this.mDefaultPublishableKey = publishableKey;
+        mDefaultPublishableKey = publishableKey;
+    }
+
+    /**
+     * Set the Stripe Connect account to use with this Stripe instance.
+     *
+     * @see <a href=https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header>
+     *     Authentication via the stripe account header</a>
+     * @param stripeAccount the account ID to be set
+     */
+    public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
+        mStripeAccount = stripeAccount;
     }
 
     @VisibleForTesting
@@ -687,6 +716,7 @@ public class Stripe {
         mTokenCreator.create(
                 tokenParams,
                 publishableKey,
+                mStripeAccount,
                 tokenType,
                 executor,
                 callback);
@@ -756,6 +786,7 @@ public class Stripe {
         void create(
                 @NonNull SourceParams params,
                 @NonNull String publishableKey,
+                @Nullable String stripeAccount,
                 @Nullable Executor executor,
                 @NonNull SourceCallback sourceCallback);
     }
@@ -764,6 +795,7 @@ public class Stripe {
     interface TokenCreator {
         void create(Map<String, Object> params,
                     String publishableKey,
+                    String stripeAccount,
                     @NonNull @Token.TokenType String tokenType,
                     Executor executor,
                     TokenCallback callback);

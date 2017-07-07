@@ -25,18 +25,21 @@ public class RequestOptions {
     @Nullable private final String mIdempotencyKey;
     @Nullable private final String mPublishableApiKey;
     @NonNull @RequestType private final String mRequestType;
+    @Nullable private final String mStripeAccount;
 
     private RequestOptions(
             @NonNull String apiVersion,
             @Nullable String guid,
             @Nullable String idempotencyKey,
             @Nullable String publishableApiKey,
-            @NonNull @RequestType String requestType) {
+            @NonNull @RequestType String requestType,
+            @Nullable String stripeAccount) {
         mApiVersion = apiVersion;
         mGuid = guid;
         mIdempotencyKey = idempotencyKey;
         mPublishableApiKey = publishableApiKey;
         mRequestType = requestType;
+        mStripeAccount = stripeAccount;
     }
 
     /**
@@ -77,6 +80,11 @@ public class RequestOptions {
         return mRequestType;
     }
 
+    @Nullable
+    String getStripeAccount() {
+        return mStripeAccount;
+    }
+
     /**
      * Static accessor for the {@link RequestOptionsBuilder} class. Creates
      * a builder for a {@link #TYPE_QUERY} options item
@@ -86,6 +94,14 @@ public class RequestOptions {
      */
     public static RequestOptions.RequestOptionsBuilder builder(@Nullable String publishableApiKey) {
         return builder(publishableApiKey, TYPE_QUERY);
+    }
+
+    public static RequestOptions.RequestOptionsBuilder builder(
+            @Nullable String publishableApiKey,
+            @Nullable String stripeAccount,
+            @NonNull @RequestType String requestType) {
+        return new RequestOptionsBuilder(publishableApiKey, requestType)
+                .setStripeAccount(stripeAccount);
     }
 
     /**
@@ -113,13 +129,14 @@ public class RequestOptions {
         private String idempotencyKey;
         private String publishableApiKey;
         private @RequestType String requestType;
+        private String stripeAccount;
 
         /**
          * Builder constructor requiring an API key.
          *
          * @param publishableApiKey your publishable API key
          */
-        public RequestOptionsBuilder(
+        RequestOptionsBuilder(
                 @Nullable String publishableApiKey,
                 @NonNull @RequestType String requestType) {
             this.publishableApiKey = publishableApiKey;
@@ -133,7 +150,7 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        public RequestOptionsBuilder setPublishableApiKey(@NonNull String publishableApiKey) {
+        RequestOptionsBuilder setPublishableApiKey(@NonNull String publishableApiKey) {
             this.publishableApiKey = publishableApiKey;
             return this;
         }
@@ -146,7 +163,7 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        public RequestOptionsBuilder setIdempotencyKey(@Nullable String idempotencyKey) {
+        RequestOptionsBuilder setIdempotencyKey(@Nullable String idempotencyKey) {
             this.idempotencyKey = idempotencyKey;
             return this;
         }
@@ -158,7 +175,7 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        public RequestOptionsBuilder setGuid(@Nullable String guid) {
+        RequestOptionsBuilder setGuid(@Nullable String guid) {
             this.guid = guid;
             return this;
         }
@@ -171,10 +188,16 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        public RequestOptionsBuilder setApiVersion(@Nullable String apiVersion) {
+        RequestOptionsBuilder setApiVersion(@Nullable String apiVersion) {
             this.apiVersion = StripeTextUtils.isBlank(apiVersion)
                     ? null
                     : apiVersion;
+            return this;
+        }
+
+        @NonNull
+        RequestOptionsBuilder setStripeAccount(@Nullable String stripeAccount) {
+            this.stripeAccount = stripeAccount;
             return this;
         }
 
@@ -189,7 +212,8 @@ public class RequestOptions {
                     this.guid,
                     this.idempotencyKey,
                     this.publishableApiKey,
-                    this.requestType);
+                    this.requestType,
+                    this.stripeAccount);
         }
     }
 }
