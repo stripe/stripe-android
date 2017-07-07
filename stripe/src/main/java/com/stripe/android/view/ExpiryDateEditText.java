@@ -10,8 +10,6 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 
-import com.stripe.android.util.DateUtils;
-
 /**
  * An {@link EditText} that handles putting numbers around a central divider character.
  */

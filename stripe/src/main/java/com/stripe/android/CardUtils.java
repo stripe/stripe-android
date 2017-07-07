@@ -1,9 +1,10 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
+import com.stripe.android.util.StripeTextUtils;
 
 import static com.stripe.android.model.Card.CardBrand;
 
@@ -12,13 +13,31 @@ import static com.stripe.android.model.Card.CardBrand;
  */
 public class CardUtils {
 
-    public static final int LENGTH_COMMON_CARD = 16;
-    public static final int LENGTH_AMERICAN_EXPRESS = 15;
-    public static final int LENGTH_DINERS_CLUB = 14;
+    private static final int LENGTH_COMMON_CARD = 16;
+    private static final int LENGTH_AMERICAN_EXPRESS = 15;
+    private static final int LENGTH_DINERS_CLUB = 14;
 
-    public static final int CVC_LENGTH_COMMON = 3;
-    public static final int CVC_LENGTH_AMEX = 4;
+    /**
+     * Returns a {@link Card.CardBrand} corresponding to a partial card number,
+     * or {@link Card#UNKNOWN} if the card brand can't be determined from the input value.
+     *
+     * @param cardNumber a credit card number or partial card number
+     * @return the {@link Card.CardBrand} corresponding to that number,
+     * or {@link Card#UNKNOWN} if it can't be determined
+     */
+    @NonNull
+    @Card.CardBrand
+    public static String getPossibleCardType(@Nullable String cardNumber) {
+        return getPossibleCardType(cardNumber, true);
+    }
 
+    /**
+     * Checks the input string to see whether or not it is a valid card number, possibly
+     * with groupings separated by spaces or hyphens.
+     *
+     * @param cardNumber a String that may or may not represent a valid card number
+     * @return {@code true} if and only if the input value is a valid card number
+     */
     public static boolean isValidCardNumber(@Nullable String cardNumber) {
         String normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(cardNumber);
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber);
@@ -30,7 +49,7 @@ public class CardUtils {
      * @param cardNumber a String that may or may not represent a valid Luhn number
      * @return {@code true} if and only if the input value is a valid Luhn number
      */
-    public static boolean isValidLuhnNumber(@Nullable String cardNumber) {
+    static boolean isValidLuhnNumber(@Nullable String cardNumber) {
         if (cardNumber == null) {
             return false;
         }
@@ -68,12 +87,9 @@ public class CardUtils {
      * @param cardNumber the card number with no spaces or dashes
      * @return {@code true} if the card number is of known type and the correct length
      */
-    public static boolean isValidCardLength(@Nullable String cardNumber) {
-        if (cardNumber == null) {
-            return false;
-        }
-
-        return isValidCardLength(cardNumber, getPossibleCardType(cardNumber, false));
+    static boolean isValidCardLength(@Nullable String cardNumber) {
+        return cardNumber != null && isValidCardLength(cardNumber,
+                getPossibleCardType(cardNumber, false));
     }
 
     /**
@@ -84,7 +100,7 @@ public class CardUtils {
      * @param cardBrand a {@link CardBrand} used to get the correct size
      * @return {@code true} if the card number is the correct length for the assumed brand
      */
-    public static boolean isValidCardLength(
+    static boolean isValidCardLength(
             @Nullable String cardNumber,
             @NonNull @CardBrand String cardBrand) {
         if(cardNumber == null || Card.UNKNOWN.equals(cardBrand)) {
@@ -102,22 +118,8 @@ public class CardUtils {
         }
     }
 
-    /**
-     * Returns a {@link CardBrand} corresponding to a partial card number,
-     * or {@link Card#UNKNOWN} if the card brand can't be determined from the input value.
-     *
-     * @param cardNumber a credit card number or partial card number
-     * @return the {@link CardBrand} corresponding to that number,
-     * or {@link Card#UNKNOWN} if it can't be determined
-     */
     @NonNull
-    @CardBrand
-    public static String getPossibleCardType(@Nullable String cardNumber) {
-        return getPossibleCardType(cardNumber, true);
-    }
-
-    @NonNull
-    @CardBrand
+    @Card.CardBrand
     private static String getPossibleCardType(@Nullable String cardNumber,
                                               boolean shouldNormalize) {
         if (StripeTextUtils.isBlank(cardNumber)) {
@@ -145,60 +147,4 @@ public class CardUtils {
             return Card.UNKNOWN;
         }
     }
-
-
-    /**
-     * Separates a card number according to the brand requirements, including prefixes of card
-     * numbers, so that the groups can be easily displayed if the user is typing them in.
-     * Note that this does not verify that the card number is valid, or even that it is a number.
-     *
-     * @param spacelessCardNumber the raw card number, without spaces
-     * @param brand the {@link CardBrand} to use as a separating scheme
-     * @return an array of strings with the number groups, in order. If the number is not complete,
-     * some of the array entries may be {@code null}.
-     */
-    @NonNull
-    public static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
-                                                    @NonNull @CardBrand String brand) {
-        String[] numberGroups;
-        if (brand.equals(Card.AMERICAN_EXPRESS)) {
-            numberGroups = new String[3];
-
-            int length = spacelessCardNumber.length();
-            int lastUsedIndex = 0;
-            if (length > 4) {
-                numberGroups[0] = spacelessCardNumber.substring(0, 4);
-                lastUsedIndex = 4;
-            }
-
-            if (length > 10) {
-                numberGroups[1] = spacelessCardNumber.substring(4, 10);
-                lastUsedIndex = 10;
-            }
-
-            for (int i = 0; i < 3; i++) {
-                if (numberGroups[i] != null) {
-                    continue;
-                }
-                numberGroups[i] = spacelessCardNumber.substring(lastUsedIndex);
-                break;
-            }
-
-        } else {
-            numberGroups = new String[4];
-            int i = 0;
-            int previousStart = 0;
-            while((i + 1) * 4 < spacelessCardNumber.length()) {
-                String group = spacelessCardNumber.substring(previousStart, (i + 1) * 4);
-                numberGroups[i] = group;
-                previousStart = (i + 1) * 4;
-                i++;
-            }
-            // Always stuff whatever is left into the next available array entry. This handles
-            // incomplete numbers, full 16-digit numbers, and full 14-digit numbers
-            numberGroups[i] = spacelessCardNumber.substring(previousStart);
-        }
-        return numberGroups;
-    }
-
 }
