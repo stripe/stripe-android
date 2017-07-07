@@ -687,6 +687,8 @@ public class Stripe {
     /**
      * Set the Stripe Connect account to use with this Stripe instance.
      *
+     * @see <a href=https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header>
+     *     Authentication via the stripe account header</a>
      * @param stripeAccount the account ID to be set
      */
     public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
