@@ -1,4 +1,4 @@
-package com.stripe.android.util;
+package com.stripe.android.view;
 
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -6,45 +6,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.model.Card;
-import com.stripe.android.time.Clock;
-
 import java.util.Calendar;
-import java.util.Locale;
 
-public class DateUtils {
+class DateUtils {
 
     static final int MAX_VALID_YEAR = 9980;
-
-    /**
-     * Determines whether or not the input year has already passed.
-     *
-     * @param year the input year, as a two or four-digit integer
-     * @return {@code true} if the year has passed, {@code false} otherwise.
-     */
-    public static boolean hasYearPassed(int year) {
-        int normalized = normalizeYear(year);
-        Calendar now = Clock.getCalendarInstance();
-        return normalized < now.get(Calendar.YEAR);
-    }
-
-    /**
-     * Determines whether the input year-month pair has passed.
-     *
-     * @param year the input year, as a two or four-digit integer
-     * @param month the input month
-     * @return {@code true} if the input time has passed, {@code false} otherwise.
-     */
-    public static boolean hasMonthPassed(int year, int month) {
-        if (hasYearPassed(year)) {
-            return true;
-        }
-
-        Calendar now = Clock.getCalendarInstance();
-        // Expires at end of specified month, Calendar month starts at 0
-        return normalizeYear(year) == now.get(Calendar.YEAR)
-                && month < (now.get(Calendar.MONTH) + 1);
-    }
 
     /**
      * Checks to see if the string input represents a valid month.
@@ -53,7 +19,7 @@ public class DateUtils {
      * @return {@code true} if the string is a number between "01" and "12" inclusive,
      * {@code false} otherwise
      */
-    public static boolean isValidMonth(@Nullable String monthString) {
+    static boolean isValidMonth(@Nullable String monthString) {
         if (monthString == null) {
             return false;
         }
@@ -77,7 +43,7 @@ public class DateUtils {
      */
     @Size(2)
     @NonNull
-    public static String[] separateDateStringParts(@NonNull @Size(max = 4) String expiryInput) {
+    static String[] separateDateStringParts(@NonNull @Size(max = 4) String expiryInput) {
         String[] parts = new String[2];
         if (expiryInput.length() >= 2) {
             parts[0] = expiryInput.substring(0, 2);
@@ -103,7 +69,7 @@ public class DateUtils {
      * month and year, {@code false} otherwise. Note that some cards expire on the first of the
      * month, but we don't validate that here.
      */
-    public static boolean isExpiryDataValid(int expiryMonth, int expiryYear) {
+    static boolean isExpiryDataValid(int expiryMonth, int expiryYear) {
         return isExpiryDataValid(expiryMonth, expiryYear, Calendar.getInstance());
     }
 
@@ -141,7 +107,7 @@ public class DateUtils {
      * @param year a year number, either in two-digit form or four-digit form
      * @return a length-four string representing the date, or an empty string if input is invalid
      */
-    public static String createDateStringFromIntegerInput(
+    static String createDateStringFromIntegerInput(
             @IntRange(from = 1, to = 12) int month,
             @IntRange(from = 0, to = 9999) int year) {
         String monthString = String.valueOf(month);
@@ -175,7 +141,7 @@ public class DateUtils {
      * @return a four-digit year
      */
     @IntRange(from = 1000, to = 9999)
-    public static int convertTwoDigitYearToFour(@IntRange(from = 0, to = 99) int inputYear) {
+    static int convertTwoDigitYearToFour(@IntRange(from = 0, to = 99) int inputYear) {
         return convertTwoDigitYearToFour(inputYear, Calendar.getInstance());
     }
 
@@ -193,16 +159,5 @@ public class DateUtils {
             centuryBase--;
         }
         return centuryBase * 100 + inputYear;
-    }
-
-    // Convert two-digit year to full year if necessary
-    private static int normalizeYear(int year)  {
-        if (year < 100 && year >= 0) {
-            Calendar now = Clock.getCalendarInstance();
-            String currentYear = String.valueOf(now.get(Calendar.YEAR));
-            String prefix = currentYear.substring(0, currentYear.length() - 2);
-            year = Integer.parseInt(String.format(Locale.US, "%s%02d", prefix, year));
-        }
-        return year;
     }
 }

@@ -28,8 +28,6 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
-import com.stripe.android.util.CardUtils;
-import com.stripe.android.util.DateUtils;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeTextUtils;
 
@@ -145,7 +143,7 @@ public class CardInputWidget extends LinearLayout {
         }
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        int requiredLength = mIsAmEx ? CardUtils.CVC_LENGTH_AMEX : CardUtils.CVC_LENGTH_COMMON;
+        int requiredLength = mIsAmEx ? Card.CVC_LENGTH_AMERICAN_EXPRESS : Card.CVC_LENGTH_COMMON;
         String cvcValue = mCvcNumberEditText.getText().toString();
         if (StripeTextUtils.isBlank(cvcValue) || cvcValue.length() != requiredLength) {
             return null;
@@ -188,7 +186,7 @@ public class CardInputWidget extends LinearLayout {
      */
     public void setExpiryDate(
             @IntRange(from = 1, to = 12) int month,
-            @IntRange(from = 0) int year) {
+            @IntRange(from = 0, to = 9999) int year) {
         mExpiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year));
     }
 
@@ -842,11 +840,12 @@ public class CardInputWidget extends LinearLayout {
     private void updateCvc(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             mCvcNumberEditText.setFilters(
-                    new InputFilter[] {new InputFilter.LengthFilter(CardUtils.CVC_LENGTH_AMEX)});
+                    new InputFilter[] {
+                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)});
             mCvcNumberEditText.setHint(R.string.cvc_amex_hint);
         } else {
             mCvcNumberEditText.setFilters(
-                    new InputFilter[] {new InputFilter.LengthFilter(CardUtils.CVC_LENGTH_COMMON)});
+                    new InputFilter[] {new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
             mCvcNumberEditText.setHint(R.string.cvc_number_hint);
         }
     }

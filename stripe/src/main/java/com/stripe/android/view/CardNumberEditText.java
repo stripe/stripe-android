@@ -11,7 +11,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.util.CardUtils;
+import com.stripe.android.CardUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import java.util.Arrays;
@@ -174,7 +174,7 @@ public class CardNumberEditText extends StripeEditText {
                     return;
                 }
 
-                String[] cardParts = CardUtils.separateCardNumberGroups(
+                String[] cardParts = ViewUtils.separateCardNumberGroups(
                         spacelessNumber, mCardBrand);
                 StringBuilder formattedNumberBuilder = new StringBuilder();
                 for (int i = 0; i < cardParts.length; i++) {

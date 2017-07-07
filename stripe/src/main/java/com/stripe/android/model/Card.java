@@ -7,8 +7,7 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
-import com.stripe.android.util.CardUtils;
-import com.stripe.android.util.DateUtils;
+import com.stripe.android.CardUtils;
 import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.util.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
@@ -576,7 +575,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         if (!validateExpYear()) {
             return false;
         }
-        return !DateUtils.hasMonthPassed(expYear, expMonth);
+        return !ModelUtils.hasMonthPassed(expYear, expMonth);
     }
 
     /**
@@ -613,7 +612,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateExpYear() {
-        return expYear != null && !DateUtils.hasYearPassed(expYear);
+        return expYear != null && !ModelUtils.hasYearPassed(expYear);
     }
 
     /**

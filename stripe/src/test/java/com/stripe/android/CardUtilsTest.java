@@ -1,4 +1,4 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import com.stripe.android.model.Card;
 
@@ -9,7 +9,6 @@ import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -194,112 +193,5 @@ public class CardUtilsTest {
         // Note: it is not the job of this function to de-space the card number, nor de-hyphen it
         assertFalse(CardUtils.isValidLuhnNumber("4242 4242 4242 4242"));
         assertFalse(CardUtils.isValidLuhnNumber("4242-4242-4242-4242"));
-    }
-
-
-    @Test
-    public void separateCardNumberGroups_withVisa_returnsCorrectCardGroups() {
-        String testCardNumber = "4000056655665556";
-        String[] groups = CardUtils.separateCardNumberGroups(testCardNumber, Card.VISA);
-        assertEquals(4, groups.length);
-        assertEquals("4000", groups[0]);
-        assertEquals("0566", groups[1]);
-        assertEquals("5566", groups[2]);
-        assertEquals("5556", groups[3]);
-    }
-
-    @Test
-    public void separateCardNumberGroups_withAmex_returnsCorrectCardGroups() {
-        String testCardNumber = "378282246310005";
-        String[] groups =
-                CardUtils.separateCardNumberGroups(testCardNumber, Card.AMERICAN_EXPRESS);
-        assertEquals(3, groups.length);
-        assertEquals("3782", groups[0]);
-        assertEquals("822463", groups[1]);
-        assertEquals("10005", groups[2]);
-    }
-
-    @Test
-    public void separateCardNumberGroups_withDinersClub_returnsCorrectCardGroups() {
-        String testCardNumber = "38520000023237";
-        String[] groups =
-                CardUtils.separateCardNumberGroups(testCardNumber, Card.DINERS_CLUB);
-        assertEquals(4, groups.length);
-        assertEquals("3852", groups[0]);
-        assertEquals("0000", groups[1]);
-        assertEquals("0232", groups[2]);
-        assertEquals("37", groups[3]);
-    }
-
-    @Test
-    public void separateCardNumberGroups_withInvalid_returnsCorrectCardGroups() {
-        String testCardNumber = "1234056655665556";
-        String[] groups = CardUtils.separateCardNumberGroups(testCardNumber, Card.UNKNOWN);
-        assertEquals(4, groups.length);
-        assertEquals("1234", groups[0]);
-        assertEquals("0566", groups[1]);
-        assertEquals("5566", groups[2]);
-        assertEquals("5556", groups[3]);
-    }
-
-    @Test
-    public void separateCardNumberGroups_withAmexPrefix_returnsPrefixGroups() {
-        String testCardNumber = "378282246310005";
-        String[] groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 2), Card.AMERICAN_EXPRESS);
-        assertEquals(3, groups.length);
-        assertEquals("37", groups[0]);
-        assertNull(groups[1]);
-        assertNull(groups[2]);
-
-        groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 5), Card.AMERICAN_EXPRESS);
-        assertEquals(3, groups.length);
-        assertEquals("3782", groups[0]);
-        assertEquals("8", groups[1]);
-        assertNull(groups[2]);
-
-        groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 11), Card.AMERICAN_EXPRESS);
-        assertEquals(3, groups.length);
-        assertEquals("3782", groups[0]);
-        assertEquals("822463", groups[1]);
-        assertEquals("1", groups[2]);
-    }
-
-    @Test
-    public void separateCardNumberGroups_withVisaPrefix_returnsCorrectGroups() {
-        String testCardNumber = "4000056655665556";
-        String[] groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 2), Card.VISA);
-        assertEquals(4, groups.length);
-        assertEquals("40", groups[0]);
-        assertNull(groups[1]);
-        assertNull(groups[2]);
-        assertNull(groups[3]);
-
-        groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 5), Card.VISA);
-        assertEquals(4, groups.length);
-        assertEquals("4000", groups[0]);
-        assertEquals("0", groups[1]);
-        assertNull(groups[2]);
-        assertNull(groups[3]);
-
-        groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 9), Card.VISA);
-        assertEquals(4, groups.length);
-        assertEquals("4000", groups[0]);
-        assertEquals("0566", groups[1]);
-        assertEquals("5", groups[2]);
-        assertNull(groups[3]);
-
-        groups = CardUtils.separateCardNumberGroups(
-                testCardNumber.substring(0, 15), Card.VISA);
-        assertEquals(4, groups.length);
-        assertEquals("4000", groups[0]);
-        assertEquals("0566", groups[1]);
-        assertEquals("5566", groups[2]);
-        assertEquals("555", groups[3]);
     }
 }
