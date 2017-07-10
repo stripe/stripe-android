@@ -7,7 +7,6 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.net.StripeResponse;
-import com.stripe.android.util.StripeNetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
