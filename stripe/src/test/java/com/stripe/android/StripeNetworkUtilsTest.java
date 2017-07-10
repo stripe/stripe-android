@@ -1,4 +1,4 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import android.support.annotation.NonNull;
 
