@@ -19,7 +19,7 @@ import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information

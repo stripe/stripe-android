@@ -9,7 +9,7 @@ import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeNetworkUtils;
+import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONException;
