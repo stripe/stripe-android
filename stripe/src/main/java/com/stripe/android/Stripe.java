@@ -24,9 +24,9 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 
-import static com.stripe.android.util.StripeNetworkUtils.hashMapFromBankAccount;
-import static com.stripe.android.util.StripeNetworkUtils.hashMapFromCard;
-import static com.stripe.android.util.StripeNetworkUtils.hashMapFromPersonalId;
+import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
+import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
+import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
 
 /**
  * Class that handles {@link Token} creation from charges and {@link Card} models.

@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
