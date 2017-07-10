@@ -5,13 +5,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 
-import com.stripe.android.util.StripeNetworkUtils;
+import com.stripe.android.StripeNetworkUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.Source.SourceType;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.

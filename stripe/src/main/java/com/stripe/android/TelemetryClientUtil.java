@@ -55,12 +55,14 @@ class TelemetryClientUtil {
         return telemetryMap;
     }
 
+    @NonNull
     private static Map<String, Object> createSingleValuePair(Object value) {
         Map<String, Object> singleItemMap = new HashMap<>();
         singleItemMap.put("v", value);
         return singleItemMap;
     }
 
+    @NonNull
     private static String getTimeZoneString() {
         int minutes =
                 (int) TimeUnit.MINUTES.convert(TimeZone.getDefault().getRawOffset(),
@@ -79,6 +81,7 @@ class TelemetryClientUtil {
         return decHours.toString();
     }
 
+    @NonNull
     private static String getScreen(@NonNull final Context context) {
         if (context.getResources() == null) {
             return "";
@@ -91,6 +94,7 @@ class TelemetryClientUtil {
         return String.format(Locale.ENGLISH, "%dw_%dh_%ddpi", width, height, density);
     }
 
+    @NonNull
     private static String getAndroidVersionString() {
         StringBuilder builder = new StringBuilder();
         final String DELIMITER = " ";
@@ -102,6 +106,7 @@ class TelemetryClientUtil {
     }
 
     @SuppressWarnings("HardwareIds")
+    @NonNull
     static String getHashedId(@NonNull final Context context) {
         String id = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
@@ -113,6 +118,7 @@ class TelemetryClientUtil {
         return hashId == null ? "" : hashId;
     }
 
+    @NonNull
     private static String getHashedMuid(@NonNull final Context context) {
         String guid = getHashedId(context);
         String packageName = getPackageName(context);
@@ -121,6 +127,7 @@ class TelemetryClientUtil {
         return hashed == null ? "" : hashed;
     }
 
+    @NonNull
     private static String getPackageName(@NonNull final Context context) {
         if (context.getApplicationContext() == null
                 || context.getApplicationContext().getPackageName() == null) {
