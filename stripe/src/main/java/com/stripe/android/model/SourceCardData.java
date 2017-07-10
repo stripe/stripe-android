@@ -5,8 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.util.StripeNetworkUtils;
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.StripeNetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;

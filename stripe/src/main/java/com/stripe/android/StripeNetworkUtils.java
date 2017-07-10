@@ -1,4 +1,4 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
+import com.stripe.android.util.LoggingUtils;
+import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,12 +35,12 @@ public class StripeNetworkUtils {
      * @return a {@link Map} containing the appropriate values read from the card
      */
     @NonNull
-    public static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
+    static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
         return hashMapFromCard(null, context, card);
     }
 
     @NonNull
-    public static Map<String, Object> hashMapFromPersonalId(@NonNull Context context,
+    static Map<String, Object> hashMapFromPersonalId(@NonNull Context context,
                                                             @NonNull String personalId) {
         Map<String, Object> tokenParams = new HashMap<>();
         tokenParams.put("personal_id_number", personalId);
@@ -89,7 +91,7 @@ public class StripeNetworkUtils {
      * @return a map that can be used as parameters to create a bank account object
      */
     @NonNull
-    public static Map<String, Object> hashMapFromBankAccount(@NonNull Context context,
+    static Map<String, Object> hashMapFromBankAccount(@NonNull Context context,
                                                              @NonNull BankAccount bankAccount) {
         return hashMapFromBankAccount(null, context, bankAccount);
     }
@@ -122,7 +124,7 @@ public class StripeNetworkUtils {
     }
 
     @SuppressWarnings("HardwareIds")
-    public static void addUidParams(
+    static void addUidParams(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull Map<String, Object> params) {
@@ -179,7 +181,7 @@ public class StripeNetworkUtils {
     }
 
     @VisibleForTesting
-    public interface UidProvider {
+    interface UidProvider {
         String getUid();
         String getPackageName();
     }
