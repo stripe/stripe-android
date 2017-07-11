@@ -1,7 +1,6 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -19,42 +18,13 @@ public class StripeTextUtils {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     /**
-     * Check to see if the input number has any of the given prefixes.
-     *
-     * @param number the number to test
-     * @param prefixes the prefixes to test against
-     * @return {@code true} if number begins with any of the input prefixes
-     */
-    public static boolean hasAnyPrefix(String number, String... prefixes) {
-        if (number == null) {
-            return false;
-        }
-
-        for (String prefix : prefixes) {
-            if (number.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check to see whether the input string is a whole, positive number.
-     *
-     * @param value the input string to test
-     * @return {@code true} if the input value consists entirely of integers
-     */
-    public static boolean isWholePositiveNumber(@Nullable String value) {
-        return value != null && TextUtils.isDigitsOnly(value);
-    }
-
-    /**
      * Swap {@code null} for blank text values.
      *
      * @param value an input string that may or may not be entirely whitespace
-     * @return {@code null} if the string is entirely whitespace, or the original value if not
+     * @return {@code null} if the string is entirely whitespace, otherwise the input value
      */
-    public static String nullIfBlank(String value) {
+    @Nullable
+    public static String nullIfBlank(@Nullable String value) {
         if (isBlank(value)) {
             return null;
         }
@@ -69,7 +39,7 @@ public class StripeTextUtils {
      * @param value a possibly blank input string value
      * @return {@code true} if and only if the value is all whitespace, {@code null}, or empty
      */
-    public static boolean isBlank(String value) {
+    public static boolean isBlank(@Nullable String value) {
         return value == null || value.trim().length() == 0;
     }
 
@@ -90,13 +60,33 @@ public class StripeTextUtils {
     }
 
     /**
+     * Check to see if the input number has any of the given prefixes.
+     *
+     * @param number the number to test
+     * @param prefixes the prefixes to test against
+     * @return {@code true} if number begins with any of the input prefixes
+     */
+    static boolean hasAnyPrefix(String number, String... prefixes) {
+        if (number == null) {
+            return false;
+        }
+
+        for (String prefix : prefixes) {
+            if (number.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Calculate a hash value of a String input and convert the result to a hex string.
      *
      * @param toHash a value to hash
      * @return a hexadecimal string
      */
     @Nullable
-    public static String shaHashInput(@Nullable String toHash) {
+    static String shaHashInput(@Nullable String toHash) {
         if (StripeTextUtils.isBlank(toHash)) {
             return null;
         }

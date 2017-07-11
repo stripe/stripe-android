@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.StripeTextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

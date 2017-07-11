@@ -1,5 +1,8 @@
 package com.stripe.android.model;
 
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
 import com.stripe.android.time.Clock;
 
 import java.util.Calendar;
@@ -9,6 +12,16 @@ import java.util.Locale;
  * Utilities function class for the models package.
  */
 class ModelUtils {
+
+    /**
+     * Check to see whether the input string is a whole, positive number.
+     *
+     * @param value the input string to test
+     * @return {@code true} if the input value consists entirely of integers
+     */
+    static boolean isWholePositiveNumber(@Nullable String value) {
+        return value != null && TextUtils.isDigitsOnly(value);
+    }
 
     /**
      * Determines whether the input year-month pair has passed.

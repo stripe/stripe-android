@@ -28,8 +28,7 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
-import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.StripeTextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,10 +51,10 @@ public class CardInputWidget extends LinearLayout {
             FOCUS_EXPIRY,
             FOCUS_CVC
     })
-    public @interface FocusField { }
-    public static final String FOCUS_CARD = "focus_card";
-    public static final String FOCUS_EXPIRY = "focus_expiry";
-    public static final String FOCUS_CVC = "focus_cvc";
+    @interface FocusField { }
+    static final String FOCUS_CARD = "focus_card";
+    static final String FOCUS_EXPIRY = "focus_expiry";
+    static final String FOCUS_CVC = "focus_cvc";
 
     public static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
@@ -67,6 +66,8 @@ public class CardInputWidget extends LinearLayout {
                 put(Card.VISA, R.drawable.ic_visa);
                 put(Card.UNKNOWN, R.drawable.ic_unknown);
             }};
+
+    static final String LOGGING_TOKEN = "CardInputView";
 
     private static final String PEEK_TEXT_COMMON = "4242";
     private static final String PEEK_TEXT_DINERS = "88";
@@ -150,7 +151,7 @@ public class CardInputWidget extends LinearLayout {
         }
 
         return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
-                .addLoggingToken(LoggingUtils.CARD_WIDGET_TOKEN);
+                .addLoggingToken(LOGGING_TOKEN);
     }
 
     /**
