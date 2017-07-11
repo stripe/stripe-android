@@ -525,10 +525,9 @@ public class Stripe {
                 mLoggingResponseListener);
     }
 
-    public void logEventSynchronous(@NonNull Map<String, Object> loggingMap,
-                                    @Nullable StripeApiHandler.LoggingResponseListener listener) {
+    public void logEventSynchronous(@NonNull Map<String, Object> loggingMap) {
         RequestOptions options = RequestOptions.builder(mDefaultPublishableKey).build();
-        StripeApiHandler.logApiCall(loggingMap, options, listener);
+        StripeApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
     }
 
     /**
