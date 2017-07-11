@@ -1,6 +1,7 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import com.stripe.android.BuildConfig;
+import com.stripe.android.LoggingUtils;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
 
@@ -26,13 +27,13 @@ public class LoggingUtilsTest {
     private static final String DUMMY_API_KEY = "pk_abc123";
     private static final List<String> EXPECTED_SINGLE_TOKEN_LIST = new ArrayList<>();
     static {
-        EXPECTED_SINGLE_TOKEN_LIST.add(LoggingUtils.CARD_WIDGET_TOKEN);
+        EXPECTED_SINGLE_TOKEN_LIST.add("CardInputView");
     }
 
     @Test
     public void getTokenCreationParams_withValidInput_createsCorrectMap() {
         List<String> tokensList = new ArrayList<>();
-        tokensList.add(LoggingUtils.CARD_WIDGET_TOKEN);
+        tokensList.add("CardInputView");
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         final String expectedTokenName =
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
@@ -66,7 +67,7 @@ public class LoggingUtilsTest {
     @Test
     public void getEventLoggingParams_withProductUsage_createsAllFields() {
         List<String> tokensList = new ArrayList<>();
-        tokensList.add(LoggingUtils.CARD_WIDGET_TOKEN);
+        tokensList.add("CardInputView");
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         final String expectedTokenName =
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
