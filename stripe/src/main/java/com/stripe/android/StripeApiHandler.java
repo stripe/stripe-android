@@ -21,8 +21,6 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeResponse;
 import com.stripe.android.net.StripeSSLSocketFactory;
-import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeTextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

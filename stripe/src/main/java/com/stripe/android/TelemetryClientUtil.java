@@ -7,9 +7,6 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 
-import com.stripe.android.BuildConfig;
-import com.stripe.android.util.StripeTextUtils;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashMap;
