@@ -1,4 +1,4 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
 import android.support.annotation.Nullable;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Represents a response from the Stripe servers.
  */
-public class StripeResponse {
+class StripeResponse {
 
     private String mResponseBody;
     private int mResponseCode;
@@ -21,7 +21,7 @@ public class StripeResponse {
      * @param responseBody the body of the response
      * @param responseHeaders any headers associated with the response
      */
-    public StripeResponse(
+    StripeResponse(
             int responseCode,
             String responseBody,
             @Nullable Map<String, List<String>> responseHeaders) {
@@ -33,14 +33,14 @@ public class StripeResponse {
     /**
      * @return the {@link #mResponseCode response code}.
      */
-    public int getResponseCode() {
+    int getResponseCode() {
         return mResponseCode;
     }
 
     /**
      * @return the {@link #mResponseBody response body}.
      */
-    public String getResponseBody() {
+    String getResponseBody() {
         return mResponseBody;
     }
 
@@ -48,7 +48,7 @@ public class StripeResponse {
      * @return the {@link #mResponseHeaders response headers}.
      */
     @Nullable
-    public Map<String, List<String>> getResponseHeaders() {
+    Map<String, List<String>> getResponseHeaders() {
         return mResponseHeaders;
     }
 }

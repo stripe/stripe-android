@@ -543,6 +543,11 @@ public class Stripe {
                 mLoggingResponseListener);
     }
 
+    public void logEventSynchronous(@NonNull Map<String, Object> loggingMap) {
+        RequestOptions options = RequestOptions.builder(mDefaultPublishableKey).build();
+        StripeApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
+    }
+
     /**
      * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
