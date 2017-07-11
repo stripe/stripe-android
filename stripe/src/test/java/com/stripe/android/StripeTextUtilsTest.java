@@ -1,6 +1,4 @@
-package com.stripe.android.util;
-
-import com.stripe.android.model.Card;
+package com.stripe.android;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,36 +61,6 @@ public class StripeTextUtilsTest {
     @Test
     public void hasAnyPrefixShouldNotMatchWithSpace() {
         assertFalse(StripeTextUtils.hasAnyPrefix("xyz", " x"));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldFailNull() {
-        assertFalse(StripeTextUtils.isWholePositiveNumber(null));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldPassIfEmpty() {
-        assertTrue(StripeTextUtils.isWholePositiveNumber(""));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldPass() {
-        assertTrue(StripeTextUtils.isWholePositiveNumber("123"));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldPassWithLeadingZero() {
-        assertTrue(StripeTextUtils.isWholePositiveNumber("000"));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldFailIfNegative() {
-        assertFalse(StripeTextUtils.isWholePositiveNumber("-1"));
-    }
-
-    @Test
-    public void wholePositiveNumberShouldFailIfLetters() {
-        assertFalse(StripeTextUtils.isWholePositiveNumber("1a"));
     }
 
     @Test

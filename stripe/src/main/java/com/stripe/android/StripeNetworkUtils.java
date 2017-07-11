@@ -10,8 +10,6 @@ import android.text.TextUtils;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeTextUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;

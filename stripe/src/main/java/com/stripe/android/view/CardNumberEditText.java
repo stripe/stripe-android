@@ -12,7 +12,7 @@ import android.widget.EditText;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.CardUtils;
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.StripeTextUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
