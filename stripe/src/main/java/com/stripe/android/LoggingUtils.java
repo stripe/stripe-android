@@ -1,11 +1,10 @@
-package com.stripe.android.util;
+package com.stripe.android;
 
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
 
@@ -21,32 +20,17 @@ import java.util.Set;
  * Util class to create logging items, which are fed as {@link java.util.Map Map} objects in
  * query parameters to our server.
  */
-public class LoggingUtils {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            ANDROID_PAY_TOKEN,
-            CARD_WIDGET_TOKEN
-    })
-    public @interface LoggingToken { }
-    public static final String ANDROID_PAY_TOKEN = "AndroidPay";
-    public static final String PII_TOKEN = "PII";
-    public static final String CARD_WIDGET_TOKEN = "CardInputView";
-    public static final Set<String> VALID_LOGGING_TOKENS = new HashSet<>();
-    static {
-        VALID_LOGGING_TOKENS.add(ANDROID_PAY_TOKEN);
-        VALID_LOGGING_TOKENS.add(CARD_WIDGET_TOKEN);
-    }
+class LoggingUtils {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             EVENT_TOKEN_CREATION,
             EVENT_SOURCE_CREATION
     })
-    public @interface LoggingEventName { }
-    public static final String EVENT_TOKEN_CREATION = "token_creation";
-    public static final String EVENT_SOURCE_CREATION = "source_creation";
-    public static final String FIELD_PRODUCT_USAGE = "product_usage";
+    @interface LoggingEventName { }
+    static final String EVENT_TOKEN_CREATION = "token_creation";
+    static final String EVENT_SOURCE_CREATION = "source_creation";
+    static final String FIELD_PRODUCT_USAGE = "product_usage";
 
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
     static final String FIELD_BINDINGS_VERSION = "bindings_version";
@@ -78,7 +62,7 @@ public class LoggingUtils {
     private static final String ANALYTICS_VERSION = "1.0";
 
     @NonNull
-    public static Map<String, Object> getTokenCreationParams(
+    static Map<String, Object> getTokenCreationParams(
             @NonNull List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @Nullable String tokenType) {
@@ -91,7 +75,7 @@ public class LoggingUtils {
     }
 
     @NonNull
-    public static Map<String, Object> getSourceCreationParams(
+    static Map<String, Object> getSourceCreationParams(
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
@@ -103,7 +87,7 @@ public class LoggingUtils {
     }
 
     @NonNull
-    public static Map<String, Object> getEventLoggingParams(
+    static Map<String, Object> getEventLoggingParams(
             @Nullable List<String> productUsageTokens,
             @Nullable @Source.SourceType String sourceType,
             @Nullable @Token.TokenType String tokenType,

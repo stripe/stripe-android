@@ -8,9 +8,8 @@ import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
-import com.stripe.android.util.LoggingUtils;
 import com.stripe.android.StripeNetworkUtils;
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,8 +31,6 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * A model object representing a Card in the Android SDK.
  */
 public class Card extends StripeJsonModel implements StripePaymentSource {
-
-    public static final String VALUE_CARD = "card";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -87,6 +84,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final int MAX_LENGTH_STANDARD = 16;
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
+
+    static final String VALUE_CARD = "card";
 
     private static final String FIELD_OBJECT = "object";
     private static final String FIELD_ADDRESS_CITY = "address_city";
@@ -594,7 +593,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
                 || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
                 || cvcValue.length() == 3;
 
-        return StripeTextUtils.isWholePositiveNumber(cvcValue) && validLength;
+        return ModelUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
 
     /**
@@ -637,7 +636,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public Card addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
+    public Card addLoggingToken(@NonNull String loggingToken) {
         loggingTokens.add(loggingToken);
         return this;
     }
@@ -852,23 +851,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     @CardBrand
     public String getBrand() {
         if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
-            @CardBrand String evaluatedType;
-            if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
-                evaluatedType = AMERICAN_EXPRESS;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
-                evaluatedType = DISCOVER;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_JCB)) {
-                evaluatedType = JCB;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DINERS_CLUB)) {
-                evaluatedType = DINERS_CLUB;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_VISA)) {
-                evaluatedType = VISA;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_MASTERCARD)) {
-                evaluatedType = MASTERCARD;
-            } else {
-                evaluatedType = UNKNOWN;
-            }
-            brand = evaluatedType;
+            brand = CardUtils.getPossibleCardType(number);
         }
 
         return brand;

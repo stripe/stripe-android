@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.util.StripeTextUtils;
 
 import static com.stripe.android.model.Card.CardBrand;
 
