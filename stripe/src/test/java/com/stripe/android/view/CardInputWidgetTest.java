@@ -13,7 +13,6 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
-import com.stripe.android.util.LoggingUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
+import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
 import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.verify;
 public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
-    private static final String[] EXPECTED_LOGGING_ARRAY = { LoggingUtils.CARD_WIDGET_TOKEN };
+    private static final String[] EXPECTED_LOGGING_ARRAY = { LOGGING_TOKEN };
     private CardInputWidget mCardInputWidget;
     private CardNumberEditText mCardNumberEditText;
     private ImageView mIconView;
