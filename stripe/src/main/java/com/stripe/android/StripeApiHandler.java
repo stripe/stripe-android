@@ -19,7 +19,6 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.StripeResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
