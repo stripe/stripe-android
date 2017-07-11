@@ -1,4 +1,4 @@
-package com.stripe.android.net;
+package com.stripe.android;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -16,7 +16,7 @@ import java.util.Set;
  * Wraps a SSLSocketFactory and enables more TLS versions on older versions of Android.
  * Most of the code is taken from stripe-java.
  */
-public class StripeSSLSocketFactory extends SSLSocketFactory {
+class StripeSSLSocketFactory extends SSLSocketFactory {
 
     private final SSLSocketFactory under;
     private final boolean tlsv11Supported, tlsv12Supported;
@@ -26,7 +26,7 @@ public class StripeSSLSocketFactory extends SSLSocketFactory {
     /**
      * Constructor for a socket factory instance.
      */
-    public StripeSSLSocketFactory() {
+    StripeSSLSocketFactory() {
         this.under = HttpsURLConnection.getDefaultSSLSocketFactory();
 
         // For Android prior to 4.1, TLSv1.1 and TLSv1.2 might not be supported

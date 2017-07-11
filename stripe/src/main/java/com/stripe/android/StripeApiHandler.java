@@ -20,7 +20,6 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeResponse;
-import com.stripe.android.net.StripeSSLSocketFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +48,7 @@ import javax.net.ssl.SSLSocketFactory;
 /**
  * Handler for calls to the Stripe API.
  */
-public class StripeApiHandler {
+class StripeApiHandler {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -70,7 +69,7 @@ public class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    public static void logApiCall(
+    static void logApiCall(
             @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
             @Nullable LoggingResponseListener listener) {
