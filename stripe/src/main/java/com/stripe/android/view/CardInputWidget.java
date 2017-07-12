@@ -217,6 +217,17 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText.setText("");
     }
 
+    /**
+     * Enable or disable text fields
+     *
+     * @param isEnabled boolean indicating whether fields should be enabled
+     */
+    public void setEnabled(boolean isEnabled) {
+        mCardNumberEditText.setEnabled(isEnabled);
+        mExpiryDateEditText.setEnabled(isEnabled);
+        mCvcNumberEditText.setEnabled(isEnabled);
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() != MotionEvent.ACTION_DOWN) {
