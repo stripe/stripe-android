@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -545,11 +546,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateCard() {
-        if (cvc == null) {
-            return validateNumber() && validateExpiryDate();
-        } else {
-            return validateNumber() && validateExpiryDate() && validateCVC();
-        }
+        return validateCard(Calendar.getInstance());
     }
 
     /**
@@ -568,13 +565,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean validateExpiryDate() {
-        if (!validateExpMonth()) {
-            return false;
-        }
-        if (!validateExpYear()) {
-            return false;
-        }
-        return !ModelUtils.hasMonthPassed(expYear, expMonth);
+        return validateExpiryDate(Calendar.getInstance());
     }
 
     /**
@@ -610,8 +601,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      *
      * @return {@code true} if valid, {@code false} otherwise.
      */
-    public boolean validateExpYear() {
-        return expYear != null && !ModelUtils.hasYearPassed(expYear);
+    boolean validateExpYear(Calendar now) {
+        return expYear != null && !ModelUtils.hasYearPassed(expYear, now);
     }
 
     /**
@@ -980,6 +971,24 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         return map;
     }
 
+    boolean validateCard(Calendar now) {
+        if (cvc == null) {
+            return validateNumber() && validateExpiryDate(now);
+        } else {
+            return validateNumber() && validateExpiryDate(now) && validateCVC();
+        }
+    }
+
+    boolean validateExpiryDate(Calendar now) {
+        if (!validateExpMonth()) {
+            return false;
+        }
+        if (!validateExpYear(now)) {
+            return false;
+        }
+        return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
+    }
+    
     private Card(Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
