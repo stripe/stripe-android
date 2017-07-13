@@ -8,6 +8,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWalletRequest;
+import com.google.android.gms.wallet.MaskedWallet;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 
@@ -15,6 +16,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
 
 import java.util.Currency;
+import java.util.Locale;
 
 import static com.google.android.gms.wallet.PaymentMethodTokenizationType.PAYMENT_GATEWAY;
 
@@ -25,6 +27,7 @@ public class AndroidPayConfiguration {
 
     private static AndroidPayConfiguration mInstance;
 
+    @Nullable private String mCountryCode;
     @NonNull private Currency mCurrency;
     private boolean mIsPhoneNumberRequired;
     private boolean mIsShippingAddressRequired;
@@ -148,20 +151,29 @@ public class AndroidPayConfiguration {
             return null;
         }
 
-        return MaskedWalletRequest.newBuilder()
+        MaskedWalletRequest.Builder builder = MaskedWalletRequest.newBuilder()
                 .setCart(cart)
                 .setPhoneNumberRequired(isPhoneNumberRequired)
                 .setShippingAddressRequired(isShippingAddressRequired)
                 .setMerchantName(mMerchantName)
                 .setCurrencyCode(currencyCode)
                 .setEstimatedTotalPrice(cart.getTotalPrice())
-                .setPaymentMethodTokenizationParameters(paymentMethodTokenizationParameters)
-                .build();
+                .setPaymentMethodTokenizationParameters(paymentMethodTokenizationParameters);
+        if (!TextUtils.isEmpty(mCountryCode)) {
+            builder.setCountryCode(mCountryCode);
+        }
+
+        return builder.build();
     }
 
     @NonNull
     public Currency getCurrency() {
         return mCurrency;
+    }
+
+    @Nullable
+    public String getCountryCode() {
+        return mCountryCode;
     }
 
     @NonNull
@@ -176,8 +188,21 @@ public class AndroidPayConfiguration {
     }
 
     @NonNull
-    public AndroidPayConfiguration setCurrencyCode(String currencyCode) {
+    public AndroidPayConfiguration setCurrencyCode(@NonNull String currencyCode) {
         mCurrency = Currency.getInstance(currencyCode.toUpperCase());
+        return this;
+    }
+
+    /**
+     * Sets the ISO 3166-1 alpha-2 country code based on where the transaction will be completed
+     * or processed. Note that the input value is not validated locally.
+     *
+     * @param countryCode the country code to be set
+     * @return {@code this, for chaining purposes}
+     */
+    @NonNull
+    public AndroidPayConfiguration setCountryCode(@Nullable String countryCode) {
+        mCountryCode = countryCode;
         return this;
     }
 

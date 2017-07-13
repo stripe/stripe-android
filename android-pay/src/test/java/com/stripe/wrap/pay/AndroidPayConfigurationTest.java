@@ -69,6 +69,7 @@ public class AndroidPayConfigurationTest {
         mAndroidPayConfiguration.setPhoneNumberRequired(true);
         mAndroidPayConfiguration.setShippingAddressRequired(false);
         mAndroidPayConfiguration.setCurrencyCode("usd");
+        mAndroidPayConfiguration.setCountryCode("US");
 
         MaskedWalletRequest maskedWalletRequest =
                 mAndroidPayConfiguration.generateMaskedWalletRequest(mCart);
@@ -78,6 +79,7 @@ public class AndroidPayConfigurationTest {
         assertEquals("USD", maskedWalletRequest.getCurrencyCode());
         assertEquals(llamaName, maskedWalletRequest.getMerchantName());
         assertEquals(mCart.getTotalPrice(), maskedWalletRequest.getEstimatedTotalPrice());
+        assertEquals("US", maskedWalletRequest.getCountryCode());
         assertNotNull(maskedWalletRequest.getPaymentMethodTokenizationParameters());
         Bundle bundle =
                 maskedWalletRequest.getPaymentMethodTokenizationParameters().getParameters();
