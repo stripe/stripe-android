@@ -194,8 +194,8 @@ public class AndroidPayConfiguration {
     }
 
     /**
-     * Sets the ISO 3166-1 alpha-2 country code based on where the transaction was completed or
-     * processed. Note that the input value is not validated locally.
+     * Sets the ISO 3166-1 alpha-2 country code based on where the transaction will be completed
+     * or processed. Note that the input value is not validated locally.
      *
      * @param countryCode the country code to be set
      * @return {@code this, for chaining purposes}
