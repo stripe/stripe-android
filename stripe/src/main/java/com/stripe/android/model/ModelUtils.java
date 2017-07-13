@@ -3,8 +3,6 @@ package com.stripe.android.model;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.stripe.android.time.Clock;
-
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -28,17 +26,18 @@ class ModelUtils {
      *
      * @param year the input year, as a two or four-digit integer
      * @param month the input month
-     * @return {@code true} if the input time has passed, {@code false} otherwise.
+     * @param now the current time
+     * @return {@code true} if the input time has passed the specified current time,
+     *  {@code false} otherwise.
      */
     @SuppressWarnings("WrongConstant")
-    static boolean hasMonthPassed(int year, int month) {
-        if (hasYearPassed(year)) {
+    static boolean hasMonthPassed(int year, int month, Calendar now) {
+        if (hasYearPassed(year, now)) {
             return true;
         }
 
-        Calendar now = Clock.getCalendarInstance();
         // Expires at end of specified month, Calendar month starts at 0
-        return normalizeYear(year) == now.get(Calendar.YEAR)
+        return normalizeYear(year, now) == now.get(Calendar.YEAR)
                 && month < (now.get(Calendar.MONTH) + 1);
     }
 
@@ -46,18 +45,17 @@ class ModelUtils {
      * Determines whether or not the input year has already passed.
      *
      * @param year the input year, as a two or four-digit integer
-     * @return {@code true} if the year has passed, {@code false} otherwise.
+     * @param now, the current time
+     * @return {@code true} if the input year has passed the year of the specified current time
+     *  {@code false} otherwise.
      */
-    static boolean hasYearPassed(int year) {
-        int normalized = normalizeYear(year);
-        Calendar now = Clock.getCalendarInstance();
+    static boolean hasYearPassed(int year, Calendar now) {
+        int normalized = normalizeYear(year, now);
         return normalized < now.get(Calendar.YEAR);
     }
 
-    // Convert two-digit year to full year if necessary
-    private static int normalizeYear(int year)  {
+    private static int normalizeYear(int year, Calendar now)  {
         if (year < 100 && year >= 0) {
-            Calendar now = Clock.getCalendarInstance();
             String currentYear = String.valueOf(now.get(Calendar.YEAR));
             String prefix = currentYear.substring(0, currentYear.length() - 2);
             year = Integer.parseInt(String.format(Locale.US, "%s%02d", prefix, year));
