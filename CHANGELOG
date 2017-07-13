@@ -1,3 +1,7 @@
+4.1.3 2017-07-13
+    Adding Stripe-Account optional header for integration with Connect merchant accounts
+    Adding AndroidPayConfiguration.setCountryCode optional method to specify transaction country
+
 4.1.2 2017-06-27
     Fixing a missing method call in android pay
     Removing the android support V4 libraries
