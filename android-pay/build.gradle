@@ -37,7 +37,7 @@ dependencies {
     javadocDeps 'com.android.support:support-annotations:' + android_support_version
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
-    provided 'com.google.android.gms:play-services-wallet:11.0.1'
+    provided 'com.google.android.gms:play-services-wallet:10.2.6'
     provided 'com.stripe:stripe-android:4.1.2'
 
     testCompile 'junit:junit:4.12'
