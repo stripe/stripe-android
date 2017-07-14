@@ -88,9 +88,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
     static final String ANDROID_PAY_TOKEN = "AndroidPay";
 
-    static final String EVENT_TOKEN_CREATION = "token_creation";
-    static final String EVENT_SOURCE_CREATION = "source_creation";
-
     // Bool to track whether the app is already resolving an error
     private boolean mResolvingError = false;
     @NonNull private Executor mExecutor = Executors.newFixedThreadPool(3);
@@ -720,14 +717,13 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
     private boolean handleAsSource(@NonNull FullWallet fullWallet, @NonNull String rawSource) {
         Source source = Source.fromString(rawSource);
-
         if (source == null) {
             return false;
-        } else {
-            logApiCallOnNewThread(source);
-            onStripePaymentSourceReturned(fullWallet, source);
-            return true;
         }
+
+        logApiCallOnNewThread(source);
+        onStripePaymentSourceReturned(fullWallet, source);
+        return true;
     }
 
     private boolean handleAsToken(@NonNull FullWallet fullWallet, @NonNull String rawToken) {
