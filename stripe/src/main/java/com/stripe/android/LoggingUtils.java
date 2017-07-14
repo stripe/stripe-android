@@ -76,10 +76,11 @@ class LoggingUtils {
 
     @NonNull
     static Map<String, Object> getSourceCreationParams(
+            @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                null,
+                productUsageTokens,
                 sourceType,
                 null,
                 publishableApiKey,

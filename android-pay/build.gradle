@@ -39,7 +39,8 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
 
     provided 'com.google.android.gms:play-services-wallet:11.0.1'
-    provided 'com.stripe:stripe-android:4.1.4'
+    // This should be changed back to a "provided" line before release
+    compile project(':stripe')
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.7.22'
@@ -50,4 +51,9 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.0.1'
 }
 
-apply from: 'deploy.gradle'
+if (CONFIGURATION_STATUS == 'Release') {
+    apply from: 'deploy.gradle'
+} else {
+    print 'Current configuration status is ' + CONFIGURATION_STATUS
+}
+

@@ -1,7 +1,5 @@
 package com.stripe.android;
 
-import com.stripe.android.BuildConfig;
-import com.stripe.android.LoggingUtils;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
 
@@ -50,11 +48,12 @@ public class LoggingUtilsTest {
 
     @Test
     public void getSourceCreationParams_withValidInput_createsCorrectMap() {
-        // We don't use any product usage fields for sources yet, and we are also missing
-        // the TOKEN_TYPE logging field.
-        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 2;
+        // Size is SIZE-1 because tokens don't have a token_type field
+        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
+        List<String> tokenList = new ArrayList<>();
+        tokenList.add("CardInputView");
         Map<String, Object> loggingParams =
-                LoggingUtils.getSourceCreationParams(DUMMY_API_KEY, Source.SEPA_DEBIT);
+                LoggingUtils.getSourceCreationParams(tokenList, DUMMY_API_KEY, Source.SEPA_DEBIT);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(Source.SEPA_DEBIT, loggingParams.get(LoggingUtils.FIELD_SOURCE_TYPE));
         assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));

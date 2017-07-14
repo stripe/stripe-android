@@ -1,7 +1,6 @@
 package com.stripe.wrap.pay.activity;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.api.BooleanResult;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -13,18 +12,12 @@ import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.fragment.SupportWalletFragment;
 import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
-import com.stripe.android.exception.StripeException;
-import com.stripe.android.model.Token;
-import com.stripe.android.net.StripeApiHandler;
-import com.stripe.android.net.StripeResponse;
-import com.stripe.android.net.TokenParser;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.BuildConfig;
 import com.stripe.wrap.pay.testharness.TestAndroidPayActivity;
 import com.stripe.wrap.pay.utils.CartContentException;
 import com.stripe.wrap.pay.utils.CartManager;
 
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,16 +30,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -104,8 +91,6 @@ public class StripeAndroidPayActivityTest {
     @Mock TestAndroidPayActivity.StripeAndroidPayActivityListener mListener;
 
     private ActivityController<TestAndroidPayActivity> mActivityController;
-    private CartManager mCartManager;
-    private Cart mCart;
 
     @Before
     public void setup() {
@@ -113,17 +98,17 @@ public class StripeAndroidPayActivityTest {
         when(mGoogleApiClientMockBuilder.getMockGoogleApiClient()).thenReturn(mGoogleApiClient);
         AndroidPayConfiguration.init(FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, "USD");
 
-        mCartManager = new CartManager();
-        mCartManager.addLineItem("First item", 100L);
-        mCartManager.addLineItem("Second item", 200L);
+        CartManager manager = new CartManager();
+        manager.addLineItem("First item", 100L);
+        manager.addLineItem("Second item", 200L);
 
         when(mAndroidPayAvailabilityChooser.doesAndroidPayCheckSucceed()).thenReturn(
                 new BooleanResult(new Status(CommonStatusCodes.SUCCESS), true));
 
         try {
-            mCart = mCartManager.buildCart();
+            Cart cart = manager.buildCart();
             Intent intent = new Intent(RuntimeEnvironment.application, TestAndroidPayActivity.class)
-                    .putExtra(StripeAndroidPayActivity.EXTRA_CART, mCart);
+                    .putExtra(StripeAndroidPayActivity.EXTRA_CART, cart);
             mActivityController = Robolectric.buildActivity(TestAndroidPayActivity.class, intent);
             mActivityController.get().setStripeAppCompatActivityListener(mListener);
             mActivityController.get().setGoogleApiClientMockBuilder(mGoogleApiClientMockBuilder);
@@ -221,39 +206,5 @@ public class StripeAndroidPayActivityTest {
         assertEquals(WalletFragmentMode.SELECTION_DETAILS, options.getMode());
         assertEquals(WalletConstants.ENVIRONMENT_TEST, options.getEnvironment());
         assertEquals(WalletConstants.THEME_LIGHT, options.getTheme());
-    }
-
-    @Test
-    public void logApiCallOnNewThread_whenPaymentMethodIsToken_logsTokenCreation() {
-        mActivityController.create().start();
-
-        StripeApiHandler.LoggingResponseListener listener =
-                mock(StripeApiHandler.LoggingResponseListener.class);
-        when(listener.shouldLogTest()).thenReturn(true);
-
-        ArgumentCaptor<StripeResponse> responseArgumentCaptor =
-                ArgumentCaptor.forClass(StripeResponse.class);
-        StripeAndroidPayActivity stripeActivity = mActivityController.get();
-
-        // For testing purposes, we work on the main thread.
-        stripeActivity.setExecutor(new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-                command.run();
-            }
-        });
-
-        try {
-            Token token = TokenParser.parseToken(RAW_TOKEN);
-            stripeActivity.logApiCallOnNewThread(token, listener);
-
-            verify(listener).onLoggingResponse(responseArgumentCaptor.capture());
-            StripeResponse response = responseArgumentCaptor.getValue();
-
-            assertEquals(200, response.getResponseCode());
-            verify(listener, never()).onStripeException(any(StripeException.class));
-        } catch (JSONException unexpected) {
-            fail("Test data parsing failure");
-        }
     }
 }
