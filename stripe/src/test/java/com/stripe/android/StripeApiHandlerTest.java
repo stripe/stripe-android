@@ -252,6 +252,7 @@ public class StripeApiHandlerTest {
                     RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
+                    null,
                     testLoggingListener);
 
             // Check that we get a token back; we don't care about its fields for this test.

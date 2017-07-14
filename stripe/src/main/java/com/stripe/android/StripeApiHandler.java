@@ -111,37 +111,20 @@ class StripeApiHandler {
             @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
-            @NonNull String stripeAccount,
+            @Nullable String stripeAccount,
             @Nullable LoggingResponseListener loggingResponseListener)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        Map<String, Object> paramMap = sourceParams.toParamMap();
-        StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
-        RequestOptions options = RequestOptions.builder(publishableKey).build();
-
-        try {
-            String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
-            setTelemetryData(context, loggingResponseListener);
-            Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
-                    apiKey,
-                    sourceParams.getType());
-            RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
-            return Source.fromString(requestData(POST, getSourcesUrl(), paramMap, options));
-        } catch (CardException unexpected) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
-        }
+        return createSourceOnServer(
+                uidProvider,
+                context,
+                sourceParams,
+                publishableKey,
+                stripeAccount,
+                loggingResponseListener,
+                null);
     }
 
     @VisibleForTesting
@@ -882,12 +865,8 @@ class StripeApiHandler {
             RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-        try {
-            StripeResponse response = requestData(method, url, params, options);
-            return Token.fromString(response.getResponseBody());
-        } catch (JSONException ignored) {
-            return null;
-        }
+        StripeResponse response = requestData(method, url, params, options);
+        return Token.fromString(response.getResponseBody());
     }
 
     private static void setTelemetryData(@NonNull Context context,
