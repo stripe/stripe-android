@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -36,23 +37,16 @@ import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
 import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
-import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.RequestOptions;
-import com.stripe.android.net.StripeApiHandler;
-import com.stripe.android.net.TokenParser;
-import com.stripe.android.util.LoggingUtils;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.utils.PaymentUtils;
 
-import org.json.JSONException;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -91,6 +85,8 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
     private static final int MSG_GET_SOURCE = 5005;
     private static final int MSG_SOURCE_COMPLETE = 6006;
     private static final int MSG_SOURCE_ERROR = 7007;
+
+    static final String ANDROID_PAY_TOKEN = "AndroidPay";
 
     // Bool to track whether the app is already resolving an error
     private boolean mResolvingError = false;
@@ -261,7 +257,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                                 if (booleanResult.getStatus().isSuccess()
                                         && booleanResult.getValue()) {
                                     onAndroidPayAvailable();
-                                    createAndAddBuyButtonWalletFragment();
                                 } else {
                                     onAndroidPayNotAvailable();
                                 }
@@ -425,34 +420,27 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         String rawPurchaseToken = fullWallet.getPaymentMethodToken().getToken();
         if (rawPurchaseToken == null) {
             Log.w(TAG, "Null token returned with non-null full wallet");
+            return;
         }
 
-        try {
-            Token token = TokenParser.parseToken(rawPurchaseToken);
-            if (AndroidPayConfiguration.getInstance().getUsesSources()) {
-                getStripeSource(fullWallet, token);
-            } else {
-                logApiCallOnNewThread(token, null);
-                onStripePaymentSourceReturned(fullWallet, token);
-            }
-        } catch (JSONException jsonException) {
+        boolean handledAsToken = handleAsToken(fullWallet, rawPurchaseToken);
+        boolean handledAsSource = false;
+        if (!handledAsToken) {
+            handledAsSource = handleAsSource(fullWallet, rawPurchaseToken);
+        }
+
+        if (handledAsSource) {
             Log.i(TAG,
                     String.format(Locale.ENGLISH,
-                            "Could not parse object as Stripe token. Trying as Source.\n%s",
-                            rawPurchaseToken),
-                    jsonException);
-            Source source = Source.fromString(rawPurchaseToken);
+                            "Could not parse object as Stripe Token but found Stripe Source\n%s",
+                            rawPurchaseToken));
+        }
 
-            if (source == null) {
-                Log.w(TAG,
-                        String.format(Locale.ENGLISH,
-                                "Could not parse object as Stripe Source\n%s",
-                                rawPurchaseToken),
-                        jsonException);
-                return;
-            }
-            logApiCallOnNewThread(source, null);
-            onStripePaymentSourceReturned(fullWallet, source);
+        if (!handledAsToken && !handledAsSource) {
+            Log.w(TAG,
+                    String.format(Locale.ENGLISH,
+                            "Could not parse object as Stripe Source or Token\n%s",
+                            rawPurchaseToken));
         }
     }
 
@@ -669,7 +657,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         String sourceString = bundle.getString("source");
                         Source source = Source.fromString(sourceString);
                         if (source != null) {
-                            logApiCallOnNewThread(source, null);
+                            logApiCallOnNewThread(source);
                             onStripePaymentSourceReturned(wallet, source);
                             return;
                         }
@@ -727,37 +715,41 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         mStripeNetworkHandler.sendMessage(getSourceMessage);
     }
 
-    @VisibleForTesting
-    void setExecutor(@NonNull Executor executor) {
-        mExecutor = executor;
+    private boolean handleAsSource(@NonNull FullWallet fullWallet, @NonNull String rawSource) {
+        Source source = Source.fromString(rawSource);
+        if (source == null) {
+            return false;
+        }
+
+        logApiCallOnNewThread(source);
+        onStripePaymentSourceReturned(fullWallet, source);
+        return true;
+    }
+
+    private boolean handleAsToken(@NonNull FullWallet fullWallet, @NonNull String rawToken) {
+        Token token = Token.fromString(rawToken);
+        if (token == null) {
+            return false;
+        }
+
+        if (AndroidPayConfiguration.getInstance().getUsesSources()) {
+            getStripeSource(fullWallet, token);
+        } else {
+            logApiCallOnNewThread(token);
+            onStripePaymentSourceReturned(fullWallet, token);
+        }
+        return true;
     }
 
     @VisibleForTesting
-    void logApiCallOnNewThread(@NonNull StripePaymentSource paymentSource,
-                               @Nullable final StripeApiHandler.LoggingResponseListener listener) {
-        @LoggingUtils.LoggingEventName String eventName =
-                paymentSource instanceof Token
-                        ? LoggingUtils.EVENT_TOKEN_CREATION
-                        : LoggingUtils.EVENT_SOURCE_CREATION;
-
-        List<String> loggingTokens = Arrays.asList(LoggingUtils.ANDROID_PAY_TOKEN);
-        String publishableKey = AndroidPayConfiguration.getInstance().getPublicApiKey();
-
-        final Map<String, Object> loggingParams = LoggingUtils.getEventLoggingParams(
-                loggingTokens,
-                null,
-                null,
-                publishableKey,
-                eventName);
-        final RequestOptions options = RequestOptions.builder(publishableKey).build();
+    void logApiCallOnNewThread(@NonNull final StripePaymentSource paymentSource) {
+        final List<String> productUsageList = new ArrayList<>();
+        productUsageList.add(ANDROID_PAY_TOKEN);
 
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                StripeApiHandler.logApiCall(
-                        loggingParams,
-                        options,
-                        listener);
+                mStripe.logEventSynchronous(productUsageList, paymentSource);
             }
         };
 
