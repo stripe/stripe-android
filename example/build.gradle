@@ -12,6 +12,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
     compile 'com.google.android.gms:play-services-wallet:11.0.2'
+
     /* Needed for RxAndroid */
     /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
