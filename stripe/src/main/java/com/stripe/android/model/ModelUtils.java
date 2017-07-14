@@ -54,7 +54,7 @@ class ModelUtils {
         return normalized < now.get(Calendar.YEAR);
     }
 
-    private static int normalizeYear(int year, Calendar now)  {
+    static int normalizeYear(int year, Calendar now)  {
         if (year < 100 && year >= 0) {
             String currentYear = String.valueOf(now.get(Calendar.YEAR));
             String prefix = currentYear.substring(0, currentYear.length() - 2);
