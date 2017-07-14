@@ -423,30 +423,27 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
         String rawPurchaseToken = fullWallet.getPaymentMethodToken().getToken();
         if (rawPurchaseToken == null) {
             Log.w(TAG, "Null token returned with non-null full wallet");
-        }
-
-        Token token = Token.fromString(rawPurchaseToken);
-        if (token == null) {
-            // Could not parse object as Token, trying as Source
-            Source source = Source.fromString(rawPurchaseToken);
-
-            if (source == null) {
-                Log.w(TAG,
-                        String.format(Locale.ENGLISH,
-                                "Could not parse object as Stripe Source\n%s",
-                                rawPurchaseToken));
-            } else {
-                logApiCallOnNewThread(source);
-                onStripePaymentSourceReturned(fullWallet, source);
-            }
             return;
         }
 
-        if (AndroidPayConfiguration.getInstance().getUsesSources()) {
-            getStripeSource(fullWallet, token);
-        } else {
-            logApiCallOnNewThread(token);
-            onStripePaymentSourceReturned(fullWallet, token);
+        boolean handledAsToken = handleAsToken(fullWallet, rawPurchaseToken);
+        boolean handledAsSource = false;
+        if (!handledAsToken) {
+            handledAsSource = handleAsSource(fullWallet, rawPurchaseToken);
+        }
+
+        if (handledAsSource) {
+            Log.i(TAG,
+                    String.format(Locale.ENGLISH,
+                            "Could not parse object as Stripe Token but found Stripe Source\n%s",
+                            rawPurchaseToken));
+        }
+
+        if (!handledAsToken && !handledAsSource) {
+            Log.w(TAG,
+                    String.format(Locale.ENGLISH,
+                            "Could not parse object as Stripe Source or Token\n%s",
+                            rawPurchaseToken));
         }
     }
 
@@ -719,6 +716,33 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
 
         Message getSourceMessage = Message.obtain(mStripeNetworkHandler, MSG_GET_SOURCE);
         mStripeNetworkHandler.sendMessage(getSourceMessage);
+    }
+
+    private boolean handleAsSource(@NonNull FullWallet fullWallet, @NonNull String rawSource) {
+        Source source = Source.fromString(rawSource);
+
+        if (source == null) {
+            return false;
+        } else {
+            logApiCallOnNewThread(source);
+            onStripePaymentSourceReturned(fullWallet, source);
+            return true;
+        }
+    }
+
+    private boolean handleAsToken(@NonNull FullWallet fullWallet, @NonNull String rawToken) {
+        Token token = Token.fromString(rawToken);
+        if (token == null) {
+            return false;
+        }
+
+        if (AndroidPayConfiguration.getInstance().getUsesSources()) {
+            getStripeSource(fullWallet, token);
+        } else {
+            logApiCallOnNewThread(token);
+            onStripePaymentSourceReturned(fullWallet, token);
+        }
+        return true;
     }
 
     @VisibleForTesting
