@@ -261,7 +261,6 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                                 if (booleanResult.getStatus().isSuccess()
                                         && booleanResult.getValue()) {
                                     onAndroidPayAvailable();
-                                    createAndAddBuyButtonWalletFragment();
                                 } else {
                                     onAndroidPayNotAvailable();
                                 }

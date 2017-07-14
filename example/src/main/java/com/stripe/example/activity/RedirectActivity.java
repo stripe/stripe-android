@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
@@ -36,13 +37,6 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class RedirectActivity extends AppCompatActivity {
 
-    /*
-     * Change this to your publishable key.
-     *
-     * You can get your key here: https://dashboard.stripe.com/account/apikeys
-     */
-    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "put your key here";
     private static final String RETURN_SCHEMA = "stripe://";
     private static final String RETURN_HOST_ASYNC = "async";
     private static final String RETURN_HOST_SYNC = "sync";
@@ -145,7 +139,7 @@ public class RedirectActivity extends AppCompatActivity {
                             public Source call() throws Exception {
                                 return mStripe.createSourceSynchronous(
                                         cardSourceParams,
-                                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                                        PaymentConfiguration.getInstance().getPublishableKey());
                             }
                         });
 
@@ -217,7 +211,7 @@ public class RedirectActivity extends AppCompatActivity {
                     public Source call() throws Exception {
                         return mStripe.createSourceSynchronous(
                                 threeDParams,
-                                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+                                PaymentConfiguration.getInstance().getPublishableKey());
                     }
                 });
 

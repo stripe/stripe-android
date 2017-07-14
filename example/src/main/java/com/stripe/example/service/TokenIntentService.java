@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -27,22 +28,18 @@ public class TokenIntentService extends IntentService {
     private static final String EXTRA_MONTH = "com.stripe.example.service.extra.month";
     private static final String EXTRA_YEAR = "com.stripe.example.service.extra.year";
     private static final String EXTRA_CVC = "com.stripe.example.service.extra.cvc";
-    private static final String EXTRA_PUBLISHABLE_KEY =
-            "com.stripe.example.service.extra.publishablekey";
 
     public static Intent createTokenIntent(
             @NonNull Activity launchingActivity,
             @Nullable String cardNumber,
             @Nullable Integer month,
             @Nullable Integer year,
-            @Nullable String cvc,
-            @NonNull String publishableKey) {
+            @Nullable String cvc) {
         return new Intent(launchingActivity, TokenIntentService.class)
                 .putExtra(EXTRA_CARD_NUMBER, cardNumber)
                 .putExtra(EXTRA_MONTH, month)
                 .putExtra(EXTRA_YEAR, year)
-                .putExtra(EXTRA_CVC, cvc)
-                .putExtra(EXTRA_PUBLISHABLE_KEY, publishableKey);
+                .putExtra(EXTRA_CVC, cvc);
     }
 
     public TokenIntentService() {
@@ -59,12 +56,12 @@ public class TokenIntentService extends IntentService {
             Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
             String cvc = intent.getStringExtra(EXTRA_CVC);
 
-            String publishableKey = intent.getStringExtra(EXTRA_PUBLISHABLE_KEY);
             Card card = new Card(cardNumber, month, year, cvc);
 
             Stripe stripe = new Stripe(this);
             try {
-                token = stripe.createTokenSynchronous(card, publishableKey);
+                token = stripe.createTokenSynchronous(card,
+                        PaymentConfiguration.getInstance().getPublishableKey());
             } catch (StripeException stripeEx) {
                 errorMessage = stripeEx.getLocalizedMessage();
             }

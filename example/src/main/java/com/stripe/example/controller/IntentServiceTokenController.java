@@ -26,7 +26,6 @@ public class IntentServiceTokenController {
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListViewController;
     private ProgressDialogController mProgressDialogController;
-    private String mPublishableKey;
 
     private TokenBroadcastReceiver mTokenBroadcastReceiver;
 
@@ -36,15 +35,13 @@ public class IntentServiceTokenController {
             @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
-            @NonNull ProgressDialogController progressDialogController,
-            @NonNull String publishableKey) {
+            @NonNull ProgressDialogController progressDialogController) {
 
         mActivity = appCompatActivity;
         mCardInputWidget = cardInputWidget;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
-        mPublishableKey = publishableKey;
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,8 +83,7 @@ public class IntentServiceTokenController {
                 cardToSave.getNumber(),
                 cardToSave.getExpMonth(),
                 cardToSave.getExpYear(),
-                cardToSave.getCVC(),
-                mPublishableKey);
+                cardToSave.getCVC());
         mProgressDialogController.startProgress();
         mActivity.startService(tokenServiceIntent);
     }
