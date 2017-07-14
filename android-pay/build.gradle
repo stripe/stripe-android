@@ -50,4 +50,9 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.0.1'
 }
 
-apply from: 'deploy.gradle'
+if (CONFIGURATION_STATUS == 'Release') {
+    apply from: 'deploy.gradle'
+} else {
+    print 'Current configuration status is ' + CONFIGURATION_STATUS
+}
+
