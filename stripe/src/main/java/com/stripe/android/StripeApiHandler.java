@@ -156,6 +156,7 @@ class StripeApiHandler {
 
             setTelemetryData(context, loggingResponseListener);
             Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    null,
                     apiKey,
                     sourceParams.getType());
             RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();

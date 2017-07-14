@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -22,6 +23,7 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 
 import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
@@ -543,8 +545,26 @@ public class Stripe {
                 mLoggingResponseListener);
     }
 
-    public void logEventSynchronous(@NonNull Map<String, Object> loggingMap) {
-        RequestOptions options = RequestOptions.builder(mDefaultPublishableKey).build();
+    public void logEventSynchronous(
+            @NonNull List<String> productUsageTokens,
+            @NonNull StripePaymentSource paymentSource) {
+        RequestOptions.RequestOptionsBuilder builder =
+                RequestOptions.builder(mDefaultPublishableKey);
+        if (mStripeAccount != null) {
+            builder.setStripeAccount(mStripeAccount);
+        }
+        RequestOptions options = builder.build();
+
+        Map<String, Object> loggingMap = null;
+        if (paymentSource instanceof Token) {
+            Token token = (Token) paymentSource;
+            loggingMap = LoggingUtils.getTokenCreationParams(productUsageTokens,
+                    mDefaultPublishableKey, token.getType());
+        } else {
+            Source source = (Source) paymentSource;
+            loggingMap = LoggingUtils.getSourceCreationParams(productUsageTokens,
+                    mDefaultPublishableKey, source.getType());
+        }
         StripeApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
     }
 

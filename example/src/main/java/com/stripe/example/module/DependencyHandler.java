@@ -21,13 +21,6 @@ import com.stripe.example.controller.RxTokenController;
  */
 public class DependencyHandler {
 
-    /*
-     * Change this to your publishable key.
-     *
-     * You can get your key here: https://dashboard.stripe.com/account/apikeys
-     */
-    private static final String PUBLISHABLE_KEY = "put your key here";
-
     private AsyncTaskTokenController mAsyncTaskController;
     private CardInputWidget mCardInputWidget;
     private Context mContext;
@@ -69,8 +62,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController,
-                    PUBLISHABLE_KEY);
+                    mProgresDialogController);
         }
         return mAsyncTaskController;
     }
@@ -95,8 +87,7 @@ public class DependencyHandler {
                     mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController,
-                    PUBLISHABLE_KEY);
+                    mProgresDialogController);
         }
         return mIntentServiceTokenController;
     }
@@ -119,8 +110,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController,
-                    PUBLISHABLE_KEY);
+                    mProgresDialogController);
         }
         return mRxTokenController;
     }
