@@ -1,19 +1,28 @@
 package com.stripe.wrap.pay;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
+import com.google.android.gms.identity.intents.model.CountrySpecification;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentMethodTokenizationType;
+import com.google.android.gms.wallet.WalletConstants;
+import com.stripe.wrap.pay.testutils.AssertUtils;
 
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.stripe.wrap.pay.testutils.AssertUtils.assertUnorderedListEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,12 +38,18 @@ public class AndroidPayConfigurationTest {
 
     private Cart mCart;
     private AndroidPayConfiguration mAndroidPayConfiguration;
+    private List<Integer> mDefaultCardNetworks;
 
     @Before
     public void setup() {
         AndroidPayConfiguration.init("pk_test_abc123", "USD");
         mAndroidPayConfiguration = AndroidPayConfiguration.getInstance();
         mCart = Cart.newBuilder().setTotalPrice("10.00").build();
+        mDefaultCardNetworks = new ArrayList<>();
+        mDefaultCardNetworks.add(WalletConstants.CardNetwork.AMEX);
+        mDefaultCardNetworks.add(WalletConstants.CardNetwork.VISA);
+        mDefaultCardNetworks.add(WalletConstants.CardNetwork.DISCOVER);
+        mDefaultCardNetworks.add(WalletConstants.CardNetwork.MASTERCARD);
     }
 
     @Test
@@ -95,6 +110,18 @@ public class AndroidPayConfigurationTest {
         mAndroidPayConfiguration.setPhoneNumberRequired(true);
         mAndroidPayConfiguration.setShippingAddressRequired(false);
         mAndroidPayConfiguration.setCurrencyCode("usd");
+        mAndroidPayConfiguration.addAllowedCardNetworks(WalletConstants.CardNetwork.AMEX,
+                WalletConstants.CardNetwork.MASTERCARD,
+                WalletConstants.CardNetwork.VISA);
+        mAndroidPayConfiguration.addAllowedShippingCountries("US", "JP");
+
+        List<Integer> expectedCardNetworks = Lists.newArrayList(
+                WalletConstants.CardNetwork.AMEX,
+                WalletConstants.CardNetwork.VISA,
+                WalletConstants.CardNetwork.MASTERCARD);
+        List<CountrySpecification> expectedCountries = Lists.newArrayList(
+                new CountrySpecification("US"),
+                new CountrySpecification("JP"));
 
         MaskedWalletRequest maskedWalletRequest =
                 mAndroidPayConfiguration.generateMaskedWalletRequest(
@@ -112,6 +139,10 @@ public class AndroidPayConfigurationTest {
         Bundle bundle =
                 maskedWalletRequest.getPaymentMethodTokenizationParameters().getParameters();
         assertNotNull(bundle);
+        assertUnorderedListEquals(expectedCardNetworks,
+                maskedWalletRequest.getAllowedCardNetworks());
+        assertUnorderedListEquals(expectedCountries,
+                maskedWalletRequest.getAllowedCountrySpecificationsForShipping());
         assertEquals("pk_test_llama", bundle.getString("stripe:publishableKey"));
     }
 

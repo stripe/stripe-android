@@ -6,16 +6,21 @@ import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
+import com.google.android.gms.identity.intents.model.CountrySpecification;
 import com.google.android.gms.wallet.Cart;
 import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.MaskedWallet;
 import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 
+import com.google.android.gms.wallet.WalletConstants;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
 
 import static com.google.android.gms.wallet.PaymentMethodTokenizationType.PAYMENT_GATEWAY;
@@ -27,6 +32,8 @@ public class AndroidPayConfiguration {
 
     private static AndroidPayConfiguration mInstance;
 
+    @NonNull private List<Integer> mCardNetworks = new ArrayList<>();
+    @NonNull private List<CountrySpecification> mCountrySpecifications = new ArrayList<>();
     @Nullable private String mCountryCode;
     @NonNull private Currency mCurrency;
     private boolean mIsPhoneNumberRequired;
@@ -103,6 +110,37 @@ public class AndroidPayConfiguration {
         mUsesSources = shouldUseSources;
     }
 
+    /**
+     * Specifies a set of card networks to allow. If not explicitly set,
+     * the default supported networks will be AMEX, DISCOVER, MASTERCARD, and VISA.
+     *
+     * @param networks one or more {@link WalletConstants.CardNetwork} values
+     */
+    public void addAllowedCardNetworks(@WalletConstants.CardNetwork Integer... networks) {
+        mCardNetworks.addAll(Arrays.asList(networks));
+    }
+
+    /**
+     * Add allowed shipping countries to your Masked Wallet Requests.
+     *
+     * @param countrySpecifications one or more ISO 3166-1 alpha-2 country codes
+     */
+    public void addAllowedShippingCountries(@NonNull String... countrySpecifications) {
+        for (String countrySpecification : countrySpecifications) {
+            mCountrySpecifications.add(new CountrySpecification(countrySpecification));
+        }
+    }
+
+    /**
+     * Add allowed shipping countries to your Masked Wallet Requests.
+     *
+     * @param countrySpecifications one or more {@link CountrySpecification} objects
+     */
+    public void addAllowedShippingCountries(
+            @NonNull CountrySpecification... countrySpecifications) {
+        mCountrySpecifications.addAll(Arrays.asList(countrySpecifications));
+    }
+
     @Nullable
     public PaymentMethodTokenizationParameters getPaymentMethodTokenizationParameters() {
         if (TextUtils.isEmpty(mPublicApiKey)) {
@@ -161,6 +199,14 @@ public class AndroidPayConfiguration {
                 .setPaymentMethodTokenizationParameters(paymentMethodTokenizationParameters);
         if (!TextUtils.isEmpty(mCountryCode)) {
             builder.setCountryCode(mCountryCode);
+        }
+
+        if (!mCountrySpecifications.isEmpty()) {
+            builder.addAllowedCountrySpecificationsForShipping(mCountrySpecifications);
+        }
+
+        if (!mCardNetworks.isEmpty()) {
+            builder.addAllowedCardNetworks(mCardNetworks);
         }
 
         return builder.build();
