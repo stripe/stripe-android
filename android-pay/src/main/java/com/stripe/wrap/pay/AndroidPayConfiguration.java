@@ -112,7 +112,9 @@ public class AndroidPayConfiguration {
 
     /**
      * Specifies a set of card networks to allow. If not explicitly set,
-     * the default supported networks will be AMEX, DISCOVER, MASTERCARD, and VISA.
+     * the default supported networks will be AMEX, DISCOVER, MASTERCARD, and VISA, as per
+     * <a href="https://developers.google.com/android/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#addAllowedCardNetwork(int)">
+     * Google's specifications</a>.
      *
      * @param networks one or more {@link WalletConstants.CardNetwork} values
      */

@@ -1,6 +1,5 @@
 package com.stripe.wrap.pay.testutils;
 
-
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.identity.intents.model.CountrySpecification;
