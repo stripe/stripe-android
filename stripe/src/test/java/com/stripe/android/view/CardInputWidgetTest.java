@@ -611,6 +611,22 @@ public class CardInputWidgetTest {
     }
 
     @Test
+    public void setEnabled_isTrue() {
+        mCardInputWidget.setEnabled(true);
+        assertTrue(mCardNumberEditText.isEnabled());
+        assertTrue(mExpiryEditText.isEnabled());
+        assertTrue(mCvcEditText.isEnabled());
+    }
+
+    @Test
+    public void setEnabled_isFalse() {
+        mCardInputWidget.setEnabled(false);
+        assertFalse(mCardNumberEditText.isEnabled());
+        assertFalse(mExpiryEditText.isEnabled());
+        assertFalse(mCvcEditText.isEnabled());
+    }
+
+    @Test
     public void setAllCardFields_whenValidValues_allowsGetCardWithExpectedValues() {
         if (Calendar.getInstance().get(Calendar.YEAR) > 2079) {
             fail("Update the code with a date that is still valid. Also, hello from the past.");
