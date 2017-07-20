@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.android"
-          android:versionCode="13"
-          android:versionName="4.1.4">
+          android:versionCode="14"
+          android:versionName="4.1.5">
 </manifest>
