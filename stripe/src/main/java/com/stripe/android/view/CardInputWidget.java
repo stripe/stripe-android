@@ -82,7 +82,7 @@ public class CardInputWidget extends LinearLayout {
     private static final String HIDDEN_TEXT_COMMON = "4242 4242 4242 ";
 
     private static final String FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242";
-    private static final String FULL_SIZING_DATE_TEXT = "MM/YY";
+    private static final String FULL_SIZING_DATE_TEXT = "MM/MM";
 
     private static final String EXTRA_CARD_VIEWED = "extra_card_viewed";
     private static final String EXTRA_SUPER_STATE = "extra_super_state";
