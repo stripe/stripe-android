@@ -38,7 +38,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
     private long mExpires;
     private @NonNull String mId;
     private boolean mLiveMode;
-    private @Nullable String mObject;
+    private @NonNull String mObject;
     private @NonNull String mSecret;
     private @NonNull String mType;
 
@@ -56,7 +56,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         mExpires = in.readLong();
         mId = in.readString();
         mLiveMode = in.readInt() == 1;
-        mObject = fromNullOrEmptyStringIfNecessary(in.readString());
+        mObject = in.readString();
         mSecret = in.readString();
         mType = in.readString();
     }
@@ -67,7 +67,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
             long expires,
             @NonNull String id,
             boolean liveMode,
-            @Nullable String object,
+            @NonNull String object,
             @NonNull String secret,
             @NonNull String type
     ) {
@@ -91,9 +91,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         try {
             jsonObject.put(FIELD_CREATED, mCreated);
             jsonObject.put(FIELD_EXPIRES, mExpires);
-            if (mObject != null) {
-                jsonObject.put(FIELD_OBJECT, mObject);
-            }
+            jsonObject.put(FIELD_OBJECT, mObject);
             jsonObject.put(FIELD_ID, mId);
             jsonObject.put(FIELD_SECRET, mSecret);
             jsonObject.put(FIELD_LIVEMODE, mLiveMode);
@@ -155,7 +153,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         out.writeString(mId);
         // There is no writeBoolean
         out.writeInt(mLiveMode ? 1 : 0);
-        out.writeString(toNullStringIfNecessary(mObject));
+        out.writeString(mObject);
         out.writeString(mSecret);
         out.writeString(mType);
     }
@@ -182,7 +180,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         return mLiveMode;
     }
 
-    @Nullable
+    @NonNull
     String getObject() {
         return mObject;
     }
@@ -235,8 +233,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
             long expires = jsonObject.getLong(FIELD_EXPIRES);
             String id = jsonObject.getString(FIELD_ID);
             boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
-            String object = fromNullOrEmptyStringIfNecessary(
-                    jsonObject.optString(FIELD_OBJECT, null));
+            String object = jsonObject.getString(FIELD_OBJECT);
             String secret = jsonObject.getString(FIELD_SECRET);
 
             // Get the values from the associated objects array first element
@@ -258,17 +255,5 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         } catch (JSONException ignored) {
             return null;
         }
-    }
-
-    @Nullable
-    static String fromNullOrEmptyStringIfNecessary(@Nullable String possibleNullString) {
-        return NULL.equals(possibleNullString) || TextUtils.isEmpty(possibleNullString)
-                ? null
-                : possibleNullString;
-    }
-
-    @NonNull
-    static String toNullStringIfNecessary(@Nullable String possibleNull) {
-        return TextUtils.isEmpty(possibleNull) ? NULL : possibleNull;
     }
 }
