@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.wrap.pay"
-          android:versionCode="8"
-          android:versionName="4.1.4">
+          android:versionCode="9"
+          android:versionName="4.1.5">
 </manifest>
