@@ -3,9 +3,9 @@ package com.stripe.wrap.pay.utils;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Currency;
@@ -311,7 +311,10 @@ public class PaymentUtils {
         double modBreak = Math.pow(10, fractionDigits);
         double decimalPrice = price / modBreak;
 
-        DecimalFormat decimalFormat = new DecimalFormat(builder.toString());
+        // No matter the Locale, Android Pay requires a dot for the decimal separator.
+        DecimalFormatSymbols symbolOverride = new DecimalFormatSymbols();
+        symbolOverride.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat(builder.toString(), symbolOverride);
         decimalFormat.setCurrency(currency);
 
         return decimalFormat.format(decimalPrice);
