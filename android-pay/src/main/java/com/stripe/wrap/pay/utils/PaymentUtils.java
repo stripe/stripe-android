@@ -292,6 +292,7 @@ public class PaymentUtils {
             }
             DecimalFormat noDecimalCurrencyFormat = new DecimalFormat(builder.toString());
             noDecimalCurrencyFormat.setCurrency(currency);
+            noDecimalCurrencyFormat.setGroupingUsed(false);
             return noDecimalCurrencyFormat.format(price);
         }
 
@@ -316,6 +317,7 @@ public class PaymentUtils {
         symbolOverride.setDecimalSeparator('.');
         DecimalFormat decimalFormat = new DecimalFormat(builder.toString(), symbolOverride);
         decimalFormat.setCurrency(currency);
+        decimalFormat.setGroupingUsed(false);
 
         return decimalFormat.format(decimalPrice);
     }
