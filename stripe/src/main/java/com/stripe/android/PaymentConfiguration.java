@@ -10,6 +10,7 @@ public class PaymentConfiguration {
 
     private static PaymentConfiguration mInstance;
 
+    private @Nullable ClassLoader mEphemeralKeyProviderClassLoader;
     private @NonNull String mPublishableKey;
     private @Address.RequiredBillingAddressFields
     int mRequiredBillingAddressFields;
@@ -59,6 +60,15 @@ public class PaymentConfiguration {
     public PaymentConfiguration setShouldUseSourcesForCards(boolean shouldUseSourcesForCards) {
         mShouldUseSourcesForCards = shouldUseSourcesForCards;
         return this;
+    }
+
+    void setEphemeralKeyProviderClassLoader(@NonNull ClassLoader classLoader) {
+        mEphemeralKeyProviderClassLoader = classLoader;
+    }
+
+    @Nullable
+    ClassLoader getEphemeralKeyProviderClassLoader() {
+        return mEphemeralKeyProviderClassLoader;
     }
 
     @VisibleForTesting
