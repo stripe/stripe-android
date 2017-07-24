@@ -312,6 +312,22 @@ public class PaymentUtilsTest {
     }
 
     @Test
+    public void getPriceString_whenLocaleWithCommas_returnsExpectedValue() {
+        Locale.setDefault(Locale.FRENCH);
+        String priceString = getPriceString(100L, Currency.getInstance("USD"));
+        assertEquals("1.00", priceString);
+        assertTrue(matchesCurrencyPatternOrEmpty(priceString));
+
+        String littlePrice = getPriceString(8L, Currency.getInstance("EUR"));
+        assertEquals("0.08", littlePrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(littlePrice));
+
+        String bigPrice = getPriceString(20000000L, Currency.getInstance("GBP"));
+        assertEquals("200000.00", bigPrice);
+        assertTrue(matchesCurrencyPatternOrEmpty(bigPrice));
+    }
+
+    @Test
     public void getPriceString_whenCurrencyWithoutDecimals_returnsExpectedValue() {
         String priceString = getPriceString(250L, Currency.getInstance("JPY"));
         assertEquals("250", priceString);
