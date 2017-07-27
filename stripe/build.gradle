@@ -16,6 +16,7 @@ dependencies {
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
 
+    testCompile 'org.json:json:20140107'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.7.22'
     testCompile 'org.robolectric:robolectric:3.3.2'
@@ -40,6 +41,9 @@ android {
     }
     productFlavors {
     }
+//    testOptions {
+//        unitTests.returnDefaultValues = true
+//    }
 }
 
 task wrapper(type: Wrapper) {
