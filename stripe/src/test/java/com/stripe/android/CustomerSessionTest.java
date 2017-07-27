@@ -18,6 +18,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,9 +42,9 @@ public class CustomerSessionTest {
             "  \"id\": \"ephkey_123\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_123\",\n" +
-            "  \"created\": 1501188006223,\n" +
+            "  \"created\": 1501199335,\n" +
             "  \"livemode\": false,\n" +
-            "  \"expires\": 1501188016223,\n" +
+            "  \"expires\": 1501199335,\n" +
             "  \"associated_objects\": [{\n" +
             "            \"type\": \"customer\",\n" +
             "            \"id\": \"cus_AQsHpvKfKwJDrF\"\n" +
@@ -96,7 +97,6 @@ public class CustomerSessionTest {
                     "}";
 
     @Mock CustomerSession.StripeApiProxy mStripeApiProxy;
-    private CustomerSession mCustomerSession;
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
     private Customer mFirstCustomer;
@@ -182,7 +182,8 @@ public class CustomerSessionTest {
         Calendar pastCalendar = Calendar.getInstance();
         pastCalendar.set(2000, 1, 1);
 
-        assertTrue(CustomerSession.isTimeInPast(pastCalendar.getTimeInMillis(), null));
+        long timeInSeconds = TimeUnit.MILLISECONDS.toSeconds(pastCalendar.getTimeInMillis());
+        assertTrue(CustomerSession.isTimeInPast(timeInSeconds, null));
     }
 
     @Test
@@ -192,7 +193,9 @@ public class CustomerSessionTest {
         pastCalendar.set(2000, 1, 1);
 
         Calendar nowCalendar = Calendar.getInstance();
-        assertFalse(CustomerSession.isTimeInPast(nowCalendar.getTimeInMillis(), pastCalendar));
+        long timeInSeconds = TimeUnit.MILLISECONDS.toSeconds(nowCalendar.getTimeInMillis());
+
+        assertFalse(CustomerSession.isTimeInPast(timeInSeconds, pastCalendar));
     }
 
     @Test

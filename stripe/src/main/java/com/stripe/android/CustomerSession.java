@@ -249,7 +249,7 @@ public class CustomerSession implements Parcelable {
         }
 
         Calendar now = nowCalendar == null ? Calendar.getInstance() : nowCalendar;
-        return now.getTimeInMillis() > milliSeconds;
+        return TimeUnit.MILLISECONDS.toSeconds(now.getTimeInMillis()) > milliSeconds;
     }
 
     static final Parcelable.Creator<CustomerSession> CREATOR
