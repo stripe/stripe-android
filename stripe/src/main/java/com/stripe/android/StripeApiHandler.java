@@ -70,7 +70,7 @@ class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    static final String API_VERSION = "2015-10-12";
+    static final String API_VERSION = "2017-06-05";
 
     static void logApiCall(
             @NonNull Map<String, Object> loggingMap,
