@@ -129,13 +129,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
-    /**
-     * Get the currently cached {@link Customer}. Note that this may be an empty
-     * customer value (equivalent to {@link Customer#getEmptyCustomer()} if there is no
-     * valid current customer.
-     *
-     * @return the current {@link Customer} object
-     */
     @Nullable
     @VisibleForTesting
     Customer getCustomer() {

@@ -62,15 +62,6 @@ public class PaymentConfiguration {
         return this;
     }
 
-    void setEphemeralKeyProviderClassLoader(@NonNull ClassLoader classLoader) {
-        mEphemeralKeyProviderClassLoader = classLoader;
-    }
-
-    @Nullable
-    ClassLoader getEphemeralKeyProviderClassLoader() {
-        return mEphemeralKeyProviderClassLoader;
-    }
-
     @VisibleForTesting
     static void setInstance(@Nullable PaymentConfiguration paymentConfiguration) {
         mInstance = paymentConfiguration;

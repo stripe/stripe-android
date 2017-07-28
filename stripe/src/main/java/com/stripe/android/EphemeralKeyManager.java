@@ -30,18 +30,16 @@ class EphemeralKeyManager {
     }
 
     void retrieveEphemeralKey() {
-        if (mEphemeralKey != null &&
-                !shouldRefreshKey(
-                        mEphemeralKey,
-                        mTimeBufferInSeconds,
-                        mOverrideCalendar)) {
+        if (shouldRefreshKey(
+                mEphemeralKey,
+                mTimeBufferInSeconds,
+                mOverrideCalendar)) {
+            mEphemeralKeyProvider.createEphemeralKey(
+                    StripeApiHandler.API_VERSION,
+                    new ClientKeyUpdateListener(this));
+        } else {
             mListener.onKeyUpdate(mEphemeralKey);
-            return;
         }
-
-        mEphemeralKeyProvider.createEphemeralKey(
-                StripeApiHandler.API_VERSION,
-                new ClientKeyUpdateListener(this));
     }
 
     @Nullable

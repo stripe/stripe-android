@@ -103,11 +103,6 @@ public class Customer extends StripeJsonModel {
     }
 
     @NonNull
-    public static Customer getEmptyCustomer() {
-        return new Customer();
-    }
-
-    @NonNull
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> mapObject = new HashMap<>();
