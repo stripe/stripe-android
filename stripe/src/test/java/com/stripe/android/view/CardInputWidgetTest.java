@@ -26,6 +26,9 @@ import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
 import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
@@ -65,7 +68,7 @@ public class CardInputWidgetTest {
 
     private CardInputWidget.DimensionOverrideSettings mDimensionOverrides;
 
-    @Mock CardInputWidget.CardInputListener mCardInputListener;
+    @Mock CardInputListener mCardInputListener;
 
     @Before
     public void setup() {
@@ -256,7 +259,7 @@ public class CardInputWidgetTest {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
 
         verify(mCardInputListener, times(1)).onCardComplete();
-        verify(mCardInputListener, times(1)).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
+        verify(mCardInputListener, times(1)).onFocusChange(FOCUS_EXPIRY);
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
     }
@@ -271,7 +274,7 @@ public class CardInputWidgetTest {
         reset(mCardInputListener);
 
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
-        verify(mCardInputListener, times(1)).onFocusChange(CardInputWidget.FOCUS_CARD);
+        verify(mCardInputListener, times(1)).onFocusChange(FOCUS_CARD);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
 
@@ -301,20 +304,20 @@ public class CardInputWidgetTest {
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
 
         verify(mCardInputListener).onCardComplete();
-        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
+        verify(mCardInputListener).onFocusChange(FOCUS_EXPIRY);
 
         mExpiryEditText.append("12");
         mExpiryEditText.append("79");
 
         verify(mCardInputListener).onExpirationComplete();
-        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_CVC);
+        verify(mCardInputListener).onFocusChange(FOCUS_CVC);
         assertTrue(mCvcEditText.hasFocus());
 
         // Clearing already-verified data.
         reset(mCardInputListener);
 
         ViewTestUtils.sendDeleteKeyEvent(mCvcEditText);
-        verify(mCardInputListener).onFocusChange(CardInputWidget.FOCUS_EXPIRY);
+        verify(mCardInputListener).onFocusChange(FOCUS_EXPIRY);
         assertEquals(R.id.et_cvc_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
 

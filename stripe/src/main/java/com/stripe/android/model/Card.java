@@ -8,6 +8,7 @@ import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
+import com.stripe.android.R;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
 
@@ -51,6 +52,17 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String VISA = "Visa";
     public static final String MASTERCARD = "MasterCard";
     public static final String UNKNOWN = "Unknown";
+
+    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
 
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
     public static final int CVC_LENGTH_COMMON = 3;
@@ -988,7 +1000,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         }
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
     }
-    
+
     private Card(Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;

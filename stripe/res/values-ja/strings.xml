@@ -2,5 +2,12 @@
 <resources>
     <string name="acc_label_card_number">"カード番号"</string>
     <string name="acc_label_expiry_date">"有効期限"</string>
+    <string name="acc_label_zip">郵便番号</string>
+    <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/YY</string>
+    <string name="invalid_card_number">カードの番号が無効です。</string>
+    <string name="invalid_expiry_month">カードの有効期限として指定した月が無効です。</string>
+    <string name="invalid_expiry_year">カードの有効期限として指定した年が無効です。</string>
+    <string name="invalid_cvc">指定したカードのセキュリティコードが無効です。</string>
+    <string name="invalid_zip">指定した郵便番号が未入力です。</string>
 </resources>
