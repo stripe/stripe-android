@@ -16,6 +16,7 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
@@ -63,10 +64,13 @@ class StripeApiHandler {
     private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
 
     private static final String CHARSET = "UTF-8";
+    private static final String CUSTOMERS = "customers";
     private static final String TOKENS = "tokens";
     private static final String SOURCES = "sources";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
+
+    static final String API_VERSION = "2017-06-05";
 
     static void logApiCall(
             @NonNull Map<String, Object> loggingMap,
@@ -301,6 +305,17 @@ class StripeApiHandler {
         }
     }
 
+    @Nullable
+    static Customer retrieveCustomer(@NonNull String customerId, @NonNull String secret)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        StripeResponse response = getStripeResponse(
+                GET,
+                getRetrieveCustomerUrl(customerId),
+                null,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Customer.fromString(response.getResponseBody());
+    }
+
     static String createQuery(Map<String, Object> params)
             throws UnsupportedEncodingException, InvalidRequestException {
         StringBuilder queryStringBuffer = new StringBuilder();
@@ -366,6 +381,16 @@ class StripeApiHandler {
     @VisibleForTesting
     static String getSourcesUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    }
+
+    @VisibleForTesting
+    static String getCustomersUrl() {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, CUSTOMERS);
+    }
+
+    @VisibleForTesting
+    static String getRetrieveCustomerUrl(@NonNull String customerId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getCustomersUrl(), customerId);
     }
 
     @VisibleForTesting

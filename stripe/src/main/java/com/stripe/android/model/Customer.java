@@ -135,8 +135,7 @@ public class Customer extends StripeJsonModel {
     @Nullable
     public static Customer fromString(String jsonString) {
         try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            return fromJson(jsonObject);
+            return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
             return null;
         }

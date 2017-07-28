@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.StripeJsonModel;
 
@@ -31,7 +31,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
 
-    private static final String NULL = "null";
+    static final String NULL = "null";
 
     private long mCreated;
     private @NonNull String mCustomerId;
@@ -171,6 +171,11 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         return mExpires;
     }
 
+    @VisibleForTesting
+    void setExpires(long value) {
+        mExpires = value;
+    }
+
     @NonNull
     String getId() {
         return mId;
@@ -216,7 +221,8 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         }
 
         try {
-            return fromJson(new JSONObject(rawJson));
+            JSONObject object = new JSONObject(rawJson);
+            return fromJson(object);
         } catch (JSONException ignored) {
             return null;
         }
