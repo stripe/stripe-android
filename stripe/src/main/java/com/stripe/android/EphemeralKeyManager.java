@@ -48,12 +48,12 @@ class EphemeralKeyManager {
         return mEphemeralKey;
     }
 
-    private void updateSessionKey(@NonNull String key) {
+    private void updateKey(@NonNull String key) {
         mEphemeralKey = EphemeralKey.fromString(key);
         mListener.onKeyUpdate(mEphemeralKey);
     }
 
-    private void updateSessionKeyError(int errorCode, @Nullable String errorMessage) {
+    private void updateKeyError(int errorCode, @Nullable String errorMessage) {
         mEphemeralKey = null;
         mListener.onKeyError(errorCode, errorMessage);
     }
@@ -91,7 +91,7 @@ class EphemeralKeyManager {
         public void onKeyUpdate(@NonNull String rawKey) {
             final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
             if (keyManager != null) {
-                keyManager.updateSessionKey(rawKey);
+                keyManager.updateKey(rawKey);
             }
         }
 
@@ -99,7 +99,7 @@ class EphemeralKeyManager {
         public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
             final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
             if (keyManager != null) {
-                keyManager.updateSessionKeyError(responseCode, message);
+                keyManager.updateKeyError(responseCode, message);
             }
         }
     }
