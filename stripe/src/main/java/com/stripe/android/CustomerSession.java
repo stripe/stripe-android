@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private @Nullable Customer mCustomer;
+    private long mCustomerCacheTime;
+    private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
+
     private @Nullable EphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyManager mEphemeralKeyManager;
 
@@ -48,7 +51,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     // Sets the Time Unit to seconds
     private static final TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
 
-    private static final long KEY_REFRESH_BUFFER = TimeUnit.MINUTES.toMillis(1);
+    private static final long KEY_REFRESH_BUFFER_IN_SECONDS = 30L;
+    private static final long CUSTOMER_CACHE_DURATION_MILLISECONDS = TimeUnit.MINUTES.toMillis(1);
 
     private static CustomerSession mInstance;
 
@@ -84,6 +88,11 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mInstance = new CustomerSession(keyProvider, stripeApiProxy, proxyNowCalendar);
     }
 
+    @VisibleForTesting
+    static void clearInstance() {
+        mInstance = null;
+    }
+
     private CustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
             @Nullable StripeApiProxy stripeApiProxy,
@@ -96,8 +105,28 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mEphemeralKeyManager = new EphemeralKeyManager(
                 keyProvider,
                 this,
-                KEY_REFRESH_BUFFER,
+                KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar);
+    }
+
+    /**
+     * Retrieve the current {@link Customer}. If the cached value at {@link #mCustomer} is not
+     * stale, this returns immediately with the cache. If not, it fetches a new value and returns
+     * that to the listener.
+     *
+     * @param listener a {@link CustomerRetrievalListener} to invoke with the result of getting the
+     *                 customer, either from the cache or from the server
+     */
+    public void retrieveCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
+        long currentTime = getCalendarInstance().getTimeInMillis();
+        if (mCustomer == null ||
+                currentTime - mCustomerCacheTime > CUSTOMER_CACHE_DURATION_MILLISECONDS) {
+            mCustomer = null;
+            mCustomerRetrievalListener = listener;
+            mEphemeralKeyManager.retrieveEphemeralKey();
+        } else {
+            listener.onCustomerRetrieved(mCustomer);
+        }
     }
 
     /**
@@ -108,8 +137,14 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      * @return the current {@link Customer} object
      */
     @Nullable
-    public Customer getCustomer() {
+    @VisibleForTesting
+    Customer getCustomer() {
         return mCustomer;
+    }
+
+    @VisibleForTesting
+    long getCustomerCacheTime() {
+        return mCustomerCacheTime;
     }
 
     @Nullable
@@ -118,17 +153,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return mEphemeralKey;
     }
 
-    @NonNull
-    @VisibleForTesting
-    EphemeralKeyManager getEphemeralKeyManager() {
-        return mEphemeralKeyManager;
-    }
-
-    void updateCustomerIfNecessary(@NonNull final EphemeralKey key) {
-        if (mCustomer != null && key.getCustomerId().equals(mCustomer.getId())) {
-            return;
-        }
-
+    private void updateCustomer(@NonNull final EphemeralKey key) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
@@ -141,7 +166,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         executeRunnable(fetchCustomerRunnable);
     }
 
-    void executeRunnable(@NonNull Runnable runnable) {
+    private void executeRunnable(@NonNull Runnable runnable) {
 
         // In automation, run on the main thread.
         if (mStripeApiProxy != null) {
@@ -156,13 +181,17 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     public void onKeyUpdate(@Nullable EphemeralKey ephemeralKey) {
         mEphemeralKey = ephemeralKey;
         if (mEphemeralKey != null) {
-            updateCustomerIfNecessary(mEphemeralKey);
+            updateCustomer(mEphemeralKey);
         }
     }
 
     @Override
     public void onKeyError(int errorCode, @Nullable String errorMessage) {
-        // Not yet handling errors
+        if (mCustomerRetrievalListener != null) {
+            mCustomerRetrievalListener.onError(errorCode, errorMessage);
+            // Only keep the customer listener object for one server round trip
+            mCustomerRetrievalListener = null;
+        }
     }
 
     private Handler createMainThreadHandler() {
@@ -177,6 +206,12 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     case CUSTOMER_RETRIEVED:
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
+                            mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
+                            if (mCustomerRetrievalListener != null) {
+                                mCustomerRetrievalListener.onCustomerRetrieved(mCustomer);
+                                // Eliminate reference to retrival listener after use.
+                                mCustomerRetrievalListener = null;
+                            }
                         }
                         break;
                 }
@@ -193,10 +228,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 mNetworkQueue);
     }
 
+    @NonNull
+    private Calendar getCalendarInstance() {
+        return mProxyNowCalendar == null ? Calendar.getInstance() : mProxyNowCalendar;
+    }
+
     /**
      * Calls the Stripe API (or a test proxy) to fetch a customer. If the provided key is expired,
      * this method <b>does not</b> update the key.
-     * Use {@link #updateCustomerIfNecessary(EphemeralKey)} to validate the key
+     * Use {@link #updateCustomer(EphemeralKey)} to validate the key
      * before refreshing the customer.
      *
      * @param key the {@link EphemeralKey} used for this access
@@ -224,9 +264,13 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return customer;
     }
 
+    public interface CustomerRetrievalListener {
+        void onCustomerRetrieved(@NonNull Customer customer);
+        void onError(int errorCode, @Nullable String errorMessage);
+    }
+
     interface StripeApiProxy {
         Customer retrieveCustomerWithKey(@NonNull String customerId, @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
     }
-
 }

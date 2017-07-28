@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
@@ -25,26 +26,28 @@ class EphemeralKeyManager {
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
-        updateKeyIfNecessary();
+        retrieveEphemeralKey();
     }
 
-    @Nullable
-    EphemeralKey getEphemeralKey() {
-        return mEphemeralKey;
-    }
-
-    void updateKeyIfNecessary() {
+    void retrieveEphemeralKey() {
         if (mEphemeralKey != null &&
                 !shouldRefreshKey(
-                    mEphemeralKey,
-                    mTimeBufferInSeconds,
-                    mOverrideCalendar)) {
+                        mEphemeralKey,
+                        mTimeBufferInSeconds,
+                        mOverrideCalendar)) {
+            mListener.onKeyUpdate(mEphemeralKey);
             return;
         }
 
         mEphemeralKeyProvider.createEphemeralKey(
                 StripeApiHandler.API_VERSION,
                 new ClientKeyUpdateListener(this));
+    }
+
+    @Nullable
+    @VisibleForTesting
+    EphemeralKey getEphemeralKey() {
+        return mEphemeralKey;
     }
 
     private void updateSessionKey(@NonNull String key) {

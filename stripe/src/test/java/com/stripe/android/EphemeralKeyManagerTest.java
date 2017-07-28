@@ -175,8 +175,8 @@ public class EphemeralKeyManagerTest {
         final String errorMessage = "This is an error";
         mTestEphemeralKeyProvider.setNextError(404, errorMessage);
 
-        // It should be necessary because the key is expired.
-        keyManager.updateKeyIfNecessary();
+        // It should be necessary to update because the key is expired.
+        keyManager.retrieveEphemeralKey();
 
         verify(mKeyManagerListener, times(1)).onKeyError(404, errorMessage);
         verifyNoMoreInteractions(mKeyManagerListener);
