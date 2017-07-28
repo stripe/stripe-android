@@ -23,7 +23,7 @@ public class PaymentConfiguration {
     @NonNull
     public static PaymentConfiguration getInstance() {
         if (mInstance == null) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Attempted to get instance of PaymentConfiguration without initialization.");
         }
         return mInstance;

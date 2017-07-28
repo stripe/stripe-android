@@ -26,7 +26,7 @@ public class PaymentConfigurationTest {
         PaymentConfiguration.setInstance(null);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalStateException.class)
     public void getInstance_beforeInit_throwsRuntimeException() {
         PaymentConfiguration.getInstance();
         fail("Should not be able to get a payment configuration before it has been initialized.");

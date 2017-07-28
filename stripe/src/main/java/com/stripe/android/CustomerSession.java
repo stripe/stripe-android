@@ -3,8 +3,6 @@ package com.stripe.android;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -16,7 +14,6 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 
-import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,11 +23,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
-public class CustomerSession implements Parcelable {
+public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
-    private @NonNull Customer mCustomer;
-    private @NonNull EphemeralKey mEphemeralKey;
-    private @NonNull EphemeralKeyProvider mKeyProvider;
+    private @Nullable Customer mCustomer;
+    private @Nullable EphemeralKey mEphemeralKey;
+    private @NonNull EphemeralKeyManager mEphemeralKeyManager;
 
     private @NonNull Handler mUiThreadHandler;
 
@@ -51,26 +48,9 @@ public class CustomerSession implements Parcelable {
     // Sets the Time Unit to seconds
     private static final TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
 
-    private CustomerSession(Parcel in) {
-        ClassLoader keyProviderLoader =
-                PaymentConfiguration.getInstance().getEphemeralKeyProviderClassLoader();
-        if (keyProviderLoader == null) {
-            throw new IllegalStateException("Cannot create CustomerSession objects without " +
-                    "a KeyProvider with proper ClassLoader");
-        }
+    private static final long KEY_REFRESH_BUFFER = TimeUnit.MINUTES.toMillis(1);
 
-        // Initialize Threads and Handlers
-        initializeMainThreadHandler();
-        initializeThreadPoolExecutor();
-
-        mKeyProvider = in.readParcelable(keyProviderLoader);
-
-        // The Ephemeral Key class is part of this package, so we use this classloader.
-        mEphemeralKey = in.readParcelable(getClass().getClassLoader());
-
-        Customer customer = Customer.fromString(in.readString());
-        mCustomer = customer == null ? Customer.getEmptyCustomer() : customer;
-    }
+    private static CustomerSession mInstance;
 
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
@@ -78,38 +58,46 @@ public class CustomerSession implements Parcelable {
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
      * {@link EphemeralKey EphemeralKeys} as needed
      */
-    public CustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
-        this(keyProvider, null, null);
+    public static void initCustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
+        initCustomerSession(keyProvider, null, null);
+    }
+
+    /**
+     * Gets the singleton instance of {@link CustomerSession}. If the session has not been
+     * initialized, this will throw a {@link RuntimeException}.
+     *
+     * @return the singleton {@link CustomerSession} instance.
+     */
+    public static CustomerSession getInstance() {
+        if (mInstance == null) {
+            throw new IllegalStateException(
+                    "Attempted to get instance of CustomerSession without initialization.");
+        }
+        return mInstance;
     }
 
     @VisibleForTesting
-    CustomerSession(
+    static void initCustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
             @Nullable StripeApiProxy stripeApiProxy,
             @Nullable Calendar proxyNowCalendar) {
-        mKeyProvider = keyProvider;
-        mEphemeralKey = EphemeralKey.getEmptyKey();
-        mCustomer = Customer.getEmptyCustomer();
+        mInstance = new CustomerSession(keyProvider, stripeApiProxy, proxyNowCalendar);
+    }
+
+    private CustomerSession(
+            @NonNull EphemeralKeyProvider keyProvider,
+            @Nullable StripeApiProxy stripeApiProxy,
+            @Nullable Calendar proxyNowCalendar) {
+        mThreadPoolExecutor = createThreadPoolExecutor();
+        mUiThreadHandler = createMainThreadHandler();
         mStripeApiProxy = stripeApiProxy;
         mProxyNowCalendar = proxyNowCalendar;
-        PaymentConfiguration.getInstance().setEphemeralKeyProviderClassLoader(
-                keyProvider.getClassLoader());
-        initializeThreadPoolExecutor();
-        initializeMainThreadHandler();
-        updateKeyIfNecessary(mEphemeralKey, mProxyNowCalendar);
-    }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeParcelable(mKeyProvider, i);
-        parcel.writeParcelable(mEphemeralKey, i);
-        // Using JSON serialization of the Customer
-        parcel.writeString(mCustomer.toString());
+        mEphemeralKeyManager = new EphemeralKeyManager(
+                keyProvider,
+                this,
+                KEY_REFRESH_BUFFER,
+                proxyNowCalendar);
     }
 
     /**
@@ -119,44 +107,38 @@ public class CustomerSession implements Parcelable {
      *
      * @return the current {@link Customer} object
      */
-    @NonNull
+    @Nullable
     public Customer getCustomer() {
         return mCustomer;
     }
 
-    @NonNull
+    @Nullable
     @VisibleForTesting
     EphemeralKey getEphemeralKey() {
         return mEphemeralKey;
     }
 
-    void updateCustomerIfNecessary(
-            @NonNull final EphemeralKey key,
-            @Nullable final Calendar nowCalendar) {
-        if (key.getCustomerId().equals(mCustomer.getId())) {
+    @NonNull
+    @VisibleForTesting
+    EphemeralKeyManager getEphemeralKeyManager() {
+        return mEphemeralKeyManager;
+    }
+
+    void updateCustomerIfNecessary(@NonNull final EphemeralKey key) {
+        if (mCustomer != null && key.getCustomerId().equals(mCustomer.getId())) {
             return;
         }
 
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = retrieveCustomerWithKey(key, mStripeApiProxy, nowCalendar);
+                Customer customer = retrieveCustomerWithKey(key, mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
                 mUiThreadHandler.sendMessage(message);
             }
         };
 
         executeRunnable(fetchCustomerRunnable);
-    }
-
-    void updateKeyIfNecessary(@NonNull final EphemeralKey key, @Nullable Calendar nowCalendar) {
-        if (!isTimeInPast(key.getExpires(), nowCalendar)) {
-            return;
-        }
-
-        mKeyProvider.fetchEphemeralKey(
-                StripeApiHandler.API_VERSION,
-                new CustomerKeyUpdateListener(this));
     }
 
     void executeRunnable(@NonNull Runnable runnable) {
@@ -170,18 +152,21 @@ public class CustomerSession implements Parcelable {
         mThreadPoolExecutor.execute(runnable);
     }
 
-    void onKeyUpdated(String rawKey) {
-        EphemeralKey key = EphemeralKey.fromString(rawKey);
-        mEphemeralKey = key == null ? EphemeralKey.getEmptyKey() : key;
-        updateCustomerIfNecessary(mEphemeralKey, mProxyNowCalendar);
+    @Override
+    public void onKeyUpdate(@Nullable EphemeralKey ephemeralKey) {
+        mEphemeralKey = ephemeralKey;
+        if (mEphemeralKey != null) {
+            updateCustomerIfNecessary(mEphemeralKey);
+        }
     }
 
-    void onKeyError(int code, @Nullable String errorMessage) {
-        // Not yet handling this case
+    @Override
+    public void onKeyError(int errorCode, @Nullable String errorMessage) {
+        // Not yet handling errors
     }
 
-    private void initializeMainThreadHandler() {
-        mUiThreadHandler = new Handler(Looper.getMainLooper()) {
+    private Handler createMainThreadHandler() {
+        return new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
@@ -199,8 +184,8 @@ public class CustomerSession implements Parcelable {
         };
     }
 
-    private void initializeThreadPoolExecutor() {
-        mThreadPoolExecutor = new ThreadPoolExecutor(
+    private ThreadPoolExecutor createThreadPoolExecutor() {
+        return new ThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 THREAD_POOL_SIZE,
                 KEEP_ALIVE_TIME,
@@ -211,7 +196,7 @@ public class CustomerSession implements Parcelable {
     /**
      * Calls the Stripe API (or a test proxy) to fetch a customer. If the provided key is expired,
      * this method <b>does not</b> update the key.
-     * Use {@link #updateCustomerIfNecessary(EphemeralKey, Calendar)} to validate the key
+     * Use {@link #updateCustomerIfNecessary(EphemeralKey)} to validate the key
      * before refreshing the customer.
      *
      * @param key the {@link EphemeralKey} used for this access
@@ -221,12 +206,8 @@ public class CustomerSession implements Parcelable {
     @Nullable
     static Customer retrieveCustomerWithKey(
             @NonNull EphemeralKey key,
-            @Nullable StripeApiProxy proxy,
-            @Nullable Calendar nowCalendar) {
+            @Nullable StripeApiProxy proxy) {
         Customer customer = null;
-        if (isTimeInPast(key.getExpires(), nowCalendar)) {
-            return null;
-        }
 
         try {
             if (proxy != null) {
@@ -241,54 +222,6 @@ public class CustomerSession implements Parcelable {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
         }
         return customer;
-    }
-
-    static boolean isTimeInPast(long milliSeconds, @Nullable Calendar nowCalendar) {
-        if (milliSeconds == 0L) {
-            return true;
-        }
-
-        Calendar now = nowCalendar == null ? Calendar.getInstance() : nowCalendar;
-        return TimeUnit.MILLISECONDS.toSeconds(now.getTimeInMillis()) > milliSeconds;
-    }
-
-    static final Parcelable.Creator<CustomerSession> CREATOR
-            = new Parcelable.Creator<CustomerSession>() {
-
-        @Override
-        public CustomerSession createFromParcel(Parcel in) {
-            return new CustomerSession(in);
-        }
-
-        @Override
-        public CustomerSession[] newArray(int size) {
-            return new CustomerSession[size];
-        }
-    };
-
-    private static class CustomerKeyUpdateListener implements EphemeralKeyUpdateListener {
-
-        private @NonNull WeakReference<CustomerSession> mCustomerSessionReference;
-
-        CustomerKeyUpdateListener(@NonNull CustomerSession session) {
-            mCustomerSessionReference = new WeakReference<>(session);
-        }
-
-        @Override
-        public void onKeyUpdate(@NonNull String rawKey) {
-            final CustomerSession session = mCustomerSessionReference.get();
-            if (session != null) {
-                session.onKeyUpdated(rawKey);
-            }
-        }
-
-        @Override
-        public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
-            final CustomerSession session = mCustomerSessionReference.get();
-            if (session != null) {
-                session.onKeyError(responseCode, message);
-            }
-        }
     }
 
     interface StripeApiProxy {

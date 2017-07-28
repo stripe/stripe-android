@@ -1,13 +1,8 @@
 package com.stripe.android;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
-
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,14 +16,13 @@ import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -42,7 +36,7 @@ public class CustomerSessionTest {
             "  \"id\": \"ephkey_123\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_123\",\n" +
-            "  \"created\": 1501199335,\n" +
+            "  \"created\": 1501179335,\n" +
             "  \"livemode\": false,\n" +
             "  \"expires\": 1501199335,\n" +
             "  \"associated_objects\": [{\n" +
@@ -55,9 +49,9 @@ public class CustomerSessionTest {
             "  \"id\": \"ephkey_ABC\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_456\",\n" +
-            "  \"created\": 1483575790,\n" +
+            "  \"created\": 1601189335,\n" +
             "  \"livemode\": false,\n" +
-            "  \"expires\": 1483579790,\n" +
+            "  \"expires\": 1601199335,\n" +
             "  \"associated_objects\": [{\n" +
             "            \"type\": \"customer\",\n" +
             "            \"id\": \"cus_abc123\"\n" +
@@ -122,26 +116,30 @@ public class CustomerSessionTest {
         }
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void getInstance_withoutInitializing_throwsException() {
+        CustomerSession.getInstance();
+        fail("Should not be able to get instance of CustomerSession without initializing");
+    }
+
     @Test
     public void create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
-        // Note: the test ephemeral key expiration is set to July 27, 2017
-        Calendar fixedCalendar = Calendar.getInstance();
-        fixedCalendar.set(2017, 1, 1);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession session = new CustomerSession(
+        CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
                 mStripeApiProxy,
-                fixedCalendar);
+                null);
+        CustomerSession session = CustomerSession.getInstance();
 
         assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
 
         try {
             verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
+            assertNotNull(session.getCustomer());
             assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -149,132 +147,77 @@ public class CustomerSessionTest {
     }
 
     @Test
-    public void updateKeyIfNecessary_whenKeyIsValid_doesNotUpdateKey() {
-        // This test will always be run after January 01, 2000.
-        Calendar pastCalendar = Calendar.getInstance();
-        pastCalendar.set(2000, 1, 1);
-        Calendar now = Calendar.getInstance();
-
+    public void updateCustomerIfNecessary_withDifferentEphemeralKey_updatesCustomer() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
+
         EphemeralKey secondKey = EphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
         assertNotNull(secondKey);
-        assertNotEquals("Test keys should not have same ID", secondKey.getId(), firstKey.getId());
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis - 100L);
+
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        mEphemeralKeyProvider.setEphemeralKeyExpiration(now.getTimeInMillis());
-
-        CustomerSession session = new CustomerSession(
+        CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
                 mStripeApiProxy,
-                pastCalendar);
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
 
-        // We'll fetch a new key if the first one is expired.
+        assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
+        assertEquals(firstKey.getCustomerId(), mFirstCustomer.getId());
+
         mEphemeralKeyProvider.setNextRawEphemeralKey(SECOND_SAMPLE_KEY_RAW);
 
-        session.updateKeyIfNecessary(session.getEphemeralKey(), pastCalendar);
+        // The key manager should think it is necessary to update the key,
+        // because the first one was expired.
+        session.getEphemeralKeyManager().updateKeyIfNecessary();
+        try {
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    firstKey.getCustomerId(), firstKey.getSecret());
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    secondKey.getCustomerId(), secondKey.getSecret());
+            assertNotNull(session.getCustomer());
+            assertEquals(mSecondCustomer.getId(), session.getCustomer().getId());
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
+        }
+    }
+
+    @Test
+    public void updateCustomerIfNecessary_withSameEphemeralKey_doesNotUpdateCustomer() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + 100000L);
+
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+
         assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
-    }
+        assertEquals(firstKey.getCustomerId(), mFirstCustomer.getId());
 
-    @Test
-    public void isTimeInPast_forTimeInPast_returnsTrue() {
-        // This test will always be run after January 01, 2000.
-        Calendar pastCalendar = Calendar.getInstance();
-        pastCalendar.set(2000, 1, 1);
+        session.updateCustomerIfNecessary(firstKey);
 
-        long timeInSeconds = TimeUnit.MILLISECONDS.toSeconds(pastCalendar.getTimeInMillis());
-        assertTrue(CustomerSession.isTimeInPast(timeInSeconds, null));
-    }
-
-    @Test
-    public void isTimeInPast_forPresentOrFuture_returnsFalse() {
-        // This test will always be run after January 01, 2000.
-        Calendar pastCalendar = Calendar.getInstance();
-        pastCalendar.set(2000, 1, 1);
-
-        Calendar nowCalendar = Calendar.getInstance();
-        long timeInSeconds = TimeUnit.MILLISECONDS.toSeconds(nowCalendar.getTimeInMillis());
-
-        assertFalse(CustomerSession.isTimeInPast(timeInSeconds, pastCalendar));
-    }
-
-    @Test
-    public void isTimeInPast_forZeroTime_returnsTrue() {
-        assertTrue(CustomerSession.isTimeInPast(0L, null));
-    }
-
-    static class TestEphemeralKeyProvider implements EphemeralKeyProvider {
-
-        private static final int INVALID_ERROR_CODE = -1;
-        private @Nullable String mRawEphemeralKey;
-        private int mErrorCode = INVALID_ERROR_CODE;
-        private @Nullable String mErrorMessage;
-
-        private EphemeralKey mEphemeralKey;
-
-        private TestEphemeralKeyProvider(Parcel in) {}
-
-        TestEphemeralKeyProvider() {}
-
-        @Override
-        public void fetchEphemeralKey(
-                @NonNull @Size(min = 4) String apiVersion,
-                @NonNull final EphemeralKeyUpdateListener keyUpdateListener) {
-            if (mRawEphemeralKey != null) {
-                keyUpdateListener.onKeyUpdate(mRawEphemeralKey);
-            } else if (mErrorCode != INVALID_ERROR_CODE) {
-                keyUpdateListener.onKeyUpdateFailure(mErrorCode, mErrorMessage);
-            }
+        try {
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    firstKey.getCustomerId(), firstKey.getSecret());
+            verifyNoMoreInteractions(mStripeApiProxy);
+            assertNotNull(session.getCustomer());
+            assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
         }
-
-        @NonNull
-        @Override
-        public ClassLoader getClassLoader() {
-            return getClass().getClassLoader();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-
-        }
-
-        void setNextRawEphemeralKey(@NonNull String rawEphemeralKey) {
-            mRawEphemeralKey = rawEphemeralKey;
-            mEphemeralKey = EphemeralKey.fromString(mRawEphemeralKey);
-            mErrorCode = INVALID_ERROR_CODE;
-            mErrorMessage = null;
-        }
-
-        void setEphemeralKeyExpiration(long expiration) {
-            if (mEphemeralKey != null) {
-                mEphemeralKey.setExpires(expiration);
-                mRawEphemeralKey = mEphemeralKey.toString();
-            }
-        }
-
-        void setNextError(int errorCode, @NonNull String errorMessage) {
-            mRawEphemeralKey = null;
-            mErrorCode = errorCode;
-            mErrorMessage = errorMessage;
-        }
-
-        static final Parcelable.Creator<TestEphemeralKeyProvider> CREATOR
-                = new Parcelable.Creator<TestEphemeralKeyProvider>() {
-
-            @Override
-            public TestEphemeralKeyProvider createFromParcel(Parcel in) {
-                return new TestEphemeralKeyProvider(in);
-            }
-
-            @Override
-            public TestEphemeralKeyProvider[] newArray(int size) {
-                return new TestEphemeralKeyProvider[size];
-            }
-        };
     }
 }
