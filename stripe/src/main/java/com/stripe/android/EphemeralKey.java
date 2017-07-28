@@ -214,10 +214,6 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         }
     };
 
-    static EphemeralKey getEmptyKey() {
-        return new EphemeralKey(0, NULL, 0, NULL, false, NULL, NULL, NULL);
-    }
-
     @Nullable
     static EphemeralKey fromString(@Nullable String rawJson) {
         if (rawJson == null) {

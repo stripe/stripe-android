@@ -246,7 +246,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             if (proxy != null) {
                 return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
             }
-            customer = StripeApiHandler.retrieveCustomerWithKey(
+            customer = StripeApiHandler.retrieveCustomer(
                     key.getCustomerId(),
                     key.getSecret());
         } catch (InvalidRequestException invalidException) {

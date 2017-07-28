@@ -306,7 +306,7 @@ class StripeApiHandler {
     }
 
     @Nullable
-    static Customer retrieveCustomerWithKey(@NonNull String customerId, @NonNull String secret)
+    static Customer retrieveCustomer(@NonNull String customerId, @NonNull String secret)
             throws InvalidRequestException, APIConnectionException, APIException {
         StripeResponse response = getStripeResponse(
                 GET,
