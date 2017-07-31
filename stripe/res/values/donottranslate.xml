@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="card_number_hint">4242 4242 4242 4242</string>
+    <string name="card_number_hint">1234 5678 9012 3456</string>
     <string name="cvc_number_hint">CVC</string>
     <string name="cvc_amex_hint">CVV</string>
+    <string name="cvc_multiline_helper">123</string>
+    <string name="cvc_multiline_helper_amex">1234</string>
+    <string name="zip_helper">12345</string>
 </resources>
