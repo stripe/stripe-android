@@ -1,3 +1,6 @@
+4.1.6 2017-07-31
+    Fixing Android Pay string translation crash for decimal comma languages
+
 4.1.5 2017-07-24
     Fixing a display bug for dates in certain locales
 
