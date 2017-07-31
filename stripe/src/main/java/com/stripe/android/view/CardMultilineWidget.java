@@ -1,15 +1,20 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.text.InputFilter;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
@@ -119,6 +124,7 @@ public class CardMultilineWidget extends LinearLayout {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.card_multiline_widget, this);
 
+        mShouldShowPostalCode = true;
         mCardNumberEditText = findViewById(R.id.et_add_source_card_number_ml);
         mExpiryDateEditText = findViewById(R.id.et_add_source_expiry_ml);
         mCvcEditText = findViewById(R.id.et_add_source_cvc_ml);
@@ -134,6 +140,20 @@ public class CardMultilineWidget extends LinearLayout {
         mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
         mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
         mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
+
+        if (attrs != null) {
+            TypedArray a = getContext().getTheme().obtainStyledAttributes(
+                    attrs,
+                    R.styleable.CardMultilineWidget,
+                    0, 0);
+
+            try {
+                mShouldShowPostalCode =
+                        a.getBoolean(R.styleable.CardMultilineWidget_shouldShowZip, true);
+            } finally {
+                a.recycle();
+            }
+        }
 
         mCardNumberEditText.setErrorMessageListener(new ErrorListener(cardInputLayout));
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -235,6 +255,17 @@ public class CardMultilineWidget extends LinearLayout {
                         mCvcEditText.setShouldShowError(false);
                     }
                 });
+
+        if (!mShouldShowPostalCode) {
+            mCvcEditText.setNextFocusForwardId(NO_ID);
+            mCvcEditText.setNextFocusDownId(NO_ID);
+            postalInputLayout.setVisibility(View.GONE);
+            LinearLayout secondRowLayout = findViewById(R.id.second_row_layout);
+            secondRowLayout.removeView(postalInputLayout);
+            LinearLayout.LayoutParams linearParams = (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
+            linearParams.setMargins(0,0, 0, 0);
+            mCvcTextInputLayout.setLayoutParams(linearParams);
+        }
 
         mPostalCodeEditText.setAfterTextChangedListener(
                 new StripeEditText.AfterTextChangedListener() {

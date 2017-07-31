@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-def android_support_version = '25.3.1'
+def android_support_version = '26.0.0'
 
 version = VERSION_NAME
 
@@ -25,9 +25,9 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.0'
+    buildToolsVersion '26.0.1'
     defaultConfig {
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 26
     }
     sourceSets {
