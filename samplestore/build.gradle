@@ -40,7 +40,7 @@ dependencies {
 
     /* To use the Stripe android pay wrapper, you need these two lines */
     compile 'com.stripe:stripe-android-pay:4.1.6'
-    compile 'com.google.android.gms:play-services-wallet:11.0.1'
+    compile 'com.google.android.gms:play-services-wallet:11.0.2'
 
     /* Needed for RxAndroid */
     compile 'io.reactivex:rxandroid:1.2.1'
