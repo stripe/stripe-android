@@ -1,17 +1,14 @@
 package com.stripe.android.view;
 
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
-import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.testharness.TestFocusChangeListener;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -21,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
@@ -32,12 +29,12 @@ import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
 import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,12 +47,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test class for {@link CardInputWidget}. Note that we have to test against SDK 22
- * because of a <a href="https://github.com/robolectric/robolectric/issues/1932">known issue</a> in
- * Robolectric.
+ * Test class for {@link CardInputWidget}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
@@ -74,7 +69,7 @@ public class CardInputWidgetTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController activityController =
+        ActivityController<CardInputTestActivity> activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class)
                         .create().start();
 
@@ -92,19 +87,18 @@ public class CardInputWidgetTest {
             }
         };
 
-        mCardInputWidget = ((CardInputTestActivity) activityController.get()).getCardInputWidget();
+        mCardInputWidget = activityController.get().getCardInputWidget();
         mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
 
-        mCardNumberEditText =
-                ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
+        mCardNumberEditText = activityController.get().getCardNumberEditText();
         mCardNumberEditText.setText("");
 
-        mExpiryEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_expiry_date);
-        mCvcEditText = (StripeEditText) mCardInputWidget.findViewById(R.id.et_cvc_number);
-        mIconView = (ImageView) mCardInputWidget.findViewById(R.id.iv_card_icon);
+        mExpiryEditText = mCardInputWidget.findViewById(R.id.et_expiry_date);
+        mCvcEditText = mCardInputWidget.findViewById(R.id.et_cvc_number);
+        mIconView = mCardInputWidget.findViewById(R.id.iv_card_icon);
 
         // Set the width of the icon and its margin so that test calculations have
         // an expected value that is repeatable on all systems.
@@ -704,34 +698,5 @@ public class CardInputWidgetTest {
         assertTrue(shouldIconShowBrand(Card.MASTERCARD, true, "919"));
         assertTrue(shouldIconShowBrand(Card.DINERS_CLUB, true, "415"));
         assertTrue(shouldIconShowBrand(Card.UNKNOWN, true, "212"));
-    }
-
-    class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusChangeListener {
-        View mOldFocus;
-        View mNewFocus;
-
-        @Override
-        public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-            mOldFocus = oldFocus;
-            mNewFocus = newFocus;
-        }
-
-        @IdRes
-        int getOldFocusId() {
-            return mOldFocus.getId();
-        }
-
-        @IdRes
-        int getNewFocusId() {
-            return mNewFocus.getId();
-        }
-
-        boolean hasOldFocus() {
-            return mOldFocus != null;
-        }
-
-        boolean hasNewFocus() {
-            return mNewFocus != null;
-        }
     }
 }

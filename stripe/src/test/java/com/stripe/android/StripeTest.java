@@ -13,7 +13,7 @@ import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
-import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.junit.Before;

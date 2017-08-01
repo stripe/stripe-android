@@ -1,13 +1,31 @@
 package com.stripe.android.view;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
+
+import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
+import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 
 /**
  * Static utility functions needed for View classes.
  */
 class ViewUtils {
+
+    static boolean isCvcMaximalLength(
+            @NonNull @Card.CardBrand String cardBrand,
+            @Nullable String cvcText) {
+        if (cvcText == null) {
+            return false;
+        }
+
+        if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
+            return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
+        } else {
+            return cvcText.length() == CVC_LENGTH_COMMON;
+        }
+    }
 
     /**
      * Separates a card number according to the brand requirements, including prefixes of card

@@ -13,20 +13,20 @@ import java.lang.reflect.Method;
  * a DrawableLeft, instead of just straight up beside it. If the Support Libraries ever
  * officially support this behavior, this class should be removed to avoid Reflection.
  */
-class IconTextInputLayout extends TextInputLayout {
+public class IconTextInputLayout extends TextInputLayout {
     private Object mCollapsingTextHelper;
     private Rect mBounds;
     private Method mRecalculateMethod;
 
-    IconTextInputLayout(Context context) {
+    public IconTextInputLayout(Context context) {
         this(context, null);
     }
 
-    IconTextInputLayout(Context context, AttributeSet attrs) {
+    public IconTextInputLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    IconTextInputLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public IconTextInputLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -39,6 +39,10 @@ class IconTextInputLayout extends TextInputLayout {
     }
 
     private void init() {
+        int x = 5;
+        if (x == 5) {
+            return;
+        }
         try {
             Field textHeaderField = TextInputLayout.class.getDeclaredField("mCollapsingTextHelper");
             textHeaderField.setAccessible(true);

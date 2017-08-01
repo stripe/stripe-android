@@ -19,13 +19,15 @@ import com.stripe.android.model.Card;
 import com.stripe.android.CardUtils;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
-import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
-import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
 
+/**
+ * A multiline card input widget using the support design library's {@link TextInputLayout}
+ * to match Material Design.
+ */
 public class CardMultilineWidget extends LinearLayout {
 
     static final String CARD_MULTILINE_TOKEN = "CardMultilineView";
@@ -37,7 +39,7 @@ public class CardMultilineWidget extends LinearLayout {
     private StripeEditText mPostalCodeEditText;
     private TextInputLayout mCvcTextInputLayout;
 
-    private boolean mShouldShowPostalCode = true;
+    private boolean mShouldShowPostalCode;
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
 
@@ -109,13 +111,13 @@ public class CardMultilineWidget extends LinearLayout {
         mExpiryDateEditText.setShouldShowError(
                 mExpiryDateEditText.getValidDateFields() == null ||
                         !mExpiryDateEditText.isDateValid());
-        mCvcEditText.setShouldShowError(!isCvcMaximalLength(mCardBrand,
+        mCvcEditText.setShouldShowError(!ViewUtils.isCvcMaximalLength(mCardBrand,
                 mCvcEditText.getText().toString()));
         boolean postalCodeIsValidOrGone;
         if (mShouldShowPostalCode) {
-            mPostalCodeEditText.setShouldShowError(!isPostalCodeMaximalLength(true,
-                    mPostalCodeEditText.getText().toString()));
-            postalCodeIsValidOrGone = mPostalCodeEditText.getShouldShowError();
+            postalCodeIsValidOrGone = isPostalCodeMaximalLength(true,
+                    mPostalCodeEditText.getText().toString());
+            mPostalCodeEditText.setShouldShowError(!postalCodeIsValidOrGone);
         } else {
             postalCodeIsValidOrGone = true;
         }
@@ -126,7 +128,42 @@ public class CardMultilineWidget extends LinearLayout {
                 && postalCodeIsValidOrGone;
     }
 
-    void initView(AttributeSet attrs) {
+    static void adjustViewForPostalCodeAttribute(
+            @NonNull StripeEditText navigationEditText,
+            @NonNull TextInputLayout postalInputLayout,
+            @NonNull LinearLayout postalParentLayout,
+            @NonNull TextInputLayout paddedMiddleTextInputLayout) {
+        navigationEditText.setNextFocusForwardId(NO_ID);
+        navigationEditText.setNextFocusDownId(NO_ID);
+        postalInputLayout.setVisibility(View.GONE);
+        postalParentLayout.removeView(postalInputLayout);
+        LinearLayout.LayoutParams linearParams =
+                (LinearLayout.LayoutParams) paddedMiddleTextInputLayout.getLayoutParams();
+        linearParams.setMargins(0,0,0,0);
+        paddedMiddleTextInputLayout.setLayoutParams(linearParams);
+    }
+
+    static boolean isPostalCodeMaximalLength(boolean isZip, @Nullable String text) {
+        return isZip && text != null && text.length() == 5;
+    }
+
+    private void checkAttributeSet(AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray a = getContext().getTheme().obtainStyledAttributes(
+                    attrs,
+                    R.styleable.CardMultilineWidget,
+                    0, 0);
+
+            try {
+                mShouldShowPostalCode =
+                        a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false);
+            } finally {
+                a.recycle();
+            }
+        }
+    }
+
+    private void initView(AttributeSet attrs) {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.card_multiline_widget, this);
 
@@ -141,62 +178,21 @@ public class CardMultilineWidget extends LinearLayout {
 
         TextInputLayout cardInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         TextInputLayout expiryInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
+        // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
         TextInputLayout postalInputLayout = findViewById(R.id.tl_add_source_zip_ml);
 
-        mCardNumberEditText.setErrorMessage(getContext().getString(R.string.invalid_card_number));
-        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
-        mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
-        mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
+        initTextInputLayoutErrorHandlers(
+                cardInputLayout,
+                expiryInputLayout,
+                mCvcTextInputLayout,
+                postalInputLayout);
 
-        mCardNumberEditText.setErrorMessageListener(new ErrorListener(cardInputLayout));
-        mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CARD);
-                }
-            }
-        });
+        initErrorMessages();
+        initFocusChangeListeners();
 
-        mExpiryDateEditText.setErrorMessageListener(new ErrorListener(expiryInputLayout));
-        mExpiryDateEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_EXPIRY);
-                }
-            }
-        });
 
-        mCvcEditText.setErrorMessageListener(new ErrorListener(mCvcTextInputLayout));
-        mCvcEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CVC);
-                }
-            }
-        });
-
-        mPostalCodeEditText.setErrorMessageListener(new ErrorListener(postalInputLayout));
-        mPostalCodeEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_POSTAL);
-                }
-            }
-        });
-
-        mExpiryDateEditText.setDeleteEmptyListener(
-                new BackUpFieldDeleteListener(mCardNumberEditText));
-
-        mCvcEditText.setDeleteEmptyListener(
-                new BackUpFieldDeleteListener(mExpiryDateEditText));
-
-        mPostalCodeEditText.setDeleteEmptyListener(
-                new BackUpFieldDeleteListener(mCvcEditText));
+        initDeleteEmptyListeners();
 
         mCardNumberEditText.setCardBrandChangeListener(
                 new CardNumberEditText.CardBrandChangeListener() {
@@ -232,7 +228,7 @@ public class CardMultilineWidget extends LinearLayout {
                 new StripeEditText.AfterTextChangedListener() {
                     @Override
                     public void onTextChanged(String text) {
-                        if (isCvcMaximalLength(mCardBrand, text)) {
+                        if (ViewUtils.isCvcMaximalLength(mCardBrand, text)) {
                             mPostalCodeEditText.requestFocus();
                             if (mCardInputListener != null) {
                                 mCardInputListener.onCvcComplete();
@@ -249,70 +245,100 @@ public class CardMultilineWidget extends LinearLayout {
                     postalInputLayout,
                     postalParentLayout,
                     mCvcTextInputLayout);
-        }
-
-
-        mPostalCodeEditText.setAfterTextChangedListener(
-                new StripeEditText.AfterTextChangedListener() {
-                    @Override
-                    public void onTextChanged(String text) {
-                        if (isPostalCodeMaximalLength(true, text) && mCardInputListener != null) {
-                            mCardInputListener.onPostalCodeComplete();
+        } else {
+            mPostalCodeEditText.setAfterTextChangedListener(
+                    new StripeEditText.AfterTextChangedListener() {
+                        @Override
+                        public void onTextChanged(String text) {
+                            if (isPostalCodeMaximalLength(true, text) && mCardInputListener != null) {
+                                mCardInputListener.onPostalCodeComplete();
+                            }
+                            mPostalCodeEditText.setShouldShowError(false);
                         }
-                        mPostalCodeEditText.setShouldShowError(false);
-                    }
-                });
+                    });
+        }
 
         updateBrand(Card.UNKNOWN);
     }
 
-    void checkAttributeSet(AttributeSet attrs) {
-        if (attrs != null) {
-            TypedArray a = getContext().getTheme().obtainStyledAttributes(
-                    attrs,
-                    R.styleable.CardMultilineWidget,
-                    0, 0);
+    private void initDeleteEmptyListeners() {
+        mExpiryDateEditText.setDeleteEmptyListener(
+                new BackUpFieldDeleteListener(mCardNumberEditText));
 
-            try {
-                mShouldShowPostalCode =
-                        a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false);
-            } finally {
-                a.recycle();
+        mCvcEditText.setDeleteEmptyListener(
+                new BackUpFieldDeleteListener(mExpiryDateEditText));
+
+        // It doesn't matter whether or not the postal code is shown;
+        // we can still say where you go when you delete an empty field from it.
+        if (mPostalCodeEditText == null) {
+            return;
+        }
+        mPostalCodeEditText.setDeleteEmptyListener(
+                new BackUpFieldDeleteListener(mCvcEditText));
+    }
+
+    private void initErrorMessages() {
+        mCardNumberEditText.setErrorMessage(getContext().getString(R.string.invalid_card_number));
+        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
+        mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
+        mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
+    }
+
+    private void initFocusChangeListeners() {
+        mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && mCardInputListener != null) {
+                    mCardInputListener.onFocusChange(FOCUS_CARD);
+                }
             }
+        });
+
+        mExpiryDateEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && mCardInputListener != null) {
+                    mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                }
+            }
+        });
+
+        mCvcEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && mCardInputListener != null) {
+                    mCardInputListener.onFocusChange(FOCUS_CVC);
+                }
+            }
+        });
+
+        if (mPostalCodeEditText == null) {
+            return;
         }
+
+        mPostalCodeEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && mCardInputListener != null && mShouldShowPostalCode) {
+                    mCardInputListener.onFocusChange(FOCUS_POSTAL);
+                }
+            }
+        });
     }
 
-    static void adjustViewForPostalCodeAttribute(
-            @NonNull StripeEditText navigationEditText,
-            @NonNull TextInputLayout postalInputLayout,
-            @NonNull LinearLayout postalParentLayout,
-            @NonNull TextInputLayout paddedMiddleTextInputLayout) {
-        navigationEditText.setNextFocusForwardId(NO_ID);
-        navigationEditText.setNextFocusDownId(NO_ID);
-        postalInputLayout.setVisibility(View.GONE);
-        postalParentLayout.removeView(postalInputLayout);
-        LinearLayout.LayoutParams linearParams =
-                (LinearLayout.LayoutParams) paddedMiddleTextInputLayout.getLayoutParams();
-        linearParams.setMargins(0,0,0,0);
-        paddedMiddleTextInputLayout.setLayoutParams(linearParams);
-    }
+    private void initTextInputLayoutErrorHandlers(
+            TextInputLayout cardInputLayout,
+            TextInputLayout expiryInputLayout,
+            TextInputLayout cvcTextInputLayout,
+            TextInputLayout postalInputLayout) {
 
-    private static boolean isCvcMaximalLength(
-            @NonNull @Card.CardBrand String cardBrand,
-            @Nullable String cvcText) {
-        if (cvcText == null) {
-            return false;
+        mCardNumberEditText.setErrorMessageListener(new ErrorListener(cardInputLayout));
+        mExpiryDateEditText.setErrorMessageListener(new ErrorListener(expiryInputLayout));
+        mCvcEditText.setErrorMessageListener(new ErrorListener(cvcTextInputLayout));
+        if (mPostalCodeEditText == null) {
+            return;
         }
-
-        if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
-            return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
-        } else {
-            return cvcText.length() == CVC_LENGTH_COMMON;
-        }
-    }
-
-    private static boolean isPostalCodeMaximalLength(boolean isZip, @Nullable String text) {
-        return isZip && text != null && text.length() == 5;
+        mPostalCodeEditText.setErrorMessageListener(new ErrorListener(postalInputLayout));
     }
 
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
@@ -350,35 +376,7 @@ public class CardMultilineWidget extends LinearLayout {
         }
     }
 
-    /**
-     * Class used to encapsulate the functionality of "backing up" via the delete/backspace key
-     * from one text field to the previous. We use this to simulate multiple fields being all part
-     * of the same EditText, so a delete key entry from field N+1 deletes the last character in
-     * field N. Each BackUpFieldDeleteListener is attached to the N+1 field, from which it gets
-     * its {@link #onDeleteEmpty()} call, and given a reference to the N field, upon which
-     * it will be acting.
-     */
-    private class BackUpFieldDeleteListener implements StripeEditText.DeleteEmptyListener {
-
-        private StripeEditText backUpTarget;
-
-        BackUpFieldDeleteListener(StripeEditText backUpTarget) {
-            this.backUpTarget = backUpTarget;
-        }
-
-        @Override
-        public void onDeleteEmpty() {
-            String fieldText = backUpTarget.getText().toString();
-            if (fieldText.length() > 1) {
-                backUpTarget.setText(
-                        fieldText.substring(0, fieldText.length() - 1));
-            }
-            backUpTarget.requestFocus();
-            backUpTarget.setSelection(backUpTarget.length());
-        }
-    }
-
-    private class ErrorListener implements StripeEditText.ErrorMessageListener {
+    private static class ErrorListener implements StripeEditText.ErrorMessageListener {
 
         TextInputLayout textInputLayout;
 
