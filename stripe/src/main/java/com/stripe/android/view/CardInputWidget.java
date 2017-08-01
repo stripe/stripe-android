@@ -486,10 +486,10 @@ public class CardInputWidget extends LinearLayout {
         });
 
         mExpiryDateEditText.setDeleteEmptyListener(
-                new CardInputWidget.BackUpFieldDeleteListener(mCardNumberEditText));
+                new BackUpFieldDeleteListener(mCardNumberEditText));
 
         mCvcNumberEditText.setDeleteEmptyListener(
-                new CardInputWidget.BackUpFieldDeleteListener(mExpiryDateEditText));
+                new BackUpFieldDeleteListener(mExpiryDateEditText));
 
         mCvcNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -511,7 +511,7 @@ public class CardInputWidget extends LinearLayout {
             @Override
             public void onTextChanged(String text) {
                 if (mCardInputListener != null
-                        && isCvcMaximalLength(mCardNumberEditText.getCardBrand(), text)) {
+                        && ViewUtils.isCvcMaximalLength(mCardNumberEditText.getCardBrand(), text)) {
                     mCardInputListener.onCvcComplete();
                 }
                 updateIconCvc(
@@ -742,7 +742,7 @@ public class CardInputWidget extends LinearLayout {
         if (!cvcHasFocus) {
             return true;
         }
-        return isCvcMaximalLength(brand, cvcText);
+        return ViewUtils.isCvcMaximalLength(brand, cvcText);
     }
 
     @Override
@@ -771,20 +771,6 @@ public class CardInputWidget extends LinearLayout {
                     + mPlacementParameters.dateWidth
                     + mPlacementParameters.dateCvcSeparation;
             setLayoutValues(mPlacementParameters.cvcWidth, cvcMargin, mCvcNumberEditText);
-        }
-    }
-
-    private static boolean isCvcMaximalLength(
-            @NonNull @CardBrand String cardBrand,
-            @Nullable String cvcText) {
-        if (cvcText == null) {
-            return false;
-        }
-
-        if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
-            return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
-        } else {
-            return cvcText.length() == CVC_LENGTH_COMMON;
         }
     }
 
@@ -879,37 +865,9 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
-     * Class used to encapsulate the functionality of "backing up" via the delete/backspace key
-     * from one text field to the previous. We use this to simulate multiple fields being all part
-     * of the same EditText, so a delete key entry from field N+1 deletes the last character in
-     * field N. Each BackUpFieldDeleteListener is attached to the N+1 field, from which it gets
-     * its {@link #onDeleteEmpty()} call, and given a reference to the N field, upon which
-     * it will be acting.
-     */
-    private class BackUpFieldDeleteListener implements StripeEditText.DeleteEmptyListener {
-
-        private StripeEditText backUpTarget;
-
-        BackUpFieldDeleteListener(StripeEditText backUpTarget) {
-            this.backUpTarget = backUpTarget;
-        }
-
-        @Override
-        public void onDeleteEmpty() {
-            String fieldText = backUpTarget.getText().toString();
-            if (fieldText.length() > 1) {
-                backUpTarget.setText(
-                        fieldText.substring(0, fieldText.length() - 1));
-            }
-            backUpTarget.requestFocus();
-            backUpTarget.setSelection(backUpTarget.length());
-        }
-    }
-
-    /**
      * A data-dump class.
      */
-    class PlacementParameters {
+    static class PlacementParameters {
         int cardWidth;
         int hiddenCardWidth;
         int peekCardWidth;

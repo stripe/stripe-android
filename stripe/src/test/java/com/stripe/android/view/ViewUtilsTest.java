@@ -8,7 +8,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link ViewUtils}
@@ -121,5 +123,56 @@ public class ViewUtilsTest {
         assertEquals("0566", groups[1]);
         assertEquals("5566", groups[2]);
         assertEquals("555", groups[3]);
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenThreeDigitsAndNotAmEx_returnsTrue() {
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.VISA, "123"));
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.MASTERCARD, "345"));
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.JCB, "678"));
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.DINERS_CLUB, "910"));
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.DISCOVER, "234"));
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.UNKNOWN, "333"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenThreeDigitsAndIsAmEx_returnsFalse() {
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, "123"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenFourDigitsAndIsAmEx_returnsTrue() {
+        assertTrue(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, "1234"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenTooManyDigits_returnsFalse() {
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, "12345"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.VISA, "1234"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.MASTERCARD, "123456"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.DINERS_CLUB, "1234567"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.DISCOVER, "12345678"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.JCB, "123456789012345"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenNotEnoughDigits_returnsFalse() {
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, ""));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.VISA, "1"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.MASTERCARD, "12"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.DINERS_CLUB, ""));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.DISCOVER, "8"));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.JCB, "1"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenWhitespaceAndNotEnoughDigits_returnsFalse() {
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, "   "));
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.VISA, "  1"));
+    }
+
+    @Test
+    public void isCvcMaximalLength_whenNull_returnsFalse() {
+        assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, null));
     }
 }

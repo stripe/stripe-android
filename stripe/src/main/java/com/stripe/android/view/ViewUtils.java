@@ -21,9 +21,9 @@ class ViewUtils {
         }
 
         if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
-            return cvcText.length() == CVC_LENGTH_AMERICAN_EXPRESS;
+            return cvcText.trim().length() == CVC_LENGTH_AMERICAN_EXPRESS;
         } else {
-            return cvcText.length() == CVC_LENGTH_COMMON;
+            return cvcText.trim().length() == CVC_LENGTH_COMMON;
         }
     }
 
