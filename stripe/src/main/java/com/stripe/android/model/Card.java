@@ -8,6 +8,7 @@ import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
+import com.stripe.android.R;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
 
@@ -67,6 +68,17 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String FUNDING_DEBIT = "debit";
     public static final String FUNDING_PREPAID = "prepaid";
     public static final String FUNDING_UNKNOWN = "unknown";
+
+    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
@@ -988,7 +1000,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         }
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
     }
-    
+
     private Card(Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;

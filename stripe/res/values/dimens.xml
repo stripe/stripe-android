@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="add_card_element_vertical_margin">12dp</dimen>
+    <dimen name="add_card_expiry_middle_margin">8dp</dimen>
     <dimen name="card_icon_padding">12dp</dimen>
     <dimen name="card_widget_min_width">320dp</dimen>
     <dimen name="card_expiry_initial_margin">200dp</dimen>
@@ -7,4 +9,5 @@
     <dimen name="android_pay_button_layout_margin">24dp</dimen>
     <dimen name="android_pay_confirmation_margin">8dp</dimen>
     <dimen name="android_pay_button_separation">8dp</dimen>
+    <dimen name="card_icon_multiline_width">24dp</dimen>
 </resources>

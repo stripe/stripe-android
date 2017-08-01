@@ -10,7 +10,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
@@ -30,42 +29,20 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.StripeTextUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
+import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
 import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 import static com.stripe.android.model.Card.CardBrand;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
+import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 
 /**
  * A card input widget that handles all animation on its own.
  */
 public class CardInputWidget extends LinearLayout {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            FOCUS_CARD,
-            FOCUS_EXPIRY,
-            FOCUS_CVC
-    })
-    @interface FocusField { }
-    static final String FOCUS_CARD = "focus_card";
-    static final String FOCUS_EXPIRY = "focus_expiry";
-    static final String FOCUS_CVC = "focus_cvc";
-
-    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
-            new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
-                put(Card.DINERS_CLUB, R.drawable.ic_diners);
-                put(Card.DISCOVER, R.drawable.ic_discover);
-                put(Card.JCB, R.drawable.ic_jcb);
-                put(Card.MASTERCARD, R.drawable.ic_mastercard);
-                put(Card.VISA, R.drawable.ic_visa);
-                put(Card.UNKNOWN, R.drawable.ic_unknown);
-            }};
 
     static final String LOGGING_TOKEN = "CardInputView";
 
@@ -409,8 +386,8 @@ public class CardInputWidget extends LinearLayout {
                     + mPlacementParameters.cardDateSeparation;
             mPlacementParameters.dateRightTouchBufferLimit =
                     mPlacementParameters.dateStartPosition
-                    + mPlacementParameters.dateWidth
-                    + mPlacementParameters.dateCvcSeparation / 2;
+                            + mPlacementParameters.dateWidth
+                            + mPlacementParameters.dateCvcSeparation / 2;
             mPlacementParameters.cvcStartPosition = mPlacementParameters.dateStartPosition
                     + mPlacementParameters.dateWidth
                     + mPlacementParameters.dateCvcSeparation;
@@ -449,14 +426,14 @@ public class CardInputWidget extends LinearLayout {
         setOrientation(LinearLayout.HORIZONTAL);
         setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
         mPlacementParameters = new PlacementParameters();
-        mCardIconImageView = (ImageView) findViewById(R.id.iv_card_icon);
-        mCardNumberEditText = (CardNumberEditText) findViewById(R.id.et_card_number);
-        mExpiryDateEditText = (ExpiryDateEditText) findViewById(R.id.et_expiry_date);
-        mCvcNumberEditText = (StripeEditText) findViewById(R.id.et_cvc_number);
+        mCardIconImageView = findViewById(R.id.iv_card_icon);
+        mCardNumberEditText = findViewById(R.id.et_card_number);
+        mExpiryDateEditText = findViewById(R.id.et_expiry_date);
+        mCvcNumberEditText = findViewById(R.id.et_cvc_number);
 
         mCardNumberIsViewed = true;
 
-        mFrameLayout = (FrameLayout) findViewById(R.id.frame_container);
+        mFrameLayout = findViewById(R.id.frame_container);
         mErrorColorInt = mCardNumberEditText.getDefaultErrorColorInt();
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
         if (attrs != null) {
@@ -680,7 +657,7 @@ public class CardInputWidget extends LinearLayout {
 
         final int dateDestination =
                 mPlacementParameters.peekCardWidth
-                + mPlacementParameters.cardDateSeparation;
+                        + mPlacementParameters.cardDateSeparation;
 
         Animation slideDateRightAnimation = new Animation() {
             @Override
@@ -698,9 +675,9 @@ public class CardInputWidget extends LinearLayout {
 
         final int cvcDestination =
                 mPlacementParameters.peekCardWidth
-                + mPlacementParameters.cardDateSeparation
-                + mPlacementParameters.dateWidth
-                + mPlacementParameters.dateCvcSeparation;
+                        + mPlacementParameters.cardDateSeparation
+                        + mPlacementParameters.dateWidth
+                        + mPlacementParameters.dateCvcSeparation;
         final int cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination);
 
         Animation slideCvcRightAnimation = new Animation() {
@@ -893,41 +870,6 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
-     * Represents a listener for card input events. Note that events are
-     * not one-time events. For instance, a user can "complete" the CVC many times
-     * by deleting and re-entering the value.
-     */
-    public interface CardInputListener {
-
-        /**
-         * Called whenever the field of focus within the widget changes.
-         *
-         * @param focusField a {@link FocusField} to which the focus has just changed.
-         */
-        void onFocusChange(@FocusField String focusField);
-
-        /**
-         * Called when a potentially valid card number has been completed in the
-         * {@link CardNumberEditText}. May be called multiple times if the user edits
-         * the field.
-         */
-        void onCardComplete();
-
-        /**
-         * Called when a expiration date (one that has not yet passed) has been entered.
-         * May be called multiple times, if the user edits the date.
-         */
-        void onExpirationComplete();
-
-        /**
-         * Called when a potentially valid CVC has been entered. The only verification performed
-         * on the number is that it is the correct length. May be called multiple times, if
-         * the user edits the CVC.
-         */
-        void onCvcComplete();
-    }
-
-    /**
      * Interface useful for testing calculations without generating real views.
      */
     @VisibleForTesting
@@ -985,22 +927,22 @@ public class CardInputWidget extends LinearLayout {
         public String toString() {
             String touchBufferData = String.format(Locale.ENGLISH,
                     "Touch Buffer Data:\n" +
-                    "CardTouchBufferLimit = %d\n" +
-                    "DateStartPosition = %d\n" +
-                    "DateRightTouchBufferLimit = %d\n" +
-                    "CvcStartPosition = %d",
+                            "CardTouchBufferLimit = %d\n" +
+                            "DateStartPosition = %d\n" +
+                            "DateRightTouchBufferLimit = %d\n" +
+                            "CvcStartPosition = %d",
                     cardTouchBufferLimit,
                     dateStartPosition,
                     dateRightTouchBufferLimit,
                     cvcStartPosition);
             String elementSizeData = String.format(Locale.ENGLISH,
                     "CardWidth = %d\n" +
-                    "HiddenCardWidth = %d\n" +
-                    "PeekCardWidth = %d\n" +
-                    "CardDateSeparation = %d\n" +
-                    "DateWidth = %d\n" +
-                    "DateCvcSeparation = %d\n" +
-                    "CvcWidth = %d\n",
+                            "HiddenCardWidth = %d\n" +
+                            "PeekCardWidth = %d\n" +
+                            "CardDateSeparation = %d\n" +
+                            "DateWidth = %d\n" +
+                            "DateCvcSeparation = %d\n" +
+                            "CvcWidth = %d\n",
                     cardWidth,
                     hiddenCardWidth,
                     peekCardWidth,
