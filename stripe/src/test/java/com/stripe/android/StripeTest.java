@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Stripe}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeTest {
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
@@ -68,12 +69,11 @@ public class StripeTest {
     private Card mCard;
     private int mYear;
 
-    @Mock Context mContext;
+    private Context mContext;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
+        mContext = RuntimeEnvironment.application;
         String cvc = "123";
         int month = 12;
         Calendar rightNow = Calendar.getInstance();

@@ -558,12 +558,18 @@ public class Stripe {
         Map<String, Object> loggingMap = null;
         if (paymentSource instanceof Token) {
             Token token = (Token) paymentSource;
-            loggingMap = LoggingUtils.getTokenCreationParams(productUsageTokens,
-                    mDefaultPublishableKey, token.getType());
+            loggingMap = LoggingUtils.getTokenCreationParams(
+                    mContext,
+                    productUsageTokens,
+                    mDefaultPublishableKey,
+                    token.getType());
         } else {
             Source source = (Source) paymentSource;
-            loggingMap = LoggingUtils.getSourceCreationParams(productUsageTokens,
-                    mDefaultPublishableKey, source.getType());
+            loggingMap = LoggingUtils.getSourceCreationParams(
+                    mContext,
+                    productUsageTokens,
+                    mDefaultPublishableKey,
+                    source.getType());
         }
         StripeApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
     }
