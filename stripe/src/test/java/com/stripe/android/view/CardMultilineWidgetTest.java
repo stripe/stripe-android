@@ -328,7 +328,7 @@ public class CardMultilineWidgetTest {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);
             expiryDateEditText = parentWidget.findViewById(R.id.et_add_source_expiry_ml);
             cvcEditText = parentWidget.findViewById(R.id.et_add_source_cvc_ml);
-            postalCodeEditText = parentWidget.findViewById(R.id.et_add_source_zip_ml);
+            postalCodeEditText = parentWidget.findViewById(R.id.et_add_source_postal_ml);
             secondRowLayout = parentWidget.findViewById(R.id.second_row_layout);
         }
     }

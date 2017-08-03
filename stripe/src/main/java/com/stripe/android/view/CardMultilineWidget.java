@@ -11,7 +11,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -173,7 +172,7 @@ public class CardMultilineWidget extends LinearLayout {
         mCardNumberEditText = findViewById(R.id.et_add_source_card_number_ml);
         mExpiryDateEditText = findViewById(R.id.et_add_source_expiry_ml);
         mCvcEditText = findViewById(R.id.et_add_source_cvc_ml);
-        mPostalCodeEditText = findViewById(R.id.et_add_source_zip_ml);
+        mPostalCodeEditText = findViewById(R.id.et_add_source_postal_ml);
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
 
         // This sets the value of mShouldShowPostalCode
@@ -184,7 +183,7 @@ public class CardMultilineWidget extends LinearLayout {
         TextInputLayout expiryInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
-        TextInputLayout postalInputLayout = findViewById(R.id.tl_add_source_zip_ml);
+        TextInputLayout postalInputLayout = findViewById(R.id.tl_add_source_postal_ml);
 
         initTextInputLayoutErrorHandlers(
                 cardInputLayout,
