@@ -4,7 +4,7 @@ def android_support_version = '25.3.1'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
