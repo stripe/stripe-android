@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,7 +27,7 @@ import com.stripe.android.R;
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-public class StripeEditText extends AppCompatEditText {
+public class StripeEditText extends TextInputEditText {
 
     @Nullable private AfterTextChangedListener mAfterTextChangedListener;
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
@@ -34,6 +35,9 @@ public class StripeEditText extends AppCompatEditText {
     private boolean mShouldShowError;
     @ColorRes private int mDefaultErrorColorResId;
     @ColorInt private int mErrorColor;
+
+    private String mErrorMessage;
+    private ErrorMessageListener mErrorMessageListener;
 
     public StripeEditText(Context context) {
         super(context);
@@ -61,7 +65,8 @@ public class StripeEditText extends AppCompatEditText {
      *
      * @param afterTextChangedListener the {@link AfterTextChangedListener} to attach to this view
      */
-    public void setAfterTextChangedListener(AfterTextChangedListener afterTextChangedListener) {
+    void setAfterTextChangedListener(
+            @Nullable AfterTextChangedListener afterTextChangedListener) {
         mAfterTextChangedListener = afterTextChangedListener;
     }
 
@@ -70,8 +75,16 @@ public class StripeEditText extends AppCompatEditText {
      *
      * @param deleteEmptyListener the {@link DeleteEmptyListener} to attach to this view
      */
-    public void setDeleteEmptyListener(DeleteEmptyListener deleteEmptyListener) {
+    void setDeleteEmptyListener(@Nullable DeleteEmptyListener deleteEmptyListener) {
         mDeleteEmptyListener = deleteEmptyListener;
+    }
+
+    void setErrorMessageListener(@Nullable ErrorMessageListener errorMessageListener) {
+        mErrorMessageListener = errorMessageListener;
+    }
+
+    void setErrorMessage(@Nullable String errorMessage) {
+        mErrorMessage = errorMessage;
     }
 
     /**
@@ -82,14 +95,19 @@ public class StripeEditText extends AppCompatEditText {
      */
     @SuppressWarnings("deprecation")
     public void setShouldShowError(boolean shouldShowError) {
-        mShouldShowError = shouldShowError;
-        if (mShouldShowError) {
-            setTextColor(mErrorColor);
+        if (mErrorMessage != null && mErrorMessageListener != null) {
+            String errorMessage = shouldShowError ? mErrorMessage : null;
+            mErrorMessageListener.displayErrorMessage(errorMessage);
         } else {
-            setTextColor(mCachedColorStateList);
-        }
+            mShouldShowError = shouldShowError;
+            if (mShouldShowError) {
+                setTextColor(mErrorColor);
+            } else {
+                setTextColor(mCachedColorStateList);
+            }
 
-        refreshDrawableState();
+            refreshDrawableState();
+        }
     }
 
     @Nullable
@@ -220,15 +238,16 @@ public class StripeEditText extends AppCompatEditText {
         });
     }
 
-    /**
-     * A class that can listen for when the user attempts to delete the empty string.
-     */
-    public interface DeleteEmptyListener {
+    interface DeleteEmptyListener {
         void onDeleteEmpty();
     }
 
-    public interface AfterTextChangedListener {
+    interface AfterTextChangedListener {
         void onTextChanged(String text);
+    }
+
+    interface ErrorMessageListener {
+        void displayErrorMessage(@Nullable String message);
     }
 
     private class SoftDeleteInputConnection extends InputConnectionWrapper {

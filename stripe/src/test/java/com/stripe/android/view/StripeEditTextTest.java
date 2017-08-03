@@ -3,8 +3,8 @@ package com.stripe.android.view;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
-import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -14,9 +14,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * Test class for {@link StripeEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeEditTextTest {
 
     @Mock StripeEditText.AfterTextChangedListener mAfterTextChangedListener;

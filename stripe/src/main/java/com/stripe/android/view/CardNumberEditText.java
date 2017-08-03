@@ -102,6 +102,10 @@ public class CardNumberEditText extends StripeEditText {
         mCardBrandChangeListener.onCardBrandChanged(mCardBrand);
     }
 
+    void updateLengthFilter() {
+        setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
+    }
+
     /**
      * Updates the selection index based on the current (pre-edit) index, and
      * the size change of the number being input.
@@ -236,7 +240,7 @@ public class CardNumberEditText extends StripeEditText {
             return;
         }
 
-        setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
+        updateLengthFilter();
     }
 
     private void updateCardBrandFromNumber(String partialNumber) {

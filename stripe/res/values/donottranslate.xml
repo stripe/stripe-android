@@ -5,5 +5,6 @@
     <string name="cvc_amex_hint">CVV</string>
     <string name="cvc_multiline_helper">123</string>
     <string name="cvc_multiline_helper_amex">1234</string>
+    <string name="valid_digits">0123456789</string>
     <string name="zip_helper">12345</string>
 </resources>

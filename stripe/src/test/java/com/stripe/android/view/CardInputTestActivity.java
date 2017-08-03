@@ -1,20 +1,16 @@
-package com.stripe.android.testharness;
+package com.stripe.android.view;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.view.CardInputWidget;
-import com.stripe.android.view.CardNumberEditText;
-import com.stripe.android.view.StripeEditText;
-import com.stripe.android.view.ExpiryDateEditText;
 
 /**
  * Activity used to test UI components. We add the layout programmatically to avoid needing test
  * resource files.
  */
-public class CardInputTestActivity extends Activity {
+public class CardInputTestActivity extends AppCompatActivity {
 
     public static final String VALID_AMEX_NO_SPACES = "378282246310005";
     public static final String VALID_AMEX_WITH_SPACES = "3782 822463 10005";
@@ -24,14 +20,21 @@ public class CardInputTestActivity extends Activity {
     public static final String VALID_VISA_WITH_SPACES = "4242 4242 4242 4242";
 
     private CardInputWidget mCardInputWidget;
+    private CardMultilineWidget mCardMultilineWidget;
+    private CardMultilineWidget mNoZipCardMulitlineWidget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setTheme(R.style.Theme_AppCompat);
         mCardInputWidget = new CardInputWidget(this);
+        mCardMultilineWidget = new CardMultilineWidget(this, true);
+        mNoZipCardMulitlineWidget = new CardMultilineWidget(this, false);
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.addView(mCardInputWidget);
+        linearLayout.addView(mCardMultilineWidget);
+        linearLayout.addView(mNoZipCardMulitlineWidget);
         setContentView(linearLayout);
     }
 
@@ -49,5 +52,13 @@ public class CardInputTestActivity extends Activity {
 
     public CardInputWidget getCardInputWidget() {
         return mCardInputWidget;
+    }
+
+    public CardMultilineWidget getCardMultilineWidget() {
+        return mCardMultilineWidget;
+    }
+
+    public CardMultilineWidget getNoZipCardMulitlineWidget() {
+        return mNoZipCardMulitlineWidget;
     }
 }
