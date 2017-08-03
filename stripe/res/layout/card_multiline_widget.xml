@@ -14,11 +14,11 @@
             android:id="@+id/et_add_source_card_number_ml"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_unknown"
+            android:drawablePadding="@dimen/card_icon_padding"
+            android:drawableStart="@drawable/ic_unknown"
             android:hint="@string/acc_label_card_number"
             android:inputType="number"
-            android:drawableLeft="@drawable/ic_unknown"
-            android:drawableStart="@drawable/ic_unknown"
-            android:drawablePadding="@dimen/card_icon_padding"
             android:nextFocusDown="@+id/et_add_source_expiry_ml"
             android:nextFocusForward="@+id/et_add_source_expiry_ml"
             />
@@ -29,28 +29,29 @@
         android:id="@+id/second_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
         android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
         >
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/tl_add_source_expiry_ml"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
             android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
             >
+
             <com.stripe.android.view.ExpiryDateEditText
                 android:id="@+id/et_add_source_expiry_ml"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/acc_label_expiry_date"
                 android:inputType="date"
+                android:maxLength="@integer/date_length"
                 android:nextFocusDown="@+id/et_add_source_cvc_ml"
                 android:nextFocusForward="@+id/et_add_source_cvc_ml"
-                android:maxLength="@integer/date_length"
                 />
 
         </android.support.design.widget.TextInputLayout>
@@ -59,9 +60,9 @@
             android:id="@+id/tl_add_source_cvc_ml"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
             android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
             >
 
             <com.stripe.android.view.StripeEditText
@@ -71,7 +72,6 @@
                 android:inputType="number"
                 android:nextFocusDown="@+id/et_add_source_zip_ml"
                 android:nextFocusForward="@+id/et_add_source_zip_ml"
-
                 />
 
         </android.support.design.widget.TextInputLayout>

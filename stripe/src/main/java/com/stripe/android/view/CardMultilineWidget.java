@@ -107,13 +107,15 @@ public class CardMultilineWidget extends LinearLayout {
      * @return {@code true} if all shown fields are valid, {@code false} otherwise
      */
     public boolean validateAllFields() {
-        mCardNumberEditText.setShouldShowError(
-                !CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber()));
-        mExpiryDateEditText.setShouldShowError(
-                mExpiryDateEditText.getValidDateFields() == null ||
-                        !mExpiryDateEditText.isDateValid());
-        mCvcEditText.setShouldShowError(!ViewUtils.isCvcMaximalLength(mCardBrand,
-                mCvcEditText.getText().toString()));
+        boolean cardNumberIsValid =
+                CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber());
+        boolean expiryIsValid = mExpiryDateEditText.getValidDateFields() != null &&
+                mExpiryDateEditText.isDateValid();
+        boolean cvcIsValid = ViewUtils.isCvcMaximalLength(
+                mCardBrand, mCvcEditText.getText().toString());
+        mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
+        mExpiryDateEditText.setShouldShowError(!expiryIsValid);
+        mCvcEditText.setShouldShowError(!cvcIsValid);
         boolean postalCodeIsValidOrGone;
         if (mShouldShowPostalCode) {
             postalCodeIsValidOrGone = isPostalCodeMaximalLength(true,
@@ -123,9 +125,9 @@ public class CardMultilineWidget extends LinearLayout {
             postalCodeIsValidOrGone = true;
         }
 
-        return !mCardNumberEditText.getShouldShowError()
-                && !mExpiryDateEditText.getShouldShowError()
-                && !mCvcEditText.getShouldShowError()
+        return cardNumberIsValid
+                && expiryIsValid
+                && cvcIsValid
                 && postalCodeIsValidOrGone;
     }
 

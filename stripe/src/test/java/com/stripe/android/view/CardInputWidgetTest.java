@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verify;
 public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
-    private static final String[] EXPECTED_LOGGING_ARRAY = { LOGGING_TOKEN };
+    private static final String[] EXPECTED_LOGGING_ARRAY = {LOGGING_TOKEN};
     private CardInputWidget mCardInputWidget;
     private CardNumberEditText mCardNumberEditText;
     private ImageView mIconView;
@@ -64,7 +64,8 @@ public class CardInputWidgetTest {
 
     private CardInputWidget.DimensionOverrideSettings mDimensionOverrides;
 
-    @Mock CardInputListener mCardInputListener;
+    @Mock
+    CardInputListener mCardInputListener;
 
     @Before
     public void setup() {
