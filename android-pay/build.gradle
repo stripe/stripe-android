@@ -38,7 +38,7 @@ dependencies {
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
 
-    provided 'com.google.android.gms:play-services-wallet:11.0.2'
+    provided 'com.google.android.gms:play-services-wallet:11.0.4'
     // This should be changed back to a "provided" line before release
     compile project(':stripe')
 
