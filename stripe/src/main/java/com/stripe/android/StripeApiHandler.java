@@ -160,6 +160,7 @@ class StripeApiHandler {
 
             setTelemetryData(context, loggingResponseListener);
             Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
+                    context,
                     null,
                     apiKey,
                     sourceParams.getType());
@@ -264,7 +265,7 @@ class StripeApiHandler {
             setTelemetryData(context, listener);
 
             Map<String, Object> loggingParams =
-                    LoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
+                    LoggingUtils.getTokenCreationParams(context, loggingTokens, apiKey, tokenType);
             logApiCall(loggingParams, options, listener);
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.

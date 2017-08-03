@@ -1,9 +1,13 @@
 package com.stripe.android;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
+import android.text.TextUtils;
 
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
@@ -22,6 +26,9 @@ import java.util.Set;
  */
 class LoggingUtils {
 
+    static final String UNKNOWN = "unknown";
+    static final String NO_CONTEXT = "no_context";
+
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             EVENT_TOKEN_CREATION,
@@ -33,6 +40,8 @@ class LoggingUtils {
     static final String FIELD_PRODUCT_USAGE = "product_usage";
 
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
+    static final String FIELD_APP_NAME = "app_name";
+    static final String FIELD_APP_VERSION = "app_version";
     static final String FIELD_BINDINGS_VERSION = "bindings_version";
     static final String FIELD_DEVICE_TYPE = "device_type";
     static final String FIELD_EVENT = "event";
@@ -45,6 +54,8 @@ class LoggingUtils {
     static final Set<String> VALID_PARAM_FIELDS = new HashSet<>();
     static {
         VALID_PARAM_FIELDS.add(FIELD_ANALYTICS_UA);
+        VALID_PARAM_FIELDS.add(FIELD_APP_NAME);
+        VALID_PARAM_FIELDS.add(FIELD_APP_VERSION);
         VALID_PARAM_FIELDS.add(FIELD_BINDINGS_VERSION);
         VALID_PARAM_FIELDS.add(FIELD_DEVICE_TYPE);
         VALID_PARAM_FIELDS.add(FIELD_EVENT);
@@ -63,10 +74,12 @@ class LoggingUtils {
 
     @NonNull
     static Map<String, Object> getTokenCreationParams(
+            @NonNull Context context,
             @NonNull List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @Nullable String tokenType) {
         return getEventLoggingParams(
+                context,
                 productUsageTokens,
                 null,
                 tokenType,
@@ -76,10 +89,12 @@ class LoggingUtils {
 
     @NonNull
     static Map<String, Object> getSourceCreationParams(
+            @NonNull Context context,
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
+                context,
                 productUsageTokens,
                 sourceType,
                 null,
@@ -89,6 +104,7 @@ class LoggingUtils {
 
     @NonNull
     static Map<String, Object> getEventLoggingParams(
+            @NonNull Context context,
             @Nullable List<String> productUsageTokens,
             @Nullable @Source.SourceType String sourceType,
             @Nullable @Token.TokenType String tokenType,
@@ -103,6 +119,9 @@ class LoggingUtils {
         paramsObject.put(FIELD_OS_VERSION, Build.VERSION.SDK_INT);
         paramsObject.put(FIELD_DEVICE_TYPE, getDeviceLoggingString());
         paramsObject.put(FIELD_BINDINGS_VERSION, BuildConfig.VERSION_NAME);
+
+        addNameAndVersion(paramsObject, context);
+
         if (productUsageTokens != null) {
             paramsObject.put(FIELD_PRODUCT_USAGE, productUsageTokens);
         }
@@ -120,6 +139,40 @@ class LoggingUtils {
         }
 
         return paramsObject;
+    }
+
+    static void addNameAndVersion(
+            @NonNull Map<String, Object> paramsObject,
+            @NonNull Context context) {
+        Context applicationContext = context.getApplicationContext();
+        if (applicationContext != null && applicationContext.getPackageManager() != null) {
+            try {
+                PackageInfo info = applicationContext.getPackageManager().getPackageInfo(
+                        applicationContext.getPackageName(), 0);
+
+                String nameString = null;
+                if (info.applicationInfo != null) {
+                    CharSequence name =
+                            info.applicationInfo.loadLabel(applicationContext.getPackageManager());
+                    if (name != null) {
+                        nameString = name.toString();
+                    }
+                    paramsObject.put(FIELD_APP_NAME, nameString);
+                }
+
+                if (StripeTextUtils.isBlank(nameString)) {
+                    paramsObject.put(FIELD_APP_NAME, info.packageName);
+                }
+
+                paramsObject.put(FIELD_APP_VERSION, info.versionCode);
+            } catch (PackageManager.NameNotFoundException nameNotFound) {
+                paramsObject.put(FIELD_APP_NAME, UNKNOWN);
+                paramsObject.put(FIELD_APP_VERSION, UNKNOWN);
+            }
+        } else {
+            paramsObject.put(FIELD_APP_NAME, NO_CONTEXT);
+            paramsObject.put(FIELD_APP_VERSION, NO_CONTEXT);
+        }
     }
 
     @NonNull
