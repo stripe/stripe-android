@@ -50,6 +50,7 @@
                 android:inputType="date"
                 android:nextFocusDown="@+id/et_add_source_cvc_ml"
                 android:nextFocusForward="@+id/et_add_source_cvc_ml"
+                android:maxLength="@integer/date_length"
                 />
 
         </android.support.design.widget.TextInputLayout>

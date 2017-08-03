@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.EditText;
 
 import com.stripe.android.model.Card;
@@ -100,6 +101,10 @@ public class CardNumberEditText extends StripeEditText {
         // Immediately display the brand if known, in case this method is invoked when
         // partial data already exists.
         mCardBrandChangeListener.onCardBrandChanged(mCardBrand);
+    }
+
+    void updateLengthFilter() {
+        setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
     }
 
     /**
@@ -236,7 +241,7 @@ public class CardNumberEditText extends StripeEditText {
             return;
         }
 
-        setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
+        updateLengthFilter();
     }
 
     private void updateCardBrandFromNumber(String partialNumber) {

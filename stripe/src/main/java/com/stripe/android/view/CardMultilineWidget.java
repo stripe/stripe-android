@@ -11,6 +11,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -176,6 +177,7 @@ public class CardMultilineWidget extends LinearLayout {
         // This sets the value of mShouldShowPostalCode
         checkAttributeSet(attrs);
 
+
         TextInputLayout cardInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         TextInputLayout expiryInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
@@ -190,8 +192,6 @@ public class CardMultilineWidget extends LinearLayout {
 
         initErrorMessages();
         initFocusChangeListeners();
-
-
         initDeleteEmptyListeners();
 
         mCardNumberEditText.setCardBrandChangeListener(
@@ -258,6 +258,7 @@ public class CardMultilineWidget extends LinearLayout {
                     });
         }
 
+        mCardNumberEditText.updateLengthFilter();
         updateBrand(Card.UNKNOWN);
     }
 
@@ -366,12 +367,14 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateCvc(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             mCvcEditText.setFilters(
-                    new InputFilter[] {new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
+                    new InputFilter[] {
+                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
+                    });
             mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
         } else {
             mCvcEditText.setFilters(
                     new InputFilter[] {
-                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)});
+                            new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
             mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
         }
     }
