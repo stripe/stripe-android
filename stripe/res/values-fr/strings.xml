@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="acc_label_card_number">"Numéro de carte"</string>
-    <string name="acc_label_expiry_date">"Date d’expiration"</string>
+    <string name="acc_label_card_number">Numéro de carte</string>
+    <string name="acc_label_expiry_date">Date d’expiration</string>
     <string name="acc_label_zip">Code postal</string>
     <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/AA</string>
+    <string name="expiry_label_short">Expire</string>
     <string name="invalid_card_number">Le numéro de carte n’est pas valide.</string>
     <string name="invalid_expiry_month">Le mois d’expiration de votre carte n’est pas valide.</string>
     <string name="invalid_expiry_year">L’année d’expiration de votre carte n’est pas valide.</string>

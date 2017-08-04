@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="acc_label_card_number">"Kaartnummer"</string>
-    <string name="acc_label_expiry_date">"Vervaldatum"</string>
+    <string name="acc_label_card_number">Kaartnummer</string>
+    <string name="acc_label_expiry_date">Vervaldatum</string>
     <string name="acc_label_zip">Postcode</string>
     <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/YY</string>
+    <string name="expiry_label_short">Verval</string>
     <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
     <string name="invalid_expiry_month">De vervalmaand van uw kaart is ongeldig.</string>
     <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
