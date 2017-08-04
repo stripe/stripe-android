@@ -1,6 +1,8 @@
 package com.stripe.android.view;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
@@ -87,6 +89,25 @@ public class CardMultilineWidgetTest {
         // The No ZIP Group will get eliminated because its layout loses the reference
         assertNull(mNoZipGroup.postalCodeEditText);
         assertNotNull(mNoZipGroup.secondRowLayout);
+    }
+
+    @Test
+    public void onCreate_setsCorrectHintForExpiry() {
+        TextInputLayout shortExpiryContainer = mCardMultilineWidget
+                .findViewById(R.id.tl_add_source_expiry_ml);
+
+        TextInputLayout longExpiryContainer = mNoZipCardMultilineWidget
+                .findViewById(R.id.tl_add_source_expiry_ml);
+
+        String shortExpiryHint = mCardMultilineWidget
+                .getResources().getString(R.string.expiry_label_short);
+        String longExpiryHint = mCardMultilineWidget
+                .getResources().getString(R.string.acc_label_expiry_date);
+
+        assertNotNull(shortExpiryContainer.getHint());
+        assertEquals(shortExpiryHint, shortExpiryContainer.getHint().toString());
+        assertNotNull(longExpiryContainer.getHint());
+        assertEquals(longExpiryHint, longExpiryContainer.getHint().toString());
     }
 
     @Test

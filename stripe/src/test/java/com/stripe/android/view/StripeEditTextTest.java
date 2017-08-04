@@ -96,36 +96,6 @@ public class StripeEditTextTest {
     }
 
     @Test
-    public void isColorDark_forExampleLightColors_returnsFalse() {
-        @ColorInt int middleGray = 0x888888;
-        @ColorInt int offWhite = 0xfaebd7;
-        @ColorInt int lightCyan = 0x8feffb;
-        @ColorInt int lightYellow = 0xfcf4b2;
-        @ColorInt int lightBlue = 0x9cdbff;
-
-        assertFalse(StripeEditText.isColorDark(middleGray));
-        assertFalse(StripeEditText.isColorDark(offWhite));
-        assertFalse(StripeEditText.isColorDark(lightCyan));
-        assertFalse(StripeEditText.isColorDark(lightYellow));
-        assertFalse(StripeEditText.isColorDark(lightBlue));
-        assertFalse(StripeEditText.isColorDark(Color.WHITE));
-    }
-
-    @Test
-    public void isColorDark_forExampleDarkColors_returnsTrue() {
-        @ColorInt int logoBlue = 0x6772e5;
-        @ColorInt int slate = 0x525f7f;
-        @ColorInt int darkPurple = 0x6b3791;
-        @ColorInt int darkishRed = 0x9e2146;
-
-        assertTrue(StripeEditText.isColorDark(logoBlue));
-        assertTrue(StripeEditText.isColorDark(slate));
-        assertTrue(StripeEditText.isColorDark(darkPurple));
-        assertTrue(StripeEditText.isColorDark(darkishRed));
-        assertTrue(StripeEditText.isColorDark(Color.BLACK));
-    }
-
-    @Test
     @SuppressWarnings("deprecation")
     public void getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
         mEditText.setTextColor(

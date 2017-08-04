@@ -10,4 +10,6 @@
     <dimen name="android_pay_confirmation_margin">8dp</dimen>
     <dimen name="android_pay_button_separation">8dp</dimen>
     <dimen name="card_icon_multiline_width">24dp</dimen>
+    <dimen name="card_icon_multiline_padding">8dp</dimen>
+    <dimen name="card_icon_multiline_padding_bottom">1.52380955dp</dimen>
 </resources>

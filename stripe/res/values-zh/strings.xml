@@ -5,6 +5,7 @@
     <string name="acc_label_zip">邮政编码</string>
     <string name="acc_label_zip_short">邮政编码</string>
     <string name="expiry_date_hint">月 / 年</string>
+    <string name="expiry_label_short">有效期</string>
     <string name="invalid_card_number">您的卡号无效。</string>
     <string name="invalid_expiry_month">您的银行卡有效日期的月份无效。</string>
     <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>

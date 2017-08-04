@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="acc_label_card_number">"Número de tarjeta"</string>
-    <string name="acc_label_expiry_date">"Fecha de vencimiento"</string>
+    <string name="acc_label_card_number">Número de tarjeta</string>
+    <string name="acc_label_expiry_date">Fecha de vencimiento</string>
     <string name="acc_label_zip">Código postal</string>
     <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/AA</string>
+    <string name="expiry_label_short">Venc.</string>
     <string name="invalid_card_number">El número de tarjeta no es válido.</string>
     <string name="invalid_expiry_month">El mes de vencimiento de la tarjeta no es válido.</string>
     <string name="invalid_expiry_year">El año de vencimiento de la tarjeta no es válido.</string>

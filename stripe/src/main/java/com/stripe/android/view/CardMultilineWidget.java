@@ -2,10 +2,14 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -17,6 +21,9 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.CardUtils;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
@@ -31,6 +38,8 @@ import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
 public class CardMultilineWidget extends LinearLayout {
 
     static final String CARD_MULTILINE_TOKEN = "CardMultilineView";
+    static final long CARD_NUMBER_HINT_DELAY = 120L;
+    static final long COMMON_HINT_DELAY = 90L;
 
     private @Nullable CardInputListener mCardInputListener;
     private CardNumberEditText mCardNumberEditText;
@@ -40,6 +49,9 @@ public class CardMultilineWidget extends LinearLayout {
     private TextInputLayout mCvcTextInputLayout;
 
     private boolean mShouldShowPostalCode;
+    private boolean mHasAdjustedDrawable;
+
+    private @DrawableRes int mCachedIconResource;
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
 
@@ -141,7 +153,7 @@ public class CardMultilineWidget extends LinearLayout {
         postalParentLayout.removeView(postalInputLayout);
         LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) paddedMiddleTextInputLayout.getLayoutParams();
-        linearParams.setMargins(0,0,0,0);
+        linearParams.setMargins(0, 0, 0, 0);
         paddedMiddleTextInputLayout.setLayoutParams(linearParams);
     }
 
@@ -165,6 +177,33 @@ public class CardMultilineWidget extends LinearLayout {
         }
     }
 
+    private void flipToCvcIconIfNotFinished() {
+        if (ViewUtils.isCvcMaximalLength(mCardBrand, mCvcEditText.getText().toString())) {
+            return;
+        }
+
+        @DrawableRes int resourceId = Card.AMERICAN_EXPRESS.equals(mCardBrand)
+                ? R.drawable.ic_cvc_amex
+                : R.drawable.ic_cvc;
+
+        updateDrawable(resourceId, true);
+    }
+
+    @StringRes
+    private int getCvcHelperText() {
+        return Card.AMERICAN_EXPRESS.equals(mCardBrand)
+                ? R.string.cvc_multiline_helper_amex
+                : R.string.cvc_multiline_helper;
+    }
+
+    private int getDynamicBufferInPixels() {
+        float pixelsToAdjust = getResources()
+                .getDimension(R.dimen.card_icon_multiline_padding_bottom);
+        BigDecimal bigDecimal = new BigDecimal(pixelsToAdjust);
+        BigDecimal pixels = bigDecimal.setScale(0, RoundingMode.HALF_DOWN);
+        return pixels.intValue();
+    }
+
     private void initView(AttributeSet attrs) {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.card_multiline_widget, this);
@@ -184,6 +223,11 @@ public class CardMultilineWidget extends LinearLayout {
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
         TextInputLayout postalInputLayout = findViewById(R.id.tl_add_source_postal_ml);
+
+        if (mShouldShowPostalCode) {
+            // Set the label/hint to the shorter value if we have three things in a row.
+            expiryInputLayout.setHint(getResources().getString(R.string.expiry_label_short));
+        }
 
         initTextInputLayoutErrorHandlers(
                 cardInputLayout,
@@ -230,10 +274,13 @@ public class CardMultilineWidget extends LinearLayout {
                     @Override
                     public void onTextChanged(String text) {
                         if (ViewUtils.isCvcMaximalLength(mCardBrand, text)) {
+                            updateBrand(mCardBrand);
                             mPostalCodeEditText.requestFocus();
                             if (mCardInputListener != null) {
                                 mCardInputListener.onCvcComplete();
                             }
+                        } else {
+                            flipToCvcIconIfNotFinished();
                         }
                         mCvcEditText.setShouldShowError(false);
                     }
@@ -251,7 +298,8 @@ public class CardMultilineWidget extends LinearLayout {
                     new StripeEditText.AfterTextChangedListener() {
                         @Override
                         public void onTextChanged(String text) {
-                            if (isPostalCodeMaximalLength(true, text) && mCardInputListener != null) {
+                            if (isPostalCodeMaximalLength(true, text)
+                                    && mCardInputListener != null) {
                                 mCardInputListener.onPostalCodeComplete();
                             }
                             mPostalCodeEditText.setShouldShowError(false);
@@ -290,8 +338,14 @@ public class CardMultilineWidget extends LinearLayout {
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CARD);
+                if (hasFocus) {
+                    mCardNumberEditText.setHintDelayed(
+                            R.string.card_number_hint, CARD_NUMBER_HINT_DELAY);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CARD);
+                    }
+                } else {
+                    mCardNumberEditText.setHint("");
                 }
             }
         });
@@ -299,8 +353,14 @@ public class CardMultilineWidget extends LinearLayout {
         mExpiryDateEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                if (hasFocus) {
+                    mExpiryDateEditText.setHintDelayed(
+                            R.string.expiry_date_hint, COMMON_HINT_DELAY);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                    }
+                } else {
+                    mExpiryDateEditText.setHint("");
                 }
             }
         });
@@ -308,8 +368,16 @@ public class CardMultilineWidget extends LinearLayout {
         mCvcEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CVC);
+                if (hasFocus) {
+                    flipToCvcIconIfNotFinished();
+                    @StringRes int helperText = getCvcHelperText();
+                    mCvcEditText.setHintDelayed(helperText, COMMON_HINT_DELAY);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CVC);
+                    }
+                } else {
+                    updateBrand(mCardBrand);
+                    mCvcEditText.setHint("");
                 }
             }
         });
@@ -321,8 +389,16 @@ public class CardMultilineWidget extends LinearLayout {
         mPostalCodeEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null && mShouldShowPostalCode) {
-                    mCardInputListener.onFocusChange(FOCUS_POSTAL);
+                if (!mShouldShowPostalCode) {
+                    return;
+                }
+                if (hasFocus) {
+                    mPostalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_POSTAL);
+                    }
+                } else {
+                    mPostalCodeEditText.setHint("");
                 }
             }
         });
@@ -346,38 +422,70 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
         updateCvc(mCardBrand);
+        updateDrawable(BRAND_RESOURCE_MAP.get(brand), Card.UNKNOWN.equals(brand));
+    }
 
-        int iconPadding = mCardNumberEditText.getCompoundDrawablePadding();
+    private void updateCvc(@NonNull @Card.CardBrand String brand) {
+        if (Card.AMERICAN_EXPRESS.equals(brand)) {
+            mCvcEditText.setFilters(
+                    new InputFilter[]{
+                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
+                    });
+            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
+        } else {
+            mCvcEditText.setFilters(
+                    new InputFilter[]{
+                            new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
+            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void updateDrawable(
+            @DrawableRes int iconResourceId,
+            boolean needsTint) {
+
+        // Don't update the drawable more than is necessary.
+        if (mCachedIconResource == iconResourceId) {
+            return;
+        } else {
+            mCachedIconResource = iconResourceId;
+        }
+
+        Drawable icon;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            icon = getResources().getDrawable(iconResourceId, null);
+        } else {
+            // This method still triggers the "deprecation" warning, despite the other
+            // one not being allowed for SDK < 21
+            icon = getResources().getDrawable(iconResourceId);
+        }
+
         Drawable[] drawables = mCardNumberEditText.getCompoundDrawables();
         Drawable original = drawables[0];
         if (original == null) {
             return;
         }
 
-        Drawable icon = getResources().getDrawable(BRAND_RESOURCE_MAP.get(brand));
-        icon.setBounds(original.copyBounds());
+        Rect copyBounds = new Rect();
+        original.copyBounds(copyBounds);
+
+        int iconPadding = mCardNumberEditText.getCompoundDrawablePadding();
+
+        if (!mHasAdjustedDrawable) {
+            copyBounds.top = copyBounds.top - getDynamicBufferInPixels();
+            copyBounds.bottom = copyBounds.bottom - getDynamicBufferInPixels();
+            mHasAdjustedDrawable = true;
+        }
+
+        icon.setBounds(copyBounds);
         Drawable compatIcon = DrawableCompat.wrap(icon);
-        if (Card.UNKNOWN.equals(brand)) {
+        if (needsTint) {
             DrawableCompat.setTint(compatIcon.mutate(), mTintColorInt);
         }
 
         mCardNumberEditText.setCompoundDrawablePadding(iconPadding);
         mCardNumberEditText.setCompoundDrawables(compatIcon, null, null, null);
-    }
-
-    private void updateCvc(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
-            mCvcEditText.setFilters(
-                    new InputFilter[] {
-                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
-                    });
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
-        } else {
-            mCvcEditText.setFilters(
-                    new InputFilter[] {
-                            new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
-        }
     }
 
     private static class ErrorListener implements StripeEditText.ErrorMessageListener {

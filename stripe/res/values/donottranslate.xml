@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="card_number_hint">1234 5678 9012 3456</string>
+    <string name="card_number_hint">1234 1234 1234 1234</string>
     <string name="cvc_number_hint">CVC</string>
     <string name="cvc_amex_hint">CVV</string>
     <string name="cvc_multiline_helper">123</string>
