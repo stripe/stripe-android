@@ -2,21 +2,28 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.CardUtils;
+
+import java.util.Locale;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
@@ -31,6 +38,8 @@ import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
 public class CardMultilineWidget extends LinearLayout {
 
     static final String CARD_MULTILINE_TOKEN = "CardMultilineView";
+    // On XHDPI, this works out to be approximately 4px
+    private static final float CARD_ICON_PADDING_DP = 1.52380955f;
 
     private @Nullable CardInputListener mCardInputListener;
     private CardNumberEditText mCardNumberEditText;
@@ -40,6 +49,8 @@ public class CardMultilineWidget extends LinearLayout {
     private TextInputLayout mCvcTextInputLayout;
 
     private boolean mShouldShowPostalCode;
+    private boolean mHasAdjustedDrawable;
+
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
 
@@ -141,7 +152,7 @@ public class CardMultilineWidget extends LinearLayout {
         postalParentLayout.removeView(postalInputLayout);
         LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) paddedMiddleTextInputLayout.getLayoutParams();
-        linearParams.setMargins(0,0,0,0);
+        linearParams.setMargins(0, 0, 0, 0);
         paddedMiddleTextInputLayout.setLayoutParams(linearParams);
     }
 
@@ -290,8 +301,14 @@ public class CardMultilineWidget extends LinearLayout {
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CARD);
+                if (hasFocus) {
+                    mCardNumberEditText.setHintDelayed(
+                            R.string.card_number_hint, 120L);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CARD);
+                    }
+                } else {
+                    mCardNumberEditText.setHint("");
                 }
             }
         });
@@ -299,8 +316,14 @@ public class CardMultilineWidget extends LinearLayout {
         mExpiryDateEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                if (hasFocus) {
+                    mExpiryDateEditText.setHintDelayed(
+                            R.string.expiry_date_hint, 80L);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_EXPIRY);
+                    }
+                } else {
+                    mExpiryDateEditText.setHint("");
                 }
             }
         });
@@ -308,8 +331,14 @@ public class CardMultilineWidget extends LinearLayout {
         mCvcEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null) {
-                    mCardInputListener.onFocusChange(FOCUS_CVC);
+                if (hasFocus) {
+                    @StringRes int helperText = getCvcHelperText();
+                    mCvcEditText.setHintDelayed(helperText, 80L);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_CVC);
+                    }
+                } else {
+                    mCvcEditText.setHint("");
                 }
             }
         });
@@ -321,11 +350,26 @@ public class CardMultilineWidget extends LinearLayout {
         mPostalCodeEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && mCardInputListener != null && mShouldShowPostalCode) {
-                    mCardInputListener.onFocusChange(FOCUS_POSTAL);
+                if (!mShouldShowPostalCode) {
+                    return;
+                }
+                if (hasFocus) {
+                    mPostalCodeEditText.setHintDelayed(R.string.zip_helper, 80L);
+                    if (mCardInputListener != null) {
+                        mCardInputListener.onFocusChange(FOCUS_POSTAL);
+                    }
+                } else {
+                    mPostalCodeEditText.setHint("");
                 }
             }
         });
+    }
+
+    @StringRes
+    private int getCvcHelperText() {
+        return Card.AMERICAN_EXPRESS.equals(mCardBrand)
+                ? R.string.cvc_multiline_helper_amex
+                : R.string.cvc_multiline_helper;
     }
 
     private void initTextInputLayoutErrorHandlers(
@@ -343,6 +387,8 @@ public class CardMultilineWidget extends LinearLayout {
         mPostalCodeEditText.setErrorMessageListener(new ErrorListener(postalInputLayout));
     }
 
+
+    @SuppressWarnings("deprecation")
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
         updateCvc(mCardBrand);
@@ -355,7 +401,22 @@ public class CardMultilineWidget extends LinearLayout {
         }
 
         Drawable icon = getResources().getDrawable(BRAND_RESOURCE_MAP.get(brand));
-        icon.setBounds(original.copyBounds());
+        Rect originalBounds = original.copyBounds();
+
+        Log.d("chewie", String.format(Locale.ENGLISH,
+                "I should be moving things %.8f",
+                ViewUtils.convertPixelsToDp(4f)));
+
+        float someDimension = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 4f, getResources().getDisplayMetrics());
+        Log.d("chewie", String.format(Locale.ENGLISH,
+                "The other dimension is %.4f", someDimension));
+        if (!mHasAdjustedDrawable) {
+            originalBounds.top = originalBounds.top - 4;
+            originalBounds.bottom = originalBounds.bottom - 4;
+            mHasAdjustedDrawable = true;
+        }
+
+        icon.setBounds(originalBounds);
         Drawable compatIcon = DrawableCompat.wrap(icon);
         if (Card.UNKNOWN.equals(brand)) {
             DrawableCompat.setTint(compatIcon.mutate(), mTintColorInt);
@@ -368,13 +429,13 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateCvc(@NonNull @Card.CardBrand String brand) {
         if (Card.AMERICAN_EXPRESS.equals(brand)) {
             mCvcEditText.setFilters(
-                    new InputFilter[] {
+                    new InputFilter[]{
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
                     });
             mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
         } else {
             mCvcEditText.setFilters(
-                    new InputFilter[] {
+                    new InputFilter[]{
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
             mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
         }

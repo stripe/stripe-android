@@ -1,5 +1,8 @@
 package com.stripe.android.view;
 
+import android.graphics.Color;
+import android.support.annotation.ColorInt;
+
 import com.stripe.android.model.Card;
 
 import org.junit.Test;
@@ -174,5 +177,35 @@ public class ViewUtilsTest {
     @Test
     public void isCvcMaximalLength_whenNull_returnsFalse() {
         assertFalse(ViewUtils.isCvcMaximalLength(Card.AMERICAN_EXPRESS, null));
+    }
+
+    @Test
+    public void isColorDark_forExampleLightColors_returnsFalse() {
+        @ColorInt int middleGray = 0x888888;
+        @ColorInt int offWhite = 0xfaebd7;
+        @ColorInt int lightCyan = 0x8feffb;
+        @ColorInt int lightYellow = 0xfcf4b2;
+        @ColorInt int lightBlue = 0x9cdbff;
+
+        assertFalse(ViewUtils.isColorDark(middleGray));
+        assertFalse(ViewUtils.isColorDark(offWhite));
+        assertFalse(ViewUtils.isColorDark(lightCyan));
+        assertFalse(ViewUtils.isColorDark(lightYellow));
+        assertFalse(ViewUtils.isColorDark(lightBlue));
+        assertFalse(ViewUtils.isColorDark(Color.WHITE));
+    }
+
+    @Test
+    public void isColorDark_forExampleDarkColors_returnsTrue() {
+        @ColorInt int logoBlue = 0x6772e5;
+        @ColorInt int slate = 0x525f7f;
+        @ColorInt int darkPurple = 0x6b3791;
+        @ColorInt int darkishRed = 0x9e2146;
+
+        assertTrue(ViewUtils.isColorDark(logoBlue));
+        assertTrue(ViewUtils.isColorDark(slate));
+        assertTrue(ViewUtils.isColorDark(darkPurple));
+        assertTrue(ViewUtils.isColorDark(darkishRed));
+        assertTrue(ViewUtils.isColorDark(Color.BLACK));
     }
 }

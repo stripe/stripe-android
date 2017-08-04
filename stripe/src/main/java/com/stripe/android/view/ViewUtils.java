@@ -1,9 +1,16 @@
 package com.stripe.android.view;
 
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.stripe.android.model.Card;
+
+import java.util.Locale;
 
 import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
 import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
@@ -12,6 +19,57 @@ import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
  * Static utility functions needed for View classes.
  */
 class ViewUtils {
+
+    /**
+     * This method converts dp unit to equivalent pixels, depending on device density.
+     *
+     * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
+     * @return A float value to represent px equivalent to dp depending on device density
+     */
+    public static float convertDpToPixel(float dp){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    /**
+     * This method converts device specific pixels to density independent pixels.
+     *
+     * @param px A value in px (pixels) unit. Which we need to convert into db
+     * @return A float value to represent dp equivalent to px value
+     */
+    public static float convertPixelsToDp(float px){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        Log.d("chewie", String.format(Locale.ENGLISH, "My density is %.2f", metrics.density));
+        return px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    /**
+     * A crude mechanism by which we check whether or not a color is "dark."
+     * This is subject to much interpretation, but we attempt to follow traditional
+     * design standards.
+     *
+     * @param color an integer representation of a color
+     * @return {@code true} if the color is "dark," else {@link false}
+     */
+    static boolean isColorDark(@ColorInt int color){
+        // Forumla comes from W3C standards and conventional theory
+        // about how to calculate the "brightness" of a color, often
+        // thought of as how far along the spectrum from white to black the
+        // grayscale version would be.
+        // See https://www.w3.org/TR/AERT#color-contrast and
+        // http://paulbourke.net/texture_colour/colourspace/ for further reading.
+        double luminescence = 0.299* Color.red(color)
+                + 0.587*Color.green(color)
+                + 0.114* Color.blue(color);
+
+        // Because the colors are all hex integers.
+        double luminescencePercentage = luminescence / 255;
+        if (luminescencePercentage > 0.5) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     static boolean isCvcMaximalLength(
             @NonNull @Card.CardBrand String cardBrand,
