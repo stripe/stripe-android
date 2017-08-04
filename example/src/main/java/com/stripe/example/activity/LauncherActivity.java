@@ -22,7 +22,7 @@ public class LauncherActivity extends AppCompatActivity {
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY =
-            "put your key here";
+            "put your test key here";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +30,7 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
-        Button tokenButton = (Button) findViewById(R.id.btn_make_card_tokens);
+        Button tokenButton = findViewById(R.id.btn_make_card_tokens);
         tokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -39,7 +39,16 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        Button sourceButton = (Button) findViewById(R.id.btn_make_sources);
+        Button multilineButton = findViewById(R.id.btn_make_card_sources);
+        multilineButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LauncherActivity.this, PaymentMultilineActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button sourceButton = findViewById(R.id.btn_make_sources);
         sourceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,7 +57,7 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        Button androidPayButton = (Button) findViewById(R.id.btn_android_pay_launch);
+        Button androidPayButton = findViewById(R.id.btn_android_pay_launch);
         androidPayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
