@@ -4,5 +4,6 @@
 
         <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
         <item name="colorAccent">@color/fadedBlue</item>
+        <item name="colorControlNormal">@color/crazyOrange</item>
     </style>
 </resources>

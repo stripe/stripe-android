@@ -34,7 +34,7 @@ public class LauncherActivity extends AppCompatActivity {
         tokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, PaymentActivity.class);
+                Intent intent = new Intent(LauncherActivity.this, MaskedListActivity.class);
                 startActivity(intent);
             }
         });

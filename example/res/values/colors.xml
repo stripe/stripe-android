@@ -5,4 +5,5 @@
     <color name="headerText">#EEEEEE</color>
     <color name="underline">#5458DF</color>
     <color name="fadedBlue">#AA5458DF</color>
+    <color name="crazyOrange">#ccFF9900</color>
 </resources>

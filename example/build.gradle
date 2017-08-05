@@ -11,12 +11,13 @@ dependencies {
     compile project(':stripe')
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
-    compile 'com.google.android.gms:play-services-wallet:11.0.4'
     /* Needed for RxAndroid */
     /* Needed for Rx Bindings on views */
+    compile 'com.google.android.gms:play-services-wallet:11.0.4'
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 
 android {
