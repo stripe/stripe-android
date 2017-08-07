@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="SampleTheme" parent="@style/Theme.AppCompat.Light">
-
         <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
         <item name="colorAccent">@color/fadedBlue</item>
-        <item name="colorControlNormal">@color/crazyOrange</item>
+        <item name="colorControlNormal">@color/editText</item>
+    </style>
+
+    <style name="SampleThemeDefault" parent="@style/Theme.AppCompat.Light">
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
+        <item name="colorAccent">@color/accent_color_default_theme</item>
+        <item name="colorControlNormal">@color/control_normal_color_default_theme</item>
     </style>
 </resources>

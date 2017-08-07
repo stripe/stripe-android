@@ -27,7 +27,7 @@ public class CardInputTestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setTheme(R.style.Theme_AppCompat);
+        setTheme(R.style.StripeDefaultTheme);
         mCardInputWidget = new CardInputWidget(this);
         mCardMultilineWidget = new CardMultilineWidget(this, true);
         mNoZipCardMulitlineWidget = new CardMultilineWidget(this, false);

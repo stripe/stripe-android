@@ -3,12 +3,10 @@
 
     <ImageView
         android:id="@+id/masked_icon_view"
-        android:layout_width="@dimen/masked_card_icon_width"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/card_icon_multiline_padding"
-        android:layout_marginEnd="@dimen/card_icon_multiline_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/masked_card_icon_width"
         android:src="@drawable/ic_unknown"
-        android:layout_gravity="center"
+        android:layout_gravity="center_vertical|start"
         />
 
     <TextView
@@ -16,7 +14,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_marginLeft="@dimen/card_icon_multiline_padding"
+        android:layout_marginStart="@dimen/card_icon_multiline_padding"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:layout_gravity="center_vertical|start"
         />
 
     <ImageView
