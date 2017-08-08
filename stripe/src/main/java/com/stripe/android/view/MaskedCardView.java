@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static com.stripe.android.view.ViewUtils.getThemeAccentColor;
 import static com.stripe.android.view.ViewUtils.getThemeColorControlNormal;
+import static com.stripe.android.view.ViewUtils.getThemeColorTextPrimary;
 
 /**
  * View that displays card information without revealing the entire number, usually for
@@ -50,6 +51,7 @@ public class MaskedCardView extends LinearLayout {
 
     @ColorInt int mSelectedColorInt;
     @ColorInt int mUnselectedColorInt;
+    @ColorInt int mUnselectedTextColorInt;
 
     static final Map<String , Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
     static {
@@ -175,6 +177,7 @@ public class MaskedCardView extends LinearLayout {
 
         mSelectedColorInt = getThemeAccentColor(getContext()).data;
         mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
+        mUnselectedTextColorInt = getThemeColorTextPrimary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
 
         initializeCheckMark();
@@ -191,7 +194,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateTextColor() {
-        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedTextColorInt;
         mCardInformationTextView.setTextColor(textColor);
     }
 
@@ -256,6 +259,9 @@ public class MaskedCardView extends LinearLayout {
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
                     ? res.getColor(R.color.control_normal_color_default, context.getTheme())
                     : mUnselectedColorInt;
+            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
+                    ? res.getColor(R.color.masked_card_default_text, context.getTheme())
+                    : mUnselectedTextColorInt;
         } else {
             // This method still triggers the "deprecation" warning, despite the other
             // one not being allowed for SDK < 23
@@ -265,6 +271,10 @@ public class MaskedCardView extends LinearLayout {
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
                     ? res.getColor(R.color.control_normal_color_default)
                     : mUnselectedColorInt;
+            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
+                    ? res.getColor(R.color.masked_card_default_text)
+                    : mUnselectedTextColorInt;
+
         }
     }
 }

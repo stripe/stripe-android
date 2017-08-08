@@ -3,5 +3,6 @@
     <color name="error_text_light_theme">#ffeb1c26</color>
     <color name="error_text_dark_theme">#ffe85746</color>
     <color name="accent_color_default">#ff306af7</color>
-    <color name="control_normal_color_default">#ffb3b3b3</color>
+    <color name="masked_card_default_text">#ff32325d</color>
+    <color name="control_normal_color_default">#ff32325d</color>
 </resources>
