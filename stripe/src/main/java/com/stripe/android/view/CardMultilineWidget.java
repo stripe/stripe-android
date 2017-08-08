@@ -142,6 +142,14 @@ public class CardMultilineWidget extends LinearLayout {
                 && postalCodeIsValidOrGone;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            updateBrand(mCardBrand);
+        }
+    }
+
     static void adjustViewForPostalCodeAttribute(
             @NonNull StripeEditText navigationEditText,
             @NonNull TextInputLayout postalInputLayout,
@@ -214,6 +222,7 @@ public class CardMultilineWidget extends LinearLayout {
         mPostalCodeEditText = findViewById(R.id.et_add_source_postal_ml);
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
 
+        mCardBrand = Card.UNKNOWN;
         // This sets the value of mShouldShowPostalCode
         checkAttributeSet(attrs);
 
@@ -444,13 +453,6 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateDrawable(
             @DrawableRes int iconResourceId,
             boolean needsTint) {
-
-        // Don't update the drawable more than is necessary.
-        if (mCachedIconResource == iconResourceId) {
-            return;
-        } else {
-            mCachedIconResource = iconResourceId;
-        }
 
         Drawable icon;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

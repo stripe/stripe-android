@@ -10,6 +10,8 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -17,7 +19,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
@@ -41,11 +42,11 @@ public class MaskedCardView extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
     private String mLast4;
-    private boolean mIsSelected;
+    private boolean mIsHighlighted;
 
-    private ImageView mCardIconImageView;
-    private TextView mCardInformationTextView;
-    private ImageView mSelectedImageView;
+    private AppCompatImageView mCardIconImageView;
+    private AppCompatTextView mCardInformationTextView;
+    private AppCompatImageView mCheckMarkImageView;
 
     @ColorInt int mSelectedColorInt;
     @ColorInt int mUnselectedColorInt;
@@ -94,7 +95,7 @@ public class MaskedCardView extends LinearLayout {
      *
      * @param sourceCardData the {@link SourceCardData} to be partially displayed
      */
-    public void setCardData(@NonNull SourceCardData sourceCardData) {
+    public void setSourceCardData(@NonNull SourceCardData sourceCardData) {
         mCardBrand = sourceCardData.getBrand();
         mLast4 = sourceCardData.getLast4();
         updateBrandIcon();
@@ -115,7 +116,7 @@ public class MaskedCardView extends LinearLayout {
                 && Source.CARD.equals(source.getType())
                 && source.getSourceTypeModel() instanceof SourceCardData) {
             SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            setCardData(sourceCardData);
+            setSourceCardData(sourceCardData);
             return;
         }
 
@@ -128,15 +129,15 @@ public class MaskedCardView extends LinearLayout {
     /**
      * @return whether or not this view is displaying as selected
      */
-    public boolean getIsSelected() {
-        return mIsSelected;
+    public boolean isHighlighted() {
+        return mIsHighlighted;
     }
 
     /**
-     * @param isSelected whether or not this view should display in selected mode
+     * @param isHighlighted whether or not this view should display in selected mode
      */
-    public void setIsSelected(boolean isSelected) {
-        mIsSelected = isSelected;
+    public void setHighlighted(boolean isHighlighted) {
+        mIsHighlighted = isHighlighted;
         updateCheckMark();
         updateBrandIcon();
         updateTextColor();
@@ -145,8 +146,8 @@ public class MaskedCardView extends LinearLayout {
     /**
      * Toggle the view from selected to unselected or vice-versa.
      */
-    public void toggleSelected() {
-        setIsSelected(!mIsSelected);
+    public void toggleHighlighted() {
+        setHighlighted(!mIsHighlighted);
     }
 
     @Card.CardBrand
@@ -170,17 +171,18 @@ public class MaskedCardView extends LinearLayout {
 
         mCardIconImageView = findViewById(R.id.masked_icon_view);
         mCardInformationTextView = findViewById(R.id.masked_card_info_view);
-        mSelectedImageView = findViewById(R.id.masked_selected_icon);
+        mCheckMarkImageView = findViewById(R.id.masked_check_icon);
 
         mSelectedColorInt = getThemeAccentColor(getContext()).data;
         mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
 
         initializeCheckMark();
+        updateCheckMark();
     }
 
     private void initializeCheckMark() {
-        updateDrawable(R.drawable.ic_checkmark, mSelectedImageView, true);
+        updateDrawable(R.drawable.ic_checkmark, mCheckMarkImageView, true);
     }
 
     private void updateBrandIcon() {
@@ -189,7 +191,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateTextColor() {
-        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedColorInt;
         mCardInformationTextView.setTextColor(textColor);
     }
 
@@ -207,7 +209,7 @@ public class MaskedCardView extends LinearLayout {
             icon = getResources().getDrawable(resourceId);
         }
 
-        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int tintColor = mIsHighlighted || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), tintColor);
         imageView.setImageDrawable(compatIcon);
@@ -232,13 +234,14 @@ public class MaskedCardView extends LinearLayout {
                 brandLength + middleLength + last4length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mCardInformationTextView.setText(str);
+        updateTextColor();
     }
 
     private void updateCheckMark() {
-        if (mIsSelected) {
-            mSelectedImageView.setVisibility(View.VISIBLE);
+        if (mIsHighlighted) {
+            mCheckMarkImageView.setVisibility(View.VISIBLE);
         } else {
-            mSelectedImageView.setVisibility(View.INVISIBLE);
+            mCheckMarkImageView.setVisibility(View.INVISIBLE);
         }
     }
 
