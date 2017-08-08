@@ -3,11 +3,17 @@ package com.stripe.android.view;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Card;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
@@ -19,8 +25,63 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ViewUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
+@Config(sdk = 25, constants = BuildConfig.class)
 public class ViewUtilsTest {
+
+    ActivityController<CardInputTestActivity> mActivityController;
+
+    @Before
+    public void setup() {
+        mActivityController = Robolectric.buildActivity(CardInputTestActivity.class)
+                .create().start();
+    }
+
+    @Test
+    public void getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
+        @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
+        assertTrue(Color.alpha(color) > 0);
+    }
+
+    @Test
+    @Config(sdk = 16)
+    public void getThemeAccentColor_whenOnPreKitKatConfig_getsNonzeroColor() {
+        @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
+        assertTrue(Color.alpha(color) > 0);
+    }
+
+    @Test
+    public void getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
+        @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
+        assertTrue(Color.alpha(color) > 0);
+    }
+
+    @Test
+    @Config(sdk = 16)
+    public void getThemeColorControlNormal_whenOnPreKitKatConfig_getsNonzeroColor() {
+        @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
+        assertTrue(Color.alpha(color) > 0);
+    }
+
+    @Test
+    public void isColorTransparent_whenColorIsZero_returnsTrue() {
+        assertTrue(ViewUtils.isColorTransparent(0));
+    }
+
+    @Test
+    public void isColorTransparent_whenColorIsNonzeroButHasLowAlpha_returnsTrue() {
+        @ColorInt int invisibleBlue = 0x050000ff;
+        @ColorInt int invisibleRed = 0x0bff0000;
+        assertTrue(ViewUtils.isColorTransparent(invisibleBlue));
+        assertTrue(ViewUtils.isColorTransparent(invisibleRed));
+    }
+
+    @Test
+    public void isColorTransparent_whenColorIsNotCloseToTransparent_returnsFalse() {
+        @ColorInt int brightWhite = 0xffffffff;
+        @ColorInt int completelyBlack = 0xff000000;
+        assertFalse(ViewUtils.isColorTransparent(brightWhite));
+        assertFalse(ViewUtils.isColorTransparent(completelyBlack));
+    }
 
     @Test
     public void separateCardNumberGroups_withVisa_returnsCorrectCardGroups() {

@@ -30,6 +30,7 @@
     <string name="updatedSources">Source results</string>
     <string name="cvc">CVC</string>
 
+    <string name="load_items">Load Items</string>
     <string name="ok">OK</string>
 
     <string name="label_source_type">Type</string>

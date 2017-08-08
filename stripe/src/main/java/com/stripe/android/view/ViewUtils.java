@@ -1,12 +1,15 @@
 package com.stripe.android.view;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.stripe.android.model.Card;
 
@@ -20,27 +23,44 @@ import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
  */
 class ViewUtils {
 
-    /**
-     * This method converts dp unit to equivalent pixels, depending on device density.
-     *
-     * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
-     * @return A float value to represent px equivalent to dp depending on device density
-     */
-    public static float convertDpToPixel(float dp){
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        return dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    static TypedValue getThemeAccentColor(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.colorAccent;
+        } else {
+            //Get colorAccent defined for AppCompat
+            colorAttr = context
+                    .getResources()
+                    .getIdentifier("colorAccent", "attr", context.getPackageName());
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue;
+    }
+
+    static TypedValue getThemeColorControlNormal(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.colorControlNormal;
+        } else {
+            //Get colorAccent defined for AppCompat
+            colorAttr = context
+                    .getResources()
+                    .getIdentifier("colorControlNormal", "attr", context.getPackageName());
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue;
     }
 
     /**
-     * This method converts device specific pixels to density independent pixels.
+     * Check to see whether the color int is essentially transparent.
      *
-     * @param px A value in px (pixels) unit. Which we need to convert into db
-     * @return A float value to represent dp equivalent to px value
+     * @param color a {@link ColorInt} integer
+     * @return {@code true} if this color is too transparent to be seen
      */
-    public static float convertPixelsToDp(float px){
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        Log.d("chewie", String.format(Locale.ENGLISH, "My density is %.2f", metrics.density));
-        return px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    static boolean isColorTransparent(@ColorInt int color) {
+        return Color.alpha(color) < 0x10;
     }
 
     /**
