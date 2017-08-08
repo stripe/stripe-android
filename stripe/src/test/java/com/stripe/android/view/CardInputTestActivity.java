@@ -22,6 +22,7 @@ public class CardInputTestActivity extends AppCompatActivity {
     private CardInputWidget mCardInputWidget;
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidget mNoZipCardMulitlineWidget;
+    private MaskedCardView mMaskedCardView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +32,12 @@ public class CardInputTestActivity extends AppCompatActivity {
         mCardInputWidget = new CardInputWidget(this);
         mCardMultilineWidget = new CardMultilineWidget(this, true);
         mNoZipCardMulitlineWidget = new CardMultilineWidget(this, false);
+        mMaskedCardView = new MaskedCardView(this);
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.addView(mCardInputWidget);
         linearLayout.addView(mCardMultilineWidget);
         linearLayout.addView(mNoZipCardMulitlineWidget);
+        linearLayout.addView(mMaskedCardView);
         setContentView(linearLayout);
     }
 
@@ -56,6 +59,10 @@ public class CardInputTestActivity extends AppCompatActivity {
 
     public CardMultilineWidget getCardMultilineWidget() {
         return mCardMultilineWidget;
+    }
+
+    public MaskedCardView getMaskedCardView() {
+        return mMaskedCardView;
     }
 
     public CardMultilineWidget getNoZipCardMulitlineWidget() {

@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -146,6 +147,17 @@ public class MaskedCardView extends LinearLayout {
      */
     public void toggleSelected() {
         setIsSelected(!mIsSelected);
+    }
+
+    @Card.CardBrand
+    @VisibleForTesting
+    String getCardBrand() {
+        return mCardBrand;
+    }
+
+    @VisibleForTesting
+    String getLast4() {
+        return mLast4;
     }
 
     void init() {

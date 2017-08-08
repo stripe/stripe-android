@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.widget.LinearLayout;
