@@ -63,6 +63,27 @@ public class ViewUtilsTest {
     }
 
     @Test
+    public void isColorTransparent_whenColorIsZero_returnsTrue() {
+        assertTrue(ViewUtils.isColorTransparent(0));
+    }
+
+    @Test
+    public void isColorTransparent_whenColorIsNonzeroButHasLowAlpha_returnsTrue() {
+        @ColorInt int invisibleBlue = 0x050000ff;
+        @ColorInt int invisibleRed = 0x0bff0000;
+        assertTrue(ViewUtils.isColorTransparent(invisibleBlue));
+        assertTrue(ViewUtils.isColorTransparent(invisibleRed));
+    }
+
+    @Test
+    public void isColorTransparent_whenColorIsNotCloseToTransparent_returnsFalse() {
+        @ColorInt int brightWhite = 0xffffffff;
+        @ColorInt int completelyBlack = 0xff000000;
+        assertFalse(ViewUtils.isColorTransparent(brightWhite));
+        assertFalse(ViewUtils.isColorTransparent(completelyBlack));
+    }
+
+    @Test
     public void separateCardNumberGroups_withVisa_returnsCorrectCardGroups() {
         String testCardNumber = "4000056655665556";
         String[] groups = ViewUtils.separateCardNumberGroups(testCardNumber, Card.VISA);

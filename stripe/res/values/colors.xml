@@ -2,6 +2,6 @@
 <resources>
     <color name="error_text_light_theme">#ffeb1c26</color>
     <color name="error_text_dark_theme">#ffe85746</color>
-    <color name="accent_color_default_theme">#ff306af7</color>
-    <color name="control_normal_color_default_theme">#ffb3b3b3</color>
+    <color name="accent_color_default">#ff306af7</color>
+    <color name="control_normal_color_default">#ffb3b3b3</color>
 </resources>

@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -29,6 +30,12 @@ import java.util.Map;
 import static com.stripe.android.view.ViewUtils.getThemeAccentColor;
 import static com.stripe.android.view.ViewUtils.getThemeColorControlNormal;
 
+/**
+ * View that displays card information without revealing the entire number, usually for
+ * selection in a list. The view can be toggled to "selected" state. Colors for the selected
+ * and unselected states are taken from the host Activity theme's
+ * "colorAccent" and "colorControlNormal" states.
+ */
 public class MaskedCardView extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
@@ -39,8 +46,8 @@ public class MaskedCardView extends LinearLayout {
     private TextView mCardInformationTextView;
     private ImageView mSelectedImageView;
 
-    @ColorInt private int mSelectedColorId;
-    @ColorInt private int mUnselectedColorId;
+    @ColorInt int mSelectedColorInt;
+    @ColorInt int mUnselectedColorInt;
 
     static final Map<String , Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
     static {
@@ -68,6 +75,79 @@ public class MaskedCardView extends LinearLayout {
         init();
     }
 
+    /**
+     * Set the card data displayed using a {@link Card} object. Note that
+     * the full number will not be accessed here.
+     *
+     * @param card the {@link Card} to be partially displayed
+     */
+    public void setCard(@NonNull Card card) {
+        mCardBrand = card.getBrand();
+        mLast4 = card.getLast4();
+        updateBrandIcon();
+        updateCardInformation();
+    }
+
+    /**
+     * Set the card data displayed using a {@link SourceCardData} object.
+     *
+     * @param sourceCardData the {@link SourceCardData} to be partially displayed
+     */
+    public void setCardData(@NonNull SourceCardData sourceCardData) {
+        mCardBrand = sourceCardData.getBrand();
+        mLast4 = sourceCardData.getLast4();
+        updateBrandIcon();
+        updateCardInformation();
+    }
+
+    /**
+     * Set the card data displayed using a {@link CustomerSource} object. If the object
+     * is not a {@link Source} object that represents a card and the object returns {@code null}
+     * from its {@link CustomerSource#asCard()} method, then no values will be set on this control.
+     *
+     * @param customerSource the {@link CustomerSource} to be partially displayed
+     */
+    public void setCustomerSource(@NonNull CustomerSource customerSource) {
+        Source source = customerSource.asSource();
+        if (source != null
+                && source.getSourceTypeModel() != null
+                && Source.CARD.equals(source.getType())
+                && source.getSourceTypeModel() instanceof SourceCardData) {
+            SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
+            setCardData(sourceCardData);
+            return;
+        }
+
+        Card card = customerSource.asCard();
+        if (card != null) {
+            setCard(card);
+        }
+    }
+
+    /**
+     * @return whether or not this view is displaying as selected
+     */
+    public boolean getIsSelected() {
+        return mIsSelected;
+    }
+
+    /**
+     * @param isSelected whether or not this view should display in selected mode
+     */
+    public void setIsSelected(boolean isSelected) {
+        mIsSelected = isSelected;
+        updateCheckMark();
+        updateBrandIcon();
+        updateTextColor();
+    }
+
+    /**
+     * Toggle the view from selected to unselected or vice-versa.
+     */
+    public void toggleSelected() {
+        setIsSelected(!mIsSelected);
+    }
+
     void init() {
         inflate(getContext(), R.layout.masked_card_view, this);
         setOrientation(HORIZONTAL);
@@ -80,55 +160,11 @@ public class MaskedCardView extends LinearLayout {
         mCardInformationTextView = findViewById(R.id.masked_card_info_view);
         mSelectedImageView = findViewById(R.id.masked_selected_icon);
 
-        mSelectedColorId = getThemeAccentColor(getContext()).data;
-        mUnselectedColorId = getThemeColorControlNormal(getContext()).data;
+        mSelectedColorInt = getThemeAccentColor(getContext()).data;
+        mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
+        useDefaultColorsIfThemeColorsAreInvisible();
 
         initializeCheckMark();
-    }
-
-    public void setCard(@NonNull Card card) {
-        mCardBrand = card.getBrand();
-        mLast4 = card.getLast4();
-        updateBrandIcon();
-        updateCardInformation();
-    }
-
-    public void setCardData(@NonNull SourceCardData sourceCardData) {
-        mCardBrand = sourceCardData.getBrand();
-        mLast4 = sourceCardData.getLast4();
-        updateBrandIcon();
-        updateCardInformation();
-    }
-
-    public void setCustomerSource(@NonNull CustomerSource customerSource) {
-        Source source = customerSource.asSource();
-        if (source != null
-                && source.getSourceTypeModel() != null
-                && Source.CARD.equals(source.getType())
-                && source.getSourceTypeModel() instanceof SourceCardData) {
-            SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            setCardData(sourceCardData);
-        }
-
-        Card card = customerSource.asCard();
-        if (card != null) {
-            setCard(card);
-        }
-    }
-
-    public boolean getIsSelected() {
-        return mIsSelected;
-    }
-
-    public void setIsSelected(boolean isSelected) {
-        mIsSelected = isSelected;
-        updateCheckMark();
-        updateBrandIcon();
-        updateTextColor();
-    }
-
-    public void toggleSelected() {
-        setIsSelected(!mIsSelected);
     }
 
     private void initializeCheckMark() {
@@ -141,7 +177,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateTextColor() {
-        @ColorInt int textColor = mIsSelected ? mSelectedColorId : mUnselectedColorId;
+        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedColorInt;
         mCardInformationTextView.setTextColor(textColor);
     }
 
@@ -159,7 +195,7 @@ public class MaskedCardView extends LinearLayout {
             icon = getResources().getDrawable(resourceId);
         }
 
-        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorId : mUnselectedColorId;
+        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), tintColor);
         imageView.setImageDrawable(compatIcon);
@@ -191,6 +227,29 @@ public class MaskedCardView extends LinearLayout {
             mSelectedImageView.setVisibility(View.VISIBLE);
         } else {
             mSelectedImageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void useDefaultColorsIfThemeColorsAreInvisible() {
+        Resources res = getResources();
+        Context context = getContext();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
+                    ? res.getColor(R.color.accent_color_default, context.getTheme())
+                    : mSelectedColorInt;
+            mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
+                    ? res.getColor(R.color.control_normal_color_default, context.getTheme())
+                    : mUnselectedColorInt;
+        } else {
+            // This method still triggers the "deprecation" warning, despite the other
+            // one not being allowed for SDK < 23
+            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
+                    ? res.getColor(R.color.accent_color_default)
+                    : mSelectedColorInt;
+            mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
+                    ? res.getColor(R.color.control_normal_color_default)
+                    : mUnselectedColorInt;
         }
     }
 }

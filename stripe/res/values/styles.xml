@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="StripeDefaultTheme" parent="@style/Theme.AppCompat.Light">
-        <item name="colorAccent">@color/accent_color_default_theme</item>
-        <item name="colorControlNormal">@color/control_normal_color_default_theme</item>
+        <item name="colorAccent">@color/accent_color_default</item>
+        <item name="colorControlNormal">@color/control_normal_color_default</item>
     </style>
 </resources>

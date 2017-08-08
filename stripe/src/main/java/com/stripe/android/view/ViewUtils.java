@@ -53,9 +53,14 @@ class ViewUtils {
         return outValue;
     }
 
+    /**
+     * Check to see whether the color int is essentially transparent.
+     *
+     * @param color a {@link ColorInt} integer
+     * @return {@code true} if this color is too transparent to be seen
+     */
     static boolean isColorTransparent(@ColorInt int color) {
-        int alpha = (color >> 24) & 0xff;
-        return alpha < 0x10;
+        return Color.alpha(color) < 0x10;
     }
 
     /**
