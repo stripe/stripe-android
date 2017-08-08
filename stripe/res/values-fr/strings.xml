@@ -11,4 +11,5 @@
     <string name="invalid_expiry_year">L’année d’expiration de votre carte n’est pas valide.</string>
     <string name="invalid_cvc">Le code de sécurité de votre carte n’est pas valide.</string>
     <string name="invalid_zip">Votre code postal est incomplet.</string>
+    <string name="title_add_a_card">Ajouter une carte</string>
 </resources>

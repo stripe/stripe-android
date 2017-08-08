@@ -11,4 +11,5 @@
     <string name="invalid_expiry_year">カードの有効期限として指定した年が無効です。</string>
     <string name="invalid_cvc">指定したカードのセキュリティコードが無効です。</string>
     <string name="invalid_zip">指定した郵便番号が未入力です。</string>
+    <string name="title_add_a_card">カードを追加</string>
 </resources>

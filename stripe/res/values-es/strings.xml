@@ -11,4 +11,5 @@
     <string name="invalid_expiry_year">El año de vencimiento de la tarjeta no es válido.</string>
     <string name="invalid_cvc">El código de seguridad de la tarjeta no es válido.</string>
     <string name="invalid_zip">Código postal incompleto.</string>
+    <string name="title_add_a_card">Añadir una tarjeta</string>
 </resources>

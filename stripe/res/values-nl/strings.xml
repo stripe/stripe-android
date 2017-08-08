@@ -11,4 +11,5 @@
     <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
     <string name="invalid_cvc">De beveiligingscode van uw kaart is ongeldig.</string>
     <string name="invalid_zip">Uw postcode is onvolledig.</string>
+    <string name="title_add_a_card">Een kaart toevoegen</string>
 </resources>

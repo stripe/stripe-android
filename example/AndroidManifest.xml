@@ -74,6 +74,9 @@
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
+
+        <activity android:name="com.stripe.android.view.AddSourceActivity"/>
+
     </application>
 
 </manifest>
