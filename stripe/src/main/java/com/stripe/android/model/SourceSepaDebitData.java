@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.util.StripeNetworkUtils;
+import com.stripe.android.StripeNetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,8 +12,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for the SourceTypeData contained in a SEPA Debit Source object.

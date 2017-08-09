@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
-import com.stripe.android.util.StripeJsonUtils;
-import com.stripe.android.util.StripeTextUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model for a
  * {@url https://stripe.com/docs/api#source_object-code_verification code_verification}

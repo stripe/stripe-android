@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.widget.Button;
 
 import com.jakewharton.rxbinding.view.RxView;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -31,7 +32,6 @@ public class RxTokenController {
     private ErrorDialogHandler mErrorDialogHandler;
     private ListViewController mOutputListController;
     private ProgressDialogController mProgressDialogController;
-    private String mPublishableKey;
 
     public RxTokenController (
             @NonNull Button button,
@@ -39,8 +39,7 @@ public class RxTokenController {
             @NonNull Context context,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
-            @NonNull ProgressDialogController progressDialogController,
-            @NonNull String publishableKey) {
+            @NonNull ProgressDialogController progressDialogController) {
         mCompositeSubscription = new CompositeSubscription();
 
         mCardInputWidget = cardInputWidget;
@@ -48,7 +47,6 @@ public class RxTokenController {
         mErrorDialogHandler = errorDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
-        mPublishableKey = publishableKey;
 
         mCompositeSubscription.add(
                 RxView.clicks(button).subscribe(new Action1<Void>() {
@@ -85,7 +83,8 @@ public class RxTokenController {
                         new Callable<Token>() {
                             @Override
                             public Token call() throws Exception {
-                                return stripe.createTokenSynchronous(cardToSave, mPublishableKey);
+                                return stripe.createTokenSynchronous(cardToSave,
+                                        PaymentConfiguration.getInstance().getPublishableKey());
                             }
                         });
 

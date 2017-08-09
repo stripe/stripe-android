@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/add_source_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:title="@string/title_add_a_card"
+        android:theme="@style/ToolBarStyle.Event"
+        />
+
+    <com.stripe.android.view.CardMultilineWidget
+        android:id="@+id/add_source_card_entry_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_source_toolbar"
+        android:layout_margin="@dimen/add_card_total_margin"
+        />
+
+    <ProgressBar
+        android:id="@+id/add_source_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:indeterminate="true"
+        android:layout_below="@id/add_source_toolbar"
+        />
+
+    <FrameLayout
+        android:id="@+id/add_source_error_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_source_card_entry_widget"
+        >
+        <TextView
+            android:id="@+id/tv_add_source_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/add_card_total_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+</RelativeLayout>

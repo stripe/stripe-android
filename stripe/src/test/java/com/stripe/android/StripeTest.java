@@ -13,9 +13,7 @@ import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.StripeApiHandler;
-import com.stripe.android.net.StripeResponse;
-import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.junit.Before;
@@ -24,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Stripe}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeTest {
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
@@ -70,12 +69,11 @@ public class StripeTest {
     private Card mCard;
     private int mYear;
 
-    @Mock Context mContext;
+    private Context mContext;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
+        mContext = RuntimeEnvironment.application;
         String cvc = "123";
         int month = 12;
         Calendar rightNow = Calendar.getInstance();

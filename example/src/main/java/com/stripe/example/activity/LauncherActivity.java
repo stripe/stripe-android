@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -28,7 +29,8 @@ public class LauncherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
 
-        Button tokenButton = (Button) findViewById(R.id.btn_make_card_tokens);
+        PaymentConfiguration.init(PUBLISHABLE_KEY);
+        Button tokenButton = findViewById(R.id.btn_make_card_tokens);
         tokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -37,7 +39,16 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        Button sourceButton = (Button) findViewById(R.id.btn_make_sources);
+        Button multilineButton = findViewById(R.id.btn_make_card_sources);
+        multilineButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LauncherActivity.this, PaymentMultilineActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button sourceButton = findViewById(R.id.btn_make_sources);
         sourceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,7 +57,7 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        Button androidPayButton = (Button) findViewById(R.id.btn_android_pay_launch);
+        Button androidPayButton = findViewById(R.id.btn_android_pay_launch);
         androidPayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

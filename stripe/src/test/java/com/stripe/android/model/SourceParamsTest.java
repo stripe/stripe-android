@@ -12,7 +12,7 @@ import org.robolectric.annotation.Config;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

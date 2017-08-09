@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
  * Model of the "data" object inside a {@link Customer} "source" object.

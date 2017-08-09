@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
-def android_support_version = '25.3.1'
+def android_support_version = '26.0.0'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
@@ -40,7 +40,7 @@ dependencies {
 
     /* To use the Stripe android pay wrapper, you need these two lines */
     compile 'com.stripe:stripe-android-pay:4.1.6'
-    compile 'com.google.android.gms:play-services-wallet:10.2.6'
+    compile 'com.google.android.gms:play-services-wallet:11.0.4'
 
     /* Needed for RxAndroid */
     compile 'io.reactivex:rxandroid:1.2.1'
@@ -66,5 +66,5 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '4.0.1'
 }

@@ -1,6 +1,6 @@
 package com.stripe.android.view;
 
-import com.stripe.android.testharness.CardInputTestActivity;
+import com.stripe.android.BuildConfig;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -10,8 +10,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 
@@ -26,12 +26,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
- * Test class for {@link ExpiryDateEditText}.Note that we have to test against SDK 22
- * because of a <a href="https://github.com/robolectric/robolectric/issues/1932">known issue</a> in
- * Robolectric.
+ * Test class for {@link ExpiryDateEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class ExpiryDateEditTextTest {
 
     @Mock ExpiryDateEditText.ExpiryDateEditListener mExpiryDateEditListener;
@@ -40,11 +38,10 @@ public class ExpiryDateEditTextTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController activityController =
+        ActivityController<CardInputTestActivity> activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
-        mExpiryDateEditText =
-                ((CardInputTestActivity) activityController.get()).getExpiryDateEditText();
+        mExpiryDateEditText = activityController.get().getExpiryDateEditText();
         mExpiryDateEditText.setText("");
         mExpiryDateEditText.setExpiryDateEditListener(mExpiryDateEditListener);
     }

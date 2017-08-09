@@ -3,15 +3,15 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.util.StripeNetworkUtils;
+import com.stripe.android.StripeNetworkUtils;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model representing a shipping address object
@@ -22,12 +22,13 @@ public class ShippingInformation extends StripeJsonModel {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_PHONE = "phone";
 
-    private @Nullable SourceAddress mAddress;
+    private @Nullable
+    Address mAddress;
     private @Nullable String mName;
     private @Nullable String mPhone;
 
     @Nullable
-    public SourceAddress getAddress() {
+    public Address getAddress() {
         return mAddress;
     }
 
@@ -51,7 +52,7 @@ public class ShippingInformation extends StripeJsonModel {
         shippingInformation.mName = optString(jsonObject, FIELD_NAME);
         shippingInformation.mPhone = optString(jsonObject, FIELD_PHONE);
         shippingInformation.mAddress =
-                SourceAddress.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS));
+                Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS));
         return shippingInformation;
     }
 

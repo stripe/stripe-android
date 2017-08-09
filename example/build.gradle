@@ -4,14 +4,14 @@ repositories {
     mavenCentral()
 }
 
-def android_support_version = '25.3.1'
+def android_support_version = '26.0.0'
 
 dependencies {
     compile project(':android-pay')
     compile project(':stripe')
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
-    compile 'com.google.android.gms:play-services-wallet:10.2.6'
+    compile 'com.google.android.gms:play-services-wallet:11.0.4'
     /* Needed for RxAndroid */
     /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
@@ -21,7 +21,7 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         minSdkVersion 14
@@ -45,4 +45,8 @@ android {
             setRoot('src/test')
         }
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0.1'
 }
