@@ -8,7 +8,6 @@ import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
 import com.stripe.android.PaymentConfiguration;
-import com.stripe.android.view.AddSourceActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -35,7 +34,7 @@ public class LauncherActivity extends AppCompatActivity {
         tokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, AddSourceActivity.class);
+                Intent intent = new Intent(LauncherActivity.this, PaymentActivity.class);
                 startActivity(intent);
             }
         });
