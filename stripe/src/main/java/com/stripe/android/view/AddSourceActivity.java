@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,7 +31,6 @@ public class AddSourceActivity extends AppCompatActivity {
     static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
     ProgressBar mProgressBar;
-    ImageView mCheckMark;
     TextView mErrorTextView;
     FrameLayout mErrorLayout;
 
@@ -50,7 +48,6 @@ public class AddSourceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_source);
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = findViewById(R.id.add_source_progress_bar);
-        mCheckMark = findViewById(R.id.add_source_check_mark);
         mErrorTextView = findViewById(R.id.tv_add_source_error);
         Toolbar toolbar = findViewById(R.id.add_source_toolbar);
         setSupportActionBar(toolbar);

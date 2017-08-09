@@ -33,15 +33,6 @@
         android:layout_below="@id/add_source_toolbar"
         />
 
-    <ImageView
-        android:id="@+id/add_source_check_mark"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_checkmark"
-        android:tint="@color/accent_color_default"
-        android:layout_below="@id/add_source_card_entry_widget"
-        android:visibility="gone"/>
-
     <FrameLayout
         android:id="@+id/add_source_error_container"
         android:layout_width="match_parent"
