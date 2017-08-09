@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.transition.Fade;
 import android.support.transition.TransitionManager;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,7 @@ public class AddSourceActivity extends AppCompatActivity {
     ProgressBar mProgressBar;
     TextView mErrorTextView;
     FrameLayout mErrorLayout;
+    StripeProvider mStripeProvider;
 
     private boolean mCommunicating;
 
@@ -93,7 +95,7 @@ public class AddSourceActivity extends AppCompatActivity {
         }
 
         card.addLoggingToken(ADD_SOURCE_ACTIVITY);
-        Stripe stripe = new Stripe(this);
+        Stripe stripe = getStripe();
         stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
 
         SourceParams sourceParams = SourceParams.createCardParams(card);
@@ -103,7 +105,7 @@ public class AddSourceActivity extends AppCompatActivity {
             @Override
             public void onError(Exception error) {
                 setCommunicatingProgress(false);
-                showError(error.getLocalizedMessage());
+                showError(error.getLocalizedMessage(), mStripeProvider == null);
             }
 
             @Override
@@ -118,6 +120,19 @@ public class AddSourceActivity extends AppCompatActivity {
         });
     }
 
+    @VisibleForTesting
+    void setStripeProvider(@NonNull StripeProvider stripeProvider) {
+        mStripeProvider = stripeProvider;
+    }
+
+    private Stripe getStripe() {
+        if (mStripeProvider == null) {
+            return new Stripe(this);
+        } else {
+            return mStripeProvider.getStripe(this);
+        }
+    }
+
     private void setCommunicatingProgress(boolean communicating) {
         mCommunicating = communicating;
         if (communicating) {
@@ -128,11 +143,17 @@ public class AddSourceActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
     }
 
-    private void showError(@NonNull String error) {
-        Fade fadeIn = new Fade(Fade.IN);
-        fadeIn.setDuration(FADE_DURATION_MS);
+    private void showError(@NonNull String error, boolean shouldAnimate) {
         mErrorTextView.setText(error);
-        TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
+        if (shouldAnimate) {
+            Fade fadeIn = new Fade(Fade.IN);
+            fadeIn.setDuration(FADE_DURATION_MS);
+            TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
+        }
         mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    interface StripeProvider {
+        Stripe getStripe(@NonNull Context context);
     }
 }

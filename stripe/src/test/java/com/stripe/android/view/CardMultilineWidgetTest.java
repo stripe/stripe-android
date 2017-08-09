@@ -374,13 +374,13 @@ public class CardMultilineWidgetTest {
 
     static class WidgetControlGroup {
 
-        private CardNumberEditText cardNumberEditText;
-        private ExpiryDateEditText expiryDateEditText;
-        private StripeEditText cvcEditText;
-        private TextInputLayout cvcInputLayout;
-        private StripeEditText postalCodeEditText;
-        private TextInputLayout postalCodeInputLayout;
-        private LinearLayout secondRowLayout;
+        CardNumberEditText cardNumberEditText;
+        ExpiryDateEditText expiryDateEditText;
+        StripeEditText cvcEditText;
+        TextInputLayout cvcInputLayout;
+        StripeEditText postalCodeEditText;
+        TextInputLayout postalCodeInputLayout;
+        LinearLayout secondRowLayout;
 
         WidgetControlGroup(@NonNull CardMultilineWidget parentWidget) {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);
