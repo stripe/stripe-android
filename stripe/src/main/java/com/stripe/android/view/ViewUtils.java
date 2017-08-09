@@ -13,6 +13,7 @@ import android.util.TypedValue;
 
 import com.stripe.android.model.Card;
 
+import java.lang.reflect.Type;
 import java.util.Locale;
 
 import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
@@ -43,10 +44,23 @@ class ViewUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.colorControlNormal;
         } else {
-            //Get colorAccent defined for AppCompat
+            //Get colorControlNormal defined for AppCompat
             colorAttr = context
                     .getResources()
                     .getIdentifier("colorControlNormal", "attr", context.getPackageName());
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue;
+    }
+
+    static TypedValue getThemeTextColorSecondary(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.textColorSecondary;
+        } else {
+            //Get textColorSecondary defined for AppCompat
+            colorAttr = android.R.color.secondary_text_light;
         }
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);

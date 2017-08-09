@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     >
 
     <android.support.v7.widget.Toolbar
@@ -15,11 +13,48 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         app:title="@string/title_add_a_card"
-        style="@style/ToolBarStyle.Event"
+        android:theme="@style/ToolBarStyle.Event"
         />
 
     <com.stripe.android.view.CardMultilineWidget
         android:id="@+id/add_source_card_entry_widget"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_source_toolbar"
+        android:layout_margin="@dimen/add_card_total_margin"
+        />
+
+    <ProgressBar
+        android:id="@+id/add_source_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:indeterminate="true"
+        android:layout_below="@id/add_source_toolbar"
+        />
+
+    <ImageView
+        android:id="@+id/add_source_check_mark"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_checkmark"
+        android:tint="@color/accent_color_default"
+        android:layout_below="@id/add_source_card_entry_widget"
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/add_source_error_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_source_card_entry_widget"
+        >
+        <TextView
+            android:id="@+id/tv_add_source_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/add_card_total_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+</RelativeLayout>

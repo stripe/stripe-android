@@ -3,24 +3,24 @@
     <style name="StripeDefaultTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="colorAccent">@color/accent_color_default</item>
         <item name="colorControlNormal">@color/control_normal_color_default</item>
+        <item name="colorPrimary">@color/accent_color_default</item>
+        <item name="titleTextColor">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
     </style>
 
     <style name="ToolBarStyle" parent="ToolBarStyle.Base"/>
 
     <style name="ToolBarStyle.Base" parent="">
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-        <item name="theme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+        <item name="theme">@style/ThemeOverlay.AppCompat</item>
+        <item name="colorControlNormal">@android:color/white</item>
         <item name="colorPrimary">@color/accent_color_default</item>
+        <item name="titleTextColor">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
     </style>
 
     <style name="ToolBarStyle.Event" parent="ToolBarStyle">
-        <item name="titleTextAppearance">@style/TextAppearance.Widget.Event.Toolbar.Title</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Widget.AppCompat.Toolbar.Title</item>
     </style>
 
-    <style name="TextAppearance.Widget.Event.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <!--Any text styling can be done here-->
-        <item name="android:textStyle">normal</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
 </resources>

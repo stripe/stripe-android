@@ -1,7 +1,9 @@
 package com.stripe.android.view;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
@@ -85,8 +87,7 @@ public class CardMultilineWidgetTest {
         assertNotNull(mNoZipGroup.cardNumberEditText);
         assertNotNull(mNoZipGroup.expiryDateEditText);
         assertNotNull(mNoZipGroup.cvcEditText);
-        // The No ZIP Group will get eliminated because its layout loses the reference
-        assertNull(mNoZipGroup.postalCodeEditText);
+        assertNotNull(mNoZipGroup.postalCodeEditText);
         assertNotNull(mNoZipGroup.secondRowLayout);
     }
 
@@ -199,13 +200,48 @@ public class CardMultilineWidgetTest {
     }
 
     @Test
-    public void initView_whenZipRequired_secondRowContainsThreeElements() {
-        assertEquals(3, mFullGroup.secondRowLayout.getChildCount());
+    public void initView_whenZipRequired_secondRowContainsThreeVisibleElements() {
+        assertEquals(View.VISIBLE, mFullGroup.expiryDateEditText.getVisibility());
+        assertEquals(View.VISIBLE, mFullGroup.cvcEditText.getVisibility());
+        assertEquals(View.VISIBLE, mFullGroup.postalCodeEditText.getVisibility());
+        assertEquals(View.VISIBLE, mFullGroup.postalCodeInputLayout.getVisibility());
     }
 
     @Test
-    public void initView_whenNoZipRequired_secondRowContainsTwoElements() {
-        assertEquals(2, mNoZipGroup.secondRowLayout.getChildCount());
+    public void initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
+        assertEquals(View.VISIBLE, mFullGroup.postalCodeInputLayout.getVisibility());
+        mCardMultilineWidget.setShouldShowPostalCode(false);
+        assertEquals(View.GONE, mFullGroup.postalCodeInputLayout.getVisibility());
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
+                mFullGroup.cvcInputLayout.getLayoutParams();
+        assertEquals(0, params.rightMargin);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            assertEquals(0, params.getMarginEnd());
+        }
+    }
+
+    @Test
+    public void initView_whenNoZipRequired_secondRowContainsTwoVisibleElements() {
+        assertEquals(View.VISIBLE, mNoZipGroup.expiryDateEditText.getVisibility());
+        assertEquals(View.VISIBLE, mNoZipGroup.cvcEditText.getVisibility());
+        assertEquals(View.GONE, mNoZipGroup.postalCodeInputLayout.getVisibility());
+    }
+
+    @Test
+    public void initView_whenZipHiddenThenSetToRequired_secondRowAddsPostalCodeAndAdjustsMargin() {
+        assertEquals(View.GONE, mNoZipGroup.postalCodeInputLayout.getVisibility());
+        mNoZipCardMultilineWidget.setShouldShowPostalCode(true);
+        assertEquals(View.VISIBLE, mNoZipGroup.postalCodeInputLayout.getVisibility());
+
+        int expectedMargin = mNoZipCardMultilineWidget.getResources()
+                .getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin);
+
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
+                mNoZipGroup.cvcInputLayout.getLayoutParams();
+        assertEquals(expectedMargin, params.rightMargin);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            assertEquals(expectedMargin, params.getMarginEnd());
+        }
     }
 
     @Test
@@ -341,14 +377,18 @@ public class CardMultilineWidgetTest {
         private CardNumberEditText cardNumberEditText;
         private ExpiryDateEditText expiryDateEditText;
         private StripeEditText cvcEditText;
+        private TextInputLayout cvcInputLayout;
         private StripeEditText postalCodeEditText;
+        private TextInputLayout postalCodeInputLayout;
         private LinearLayout secondRowLayout;
 
         WidgetControlGroup(@NonNull CardMultilineWidget parentWidget) {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);
             expiryDateEditText = parentWidget.findViewById(R.id.et_add_source_expiry_ml);
             cvcEditText = parentWidget.findViewById(R.id.et_add_source_cvc_ml);
+            cvcInputLayout = parentWidget.findViewById(R.id.tl_add_source_cvc_ml);
             postalCodeEditText = parentWidget.findViewById(R.id.et_add_source_postal_ml);
+            postalCodeInputLayout = parentWidget.findViewById(R.id.tl_add_source_postal_ml);
             secondRowLayout = parentWidget.findViewById(R.id.second_row_layout);
         }
     }

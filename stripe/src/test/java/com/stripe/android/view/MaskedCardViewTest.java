@@ -219,7 +219,7 @@ public class MaskedCardViewTest {
 
         assertFalse(mMaskedCardView.isHighlighted());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
-        assertEquals(mMaskedCardView.mUnselectedColorInt,
+        assertEquals(mMaskedCardView.mUnselectedTextColorInt,
                 mCardInformationTextView.getCurrentTextColor());
 
         mMaskedCardView.setHighlighted(true);

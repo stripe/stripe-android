@@ -15,6 +15,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.text.style.TypefaceSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 import static com.stripe.android.view.ViewUtils.getThemeAccentColor;
 import static com.stripe.android.view.ViewUtils.getThemeColorControlNormal;
+import static com.stripe.android.view.ViewUtils.getThemeTextColorSecondary;
 
 /**
  * View that displays card information without revealing the entire number, usually for
@@ -50,6 +52,7 @@ public class MaskedCardView extends LinearLayout {
 
     @ColorInt int mSelectedColorInt;
     @ColorInt int mUnselectedColorInt;
+    @ColorInt int mUnselectedTextColorInt;
 
     static final Map<String , Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
     static {
@@ -175,6 +178,7 @@ public class MaskedCardView extends LinearLayout {
 
         mSelectedColorInt = getThemeAccentColor(getContext()).data;
         mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
+        mUnselectedTextColorInt = getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
 
         initializeCheckMark();
@@ -191,7 +195,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateTextColor() {
-        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedTextColorInt;
         mCardInformationTextView.setTextColor(textColor);
     }
 
@@ -225,7 +229,7 @@ public class MaskedCardView extends LinearLayout {
         int last4length = mLast4.length();
         SpannableString str = new SpannableString(brandText + normalText + mLast4);
         str.setSpan(
-                new StyleSpan(Typeface.BOLD),
+                new TypefaceSpan("sans-serif-medium"),
                 0,
                 brandLength,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -256,6 +260,9 @@ public class MaskedCardView extends LinearLayout {
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
                     ? res.getColor(R.color.control_normal_color_default, context.getTheme())
                     : mUnselectedColorInt;
+            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
+                    ? res.getColor(R.color.color_text_secondary_default, context.getTheme())
+                    : mUnselectedTextColorInt;
         } else {
             // This method still triggers the "deprecation" warning, despite the other
             // one not being allowed for SDK < 23
@@ -265,6 +272,9 @@ public class MaskedCardView extends LinearLayout {
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
                     ? res.getColor(R.color.control_normal_color_default)
                     : mUnselectedColorInt;
+            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
+                    ? res.getColor(R.color.color_text_secondary_default)
+                    : mUnselectedTextColorInt;
         }
     }
 }
