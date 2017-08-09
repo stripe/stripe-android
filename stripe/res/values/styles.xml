@@ -8,9 +8,7 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
     </style>
 
-    <style name="ToolBarStyle" parent="ToolBarStyle.Base"/>
-
-    <style name="ToolBarStyle.Base" parent="">
+    <style name="ToolBarStyle" parent="">
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="theme">@style/ThemeOverlay.AppCompat</item>
         <item name="colorControlNormal">@android:color/white</item>
