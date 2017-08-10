@@ -3,4 +3,11 @@
           package="com.stripe.android"
           android:versionCode="15"
           android:versionName="4.1.6">
+
+    <application>
+        <activity android:name=".view.AddSourceActivity"
+            android:theme="@style/StripeDefaultTheme">
+        </activity>
+    </application>
+
 </manifest>

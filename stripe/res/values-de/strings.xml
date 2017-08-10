@@ -11,4 +11,5 @@
     <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
     <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
     <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
+    <string name="title_add_a_card">Karte hinzufügen</string>
 </resources>
