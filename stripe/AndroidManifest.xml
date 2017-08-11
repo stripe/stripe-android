@@ -5,7 +5,11 @@
           android:versionName="4.1.6">
 
     <application>
-        <activity android:name=".view.AddSourceActivity"
+        <activity
+            android:name=".view.AddSourceActivity"
+            android:theme="@style/StripeDefaultTheme">
+        </activity>
+        <activity android:name=".view.PaymentMethodsActivity"
             android:theme="@style/StripeDefaultTheme">
         </activity>
     </application>

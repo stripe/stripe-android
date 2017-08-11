@@ -64,7 +64,7 @@ public class MaskedCardViewTest {
         mMaskedCardView.setCard(card);
         assertEquals("0005", mMaskedCardView.getLast4());
         assertEquals(Card.AMERICAN_EXPRESS, mMaskedCardView.getCardBrand());
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class MaskedCardViewTest {
         mMaskedCardView.setSourceCardData(sourceCardData);
         assertEquals(Card.VISA, mMaskedCardView.getCardBrand());
         assertEquals("4242", mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class MaskedCardViewTest {
         mMaskedCardView.setCustomerSource(customerSource);
         assertNull(mMaskedCardView.getCardBrand());
         assertNull(mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class MaskedCardViewTest {
         mMaskedCardView.setCustomerSource(customerSource);
         assertEquals(Card.VISA, mMaskedCardView.getCardBrand());
         assertEquals("4242", mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MaskedCardViewTest {
         mMaskedCardView.setCustomerSource(customerSource);
         assertEquals(Card.MASTERCARD, mMaskedCardView.getCardBrand());
         assertEquals("5555", mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
@@ -124,14 +124,14 @@ public class MaskedCardViewTest {
         assertNotNull(customerSource);
         mMaskedCardView.setCustomerSource(customerSource);
 
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
         assertEquals(mMaskedCardView.mUnselectedTextColorInt,
                 mCardInformationTextView.getCurrentTextColor());
 
-        mMaskedCardView.setHighlighted(true);
+        mMaskedCardView.setSelected(true);
 
-        assertTrue(mMaskedCardView.isHighlighted());
+        assertTrue(mMaskedCardView.isSelected());
         assertEquals(View.VISIBLE, mSelectedImageView.getVisibility());
         assertEquals(mMaskedCardView.mSelectedColorInt,
                 mCardInformationTextView.getCurrentTextColor());
@@ -142,14 +142,14 @@ public class MaskedCardViewTest {
         CustomerSource customerSource = CustomerSource.fromString(JSON_CARD);
         assertNotNull(customerSource);
         mMaskedCardView.setCustomerSource(customerSource);
-        assertFalse(mMaskedCardView.isHighlighted());
+        assertFalse(mMaskedCardView.isSelected());
 
-        mMaskedCardView.toggleHighlighted();
-        assertTrue(mMaskedCardView.isHighlighted());
+        mMaskedCardView.toggleSelected();
+        assertTrue(mMaskedCardView.isSelected());
         assertEquals(View.VISIBLE, mSelectedImageView.getVisibility());
 
-        mMaskedCardView.toggleHighlighted();
-        assertFalse(mMaskedCardView.isHighlighted());
+        mMaskedCardView.toggleSelected();
+        assertFalse(mMaskedCardView.isSelected());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
     }
 }

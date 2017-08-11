@@ -15,6 +15,8 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,6 +26,10 @@ import java.util.concurrent.TimeUnit;
  * Represents a logged-in session of a single Customer.
  */
 public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
+
+    private static final String ACTION_ADD_SOURCE = "add_source";
+    private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
+    private static final String KEY_SOURCE = "source";
 
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
@@ -118,15 +124,39 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      *                 customer, either from the cache or from the server
      */
     public void retrieveCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
-        long currentTime = getCalendarInstance().getTimeInMillis();
-        if (mCustomer == null ||
-                currentTime - mCustomerCacheTime > CUSTOMER_CACHE_DURATION_MILLISECONDS) {
+        if (canUseCachedCustomer()) {
+            listener.onCustomerRetrieved(getCachedCustomer());
+        } else {
             mCustomer = null;
             mCustomerRetrievalListener = listener;
-            mEphemeralKeyManager.retrieveEphemeralKey();
-        } else {
-            listener.onCustomerRetrieved(mCustomer);
+            mEphemeralKeyManager.retrieveEphemeralKey(null, null);
         }
+    }
+
+    public boolean canUseCachedCustomer() {
+        long currentTime = getCalendarInstance().getTimeInMillis();
+        return mCustomer != null &&
+                currentTime - mCustomerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS;
+    }
+
+    public Customer getCachedCustomer() {
+        return mCustomer;
+    }
+
+    public void addCustomerSource(@NonNull String sourceId,
+                                  @Nullable CustomerRetrievalListener listener) {
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_SOURCE, sourceId);
+        mCustomerRetrievalListener = listener;
+        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
+    }
+
+    public void setCustomerDefaultSource(@NonNull String sourceId,
+                                         @Nullable CustomerRetrievalListener listener) {
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_SOURCE, sourceId);
+        mCustomerRetrievalListener = listener;
+        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
     }
 
     @Nullable
@@ -144,6 +174,34 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     @VisibleForTesting
     EphemeralKey getEphemeralKey() {
         return mEphemeralKey;
+    }
+
+    private void addCustomerSource(@NonNull final EphemeralKey key,
+                                   @NonNull final String sourceId) {
+        Runnable fetchCustomerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Customer customer = addCustomerSourceWithKey(key, sourceId, mStripeApiProxy);
+                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
+                mUiThreadHandler.sendMessage(message);
+            }
+        };
+
+        executeRunnable(fetchCustomerRunnable);
+    }
+
+    private void setCustomerSourceDefault(@NonNull final EphemeralKey key,
+                                          @NonNull final String sourceId) {
+        Runnable fetchCustomerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Customer customer = setCustomerSourceDefaultWithKey(key, sourceId, mStripeApiProxy);
+                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
+                mUiThreadHandler.sendMessage(message);
+            }
+        };
+
+        executeRunnable(fetchCustomerRunnable);
     }
 
     private void updateCustomer(@NonNull final EphemeralKey key) {
@@ -171,10 +229,23 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     @Override
-    public void onKeyUpdate(@Nullable EphemeralKey ephemeralKey) {
+    public void onKeyUpdate(
+            @Nullable EphemeralKey ephemeralKey,
+            @Nullable String actionString,
+            @Nullable Map<String, Object> arguments) {
         mEphemeralKey = ephemeralKey;
         if (mEphemeralKey != null) {
-            updateCustomer(mEphemeralKey);
+            if (actionString == null) {
+                updateCustomer(mEphemeralKey);
+            } else if (ACTION_ADD_SOURCE.equals(actionString)
+                    && arguments != null
+                    && arguments.containsKey(KEY_SOURCE)) {
+                addCustomerSource(mEphemeralKey, (String) arguments.get(KEY_SOURCE));
+            } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
+                    && arguments != null
+                    && arguments.containsKey(KEY_SOURCE)) {
+                setCustomerSourceDefault(mEphemeralKey, (String) arguments.get(KEY_SOURCE));
+            }
         }
     }
 
@@ -202,7 +273,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                             mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
                             if (mCustomerRetrievalListener != null) {
                                 mCustomerRetrievalListener.onCustomerRetrieved(mCustomer);
-                                // Eliminate reference to retrival listener after use.
+                                // Eliminate reference to retrieval listener after use.
                                 mCustomerRetrievalListener = null;
                             }
                         }
@@ -224,6 +295,54 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     @NonNull
     private Calendar getCalendarInstance() {
         return mProxyNowCalendar == null ? Calendar.getInstance() : mProxyNowCalendar;
+    }
+
+    static Customer addCustomerSourceWithKey(
+            @NonNull EphemeralKey key,
+            @NonNull String sourceId,
+            @Nullable StripeApiProxy proxy) {
+        Customer customer = null;
+        try {
+            if (proxy != null) {
+                return proxy.addCustomerSourceWithKey(
+                        key.getCustomerId(),
+                        sourceId,
+                        key.getSecret());
+            }
+            customer = StripeApiHandler.addCustomerSource(
+                    key.getCustomerId(),
+                    sourceId,
+                    key.getSecret());
+        } catch (InvalidRequestException invalidException) {
+            // Then the key is invalid
+        } catch (StripeException stripeException) {
+            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+        }
+        return customer;
+    }
+
+    static Customer setCustomerSourceDefaultWithKey(
+            @NonNull EphemeralKey key,
+            @NonNull String sourceId,
+            @Nullable StripeApiProxy proxy) {
+        Customer customer = null;
+        try {
+            if (proxy != null) {
+                return proxy.setDefaultCustomerSourceWithKey(
+                        key.getCustomerId(),
+                        sourceId,
+                        key.getSecret());
+            }
+            customer = StripeApiHandler.setDefaultCustomerSource(
+                    key.getCustomerId(),
+                    sourceId,
+                    key.getSecret());
+        } catch (InvalidRequestException invalidException) {
+            // Then the key is invalid
+        } catch (StripeException stripeException) {
+            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+        }
+        return customer;
     }
 
     /**
@@ -264,6 +383,18 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     interface StripeApiProxy {
         Customer retrieveCustomerWithKey(@NonNull String customerId, @NonNull String secret)
+                throws InvalidRequestException, APIConnectionException, APIException;
+
+        Customer addCustomerSourceWithKey(
+                @NonNull String customerId,
+                @NonNull String sourceId,
+                @NonNull String secret)
+                throws InvalidRequestException, APIConnectionException, APIException;
+
+        Customer setDefaultCustomerSourceWithKey(
+                @NonNull String customerId,
+                @NonNull String sourceId,
+                @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
     }
 }

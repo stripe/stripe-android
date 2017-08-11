@@ -11,5 +11,8 @@
     <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="payment_method_add_new_card">Add New Card&#8230;</string>
     <string name="title_add_a_card">Add a Card</string>
+    <string name="title_payment_method">Payment Method</string>
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="activity_total_margin">8dp</dimen>
     <dimen name="add_card_element_vertical_margin">12dp</dimen>
     <dimen name="add_card_expiry_middle_margin">8dp</dimen>
-    <dimen name="add_card_total_margin">8dp</dimen>
     <dimen name="card_icon_padding">12dp</dimen>
     <dimen name="card_widget_min_width">320dp</dimen>
     <dimen name="card_expiry_initial_margin">200dp</dimen>
@@ -15,4 +15,5 @@
     <dimen name="card_icon_multiline_padding_bottom">1.52380955dp</dimen>
     <dimen name="masked_card_icon_width">32dp</dimen>
     <dimen name="masked_card_vertical_padding">4dp</dimen>
+    <dimen name="toolbar_elevation">4dp</dimen>
 </resources>

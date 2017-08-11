@@ -31,8 +31,6 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
 
-    static final String NULL = "null";
-
     private long mCreated;
     private @NonNull String mCustomerId;
     private long mExpires;

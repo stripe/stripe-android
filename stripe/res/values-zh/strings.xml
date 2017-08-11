@@ -11,5 +11,8 @@
     <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>
     <string name="invalid_cvc">您的银行卡安全码无效。</string>
     <string name="invalid_zip">您的邮政编码不完整。</string>
+    <string name="loading">正在加载……</string>
+    <string name="payment_method_add_new_card">添加新卡……</string>
     <string name="title_add_a_card">添加一张卡</string>
+    <string name="title_payment_method">支付方式</string>
 </resources>

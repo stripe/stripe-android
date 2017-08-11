@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:elevation="4dp"
+        android:elevation="@dimen/toolbar_elevation"
         app:title="@string/title_add_a_card"
         android:theme="@style/ToolBarStyle.Event"
         />
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/add_source_toolbar"
-        android:layout_margin="@dimen/add_card_total_margin"
+        android:layout_margin="@dimen/activity_total_margin"
         />
 
     <ProgressBar
@@ -43,7 +43,7 @@
             android:id="@+id/tv_add_source_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/add_card_total_margin"
+            android:layout_margin="@dimen/activity_total_margin"
             android:textAppearance="@style/TextAppearance.AppCompat.Notification"
             android:visibility="gone"/>
     </FrameLayout>

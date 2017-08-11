@@ -317,6 +317,39 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
+
+    @Nullable
+    static Customer addCustomerSource(
+            @NonNull String customerId,
+            @NonNull String sourceId,
+            @NonNull String secret)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("source", sourceId);
+        StripeResponse response = getStripeResponse(
+                POST,
+                getRetrieveCustomerUrl(customerId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Customer.fromString(response.getResponseBody());
+    }
+
+    @Nullable
+    static Customer setDefaultCustomerSource(
+            @NonNull String customerId,
+            @NonNull String sourceId,
+            @NonNull String secret)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("default_source", sourceId);
+        StripeResponse response = getStripeResponse(
+                POST,
+                getRetrieveCustomerUrl(customerId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Customer.fromString(response.getResponseBody());
+    }
+
     static String createQuery(Map<String, Object> params)
             throws UnsupportedEncodingException, InvalidRequestException {
         StringBuilder queryStringBuffer = new StringBuilder();
