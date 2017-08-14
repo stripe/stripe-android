@@ -48,7 +48,7 @@ public class Stripe {
                         @Override
                         protected ResponseWrapper doInBackground(Void... params) {
                             try {
-                                Source source = StripeApiHandler.createSourceOnServer(
+                                Source source = StripeApiHandler.createSource(
                                         null,
                                         mContext,
                                         sourceParams,
@@ -95,7 +95,7 @@ public class Stripe {
                                                 publishableKey,
                                                 stripeAccount,
                                                 RequestOptions.TYPE_QUERY).build();
-                                Token token = StripeApiHandler.createTokenOnServer(
+                                Token token = StripeApiHandler.createToken(
                                         mContext,
                                         tokenParams,
                                         requestOptions,
@@ -273,7 +273,7 @@ public class Stripe {
                 publishableKey,
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
-        return StripeApiHandler.createTokenOnServer(
+        return StripeApiHandler.createToken(
                 mContext,
                 hashMapFromBankAccount(mContext, bankAccount),
                 requestOptions,
@@ -429,7 +429,7 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return StripeApiHandler.createSourceOnServer(
+        return StripeApiHandler.createSource(
                 null, mContext, params, apiKey, mStripeAccount, mLoggingResponseListener);
     }
 
@@ -482,7 +482,7 @@ public class Stripe {
                 publishableKey,
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
-        return StripeApiHandler.createTokenOnServer(
+        return StripeApiHandler.createToken(
                 mContext,
                 hashMapFromCard(mContext, card),
                 requestOptions,
@@ -537,7 +537,7 @@ public class Stripe {
                 publishableKey,
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
-        return StripeApiHandler.createTokenOnServer(
+        return StripeApiHandler.createToken(
                 mContext,
                 hashMapFromPersonalId(mContext, personalId),
                 requestOptions,

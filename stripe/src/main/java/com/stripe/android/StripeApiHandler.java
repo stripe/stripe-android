@@ -110,7 +110,7 @@ class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    static Source createSourceOnServer(
+    static Source createSource(
             @Nullable StripeNetworkUtils.UidProvider uidProvider,
             @NonNull Context context,
             @NonNull SourceParams sourceParams,
@@ -121,7 +121,7 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createSourceOnServer(
+        return createSource(
                 uidProvider,
                 context,
                 sourceParams,
@@ -133,7 +133,7 @@ class StripeApiHandler {
 
     @VisibleForTesting
     @Nullable
-    static Source createSourceOnServer(
+    static Source createSource(
             @Nullable StripeNetworkUtils.UidProvider uidProvider,
             @NonNull Context context,
             @NonNull SourceParams sourceParams,
@@ -240,7 +240,7 @@ class StripeApiHandler {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    static Token createTokenOnServer(
+    static Token createToken(
             @NonNull Context context,
             @NonNull Map<String, Object> cardParams,
             @NonNull RequestOptions options,
@@ -275,35 +275,36 @@ class StripeApiHandler {
         return requestToken(POST, getApiUrl(), cardParams, options);
     }
 
-    /**
-     * Retrieve a {@link Token} by its ID.
-     *
-     * @param options a {@link RequestOptions} object that contains
-     * @param tokenId the id of the token that you're looking for
-     * @return a {@link Token} if one exists and you have the permissions to access it
-     * @throws AuthenticationException if there is a problem authenticating to the Stripe API
-     * @throws InvalidRequestException if the token ID parameter is invalid
-     * @throws APIConnectionException if there is a problem connecting to the Stripe API
-     * @throws APIException for unknown Stripe API errors. These should be rare.
-     */
     @Nullable
-    static Token retrieveTokenFromServer(
-            @NonNull RequestOptions options,
-            @NonNull String tokenId)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        try {
-            return requestToken(GET, getRetrieveTokenApiUrl(tokenId), null, options);
-        } catch (CardException cardException) {
-            // It shouldn't be possible to throw a CardException from the retrieve token method.
-            throw new APIException(
-                    cardException.getMessage(),
-                    cardException.getRequestId(),
-                    cardException.getStatusCode(),
-                    cardException);
-        }
+    static Source addCustomerSource(
+            @NonNull String customerId,
+            @NonNull String sourceId,
+            @NonNull String secret)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("source", sourceId);
+        StripeResponse response = getStripeResponse(
+                POST,
+                getAddCustomerSourceUrl(customerId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Source.fromString(response.getResponseBody());
+    }
+
+    @Nullable
+    static Customer setDefaultCustomerSource(
+            @NonNull String customerId,
+            @NonNull String sourceId,
+            @NonNull String secret)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("default_source", sourceId);
+        StripeResponse response = getStripeResponse(
+                POST,
+                getRetrieveCustomerUrl(customerId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Customer.fromString(response.getResponseBody());
     }
 
     @Nullable
@@ -387,6 +388,11 @@ class StripeApiHandler {
     @VisibleForTesting
     static String getCustomersUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, CUSTOMERS);
+    }
+
+    @VisibleForTesting
+    static String getAddCustomerSourceUrl(@NonNull String customerId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getRetrieveCustomerUrl(customerId), SOURCES);
     }
 
     @VisibleForTesting

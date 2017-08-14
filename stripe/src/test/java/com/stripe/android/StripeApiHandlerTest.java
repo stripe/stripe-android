@@ -4,7 +4,6 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
@@ -61,6 +60,21 @@ public class StripeApiHandlerTest {
         String tokenId = "tok_sample";
         String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
         assertEquals("https://api.stripe.com/v1/tokens/" + tokenId, requestApi);
+    }
+
+    @Test
+    public void testGetRetrieveCustomerUrl() {
+        String customerId = "cus_123abc";
+        String customerRequestUrl = StripeApiHandler.getRetrieveCustomerUrl(customerId);
+        assertEquals("https://api.stripe.com/v1/customers/" + customerId, customerRequestUrl);
+    }
+
+    @Test
+    public void testGetAddCustomerSourceUrl() {
+        String customerId = "cus_123abc";
+        String addSourceUrl = StripeApiHandler.getAddCustomerSourceUrl(customerId);
+        assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources",
+                addSourceUrl);
     }
 
     @Test
@@ -165,7 +179,7 @@ public class StripeApiHandlerTest {
             };
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSourceOnServer(
+            Source source = StripeApiHandler.createSource(
                     provider,
                     RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
@@ -211,7 +225,7 @@ public class StripeApiHandlerTest {
 
             final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSourceOnServer(
+            Source source = StripeApiHandler.createSource(
                     provider,
                     RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
@@ -248,7 +262,7 @@ public class StripeApiHandlerTest {
             TestLoggingListener testLoggingListener = new TestLoggingListener(false);
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSourceOnServer(
+            Source source = StripeApiHandler.createSource(
                     null,
                     RuntimeEnvironment.application.getApplicationContext(),
                     SourceParams.createCardParams(card),
