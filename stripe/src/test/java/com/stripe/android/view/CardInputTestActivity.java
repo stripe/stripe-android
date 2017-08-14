@@ -26,7 +26,7 @@ public class CardInputTestActivity extends AppCompatActivity {
                     ":\"unchecked\",\"funding\":\"credit\",\"last4\":\"4242\",\"three_d_secure\"" +
                     ":\"optional\"}";
 
-    static final String EXAMPLE_JSON_CARD_SOURCE = "{\n"+
+    public static final String EXAMPLE_JSON_CARD_SOURCE = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
             "\"object\": \"source\",\n"+
             "\"amount\": 1000,\n"+

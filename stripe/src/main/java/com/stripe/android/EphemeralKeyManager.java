@@ -6,6 +6,7 @@ import android.support.annotation.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 class EphemeralKeyManager {
@@ -26,19 +27,19 @@ class EphemeralKeyManager {
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
-        retrieveEphemeralKey();
+        retrieveEphemeralKey(null, null);
     }
 
-    void retrieveEphemeralKey() {
+    void retrieveEphemeralKey(@Nullable String actionString, Map<String, Object> arguments) {
         if (shouldRefreshKey(
                 mEphemeralKey,
                 mTimeBufferInSeconds,
                 mOverrideCalendar)) {
             mEphemeralKeyProvider.createEphemeralKey(
                     StripeApiHandler.API_VERSION,
-                    new ClientKeyUpdateListener(this));
+                    new ClientKeyUpdateListener(this, actionString, arguments));
         } else {
-            mListener.onKeyUpdate(mEphemeralKey);
+            mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
         }
     }
 
@@ -48,9 +49,12 @@ class EphemeralKeyManager {
         return mEphemeralKey;
     }
 
-    private void updateKey(@NonNull String key) {
+    private void updateKey(
+            @NonNull String key,
+            @Nullable String actionString,
+            @Nullable Map<String, Object> arguments) {
         mEphemeralKey = EphemeralKey.fromString(key);
-        mListener.onKeyUpdate(mEphemeralKey);
+        mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }
 
     private void updateKeyError(int errorCode, @Nullable String errorMessage) {
@@ -74,24 +78,34 @@ class EphemeralKeyManager {
     }
 
     interface KeyManagerListener {
-        void onKeyUpdate(@Nullable EphemeralKey ephemeralKey);
+        void onKeyUpdate(
+                @Nullable EphemeralKey ephemeralKey,
+                @Nullable String action,
+                @Nullable Map<String, Object> arguments);
         void onKeyError(int errorCode, @Nullable String errorMessage);
     }
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
 
+        private @Nullable String mActionString;
+        private @Nullable Map<String, Object> mArguments;
         private @NonNull
         WeakReference<EphemeralKeyManager> mEphemeralKeyManagerWeakReference;
 
-        ClientKeyUpdateListener(@NonNull EphemeralKeyManager keyManager) {
+        ClientKeyUpdateListener(
+                @NonNull EphemeralKeyManager keyManager,
+                @Nullable String actionString,
+                @Nullable Map<String, Object> arguments) {
             mEphemeralKeyManagerWeakReference = new WeakReference<>(keyManager);
+            mActionString = actionString;
+            mArguments = arguments;
         }
 
         @Override
         public void onKeyUpdate(@NonNull String rawKey) {
             final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
             if (keyManager != null) {
-                keyManager.updateKey(rawKey);
+                keyManager.updateKey(rawKey, mActionString, mArguments);
             }
         }
 

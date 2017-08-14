@@ -47,6 +47,11 @@ public class CustomerTest {
             "}";
 
     @Test
+    public void fromString_whenStringIsNull_returnsNull() {
+        assertNull(Customer.fromString(null));
+    }
+
+    @Test
     public void fromJson_whenNotACustomer_returnsNull() {
         assertNull(Customer.fromString(NON_CUSTOMER_OBJECT));
     }
