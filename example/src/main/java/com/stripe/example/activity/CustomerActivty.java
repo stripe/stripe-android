@@ -89,7 +89,23 @@ public class CustomerActivty extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 55 && resultCode == RESULT_OK) {
             String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            mDebugTextView.setText(selectedSource);
+            mDebugTextView.setText("");
+            mDebugTextView.append(selectedSource);
+            CustomerSession.getInstance().setCustomerDefaultSource(selectedSource,
+                    new CustomerSession.CustomerRetrievalListener() {
+                        @Override
+                        public void onCustomerRetrieved(@NonNull Customer customer) {
+                            if (customer.getDefaultSource() != null) {
+                                mDebugTextView.append("\nNEW DEFAULT IS\n");
+                                mDebugTextView.append(customer.getDefaultSource());
+                            }
+                        }
+
+                        @Override
+                        public void onError(int errorCode, @Nullable String errorMessage) {
+
+                        }
+                    });
         }
     }
 }
