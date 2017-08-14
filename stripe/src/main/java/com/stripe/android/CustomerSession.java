@@ -13,6 +13,7 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.Source;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
     private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
+    private @Nullable SourceRetrievalListener mSourceRetrievalListener;
 
     private @Nullable EphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyManager mEphemeralKeyManager;
@@ -49,6 +51,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private @NonNull ThreadPoolExecutor mThreadPoolExecutor;
 
     private static final int CUSTOMER_RETRIEVED = 7;
+    private static final int SOURCE_RETRIEVED = 13;
 
     // The maximum number of active threads we support
     private static final int THREAD_POOL_SIZE = 3;
@@ -133,6 +136,12 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
+    public void updateCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
+        mCustomer = null;
+        mCustomerRetrievalListener = listener;
+        mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+    }
+
     public boolean canUseCachedCustomer() {
         long currentTime = getCalendarInstance().getTimeInMillis();
         return mCustomer != null &&
@@ -144,10 +153,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     public void addCustomerSource(@NonNull String sourceId,
-                                  @Nullable CustomerRetrievalListener listener) {
+                                  @Nullable SourceRetrievalListener listener) {
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
-        mCustomerRetrievalListener = listener;
+        mSourceRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
     }
 
@@ -181,8 +190,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = addCustomerSourceWithKey(key, sourceId, mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
+                Source source = addCustomerSourceWithKey(key, sourceId, mStripeApiProxy);
+                Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
                 mUiThreadHandler.sendMessage(message);
             }
         };
@@ -251,10 +260,16 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     @Override
     public void onKeyError(int errorCode, @Nullable String errorMessage) {
+        // Any error eliminates all listeners
+
         if (mCustomerRetrievalListener != null) {
             mCustomerRetrievalListener.onError(errorCode, errorMessage);
-            // Only keep the customer listener object for one server round trip
             mCustomerRetrievalListener = null;
+        }
+
+        if (mSourceRetrievalListener != null) {
+            mSourceRetrievalListener.onError(errorCode, errorMessage);
+            mSourceRetrievalListener = null;
         }
     }
 
@@ -278,6 +293,17 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                             }
                         }
                         break;
+                    case SOURCE_RETRIEVED:
+                        if (messageObject instanceof Source && mSourceRetrievalListener != null) {
+                            mSourceRetrievalListener.onSourceRetrieved((Source) messageObject);
+                            mSourceRetrievalListener = null;
+                        } else {
+                            if (mSourceRetrievalListener != null) {
+                                mSourceRetrievalListener.onError(400, "Not a source");
+                                mSourceRetrievalListener = null;
+                            }
+                        }
+                        break;
                 }
             }
         };
@@ -297,11 +323,11 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return mProxyNowCalendar == null ? Calendar.getInstance() : mProxyNowCalendar;
     }
 
-    static Customer addCustomerSourceWithKey(
+    static Source addCustomerSourceWithKey(
             @NonNull EphemeralKey key,
             @NonNull String sourceId,
             @Nullable StripeApiProxy proxy) {
-        Customer customer = null;
+        Source source = null;
         try {
             if (proxy != null) {
                 return proxy.addCustomerSourceWithKey(
@@ -309,7 +335,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         sourceId,
                         key.getSecret());
             }
-            customer = StripeApiHandler.addCustomerSource(
+            source = StripeApiHandler.addCustomerSource(
                     key.getCustomerId(),
                     sourceId,
                     key.getSecret());
@@ -318,7 +344,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
         }
-        return customer;
+        return source;
     }
 
     static Customer setCustomerSourceDefaultWithKey(
@@ -381,11 +407,16 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         void onError(int errorCode, @Nullable String errorMessage);
     }
 
+    public interface SourceRetrievalListener {
+        void onSourceRetrieved(@NonNull Source source);
+        void onError(int errorCode, @Nullable String errorMessage);
+    }
+
     interface StripeApiProxy {
         Customer retrieveCustomerWithKey(@NonNull String customerId, @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
 
-        Customer addCustomerSourceWithKey(
+        Source addCustomerSourceWithKey(
                 @NonNull String customerId,
                 @NonNull String sourceId,
                 @NonNull String secret)

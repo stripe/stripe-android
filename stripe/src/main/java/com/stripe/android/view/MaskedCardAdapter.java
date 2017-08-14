@@ -3,17 +3,20 @@ package com.stripe.android.view;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.Source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A {@link RecyclerView.Adapter} that holds a set of {@link MaskedCardView} items for a given set
@@ -33,6 +36,28 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
 
     public void addCustomerSource(@NonNull CustomerSource customerSource) {
         addCustomerSourceIfSupported(customerSource);
+    }
+
+    public void setCustomerSourceList(@NonNull List<CustomerSource> sourceList) {
+        mCustomerSourceList.clear();
+        mCustomerSourceList = sourceList;
+        notifyDataSetChanged();
+    }
+
+    public void updateCustomer(@NonNull Customer customer) {
+        mCustomerSourceList = customer.getSources();
+        String sourceId = customer.getDefaultSource();
+        if (sourceId == null) {
+            updateSelectedIndex(NO_SELECTION);
+        } else {
+            setSelectedSource(sourceId);
+        }
+
+        Log.d("chewie", String.format(Locale.ENGLISH,
+                "Updating customer to someone with %d sources", mCustomerSourceList.size()));
+        Log.d("chewie", String.format(Locale.ENGLISH,
+                "This is adapter %s", this.toString()));
+        notifyDataSetChanged();
     }
 
     @Nullable

@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.transition.Fade;
 import android.support.transition.TransitionManager;
@@ -15,20 +16,26 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
+import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.StripePaymentSource;
+import com.stripe.android.model.Token;
 
 public class AddSourceActivity extends AppCompatActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
+    static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
     static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
     ProgressBar mProgressBar;
@@ -37,10 +44,14 @@ public class AddSourceActivity extends AppCompatActivity {
     StripeProvider mStripeProvider;
 
     private boolean mCommunicating;
+    private boolean mUpdatesCustomer;
 
-    public static Intent newIntent(@NonNull Context context, boolean requireZipField) {
+    public static Intent newIntent(@NonNull Context context,
+                                   boolean requireZipField,
+                                   boolean updatesCustomer) {
         Intent intent = new Intent(context, AddSourceActivity.class);
         intent.putExtra(EXTRA_SHOW_ZIP, requireZipField);
+        intent.putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
         return intent;
     }
 
@@ -58,6 +69,7 @@ public class AddSourceActivity extends AppCompatActivity {
         }
         setCommunicatingProgress(false);
         boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
+        mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
@@ -110,14 +122,39 @@ public class AddSourceActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(Source source) {
-                setCommunicatingProgress(false);
-                mErrorTextView.setVisibility(View.GONE);
-                Intent intent = new Intent();
-                intent.putExtra(EXTRA_NEW_SOURCE, source.toString());
-                setResult(RESULT_OK, intent);
-                finish();
+                if (mUpdatesCustomer) {
+                    attachCardToCustomer(source);
+                } else {
+                    finishWithSource(source);
+                }
             }
         });
+    }
+
+    private void attachCardToCustomer(StripePaymentSource source) {
+        CustomerSession.getInstance().addCustomerSource(source.getId(),
+                new CustomerSession.SourceRetrievalListener() {
+                    @Override
+                    public void onSourceRetrieved(@NonNull Source source) {
+                        finishWithSource(source);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, @Nullable String errorMessage) {
+                        String displayedError = errorMessage == null ? "" : errorMessage;
+                        setCommunicatingProgress(false);
+                        showError(displayedError, mStripeProvider == null);
+                    }
+                });
+    }
+
+    private void finishWithSource(@NonNull Source source) {
+        setCommunicatingProgress(false);
+        mErrorTextView.setVisibility(View.GONE);
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_NEW_SOURCE, source.toString());
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @VisibleForTesting

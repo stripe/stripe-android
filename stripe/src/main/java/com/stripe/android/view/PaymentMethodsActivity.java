@@ -36,6 +36,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private View mAddCardView;
+    private boolean mRecyclerViewUpdated;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PaymentMethodsActivity.class);
@@ -82,7 +83,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     startActivityForResult(
-                            AddSourceActivity.newIntent(PaymentMethodsActivity.this, false),
+                            AddSourceActivity.newIntent(PaymentMethodsActivity.this,
+                                    false, !mIsLocalOnly),
                             REQUEST_CODE_ADD_CARD);
                 }
             });
@@ -111,8 +113,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
-            String sourceString = data.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE);
-            addSourceToCustomer(Source.fromString(sourceString));
+            CustomerSession.getInstance().updateCurrentCustomer(
+                new CustomerSession.CustomerRetrievalListener() {
+                    @Override
+                    public void onCustomerRetrieved(@NonNull Customer customer) {
+                        mMaskedCardAdapter.updateCustomer(customer);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, @Nullable String errorMessage) {
+
+                    }
+                });
         }
     }
 
@@ -138,34 +150,34 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    void addSourceToCustomer(@Nullable Source source) {
-        if (source == null) {
-            return;
-        }
-
-        if (mIsLocalOnly) {
-            CustomerSource customerSource = CustomerSource.fromJson(source.toJson());
-            if (customerSource != null) {
-                mMaskedCardAdapter.addCustomerSource(customerSource);
-            }
-        } else {
-            CustomerSession.CustomerRetrievalListener listener =
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            mCustomer = customer;
-                            initWithCustomer();
-                        }
-
-                        @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
-                            setCommunicatingProgress(false);
-
-                        }
-                    };
-            CustomerSession.getInstance().addCustomerSource(source.getId(), listener);
-        }
-    }
+//    void addSourceToCustomer(@Nullable Source source) {
+//        if (source == null) {
+//            return;
+//        }
+//
+//        if (mIsLocalOnly) {
+//            CustomerSource customerSource = CustomerSource.fromJson(source.toJson());
+//            if (customerSource != null) {
+//                mMaskedCardAdapter.addCustomerSource(customerSource);
+//            }
+//        } else {
+//            CustomerSession.CustomerRetrievalListener listener =
+//                    new CustomerSession.CustomerRetrievalListener() {
+//                        @Override
+//                        public void onCustomerRetrieved(@NonNull Customer customer) {
+//                            mCustomer = customer;
+//                            initWithCustomer();
+//                        }
+//
+//                        @Override
+//                        public void onError(int errorCode, @Nullable String errorMessage) {
+//                            setCommunicatingProgress(false);
+//
+//                        }
+//                    };
+//            CustomerSession.getInstance().addCustomerSource(source.getId(), listener);
+//        }
+//    }
 
     void initWithCustomer() {
         setCommunicatingProgress(false);
@@ -174,17 +186,24 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         List<CustomerSource> customerSourceList = mCustomer.getSources();
-        mMaskedCardAdapter = new MaskedCardAdapter(customerSourceList);
-        // init the RecyclerView
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setHasFixedSize(false);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(mMaskedCardAdapter);
+
+        if (!mRecyclerViewUpdated) {
+            mMaskedCardAdapter = new MaskedCardAdapter(customerSourceList);
+            // init the RecyclerView
+            RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
+            mRecyclerView.setHasFixedSize(false);
+            mRecyclerView.setLayoutManager(linearLayoutManager);
+            mRecyclerView.setAdapter(mMaskedCardAdapter);
+            mRecyclerViewUpdated = true;
+        } else {
+            mMaskedCardAdapter.setCustomerSourceList(customerSourceList);
+        }
 
         String defaultSource = mCustomer.getDefaultSource();
         if (!TextUtils.isEmpty(defaultSource)) {
             mMaskedCardAdapter.setSelectedSource(defaultSource);
         }
+        mMaskedCardAdapter.notifyDataSetChanged();
     }
 
     void initWithCustomerSession() {

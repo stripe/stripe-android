@@ -319,7 +319,7 @@ class StripeApiHandler {
 
 
     @Nullable
-    static Customer addCustomerSource(
+    static Source addCustomerSource(
             @NonNull String customerId,
             @NonNull String sourceId,
             @NonNull String secret)
@@ -328,10 +328,10 @@ class StripeApiHandler {
         paramsMap.put("source", sourceId);
         StripeResponse response = getStripeResponse(
                 POST,
-                getRetrieveCustomerUrl(customerId),
+                getAddCustomerSourceUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
-        return Customer.fromString(response.getResponseBody());
+        return Source.fromString(response.getResponseBody());
     }
 
     @Nullable
@@ -425,6 +425,10 @@ class StripeApiHandler {
     @VisibleForTesting
     static String getRetrieveCustomerUrl(@NonNull String customerId) {
         return String.format(Locale.ENGLISH, "%s/%s", getCustomersUrl(), customerId);
+    }
+
+    static String getAddCustomerSourceUrl(@NonNull String customerId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getRetrieveCustomerUrl(customerId), SOURCES);
     }
 
     @VisibleForTesting
