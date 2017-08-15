@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.stripe.android.BuildConfig;
+import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -48,21 +50,24 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = 25)
 public class AddSourceActivityTest {
 
-    ActivityController<AddSourceActivity> mActivityController;
-    CardMultilineWidget mCardMultilineWidget;
-    CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
-    ProgressBar mProgressBar;
-    TextView mErrorTextView;
-    ShadowActivity mShadowActivity;
+    private ActivityController<AddSourceActivity> mActivityController;
+    private CardMultilineWidget mCardMultilineWidget;
+    private CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
+    private ProgressBar mProgressBar;
+    private TextView mErrorTextView;
+    private ShadowActivity mShadowActivity;
 
     @Mock Stripe mStripe;
+    @Mock AddSourceActivity.CustomerSessionProxy mCustomerSessionProxy;
 
     @Before
     public void setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
-
         MockitoAnnotations.initMocks(this);
+    }
+
+    private void setUpForLocalTest() {
         mActivityController = Robolectric.buildActivity(AddSourceActivity.class)
                 .create().start().resume().visible();
         mCardMultilineWidget = mActivityController.get()
@@ -84,14 +89,47 @@ public class AddSourceActivityTest {
         mActivityController.get().setStripeProvider(mockStripeProvider);
     }
 
+    private void setUpForProxySessionTest() {
+        Intent intent = AddSourceActivity.newIntent(RuntimeEnvironment.application, true, true);
+        mActivityController = Robolectric.buildActivity(AddSourceActivity.class, intent)
+                .create().start().resume().visible();
+        mCardMultilineWidget = mActivityController.get()
+                .findViewById(R.id.add_source_card_entry_widget);
+        mProgressBar = mActivityController.get()
+                .findViewById(R.id.add_source_progress_bar);
+        mErrorTextView = mActivityController.get()
+                .findViewById(R.id.tv_add_source_error);
+        mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
+
+        mShadowActivity = Shadows.shadowOf(mActivityController.get());
+        AddSourceActivity.StripeProvider mockStripeProvider =
+                new AddSourceActivity.StripeProvider() {
+                    @Override
+                    public Stripe getStripe(@NonNull Context context) {
+                        return mStripe;
+                    }
+                };
+        mActivityController.get().setStripeProvider(mockStripeProvider);
+        mActivityController.get().setCustomerSessionProxy(mCustomerSessionProxy);
+    }
+
     @Test
-    public void testConstruction() {
+    public void testConstructionForLocal() {
+        setUpForLocalTest();
         assertNotNull(mCardMultilineWidget);
         assertEquals(View.GONE, mWidgetControlGroup.postalCodeInputLayout.getVisibility());
     }
 
     @Test
+    public void testConstructionForCustomerSession() {
+        setUpForProxySessionTest();
+        assertNotNull(mCardMultilineWidget);
+        assertEquals(View.VISIBLE, mWidgetControlGroup.postalCodeInputLayout.getVisibility());
+    }
+
+    @Test
     public void addCardData_whenDataIsValidAndServerReturnsSuccess_finishesWithIntent() {
+        setUpForLocalTest();
         ArgumentCaptor<SourceParams> paramsArgumentCaptor =
                 ArgumentCaptor.forClass(SourceParams.class);
         ArgumentCaptor<SourceCallback> callbackArgumentCaptor =
@@ -134,7 +172,69 @@ public class AddSourceActivityTest {
     }
 
     @Test
+    public void addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
+        setUpForProxySessionTest();
+        ArgumentCaptor<SourceParams> paramsArgumentCaptor =
+                ArgumentCaptor.forClass(SourceParams.class);
+        ArgumentCaptor<SourceCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(SourceCallback.class);
+
+        // Note: these values do not match what is being mock-sent back in the result.
+        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
+        mWidgetControlGroup.expiryDateEditText.append("12");
+        mWidgetControlGroup.expiryDateEditText.append("50");
+        mWidgetControlGroup.cvcEditText.append("1234");
+        mWidgetControlGroup.postalCodeEditText.append("90210");
+
+        PaymentConfiguration.init("pk_test_abc123");
+        MenuItem menuItem = mock(MenuItem.class);
+        when(menuItem.getItemId()).thenReturn(R.id.action_save);
+
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+
+        mActivityController.get().onOptionsItemSelected(menuItem);
+        verify(mStripe).createSource(
+                paramsArgumentCaptor.capture(),
+                callbackArgumentCaptor.capture());
+        SourceParams params = paramsArgumentCaptor.getValue();
+        SourceCallback callback = callbackArgumentCaptor.getValue();
+        assertNotNull(params);
+        assertNotNull(callback);
+
+        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+        assertEquals(Source.CARD, params.getType());
+
+        Source expectedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(expectedSource);
+        callback.onSuccess(expectedSource);
+
+        ArgumentCaptor<String> sourceIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CustomerSession.SourceRetrievalListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(CustomerSession.SourceRetrievalListener.class);
+        verify(mCustomerSessionProxy).addCustomerSource(
+                sourceIdCaptor.capture(),
+                listenerArgumentCaptor.capture());
+
+        assertEquals(expectedSource.getId(), sourceIdCaptor.getValue());
+        CustomerSession.SourceRetrievalListener listener = listenerArgumentCaptor.getValue();
+        assertNotNull(listener);
+
+        listener.onSourceRetrieved(expectedSource);
+
+        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
+        Intent intent = mShadowActivity.getResultIntent();
+
+        assertTrue(mShadowActivity.isFinishing());
+        assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
+        Source source =
+                Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
+        assertNotNull(source);
+        assertEquals(Source.CARD, source.getType());
+    }
+
+    @Test
     public void addCardData_whenDataIsValidButServerReturnsError_showsErrorAndDoesNotFinish() {
+        setUpForLocalTest();
         ArgumentCaptor<SourceParams> paramsArgumentCaptor =
                 ArgumentCaptor.forClass(SourceParams.class);
         ArgumentCaptor<SourceCallback> callbackArgumentCaptor =

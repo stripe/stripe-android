@@ -15,9 +15,6 @@
         <item name="colorPrimary">@color/accent_color_default</item>
         <item name="titleTextColor">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>
-    </style>
-
-    <style name="ToolBarStyle.Event" parent="ToolBarStyle">
         <item name="titleTextAppearance">@style/TextAppearance.Widget.AppCompat.Toolbar.Title</item>
     </style>
 
