@@ -9,5 +9,4 @@
     <declare-styleable name="CardMultilineWidget">
         <attr name="shouldShowPostalCode" format="boolean" />
     </declare-styleable>
-
 </resources>

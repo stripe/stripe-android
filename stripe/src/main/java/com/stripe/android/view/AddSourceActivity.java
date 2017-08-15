@@ -98,18 +98,11 @@ public class AddSourceActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
-        @ColorInt int color;
-        Drawable icon;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            color = getResources().getColor(android.R.color.primary_text_dark, getTheme());
-            icon = getResources().getDrawable(R.drawable.ic_checkmark, getTheme());
-        }  else {
-            color = getResources().getColor(android.R.color.primary_text_dark);
-            icon = getResources().getDrawable(R.drawable.ic_checkmark);
-        }
-        Drawable compatIcon = DrawableCompat.wrap(icon);
-        DrawableCompat.setTint(compatIcon.mutate(), color);
-        saveItem.setIcon(compatIcon);
+        Drawable tintedIcon = ViewUtils.getTintedIcon(
+                this,
+                R.drawable.ic_checkmark,
+                android.R.color.primary_text_dark);
+        saveItem.setIcon(tintedIcon);
         return super.onPrepareOptionsMenu(menu);
     }
 

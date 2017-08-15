@@ -3,14 +3,19 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.stripe.android.R;
 import com.stripe.android.model.Card;
 
 import java.lang.reflect.Type;
@@ -67,17 +72,23 @@ class ViewUtils {
         return outValue;
     }
 
-    static TypedValue getThemeTextColorPrimary(Context context) {
-        int colorAttr;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            colorAttr = android.R.attr.textColorPrimary;
-        } else {
-            //Get textColorSecondary defined for AppCompat
-            colorAttr = android.R.color.primary_text_dark;
+    @SuppressWarnings("deprecation")
+    static Drawable getTintedIcon(
+            @NonNull Context context,
+            @DrawableRes int iconResourceId,
+            @ColorRes int colorResourceId) {
+        @ColorInt int color;
+        Drawable icon;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            color = context.getResources().getColor(colorResourceId, context.getTheme());
+            icon = context.getResources().getDrawable(iconResourceId, context.getTheme());
+        }  else {
+            color = context.getResources().getColor(colorResourceId);
+            icon = context.getResources().getDrawable(iconResourceId);
         }
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(colorAttr, outValue, true);
-        return outValue;
+        Drawable compatIcon = DrawableCompat.wrap(icon);
+        DrawableCompat.setTint(compatIcon.mutate(), color);
+        return compatIcon;
     }
 
     /**
