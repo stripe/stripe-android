@@ -5,12 +5,16 @@ import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -19,6 +23,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -47,13 +56,11 @@ public class EphemeralKeyManagerTest {
 
     @Mock EphemeralKeyManager.KeyManagerListener mKeyManagerListener;
 
-    private Calendar mProxyCalendar;
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mProxyCalendar = Calendar.getInstance();
         mTestEphemeralKeyProvider = new TestEphemeralKeyProvider();
     }
 
@@ -132,6 +139,7 @@ public class EphemeralKeyManagerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void createKeyManager_updatesEphemeralKey_notifiesListener() {
         EphemeralKey testKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(testKey);
@@ -143,12 +151,62 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null);
 
-        verify(mKeyManagerListener, times(1)).onKeyUpdate(any(EphemeralKey.class));
+        verify(mKeyManagerListener, times(1)).onKeyUpdate(
+                any(EphemeralKey.class), (String) isNull(), (Map<String, Object>) isNull());
         assertNotNull(keyManager.getEphemeralKey());
         assertEquals(testKey.getId(), keyManager.getEphemeralKey().getId());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    public void retrieveEphemeralKey_whenUpdateNecessary_returnsUpdateAndArguments() {
+        EphemeralKey testKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(testKey);
+
+        Calendar fixedCalendar = Calendar.getInstance();
+
+        long currentTimeInMillis = fixedCalendar.getTimeInMillis();
+        long timeAgoInMillis = currentTimeInMillis - 100L;
+
+        testKey.setExpires(TimeUnit.MILLISECONDS.toSeconds(timeAgoInMillis));
+        mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+
+        EphemeralKeyManager keyManager = new EphemeralKeyManager(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                fixedCalendar);
+
+        // We already tested this setup, so let's reset the mock to avoid confusion.
+        reset(mKeyManagerListener);
+
+        final String ACTION_STRING = "action";
+        final Map<String, Object> ACTION_ARGS = new HashMap<>();
+        ACTION_ARGS.put("key", "value");
+        keyManager.retrieveEphemeralKey(ACTION_STRING, ACTION_ARGS);
+
+        ArgumentCaptor<EphemeralKey> keyArgumentCaptor =
+                ArgumentCaptor.forClass(EphemeralKey.class);
+        ArgumentCaptor<String> stringArgumentCaptor =
+                ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, Object>> mapArgumentCaptor =
+                ArgumentCaptor.forClass(Map.class);
+
+        verify(mKeyManagerListener, times(1)).onKeyUpdate(
+                keyArgumentCaptor.capture(),
+                stringArgumentCaptor.capture(),
+                mapArgumentCaptor.capture());
+
+        Map<String, Object> capturedMap = mapArgumentCaptor.getValue();
+        assertNotNull(capturedMap);
+        assertNotNull(keyArgumentCaptor.getValue());
+        assertEquals(1, capturedMap.size());
+        assertEquals("value", capturedMap.get("key"));
+        assertEquals(ACTION_STRING, stringArgumentCaptor.getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
         EphemeralKey testKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(testKey);
@@ -168,7 +226,8 @@ public class EphemeralKeyManagerTest {
                 proxyCalendar);
 
         // Make sure we're in a good state
-        verify(mKeyManagerListener, times(1)).onKeyUpdate(any(EphemeralKey.class));
+        verify(mKeyManagerListener, times(1)).onKeyUpdate(
+                any(EphemeralKey.class), (String) isNull(), (Map<String, Object>) isNull());
         assertNotNull(keyManager.getEphemeralKey());
 
         // Set up the error
@@ -176,7 +235,7 @@ public class EphemeralKeyManagerTest {
         mTestEphemeralKeyProvider.setNextError(404, errorMessage);
 
         // It should be necessary to update because the key is expired.
-        keyManager.retrieveEphemeralKey();
+        keyManager.retrieveEphemeralKey(null, null);
 
         verify(mKeyManagerListener, times(1)).onKeyError(404, errorMessage);
         verifyNoMoreInteractions(mKeyManagerListener);

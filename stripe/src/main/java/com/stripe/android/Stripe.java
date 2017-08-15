@@ -711,7 +711,7 @@ public class Stripe {
     }
 
     private void executeTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
-        if (executor != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+        if (executor != null) {
             task.executeOnExecutor(executor);
         } else {
             task.execute();
