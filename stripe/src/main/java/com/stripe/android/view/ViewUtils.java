@@ -67,6 +67,19 @@ class ViewUtils {
         return outValue;
     }
 
+    static TypedValue getThemeTextColorPrimary(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.textColorPrimary;
+        } else {
+            //Get textColorSecondary defined for AppCompat
+            colorAttr = android.R.color.primary_text_dark;
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue;
+    }
+
     /**
      * Check to see whether the color int is essentially transparent.
      *

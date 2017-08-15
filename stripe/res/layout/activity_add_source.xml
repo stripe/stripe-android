@@ -13,7 +13,7 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         app:title="@string/title_add_a_card"
-        android:theme="@style/ToolBarStyle.Event"
+        android:theme="@style/ToolBarStyle"
         />
 
     <com.stripe.android.view.CardMultilineWidget
