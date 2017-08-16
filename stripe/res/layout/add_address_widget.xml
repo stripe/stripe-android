@@ -1,64 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    >
 
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/spinner_country"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/tl_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_name">
+        android:hint="@string/address_label_name"
+        >
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/tl_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_address">
+        android:hint="@string/address_label_address"
+        >
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/tl_apt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_apt">
+        android:hint="@string/address_label_apt"
+        >
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_apt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/tl_city"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_city">
+        android:hint="@string/address_label_city"
+        >
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_city"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            />
     </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
@@ -66,20 +76,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        >
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/tl_state"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="@string/address_label_state">
+            android:hint="@string/address_label_state"
+            >
 
             <com.stripe.android.view.StripeEditText
                 android:id="@+id/et_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:inputType="text"
+                />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -87,14 +100,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="@string/address_label_zip">
+            android:hint="@string/address_label_zip"
+            >
 
             <com.stripe.android.view.StripeEditText
                 android:id="@+id/et_zip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:digits="@string/valid_digits"
-                android:inputType="number" />
+                android:inputType="number"
+                />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
 
@@ -102,14 +117,16 @@
         android:id="@+id/tl_phone_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_phone_number">
+        android:hint="@string/address_label_phone_number"
+        >
 
         <com.stripe.android.view.StripeEditText
             android:id="@+id/et_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:digits="@string/valid_digits"
-            android:inputType="number" />
+            android:inputType="number"
+            />
     </android.support.design.widget.TextInputLayout>
 
 </merge>

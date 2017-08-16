@@ -8,9 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -20,6 +17,9 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 import java.util.Locale;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test class for {@link CountryAdapter}
  */
@@ -27,7 +27,6 @@ import java.util.Locale;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 25)
 public class CountryAdapterTest {
-
 
     private CountryAdapter mCountryAdapter;
 
@@ -46,7 +45,7 @@ public class CountryAdapterTest {
         Locale currentLocale = mCountryAdapter.getCurrentLocale();
         assertEquals(countryToDisplayNames.get(0).first, currentLocale.getCountry());
         boolean ordered = true;
-        // Skip the first comparision since we use moved the current locale up
+        // Skip the first comparision since we moved the current locale up
         for (int i = 2; i < countryToDisplayNames.size(); i++) {
             if (countryToDisplayNames.get(i).second.compareTo(countryToDisplayNames.get(i - 1).second) < 0) {
                 ordered = false;

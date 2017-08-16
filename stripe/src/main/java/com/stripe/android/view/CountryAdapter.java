@@ -23,8 +23,7 @@ import java.util.Locale;
 /**
  * Adapter that populates a list of countries for a spinner.
  */
-
-public class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
+class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
 
     private List<Pair<String, String>> mCountryToDisplayName;
     private Context mContext;
@@ -64,7 +63,7 @@ public class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
     @VisibleForTesting
      List getOrderedCountries() {
         // Show user's current locale first, followed by countries alphabetized by display name
-        ArrayList<String> countries = new ArrayList<>(Arrays.asList(Locale.getISOCountries()));
+        List<String> countries = new ArrayList<>(Arrays.asList(Locale.getISOCountries()));
         List<Pair<String, String>> countriesToDisplayName = new ArrayList<>();
         for (String country: countries) {
             Locale locale = new Locale("", country);

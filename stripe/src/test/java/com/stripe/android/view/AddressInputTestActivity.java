@@ -10,7 +10,6 @@ import com.stripe.android.R;
 /**
  * Activity used to test UI components
  */
-
 public class AddressInputTestActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
