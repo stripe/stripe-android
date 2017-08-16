@@ -43,11 +43,11 @@ public class AddAddressWidget extends LinearLayout {
     private void initView() {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.add_address_widget, this);
-        mCountrySpinner = findViewById(R.id.spinner_country);
-        mAddressLine1 = findViewById(R.id.tl_address_line1);
-        mAddressLine2 = findViewById(R.id.tl_address_line2);
-        mPostalCode = findViewById(R.id.tl_postal_code);
-        mStateInput = findViewById(R.id.tl_state);
+        mCountrySpinner = findViewById(R.id.spinner_country_aaw);
+        mAddressLine1 = findViewById(R.id.tl_address_line1_aaw);
+        mAddressLine2 = findViewById(R.id.tl_address_line2_aaw);
+        mPostalCode = findViewById(R.id.tl_postal_code_aaw);
+        mStateInput = findViewById(R.id.tl_state_aaw);
         final CountryAdapter countryAdapter = new CountryAdapter(getContext());
         mCountrySpinner.setAdapter(countryAdapter);
         mCountrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

@@ -45,11 +45,11 @@ public class AddAddressWidgetTest {
         ActivityController<AddressInputTestActivity> activityController =
                 Robolectric.buildActivity(AddressInputTestActivity.class).create().start();
         mAddAddressWidget = activityController.get().getAddAddressWidget();
-        mAddressLine1 = mAddAddressWidget.findViewById(R.id.tl_address_line1);
-        mAddressLine2 = mAddAddressWidget.findViewById(R.id.tl_address_line2);
-        mPostalCodeLayout = mAddAddressWidget.findViewById(R.id.tl_postal_code);
-        mStateInput = mAddAddressWidget.findViewById(R.id.tl_state);
-        mCountrySpinner = mAddAddressWidget.findViewById(R.id.spinner_country);
+        mAddressLine1 = mAddAddressWidget.findViewById(R.id.tl_address_line1_aaw);
+        mAddressLine2 = mAddAddressWidget.findViewById(R.id.tl_address_line2_aaw);
+        mPostalCodeLayout = mAddAddressWidget.findViewById(R.id.tl_postal_code_aaw);
+        mStateInput = mAddAddressWidget.findViewById(R.id.tl_state_aaw);
+        mCountrySpinner = mAddAddressWidget.findViewById(R.id.spinner_country_aaw);
         mCountryAdapter = (CountryAdapter) mCountrySpinner.getAdapter();
         mOrderedCountries = mCountryAdapter.getOrderedCountries();
     }
