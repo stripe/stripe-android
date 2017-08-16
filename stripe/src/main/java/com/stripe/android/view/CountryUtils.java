@@ -8,7 +8,7 @@ import java.util.Set;
  * Created by ksun on 8/15/17.
  */
 
-public class CountryUtils {
+class CountryUtils {
 
     static final String[] NO_POSTAL_CODE_COUNTRIES = {
             "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF",
@@ -19,6 +19,6 @@ public class CountryUtils {
     static final Set<String> NO_POSTAL_CODE_COUNTRIES_SET = new HashSet<>(Arrays.asList(NO_POSTAL_CODE_COUNTRIES));
 
     static boolean doesCountryUsePostalCode(String countryCode) {
-        return ! NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);
+        return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);
     }
 }

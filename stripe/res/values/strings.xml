@@ -12,7 +12,7 @@
     <string name="address_label_city">City</string>
     <string name="address_label_county">County</string>
     <string name="address_label_country">Country</string>
-    <string name="address_label_phone_number">Phone number</string>
+    <string name="address_label_phone_number">Phone number (optional)</string>
     <string name="address_label_state">State</string>
     <string name="address_label_zip_code">ZIP code</string>
     <string name="address_label_postal_code">Postal code</string>

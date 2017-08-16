@@ -6,10 +6,11 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
+
+import java.util.Locale;
 
 /**
  * An add address widget using the support design library's {@link TextInputLayout}
@@ -44,7 +45,7 @@ public class AddAddressWidget extends LinearLayout {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.add_address_widget, this);
         mCountrySpinner = findViewById(R.id.spinner_country);
-        mAddressLine1 = findViewById(R.id.tl_address_line_1);
+        mAddressLine1 = findViewById(R.id.tl_address_line1);
         mAddressLine2 = findViewById(R.id.tl_address_line2);
         mPostalCode = findViewById(R.id.tl_postal_code);
         mStateInput = findViewById(R.id.tl_state);
@@ -54,11 +55,11 @@ public class AddAddressWidget extends LinearLayout {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String selectedCountry = countryAdapter.getItem(i).first;
-                if (selectedCountry.equals("US")) {
+                if (selectedCountry.equals(Locale.US.getCountry())) {
                     renderUSForm();
-                } else if (selectedCountry.equals("GB")) {
+                } else if (selectedCountry.equals(Locale.UK.getCountry())) {
                     renderGreatBritainForm();
-                } else if (selectedCountry.equals("CA")){
+                } else if (selectedCountry.equals(Locale.CANADA.getCountry())) {
                     renderCanadianForm();
                 } else {
                     renderInternationalForm();
@@ -72,7 +73,6 @@ public class AddAddressWidget extends LinearLayout {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }
