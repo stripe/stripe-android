@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by ksun on 8/15/17.
- */
-
 class CountryUtils {
 
     static final String[] NO_POSTAL_CODE_COUNTRIES = {

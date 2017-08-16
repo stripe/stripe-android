@@ -25,7 +25,6 @@ public class AddAddressWidget extends LinearLayout {
     private TextInputLayout mPostalCode;
     private TextInputLayout mStateInput;
 
-
     public AddAddressWidget(Context context) {
         super(context);
         initView();

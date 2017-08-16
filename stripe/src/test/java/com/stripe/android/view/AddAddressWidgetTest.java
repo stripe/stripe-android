@@ -29,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 @Config(constants = BuildConfig.class, sdk = 25)
 public class AddAddressWidgetTest {
 
-
     private AddAddressWidget mAddAddressWidget;
     private TextInputLayout mAddressLine1;
     private TextInputLayout mAddressLine2;
@@ -73,7 +72,6 @@ public class AddAddressWidgetTest {
         assertEquals(mPostalCodeLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postal_code));
         assertEquals(mStateInput.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_province));
 
-
         Pair<String, String> ukPair = new Pair(Locale.UK.getCountry(), Locale.UK.getDisplayCountry());
         int ukIndex = mOrderedCountries.indexOf(ukPair);
         mCountrySpinner.setSelection(ukIndex);
@@ -81,7 +79,6 @@ public class AddAddressWidgetTest {
         assertEquals(mAddressLine2.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2));
         assertEquals(mPostalCodeLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postcode));
         assertEquals(mStateInput.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_county));
-
 
         Pair<String, String> noPostalCodePair = new Pair("ZW", new Locale("", "ZW").getDisplayCountry()); // Zimbabwe
         int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
