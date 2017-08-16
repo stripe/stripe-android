@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,35 +15,30 @@ import com.stripe.android.model.Source;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * A {@link RecyclerView.Adapter} that holds a set of {@link MaskedCardView} items for a given set
  * of {@link CustomerSource} objects.
  */
-public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
+class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
 
     private static final int NO_SELECTION = -1;
     private @NonNull List<CustomerSource> mCustomerSourceList;
     private int mSelectedIndex = NO_SELECTION;
 
-    public MaskedCardAdapter(@NonNull List<CustomerSource> startingSources) {
+    MaskedCardAdapter(@NonNull List<CustomerSource> startingSources) {
         mCustomerSourceList = new ArrayList<>();
         CustomerSource[] customerSources = new CustomerSource[startingSources.size()];
         addCustomerSourceIfSupported(startingSources.toArray(customerSources));
     }
 
-    public void addCustomerSource(@NonNull CustomerSource customerSource) {
-        addCustomerSourceIfSupported(customerSource);
-    }
-
-    public void setCustomerSourceList(@NonNull List<CustomerSource> sourceList) {
+    void setCustomerSourceList(@NonNull List<CustomerSource> sourceList) {
         mCustomerSourceList.clear();
         mCustomerSourceList = sourceList;
         notifyDataSetChanged();
     }
 
-    public void updateCustomer(@NonNull Customer customer) {
+    void updateCustomer(@NonNull Customer customer) {
         mCustomerSourceList = customer.getSources();
         String sourceId = customer.getDefaultSource();
         if (sourceId == null) {
@@ -53,20 +47,7 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
             setSelectedSource(sourceId);
         }
 
-        Log.d("chewie", String.format(Locale.ENGLISH,
-                "Updating customer to someone with %d sources", mCustomerSourceList.size()));
-        Log.d("chewie", String.format(Locale.ENGLISH,
-                "This is adapter %s", this.toString()));
         notifyDataSetChanged();
-    }
-
-    @Nullable
-    public CustomerSource getSelectedCustomerSource() {
-        if (mSelectedIndex == NO_SELECTION) {
-            return null;
-        }
-
-        return mCustomerSourceList.get(mSelectedIndex);
     }
 
     @Override
@@ -89,21 +70,13 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
     }
 
     /**
-     * Clear all {@link CustomerSource} objects stored in this adapter.
-     */
-    public void clearSources() {
-        mCustomerSourceList.clear();
-        notifyDataSetChanged();
-    }
-
-    /**
      * Sets the selected source to the one whose ID is identical to the input string, if such
      * a value is found.
      *
      * @param sourceId a stripe ID to search for among the list of {@link CustomerSource} objects
      * @return {@code true} if the value was found, {@code false} if not
      */
-    public boolean setSelectedSource(@NonNull String sourceId) {
+    boolean setSelectedSource(@NonNull String sourceId) {
         for (int i = 0; i < mCustomerSourceList.size(); i++) {
             if (sourceId.equals(mCustomerSourceList.get(i).getId())) {
                 updateSelectedIndex(i);
@@ -114,7 +87,7 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
     }
 
     @Nullable
-    public String getSelectedSource() {
+    String getSelectedSource() {
         if (mSelectedIndex == NO_SELECTION) {
             return null;
         }

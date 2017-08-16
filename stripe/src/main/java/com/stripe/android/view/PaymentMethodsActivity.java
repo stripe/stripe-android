@@ -306,9 +306,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     void finishWithSelection(String selectedSourceId) {
         CustomerSource customerSource = mCustomer.getSourceById(selectedSourceId);
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toString());
-        setResult(RESULT_OK, intent);
+        if (customerSource != null) {
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toString());
+            setResult(RESULT_OK, intent);
+        } else {
+            setResult(RESULT_CANCELED);
+        }
+
         finish();
     }
 

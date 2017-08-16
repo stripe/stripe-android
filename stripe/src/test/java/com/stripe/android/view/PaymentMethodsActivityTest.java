@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = 25)
 public class PaymentMethodsActivityTest {
 
-    private static final String TEST_CUSTOMER_OBJECT_WITH_SOURCES =
+    static final String TEST_CUSTOMER_OBJECT_WITH_SOURCES =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
