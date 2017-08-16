@@ -44,7 +44,7 @@ public class MaskedCardView extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
     private String mLast4;
-    private boolean mIsHighlighted;
+    private boolean mIsSelected;
 
     private AppCompatImageView mCardIconImageView;
     private AppCompatTextView mCardInformationTextView;
@@ -78,6 +78,19 @@ public class MaskedCardView extends LinearLayout {
     public MaskedCardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
+    }
+
+    @Override
+    public boolean isSelected() {
+        return mIsSelected;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        mIsSelected = selected;
+        updateCheckMark();
+        updateBrandIcon();
+        updateTextColor();
     }
 
     /**
@@ -130,27 +143,10 @@ public class MaskedCardView extends LinearLayout {
     }
 
     /**
-     * @return whether or not this view is displaying as selected
-     */
-    public boolean isHighlighted() {
-        return mIsHighlighted;
-    }
-
-    /**
-     * @param isHighlighted whether or not this view should display in selected mode
-     */
-    public void setHighlighted(boolean isHighlighted) {
-        mIsHighlighted = isHighlighted;
-        updateCheckMark();
-        updateBrandIcon();
-        updateTextColor();
-    }
-
-    /**
      * Toggle the view from selected to unselected or vice-versa.
      */
-    public void toggleHighlighted() {
-        setHighlighted(!mIsHighlighted);
+    public void toggleSelected() {
+        setSelected(!mIsSelected);
     }
 
     @Card.CardBrand
@@ -195,7 +191,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateTextColor() {
-        @ColorInt int textColor = mIsHighlighted ? mSelectedColorInt : mUnselectedTextColorInt;
+        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
         mCardInformationTextView.setTextColor(textColor);
     }
 
@@ -213,7 +209,7 @@ public class MaskedCardView extends LinearLayout {
             icon = getResources().getDrawable(resourceId);
         }
 
-        @ColorInt int tintColor = mIsHighlighted || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), tintColor);
         imageView.setImageDrawable(compatIcon);
@@ -242,7 +238,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateCheckMark() {
-        if (mIsHighlighted) {
+        if (mIsSelected) {
             mCheckMarkImageView.setVisibility(View.VISIBLE);
         } else {
             mCheckMarkImageView.setVisibility(View.INVISIBLE);

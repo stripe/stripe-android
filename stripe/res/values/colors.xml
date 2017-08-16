@@ -5,4 +5,5 @@
     <color name="accent_color_default">#ff306af7</color>
     <color name="control_normal_color_default">#ffb3b3b3</color>
     <color name="color_text_secondary_default">#ff32325d</color>
+    <color name="slate_50">#3332325d</color>
 </resources>

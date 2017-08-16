@@ -80,6 +80,16 @@ public class Customer extends StripeJsonModel {
         return mUrl;
     }
 
+    @Nullable
+    public CustomerSource getSourceById(@NonNull String sourceId) {
+        for (CustomerSource source : mSources) {
+            if (sourceId.equals(source.getId())) {
+                return source;
+            }
+        }
+        return null;
+    }
+
     @NonNull
     @Override
     public JSONObject toJson() {
