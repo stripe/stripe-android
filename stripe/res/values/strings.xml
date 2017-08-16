@@ -4,6 +4,14 @@
     <string name="acc_label_expiry_date">Expiration date</string>
     <string name="acc_label_zip">ZIP Code</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <string name="address_label_name">Name</string>
+    <string name="address_label_address">Address</string>
+    <string name="address_label_apt">Apt. (Optional)</string>
+    <string name="address_label_city">City</string>
+    <string name="address_label_country">Country</string>
+    <string name="address_label_phone_number">Phone number</string>
+    <string name="address_label_state">State</string>
+    <string name="address_label_zip">Zip code</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
