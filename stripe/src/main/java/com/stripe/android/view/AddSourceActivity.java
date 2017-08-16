@@ -2,17 +2,12 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.transition.Fade;
 import android.support.transition.TransitionManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -22,19 +17,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
-import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
-import com.stripe.android.model.Token;
 
 public class AddSourceActivity extends AppCompatActivity {
 
@@ -91,11 +83,9 @@ public class AddSourceActivity extends AppCompatActivity {
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
-
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
         Drawable tintedIcon = ViewUtils.getTintedIcon(
@@ -162,6 +152,7 @@ public class AddSourceActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(Source source) {
+                mErrorTextView.setVisibility(View.GONE);
                 if (mUpdatesCustomer) {
                     attachCardToCustomer(source);
                 } else {

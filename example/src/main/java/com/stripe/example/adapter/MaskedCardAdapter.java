@@ -32,8 +32,8 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
             itemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mMaskedCardView.toggleHighlighted();
-                    if (mMaskedCardView.isHighlighted()) {
+                    mMaskedCardView.toggleSelected();
+                    if (mMaskedCardView.isSelected()) {
                         updateSelected(mIndex);
                     } else {
                         updateSelected(NO_SELECTION);
@@ -51,7 +51,7 @@ public class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.Vi
         }
 
         void setSelected(boolean isSelected) {
-            mMaskedCardView.setHighlighted(isSelected);
+            mMaskedCardView.setSelected(isSelected);
         }
     }
 
