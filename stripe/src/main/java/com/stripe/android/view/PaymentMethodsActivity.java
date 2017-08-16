@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
-import com.stripe.android.Stripe;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 
@@ -35,7 +34,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     private static final String EXTRA_CUSTOMER = "customer";
 
-    private static final int REQUEST_CODE_ADD_CARD = 700;
+    static final int REQUEST_CODE_ADD_CARD = 700;
     private static final long FADE_DURATION_MS = 100L;
     private boolean mCommunicating;
     private boolean mIsLocalOnly;
@@ -71,6 +70,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mErrorLayout = findViewById(R.id.payment_methods_error_container);
         mErrorTextView = findViewById(R.id.tv_payment_methods_error);
         mAddCardView = findViewById(R.id.payment_methods_add_payment_container);
+
+        if (mIsLocalOnly) {
+            mAddCardView.setVisibility(View.GONE);
+        }
         mAddCardView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -110,8 +113,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
-                            mMaskedCardAdapter.updateCustomer(customer);
-                            setCommunicatingProgress(false);
+                            addSelectionIfNecessaryAndUpdateCustomer(customer);
                         }
 
                         @Override
@@ -159,6 +161,41 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 onBackPressed();
             }
             return handled;
+        }
+    }
+
+    void addSelectionIfNecessaryAndUpdateCustomer(@NonNull Customer customer) {
+        if (!TextUtils.isEmpty(customer.getDefaultSource()) || customer.getSources().size() != 1) {
+            updateAdapterWithCustomer(customer);
+            return;
+        }
+
+        CustomerSession.CustomerRetrievalListener listener =
+                new CustomerSession.CustomerRetrievalListener() {
+                    @Override
+                    public void onCustomerRetrieved(@NonNull Customer customer) {
+                        updateAdapterWithCustomer(customer);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, @Nullable String errorMessage) {
+                        String displayedError = errorMessage == null ? "" : errorMessage;
+                        showError(displayedError, mCustomerSessionProxy == null);
+                        setCommunicatingProgress(false);
+                    }
+                };
+
+        // We only activate this if there is a single source in the list
+        String sourceId = customer.getSources().get(0).getId();
+        if (sourceId == null) {
+            updateAdapterWithCustomer(customer);
+            return;
+        }
+
+        if (mCustomerSessionProxy == null) {
+            CustomerSession.getInstance().setCustomerDefaultSource(sourceId, listener);
+        } else {
+            mCustomerSessionProxy.setCustomerDefaultSource(sourceId, listener);
         }
     }
 
@@ -268,8 +305,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     void finishWithSelection(String selectedSourceId) {
+        CustomerSource customerSource = mCustomer.getSourceById(selectedSourceId);
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_SELECTED_PAYMENT, selectedSourceId);
+        intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toString());
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -302,6 +340,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
         }
         mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void updateAdapterWithCustomer(@NonNull Customer customer) {
+        mMaskedCardAdapter.updateCustomer(customer);
+        setCommunicatingProgress(false);
     }
 
     interface CustomerSessionProxy {

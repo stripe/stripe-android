@@ -59,6 +59,39 @@ public class CardInputTestActivity extends AppCompatActivity {
             "\"card\": " + EXAMPLE_JSON_SOURCE_CARD_DATA + "\n"+
             "}";
 
+    public static final String EXAMPLE_JSON_CARD_SOURCE_SECOND = "{\n"+
+            "\"id\": \"src_20s4yLCArFYluyI4uz2dxBgR\",\n"+
+            "\"object\": \"source\",\n"+
+            "\"amount\": 1000,\n"+
+            "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
+            "\"created\": 1488499654,\n"+
+            "\"currency\": \"usd\",\n"+
+            "\"flow\": \"receiver\",\n"+
+            "\"livemode\": false,\n"+
+            "\"metadata\": {\n"+
+            "},\n"+
+            "\"owner\": {\n"+
+            "\"address\": null,\n"+
+            "\"email\": \"jenny.rosen@example.com\",\n"+
+            "\"name\": \"Jenny Rosen\",\n"+
+            "\"phone\": \"4158675309\",\n"+
+            "\"verified_address\": null,\n"+
+            "\"verified_email\": null,\n"+
+            "\"verified_name\": null,\n"+
+            "\"verified_phone\": null\n"+
+            "},\n"+
+            "\"receiver\": {\n"+
+            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
+            "\"amount_charged\": 0,\n"+
+            "\"amount_received\": 0,\n"+
+            "\"amount_returned\": 0\n"+
+            "},\n"+
+            "\"status\": \"pending\",\n"+
+            "\"type\": \"card\",\n"+
+            "\"usage\": \"single_use\",\n"+
+            "\"card\": " + EXAMPLE_JSON_SOURCE_CARD_DATA + "\n"+
+            "}";
+
     static final String EXAMPLE_JSON_SOURCE_BITCOIN = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
             "\"object\": \"source\",\n"+
