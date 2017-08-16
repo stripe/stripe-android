@@ -64,6 +64,15 @@ public class LauncherActivity extends AppCompatActivity {
                 createSampleCartAndLaunchAndroidPayActivity();
             }
         });
+
+        Button addAddressButton = findViewById(R.id.btn_add_address_launch);
+        addAddressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LauncherActivity.this, AddAddressActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void createSampleCartAndLaunchAndroidPayActivity() {
