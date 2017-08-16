@@ -37,7 +37,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     static final int REQUEST_CODE_ADD_CARD = 700;
     private static final long FADE_DURATION_MS = 100L;
     private boolean mCommunicating;
-    private boolean mIsLocalOnly;
     private Customer mCustomer;
     private CustomerSessionProxy mCustomerSessionProxy;
     private TextView mErrorTextView;
@@ -57,30 +56,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_methods);
 
-        Intent startingIntent = getIntent();
-        String customerString = startingIntent.hasExtra(EXTRA_CUSTOMER)
-                ? startingIntent.getStringExtra(EXTRA_CUSTOMER)
-                : null;
-
-        mIsLocalOnly = !TextUtils.isEmpty(customerString);
-        Customer localCustomer = Customer.fromString(customerString);
-
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
         mErrorLayout = findViewById(R.id.payment_methods_error_container);
         mErrorTextView = findViewById(R.id.tv_payment_methods_error);
         mAddCardView = findViewById(R.id.payment_methods_add_payment_container);
 
-        if (mIsLocalOnly) {
-            mAddCardView.setVisibility(View.GONE);
-        }
         mAddCardView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         startActivityForResult(
                                 AddSourceActivity.newIntent(PaymentMethodsActivity.this,
-                                        false, !mIsLocalOnly),
+                                        false, true),
                                 REQUEST_CODE_ADD_CARD);
                     }
                 });
@@ -91,17 +79,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        if (localCustomer != null) {
-            mCustomer = localCustomer;
-            initWithCustomer();
-            return;
-        }
-
         boolean waitForProxy = getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false);
-        if (waitForProxy) {
-            return;
+        if (!waitForProxy) {
+            initializeCustomerSourceData();
         }
-        initializeData();
     }
 
     @Override
@@ -113,7 +94,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
-                            addSelectionIfNecessaryAndUpdateCustomer(customer);
+                            removeError();
+                            updateCustomerAndSetDefaultSourceIfNecessary(customer);
                         }
 
                         @Override
@@ -164,7 +146,39 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    void addSelectionIfNecessaryAndUpdateCustomer(@NonNull Customer customer) {
+    @VisibleForTesting
+    void initializeCustomerSourceData() {
+        Customer cachedCustomer;
+        if (mCustomerSessionProxy == null) {
+            cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
+        } else {
+            cachedCustomer = mCustomerSessionProxy.getCachedCustomer();
+        }
+
+        if (cachedCustomer != null) {
+            mCustomer = cachedCustomer;
+            createListFromCustomerSources();
+        } else {
+            getCustomerFromSession();
+        }
+    }
+
+    @VisibleForTesting
+    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
+        mCustomerSessionProxy = proxy;
+    }
+
+    /**
+     * Update our currently displayed customer data. If the customer only has one
+     * {@link CustomerSource} and does not have a {@link Customer#mDefaultSource defaultSource},
+     * then set that one source to be the default source before updating displayed source data.
+     *
+     * @param customer the new {@link Customer} object whose sources should be displayed
+     */
+    private void updateCustomerAndSetDefaultSourceIfNecessary(@NonNull Customer customer) {
+        // An inverted early return - we don't need to talk to the CustomerSession if there is
+        // already a default source selected or we have no or more than one customer sources in our
+        // list.
         if (!TextUtils.isEmpty(customer.getDefaultSource()) || customer.getSources().size() != 1) {
             updateAdapterWithCustomer(customer);
             return;
@@ -174,6 +188,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
+                        removeError();
                         updateAdapterWithCustomer(customer);
                     }
 
@@ -188,6 +203,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         // We only activate this if there is a single source in the list
         String sourceId = customer.getSources().get(0).getId();
         if (sourceId == null) {
+            // If the source ID is null for the only source we have, then there is nothing
+            // we can do but update the display. This should not happen. It is only possible
+            // for a CustomerSource to have null ID because a Card is a customer source, and
+            // before those are sent to Stripe, they haven't yet been assigned an ID.
             updateAdapterWithCustomer(customer);
             return;
         }
@@ -199,23 +218,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    void initializeData() {
-        Customer cachedCustomer;
-        if (mCustomerSessionProxy == null) {
-            cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
-        } else {
-            cachedCustomer = mCustomerSessionProxy.getCachedCustomer();
-        }
-
-        if (cachedCustomer != null) {
-            mCustomer = cachedCustomer;
-            initWithCustomer();
-        } else {
-            initWithCustomerSession();
-        }
-    }
-
-    void initWithCustomer() {
+    private void createListFromCustomerSources() {
         setCommunicatingProgress(false);
         if (mCustomer == null) {
             return;
@@ -242,13 +245,32 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mMaskedCardAdapter.notifyDataSetChanged();
     }
 
-    void initWithCustomerSession() {
+    private void cancelAndFinish() {
+        setResult(RESULT_CANCELED);
+        finish();
+    }
+
+    private void finishWithSelection(String selectedSourceId) {
+        CustomerSource customerSource = mCustomer.getSourceById(selectedSourceId);
+        if (customerSource != null) {
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toString());
+            setResult(RESULT_OK, intent);
+        } else {
+            setResult(RESULT_CANCELED);
+        }
+
+        finish();
+    }
+
+    private void getCustomerFromSession() {
         CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         mCustomer = customer;
-                        initWithCustomer();
+                        removeError();
+                        createListFromCustomerSources();
                     }
 
                     @Override
@@ -265,66 +287,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    void setSelectionAndFinish() {
-        if (mMaskedCardAdapter == null) {
-            cancelAndFinish();
-            return;
-        }
-
-        String selectedId = mMaskedCardAdapter.getSelectedSource();
-        if (selectedId == null) {
-            cancelAndFinish();
-            return;
-        }
-
-        if (mIsLocalOnly) {
-            finishWithSelection(selectedId);
-        } else {
-            CustomerSession.CustomerRetrievalListener listener =
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            finishWithSelection(customer.getDefaultSource());
-                            setCommunicatingProgress(false);
-                        }
-
-                        @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
-                            String displayedError = errorMessage == null ? "" : errorMessage;
-                            showError(displayedError, mCustomerSessionProxy == null);
-                            setCommunicatingProgress(false);
-                        }
-                    };
-            if (mCustomerSessionProxy == null) {
-                CustomerSession.getInstance().setCustomerDefaultSource(selectedId, listener);
-            } else {
-                mCustomerSessionProxy.setCustomerDefaultSource(selectedId, listener);
-            }
-            setCommunicatingProgress(true);
-        }
-    }
-
-    void finishWithSelection(String selectedSourceId) {
-        CustomerSource customerSource = mCustomer.getSourceById(selectedSourceId);
-        if (customerSource != null) {
-            Intent intent = new Intent();
-            intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toString());
-            setResult(RESULT_OK, intent);
-        } else {
-            setResult(RESULT_CANCELED);
-        }
-
-        finish();
-    }
-
-    void cancelAndFinish() {
-        setResult(RESULT_CANCELED);
-        finish();
-    }
-
-    @VisibleForTesting
-    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
-        mCustomerSessionProxy = proxy;
+    private void removeError() {
+        mErrorTextView.setVisibility(View.GONE);
+        mErrorTextView.setText("");
     }
 
     private void setCommunicatingProgress(boolean communicating) {
@@ -335,6 +300,37 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             mProgressBar.setVisibility(View.GONE);
         }
         supportInvalidateOptionsMenu();
+    }
+
+    private void setSelectionAndFinish() {
+        if (mMaskedCardAdapter == null || mMaskedCardAdapter.getSelectedSource() == null) {
+            cancelAndFinish();
+            return;
+        }
+
+        String selectedId = mMaskedCardAdapter.getSelectedSource();
+        CustomerSession.CustomerRetrievalListener listener =
+                new CustomerSession.CustomerRetrievalListener() {
+                    @Override
+                    public void onCustomerRetrieved(@NonNull Customer customer) {
+                        removeError();
+                        finishWithSelection(customer.getDefaultSource());
+                        setCommunicatingProgress(false);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, @Nullable String errorMessage) {
+                        String displayedError = errorMessage == null ? "" : errorMessage;
+                        showError(displayedError, mCustomerSessionProxy == null);
+                        setCommunicatingProgress(false);
+                    }
+                };
+        if (mCustomerSessionProxy == null) {
+            CustomerSession.getInstance().setCustomerDefaultSource(selectedId, listener);
+        } else {
+            mCustomerSessionProxy.setCustomerDefaultSource(selectedId, listener);
+        }
+        setCommunicatingProgress(true);
     }
 
     private void showError(@NonNull String error, boolean shouldAnimate) {
