@@ -2,6 +2,7 @@
 <resources>
     <string name="appName">Stripe Payments Example</string>
 
+    <string name="addAddress">Add Address</string>
     <string name="addPayment">Add Payment Method</string>
     <string name="addThreeDSecureCard">Add Source</string>
     <string name="addThreeDSecureCardSync">Add Source Rx</string>
