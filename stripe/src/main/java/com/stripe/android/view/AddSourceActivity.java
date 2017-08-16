@@ -95,7 +95,6 @@ public class AddSourceActivity extends AppCompatActivity {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
         Drawable tintedIcon = ViewUtils.getTintedIcon(

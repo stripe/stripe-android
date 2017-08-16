@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:elevation="4dp"
+        android:elevation="@dimen/toolbar_elevation"
         app:title="@string/title_add_a_card"
         android:theme="@style/ToolBarStyle"
         />
