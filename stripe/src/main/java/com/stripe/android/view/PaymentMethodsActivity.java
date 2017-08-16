@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.transition.Fade;
+import android.support.transition.TransitionManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,10 +17,13 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
+import com.stripe.android.Stripe;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 
@@ -26,12 +32,17 @@ import java.util.List;
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
+    static final String EXTRA_PROXY_DELAY = "proxy_delay";
     private static final String EXTRA_CUSTOMER = "customer";
 
     private static final int REQUEST_CODE_ADD_CARD = 700;
+    private static final long FADE_DURATION_MS = 100L;
     private boolean mCommunicating;
     private boolean mIsLocalOnly;
     private Customer mCustomer;
+    private CustomerSessionProxy mCustomerSessionProxy;
+    private TextView mErrorTextView;
+    private FrameLayout mErrorLayout;
     private MaskedCardAdapter mMaskedCardAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
@@ -55,17 +66,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mIsLocalOnly = !TextUtils.isEmpty(customerString);
         Customer localCustomer = Customer.fromString(customerString);
 
-        if (!mIsLocalOnly) {
-            try {
-                CustomerSession.getInstance();
-            } catch (IllegalStateException illegalState) {
-                finish();
-                return;
-            }
-        }
-
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
+        mErrorLayout = findViewById(R.id.payment_methods_error_container);
+        mErrorTextView = findViewById(R.id.tv_payment_methods_error);
         mAddCardView = findViewById(R.id.payment_methods_add_payment_container);
         mAddCardView.setOnClickListener(
                 new View.OnClickListener() {
@@ -77,6 +81,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                                 REQUEST_CODE_ADD_CARD);
                     }
                 });
+
         Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -89,31 +94,38 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        Customer cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
-        if (cachedCustomer != null) {
-            mCustomer = cachedCustomer;
-            initWithCustomer();
-        } else {
-            initWithCustomerSession();
+        boolean waitForProxy = getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false);
+        if (waitForProxy) {
+            return;
         }
+        initializeData();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
-            CustomerSession.getInstance().updateCurrentCustomer(
+            setCommunicatingProgress(true);
+            CustomerSession.CustomerRetrievalListener listener =
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
                             mMaskedCardAdapter.updateCustomer(customer);
+                            setCommunicatingProgress(false);
                         }
 
                         @Override
                         public void onError(int errorCode, @Nullable String errorMessage) {
-
+                            String displayedError = errorMessage == null ? "" : errorMessage;
+                            showError(displayedError, mCustomerSessionProxy == null);
+                            setCommunicatingProgress(false);
                         }
-                    });
+                    };
+            if (mCustomerSessionProxy == null) {
+                CustomerSession.getInstance().updateCurrentCustomer(listener);
+            } else {
+                mCustomerSessionProxy.updateCurrentCustomer(listener);
+            }
         }
     }
 
@@ -150,6 +162,22 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
+    void initializeData() {
+        Customer cachedCustomer;
+        if (mCustomerSessionProxy == null) {
+            cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
+        } else {
+            cachedCustomer = mCustomerSessionProxy.getCachedCustomer();
+        }
+
+        if (cachedCustomer != null) {
+            mCustomer = cachedCustomer;
+            initWithCustomer();
+        } else {
+            initWithCustomerSession();
+        }
+    }
+
     void initWithCustomer() {
         setCommunicatingProgress(false);
         if (mCustomer == null) {
@@ -178,7 +206,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     void initWithCustomerSession() {
-        mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
@@ -190,12 +217,15 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
                         setCommunicatingProgress(false);
-
                     }
                 };
 
         setCommunicatingProgress(true);
-        CustomerSession.getInstance().retrieveCurrentCustomer(listener);
+        if (mCustomerSessionProxy == null) {
+            CustomerSession.getInstance().retrieveCurrentCustomer(listener);
+        } else {
+            mCustomerSessionProxy.retrieveCurrentCustomer(listener);
+        }
     }
 
     void setSelectionAndFinish() {
@@ -213,19 +243,27 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (mIsLocalOnly) {
             finishWithSelection(selectedId);
         } else {
-            CustomerSession.getInstance().setCustomerDefaultSource(
-                    selectedId,
+            CustomerSession.CustomerRetrievalListener listener =
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
                             finishWithSelection(customer.getDefaultSource());
+                            setCommunicatingProgress(false);
                         }
 
                         @Override
                         public void onError(int errorCode, @Nullable String errorMessage) {
-
+                            String displayedError = errorMessage == null ? "" : errorMessage;
+                            showError(displayedError, mCustomerSessionProxy == null);
+                            setCommunicatingProgress(false);
                         }
-                    });
+                    };
+            if (mCustomerSessionProxy == null) {
+                CustomerSession.getInstance().setCustomerDefaultSource(selectedId, listener);
+            } else {
+                mCustomerSessionProxy.setCustomerDefaultSource(selectedId, listener);
+            }
+            setCommunicatingProgress(true);
         }
     }
 
@@ -241,6 +279,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         finish();
     }
 
+    @VisibleForTesting
+    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
+        mCustomerSessionProxy = proxy;
+    }
+
     private void setCommunicatingProgress(boolean communicating) {
         mCommunicating = communicating;
         if (communicating) {
@@ -249,5 +292,24 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             mProgressBar.setVisibility(View.GONE);
         }
         supportInvalidateOptionsMenu();
+    }
+
+    private void showError(@NonNull String error, boolean shouldAnimate) {
+        mErrorTextView.setText(error);
+        if (shouldAnimate) {
+            Fade fadeIn = new Fade(Fade.IN);
+            fadeIn.setDuration(FADE_DURATION_MS);
+            TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
+        }
+        mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    interface CustomerSessionProxy {
+        @Nullable
+        Customer getCachedCustomer();
+        void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
+        void setCustomerDefaultSource(@NonNull String sourceId,
+                                      @Nullable CustomerSession.CustomerRetrievalListener listener);
+        void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
     }
 }

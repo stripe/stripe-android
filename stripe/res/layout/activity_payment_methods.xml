@@ -72,4 +72,19 @@
             android:layout_gravity="center_vertical|start"
             />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/payment_methods_error_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/payment_methods_add_payment_container"
+        >
+        <TextView
+            android:id="@+id/tv_payment_methods_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_total_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+            android:visibility="gone"/>
+    </FrameLayout>
 </RelativeLayout>

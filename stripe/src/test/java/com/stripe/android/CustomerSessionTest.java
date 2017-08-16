@@ -62,7 +62,7 @@ public class CustomerSessionTest {
             "            }]\n" +
             "}";
 
-    private static final String FIRST_TEST_CUSTOMER_OBJECT =
+    public static final String FIRST_TEST_CUSTOMER_OBJECT =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
@@ -78,7 +78,7 @@ public class CustomerSessionTest {
                     "  }\n" +
                     "}";
 
-    private static final String SECOND_TEST_CUSTOMER_OBJECT =
+    public static final String SECOND_TEST_CUSTOMER_OBJECT =
             "{\n" +
                     "  \"id\": \"cus_ABC123\",\n" +
                     "  \"object\": \"customer\",\n" +

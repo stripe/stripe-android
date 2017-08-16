@@ -91,7 +91,6 @@ public class AddSourceActivity extends AppCompatActivity {
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
-
     }
 
     @Override
@@ -161,6 +160,7 @@ public class AddSourceActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(Source source) {
+                mErrorTextView.setVisibility(View.GONE);
                 if (mUpdatesCustomer) {
                     attachCardToCustomer(source);
                 } else {
