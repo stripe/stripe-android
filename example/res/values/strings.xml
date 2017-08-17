@@ -19,6 +19,7 @@
     <string name="createSource">Creating source&#8230;</string>
     <string name="confirmPayment">Confirm payment details</string>
     <string name="changeDetails">Change payment details</string>
+    <string name="launch_customer_session">Launch Customer Session</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
