@@ -40,7 +40,7 @@ import static com.stripe.android.view.ViewUtils.getThemeTextColorSecondary;
  * and unselected states are taken from the host Activity theme's
  * "colorAccent" and "colorControlNormal" states.
  */
-public class MaskedCardView extends LinearLayout {
+class MaskedCardView extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
     private String mLast4;
@@ -99,7 +99,7 @@ public class MaskedCardView extends LinearLayout {
      *
      * @param card the {@link Card} to be partially displayed
      */
-    public void setCard(@NonNull Card card) {
+    void setCard(@NonNull Card card) {
         mCardBrand = card.getBrand();
         mLast4 = card.getLast4();
         updateBrandIcon();
@@ -111,7 +111,7 @@ public class MaskedCardView extends LinearLayout {
      *
      * @param sourceCardData the {@link SourceCardData} to be partially displayed
      */
-    public void setSourceCardData(@NonNull SourceCardData sourceCardData) {
+    void setSourceCardData(@NonNull SourceCardData sourceCardData) {
         mCardBrand = sourceCardData.getBrand();
         mLast4 = sourceCardData.getLast4();
         updateBrandIcon();
@@ -125,7 +125,7 @@ public class MaskedCardView extends LinearLayout {
      *
      * @param customerSource the {@link CustomerSource} to be partially displayed
      */
-    public void setCustomerSource(@NonNull CustomerSource customerSource) {
+    void setCustomerSource(@NonNull CustomerSource customerSource) {
         Source source = customerSource.asSource();
         if (source != null
                 && source.getSourceTypeModel() != null
@@ -145,7 +145,7 @@ public class MaskedCardView extends LinearLayout {
     /**
      * Toggle the view from selected to unselected or vice-versa.
      */
-    public void toggleSelected() {
+    void toggleSelected() {
         setSelected(!mIsSelected);
     }
 
