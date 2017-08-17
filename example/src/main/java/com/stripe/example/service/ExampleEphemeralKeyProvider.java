@@ -11,11 +11,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -47,18 +45,6 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
                 mStripeService.createEphemeralKey(apiParamMap)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSubscribe(new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressListener.onProgressStart();
-                            }
-                        })
-                        .doOnUnsubscribe(new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressListener.onProgressStop();
-                            }
-                        })
                         .subscribe(new Action1<ResponseBody>() {
                             @Override
                             public void call(ResponseBody response) {
@@ -80,9 +66,6 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
     }
 
     public interface ProgressListener {
-        void onResponse(Response response);
         void onStringResponse(String string);
-        void onProgressStart();
-        void onProgressStop();
     }
 }

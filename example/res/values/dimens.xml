@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="example_activity_total_margin">8dp</dimen>
+    <dimen name="example_customer_view_padding">4dp</dimen>
+    <dimen name="example_vertical_spacing">20dp</dimen>
+</resources>
