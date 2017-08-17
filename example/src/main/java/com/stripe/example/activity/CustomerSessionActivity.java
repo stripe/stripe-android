@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.EphemeralKeyProvider;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.SourceCardData;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.example.R;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
@@ -91,21 +92,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
             String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
             mDebugTextView.setText("");
             mDebugTextView.append(selectedSource);
-            CustomerSession.getInstance().setCustomerDefaultSource(selectedSource,
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            if (customer.getDefaultSource() != null) {
-                                mDebugTextView.append("\nNEW DEFAULT IS\n");
-                                mDebugTextView.append(customer.getDefaultSource());
-                            }
-                        }
-
-                        @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
-
-                        }
-                    });
+            mDebugTextView.append("\nNEW DEFAULT IS\n");
+            mDebugTextView.append(selectedSource);
         }
     }
 }
