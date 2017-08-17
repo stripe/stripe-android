@@ -3,8 +3,8 @@ package com.stripe.example.activity;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.PaymentConfiguration;
@@ -15,9 +15,13 @@ import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.view.CardMultilineWidget;
 import com.stripe.example.R;
-import com.stripe.example.adapter.MaskedCardAdapter;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import rx.Observable;
@@ -35,7 +39,8 @@ public class PaymentMultilineActivity extends AppCompatActivity {
     CardMultilineWidget mCardMultilineWidget;
     CompositeSubscription mCompositeSubscription;
 
-    private MaskedCardAdapter mMaskedCardAdapter;
+    private SimpleAdapter mSimpleAdapter;
+    private List<Map<String, String>> mCardSources= new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +55,15 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
 
-        RecyclerView recyclerView = findViewById(R.id.card_list_payments);
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        ListView listView = findViewById(R.id.card_list_pma);
+        mSimpleAdapter = new SimpleAdapter(
+                this,
+                mCardSources,
+                R.layout.list_item_layout,
+                new String[]{"last4", "tokenId"},
+                new int[]{R.id.last4, R.id.tokenId});
 
-        mMaskedCardAdapter = new MaskedCardAdapter();
-        recyclerView.setAdapter(mMaskedCardAdapter);
-
+        listView.setAdapter(mSimpleAdapter);
         mCompositeSubscription.add(
                 RxView.clicks(findViewById(R.id.save_payment)).subscribe(new Action1<Void>() {
                     @Override
@@ -123,9 +129,16 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         if (source == null || !Source.CARD.equals(source.getType())) {
             return;
         }
-
         SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-        mMaskedCardAdapter.addSourceCardData(sourceCardData);
+
+        String endingIn = getString(R.string.endingIn);
+        Map<String, String> map = new HashMap<>();
+        map.put("last4", endingIn + " " + sourceCardData.getLast4());
+        map.put("tokenId", source.getId());
+        mCardSources.add(map);
+        mSimpleAdapter.notifyDataSetChanged();
+
+//        mMaskedCardAdapter.addSourceCardData(sourceCardData);
     }
 
 }
