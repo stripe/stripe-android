@@ -137,8 +137,6 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         map.put("tokenId", source.getId());
         mCardSources.add(map);
         mSimpleAdapter.notifyDataSetChanged();
-
-//        mMaskedCardAdapter.addSourceCardData(sourceCardData);
     }
 
 }
