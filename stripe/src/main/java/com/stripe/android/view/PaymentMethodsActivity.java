@@ -314,6 +314,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         removeError();
+                        mCustomer = customer;
                         finishWithSelection(customer.getDefaultSource());
                         setCommunicatingProgress(false);
                     }
