@@ -79,6 +79,14 @@ public class LauncherActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LauncherActivity.this, AddAddressActivity.class);
+            }
+        });
+
+        Button customerSessionButton = findViewById(R.id.btn_customer_session_launch);
+        customerSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LauncherActivity.this, CustomerSessionActivity.class);
                 startActivity(intent);
             }
         });
