@@ -64,6 +64,15 @@ public class LauncherActivity extends AppCompatActivity {
                 createSampleCartAndLaunchAndroidPayActivity();
             }
         });
+
+        Button customerSessionButton = findViewById(R.id.btn_customer_session_launch);
+        customerSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LauncherActivity.this, CustomerSessionActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void createSampleCartAndLaunchAndroidPayActivity() {

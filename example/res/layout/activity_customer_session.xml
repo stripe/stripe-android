@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:id="@+id/ll_output_layout_acs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/example_activity_total_margin"
+        android:layout_marginRight="@dimen/example_activity_total_margin"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/example_customer_view_padding"
+            android:layout_marginRight="@dimen/example_customer_view_padding"
+            android:layout_weight="3"
+            android:text="@string/selected_card"
+            android:textAppearance="?attr/actionMenuTextAppearance"
+            />
+
+        <TextView
+            android:id="@+id/tv_customer_default_source_acs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_launch_payment_methods_acs"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_output_layout_acs"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:text="@string/select_add_card"
+        />
+
+    <ProgressBar
+        android:id="@+id/customer_progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:indeterminate="true"
+        />
+
+</RelativeLayout>

@@ -271,16 +271,6 @@ Checks whether or not the supplied number could be a valid verification code.
 
 Convenience method to validate card number, expiry date and CVC.
 
-### Retrieving information about a token
-
-The bindings for retrieving information about a token has been removed from the Android SDK because only older Stripe accounts (from early 2014) can perform this operation with a public key. If you still need this functionality, make sure to use the last version of the Android bindings that contained this functionality by setting your version in the `build.gradle` file as follows.
-
-```groovy
-    // Using older bindings to have access to requestToken
-    compile 'com.stripe:stripe-android:1.1.1'
-```
-
-
 ## Example apps
 
 There are 2 example apps included in the repository:
@@ -302,14 +292,14 @@ Note: both example apps require an [Android SDK](https://developer.android.com/s
     * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
 4. Build and run the project on your device or in the Android emulator.
 
-The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in DependencyHandler with your test key](example/src/main/java/com/stripe/example/module/DependencyHandler.java#L30).
+The example application needs a public key from your Stripe account to interact with the Stripe API. To add this, [replace the value of PUBLISHABLE_KEY in LauncherActivity with your test key](example/src/main/java/com/stripe/example/activity/LauncherActivity.java#L25).
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
 
-### Building and Running the samplestore project
+### Building and Running the samplestore project and CustomerSessions
 
-Before you can run the SampleStore application, you need to provide it with your Stripe publishable key.
+Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
 
 1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to https://dashboard.stripe.com/account/apikeys.
 2. Replace the `PUBLISHABLE_KEY` constant in PaymentActivity.java (where it says "Put your test key here.") with your Test Publishable Key.
