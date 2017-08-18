@@ -8,6 +8,7 @@ import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.view.AddAddressActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -70,6 +71,7 @@ public class LauncherActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LauncherActivity.this, AddAddressActivity.class);
+                startActivity(intent);
             }
         });
 
