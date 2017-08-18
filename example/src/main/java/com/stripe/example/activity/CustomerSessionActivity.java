@@ -89,11 +89,10 @@ public class CustomerSessionActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
             String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
             Source source = Source.fromString(selectedSource);
+            // Note: it isn't possible for a null or non-card source to be returned.
             if (source != null && Source.CARD.equals(source.getType())) {
                 SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
                 mSelectedSourceTextView.setText(buildCardString(cardData));
-            } else {
-                mSelectedSourceTextView.setText("This isn't possible as currently written.");
             }
         }
     }

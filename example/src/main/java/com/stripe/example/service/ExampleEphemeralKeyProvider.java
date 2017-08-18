@@ -59,8 +59,7 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
                         }, new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mProgressListener.onStringResponse("Error: "  + throwable.getMessage());
-
+                                mProgressListener.onStringResponse(throwable.getMessage());
                             }
                         }));
     }
