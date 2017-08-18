@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 class CountryUtils {
 
@@ -17,4 +18,17 @@ class CountryUtils {
     static boolean doesCountryUsePostalCode(String countryCode) {
         return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);
     }
+
+    static boolean isUSZipCodeValid(String zipCode) {
+        return Pattern.matches("^[0-9]{5}(?:-[0-9]{4})?$", zipCode);
+    }
+
+    static boolean isCanadianPostalCodeValid(String postalCode) {
+        return Pattern.matches("^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$", postalCode);
+    }
+
+    static boolean isUKPostcodeValid(String postalCode) {
+        return Pattern.matches("^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$", postalCode);
+    }
+
 }
