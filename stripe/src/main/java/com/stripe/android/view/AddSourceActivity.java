@@ -28,13 +28,12 @@ public class AddSourceActivity extends StripeActivity {
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
+    static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
     CustomerSessionProxy mCustomerSessionProxy;
     TextView mErrorTextView;
     FrameLayout mErrorLayout;
     StripeProvider mStripeProvider;
-
-    static final long FADE_DURATION_MS = 100L;
 
     private boolean mUpdatesCustomer;
 

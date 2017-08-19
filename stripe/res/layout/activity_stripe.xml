@@ -12,15 +12,16 @@
         android:id="@+id/toolbar_as"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentTop="true"
         android:background="?attr/colorPrimary"
         android:elevation="@dimen/toolbar_elevation"
         android:theme="@style/ToolBarStyle"
         />
 
     <ScrollView
-        android:layout_below="@+id/toolbar_as"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar_as"
         >
 
         <ViewStub
@@ -35,6 +36,7 @@
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar_as"
         android:indeterminate="true"
         />
 

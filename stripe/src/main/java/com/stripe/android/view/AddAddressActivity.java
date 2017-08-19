@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.R;
 
+/**
+ * Activity that can take accept an address. Uses {@link AddAddressWidget}
+ */
 public class AddAddressActivity extends StripeActivity {
 
     @Override
