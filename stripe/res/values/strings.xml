@@ -30,4 +30,5 @@
     <string name="payment_method_add_new_card">Add new card&#8230;</string>
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_payment_method">Payment Method</string>
+    <string name="title_add_an_address">Add an Address</string>
 </resources>

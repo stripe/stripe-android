@@ -1,20 +1,12 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.FrameLayout;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
@@ -30,20 +22,19 @@ import com.stripe.android.model.StripePaymentSource;
  * Activity used to display a {@link CardMultilineWidget} and receive the resulting
  * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of teh launching activity.
  */
-public class AddSourceActivity extends AppCompatActivity {
+public class AddSourceActivity extends StripeActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
+    static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
     CustomerSessionProxy mCustomerSessionProxy;
-    ProgressBar mProgressBar;
+    FrameLayout mErrorLayout;
     StripeProvider mStripeProvider;
-    Toolbar mToolbar;
 
-    private boolean mCommunicating;
     private boolean mUpdatesCustomer;
 
     /**
@@ -68,15 +59,10 @@ public class AddSourceActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_source);
+        mViewStub.setLayoutResource(R.layout.activity_add_source);
+        mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
-        mProgressBar = findViewById(R.id.add_source_progress_bar);
-        mToolbar = findViewById(R.id.add_source_toolbar);
-        setSupportActionBar(mToolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        setCommunicatingProgress(false);
+        mErrorLayout = findViewById(R.id.add_source_error_container);
         boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
@@ -84,54 +70,11 @@ public class AddSourceActivity extends AppCompatActivity {
         if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
             CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
         }
+        setTitle(R.string.title_add_a_card);
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable compatIcon =
-                ViewUtils.getTintedIconWithAttribute(
-                        this,
-                        getTheme(),
-                        R.attr.titleTextColor,
-                        R.drawable.ic_checkmark);
-        saveItem.setIcon(compatIcon);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_source_menu, menu);
-        menu.findItem(R.id.action_save).setEnabled(!mCommunicating);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_save) {
-            saveCardOrDisplayError();
-            return true;
-        } else {
-            boolean handled = super.onOptionsItemSelected(item);
-            if (!handled) {
-                onBackPressed();
-            }
-            return handled;
-        }
-    }
-
-    @VisibleForTesting
-    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
-        mCustomerSessionProxy = proxy;
-    }
-
-    @VisibleForTesting
-    void setStripeProvider(@NonNull StripeProvider stripeProvider) {
-        mStripeProvider = stripeProvider;
-    }
-
-    private void saveCardOrDisplayError() {
+    protected void onActionSave() {
         Card card = mCardMultilineWidget.getCard();
         if (card == null) {
             // In this case, the error will be displayed on the card widget itself.
@@ -216,30 +159,24 @@ public class AddSourceActivity extends AppCompatActivity {
         }
     }
 
-    private void setCommunicatingProgress(boolean communicating) {
-        mCommunicating = communicating;
+    @Override
+    protected void setCommunicatingProgress(boolean communicating) {
+        super.setCommunicatingProgress(communicating);
         if (communicating) {
-            mProgressBar.setVisibility(View.VISIBLE);
             mCardMultilineWidget.setEnabled(false);
         } else {
-            mProgressBar.setVisibility(View.GONE);
             mCardMultilineWidget.setEnabled(true);
         }
-        supportInvalidateOptionsMenu();
     }
 
-    private void showError(@NonNull String error) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setMessage(error)
-                .setCancelable(true)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                })
-                .create();
-        alertDialog.show();
+    @VisibleForTesting
+    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
+        mCustomerSessionProxy = proxy;
+    }
+
+    @VisibleForTesting
+    void setStripeProvider(@NonNull StripeProvider stripeProvider) {
+        mStripeProvider = stripeProvider;
     }
 
     interface StripeProvider {
