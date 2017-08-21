@@ -73,7 +73,7 @@ public class AddSourceActivityTest {
         mCardMultilineWidget = mActivityController.get()
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
-                .findViewById(R.id.add_source_progress_bar);
+                .findViewById(R.id.progress_bar_as);
         mErrorTextView = mActivityController.get()
                 .findViewById(R.id.tv_add_source_error);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
@@ -96,7 +96,7 @@ public class AddSourceActivityTest {
         mCardMultilineWidget = mActivityController.get()
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
-                .findViewById(R.id.add_source_progress_bar);
+                .findViewById(R.id.progress_bar_as);
         mErrorTextView = mActivityController.get()
                 .findViewById(R.id.tv_add_source_error);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);

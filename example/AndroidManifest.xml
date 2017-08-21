@@ -83,7 +83,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.AddAddressActivity"
+            android:name=".activity.AddAddressExampleActivity"
             android:theme="@style/SampleThemeDefault">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

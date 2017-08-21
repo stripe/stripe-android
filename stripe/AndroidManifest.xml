@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.stripe.android"
-          android:versionCode="15"
-          android:versionName="4.1.6">
+    package="com.stripe.android"
+    android:versionCode="15"
+    android:versionName="4.1.6"
+    >
 
     <application>
-        <activity android:name=".view.AddSourceActivity"
-            android:theme="@style/StripeDefaultTheme">
+        <activity
+            android:name=".view.AddSourceActivity"
+            android:theme="@style/StripeDefaultTheme"
+            >
         </activity>
 
-        <activity android:name=".view.PaymentMethodsActivity"
-                  android:theme="@style/StripeDefaultTheme">
+        <activity
+            android:name=".view.PaymentMethodsActivity"
+            android:theme="@style/StripeDefaultTheme"
+            >
+        </activity>
+
+        <activity
+            android:name=".view.AddAddressActivity"
+            android:theme="@style/StripeDefaultTheme"
+            >
         </activity>
     </application>
 
