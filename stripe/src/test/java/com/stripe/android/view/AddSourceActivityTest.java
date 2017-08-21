@@ -72,7 +72,7 @@ public class AddSourceActivityTest {
         mCardMultilineWidget = mActivityController.get()
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
-                .findViewById(R.id.add_source_progress_bar);
+                .findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(mActivityController.get());
@@ -94,7 +94,7 @@ public class AddSourceActivityTest {
         mCardMultilineWidget = mActivityController.get()
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
-                .findViewById(R.id.add_source_progress_bar);
+                .findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(mActivityController.get());

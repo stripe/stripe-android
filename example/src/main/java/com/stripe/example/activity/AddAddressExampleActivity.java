@@ -6,11 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.example.R;
 
-public class AddAddressActivity extends AppCompatActivity {
+public class AddAddressExampleActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_address_activity);
+        setContentView(R.layout.activity_add_address_example);
     }
 }
