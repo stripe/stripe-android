@@ -67,7 +67,8 @@ public class MaskedCardAdapterTest {
         mMaskedCardAdapter.setSelectedSource(secondCardSource.getId());
         verify(mAdapterDataObserver, times(2)).onChanged();
 
-        assertEquals(secondCardSource.getId(), mMaskedCardAdapter.getSelectedSource());
+        assertNotNull(mMaskedCardAdapter.getSelectedSource());
+        assertEquals(secondCardSource.getId(), mMaskedCardAdapter.getSelectedSource().getId());
     }
 
     @Test
@@ -83,7 +84,8 @@ public class MaskedCardAdapterTest {
         assertNotNull(customer);
         mMaskedCardAdapter.updateCustomer(customer);
         assertEquals(2, mMaskedCardAdapter.getItemCount());
-        assertEquals(customer.getDefaultSource(), mMaskedCardAdapter.getSelectedSource());
+        assertNotNull(mMaskedCardAdapter.getSelectedSource());
+        assertEquals(customer.getDefaultSource(), mMaskedCardAdapter.getSelectedSource().getId());
         verify(mAdapterDataObserver, times(3)).onChanged();
     }
 }

@@ -32,13 +32,17 @@ class LoggingUtils {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             EVENT_TOKEN_CREATION,
-            EVENT_SOURCE_CREATION
+            EVENT_SOURCE_CREATION,
+            EVENT_ADD_SOURCE,
+            EVENT_DEFAULT_SOURCE
     })
     @interface LoggingEventName { }
     static final String EVENT_TOKEN_CREATION = "token_creation";
     static final String EVENT_SOURCE_CREATION = "source_creation";
-    static final String FIELD_PRODUCT_USAGE = "product_usage";
+    static final String EVENT_ADD_SOURCE = "add_source";
+    static final String EVENT_DEFAULT_SOURCE = "default_source";
 
+    static final String FIELD_PRODUCT_USAGE = "product_usage";
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
     static final String FIELD_APP_NAME = "app_name";
     static final String FIELD_APP_VERSION = "app_version";
@@ -100,6 +104,20 @@ class LoggingUtils {
                 null,
                 publishableApiKey,
                 EVENT_SOURCE_CREATION);
+    }
+
+    @NonNull static Map<String, Object> getAddSourceParams(
+            @NonNull Context context,
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableKey,
+            @NonNull @Source.SourceType String sourceType) {
+        return getEventLoggingParams(
+                context,
+                productUsageTokens,
+                sourceType,
+                null,
+                publishableKey,
+                EVENT_ADD_SOURCE);
     }
 
     @NonNull

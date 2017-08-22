@@ -1,8 +1,11 @@
 package com.stripe.android;
 
+import android.content.Context;
+
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
+import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.CardInputTestActivity;
 
@@ -10,18 +13,24 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -118,10 +127,23 @@ public class CustomerSessionTest {
         try {
             when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
                     .thenReturn(mFirstCustomer, mSecondCustomer);
-            when(mStripeApiProxy.addCustomerSourceWithKey(anyString(), anyString(), anyString()))
+            when(mStripeApiProxy.addCustomerSourceWithKey(
+                    any(Context.class),
+                    anyString(),
+                    anyString(),
+                    ArgumentMatchers.<String>anyList(),
+                    anyString(),
+                    anyString(),
+                    anyString()))
                     .thenReturn(mAddedSource);
             when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
-                    anyString(), anyString(), anyString()))
+                    any(Context.class),
+                    anyString(),
+                    anyString(),
+                    ArgumentMatchers.<String>anyList(),
+                    anyString(),
+                    anyString(),
+                    anyString()))
                     .thenReturn(mSecondCustomer);
         } catch (StripeException exception) {
             fail("Exception when accessing mock api proxy: " + exception.getMessage());
@@ -133,6 +155,40 @@ public class CustomerSessionTest {
         CustomerSession.clearInstance();
         CustomerSession.getInstance();
         fail("Should not be able to get instance of CustomerSession without initializing");
+    }
+
+    @Test
+    public void addProductUsageTokenIfValid_whenValid_addsExpectedTokens() {
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+        CustomerSession.getInstance().addProductUsageTokenIfValid("AddSourceActivity");
+
+        List<String> expectedTokens = new ArrayList<>();
+        expectedTokens.add("AddSourceActivity");
+
+        List<String> actualTokens =
+                new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+
+        JsonTestUtils.assertListEquals(expectedTokens, actualTokens);
+
+        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
+        expectedTokens.add("PaymentMethodsActivity");
+
+        actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+        JsonTestUtils.assertListEquals(expectedTokens, actualTokens);
+    }
+
+    @Test
+    public void addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+        CustomerSession.getInstance().addProductUsageTokenIfValid("SomeUnknownActivity");
+        JsonTestUtils.assertListEquals(Collections.EMPTY_LIST,
+                new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens()));
     }
 
     @Test
@@ -306,11 +362,20 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.addCustomerSource("abc123", mockListener);
+        session.addCustomerSource(RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
 
         try {
             verify(mStripeApiProxy, times(1)).addCustomerSourceWithKey(
-                    mFirstCustomer.getId(), "abc123", firstKey.getSecret());
+                    RuntimeEnvironment.application,
+                    mFirstCustomer.getId(),
+                    "pk_test_abc123",
+                    new ArrayList<String>(),
+                    "abc123",
+                    Source.CARD,
+                    firstKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }
@@ -351,11 +416,20 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        session.setCustomerDefaultSource("abc123", mockListener);
+        session.setCustomerDefaultSource(
+                RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
 
         try {
             verify(mStripeApiProxy, times(1)).setDefaultCustomerSourceWithKey(
-                    mFirstCustomer.getId(), "abc123", firstKey.getSecret());
+                    RuntimeEnvironment.application,
+                    mFirstCustomer.getId(),"pk_test_abc123",
+                    new ArrayList<String>(),
+                    "abc123",
+                    Source.CARD,
+                    firstKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }

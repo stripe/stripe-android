@@ -49,6 +49,18 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
         return null;
     }
 
+    @NonNull
+    @Source.SourceType
+    public String getSourceType() {
+        if (mStripePaymentSource instanceof Card) {
+            return Source.CARD;
+        } else if (mStripePaymentSource instanceof Source) {
+            return ((Source) mStripePaymentSource).getType();
+        } else {
+            return Source.UNKNOWN;
+        }
+    }
+
     @Nullable
     public static CustomerSource fromString(@Nullable String jsonString) {
         try {

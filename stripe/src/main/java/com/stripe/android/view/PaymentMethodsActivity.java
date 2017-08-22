@@ -25,6 +25,7 @@ import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.Source;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
+    static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
     private static final String EXTRA_CUSTOMER = "customer";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
@@ -151,8 +153,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         Customer cachedCustomer;
         if (mCustomerSessionProxy == null) {
             cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
+            CustomerSession.getInstance().addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
         } else {
             cachedCustomer = mCustomerSessionProxy.getCachedCustomer();
+            mCustomerSessionProxy.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
         }
 
         if (cachedCustomer != null) {
@@ -201,8 +205,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 };
 
         // We only activate this if there is a single source in the list
-        String sourceId = customer.getSources().get(0).getId();
-        if (sourceId == null) {
+        CustomerSource customerSource = customer.getSources().get(0);
+        if (customerSource == null || customerSource.getId() == null) {
             // If the source ID is null for the only source we have, then there is nothing
             // we can do but update the display. This should not happen. It is only possible
             // for a CustomerSource to have null ID because a Card is a customer source, and
@@ -212,9 +216,16 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(sourceId, listener);
+            CustomerSession.getInstance().setCustomerDefaultSource(
+                    this,
+                    customerSource.getId(),
+                    customerSource.getSourceType(),
+                    listener);
         } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(sourceId, listener);
+            mCustomerSessionProxy.setCustomerDefaultSource(
+                    customerSource.getId(),
+                    customerSource.getSourceType(),
+                    listener);
         }
     }
 
@@ -308,7 +319,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        String selectedId = mMaskedCardAdapter.getSelectedSource();
+        CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
         CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
@@ -326,10 +337,17 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                         setCommunicatingProgress(false);
                     }
                 };
+        if (selectedSource == null || selectedSource.getId() == null) {
+            return;
+        }
         if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(selectedId, listener);
+            CustomerSession.getInstance().setCustomerDefaultSource(
+                    this, selectedSource.getId(), selectedSource.getSourceType(), listener);
         } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(selectedId, listener);
+            mCustomerSessionProxy.setCustomerDefaultSource(
+                    selectedSource.getId(),
+                    selectedSource.getSourceType(),
+                    listener);
         }
         setCommunicatingProgress(true);
     }
@@ -350,11 +368,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     interface CustomerSessionProxy {
-        @Nullable
-        Customer getCachedCustomer();
+        void addProductUsageTokenIfValid(String token);
+        @Nullable Customer getCachedCustomer();
         void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
-        void setCustomerDefaultSource(@NonNull String sourceId,
-                                      @Nullable CustomerSession.CustomerRetrievalListener listener);
+        void setCustomerDefaultSource(
+                @NonNull String sourceId,
+                @NonNull String sourceType,
+                @Nullable CustomerSession.CustomerRetrievalListener listener);
         void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
     }
 }

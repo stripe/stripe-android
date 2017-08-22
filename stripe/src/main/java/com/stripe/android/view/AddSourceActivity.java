@@ -28,6 +28,8 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
+import java.lang.ref.WeakReference;
+
 public class AddSourceActivity extends AppCompatActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
@@ -83,6 +85,7 @@ public class AddSourceActivity extends AppCompatActivity {
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
+        addProductUsageTokenToCustomerSessionIfPossible();
     }
 
     @Override
@@ -179,7 +182,21 @@ public class AddSourceActivity extends AppCompatActivity {
                 };
 
         if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().addCustomerSource(source.getId(), listener);
+            @Source.SourceType String sourceType;
+            if (source instanceof Source) {
+                sourceType = ((Source) source).getType();
+            } else if (source instanceof Card){
+                sourceType = Source.CARD;
+            } else {
+                // This isn't possible from this activity.
+                sourceType = Source.UNKNOWN;
+            }
+
+            CustomerSession.getInstance().addCustomerSource(
+                    this,
+                    source.getId(),
+                    sourceType,
+                    listener);
         } else {
             mCustomerSessionProxy.addCustomerSource(source.getId(), listener);
         }
@@ -220,6 +237,15 @@ public class AddSourceActivity extends AppCompatActivity {
             TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
         }
         mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void addProductUsageTokenToCustomerSessionIfPossible() {
+        try {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+        } catch (IllegalStateException ignored) {
+            // This happens if the activity launches without a customer session,
+            // which is valid, so we ignore the exception.
+        }
     }
 
     interface StripeProvider {
