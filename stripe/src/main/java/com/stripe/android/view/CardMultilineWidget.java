@@ -521,21 +521,4 @@ public class CardMultilineWidget extends LinearLayout {
         mCardNumberEditText.setCompoundDrawables(compatIcon, null, null, null);
     }
 
-    private static class ErrorListener implements StripeEditText.ErrorMessageListener {
-
-        TextInputLayout textInputLayout;
-
-        ErrorListener(TextInputLayout textInputLayout) {
-            this.textInputLayout = textInputLayout;
-        }
-
-        @Override
-        public void displayErrorMessage(@Nullable String message) {
-            if (message == null) {
-                textInputLayout.setErrorEnabled(false);
-            } else {
-                textInputLayout.setError(message);
-            }
-        }
-    }
 }
