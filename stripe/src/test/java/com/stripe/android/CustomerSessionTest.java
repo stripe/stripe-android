@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -352,6 +353,8 @@ public class CustomerSessionTest {
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("AddSourceActivity");
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = session.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -367,15 +370,21 @@ public class CustomerSessionTest {
                 Source.CARD,
                 mockListener);
 
+        ArgumentCaptor<List> listArgumentCaptor =
+                ArgumentCaptor.forClass(List.class);
         try {
             verify(mStripeApiProxy, times(1)).addCustomerSourceWithKey(
-                    RuntimeEnvironment.application,
-                    mFirstCustomer.getId(),
-                    "pk_test_abc123",
-                    new ArrayList<String>(),
-                    "abc123",
-                    Source.CARD,
-                    firstKey.getSecret());
+                    eq(RuntimeEnvironment.application),
+                    eq(mFirstCustomer.getId()),
+                    eq("pk_test_abc123"),
+                    listArgumentCaptor.capture(),
+                    eq("abc123"),
+                    eq(Source.CARD),
+                    eq(firstKey.getSecret()));
+            List productUsage = listArgumentCaptor.getValue();
+            assertEquals(2, productUsage.size());
+            assertTrue(productUsage.contains("AddSourceActivity"));
+            assertTrue(productUsage.contains("PaymentMethodsActivity"));
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }
@@ -406,6 +415,7 @@ public class CustomerSessionTest {
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = session.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -422,14 +432,20 @@ public class CustomerSessionTest {
                 Source.CARD,
                 mockListener);
 
+        ArgumentCaptor<List> listArgumentCaptor =
+                ArgumentCaptor.forClass(List.class);
         try {
             verify(mStripeApiProxy, times(1)).setDefaultCustomerSourceWithKey(
-                    RuntimeEnvironment.application,
-                    mFirstCustomer.getId(),"pk_test_abc123",
-                    new ArrayList<String>(),
-                    "abc123",
-                    Source.CARD,
-                    firstKey.getSecret());
+                    eq(RuntimeEnvironment.application),
+                    eq(mFirstCustomer.getId()),
+                    eq("pk_test_abc123"),
+                    listArgumentCaptor.capture(),
+                    eq("abc123"),
+                    eq(Source.CARD),
+                    eq(firstKey.getSecret()));
+            List productUsage = listArgumentCaptor.getValue();
+            assertEquals(1, productUsage.size());
+            assertTrue(productUsage.contains("PaymentMethodsActivity"));
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }

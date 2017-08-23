@@ -293,7 +293,8 @@ class StripeApiHandler {
 
         if (context != null) {
             Map<String, Object> loggingParamsMap =
-                    LoggingUtils.getAddSourceParams(context,
+                    LoggingUtils.getAddSourceParams(
+                            context,
                             productUsageTokens,
                             publicKey,
                             sourceType);
@@ -327,7 +328,7 @@ class StripeApiHandler {
         paramsMap.put("default_source", sourceId);
 
         if (context != null) {
-            // log things
+            // log things only if the context is non-null
             RequestOptions loggingOptions = RequestOptions.builder(publicKey)
                     .setApiVersion(API_VERSION)
                     .build();
@@ -335,7 +336,7 @@ class StripeApiHandler {
             Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
                     context,
                     productUsageTokens,
-                    sourceType, // source type
+                    sourceType,
                     null,
                     publicKey,
                     LoggingUtils.EVENT_DEFAULT_SOURCE);

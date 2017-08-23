@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.AppCompatImageView;
@@ -40,7 +41,8 @@ import static com.stripe.android.view.ViewUtils.getThemeTextColorSecondary;
  * and unselected states are taken from the host Activity theme's
  * "colorAccent" and "colorControlNormal" states.
  */
-class MaskedCardView extends LinearLayout {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public class MaskedCardView extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
     private String mLast4;
