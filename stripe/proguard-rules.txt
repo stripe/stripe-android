@@ -1,0 +1,3 @@
+-keep class android.support.design.widget.TextInputLayout { *; }
+-keep class android.support.design.widget.CollapsingTextHelper { *; }
+-dontwarn com.stripe.android.view.**
