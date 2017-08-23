@@ -31,9 +31,11 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -277,12 +279,32 @@ class StripeApiHandler {
 
     @Nullable
     static Source addCustomerSource(
+            @Nullable Context context,
             @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String secret)
+            @NonNull @Source.SourceType String sourceType,
+            @NonNull String secret,
+            @Nullable LoggingResponseListener listener)
             throws InvalidRequestException, APIConnectionException, APIException {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("source", sourceId);
+
+        if (context != null) {
+            Map<String, Object> loggingParamsMap =
+                    LoggingUtils.getAddSourceParams(
+                            context,
+                            productUsageTokens,
+                            publicKey,
+                            sourceType);
+
+            // We use the public key to log, so we need different RequestOptions.
+            RequestOptions loggingOptions =
+                    RequestOptions.builder(publicKey).setApiVersion(API_VERSION).build();
+            logApiCall(loggingParamsMap, loggingOptions, listener);
+        }
+
         StripeResponse response = getStripeResponse(
                 POST,
                 getAddCustomerSourceUrl(customerId),
@@ -293,12 +315,35 @@ class StripeApiHandler {
 
     @Nullable
     static Customer setDefaultCustomerSource(
+            @Nullable Context context,
             @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String secret)
+            @NonNull @Source.SourceType String sourceType,
+            @NonNull String secret,
+            @Nullable LoggingResponseListener listener)
             throws InvalidRequestException, APIConnectionException, APIException {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("default_source", sourceId);
+
+        // Context can be nullable because this action is performed with only a weak reference
+        if (context != null) {
+            RequestOptions loggingOptions = RequestOptions.builder(publicKey)
+                    .setApiVersion(API_VERSION)
+                    .build();
+
+            Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
+                    context,
+                    productUsageTokens,
+                    sourceType,
+                    null,
+                    publicKey,
+                    LoggingUtils.EVENT_DEFAULT_SOURCE);
+
+            logApiCall(loggingParameters, loggingOptions, listener);
+        }
+
         StripeResponse response = getStripeResponse(
                 POST,
                 getRetrieveCustomerUrl(customerId),

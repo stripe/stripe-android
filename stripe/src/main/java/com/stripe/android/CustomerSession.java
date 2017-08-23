@@ -1,10 +1,12 @@
 package com.stripe.android;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -15,9 +17,15 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,9 +39,13 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private static final String ACTION_ADD_SOURCE = "add_source";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
     private static final String KEY_SOURCE = "source";
+    private static final String KEY_SOURCE_TYPE = "source_type";
+    private static final Set<String> VALID_TOKENS =
+            new HashSet<>(Arrays.asList("AddSourceActivity", "PaymentMethodsActivity"));
 
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
+    private @Nullable WeakReference<Context> mCachedContextReference;
     private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
     private @Nullable SourceRetrievalListener mSourceRetrievalListener;
 
@@ -42,6 +54,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private @NonNull Handler mUiThreadHandler;
 
+    private @NonNull Set<String> mProductUsageTokens;
     private @Nullable Calendar mProxyNowCalendar;
     private @Nullable StripeApiProxy mStripeApiProxy;
 
@@ -110,12 +123,19 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mUiThreadHandler = createMainThreadHandler();
         mStripeApiProxy = stripeApiProxy;
         mProxyNowCalendar = proxyNowCalendar;
-
+        mProductUsageTokens = new HashSet<>();
         mEphemeralKeyManager = new EphemeralKeyManager(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar);
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public void addProductUsageTokenIfValid(String token) {
+        if (token != null && VALID_TOKENS.contains(token)) {
+            mProductUsageTokens.add(token);
+        }
     }
 
     /**
@@ -166,14 +186,20 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     /**
      * Add the input source to the current customer object.
      *
+     * @param context the {@link Context} to use for resources
      * @param sourceId the ID of the source to be added
      * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
      *                 complete
      */
-    public void addCustomerSource(@NonNull String sourceId,
-                                  @Nullable SourceRetrievalListener listener) {
+    public void addCustomerSource(
+            @NonNull Context context,
+            @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
+            @Nullable SourceRetrievalListener listener) {
+        mCachedContextReference = new WeakReference<>(context);
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
+        arguments.put(KEY_SOURCE_TYPE, sourceType);
         mSourceRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
     }
@@ -181,14 +207,20 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     /**
      * Set the default source of the current customer object.
      *
+     * @param context a {@link Context} to use for resources
      * @param sourceId the ID of the source to be set
      * @param listener a {@link CustomerRetrievalListener} to be notified about an update to the
      *                 customer
      */
-    public void setCustomerDefaultSource(@NonNull String sourceId,
-                                         @Nullable CustomerRetrievalListener listener) {
+    public void setCustomerDefaultSource(
+            @NonNull Context context,
+            @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
+            @Nullable CustomerRetrievalListener listener) {
+        mCachedContextReference = new WeakReference<>(context);
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
+        arguments.put(KEY_SOURCE_TYPE, sourceType);
         mCustomerRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
     }
@@ -210,12 +242,27 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return mEphemeralKey;
     }
 
-    private void addCustomerSource(@NonNull final EphemeralKey key,
-                                   @NonNull final String sourceId) {
+
+    @VisibleForTesting
+    Set<String> getProductUsageTokens() {
+        return mProductUsageTokens;
+    }
+
+    private void addCustomerSource(
+            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final EphemeralKey key,
+            @NonNull final String sourceId,
+            @NonNull final String sourceType) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Source source = addCustomerSourceWithKey(key, sourceId, mStripeApiProxy);
+                Source source = addCustomerSourceWithKey(
+                        contextWeakReference,
+                        key,
+                        new ArrayList<>(mProductUsageTokens),
+                        sourceId,
+                        sourceType,
+                        mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
                 mUiThreadHandler.sendMessage(message);
             }
@@ -230,12 +277,21 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 currentTime - mCustomerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS;
     }
 
-    private void setCustomerSourceDefault(@NonNull final EphemeralKey key,
-                                          @NonNull final String sourceId) {
+    private void setCustomerSourceDefault(
+            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final EphemeralKey key,
+            @NonNull final String sourceId,
+            @NonNull final String sourceType) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = setCustomerSourceDefaultWithKey(key, sourceId, mStripeApiProxy);
+                Customer customer = setCustomerSourceDefaultWithKey(
+                        contextWeakReference,
+                        key,
+                        new ArrayList<>(mProductUsageTokens),
+                        sourceId,
+                        sourceType,
+                        mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
                 mUiThreadHandler.sendMessage(message);
             }
@@ -278,13 +334,25 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             if (actionString == null) {
                 updateCustomer(mEphemeralKey);
             } else if (ACTION_ADD_SOURCE.equals(actionString)
+                    && mCachedContextReference != null
                     && arguments != null
-                    && arguments.containsKey(KEY_SOURCE)) {
-                addCustomerSource(mEphemeralKey, (String) arguments.get(KEY_SOURCE));
+                    && arguments.containsKey(KEY_SOURCE)
+                    && arguments.containsKey(KEY_SOURCE_TYPE)) {
+                addCustomerSource(
+                        mCachedContextReference,
+                        mEphemeralKey,
+                        (String) arguments.get(KEY_SOURCE),
+                        (String) arguments.get(KEY_SOURCE_TYPE));
             } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
+                    && mCachedContextReference != null
                     && arguments != null
-                    && arguments.containsKey(KEY_SOURCE)) {
-                setCustomerSourceDefault(mEphemeralKey, (String) arguments.get(KEY_SOURCE));
+                    && arguments.containsKey(KEY_SOURCE)
+                    && arguments.containsKey(KEY_SOURCE_TYPE)) {
+                setCustomerSourceDefault(
+                        mCachedContextReference,
+                        mEphemeralKey,
+                        (String) arguments.get(KEY_SOURCE),
+                        (String) arguments.get(KEY_SOURCE_TYPE));
             }
         }
     }
@@ -334,6 +402,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                                 mSourceRetrievalListener = null;
                             }
                         }
+                        // Clear our context reference so we don't use a stale one.
+                        mCachedContextReference = null;
                         break;
                 }
             }
@@ -355,21 +425,34 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     static Source addCustomerSourceWithKey(
+            @NonNull WeakReference<Context> contextWeakReference,
             @NonNull EphemeralKey key,
+            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
             @Nullable StripeApiProxy proxy) {
         Source source = null;
         try {
             if (proxy != null) {
                 return proxy.addCustomerSourceWithKey(
+                        contextWeakReference.get(),
                         key.getCustomerId(),
+                        PaymentConfiguration.getInstance().getPublishableKey(),
+                        productUsageTokens,
                         sourceId,
+                        sourceType,
                         key.getSecret());
             }
+
             source = StripeApiHandler.addCustomerSource(
+                    contextWeakReference.get(),
                     key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
                     sourceId,
-                    key.getSecret());
+                    sourceType,
+                    key.getSecret(),
+                    null);
         } catch (InvalidRequestException invalidException) {
             // Then the key is invalid
         } catch (StripeException stripeException) {
@@ -379,21 +462,33 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     static Customer setCustomerSourceDefaultWithKey(
+            @NonNull WeakReference<Context> contextWeakReference,
             @NonNull EphemeralKey key,
+            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
             @Nullable StripeApiProxy proxy) {
         Customer customer = null;
         try {
             if (proxy != null) {
                 return proxy.setDefaultCustomerSourceWithKey(
+                        contextWeakReference.get(),
                         key.getCustomerId(),
+                        PaymentConfiguration.getInstance().getPublishableKey(),
+                        productUsageTokens,
                         sourceId,
+                        sourceType,
                         key.getSecret());
             }
             customer = StripeApiHandler.setDefaultCustomerSource(
+                    contextWeakReference.get(),
                     key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
                     sourceId,
-                    key.getSecret());
+                    sourceType,
+                    key.getSecret(),
+                    null);
         } catch (InvalidRequestException invalidException) {
             // Then the key is invalid
         } catch (StripeException stripeException) {
@@ -448,15 +543,24 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 throws InvalidRequestException, APIConnectionException, APIException;
 
         Source addCustomerSourceWithKey(
+                @Nullable Context context,
                 @NonNull String customerId,
+                @NonNull String publicKey,
+                @NonNull List<String> productUsageTokens,
                 @NonNull String sourceId,
+                @NonNull String sourceType,
                 @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
 
         Customer setDefaultCustomerSourceWithKey(
+                @Nullable Context context,
                 @NonNull String customerId,
+                @NonNull String publicKey,
+                @NonNull List<String> productUsageTokens,
                 @NonNull String sourceId,
+                @NonNull String sourceType,
                 @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
+
     }
 }

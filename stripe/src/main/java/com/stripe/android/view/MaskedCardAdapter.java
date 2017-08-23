@@ -87,12 +87,12 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     @Nullable
-    String getSelectedSource() {
+    CustomerSource getSelectedSource() {
         if (mSelectedIndex == NO_SELECTION) {
             return null;
         }
 
-        return mCustomerSourceList.get(mSelectedIndex).getId();
+        return mCustomerSourceList.get(mSelectedIndex);
     }
 
     void addCustomerSourceIfSupported(CustomerSource... customerSources) {

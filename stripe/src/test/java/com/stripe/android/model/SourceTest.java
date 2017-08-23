@@ -31,6 +31,49 @@ import static org.junit.Assert.fail;
 @Config(sdk = 23)
 public class SourceTest {
 
+    static final String EXAMPLE_BITCOIN_SOURCE = "{\n" +
+                    "  \"id\": \"src_1AtlSXBZqEXluyI4JgBYTq5W\",\n" +
+                    "  \"object\": \"source\",\n" +
+                    "  \"amount\": 1000,\n" +
+                    "  \"client_secret\": \"src_client_secret_BGI2mBjd810BJEbvWRd83jac\",\n" +
+                    "  \"created\": 1503443217,\n" +
+                    "  \"currency\": \"usd\",\n" +
+                    "  \"flow\": \"receiver\",\n" +
+                    "  \"livemode\": false,\n" +
+                    "  \"metadata\": {\n" +
+                    "  },\n" +
+                    "  \"owner\": {\n" +
+                    "    \"address\": null,\n" +
+                    "    \"email\": \"jenny.rosen@example.com\",\n" +
+                    "    \"name\": null,\n" +
+                    "    \"phone\": null,\n" +
+                    "    \"verified_address\": null,\n" +
+                    "    \"verified_email\": null,\n" +
+                    "    \"verified_name\": null,\n" +
+                    "    \"verified_phone\": null\n" +
+                    "  },\n" +
+                    "  \"receiver\": {\n" +
+                    "    \"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
+                    "    \"amount_charged\": 0,\n" +
+                    "    \"amount_received\": 0,\n" +
+                    "    \"amount_returned\": 0,\n" +
+                    "    \"refund_attributes_method\": \"email\",\n" +
+                    "    \"refund_attributes_status\": \"missing\"\n" +
+                    "  },\n" +
+                    "  \"statement_descriptor\": null,\n" +
+                    "  \"status\": \"pending\",\n" +
+                    "  \"type\": \"bitcoin\",\n" +
+                    "  \"usage\": \"single_use\",\n" +
+                    "  \"bitcoin\": {\n" +
+                    "    \"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
+                    "    \"amount\": 2371000,\n" +
+                    "    \"amount_charged\": 0,\n" +
+                    "    \"amount_received\": 0,\n" +
+                    "    \"amount_returned\": 0,\n" +
+                    "    \"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
+                    "  }\n" +
+                    "}";
+
     static final String EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
             "\"object\": \"source\",\n"+

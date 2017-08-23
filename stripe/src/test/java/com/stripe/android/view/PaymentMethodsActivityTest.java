@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
@@ -39,6 +40,7 @@ import static com.stripe.android.view.PaymentMethodsActivity.REQUEST_CODE_ADD_CA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -245,6 +247,7 @@ public class PaymentMethodsActivityTest {
 
         verify(mCustomerSessionProxy).setCustomerDefaultSource(
                 stringArgumentCaptor.capture(),
+                eq(Source.CARD),
                 selectionCaptor.capture());
 
         CustomerSession.CustomerRetrievalListener updateListener = selectionCaptor.getValue();
@@ -285,6 +288,7 @@ public class PaymentMethodsActivityTest {
 
         verify(mCustomerSessionProxy).setCustomerDefaultSource(
                 selectionArgumentCaptor.capture(),
+                eq(Source.CARD),
                 listenerArgumentCaptor.capture());
 
         assertEquals(customer.getDefaultSource(), selectionArgumentCaptor.getValue());

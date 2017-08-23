@@ -28,11 +28,14 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
+import java.lang.ref.WeakReference;
+
 public class AddSourceActivity extends AppCompatActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
+    static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
     static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
@@ -83,6 +86,9 @@ public class AddSourceActivity extends AppCompatActivity {
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
+        if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+        }
     }
 
     @Override
@@ -179,7 +185,21 @@ public class AddSourceActivity extends AppCompatActivity {
                 };
 
         if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().addCustomerSource(source.getId(), listener);
+            @Source.SourceType String sourceType;
+            if (source instanceof Source) {
+                sourceType = ((Source) source).getType();
+            } else if (source instanceof Card){
+                sourceType = Source.CARD;
+            } else {
+                // This isn't possible from this activity.
+                sourceType = Source.UNKNOWN;
+            }
+
+            CustomerSession.getInstance().addCustomerSource(
+                    this,
+                    source.getId(),
+                    sourceType,
+                    listener);
         } else {
             mCustomerSessionProxy.addCustomerSource(source.getId(), listener);
         }
