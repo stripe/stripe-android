@@ -327,8 +327,8 @@ class StripeApiHandler {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("default_source", sourceId);
 
+        // Context can be nullable because this action is performed with only a weak reference
         if (context != null) {
-            // log things only if the context is non-null
             RequestOptions loggingOptions = RequestOptions.builder(publicKey)
                     .setApiVersion(API_VERSION)
                     .build();

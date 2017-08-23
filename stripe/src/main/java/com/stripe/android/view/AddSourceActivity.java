@@ -35,6 +35,7 @@ public class AddSourceActivity extends AppCompatActivity {
     public static final String EXTRA_NEW_SOURCE = "new_source";
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
+    static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
     static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
@@ -85,7 +86,9 @@ public class AddSourceActivity extends AppCompatActivity {
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         mErrorLayout = findViewById(R.id.add_source_error_container);
-        addProductUsageTokenToCustomerSessionIfPossible();
+        if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+        }
     }
 
     @Override
@@ -237,15 +240,6 @@ public class AddSourceActivity extends AppCompatActivity {
             TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
         }
         mErrorTextView.setVisibility(View.VISIBLE);
-    }
-
-    private void addProductUsageTokenToCustomerSessionIfPossible() {
-        try {
-            CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
-        } catch (IllegalStateException ignored) {
-            // This happens if the activity launches without a customer session,
-            // which is valid, so we ignore the exception.
-        }
     }
 
     interface StripeProvider {

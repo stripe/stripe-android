@@ -34,6 +34,7 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
+import static com.stripe.android.view.AddSourceActivity.EXTRA_PROXY_DELAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -91,6 +92,7 @@ public class AddSourceActivityTest {
 
     private void setUpForProxySessionTest() {
         Intent intent = AddSourceActivity.newIntent(RuntimeEnvironment.application, true, true);
+        intent.putExtra(EXTRA_PROXY_DELAY, true);
         mActivityController = Robolectric.buildActivity(AddSourceActivity.class, intent)
                 .create().start().resume().visible();
         mCardMultilineWidget = mActivityController.get()
