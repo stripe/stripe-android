@@ -31,17 +31,14 @@ public class ShippingMethod extends StripeJsonModel {
     private String mIdentifier;
 
     public ShippingMethod(String label, String identifier, long amount, String currencyCode) {
-        this.mLabel = label;
-        this.mIdentifier = identifier;
-        this.mAmount = amount;
-        mCurrencyCode = currencyCode;
+        this(label, identifier, null, amount, currencyCode);
     }
 
     public ShippingMethod(String label, String identifier, @Nullable String detail, long amount, String currencyCode) {
-        this.mLabel = label;
-        this.mIdentifier = identifier;
-        this.mDetail = detail;
-        this.mAmount = amount;
+        mLabel = label;
+        mIdentifier = identifier;
+        mDetail = detail;
+        mAmount = amount;
         mCurrencyCode = currencyCode;
     }
 
