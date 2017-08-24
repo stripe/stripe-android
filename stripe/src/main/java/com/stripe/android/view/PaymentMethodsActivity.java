@@ -79,6 +79,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (!waitForProxy) {
             initializeCustomerSourceData();
         }
+        // This prevents the first click from being eaten by the focus.
+        addCardView.requestFocusFromTouch();
     }
 
     @Override
