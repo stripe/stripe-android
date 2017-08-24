@@ -3,7 +3,7 @@
     <dimen name="activity_total_margin">8dp</dimen>
     <dimen name="add_card_element_vertical_margin">12dp</dimen>
     <dimen name="add_card_expiry_middle_margin">8dp</dimen>
-    <dimen name="add_card_total_margin">8dp</dimen>
+    <dimen name="add_card_total_margin">16dp</dimen>
     <dimen name="add_payment_method_vertical_padding">8dp</dimen>
     <dimen name="card_icon_padding">12dp</dimen>
     <dimen name="card_widget_min_width">320dp</dimen>
