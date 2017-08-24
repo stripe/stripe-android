@@ -351,13 +351,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 })
                 .create();
         alertDialog.show();
-//        mErrorTextView.setText(error);
-//        if (shouldAnimate) {
-//            Fade fadeIn = new Fade(Fade.IN);
-//            fadeIn.setDuration(FADE_DURATION_MS);
-//            TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
-//        }
-//        mErrorTextView.setVisibility(View.VISIBLE);
     }
 
     private void updateAdapterWithCustomer(@NonNull Customer customer) {
