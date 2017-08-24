@@ -13,13 +13,15 @@
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addPayment"
-              style="@style/Header.Light" />
+              style="@style/Header.Light"
+        />
 
     <com.stripe.android.view.CardMultilineWidget
         android:id="@+id/card_multiline_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:shouldShowPostalCode="true"/>
+        app:shouldShowPostalCode="true"
+        />
 
     <Button
         android:id="@+id/save_payment"

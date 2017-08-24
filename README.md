@@ -20,17 +20,11 @@ Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as
 
 Note - as Google has stopped supporting Eclipse for Android Development, we will no longer be actively testing the project's compatibility within Eclipse. You may still clone and include the library as you would any other Android library project.
 
-### ProGuard
-
-If you're planning on optimizing your app with ProGuard, make sure that you exclude the Stripe bindings. You can do this by adding the following to your app's `proguard.cfg` file:
-
-    -keep class com.stripe.** { *; }
-
 ## Usage
 
 ### Using the CardInputWidget
 
-You can add a widget to your apps that easily handles the UI states for collecting card data.
+You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
 
 First, add the CardInputWidget to your layout.
 
@@ -54,7 +48,42 @@ if (cardToSave == null) {
 }
 ```
 
-Once you have a non-null `Card` object, you can call [createToken](#createtoken).
+### Using the CardMultilineWidget
+
+You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
+
+```xml
+<com.stripe.android.view.CardMultilineWidget
+    android:id="@+id/card_multiline_widget"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:shouldShowPostalCode="true"
+    />
+```
+
+Note: a `CardMultiline` widget can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
+
+In order to use the `app:shouldShowPostalCode` tag, you'll need to enable the app XML namespace somewhere in the layout.
+
+Note: We currently only support US ZIP in the postal code field.
+
+```xml
+xmlns:app="http://schemas.android.com/apk/res-auto"
+```
+
+To get a `Card` object from the `CardMultilineWidget`, you ask the widget for its card, just like the `CardInputWidget`.
+
+```java
+Card cardToSave = mCardMultilineWidget();
+if (cardToSave == null) {
+    mErrorDialogHandler.showError("Invalid Card Data");
+    return;
+}
+```
+
+If the returned `Card` is null, error states will show on the fields that need to be fixed. 
+
+Once you have a non-null `Card` object from either widget, you can call [createToken](#createtoken).
 
 ### setDefaultPublishableKey
 

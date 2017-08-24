@@ -40,12 +40,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Test class for {@link StripeAndroidPayActivity}. Note that we have to test against SDK 22
- * because of a <a href="https://github.com/robolectric/robolectric/issues/1932">known issue</a> in
- * Robolectric.
+ * Test class for {@link StripeAndroidPayActivity}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeAndroidPayActivityTest {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
