@@ -1,22 +1,20 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.transition.Fade;
-import android.support.transition.TransitionManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
@@ -28,8 +26,10 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
-import java.lang.ref.WeakReference;
-
+/**
+ * Activity used to display a {@link CardMultilineWidget} and receive the resulting
+ * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of teh launching activity.
+ */
 public class AddSourceActivity extends AppCompatActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
@@ -37,12 +37,9 @@ public class AddSourceActivity extends AppCompatActivity {
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
-    static final long FADE_DURATION_MS = 100L;
     CardMultilineWidget mCardMultilineWidget;
     CustomerSessionProxy mCustomerSessionProxy;
     ProgressBar mProgressBar;
-    TextView mErrorTextView;
-    FrameLayout mErrorLayout;
     StripeProvider mStripeProvider;
     Toolbar mToolbar;
 
@@ -74,7 +71,6 @@ public class AddSourceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_source);
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = findViewById(R.id.add_source_progress_bar);
-        mErrorTextView = findViewById(R.id.tv_add_source_error);
         mToolbar = findViewById(R.id.add_source_toolbar);
         setSupportActionBar(mToolbar);
         if (getSupportActionBar() != null) {
@@ -85,7 +81,6 @@ public class AddSourceActivity extends AppCompatActivity {
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
-        mErrorLayout = findViewById(R.id.add_source_error_container);
         if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
             CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
         }
@@ -135,7 +130,6 @@ public class AddSourceActivity extends AppCompatActivity {
     }
 
     private void saveCardOrDisplayError() {
-        mErrorTextView.setVisibility(View.GONE);
         Card card = mCardMultilineWidget.getCard();
         if (card == null) {
             // In this case, the error will be displayed on the card widget itself.
@@ -153,12 +147,11 @@ public class AddSourceActivity extends AppCompatActivity {
             @Override
             public void onError(Exception error) {
                 setCommunicatingProgress(false);
-                showError(error.getLocalizedMessage(), mStripeProvider == null);
+                showError(error.getLocalizedMessage());
             }
 
             @Override
             public void onSuccess(Source source) {
-                mErrorTextView.setVisibility(View.GONE);
                 if (mUpdatesCustomer) {
                     attachCardToCustomer(source);
                 } else {
@@ -180,7 +173,7 @@ public class AddSourceActivity extends AppCompatActivity {
                     public void onError(int errorCode, @Nullable String errorMessage) {
                         String displayedError = errorMessage == null ? "" : errorMessage;
                         setCommunicatingProgress(false);
-                        showError(displayedError, mStripeProvider == null);
+                        showError(displayedError);
                     }
                 };
 
@@ -207,7 +200,6 @@ public class AddSourceActivity extends AppCompatActivity {
 
     private void finishWithSource(@NonNull Source source) {
         setCommunicatingProgress(false);
-        mErrorTextView.setVisibility(View.GONE);
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NEW_SOURCE, source.toString());
         setResult(RESULT_OK, intent);
@@ -226,20 +218,26 @@ public class AddSourceActivity extends AppCompatActivity {
         mCommunicating = communicating;
         if (communicating) {
             mProgressBar.setVisibility(View.VISIBLE);
+            mCardMultilineWidget.setEnabled(false);
         } else {
             mProgressBar.setVisibility(View.GONE);
+            mCardMultilineWidget.setEnabled(true);
         }
         supportInvalidateOptionsMenu();
     }
 
-    private void showError(@NonNull String error, boolean shouldAnimate) {
-        mErrorTextView.setText(error);
-        if (shouldAnimate) {
-            Fade fadeIn = new Fade(Fade.IN);
-            fadeIn.setDuration(FADE_DURATION_MS);
-            TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
-        }
-        mErrorTextView.setVisibility(View.VISIBLE);
+    private void showError(@NonNull String error) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setMessage(error)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .create();
+        alertDialog.show();
     }
 
     interface StripeProvider {

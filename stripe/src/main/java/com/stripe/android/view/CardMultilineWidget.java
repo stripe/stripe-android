@@ -51,6 +51,7 @@ public class CardMultilineWidget extends LinearLayout {
     private TextInputLayout mCvcTextInputLayout;
     private TextInputLayout mPostalInputLayout;
 
+    private boolean mIsEnabled;
     private boolean mShouldShowPostalCode;
     private boolean mHasAdjustedDrawable;
 
@@ -153,6 +154,20 @@ public class CardMultilineWidget extends LinearLayout {
     public void setShouldShowPostalCode(boolean shouldShowPostalCode) {
         mShouldShowPostalCode = shouldShowPostalCode;
         adjustViewForPostalCodeAttribute();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        mCardNumberEditText.setEnabled(enabled);
+        mExpiryDateEditText.setEnabled(enabled);
+        mCvcEditText.setEnabled(enabled);
+        mPostalCodeEditText.setEnabled(enabled);
+        mIsEnabled = enabled;
     }
 
     void adjustViewForPostalCodeAttribute() {
