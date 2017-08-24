@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
@@ -56,6 +57,16 @@ public class MaskedCardViewTest {
 
         assertTrue("These tests assume that an expiry date of December 2050 is valid.",
                 expirationCalendar.after(nowCalendar));
+    }
+
+    @Test
+    public void init_setsColorValuesWithAlpha() {
+        final int alpha = 204; // 80% of 255
+        int[] colorValues = mMaskedCardView.getTextColorValues();
+        // The colors are arranged [selected, selectedLowAlpha, unselected, unselectedLowAlpha
+        assertEquals(4, colorValues.length);
+        assertEquals(colorValues[1], ColorUtils.setAlphaComponent(colorValues[0], alpha));
+        assertEquals(colorValues[3], ColorUtils.setAlphaComponent(colorValues[2], alpha));
     }
 
     @Test
