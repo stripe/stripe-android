@@ -47,6 +47,7 @@ public class CardMultilineWidget extends LinearLayout {
     private ExpiryDateEditText mExpiryDateEditText;
     private StripeEditText mCvcEditText;
     private StripeEditText mPostalCodeEditText;
+    private TextInputLayout mCardNumberTextInputLayout;
     private TextInputLayout mExpiryTextInputLayout;
     private TextInputLayout mCvcTextInputLayout;
     private TextInputLayout mPostalInputLayout;
@@ -163,10 +164,10 @@ public class CardMultilineWidget extends LinearLayout {
 
     @Override
     public void setEnabled(boolean enabled) {
-        mCardNumberEditText.setEnabled(enabled);
-        mExpiryDateEditText.setEnabled(enabled);
-        mCvcEditText.setEnabled(enabled);
-        mPostalCodeEditText.setEnabled(enabled);
+        mExpiryTextInputLayout.setEnabled(enabled);
+        mCardNumberTextInputLayout.setEnabled(enabled);
+        mCvcTextInputLayout.setEnabled(enabled);
+        mPostalInputLayout.setEnabled(enabled);
         mIsEnabled = enabled;
     }
 
@@ -261,7 +262,7 @@ public class CardMultilineWidget extends LinearLayout {
         checkAttributeSet(attrs);
 
 
-        TextInputLayout cardInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
+        mCardNumberTextInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         mExpiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
@@ -273,7 +274,7 @@ public class CardMultilineWidget extends LinearLayout {
         }
 
         initTextInputLayoutErrorHandlers(
-                cardInputLayout,
+                mCardNumberTextInputLayout,
                 mExpiryTextInputLayout,
                 mCvcTextInputLayout,
                 mPostalInputLayout);
@@ -347,6 +348,7 @@ public class CardMultilineWidget extends LinearLayout {
 
         mCardNumberEditText.updateLengthFilter();
         updateBrand(Card.UNKNOWN);
+        setEnabled(true);
     }
 
     private void initDeleteEmptyListeners() {

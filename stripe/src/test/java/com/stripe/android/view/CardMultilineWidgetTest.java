@@ -372,10 +372,49 @@ public class CardMultilineWidgetTest {
         assertEquals("12", mFullGroup.cvcEditText.getText().toString());
     }
 
+    @Test
+    public void setEnabled_setsEnabledPropertyOnAllChildWidgets() {
+        assertTrue(mCardMultilineWidget.isEnabled());
+        assertTrue(mFullGroup.cardInputLayout.isEnabled());
+        assertTrue(mFullGroup.expiryInputLayout.isEnabled());
+        assertTrue(mFullGroup.postalCodeInputLayout.isEnabled());
+        assertTrue(mFullGroup.cvcInputLayout.isEnabled());
+        assertTrue(mFullGroup.expiryDateEditText.isEnabled());
+        assertTrue(mFullGroup.cardNumberEditText.isEnabled());
+        assertTrue(mFullGroup.cvcEditText.isEnabled());
+        assertTrue(mFullGroup.postalCodeEditText.isEnabled());
+
+        mCardMultilineWidget.setEnabled(false);
+
+        assertFalse(mCardMultilineWidget.isEnabled());
+        assertFalse(mFullGroup.cardInputLayout.isEnabled());
+        assertFalse(mFullGroup.expiryInputLayout.isEnabled());
+        assertFalse(mFullGroup.postalCodeInputLayout.isEnabled());
+        assertFalse(mFullGroup.cvcInputLayout.isEnabled());
+        assertFalse(mFullGroup.expiryDateEditText.isEnabled());
+        assertFalse(mFullGroup.cardNumberEditText.isEnabled());
+        assertFalse(mFullGroup.cvcEditText.isEnabled());
+        assertFalse(mFullGroup.postalCodeEditText.isEnabled());
+
+        mCardMultilineWidget.setEnabled(true);
+
+        assertTrue(mCardMultilineWidget.isEnabled());
+        assertTrue(mFullGroup.cardInputLayout.isEnabled());
+        assertTrue(mFullGroup.expiryInputLayout.isEnabled());
+        assertTrue(mFullGroup.postalCodeInputLayout.isEnabled());
+        assertTrue(mFullGroup.cvcInputLayout.isEnabled());
+        assertTrue(mFullGroup.expiryDateEditText.isEnabled());
+        assertTrue(mFullGroup.cardNumberEditText.isEnabled());
+        assertTrue(mFullGroup.cvcEditText.isEnabled());
+        assertTrue(mFullGroup.postalCodeEditText.isEnabled());
+    }
+
     static class WidgetControlGroup {
 
         CardNumberEditText cardNumberEditText;
+        TextInputLayout cardInputLayout;
         ExpiryDateEditText expiryDateEditText;
+        TextInputLayout expiryInputLayout;
         StripeEditText cvcEditText;
         TextInputLayout cvcInputLayout;
         StripeEditText postalCodeEditText;
@@ -384,7 +423,9 @@ public class CardMultilineWidgetTest {
 
         WidgetControlGroup(@NonNull CardMultilineWidget parentWidget) {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);
+            cardInputLayout = parentWidget.findViewById(R.id.tl_add_source_card_number_ml);
             expiryDateEditText = parentWidget.findViewById(R.id.et_add_source_expiry_ml);
+            expiryInputLayout = parentWidget.findViewById(R.id.tl_add_source_expiry_ml);
             cvcEditText = parentWidget.findViewById(R.id.et_add_source_cvc_ml);
             cvcInputLayout = parentWidget.findViewById(R.id.tl_add_source_cvc_ml);
             postalCodeEditText = parentWidget.findViewById(R.id.et_add_source_postal_ml);
