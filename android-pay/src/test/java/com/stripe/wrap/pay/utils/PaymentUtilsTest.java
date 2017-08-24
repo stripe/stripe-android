@@ -38,7 +38,7 @@ import static junit.framework.TestCase.assertTrue;
  * Test class for {@link PaymentUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class PaymentUtilsTest {
 
     @Test

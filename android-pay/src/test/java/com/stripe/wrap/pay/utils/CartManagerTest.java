@@ -33,7 +33,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link CartManager}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class CartManagerTest {
 
     @Test(expected = RuntimeException.class)
