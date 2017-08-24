@@ -449,6 +449,27 @@ class StripeJsonUtils {
     }
 
     /**
+     * Util function for putting an double value into a {@link JSONObject} if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown
+     * due to insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    static void putDoubleIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable Double value) {
+        if (value == null) {
+            return;
+        }
+        try {
+            jsonObject.put(fieldName, value.doubleValue());
+        } catch (JSONException ignored) { }
+    }
+
+    /**
      * Util function for putting a {@link Boolean} value into a {@link JSONObject} if that
      * value is not null. This ignores any {@link JSONException} that may be thrown due to
      * insertion.

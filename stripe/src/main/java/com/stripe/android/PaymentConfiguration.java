@@ -5,6 +5,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingMethod;
+
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.List;
 
 public class PaymentConfiguration {
 
@@ -15,6 +20,8 @@ public class PaymentConfiguration {
     private @Address.RequiredBillingAddressFields
     int mRequiredBillingAddressFields;
     private boolean mShouldUseSourcesForCards;
+    private List<ShippingMethod> mShippingMethods = new ArrayList<>();
+    private Currency mCurrency;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
         mPublishableKey = publishableKey;
@@ -60,6 +67,35 @@ public class PaymentConfiguration {
     public PaymentConfiguration setShouldUseSourcesForCards(boolean shouldUseSourcesForCards) {
         mShouldUseSourcesForCards = shouldUseSourcesForCards;
         return this;
+    }
+
+    /**
+     * Set the shipping methods to allow for payments made with this configuration.
+     */
+    public PaymentConfiguration setShippingMethods(List<ShippingMethod> shippingMethods) {
+        mShippingMethods = shippingMethods;
+        return this;
+    }
+
+    /**
+     * @return The shipping methods to allow for payments made with this configuration.
+     */
+    public List<ShippingMethod> getShippingMethods() {
+        return mShippingMethods;
+    }
+
+    /**
+     * @return the currency that prices will be rendered in.
+     */
+    public Currency getCurrency() {
+        return mCurrency;
+    }
+
+    /**
+     * Sets the currency that prices will be rendered in.
+     */
+    public void setCurrency(Currency currency) {
+        mCurrency = currency;
     }
 
     @VisibleForTesting
