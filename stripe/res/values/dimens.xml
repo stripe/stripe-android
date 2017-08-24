@@ -15,6 +15,7 @@
     <dimen name="card_icon_multiline_padding">8dp</dimen>
     <dimen name="card_icon_multiline_padding_bottom">1.52380955dp</dimen>
     <dimen name="masked_card_icon_width">32dp</dimen>
+    <dimen name="shipping_check_icon_width">24dp</dimen>
     <dimen name="masked_card_vertical_padding">4dp</dimen>
     <dimen name="toolbar_elevation">4dp</dimen>
 </resources>

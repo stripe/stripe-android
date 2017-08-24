@@ -29,6 +29,7 @@
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
     <string name="selectSampleActivity">Select sample activity</string>
+    <string name="selectShippingMethod">Select Shipping Method</string>
     <string name="startPolling">Start polling</string>
     <string name="tryThreeDSecure">Try 3DS</string>
     <string name="verify">Verify</string>
