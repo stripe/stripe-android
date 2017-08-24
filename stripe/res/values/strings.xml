@@ -43,4 +43,5 @@
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_payment_method">Payment Method</string>
     <string name="title_add_an_address">Add an Address</string>
+    <string name="title_select_shipping_method">Select Shipping Method</string>
 </resources>
