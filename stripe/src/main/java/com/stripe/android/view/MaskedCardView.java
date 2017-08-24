@@ -2,20 +2,22 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
+import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.style.StyleSpan;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.TypefaceSpan;
 import android.util.AttributeSet;
 import android.view.View;
@@ -52,8 +54,10 @@ public class MaskedCardView extends LinearLayout {
     private AppCompatTextView mCardInformationTextView;
     private AppCompatImageView mCheckMarkImageView;
 
+    @ColorInt int mSelectedAlphaColorInt;
     @ColorInt int mSelectedColorInt;
     @ColorInt int mUnselectedColorInt;
+    @ColorInt int mUnselectedTextAlphaColorInt;
     @ColorInt int mUnselectedTextColorInt;
 
     static final Map<String , Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
@@ -92,7 +96,7 @@ public class MaskedCardView extends LinearLayout {
         mIsSelected = selected;
         updateCheckMark();
         updateBrandIcon();
-        updateTextColor();
+        updateCardInformation();
     }
 
     /**
@@ -151,6 +155,16 @@ public class MaskedCardView extends LinearLayout {
         setSelected(!mIsSelected);
     }
 
+    @VisibleForTesting
+    int[] getTextColorValues() {
+        int[] colorValues = new int[4];
+        colorValues[0] = mSelectedColorInt;
+        colorValues[1] = mSelectedAlphaColorInt;
+        colorValues[2] = mUnselectedTextColorInt;
+        colorValues[3] = mUnselectedTextAlphaColorInt;
+        return colorValues;
+    }
+
     @Card.CardBrand
     @VisibleForTesting
     String getCardBrand() {
@@ -178,6 +192,7 @@ public class MaskedCardView extends LinearLayout {
         mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
         mUnselectedTextColorInt = getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
+        setLightTextColorValues();
 
         initializeCheckMark();
         updateCheckMark();
@@ -190,11 +205,6 @@ public class MaskedCardView extends LinearLayout {
     private void updateBrandIcon() {
         @DrawableRes int iconResourceId = TEMPLATE_RESOURCE_MAP.get(mCardBrand);
         updateDrawable(iconResourceId, mCardIconImageView, false);
-    }
-
-    private void updateTextColor() {
-        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
-        mCardInformationTextView.setTextColor(textColor);
     }
 
     @SuppressWarnings("deprecation")
@@ -225,18 +235,38 @@ public class MaskedCardView extends LinearLayout {
         int brandLength = brandText.length();
         int middleLength = normalText.length();
         int last4length = mLast4.length();
+        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
+        @ColorInt int lightTextColor = mIsSelected
+                ? mSelectedAlphaColorInt
+                : mUnselectedTextAlphaColorInt;
+
         SpannableString str = new SpannableString(brandText + normalText + mLast4);
         str.setSpan(
                 new TypefaceSpan("sans-serif-medium"),
                 0,
                 brandLength,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        str.setSpan(new StyleSpan(Typeface.BOLD),
+        str.setSpan(
+                new ForegroundColorSpan(textColor),
+                0,
+                brandLength,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        str.setSpan(
+                new ForegroundColorSpan(lightTextColor),
+                brandLength,
+                brandLength + middleLength,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        str.setSpan(
+                new TypefaceSpan("sans-serif-medium"),
+                brandLength + middleLength,
+                brandLength + middleLength + last4length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        str.setSpan(
+                new ForegroundColorSpan(textColor),
                 brandLength + middleLength,
                 brandLength + middleLength + last4length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mCardInformationTextView.setText(str);
-        updateTextColor();
     }
 
     private void updateCheckMark() {
@@ -274,5 +304,14 @@ public class MaskedCardView extends LinearLayout {
                     ? res.getColor(R.color.color_text_secondary_default)
                     : mUnselectedTextColorInt;
         }
+    }
+
+    private void setLightTextColorValues() {
+        mSelectedAlphaColorInt = ColorUtils.setAlphaComponent(
+                mSelectedColorInt,
+                getResources().getInteger(R.integer.light_text_alpha_hex));
+        mUnselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(
+                mUnselectedTextColorInt,
+                getResources().getInteger(R.integer.light_text_alpha_hex));
     }
 }

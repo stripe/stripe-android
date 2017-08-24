@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.CustomerSession;
@@ -26,7 +25,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
@@ -43,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 /**
  * Test class for {@link AddSourceActivity}.
@@ -55,7 +54,6 @@ public class AddSourceActivityTest {
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
     private ProgressBar mProgressBar;
-    private TextView mErrorTextView;
     private ShadowActivity mShadowActivity;
 
     @Mock Stripe mStripe;
@@ -75,11 +73,9 @@ public class AddSourceActivityTest {
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
                 .findViewById(R.id.add_source_progress_bar);
-        mErrorTextView = mActivityController.get()
-                .findViewById(R.id.tv_add_source_error);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
-        mShadowActivity = Shadows.shadowOf(mActivityController.get());
+        mShadowActivity = shadowOf(mActivityController.get());
         AddSourceActivity.StripeProvider mockStripeProvider =
                 new AddSourceActivity.StripeProvider() {
                     @Override
@@ -99,11 +95,9 @@ public class AddSourceActivityTest {
                 .findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivityController.get()
                 .findViewById(R.id.add_source_progress_bar);
-        mErrorTextView = mActivityController.get()
-                .findViewById(R.id.tv_add_source_error);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
-        mShadowActivity = Shadows.shadowOf(mActivityController.get());
+        mShadowActivity = shadowOf(mActivityController.get());
         AddSourceActivity.StripeProvider mockStripeProvider =
                 new AddSourceActivity.StripeProvider() {
                     @Override
@@ -193,6 +187,7 @@ public class AddSourceActivityTest {
         when(menuItem.getItemId()).thenReturn(R.id.action_save);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
+        assertTrue(mCardMultilineWidget.isEnabled());
 
         mActivityController.get().onOptionsItemSelected(menuItem);
         verify(mStripe).createSource(
@@ -204,6 +199,7 @@ public class AddSourceActivityTest {
         assertNotNull(callback);
 
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+        assertFalse(mCardMultilineWidget.isEnabled());
         assertEquals(Source.CARD, params.getType());
 
         Source expectedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
@@ -235,7 +231,7 @@ public class AddSourceActivityTest {
     }
 
     @Test
-    public void addCardData_whenDataIsValidButServerReturnsError_showsErrorAndDoesNotFinish() {
+    public void addCardData_whenDataIsValidButServerReturnsError_doesNotFinish() {
         setUpForLocalTest();
         ArgumentCaptor<SourceParams> paramsArgumentCaptor =
                 ArgumentCaptor.forClass(SourceParams.class);
@@ -263,7 +259,6 @@ public class AddSourceActivityTest {
         assertNotNull(params);
         assertNotNull(callback);
 
-        assertEquals(View.GONE, mErrorTextView.getVisibility());
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(Source.CARD, params.getType());
 
@@ -277,7 +272,5 @@ public class AddSourceActivityTest {
 
         assertFalse(mShadowActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
-        assertEquals(errorMessage, mErrorTextView.getText().toString());
-        assertEquals(View.VISIBLE, mErrorTextView.getVisibility());
     }
 }

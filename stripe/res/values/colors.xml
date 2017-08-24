@@ -2,8 +2,9 @@
 <resources>
     <color name="error_text_light_theme">#ffeb1c26</color>
     <color name="error_text_dark_theme">#ffe85746</color>
-    <color name="accent_color_default">#ff306af7</color>
-    <color name="control_normal_color_default">#ffb3b3b3</color>
+    <color name="accent_color_default">#ff2296f3</color>
+    <color name="control_normal_color_default">#ff90A4AE</color>
     <color name="color_text_secondary_default">#ff32325d</color>
     <color name="slate_50">#3332325d</color>
+    <color name="toolbar_color_default">#ff3f51b5</color>
 </resources>

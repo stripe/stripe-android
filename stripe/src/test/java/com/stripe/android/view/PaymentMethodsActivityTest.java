@@ -91,8 +91,6 @@ public class PaymentMethodsActivityTest {
     @Mock PaymentMethodsActivity.CustomerSessionProxy mCustomerSessionProxy;
 
     private ActivityController<PaymentMethodsActivity> mActivityController;
-    private TextView mErrorTextView;
-    private FrameLayout mErrorLayout;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private View mAddCardView;
@@ -110,8 +108,6 @@ public class PaymentMethodsActivityTest {
 
         mProgressBar = mActivityController.get().findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = mActivityController.get().findViewById(R.id.payment_methods_recycler);
-        mErrorLayout = mActivityController.get().findViewById(R.id.payment_methods_error_container);
-        mErrorTextView = mActivityController.get().findViewById(R.id.tv_payment_methods_error);
         mAddCardView = mActivityController.get().findViewById(R.id.payment_methods_add_payment_container);
     }
 
@@ -123,13 +119,9 @@ public class PaymentMethodsActivityTest {
 
         assertNotNull(mProgressBar);
         assertNotNull(mRecyclerView);
-        assertNotNull(mErrorLayout);
-        assertNotNull(mErrorTextView);
         assertNotNull(mAddCardView);
         assertEquals(View.VISIBLE, mAddCardView.getVisibility());
         assertEquals(View.VISIBLE, mRecyclerView.getVisibility());
-        assertEquals(View.GONE, mErrorTextView.getVisibility());
-        assertEquals(View.VISIBLE, mErrorLayout.getVisibility());
         assertEquals(View.GONE, mProgressBar.getVisibility());
     }
 
@@ -143,8 +135,6 @@ public class PaymentMethodsActivityTest {
 
         assertNotNull(mProgressBar);
         assertNotNull(mRecyclerView);
-        assertNotNull(mErrorLayout);
-        assertNotNull(mErrorTextView);
         assertNotNull(mAddCardView);
 
         mActivityController.get().initializeCustomerSourceData();
@@ -152,8 +142,6 @@ public class PaymentMethodsActivityTest {
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(View.VISIBLE, mAddCardView.getVisibility());
         assertEquals(View.VISIBLE, mRecyclerView.getVisibility());
-        assertEquals(View.GONE, mErrorTextView.getVisibility());
-        assertEquals(View.VISIBLE, mErrorLayout.getVisibility());
 
         CustomerSession.CustomerRetrievalListener listener = listenerArgumentCaptor.getValue();
         assertNotNull(listener);

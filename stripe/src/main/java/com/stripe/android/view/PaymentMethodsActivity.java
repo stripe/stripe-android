@@ -1,13 +1,13 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.transition.Fade;
-import android.support.transition.TransitionManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,36 +17,32 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
-import com.stripe.android.model.Source;
 
 import java.util.List;
 
+/**
+ * An activity that allows a user to select from a customer's available payment methods, or
+ * to add new ones.
+ */
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
-    private static final String EXTRA_CUSTOMER = "customer";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
-    private static final long FADE_DURATION_MS = 100L;
     private boolean mCommunicating;
     private Customer mCustomer;
     private CustomerSessionProxy mCustomerSessionProxy;
-    private TextView mErrorTextView;
-    private FrameLayout mErrorLayout;
     private MaskedCardAdapter mMaskedCardAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
-    private View mAddCardView;
     private boolean mRecyclerViewUpdated;
 
     public static Intent newIntent(Context context) {
@@ -60,11 +56,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
-        mErrorLayout = findViewById(R.id.payment_methods_error_container);
-        mErrorTextView = findViewById(R.id.tv_payment_methods_error);
-        mAddCardView = findViewById(R.id.payment_methods_add_payment_container);
+        View addCardView = findViewById(R.id.payment_methods_add_payment_container);
 
-        mAddCardView.setOnClickListener(
+        addCardView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -85,6 +79,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (!waitForProxy) {
             initializeCustomerSourceData();
         }
+        // This prevents the first click from being eaten by the focus.
+        addCardView.requestFocusFromTouch();
     }
 
     @Override
@@ -96,14 +92,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
-                            removeError();
                             updateCustomerAndSetDefaultSourceIfNecessary(customer);
                         }
 
                         @Override
                         public void onError(int errorCode, @Nullable String errorMessage) {
                             String displayedError = errorMessage == null ? "" : errorMessage;
-                            showError(displayedError, mCustomerSessionProxy == null);
+                            showError(displayedError);
                             setCommunicatingProgress(false);
                         }
                     };
@@ -192,14 +187,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
-                        removeError();
                         updateAdapterWithCustomer(customer);
                     }
 
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
                         String displayedError = errorMessage == null ? "" : errorMessage;
-                        showError(displayedError, mCustomerSessionProxy == null);
+                        showError(displayedError);
                         setCommunicatingProgress(false);
                     }
                 };
@@ -280,7 +274,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         mCustomer = customer;
-                        removeError();
                         createListFromCustomerSources();
                     }
 
@@ -296,11 +289,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         } else {
             mCustomerSessionProxy.retrieveCurrentCustomer(listener);
         }
-    }
-
-    private void removeError() {
-        mErrorTextView.setVisibility(View.GONE);
-        mErrorTextView.setText("");
     }
 
     private void setCommunicatingProgress(boolean communicating) {
@@ -324,7 +312,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
-                        removeError();
                         mCustomer = customer;
                         finishWithSelection(customer.getDefaultSource());
                         setCommunicatingProgress(false);
@@ -333,7 +320,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
                         String displayedError = errorMessage == null ? "" : errorMessage;
-                        showError(displayedError, mCustomerSessionProxy == null);
+                        showError(displayedError);
                         setCommunicatingProgress(false);
                     }
                 };
@@ -352,14 +339,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         setCommunicatingProgress(true);
     }
 
-    private void showError(@NonNull String error, boolean shouldAnimate) {
-        mErrorTextView.setText(error);
-        if (shouldAnimate) {
-            Fade fadeIn = new Fade(Fade.IN);
-            fadeIn.setDuration(FADE_DURATION_MS);
-            TransitionManager.beginDelayedTransition(mErrorLayout, fadeIn);
-        }
-        mErrorTextView.setVisibility(View.VISIBLE);
+    private void showError(@NonNull String error) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setMessage(error)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .create();
+        alertDialog.show();
     }
 
     private void updateAdapterWithCustomer(@NonNull Customer customer) {

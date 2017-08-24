@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
@@ -38,7 +39,6 @@ import static org.junit.Assert.assertTrue;
 public class MaskedCardViewTest {
 
     private MaskedCardView mMaskedCardView;
-    private AppCompatTextView mCardInformationTextView;
     private AppCompatImageView mSelectedImageView;
 
     @Before
@@ -46,7 +46,6 @@ public class MaskedCardViewTest {
         ActivityController<CardInputTestActivity> activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class).create().start().resume();
         mMaskedCardView = activityController.get().getMaskedCardView();
-        mCardInformationTextView = mMaskedCardView.findViewById(R.id.masked_card_info_view);
         mSelectedImageView = mMaskedCardView.findViewById(R.id.masked_check_icon);
 
         Calendar expirationCalendar = Calendar.getInstance();
@@ -56,6 +55,16 @@ public class MaskedCardViewTest {
 
         assertTrue("These tests assume that an expiry date of December 2050 is valid.",
                 expirationCalendar.after(nowCalendar));
+    }
+
+    @Test
+    public void init_setsColorValuesWithAlpha() {
+        final int alpha = 204; // 80% of 255
+        int[] colorValues = mMaskedCardView.getTextColorValues();
+        // The colors are arranged [selected, selectedLowAlpha, unselected, unselectedLowAlpha
+        assertEquals(4, colorValues.length);
+        assertEquals(colorValues[1], ColorUtils.setAlphaComponent(colorValues[0], alpha));
+        assertEquals(colorValues[3], ColorUtils.setAlphaComponent(colorValues[2], alpha));
     }
 
     @Test
@@ -119,22 +128,18 @@ public class MaskedCardViewTest {
     }
 
     @Test
-    public void setSelected_changesTextColor_andCheckMarkVisibility() {
+    public void setSelected_changesCheckMarkVisibility() {
         CustomerSource customerSource = CustomerSource.fromString(JSON_CARD);
         assertNotNull(customerSource);
         mMaskedCardView.setCustomerSource(customerSource);
 
         assertFalse(mMaskedCardView.isSelected());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
-        assertEquals(mMaskedCardView.mUnselectedTextColorInt,
-                mCardInformationTextView.getCurrentTextColor());
 
         mMaskedCardView.setSelected(true);
 
         assertTrue(mMaskedCardView.isSelected());
         assertEquals(View.VISIBLE, mSelectedImageView.getVisibility());
-        assertEquals(mMaskedCardView.mSelectedColorInt,
-                mCardInformationTextView.getCurrentTextColor());
     }
 
     @Test

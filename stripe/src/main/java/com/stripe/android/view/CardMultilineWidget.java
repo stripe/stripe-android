@@ -47,10 +47,12 @@ public class CardMultilineWidget extends LinearLayout {
     private ExpiryDateEditText mExpiryDateEditText;
     private StripeEditText mCvcEditText;
     private StripeEditText mPostalCodeEditText;
+    private TextInputLayout mCardNumberTextInputLayout;
     private TextInputLayout mExpiryTextInputLayout;
     private TextInputLayout mCvcTextInputLayout;
     private TextInputLayout mPostalInputLayout;
 
+    private boolean mIsEnabled;
     private boolean mShouldShowPostalCode;
     private boolean mHasAdjustedDrawable;
 
@@ -155,6 +157,20 @@ public class CardMultilineWidget extends LinearLayout {
         adjustViewForPostalCodeAttribute();
     }
 
+    @Override
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        mExpiryTextInputLayout.setEnabled(enabled);
+        mCardNumberTextInputLayout.setEnabled(enabled);
+        mCvcTextInputLayout.setEnabled(enabled);
+        mPostalInputLayout.setEnabled(enabled);
+        mIsEnabled = enabled;
+    }
+
     void adjustViewForPostalCodeAttribute() {
         // Set the label/hint to the shorter value if we have three things in a row.
         @StringRes int expiryLabel = mShouldShowPostalCode
@@ -246,7 +262,7 @@ public class CardMultilineWidget extends LinearLayout {
         checkAttributeSet(attrs);
 
 
-        TextInputLayout cardInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
+        mCardNumberTextInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         mExpiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
@@ -258,7 +274,7 @@ public class CardMultilineWidget extends LinearLayout {
         }
 
         initTextInputLayoutErrorHandlers(
-                cardInputLayout,
+                mCardNumberTextInputLayout,
                 mExpiryTextInputLayout,
                 mCvcTextInputLayout,
                 mPostalInputLayout);
@@ -332,6 +348,7 @@ public class CardMultilineWidget extends LinearLayout {
 
         mCardNumberEditText.updateLengthFilter();
         updateBrand(Card.UNKNOWN);
+        setEnabled(true);
     }
 
     private void initDeleteEmptyListeners() {

@@ -33,19 +33,4 @@
         android:layout_below="@id/add_source_toolbar"
         />
 
-    <FrameLayout
-        android:id="@+id/add_source_error_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/add_source_card_entry_widget"
-        >
-        <TextView
-            android:id="@+id/tv_add_source_error"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/add_card_total_margin"
-            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
-            android:visibility="gone"/>
-    </FrameLayout>
-
 </RelativeLayout>
