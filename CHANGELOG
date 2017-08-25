@@ -1,3 +1,13 @@
+5.0.0 2017-08-25
+    Adding the CustomerSession and EphemeralKeyProvider classes
+    Adding CardMultilineWidget class for adding Card data in material design
+    Adding AddSourceActivity and PaymentMethodsActivity for selecting customer payment
+    Stability and efficiency improvements
+    *breaking* Moving networking and utils classes to be package-private instead of public
+    *breaking* Upgrading Gradle wrapper version
+    *breaking* Upgrading Android support library versions
+    *breaking* Upgrading build tools version
+
 4.1.6 2017-07-31
     Fixing Android Pay string translation crash for decimal comma languages
 
