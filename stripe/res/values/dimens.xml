@@ -23,4 +23,6 @@
     <dimen name="masked_card_row_end_padding">8dp</dimen>
     <dimen name="masked_card_row_height">48dp</dimen>
     <dimen name="toolbar_elevation">4dp</dimen>
+    <dimen name="shipping_widget_vertical_margin">6dp</dimen>
+    <dimen name="shipping_widget_horizontal_margin">12dp</dimen>
 </resources>
