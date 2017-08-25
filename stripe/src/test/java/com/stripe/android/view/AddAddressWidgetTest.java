@@ -17,6 +17,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,6 +44,7 @@ public class AddAddressWidgetTest {
     private StripeEditText mCityEditText;
     private StripeEditText mNameEditText;
     private StripeEditText mStateEditText;
+    private StripeEditText mPhoneEditText;
     private Spinner mCountrySpinner;
     private CountryAdapter mCountryAdapter;
     private List<Pair<String, String>> mOrderedCountries;
@@ -52,7 +54,7 @@ public class AddAddressWidgetTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
+        Locale.setDefault(Locale.US);
         ActivityController<AddressInputTestActivity> activityController =
                 Robolectric.buildActivity(AddressInputTestActivity.class).create().start();
         mAddAddressWidget = activityController.get().getAddAddressWidget();
@@ -62,11 +64,12 @@ public class AddAddressWidgetTest {
         mNameTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_name_aaw);
         mPostalCodeTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_postal_code_aaw);
         mStateTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_state_aaw);
-        mAddressEditText = mAddAddressWidget.findViewById(R.id.et_address_aaw);
+        mAddressEditText = mAddAddressWidget.findViewById(R.id.et_address_line_one_aaw);
         mCityEditText = mAddAddressWidget.findViewById(R.id.et_city_aaw);
         mNameEditText = mAddAddressWidget.findViewById(R.id.et_name_aaw);
         mPostalEditText = mAddAddressWidget.findViewById(R.id.et_postal_code_aaw);
         mStateEditText = mAddAddressWidget.findViewById(R.id.et_state_aaw);
+        mPhoneEditText = mAddAddressWidget.findViewById(R.id.et_phone_number_aaw);
         mCountrySpinner = mAddAddressWidget.findViewById(R.id.spinner_country_aaw);
         mCountryAdapter = (CountryAdapter) mCountrySpinner.getAdapter();
         mOrderedCountries = mCountryAdapter.getOrderedCountries();
@@ -118,6 +121,7 @@ public class AddAddressWidgetTest {
         mCityEditText.setText("Fake City");
         mPostalEditText.setText("12345");
         mStateEditText.setText("CA");
+        mPhoneEditText.setText("(123) 456 - 7890");
         assertTrue(mAddAddressWidget.validateAllFields());
         mPostalEditText.setText("");
         assertFalse(mAddAddressWidget.validateAllFields());
@@ -191,4 +195,38 @@ public class AddAddressWidgetTest {
         assertEquals(mStateTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_region_generic_required));
     }
 
+    @Test
+    public void addAddressWidget_whenFieldsOptional_markedAsOptional(){
+        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_zip_code));
+        assertEquals(mNameTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_name));
+        List<String> optionalFields = new ArrayList<>();
+        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        optionalFields.add(AddAddressWidget.NAME_FIELD);
+        mAddAddressWidget.setOptionalFields(optionalFields);
+        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_zip_code_optional));
+        assertEquals(mNameTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_name_optional));
+        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
+        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
+        mCountrySpinner.setSelection(canadaIndex);
+        assertEquals(mStateTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_province));
+        optionalFields.add(AddAddressWidget.STATE_FIELD);
+        mAddAddressWidget.setOptionalFields(optionalFields);
+        assertEquals(mStateTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_province_optional));
+    }
+
+    @Test
+    public void addAddressWidget_whenFieldsHidden_renderedHidden() {
+        assertEquals(mNameTextInputLayout.getVisibility(), View.VISIBLE);
+        assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.VISIBLE);
+        List<String> hiddenFields = new ArrayList<>();
+        hiddenFields.add(AddAddressWidget.NAME_FIELD);
+        hiddenFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        mAddAddressWidget.setHiddenFields(hiddenFields);
+        assertEquals(mNameTextInputLayout.getVisibility(), View.GONE);
+        assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
+        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
+        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
+        mCountrySpinner.setSelection(canadaIndex);
+        assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
+    }
 }

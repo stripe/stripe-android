@@ -14,7 +14,6 @@
         android:id="@+id/tl_name_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_name"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -29,11 +28,10 @@
         android:id="@+id/tl_address_line1_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_address"
         >
 
         <com.stripe.android.view.StripeEditText
-            android:id="@+id/et_address_aaw"
+            android:id="@+id/et_address_line_one_aaw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
@@ -44,11 +42,10 @@
         android:id="@+id/tl_address_line2_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_apt"
         >
 
         <com.stripe.android.view.StripeEditText
-            android:id="@+id/et_apt_aaw"
+            android:id="@+id/et_address_line_two_aaw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
@@ -59,7 +56,6 @@
         android:id="@+id/tl_city_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_city"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -75,7 +71,6 @@
         android:id="@+id/tl_state_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_state"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -90,7 +85,6 @@
         android:id="@+id/tl_postal_code_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_zip_code"
         >
 
         <com.stripe.android.view.StripeEditText
