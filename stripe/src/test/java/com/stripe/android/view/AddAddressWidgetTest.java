@@ -73,7 +73,7 @@ public class AddAddressWidgetTest {
     }
 
     @Test
-    public void fieldsRenderTest() {
+    public void addAddressWidget_whenCountryChanged_fieldsRenderCorrectly() {
         Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
@@ -108,7 +108,7 @@ public class AddAddressWidgetTest {
     }
 
     @Test
-    public void validationTest() {
+    public void addAddressWidget_addressSaved_validationTriggers() {
         Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
@@ -130,7 +130,7 @@ public class AddAddressWidgetTest {
     }
 
     @Test
-    public void errorRenderingTest() {
+    public void addAddressTest_whenValidationFails_errorTextRenders() {
         Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
@@ -162,7 +162,7 @@ public class AddAddressWidgetTest {
     }
 
     @Test
-    public void internationalErrorRenderingTest() {
+    public void addAddressWidget_whenErrorOccurs_errorsRenderInternationalized() {
         Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
