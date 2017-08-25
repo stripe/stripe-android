@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/tv_amount_smv"
         android:layout_toStartOf="@+id/tv_amount_smv"
-        android:paddingTop="6dp"
+        android:paddingTop="@dimen/shipping_widget_vertical_margin"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
         />
 
@@ -22,10 +22,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/tv_label_smv"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="@dimen/shipping_widget_vertical_margin"
         android:layout_toLeftOf="@+id/tv_amount_smv"
         android:layout_toStartOf="@+id/tv_amount_smv"
-        android:paddingBottom="6dp"
+        android:paddingBottom="@dimen/shipping_widget_vertical_margin"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
@@ -34,8 +34,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
+        android:layout_marginEnd="@dimen/shipping_widget_horizontal_margin"
+        android:layout_marginRight="@dimen/shipping_widget_horizontal_margin"
         android:layout_toLeftOf="@+id/iv_selected_icon"
         android:layout_toStartOf="@+id/iv_selected_icon"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"

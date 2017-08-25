@@ -16,8 +16,7 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
     private List<ShippingMethod> mShippingMethods;
     private int mSelectedIndex = 0;
 
-    ShippingMethodAdapter() {
-    }
+    ShippingMethodAdapter() {}
 
     @Override
     public int getItemCount() {
