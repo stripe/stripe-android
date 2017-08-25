@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-def android_support_version = '25.3.1'
+def android_support_version = '26.0.1'
 
 version = VERSION_NAME
 
@@ -11,22 +11,25 @@ configurations {
 dependencies {
     compile 'com.android.support:support-annotations:' + android_support_version
     compile 'com.android.support:appcompat-v7:' + android_support_version
+    compile 'com.android.support:design:' + android_support_version
 
     javadocDeps 'com.android.support:support-annotations:' + android_support_version
     javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
+    javadocDeps 'com.android.support:design:' + android_support_version
     provided 'javax.annotation:jsr250-api:1.0'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.7.22'
-    testCompile 'org.robolectric:robolectric:3.3.2'
+    testCompile 'org.robolectric:robolectric:3.4'
 }
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.0'
+    buildToolsVersion '26.0.1'
     defaultConfig {
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 26
+        consumerProguardFiles 'proguard-rules.txt'
     }
     sourceSets {
         main {
@@ -43,7 +46,7 @@ android {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '4.0.1'
 }
 
 apply from: 'deploy.gradle'

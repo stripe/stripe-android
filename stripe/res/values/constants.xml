@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="date_length">5</integer>
+    <integer name="light_text_alpha_hex">204</integer>
+</resources>

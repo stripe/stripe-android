@@ -5,4 +5,8 @@
         <attr name="cardTint" format="color"/>
         <attr name="cardTextErrorColor" format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="CardMultilineWidget">
+        <attr name="shouldShowPostalCode" format="boolean" />
+    </declare-styleable>
 </resources>

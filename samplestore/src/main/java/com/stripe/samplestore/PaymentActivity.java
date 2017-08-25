@@ -165,6 +165,7 @@ public class PaymentActivity extends StripeAndroidPayActivity {
      */
     @Override
     protected void onAndroidPayAvailable() {
+        createAndAddBuyButtonWalletFragment();
         mAndroidPayGroupContainer.setVisibility(View.VISIBLE);
         mTvOr.setVisibility(View.VISIBLE);
         mTvOr.requestFocus();

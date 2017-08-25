@@ -4,24 +4,38 @@ repositories {
     mavenCentral()
 }
 
-def android_support_version = '25.3.1'
+def android_support_version = '26.0.1'
 
 dependencies {
     compile project(':android-pay')
     compile project(':stripe')
     compile 'com.android.support:appcompat-v7:' + android_support_version
     compile 'com.android.support:recyclerview-v7:' + android_support_version
-    compile 'com.google.android.gms:play-services-wallet:10.2.6'
+    compile 'com.google.android.gms:play-services-wallet:11.0.4'
+
     /* Needed for RxAndroid */
-    /* Needed for Rx Bindings on views */
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
+
+    /* Needed for Rx Bindings on views */
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+
+    /* Used for server calls */
+    compile 'com.squareup.okio:okio:1.11.0'
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+
+    /* Used to make Retrofit easier and GSON & Rx-compatible*/
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0'
+
+    /* Used to debug your Retrofit connections */
+    compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
 }
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         minSdkVersion 14
@@ -45,4 +59,8 @@ android {
             setRoot('src/test')
         }
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0.1'
 }

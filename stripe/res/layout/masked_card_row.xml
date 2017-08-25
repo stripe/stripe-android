@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingEnd="@dimen/masked_card_row_end_padding"
+    android:paddingRight="@dimen/masked_card_row_end_padding"
+    android:paddingLeft="@dimen/masked_card_row_start_padding"
+    android:paddingStart="@dimen/masked_card_row_start_padding"
+    >
+
+    <com.stripe.android.view.MaskedCardView
+        android:id="@+id/masked_card_item"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/masked_card_row_height"/>
+
+</FrameLayout>

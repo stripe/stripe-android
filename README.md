@@ -20,17 +20,11 @@ Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as
 
 Note - as Google has stopped supporting Eclipse for Android Development, we will no longer be actively testing the project's compatibility within Eclipse. You may still clone and include the library as you would any other Android library project.
 
-### ProGuard
-
-If you're planning on optimizing your app with ProGuard, make sure that you exclude the Stripe bindings. You can do this by adding the following to your app's `proguard.cfg` file:
-
-    -keep class com.stripe.** { *; }
-
 ## Usage
 
 ### Using the CardInputWidget
 
-You can add a widget to your apps that easily handles the UI states for collecting card data.
+You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
 
 First, add the CardInputWidget to your layout.
 
@@ -54,7 +48,42 @@ if (cardToSave == null) {
 }
 ```
 
-Once you have a non-null `Card` object, you can call [createToken](#createtoken).
+### Using the CardMultilineWidget
+
+You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
+
+```xml
+<com.stripe.android.view.CardMultilineWidget
+    android:id="@+id/card_multiline_widget"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:shouldShowPostalCode="true"
+    />
+```
+
+Note: a `CardMultiline` widget can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
+
+In order to use the `app:shouldShowPostalCode` tag, you'll need to enable the app XML namespace somewhere in the layout.
+
+Note: We currently only support US ZIP in the postal code field.
+
+```xml
+xmlns:app="http://schemas.android.com/apk/res-auto"
+```
+
+To get a `Card` object from the `CardMultilineWidget`, you ask the widget for its card, just like the `CardInputWidget`.
+
+```java
+Card cardToSave = mCardMultilineWidget();
+if (cardToSave == null) {
+    mErrorDialogHandler.showError("Invalid Card Data");
+    return;
+}
+```
+
+If the returned `Card` is null, error states will show on the fields that need to be fixed. 
+
+Once you have a non-null `Card` object from either widget, you can call [createToken](#createtoken).
 
 ### setDefaultPublishableKey
 
@@ -271,16 +300,6 @@ Checks whether or not the supplied number could be a valid verification code.
 
 Convenience method to validate card number, expiry date and CVC.
 
-### Retrieving information about a token
-
-The bindings for retrieving information about a token has been removed from the Android SDK because only older Stripe accounts (from early 2014) can perform this operation with a public key. If you still need this functionality, make sure to use the last version of the Android bindings that contained this functionality by setting your version in the `build.gradle` file as follows.
-
-```groovy
-    // Using older bindings to have access to requestToken
-    compile 'com.stripe:stripe-android:1.1.1'
-```
-
-
 ## Example apps
 
 There are 2 example apps included in the repository:
@@ -302,14 +321,14 @@ Note: both example apps require an [Android SDK](https://developer.android.com/s
     * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
 4. Build and run the project on your device or in the Android emulator.
 
-The example application ships with a sample publishable key, but if you want to test with your own Stripe account, you can [replace the value of PUBLISHABLE_KEY in DependencyHandler with your test key](example/src/main/java/com/stripe/example/module/DependencyHandler.java#L30).
+The example application needs a public key from your Stripe account to interact with the Stripe API. To add this, [replace the value of PUBLISHABLE_KEY in LauncherActivity with your test key](example/src/main/java/com/stripe/example/activity/LauncherActivity.java#L25).
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
 
-### Building and Running the samplestore project
+### Building and Running the samplestore project and CustomerSessions
 
-Before you can run the SampleStore application, you need to provide it with your Stripe publishable key.
+Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
 
 1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to https://dashboard.stripe.com/account/apikeys.
 2. Replace the `PUBLISHABLE_KEY` constant in StoreActivity.java (where it says "put your publishable key here") with your Test Publishable Key.

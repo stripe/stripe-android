@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
+import android.text.TextUtils;
 
-import com.stripe.android.util.CardUtils;
-import com.stripe.android.util.DateUtils;
-import com.stripe.android.util.LoggingUtils;
-import com.stripe.android.util.StripeNetworkUtils;
-import com.stripe.android.util.StripeTextUtils;
+import com.stripe.android.CardUtils;
+import com.stripe.android.R;
+import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.StripeTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,22 +18,21 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optCountryCode;
-import static com.stripe.android.util.StripeJsonUtils.optCurrency;
-import static com.stripe.android.util.StripeJsonUtils.optInteger;
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.optCountryCode;
+import static com.stripe.android.model.StripeJsonUtils.optCurrency;
+import static com.stripe.android.model.StripeJsonUtils.optInteger;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * A model object representing a Card in the Android SDK.
  */
 public class Card extends StripeJsonModel implements StripePaymentSource {
-
-    public static final String VALUE_CARD = "card";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -70,6 +69,17 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String FUNDING_PREPAID = "prepaid";
     public static final String FUNDING_UNKNOWN = "unknown";
 
+    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
+
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
     public static final String[] PREFIXES_DISCOVER = {"60", "62", "64", "65"};
@@ -87,6 +97,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final int MAX_LENGTH_STANDARD = 16;
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
     public static final int MAX_LENGTH_DINERS_CLUB = 14;
+
+    static final String VALUE_CARD = "card";
 
     private static final String FIELD_OBJECT = "object";
     private static final String FIELD_ADDRESS_CITY = "address_city";
@@ -281,6 +293,60 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
+     * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
+     *
+     * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
+     * @return {@code null} if the input is blank, else the appropriate {@link CardBrand}.
+     */
+    @Nullable
+    @CardBrand
+    public static String asCardBrand(@Nullable String possibleCardType) {
+        if (possibleCardType == null || TextUtils.isEmpty(possibleCardType.trim())) {
+            return null;
+        }
+
+        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
+            return Card.AMERICAN_EXPRESS;
+        } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
+            return Card.MASTERCARD;
+        } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
+            return Card.DINERS_CLUB;
+        } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
+            return Card.DISCOVER;
+        } else if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
+            return Card.JCB;
+        } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
+            return Card.VISA;
+        } else {
+            return Card.UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts an unchecked String value to a {@link FundingType} or {@code null}.
+     *
+     * @param possibleFundingType a String that might match a {@link FundingType} or be empty
+     * @return {@code null} if the input is blank, else the appropriate {@link FundingType}
+     */
+    @Nullable
+    @FundingType
+    public static String asFundingType(@Nullable String possibleFundingType) {
+        if (possibleFundingType == null || TextUtils.isEmpty(possibleFundingType.trim())) {
+            return null;
+        }
+
+        if (Card.FUNDING_CREDIT.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_CREDIT;
+        } else if (Card.FUNDING_DEBIT.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_DEBIT;
+        } else if (Card.FUNDING_PREPAID.equalsIgnoreCase(possibleFundingType)) {
+            return Card.FUNDING_PREPAID;
+        } else {
+            return Card.FUNDING_UNKNOWN;
+        }
+    }
+
+    /**
      * Create a Card object from a raw JSON string.
      *
      * @param jsonString the JSON string representing the potential Card
@@ -327,12 +393,12 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         builder.addressState(optString(jsonObject, FIELD_ADDRESS_STATE));
         builder.addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP));
         builder.addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK));
-        builder.brand(StripeTextUtils.asCardBrand(optString(jsonObject, FIELD_BRAND)));
+        builder.brand(asCardBrand(optString(jsonObject, FIELD_BRAND)));
         builder.country(optCountryCode(jsonObject, FIELD_COUNTRY));
         builder.customer(optString(jsonObject, FIELD_CUSTOMER));
         builder.currency(optCurrency(jsonObject, FIELD_CURRENCY));
         builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
-        builder.funding(StripeTextUtils.asFundingType(optString(jsonObject, FIELD_FUNDING)));
+        builder.funding(asFundingType(optString(jsonObject, FIELD_FUNDING)));
         builder.fingerprint(optString(jsonObject, FIELD_FINGERPRINT));
         builder.id(optString(jsonObject, FIELD_ID));
         builder.last4(optString(jsonObject, FIELD_LAST4));
@@ -393,10 +459,10 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         this.addressState = StripeTextUtils.nullIfBlank(addressState);
         this.addressZip = StripeTextUtils.nullIfBlank(addressZip);
         this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
-        this.brand = StripeTextUtils.asCardBrand(brand) == null ? getBrand() : brand;
+        this.brand = asCardBrand(brand) == null ? getBrand() : brand;
         this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
         this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
-        this.funding = StripeTextUtils.asFundingType(funding);
+        this.funding = asFundingType(funding);
         this.country = StripeTextUtils.nullIfBlank(country);
         this.currency = StripeTextUtils.nullIfBlank(currency);
         this.id = StripeTextUtils.nullIfBlank(id);
@@ -492,11 +558,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code true} if valid, {@code false} otherwise.
      */
     public boolean validateCard() {
-        if (cvc == null) {
-            return validateNumber() && validateExpiryDate();
-        } else {
-            return validateNumber() && validateExpiryDate() && validateCVC();
-        }
+        return validateCard(Calendar.getInstance());
     }
 
     /**
@@ -515,13 +577,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean validateExpiryDate() {
-        if (!validateExpMonth()) {
-            return false;
-        }
-        if (!validateExpYear()) {
-            return false;
-        }
-        return !DateUtils.hasMonthPassed(expYear, expMonth);
+        return validateExpiryDate(Calendar.getInstance());
     }
 
     /**
@@ -540,7 +596,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
                 || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
                 || cvcValue.length() == 3;
 
-        return StripeTextUtils.isWholePositiveNumber(cvcValue) && validLength;
+        return ModelUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
 
     /**
@@ -557,8 +613,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      *
      * @return {@code true} if valid, {@code false} otherwise.
      */
-    public boolean validateExpYear() {
-        return expYear != null && !DateUtils.hasYearPassed(expYear);
+    boolean validateExpYear(Calendar now) {
+        return expYear != null && !ModelUtils.hasYearPassed(expYear, now);
     }
 
     /**
@@ -583,7 +639,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public Card addLoggingToken(@NonNull @LoggingUtils.LoggingToken String loggingToken) {
+    public Card addLoggingToken(@NonNull String loggingToken) {
         loggingTokens.add(loggingToken);
         return this;
     }
@@ -798,23 +854,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     @CardBrand
     public String getBrand() {
         if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
-            @CardBrand String evaluatedType;
-            if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_AMERICAN_EXPRESS)) {
-                evaluatedType = AMERICAN_EXPRESS;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DISCOVER)) {
-                evaluatedType = DISCOVER;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_JCB)) {
-                evaluatedType = JCB;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_DINERS_CLUB)) {
-                evaluatedType = DINERS_CLUB;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_VISA)) {
-                evaluatedType = VISA;
-            } else if (StripeTextUtils.hasAnyPrefix(number, PREFIXES_MASTERCARD)) {
-                evaluatedType = MASTERCARD;
-            } else {
-                evaluatedType = UNKNOWN;
-            }
-            brand = evaluatedType;
+            brand = CardUtils.getPossibleCardType(number);
         }
 
         return brand;
@@ -943,6 +983,24 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         return map;
     }
 
+    boolean validateCard(Calendar now) {
+        if (cvc == null) {
+            return validateNumber() && validateExpiryDate(now);
+        } else {
+            return validateNumber() && validateExpiryDate(now) && validateCVC();
+        }
+    }
+
+    boolean validateExpiryDate(Calendar now) {
+        if (!validateExpMonth()) {
+            return false;
+        }
+        if (!validateExpYear(now)) {
+            return false;
+        }
+        return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
+    }
+
     private Card(Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
@@ -960,11 +1018,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         this.last4 = StripeTextUtils.nullIfBlank(builder.last4) == null
                 ? getLast4()
                 : builder.last4;
-        this.brand = StripeTextUtils.asCardBrand(builder.brand) == null
+        this.brand = asCardBrand(builder.brand) == null
                 ? getBrand()
                 : builder.brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
-        this.funding = StripeTextUtils.asFundingType(builder.funding);
+        this.funding = asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
         this.customerId = StripeTextUtils.nullIfBlank(builder.customer);

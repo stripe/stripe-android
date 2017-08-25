@@ -110,6 +110,7 @@ public class AndroidPayActivity extends StripeAndroidPayActivity {
     @Override
     protected void onAndroidPayAvailable() {
         mFragmentContainer.setVisibility(View.VISIBLE);
+        createAndAddBuyButtonWalletFragment();
     }
 
     @Override

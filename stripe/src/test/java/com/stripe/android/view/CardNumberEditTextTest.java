@@ -1,7 +1,7 @@
 package com.stripe.android.view;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Card;
-import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -11,15 +11,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_NO_SPACES;
-import static com.stripe.android.testharness.CardInputTestActivity.VALID_VISA_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -31,12 +31,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
- * Test class for {@link CardNumberEditText}. Note that we have to test against SDK 22
- * because of a <a href="https://github.com/robolectric/robolectric/issues/1932">known issue</a> in
- * Robolectric.
+ * Test class for {@link CardNumberEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class CardNumberEditTextTest {
 
     @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
@@ -46,7 +44,7 @@ public class CardNumberEditTextTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController activityController =
+        ActivityController<CardInputTestActivity> activityController =
                 Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
         mCardNumberEditText =

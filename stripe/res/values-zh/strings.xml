@@ -2,5 +2,16 @@
 <resources>
     <string name="acc_label_card_number">"卡号"</string>
     <string name="acc_label_expiry_date">"有效日期"</string>
+    <string name="acc_label_zip">邮政编码</string>
+    <string name="acc_label_zip_short">邮政编码</string>
     <string name="expiry_date_hint">月 / 年</string>
+    <string name="expiry_label_short">有效期</string>
+    <string name="invalid_card_number">您的卡号无效。</string>
+    <string name="invalid_expiry_month">您的银行卡有效日期的月份无效。</string>
+    <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>
+    <string name="invalid_cvc">您的银行卡安全码无效。</string>
+    <string name="invalid_zip">您的邮政编码不完整。</string>
+    <string name="payment_method_add_new_card">添加新卡……</string>
+    <string name="title_add_a_card">添加一张卡</string>
+    <string name="title_payment_method">支付方式</string>
 </resources>

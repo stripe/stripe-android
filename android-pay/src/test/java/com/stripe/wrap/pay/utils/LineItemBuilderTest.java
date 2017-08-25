@@ -25,7 +25,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link LineItemBuilder}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class LineItemBuilderTest {
 
     @Test

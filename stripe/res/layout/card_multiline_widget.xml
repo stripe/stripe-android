@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+
+    <com.stripe.android.view.IconTextInputLayout
+        android:id="@+id/tl_add_source_card_number_ml"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/acc_label_card_number"
+        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        >
+
+        <com.stripe.android.view.CardNumberEditText
+            android:id="@+id/et_add_source_card_number_ml"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="@string/valid_digits"
+            android:drawableLeft="@drawable/ic_unknown"
+            android:drawablePadding="@dimen/card_icon_multiline_padding"
+            android:drawableStart="@drawable/ic_unknown"
+            android:inputType="number"
+            android:nextFocusDown="@+id/et_add_source_expiry_ml"
+            android:nextFocusForward="@+id/et_add_source_expiry_ml"
+            />
+
+    </com.stripe.android.view.IconTextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/second_row_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        >
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/tl_add_source_expiry_ml"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            android:hint="@string/acc_label_expiry_date"
+            >
+
+            <com.stripe.android.view.ExpiryDateEditText
+                android:id="@+id/et_add_source_expiry_ml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:maxLength="@integer/date_length"
+                android:nextFocusDown="@+id/et_add_source_cvc_ml"
+                android:nextFocusForward="@+id/et_add_source_cvc_ml"
+                />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/tl_add_source_cvc_ml"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            >
+
+            <com.stripe.android.view.StripeEditText
+                android:id="@+id/et_add_source_cvc_ml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="@string/valid_digits"
+                android:inputType="number"
+                android:nextFocusDown="@+id/et_add_source_postal_ml"
+                android:nextFocusForward="@+id/et_add_source_postal_ml"
+                />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/tl_add_source_postal_ml"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            >
+
+            <!--In future releases we will remove the android:digits restriction
+            to support international postal codes.-->
+            <com.stripe.android.view.StripeEditText
+                android:id="@+id/et_add_source_postal_ml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="@string/valid_digits"
+                android:hint="@string/acc_label_zip"
+                android:inputType="number"
+                android:maxLength="5"
+                />
+
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+</merge>

@@ -25,6 +25,15 @@
         />
 
     <Button
+        android:id="@+id/btn_make_card_sources"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:text="@string/createCardSources"
+        />
+
+    <Button
         android:id="@+id/btn_make_sources"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
@@ -40,6 +49,15 @@
         android:layout_margin="10dp"
         android:layout_gravity="center"
         android:text="@string/createAndroidPayTokens"
+        />
+
+    <Button
+        android:id="@+id/btn_customer_session_launch"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:text="@string/launch_customer_session"
         />
 
 </LinearLayout>

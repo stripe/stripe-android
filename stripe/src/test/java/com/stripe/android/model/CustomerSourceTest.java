@@ -10,6 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.stripe.android.model.CardTest.JSON_CARD;
+import static com.stripe.android.model.SourceTest.EXAMPLE_BITCOIN_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,5 +55,24 @@ public class CustomerSourceTest {
         } catch (JSONException exception) {
             fail("Test data failure: " + exception.getMessage());
         }
+    }
+
+    @Test
+    public void getSourceType_whenCard_returnsCard() {
+        try {
+            JSONObject jsonCard = new JSONObject(JSON_CARD);
+            CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
+            assertNotNull(sourceData);
+            assertEquals(Source.CARD, sourceData.getSourceType());
+        } catch (JSONException jsonException) {
+            fail("Test data failure: " + jsonException.getMessage());
+        }
+    }
+
+    @Test
+    public void getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
+        CustomerSource bitcoinSource = CustomerSource.fromString(EXAMPLE_BITCOIN_SOURCE);
+        assertNotNull(bitcoinSource);
+        assertEquals(Source.BITCOIN, bitcoinSource.getSourceType());
     }
 }

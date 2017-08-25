@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
  * Model of the "data" object inside a {@link Customer} "source" object.
@@ -47,6 +47,18 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
             return (Card) mStripePaymentSource;
         }
         return null;
+    }
+
+    @NonNull
+    @Source.SourceType
+    public String getSourceType() {
+        if (mStripePaymentSource instanceof Card) {
+            return Source.CARD;
+        } else if (mStripePaymentSource instanceof Source) {
+            return ((Source) mStripePaymentSource).getType();
+        } else {
+            return Source.UNKNOWN;
+        }
     }
 
     @Nullable

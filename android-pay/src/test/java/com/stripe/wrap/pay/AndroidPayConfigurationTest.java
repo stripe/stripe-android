@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link AndroidPayConfiguration}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class AndroidPayConfigurationTest {
 
     private Cart mCart;

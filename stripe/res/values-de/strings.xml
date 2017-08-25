@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="acc_label_card_number">"Kartennummer"</string>
-    <string name="acc_label_expiry_date">"Gültig bis"</string>
+    <string name="acc_label_card_number">Kartennummer</string>
+    <string name="acc_label_expiry_date">Gültig bis</string>
+    <string name="acc_label_zip">Postleitzahl</string>
+    <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/JJ</string>
+    <string name="expiry_label_short">Gültig bis</string>
+    <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>
+    <string name="invalid_expiry_month">Die Monatsangabe Ihrer Karte ist ungültig.</string>
+    <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
+    <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
+    <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
+    <string name="payment_method_add_new_card">Neue Karte hinzufügen&#8230;</string>
+    <string name="title_add_a_card">Karte hinzufügen</string>
+    <string name="title_payment_method">Zahlungsmethode</string>
 </resources>

@@ -3,8 +3,8 @@ package com.stripe.android.view;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
-import com.stripe.android.testharness.CardInputTestActivity;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -14,9 +14,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * Test class for {@link StripeEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 22)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeEditTextTest {
 
     @Mock StripeEditText.AfterTextChangedListener mAfterTextChangedListener;
@@ -94,36 +93,6 @@ public class StripeEditTextTest {
         }
 
         verify(mDeleteEmptyListener, times(1)).onDeleteEmpty();
-    }
-
-    @Test
-    public void isColorDark_forExampleLightColors_returnsFalse() {
-        @ColorInt int middleGray = 0x888888;
-        @ColorInt int offWhite = 0xfaebd7;
-        @ColorInt int lightCyan = 0x8feffb;
-        @ColorInt int lightYellow = 0xfcf4b2;
-        @ColorInt int lightBlue = 0x9cdbff;
-
-        assertFalse(StripeEditText.isColorDark(middleGray));
-        assertFalse(StripeEditText.isColorDark(offWhite));
-        assertFalse(StripeEditText.isColorDark(lightCyan));
-        assertFalse(StripeEditText.isColorDark(lightYellow));
-        assertFalse(StripeEditText.isColorDark(lightBlue));
-        assertFalse(StripeEditText.isColorDark(Color.WHITE));
-    }
-
-    @Test
-    public void isColorDark_forExampleDarkColors_returnsTrue() {
-        @ColorInt int logoBlue = 0x6772e5;
-        @ColorInt int slate = 0x525f7f;
-        @ColorInt int darkPurple = 0x6b3791;
-        @ColorInt int darkishRed = 0x9e2146;
-
-        assertTrue(StripeEditText.isColorDark(logoBlue));
-        assertTrue(StripeEditText.isColorDark(slate));
-        assertTrue(StripeEditText.isColorDark(darkPurple));
-        assertTrue(StripeEditText.isColorDark(darkishRed));
-        assertTrue(StripeEditText.isColorDark(Color.BLACK));
     }
 
     @Test

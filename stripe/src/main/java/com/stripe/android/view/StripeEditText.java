@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,6 +22,8 @@ import android.view.inputmethod.InputConnectionWrapper;
 
 import com.stripe.android.R;
 
+import static com.stripe.android.view.ViewUtils.isColorDark;
+
 /**
  * Extension of {@link AppCompatEditText} that listens for users pressing the delete key when there is
  * no text present. Google has actually made this
@@ -26,7 +31,7 @@ import com.stripe.android.R;
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-public class StripeEditText extends AppCompatEditText {
+public class StripeEditText extends TextInputEditText {
 
     @Nullable private AfterTextChangedListener mAfterTextChangedListener;
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
@@ -34,6 +39,10 @@ public class StripeEditText extends AppCompatEditText {
     private boolean mShouldShowError;
     @ColorRes private int mDefaultErrorColorResId;
     @ColorInt private int mErrorColor;
+
+    private Handler mHandler;
+    private String mErrorMessage;
+    private ErrorMessageListener mErrorMessageListener;
 
     public StripeEditText(Context context) {
         super(context);
@@ -48,48 +57,6 @@ public class StripeEditText extends AppCompatEditText {
     public StripeEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView();
-    }
-
-    @Override
-    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
-    }
-
-    /**
-     * Sets a listener that can react to changes in text, but only by reflecting the new
-     * text in the field.
-     *
-     * @param afterTextChangedListener the {@link AfterTextChangedListener} to attach to this view
-     */
-    public void setAfterTextChangedListener(AfterTextChangedListener afterTextChangedListener) {
-        mAfterTextChangedListener = afterTextChangedListener;
-    }
-
-    /**
-     * Sets a listener that can react to the user attempting to delete the empty string.
-     *
-     * @param deleteEmptyListener the {@link DeleteEmptyListener} to attach to this view
-     */
-    public void setDeleteEmptyListener(DeleteEmptyListener deleteEmptyListener) {
-        mDeleteEmptyListener = deleteEmptyListener;
-    }
-
-    /**
-     * Sets whether or not the text should be put into "error mode," which displays
-     * the text in an error color determined by the original text color.
-     *
-     * @param shouldShowError whether or not we should display text in an error state.
-     */
-    @SuppressWarnings("deprecation")
-    public void setShouldShowError(boolean shouldShowError) {
-        mShouldShowError = shouldShowError;
-        if (mShouldShowError) {
-            setTextColor(mErrorColor);
-        } else {
-            setTextColor(mCachedColorStateList);
-        }
-
-        refreshDrawableState();
     }
 
     @Nullable
@@ -127,6 +94,39 @@ public class StripeEditText extends AppCompatEditText {
         return errorColor;
     }
 
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
+    }
+
+    /**
+     * Sets a listener that can react to changes in text, but only by reflecting the new
+     * text in the field.
+     *
+     * @param afterTextChangedListener the {@link AfterTextChangedListener} to attach to this view
+     */
+    void setAfterTextChangedListener(
+            @Nullable AfterTextChangedListener afterTextChangedListener) {
+        mAfterTextChangedListener = afterTextChangedListener;
+    }
+
+    /**
+     * Sets a listener that can react to the user attempting to delete the empty string.
+     *
+     * @param deleteEmptyListener the {@link DeleteEmptyListener} to attach to this view
+     */
+    void setDeleteEmptyListener(@Nullable DeleteEmptyListener deleteEmptyListener) {
+        mDeleteEmptyListener = deleteEmptyListener;
+    }
+
+    void setErrorMessageListener(@Nullable ErrorMessageListener errorMessageListener) {
+        mErrorMessageListener = errorMessageListener;
+    }
+
+    void setErrorMessage(@Nullable String errorMessage) {
+        mErrorMessage = errorMessage;
+    }
+
     /**
      * Sets the error text color on this {@link StripeEditText}.
      *
@@ -137,34 +137,53 @@ public class StripeEditText extends AppCompatEditText {
     }
 
     /**
-     * A crude mechanism by which we check whether or not a color is "dark."
-     * This is subject to much interpretation, but we attempt to follow traditional
-     * design standards.
+     * Change the hint value of this control after a delay.
      *
-     * @param color an integer representation of a color
-     * @return {@code true} if the color is "dark," else {@link false}
+     * @param hintResource the string resource for the hint to be set
+     * @param delayMilliseconds a delay period, measured in milliseconds
      */
-    static boolean isColorDark(@ColorInt int color){
-        // Forumla comes from W3C standards and conventional theory
-        // about how to calculate the "brightness" of a color, often
-        // thought of as how far along the spectrum from white to black the
-        // grayscale version would be.
-        // See https://www.w3.org/TR/AERT#color-contrast and
-        // http://paulbourke.net/texture_colour/colourspace/ for further reading.
-        double luminescence = 0.299*Color.red(color)
-                + 0.587*Color.green(color)
-                + 0.114* Color.blue(color);
+    public void setHintDelayed(@StringRes final int hintResource, long delayMilliseconds) {
+        final Runnable hintRunnable = new Runnable() {
+            @Override
+            public void run() {
+                setHint(hintResource);
+            }
+        };
+        mHandler.postDelayed(hintRunnable, delayMilliseconds);
+    }
 
-        // Because the colors are all hex integers.
-        double luminescencePercentage = luminescence / 255;
-        if (luminescencePercentage > 0.5) {
-            return false;
+    /**
+     * Sets whether or not the text should be put into "error mode," which displays
+     * the text in an error color determined by the original text color.
+     *
+     * @param shouldShowError whether or not we should display text in an error state.
+     */
+    @SuppressWarnings("deprecation")
+    public void setShouldShowError(boolean shouldShowError) {
+        if (mErrorMessage != null && mErrorMessageListener != null) {
+            String errorMessage = shouldShowError ? mErrorMessage : null;
+            mErrorMessageListener.displayErrorMessage(errorMessage);
         } else {
-            return true;
+            mShouldShowError = shouldShowError;
+            if (mShouldShowError) {
+                setTextColor(mErrorColor);
+            } else {
+                setTextColor(mCachedColorStateList);
+            }
+
+            refreshDrawableState();
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // Passing a null token removes all callbacks and messages to the handler.
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     private void initView() {
+        mHandler = new Handler();
         listenForTextChanges();
         listenForDeleteEmpty();
         determineDefaultErrorColor();
@@ -220,15 +239,16 @@ public class StripeEditText extends AppCompatEditText {
         });
     }
 
-    /**
-     * A class that can listen for when the user attempts to delete the empty string.
-     */
-    public interface DeleteEmptyListener {
+    interface DeleteEmptyListener {
         void onDeleteEmpty();
     }
 
-    public interface AfterTextChangedListener {
+    interface AfterTextChangedListener {
         void onTextChanged(String text);
+    }
+
+    interface ErrorMessageListener {
+        void displayErrorMessage(@Nullable String message);
     }
 
     private class SoftDeleteInputConnection extends InputConnectionWrapper {

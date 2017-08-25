@@ -9,9 +9,9 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.util.StripeJsonUtils.optString;
-import static com.stripe.android.util.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.util.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.model.StripeJsonUtils.optString;
+import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
@@ -29,21 +29,21 @@ public class SourceOwner extends StripeJsonModel {
     private static final String FIELD_VERIFIED_NAME = VERIFIED + FIELD_NAME;
     private static final String FIELD_VERIFIED_PHONE = VERIFIED + FIELD_PHONE;
 
-    private SourceAddress mAddress;
+    private Address mAddress;
     private String mEmail;
     private String mName;
     private String mPhone;
-    private SourceAddress mVerifiedAddress;
+    private Address mVerifiedAddress;
     private String mVerifiedEmail;
     private String mVerifiedName;
     private String mVerifiedPhone;
 
     SourceOwner(
-            SourceAddress address,
+            Address address,
             String email,
             String name,
             String phone,
-            SourceAddress verifiedAddress,
+            Address verifiedAddress,
             String verifiedEmail,
             String verifiedName,
             String verifiedPhone) {
@@ -57,7 +57,7 @@ public class SourceOwner extends StripeJsonModel {
         mVerifiedPhone = verifiedPhone;
     }
 
-    public SourceAddress getAddress() {
+    public Address getAddress() {
         return mAddress;
     }
 
@@ -73,7 +73,7 @@ public class SourceOwner extends StripeJsonModel {
         return mPhone;
     }
 
-    public SourceAddress getVerifiedAddress() {
+    public Address getVerifiedAddress() {
         return mVerifiedAddress;
     }
 
@@ -89,7 +89,7 @@ public class SourceOwner extends StripeJsonModel {
         return mVerifiedPhone;
     }
 
-    void setAddress(SourceAddress address) {
+    void setAddress(Address address) {
         mAddress = address;
     }
 
@@ -105,7 +105,7 @@ public class SourceOwner extends StripeJsonModel {
         mPhone = phone;
     }
 
-    void setVerifiedAddress(SourceAddress verifiedAddress) {
+    void setVerifiedAddress(Address verifiedAddress) {
         mVerifiedAddress = verifiedAddress;
     }
 
@@ -182,18 +182,18 @@ public class SourceOwner extends StripeJsonModel {
             return null;
         }
 
-        SourceAddress address = null;
+        Address address = null;
         String email;
         String name;
         String phone;
-        SourceAddress verifiedAddress = null;
+        Address verifiedAddress = null;
         String verifiedEmail;
         String verifiedName;
         String verifiedPhone;
 
         JSONObject addressObject = jsonObject.optJSONObject(FIELD_ADDRESS);
         if (addressObject != null) {
-            address = SourceAddress.fromJson(addressObject);
+            address = Address.fromJson(addressObject);
         }
         email = optString(jsonObject, FIELD_EMAIL);
         name = optString(jsonObject, FIELD_NAME);
@@ -201,7 +201,7 @@ public class SourceOwner extends StripeJsonModel {
 
         JSONObject vAddressObject = jsonObject.optJSONObject(FIELD_VERIFIED_ADDRESS);
         if (vAddressObject != null) {
-            verifiedAddress = SourceAddress.fromJson(vAddressObject);
+            verifiedAddress = Address.fromJson(vAddressObject);
         }
         verifiedEmail = optString(jsonObject, FIELD_VERIFIED_EMAIL);
         verifiedName = optString(jsonObject, FIELD_VERIFIED_NAME);
