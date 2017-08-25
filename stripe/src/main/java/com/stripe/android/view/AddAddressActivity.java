@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Activity that can take accept an address. Uses {@link AddAddressWidget}
  */
@@ -18,6 +21,13 @@ public class AddAddressActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_add_address);
         mViewStub.inflate();
         mAddAddressWidget = findViewById(R.id.add_address_widget);
+        List<String> optionalFields = new ArrayList<>();
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        mAddAddressWidget.setOptionalFields(optionalFields);
+        List<String> hiddenFields = new ArrayList<>();
+        hiddenFields.add(AddAddressWidget.NAME_FIELD);
+        mAddAddressWidget.setHiddenFields(hiddenFields);
         setTitle(R.string.title_add_an_address);
     }
 
