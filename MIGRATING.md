@@ -1,5 +1,10 @@
 ## Migration Guides
 
+### Migrating from versions < 5.0.0
+- StripeApiHandler methods can no longer be called directly.
+- PaymentConfiguration now stores your public key and is depended upon for CustomerSession.
+- Many *Utils* classes have been migrated to package-private access.
+
 ### Migrating from versions < 4.0.0
 
 - Instantiation of a Stripe object can no longer throw an `AuthenticationException`.
