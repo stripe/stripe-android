@@ -94,7 +94,8 @@ public class AddAddressWidget extends LinearLayout {
     public boolean validateAllFields() {
 
         boolean postalCodeValid = true;
-        if (mPostalCodeEditText.getText().toString().isEmpty() && mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mPostalCodeEditText.getText().toString().isEmpty() &&
+                (mOptionalAddressFields.contains(POSTAL_CODE_FIELD) || mHiddenAddressFields.contains(POSTAL_CODE_FIELD))) {
             postalCodeValid = true;
         } else if (mCountrySelected.equals(Locale.US.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText().toString().trim());
