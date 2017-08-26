@@ -229,4 +229,32 @@ public class AddAddressWidgetTest {
         mCountrySpinner.setSelection(canadaIndex);
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
     }
+
+    @Test
+    public void validateAllFields_whenFieldsOptional_notChecked() {
+        List<String> optionalFields = new ArrayList<>();
+        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        optionalFields.add(AddAddressWidget.NAME_FIELD);
+        optionalFields.add(AddAddressWidget.STATE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+        optionalFields.add(AddAddressWidget.PHONE_FIELD);
+        optionalFields.add(AddAddressWidget.CITY_FIELD);
+        mAddAddressWidget.setOptionalFields(optionalFields);
+        assertTrue(mAddAddressWidget.validateAllFields());
+    }
+
+    @Test
+    public void validateAllFields_whenFieldsHidden_notChecked() {
+        List<String> optionalFields = new ArrayList<>();
+        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        optionalFields.add(AddAddressWidget.NAME_FIELD);
+        optionalFields.add(AddAddressWidget.STATE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+        optionalFields.add(AddAddressWidget.PHONE_FIELD);
+        optionalFields.add(AddAddressWidget.CITY_FIELD);
+        mAddAddressWidget.setHiddenFields(optionalFields);
+        assertTrue(mAddAddressWidget.validateAllFields());
+    }
 }
