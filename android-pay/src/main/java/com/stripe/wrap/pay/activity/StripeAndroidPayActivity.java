@@ -230,6 +230,7 @@ public abstract class StripeAndroidPayActivity extends AppCompatActivity
                         handleError(errorCode);
                         break;
                 }
+                break;
             case WalletConstants.RESULT_ERROR:
                 handleError(errorCode);
                 break;
