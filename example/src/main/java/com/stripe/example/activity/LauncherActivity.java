@@ -22,7 +22,7 @@ public class LauncherActivity extends AppCompatActivity {
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY =
-            "put your key here";
+            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

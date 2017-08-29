@@ -11,4 +11,17 @@
         <item name="colorAccent">@color/accent_color_default</item>
         <item name="colorControlNormal">@color/control_normal_color_default</item>
     </style>
+
+    <style name="SampleThemeNoActionBar" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Colored</item>
+        <item name="colorAccent">#ffcc0022</item>
+        <item name="colorControlNormal">#ff00bb00</item>
+        <item name="colorPrimary">#ffcc22aa</item>
+        <item name="titleTextColor">#ffbbbb00</item>
+        <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
+    </style>
+
+    <style name="ExampleToolbarTheme" parent="ToolBarStyle">
+        <item name="colorControlNormal">#ff2222ff</item>
+    </style>
 </resources>

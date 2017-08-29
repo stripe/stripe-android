@@ -3,17 +3,28 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TypefaceSpan;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +36,8 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 
 import java.util.List;
+
+import static android.R.color.holo_purple;
 
 /**
  * An activity that allows a user to select from a customer's available payment methods, or
@@ -45,6 +58,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
 
+    @ColorRes private int mTitleColor;
+
     public static Intent newIntent(Context context) {
         return new Intent(context, PaymentMethodsActivity.class);
     }
@@ -57,7 +72,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
         View addCardView = findViewById(R.id.payment_methods_add_payment_container);
+        Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
+        setSupportActionBar(toolbar);
 
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         addCardView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -69,15 +89,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
                 });
 
-        Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         boolean waitForProxy = getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false);
         if (!waitForProxy) {
             initializeCustomerSourceData();
+//            initializeToolbar();
         }
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
@@ -113,11 +129,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable tintedIcon = ViewUtils.getTintedIcon(
-                this,
-                R.drawable.ic_checkmark,
-                android.R.color.primary_text_dark);
-        saveItem.setIcon(tintedIcon);
+        Drawable compatIcon =
+                ViewUtils.getTintedIconWithAttribute(
+                        this,
+                        getTheme(),
+                        R.attr.titleTextColor,
+                        R.drawable.ic_checkmark);
+        saveItem.setIcon(compatIcon);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -162,6 +180,16 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
+    void initializeToolbar() {
+        Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+
+    }
     @VisibleForTesting
     void setCustomerSessionProxy(CustomerSessionProxy proxy) {
         mCustomerSessionProxy = proxy;

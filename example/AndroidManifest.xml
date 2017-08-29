@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.example"
           android:versionCode="1"
-          android:versionName="1.0">
+          android:versionName="1.0"
+          xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -77,10 +78,21 @@
         </activity>
         <activity
             android:name=".activity.PaymentMultilineActivity"
-            android:theme="@style/SampleThemeDefault">
+            android:theme="@style/SampleThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.stripe.android.view.AddSourceActivity"
+            tools:replace="theme"
+            android:theme="@style/SampleThemeNoActionBar">
+        </activity>
+
+        <activity
+            android:name="com.stripe.android.view.PaymentMethodsActivity"
+            tools:replace="theme"
+            android:theme="@style/SampleThemeNoActionBar">
         </activity>
     </application>
 

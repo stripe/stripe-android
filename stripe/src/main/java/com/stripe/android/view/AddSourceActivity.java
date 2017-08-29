@@ -89,10 +89,11 @@ public class AddSourceActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable tintedIcon = ViewUtils.getTintedIcon(
+        Drawable tintedIcon = ViewUtils.getTintedIconWithAttribute(
                 this,
-                R.drawable.ic_checkmark,
-                android.R.color.primary_text_dark);
+                getTheme(),
+                R.attr.titleTextColor,
+                R.drawable.ic_checkmark);
         saveItem.setIcon(tintedIcon);
         return super.onPrepareOptionsMenu(menu);
     }

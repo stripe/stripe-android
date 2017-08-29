@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="StripeDefaultTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="colorAccent">@color/accent_color_default</item>
         <item name="colorControlNormal">@color/control_normal_color_default</item>
@@ -8,14 +9,8 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
     </style>
 
-    <style name="ToolBarStyle" parent="">
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-        <item name="theme">@style/ThemeOverlay.AppCompat</item>
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="colorPrimary">@color/toolbar_color_default</item>
-        <item name="titleTextColor">@android:color/white</item>
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="titleTextAppearance">@style/TextAppearance.Widget.AppCompat.Toolbar.Title</item>
+    <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat">
+        <item name="colorControlNormal">?attr/titleTextColor</item>
     </style>
 
 </resources>
