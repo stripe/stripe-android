@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -85,6 +86,26 @@ class ViewUtils {
             icon = context.getResources().getDrawable(iconResourceId, context.getTheme());
         }  else {
             color = context.getResources().getColor(colorResourceId);
+            icon = context.getResources().getDrawable(iconResourceId);
+        }
+        Drawable compatIcon = DrawableCompat.wrap(icon);
+        DrawableCompat.setTint(compatIcon.mutate(), color);
+        return compatIcon;
+    }
+
+    @SuppressWarnings("deprecation")
+    static Drawable getTintedIconWithAttribute(
+            @NonNull Context context,
+            @NonNull Resources.Theme theme,
+            @AttrRes int attributeResource,
+            @DrawableRes int iconResourceId) {
+        TypedValue typedValue = new TypedValue();
+        theme.resolveAttribute(attributeResource, typedValue, true);
+        @ColorInt int color = typedValue.data;
+        Drawable icon;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            icon = context.getResources().getDrawable(iconResourceId, theme);
+        } else {
             icon = context.getResources().getDrawable(iconResourceId);
         }
         Drawable compatIcon = DrawableCompat.wrap(icon);

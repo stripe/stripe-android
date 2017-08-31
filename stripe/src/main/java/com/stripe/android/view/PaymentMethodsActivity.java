@@ -113,11 +113,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable tintedIcon = ViewUtils.getTintedIcon(
-                this,
-                R.drawable.ic_checkmark,
-                android.R.color.primary_text_dark);
-        saveItem.setIcon(tintedIcon);
+        Drawable compatIcon =
+                ViewUtils.getTintedIconWithAttribute(
+                        this,
+                        getTheme(),
+                        R.attr.titleTextColor,
+                        R.drawable.ic_checkmark);
+        saveItem.setIcon(compatIcon);
         return super.onPrepareOptionsMenu(menu);
     }
 
