@@ -41,7 +41,9 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private static final String KEY_SOURCE = "source";
     private static final String KEY_SOURCE_TYPE = "source_type";
     private static final Set<String> VALID_TOKENS =
-            new HashSet<>(Arrays.asList("AddSourceActivity", "PaymentMethodsActivity"));
+            new HashSet<>(Arrays.asList("AddSourceActivity",
+                    "PaymentMethodsActivity",
+                    "PaymentSession"));
 
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
@@ -223,6 +225,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         arguments.put(KEY_SOURCE_TYPE, sourceType);
         mCustomerRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
+    }
+
+    void clearUsageTokens() {
+        mProductUsageTokens.clear();
     }
 
     @Nullable
