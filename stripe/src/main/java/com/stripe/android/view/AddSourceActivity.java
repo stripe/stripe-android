@@ -162,10 +162,8 @@ public class AddSourceActivity extends StripeActivity {
     @Override
     protected void setCommunicatingProgress(boolean communicating) {
         super.setCommunicatingProgress(communicating);
-        if (communicating) {
-            mCardMultilineWidget.setEnabled(false);
-        } else {
-            mCardMultilineWidget.setEnabled(true);
+        if (mCardMultilineWidget != null) {
+            mCardMultilineWidget.setEnabled(!communicating);
         }
     }
 
