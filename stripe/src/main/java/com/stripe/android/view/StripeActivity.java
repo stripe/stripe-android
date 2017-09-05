@@ -77,6 +77,8 @@ abstract class StripeActivity extends AppCompatActivity {
         return super.onPrepareOptionsMenu(menu);
     }
 
+    protected abstract void onActionSave();
+
     protected void setCommunicatingProgress(boolean communicating) {
         mCommunicating = communicating;
         if (communicating) {
@@ -86,8 +88,6 @@ abstract class StripeActivity extends AppCompatActivity {
         }
         supportInvalidateOptionsMenu();
     }
-
-    protected abstract void onActionSave();
 
     void showError(@NonNull String error) {
         AlertDialog alertDialog = new AlertDialog.Builder(this)

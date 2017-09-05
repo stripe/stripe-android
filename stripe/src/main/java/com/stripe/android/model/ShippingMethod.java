@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 
 import org.json.JSONObject;
 
@@ -30,11 +31,11 @@ public class ShippingMethod extends StripeJsonModel {
     private String mLabel;
     private String mIdentifier;
 
-    public ShippingMethod(String label, String identifier, long amount, String currencyCode) {
+    public ShippingMethod(@NonNull String label, @NonNull String identifier, @NonNull long amount, @NonNull String currencyCode) {
         this(label, identifier, null, amount, currencyCode);
     }
 
-    public ShippingMethod(String label, String identifier, @Nullable String detail, long amount, String currencyCode) {
+    public ShippingMethod(@NonNull String label, @NonNull String identifier, @Nullable String detail, @NonNull long amount, @NonNull @Size(min=0, max=3) String currencyCode) {
         mLabel = label;
         mIdentifier = identifier;
         mDetail = detail;
@@ -63,6 +64,7 @@ public class ShippingMethod extends StripeJsonModel {
     /**
      * @return Human friendly label specifying the shipping method that can be shown in the UI.
      */
+    @NonNull
     public String getLabel() {
         return mLabel;
     }
