@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 @Config(sdk = 25)
 public class CustomerSessionTest {
 
-    private static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
+    public static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
             "  \"id\": \"ephkey_123\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_123\",\n" +
@@ -59,7 +59,7 @@ public class CustomerSessionTest {
             "            }]\n" +
             "}";
 
-    private static final String SECOND_SAMPLE_KEY_RAW = "{\n" +
+    public static final String SECOND_SAMPLE_KEY_RAW = "{\n" +
             "  \"id\": \"ephkey_ABC\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_456\",\n" +
