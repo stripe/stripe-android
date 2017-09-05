@@ -5,7 +5,10 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-class PaymentSessionData implements Parcelable {
+/**
+ * A data class representing the state of the associated {@link PaymentSession}.
+ */
+public class PaymentSessionData implements Parcelable {
 
     private static final String NO_PAYMENT = "NO_PAYMENT";
 
@@ -15,30 +18,44 @@ class PaymentSessionData implements Parcelable {
 
     PaymentSessionData() { }
 
+    /**
+     * Get the selected payment method ID for the associated {@link PaymentSession}.
+     * @return
+     */
     @Nullable
     public String getSelectedPaymentMethodId() {
         return mSelectedPaymentMethodId.equals(NO_PAYMENT) ? null : mSelectedPaymentMethodId;
     }
 
-    public void setSelectedPaymentMethodId(@Nullable String selectedPaymentMethodId) {
+    /**
+     * Get the cart total value, excluding shipping and tax items.
+     *
+     * @return the current value of the items in the cart
+     */
+    public long getCartTotal() {
+        return mCartTotal;
+    }
+
+    /**
+     * Get the value of shipping items in the associated {@link PaymentSession}
+     *
+     * @return the current value of the shipping items in the cart
+     */
+    public long getShippingTotal() {
+        return mShippingTotal;
+    }
+
+    void setCartTotal(long cartTotal) {
+        mCartTotal = cartTotal;
+    }
+
+    void setSelectedPaymentMethodId(@Nullable String selectedPaymentMethodId) {
         mSelectedPaymentMethodId = selectedPaymentMethodId == null
                 ? NO_PAYMENT
                 : selectedPaymentMethodId;
     }
 
-    public long getCartTotal() {
-        return mCartTotal;
-    }
-
-    public void setCartTotal(long cartTotal) {
-        mCartTotal = cartTotal;
-    }
-
-    public long getShippingTotal() {
-        return mShippingTotal;
-    }
-
-    public void setShippingTotal(long shippingTotal) {
+    void setShippingTotal(long shippingTotal) {
         mShippingTotal = shippingTotal;
     }
 

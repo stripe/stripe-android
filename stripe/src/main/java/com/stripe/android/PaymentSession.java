@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 /**
@@ -18,15 +17,13 @@ import com.stripe.android.view.PaymentMethodsActivity;
 public class PaymentSession {
 
     static final int PAYMENT_METHOD_REQUEST = 3003;
-    static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
+    static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
+
+    private static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
 
     @NonNull private Activity mHostActivity;
-    @Nullable private PaymentSessionListener mPaymentSessionListener;
-
-    @Nullable private CustomerSource mSelectedPaymentSource;
     @NonNull private PaymentSessionData mPaymentSessionData;
-
-    private static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
+    @Nullable private PaymentSessionListener mPaymentSessionListener;
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -154,13 +151,10 @@ public class PaymentSession {
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         String paymentId = customer.getDefaultSource();
                         mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
-                        if (!TextUtils.isEmpty(paymentId)) {
-                            mSelectedPaymentSource =
-                                    customer.getSourceById(paymentId);
-                        }
 
                         if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener.onPaymentMethodSelected();
+                            mPaymentSessionListener
+                                    .onPaymentSessionDataChanged(mPaymentSessionData);
                             mPaymentSessionListener.onCommunicatingStateChanged(false);
                         }
                     }
@@ -170,32 +164,6 @@ public class PaymentSession {
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener.onError(errorCode, errorMessage);
                             mPaymentSessionListener.onCommunicatingStateChanged(false);
-                        }
-                    }
-                });
-    }
-
-    private void updateCustomer() {
-        CustomerSession.getInstance().updateCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        String paymentId = customer.getDefaultSource();
-                        mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
-                        if (!TextUtils.isEmpty(paymentId)) {
-                            mSelectedPaymentSource =
-                                    customer.getSourceById(paymentId);
-                        }
-
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener.onPaymentMethodSelected();
-                        }
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener.onError(errorCode, errorMessage);
                         }
                     }
                 });
@@ -222,10 +190,7 @@ public class PaymentSession {
          */
         void onError(int errorCode, @Nullable String errorMessage);
 
-        /**
-         * Notification method called when the user has selected a payment method.
-         */
-        void onPaymentMethodSelected();
+        void onPaymentSessionDataChanged(@NonNull PaymentSessionData data);
     }
 
 }
