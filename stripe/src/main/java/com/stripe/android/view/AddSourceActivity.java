@@ -20,7 +20,7 @@ import com.stripe.android.model.StripePaymentSource;
 
 /**
  * Activity used to display a {@link CardMultilineWidget} and receive the resulting
- * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of teh launching activity.
+ * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of the launching activity.
  */
 public class AddSourceActivity extends StripeActivity {
 
@@ -29,7 +29,7 @@ public class AddSourceActivity extends StripeActivity {
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
-    static final long FADE_DURATION_MS = 100L;
+
     CardMultilineWidget mCardMultilineWidget;
     CustomerSessionProxy mCustomerSessionProxy;
     FrameLayout mErrorLayout;
