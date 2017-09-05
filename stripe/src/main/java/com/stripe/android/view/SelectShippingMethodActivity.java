@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 
+/**
+ * Activity that allows users to select a shipping method.
+ */
 public class SelectShippingMethodActivity extends StripeActivity {
 
     SelectShippingMethodWidget mSelectShippingMethodWidget;
@@ -22,6 +25,6 @@ public class SelectShippingMethodActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-
+        //TODO(KSun): Save the selected shipping method to the payment context.
     }
 }

@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link ShippingMethod}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class ShippingMethodTest {
 
     static final String EXAMPLE_JSON_SHIPPING_ADDRESS = "{" +

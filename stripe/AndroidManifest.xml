@@ -18,7 +18,6 @@
             android:name=".view.PaymentMethodsActivity"
             android:theme="@style/StripeDefaultTheme"
             >
-            >
         </activity>
 
         <activity

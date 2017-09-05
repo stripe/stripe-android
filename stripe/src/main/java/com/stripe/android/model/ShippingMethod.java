@@ -45,6 +45,7 @@ public class ShippingMethod extends StripeJsonModel {
     /**
      * @return the currency that the specified amount will be rendered in.
      */
+    @NonNull
     public Currency getCurrency() {
         return Currency.getInstance(mCurrencyCode);
     }
@@ -54,6 +55,7 @@ public class ShippingMethod extends StripeJsonModel {
      * {@link com.stripe.android.PaymentConfiguration}. For example, cents in the USA and yen in
      * Japan.
      */
+    @NonNull
     public long getAmount() {
         return mAmount;
     }

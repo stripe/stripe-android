@@ -65,7 +65,6 @@ abstract class StripeActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem saveItem = menu.findItem(R.id.action_save);
@@ -77,7 +76,6 @@ abstract class StripeActivity extends AppCompatActivity {
         saveItem.setIcon(tintedIcon);
         return super.onPrepareOptionsMenu(menu);
     }
-
 
     protected void setCommunicatingProgress(boolean communicating) {
         mCommunicating = communicating;
