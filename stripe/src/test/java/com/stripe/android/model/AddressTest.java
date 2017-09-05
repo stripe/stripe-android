@@ -29,7 +29,9 @@ public class AddressTest {
             "\"line1\": \"123 Market St\"," +
             "\"line2\": \"#345\"," +
             "\"postal_code\": \"94107\"," +
-            "\"state\": \"CA\"" +
+            "\"state\": \"CA\"," +
+            "\"phone_number\": \"(123) 456 - 7890\"," +
+            "\"name\": \"Fake Name\"" +
             "}";
 
     private static final Map<String, Object> EXAMPLE_MAP_ADDRESS = new HashMap<String, Object>() {{
@@ -39,6 +41,8 @@ public class AddressTest {
         put("line2", "#345");
         put("postal_code", "94107");
         put("state", "CA");
+        put("phone_number", "(123) 456 - 7890");
+        put("name", "Fake Name");
     }};
 
     private Address mAddress;
@@ -63,4 +67,20 @@ public class AddressTest {
     public void fromJsonString_toMap_createsExpectedMap() {
         assertMapEquals(EXAMPLE_MAP_ADDRESS, mAddress.toMap());
     }
+
+    @Test
+    public void builderConstructor_whenCalled_createsExpectedAddress() {
+        Address address = new Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .setName("Fake Name")
+                .setPhoneNumber("(123) 456 - 7890")
+                .build();
+        assertMapEquals(address.toMap(), mAddress.toMap());
+    }
+
 }
