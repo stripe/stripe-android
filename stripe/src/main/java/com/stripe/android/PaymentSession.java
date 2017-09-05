@@ -55,7 +55,7 @@ public class PaymentSession {
             switch (requestCode) {
                 case PAYMENT_METHOD_REQUEST:
                     fetchCustomer();
-                    break;
+                    return true;
                 default:
                     break;
             }
@@ -92,6 +92,8 @@ public class PaymentSession {
             @NonNull PaymentSessionListener listener,
             @Nullable Bundle savedInstanceState) {
 
+        // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
+        // will throw a runtime exception if none is ready.
         try {
             CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         } catch (IllegalStateException illegalState) {
@@ -190,6 +192,12 @@ public class PaymentSession {
          */
         void onError(int errorCode, @Nullable String errorMessage);
 
+        /**
+         * Notification method called when the {@link PaymentSessionData} for this
+         * session has changed.
+         *
+         * @param data the updated {@link PaymentSessionData}
+         */
         void onPaymentSessionDataChanged(@NonNull PaymentSessionData data);
     }
 

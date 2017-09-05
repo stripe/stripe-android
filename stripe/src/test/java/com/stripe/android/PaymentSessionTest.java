@@ -187,9 +187,10 @@ public class PaymentSessionTest {
         // We have already tested the functionality up to here.
         reset(mockListener);
 
-        paymentSession.handlePaymentData(
+        boolean handled = paymentSession.handlePaymentData(
                 PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK, new Intent());
 
+        assertTrue(handled);
         verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
     }
 
