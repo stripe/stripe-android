@@ -14,7 +14,7 @@ import com.stripe.android.model.ShippingMethod;
 import java.util.List;
 
 /**
- * A widget that allows the user to select a shipping method
+ * A widget that allows the user to select a shipping method.
  */
 public class SelectShippingMethodWidget extends FrameLayout {
 

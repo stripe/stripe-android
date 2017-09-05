@@ -76,7 +76,6 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
             shippingMethodView.setShippingMethod(shippingMethod);
         }
 
-
         void setUIAsSelected(boolean selected) {
             shippingMethodView.setSelected(selected);
         }
@@ -84,6 +83,5 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
         void setIndex(int index) {
             this.index = index;
         }
-
     }
 }

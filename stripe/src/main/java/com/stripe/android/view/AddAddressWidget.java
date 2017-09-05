@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * An add address widget using the support design library's {@link TextInputLayout}
- * to match Material Design.
+ * A widget used to collect address data from a user.
  */
 public class AddAddressWidget extends LinearLayout {
 
@@ -50,7 +49,6 @@ public class AddAddressWidget extends LinearLayout {
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneNumberEditText;
     private String mCountrySelected;
-
 
     public AddAddressWidget(Context context) {
         super(context);
@@ -237,6 +235,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             renderInternationalForm();
         }
+
         if (CountryUtils.doesCountryUsePostalCode(countrySelected) &&
                 !mHiddenAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setVisibility(VISIBLE);
