@@ -7,6 +7,7 @@ import android.widget.Spinner;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -39,7 +41,8 @@ public class AddAddressWidgetTest {
     private TextInputLayout mNameTextInputLayout;
     private TextInputLayout mPostalCodeTextInputLayout;
     private TextInputLayout mStateTextInputLayout;
-    private StripeEditText mAddressEditText;
+    private StripeEditText mAddressLine1EditText;
+    private StripeEditText mAddressLine2EditText;
     private StripeEditText mPostalEditText;
     private StripeEditText mCityEditText;
     private StripeEditText mNameEditText;
@@ -50,6 +53,7 @@ public class AddAddressWidgetTest {
     private List<Pair<String, String>> mOrderedCountries;
 
     private String mNoPostalCodeCountry = "ZW"; // Zimbabwe
+    private Address mAddress;
 
     @Before
     public void setup() {
@@ -64,7 +68,8 @@ public class AddAddressWidgetTest {
         mNameTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_name_aaw);
         mPostalCodeTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_postal_code_aaw);
         mStateTextInputLayout = mAddAddressWidget.findViewById(R.id.tl_state_aaw);
-        mAddressEditText = mAddAddressWidget.findViewById(R.id.et_address_line_one_aaw);
+        mAddressLine1EditText = mAddAddressWidget.findViewById(R.id.et_address_line_one_aaw);
+        mAddressLine2EditText = mAddAddressWidget.findViewById(R.id.et_address_line_two_aaw);
         mCityEditText = mAddAddressWidget.findViewById(R.id.et_city_aaw);
         mNameEditText = mAddAddressWidget.findViewById(R.id.et_name_aaw);
         mPostalEditText = mAddAddressWidget.findViewById(R.id.et_postal_code_aaw);
@@ -73,6 +78,16 @@ public class AddAddressWidgetTest {
         mCountrySpinner = mAddAddressWidget.findViewById(R.id.spinner_country_aaw);
         mCountryAdapter = (CountryAdapter) mCountrySpinner.getAdapter();
         mOrderedCountries = mCountryAdapter.getOrderedCountries();
+        mAddress = new Address.Builder()
+                .setCity("San Francisco")
+                .setName("Fake Name")
+                .setState("CA")
+                .setCountry("US")
+                .setLine1("185 Berry St")
+                .setLine2("10th Floor")
+                .setPostalCode("12345")
+                .setPhoneNumber("(123) 456 - 7890")
+                .build();
     }
 
     @Test
@@ -116,7 +131,7 @@ public class AddAddressWidgetTest {
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
         assertFalse(mAddAddressWidget.validateAllFields());
-        mAddressEditText.setText("123 Fake Address");
+        mAddressLine1EditText.setText("123 Fake Address");
         mNameEditText.setText("Fake Name");
         mCityEditText.setText("Fake City");
         mPostalEditText.setText("12345");
@@ -144,7 +159,7 @@ public class AddAddressWidgetTest {
         assertTrue(mNameTextInputLayout.isErrorEnabled());
         assertTrue(mPostalCodeTextInputLayout.isErrorEnabled());
         assertTrue(mStateTextInputLayout.isErrorEnabled());
-        mAddressEditText.setText("123 Fake Address");
+        mAddressLine1EditText.setText("123 Fake Address");
         mNameEditText.setText("Fake Name");
         mCityEditText.setText("Fake City");
         mPostalEditText.setText("12345");
@@ -256,5 +271,42 @@ public class AddAddressWidgetTest {
         optionalFields.add(AddAddressWidget.CITY_FIELD);
         mAddAddressWidget.setHiddenFields(optionalFields);
         assertTrue(mAddAddressWidget.validateAllFields());
+    }
+
+    @Test
+    public void getAddress_whenAddressInvalid_returnsNull() {
+        assertNull(mAddAddressWidget.getAddress());
+    }
+
+    @Test
+    public void getAddress_whenAddressValid_returnsExpectedAddress() {
+        mStateEditText.setText("CA");
+        mCityEditText.setText("San Francisco");
+        mAddressLine1EditText.setText("185 Berry St");
+        mAddressLine2EditText.setText("10th Floor");
+        mNameEditText.setText("Fake Name");
+        mPhoneEditText.setText("(123) 456 - 7890");
+        mPostalEditText.setText("12345");
+        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
+        int usIndex = mOrderedCountries.indexOf(usPair);
+        mCountrySpinner.setSelection(usIndex);
+        Address inputAddress = mAddAddressWidget.getAddress();
+        assertEquals(inputAddress.toMap(), mAddress.toMap());
+    }
+
+    @Test
+    public void populateAddress_whenAddressProvided_populates() {
+        mAddAddressWidget.populateAddress(mAddress);
+        assertEquals(mStateEditText.getText().toString(), "CA");
+        assertEquals(mCityEditText.getText().toString(), "San Francisco");
+        assertEquals(mAddressLine1EditText.getText().toString(), "185 Berry St");
+        assertEquals(mAddressLine2EditText.getText().toString(), "10th Floor");
+        assertEquals(mPhoneEditText.getText().toString(), "(123) 456 - 7890");
+        assertEquals(mPostalEditText.getText().toString(), "12345");
+        assertEquals(mNameEditText.getText().toString(), "Fake Name");
+        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
+        int usIndex = mOrderedCountries.indexOf(usPair);
+        mCountrySpinner.setSelection(usIndex);
+        assertEquals(mCountrySpinner.getSelectedItemPosition(), usIndex);
     }
 }

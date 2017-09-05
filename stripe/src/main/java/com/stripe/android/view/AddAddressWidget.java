@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +70,10 @@ public class AddAddressWidget extends LinearLayout {
     /**
      * @param optionalAddressFields address fields that should be optional.
      */
-    public void setOptionalFields(List<String> optionalAddressFields) {
+    public void setOptionalFields(@Nullable List<String> optionalAddressFields) {
+        if (optionalAddressFields == null) {
+            return;
+        }
         mOptionalAddressFields = optionalAddressFields;
         renderLabels();
         renderCountrySpecificLabels(mCountrySelected);
@@ -78,10 +83,50 @@ public class AddAddressWidget extends LinearLayout {
      * @param hiddenAddressFields address fields that should be hidden. Hidden fields are
      *                            automatically optional.
      */
-    public void setHiddenFields(List<String> hiddenAddressFields) {
+    public void setHiddenFields(@Nullable List<String> hiddenAddressFields) {
+        if (hiddenAddressFields ==  null) {
+            return;
+        }
         mHiddenAddressFields = hiddenAddressFields;
         renderLabels();
         renderCountrySpecificLabels(mCountrySelected);
+    }
+
+    /**
+     * @return An {@link Address} object with the information the user has entered if it is valid, {@code null} otherwise
+     */
+    public @Nullable Address getAddress() {
+        if (!validateAllFields()) {
+            return null;
+        }
+
+        Address address = new Address.Builder()
+                .setCity(mCityEditText.getText().toString())
+                .setCountry(mCountrySelected)
+                .setLine1(mAddressEditText.getText().toString())
+                .setLine2(mAddressEditText2.getText().toString())
+                .setName(mNameEditText.getText().toString())
+                .setPhoneNumber(mPhoneNumberEditText.getText().toString())
+                .setPostalCode(mPostalCodeEditText.getText().toString())
+                .setState(mStateEditText.getText().toString()).build();
+        return address;
+    }
+
+    /**
+     * @param address address to populated into the widget input fields.
+     */
+    public void populateAddress(@Nullable Address address) {
+        if (address == null) {
+            return;
+        }
+        mCityEditText.setText(address.getCity());
+        mCountrySelected = address.getCountry();
+        mAddressEditText.setText(address.getLine1());
+        mAddressEditText2.setText(address.getLine2());
+        mNameEditText.setText(address.getName());
+        mPhoneNumberEditText.setText(address.getPhoneNumber());
+        mPostalCodeEditText.setText(address.getPostalCode());
+        mStateEditText.setText(address.getState());
     }
 
     /**
@@ -118,10 +163,11 @@ public class AddAddressWidget extends LinearLayout {
         boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(NAME_FIELD) && !mHiddenAddressFields.contains(NAME_FIELD);
         mNameEditText.setShouldShowError(requiredNameEmpty);
 
-        boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(STATE_FIELD) && !mHiddenAddressFields.contains(NAME_FIELD);
+        boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(STATE_FIELD) && !mHiddenAddressFields.contains(STATE_FIELD);
         mStateEditText.setShouldShowError(requiredStateEmpty);
 
         boolean requiredPhoneNumberEmpty = mPhoneNumberEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(PHONE_FIELD) && !mHiddenAddressFields.contains(PHONE_FIELD);
+        mPhoneNumberEditText.setShouldShowError(requiredPhoneNumberEmpty);
 
         return postalCodeValid &&
                 !requiredAddressLine1Empty &&
@@ -180,6 +226,7 @@ public class AddAddressWidget extends LinearLayout {
         mAddressEditText.setErrorMessage(getResources().getString(R.string.address_required));
         mCityEditText.setErrorMessage(getResources().getString(R.string.address_city_required));
         mNameEditText.setErrorMessage(getResources().getString(R.string.address_name_required));
+//        mPhoneNumberEditText.setErrorMessage(getResources().getString(R.string.address_phone_required));
     }
 
     private void renderLabels() {

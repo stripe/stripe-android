@@ -8,8 +8,10 @@ import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.view.AddAddressActivity;
+import com.stripe.android.view.AddAddressWidget;
 import com.stripe.android.view.SelectShippingMethodActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
@@ -85,7 +87,13 @@ public class LauncherActivity extends AppCompatActivity {
         addAddressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LauncherActivity.this, AddAddressActivity.class);
+                ArrayList<String> hiddenFields = new ArrayList<>();
+                hiddenFields.add(AddAddressWidget.NAME_FIELD);
+                ArrayList<String> optionalFields = new ArrayList<>();
+                optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+                optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+                Address address = new Address.Builder().setCity("San Francisco").build();
+                Intent intent = AddAddressActivity.newIntent(LauncherActivity.this , optionalFields, hiddenFields, address);
                 startActivity(intent);
             }
         });
