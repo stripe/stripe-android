@@ -33,16 +33,21 @@ public class Address extends StripeJsonModel {
     }
 
     private static final String FIELD_CITY = "city";
+    /* 2 Character Country Code */
     private static final String FIELD_COUNTRY = "country";
     private static final String FIELD_LINE_1 = "line1";
     private static final String FIELD_LINE_2 = "line2";
     private static final String FIELD_POSTAL_CODE = "postal_code";
     private static final String FIELD_STATE = "state";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_PHONE_NUMBER = "phone_number";
 
     private String mCity;
     private String mCountry;
     private String mLine1;
     private String mLine2;
+    private String mName;
+    private String mPhoneNumber;
     private String mPostalCode;
     private String mState;
 
@@ -51,20 +56,36 @@ public class Address extends StripeJsonModel {
             String country,
             String line1,
             String line2,
+            String name,
+            String phoneNumber,
             String postalCode,
             String state) {
         mCity = city;
         mCountry = country;
         mLine1 = line1;
         mLine2 = line2;
+        mName = name;
+        mPhoneNumber = phoneNumber;
         mPostalCode = postalCode;
         mState = state;
+    }
+
+    Address(Builder addressBuilder) {
+        mCity = addressBuilder.mCity;
+        mCountry = addressBuilder.mCountry;
+        mLine1 = addressBuilder.mLine1;
+        mLine2 = addressBuilder.mLine2;
+        mName = addressBuilder.mName;
+        mPhoneNumber = addressBuilder.mPhoneNumber;
+        mPostalCode = addressBuilder.mPostalCode;
+        mState = addressBuilder.mState;
     }
 
     public String getCity() {
         return mCity;
     }
 
+    @Deprecated
     public void setCity(String city) {
         mCity = city;
     }
@@ -73,6 +94,7 @@ public class Address extends StripeJsonModel {
         return mCountry;
     }
 
+    @Deprecated
     public void setCountry(String country) {
         mCountry = country;
     }
@@ -81,6 +103,7 @@ public class Address extends StripeJsonModel {
         return mLine1;
     }
 
+    @Deprecated
     public void setLine1(String line1) {
         mLine1 = line1;
     }
@@ -89,6 +112,7 @@ public class Address extends StripeJsonModel {
         return mLine2;
     }
 
+    @Deprecated
     public void setLine2(String line2) {
         mLine2 = line2;
     }
@@ -97,6 +121,7 @@ public class Address extends StripeJsonModel {
         return mPostalCode;
     }
 
+    @Deprecated
     public void setPostalCode(String postalCode) {
         mPostalCode = postalCode;
     }
@@ -105,6 +130,7 @@ public class Address extends StripeJsonModel {
         return mState;
     }
 
+    @Deprecated
     public void setState(String state) {
         mState = state;
     }
@@ -117,6 +143,8 @@ public class Address extends StripeJsonModel {
         hashMap.put(FIELD_COUNTRY, mCountry);
         hashMap.put(FIELD_LINE_1, mLine1);
         hashMap.put(FIELD_LINE_2, mLine2);
+        hashMap.put(FIELD_NAME, mName);
+        hashMap.put(FIELD_PHONE_NUMBER, mPhoneNumber);
         hashMap.put(FIELD_POSTAL_CODE, mPostalCode);
         hashMap.put(FIELD_STATE, mState);
         return hashMap;
@@ -130,6 +158,8 @@ public class Address extends StripeJsonModel {
         putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
         putStringIfNotNull(jsonObject, FIELD_LINE_1, mLine1);
         putStringIfNotNull(jsonObject, FIELD_LINE_2, mLine2);
+        putStringIfNotNull(jsonObject, FIELD_NAME, mName);
+        putStringIfNotNull(jsonObject, FIELD_PHONE_NUMBER, mPhoneNumber);
         putStringIfNotNull(jsonObject, FIELD_POSTAL_CODE, mPostalCode);
         putStringIfNotNull(jsonObject, FIELD_STATE, mState);
         return jsonObject;
@@ -154,9 +184,67 @@ public class Address extends StripeJsonModel {
         String country = optString(jsonObject, FIELD_COUNTRY);
         String line1 = optString(jsonObject, FIELD_LINE_1);
         String line2 = optString(jsonObject, FIELD_LINE_2);
+        String name = optString(jsonObject, FIELD_NAME);
+        String phoneNumber = optString(jsonObject, FIELD_PHONE_NUMBER);
         String postalCode = optString(jsonObject, FIELD_POSTAL_CODE);
         String state = optString(jsonObject, FIELD_STATE);
 
-        return new Address(city, country, line1, line2, postalCode, state);
+        return new Address(city, country, line1, line2, name, phoneNumber, postalCode, state);
+    }
+
+    public static class Builder {
+        private String mCity;
+        private String mCountry;
+        private String mLine1;
+        private String mLine2;
+        private String mName;
+        private String mPhoneNumber;
+        private String mPostalCode;
+        private String mState;
+
+        public Builder setCity(String city) {
+            mCity = city;
+            return this;
+        }
+
+        public Builder setCountry(@NonNull String country) {
+            mCountry = country.toUpperCase();
+            return this;
+        }
+
+        public Builder setLine1(String line1) {
+            mLine1 = line1;
+            return this;
+        }
+
+        public Builder setLine2(String line2) {
+            mLine2 = line2;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            mName = name;
+            return this;
+        }
+
+        public Builder setPhoneNumber(String phoneNumber) {
+            mPhoneNumber = phoneNumber;
+            return this;
+        }
+
+        public Builder setPostalCode(String postalCode) {
+            mPostalCode = postalCode;
+            return this;
+        }
+
+        public Builder setState(String state) {
+            mState = state;
+            return this;
+        }
+
+        public Address build() {
+            return new Address(this);
+        }
+
     }
 }
