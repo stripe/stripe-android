@@ -28,6 +28,21 @@ public abstract class StripeJsonModel {
         return this.toJson().toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof StripeJsonModel)) {
+            return false;
+        }
+
+        StripeJsonModel otherModel = (StripeJsonModel) obj;
+        return this.toString().equals(otherModel.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+
     static void putStripeJsonModelMapIfNotNull(
         @NonNull Map<String, Object> upperLevelMap,
         @NonNull @Size(min = 1) String key,
