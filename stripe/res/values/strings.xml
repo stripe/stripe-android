@@ -4,49 +4,92 @@
     <string name="acc_label_expiry_date">Expiration date</string>
     <string name="acc_label_zip">ZIP Code</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <!--Label for input requesting the name of a customer-->
     <string name="address_label_name">Name</string>
+    <!--Label for input requesting the name of a customer where input is optional-->
     <string name="address_label_name_optional">Name (optional)</string>
+    <!--Label for input requesting the first line of an address, used for US and Canadian addresses-->
     <string name="address_label_address">Address</string>
+    <!--Label for input requesting the first line of an address where input is optional, used for US and Canadian addresses-->
     <string name="address_label_address_optional">Address (optional) </string>
+    <!--Label for input requesting the first line of an address, used for international addresses-->
     <string name="address_label_address_line1">Address line 1</string>
+    <!--Label for input requesting the first line of an address where , used for international addresses-->
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
+    <!--Label for input requesting apartment number (address line 2), used for US and Canadian addresses-->
     <string name="address_label_apt">Apt. </string>
+    <!--Label for input requesting apartment number (address line 2) where input is optional, used for US addresses-->
     <string name="address_label_apt_optional">Apt. (optional)</string>
+    <!--Label for input requesting address line 2, used for international addresses-->
     <string name="address_label_address_line2">Address line 2</string>
+    <!--Label for input requesting address line 2 where input in optional used for international addresses-->
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
+    <!--Label for input requesting city, used for all locations-->
     <string name="address_label_city">City</string>
+    <!--Label for input requesting city where input is optional, used for all locations-->
     <string name="address_label_city_optional">City (optional)</string>
+    <!--Label for input requesting county, used for UK based addresses-->
     <string name="address_label_county">County</string>
+    <!--Label for input requesting county where input is optional , used for UK based addresses-->
     <string name="address_label_county_optional">County (optional)</string>
+    <!--Label for input requesting country, used for all locations-->
     <string name="address_label_country">Country</string>
-    <string name="address_label_country_optional">Country (optional)</string>
+    <!--Label for input requesting phone number, used for all locations-->
     <string name="address_label_phone_number">Phone number</string>
+    <!--Label for input requesting phone number where input is optional, used for all locations-->
     <string name="address_label_phone_number_optional">Phone number (optional)</string>
+    <!--Label for input requesting state, used for US addreses-->
     <string name="address_label_state">State</string>
+    <!--Label for input requesting state where input is optional, used for US addresses-->
     <string name="address_label_state_optional">State (optional)</string>
+    <!--Label for input requesting zip code, used for US addreses-->
     <string name="address_label_zip_code">ZIP code</string>
+    <!--Label for input requesting zip code where input is optional, used for US addresses-->
     <string name="address_label_zip_code_optional">ZIP code (optional)</string>
+    <!--Label for input requesting postal code, used for Canadian addresses-->
     <string name="address_label_postal_code">Postal code</string>
+    <!--Label for input requesting postal code where input is optional, used for Canadian addresses-->
     <string name="address_label_postal_code_optional">Postal code (optional)</string>
+    <!--Label for input requesting postcode, used for UK based addresses-->
     <string name="address_label_postcode">Postcode</string>
+    <!--Label for input requesting postcode where input is optional, used for UK based addresses-->
     <string name="address_label_postcode_optional">Postcode (optional)</string>
+    <!--Label for input requesting postal code, used for international addresses-->
     <string name="address_label_zip_postal_code">ZIP/Postal code</string>
+    <!--Label for input requesting postal code where input is optional, used for international addresses-->
     <string name="address_label_zip_postal_code_optional">ZIP / Postal code (optional)</string>
+    <!--Error text indicating zip code is invalid, used for US addresses-->
     <string name="address_zip_invalid">Your ZIP code is invalid.</string>
+    <!--Error text indicating postcode is invalid, used for UK addresses-->
     <string name="address_postcode_invalid">Your postcode is invalid</string>
+    <!--Error text indicating postal code is invalid, used for Canadian addresses-->
     <string name="address_postal_code_invalid">Your postal code is invalid</string>
+    <!--Error text indicating zip/ postal code is invalid, used for international addresses-->
     <string name="address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
+    <!--Label for input requesting province, used for canadian addresses-->
     <string name="address_label_province">Province</string>
+    <!--Label for input requesting province where province is optional, used for canadian addresses-->
     <string name="address_label_province_optional">Province (optional)</string>
+    <!--Label for input requesting the region, used for international addresses-->
     <string name="address_label_region_generic"> State / Province / Region</string>
+    <!--Label for input requesting the region where input is optional, used for international addresses-->
     <string name="address_label_region_generic_optional">State / Province / Region (optional)</string>
+    <!--Error text indicating name is required-->
     <string name="address_name_required">Please enter your name</string>
+    <!--Error text indicating that address is required, used for all locations-->
     <string name="address_required">Please enter your address</string>
+    <!--Error text indicating that city is required, used for all locations-->
     <string name="address_city_required">Please enter your city</string>
+    <!--Error text indicating that county is required, used for UK addresses-->
     <string name="address_county_required">Please enter your county</string>
+    <!--Error text indicating that state is required, used for US addresses-->
     <string name="address_state_required">Please enter your state</string>
+    <!--Error text indicating that province is required, used for Canadian addresses-->
     <string name="address_province_required">Please enter your province</string>
+    <!--Error text indicating that region is required, used for international addresses-->
     <string name="address_region_generic_required">Please enter your State/Province/Region</string>
+    <!--Error text indicating that phone number is required, used for all addresses-->
+    <string name="address_phone_number_required">Please enter your phone number</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
@@ -55,9 +98,12 @@
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>
     <string name="payment_method_add_new_card">Add new card&#8230;</string>
+    <!--Human-friendly label for something with $0 price-->
     <string name="price_free">Free</string>
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_payment_method">Payment Method</string>
+    <!--Screen title telling users they should add an address-->
     <string name="title_add_an_address">Add an Address</string>
+    <!--Screen title telling users they should select a shipping address-->
     <string name="title_select_shipping_method">Select Shipping Method</string>
 </resources>
