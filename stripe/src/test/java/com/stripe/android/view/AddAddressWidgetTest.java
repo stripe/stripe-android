@@ -96,7 +96,7 @@ public class AddAddressWidgetTest {
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_zip_code));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_state));
 
@@ -104,7 +104,7 @@ public class AddAddressWidgetTest {
         int canadaIndex = mOrderedCountries.indexOf(canadaPair);
         mCountrySpinner.setSelection(canadaIndex);
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postal_code));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_province));
 
@@ -112,7 +112,7 @@ public class AddAddressWidgetTest {
         int ukIndex = mOrderedCountries.indexOf(ukPair);
         mCountrySpinner.setSelection(ukIndex);
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line1));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postcode));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_county));
 
@@ -120,7 +120,7 @@ public class AddAddressWidgetTest {
         int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
         mCountrySpinner.setSelection(noPostalCodeIndex);
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line1));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2_optional));
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_region_generic));
     }
@@ -247,29 +247,13 @@ public class AddAddressWidgetTest {
 
     @Test
     public void validateAllFields_whenFieldsOptional_notChecked() {
-        List<String> optionalFields = new ArrayList<>();
-        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
-        optionalFields.add(AddAddressWidget.NAME_FIELD);
-        optionalFields.add(AddAddressWidget.STATE_FIELD);
-        optionalFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
-        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
-        optionalFields.add(AddAddressWidget.PHONE_FIELD);
-        optionalFields.add(AddAddressWidget.CITY_FIELD);
-        mAddAddressWidget.setOptionalFields(optionalFields);
+        setAllFieldsOptional();
         assertTrue(mAddAddressWidget.validateAllFields());
     }
 
     @Test
     public void validateAllFields_whenFieldsHidden_notChecked() {
-        List<String> optionalFields = new ArrayList<>();
-        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
-        optionalFields.add(AddAddressWidget.NAME_FIELD);
-        optionalFields.add(AddAddressWidget.STATE_FIELD);
-        optionalFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
-        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
-        optionalFields.add(AddAddressWidget.PHONE_FIELD);
-        optionalFields.add(AddAddressWidget.CITY_FIELD);
-        mAddAddressWidget.setHiddenFields(optionalFields);
+        setAllFieldsHidden();
         assertTrue(mAddAddressWidget.validateAllFields());
     }
 
@@ -308,5 +292,45 @@ public class AddAddressWidgetTest {
         int usIndex = mOrderedCountries.indexOf(usPair);
         mCountrySpinner.setSelection(usIndex);
         assertEquals(mCountrySpinner.getSelectedItemPosition(), usIndex);
+    }
+
+    @Test
+    public void setHiddenFields_whenNull_noHiddenFields() {
+        setAllFieldsHidden();
+        assertTrue(mAddAddressWidget.validateAllFields());
+        mAddAddressWidget.setHiddenFields(null);
+        assertFalse(mAddAddressWidget.validateAllFields());
+    }
+
+    @Test
+    public void setOptionalFields_whenNull_noOptionalFields() {
+        setAllFieldsOptional();
+        assertTrue(mAddAddressWidget.validateAllFields());
+        mAddAddressWidget.setOptionalFields(null);
+        assertFalse(mAddAddressWidget.validateAllFields());
+    }
+
+    private void setAllFieldsOptional() {
+        List<String> optionalFields = new ArrayList<>();
+        optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        optionalFields.add(AddAddressWidget.NAME_FIELD);
+        optionalFields.add(AddAddressWidget.STATE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
+        optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+        optionalFields.add(AddAddressWidget.PHONE_FIELD);
+        optionalFields.add(AddAddressWidget.CITY_FIELD);
+        mAddAddressWidget.setOptionalFields(optionalFields);
+    }
+
+    private void setAllFieldsHidden() {
+        List<String> hiddenFields = new ArrayList<>();
+        hiddenFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
+        hiddenFields.add(AddAddressWidget.NAME_FIELD);
+        hiddenFields.add(AddAddressWidget.STATE_FIELD);
+        hiddenFields.add(AddAddressWidget.ADDRESS_LINE_ONE_FIELD);
+        hiddenFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
+        hiddenFields.add(AddAddressWidget.PHONE_FIELD);
+        hiddenFields.add(AddAddressWidget.CITY_FIELD);
+        mAddAddressWidget.setHiddenFields(hiddenFields);
     }
 }

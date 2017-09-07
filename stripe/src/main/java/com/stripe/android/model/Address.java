@@ -60,7 +60,6 @@ public class Address extends StripeJsonModel implements Parcelable{
     private String mLine1;
     private String mLine2;
     private String mName;
-
     private String mPhoneNumber;
     private String mPostalCode;
     private String mState;

@@ -50,7 +50,7 @@ public class AddAddressWidget extends LinearLayout {
     private StripeEditText mPostalCodeEditText;
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneNumberEditText;
-    private String mCountrySelected;
+    private String mCountrySelected; 
 
     public AddAddressWidget(Context context) {
         super(context);
@@ -71,10 +71,11 @@ public class AddAddressWidget extends LinearLayout {
      * @param optionalAddressFields address fields that should be optional.
      */
     public void setOptionalFields(@Nullable List<String> optionalAddressFields) {
-        if (optionalAddressFields == null) {
-            return;
+        if (optionalAddressFields != null) {
+            mOptionalAddressFields = optionalAddressFields;
+        } else {
+            mOptionalAddressFields = new ArrayList<>();
         }
-        mOptionalAddressFields = optionalAddressFields;
         renderLabels();
         renderCountrySpecificLabels(mCountrySelected);
     }
@@ -84,10 +85,11 @@ public class AddAddressWidget extends LinearLayout {
      *                            automatically optional.
      */
     public void setHiddenFields(@Nullable List<String> hiddenAddressFields) {
-        if (hiddenAddressFields ==  null) {
-            return;
+        if (hiddenAddressFields !=  null) {
+            mHiddenAddressFields = hiddenAddressFields;
+        } else {
+            mHiddenAddressFields = new ArrayList<>();
         }
-        mHiddenAddressFields = hiddenAddressFields;
         renderLabels();
         renderCountrySpecificLabels(mCountrySelected);
     }
@@ -295,7 +297,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
-        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_code_optional));
         } else {
@@ -316,7 +318,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1));
         }
-        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2));
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postcode_optional));
         } else {
@@ -337,7 +339,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
-        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postal_code_optional));
         } else {
