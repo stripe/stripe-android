@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,8 +28,66 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeJsonModel}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class StripeJsonModelTest {
+
+    @Test
+    public void equals_whenEquals_returnsTrue() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
+        Card firstCard = Card.fromString(CardTest.JSON_CARD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+
+        assertEquals(firstCard, secondCard);
+        // Just confirming for sanity
+        assertFalse(firstCard == secondCard);
+    }
+
+    @Test
+    public void equals_whenNotEquals_returnsFalse() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
+        Card firstCard = Card.fromString(CardTest.JSON_CARD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+
+        assertNotNull(firstCard);
+        assertNotNull(secondCard);
+
+        String firstName = firstCard.getName();
+        String secondName = firstName == null ? "a non-null value" : firstName + "a change";
+        secondCard.setName(secondName);
+
+        assertNotEquals(firstCard, secondCard);
+    }
+
+    @Test
+    public void hashCode_whenEquals_returnsSameValue() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
+        Card firstCard = Card.fromString(CardTest.JSON_CARD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+        assertNotNull(firstCard);
+        assertNotNull(secondCard);
+
+        assertEquals(firstCard.hashCode(), secondCard.hashCode());
+    }
+
+    @Test
+    public void hashCode_whenNotEquals_returnsDifferentValues() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
+        Card firstCard = Card.fromString(CardTest.JSON_CARD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+
+        assertNotNull(firstCard);
+        assertNotNull(secondCard);
+
+        String firstCurrency = firstCard.getCurrency();
+        String secondCurrency = "USD".equals(firstCurrency) ? "EUR" : "USD";
+        secondCard.setCurrency(secondCurrency);
+
+        assertNotEquals(firstCard.hashCode(), secondCard.hashCode());
+    }
 
     @Test
     public void putStripeJsonModelListIfNotNull_forMapsWhenNull_doesNothing() {
