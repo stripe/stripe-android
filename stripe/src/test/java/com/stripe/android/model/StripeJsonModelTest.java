@@ -33,8 +33,11 @@ public class StripeJsonModelTest {
 
     @Test
     public void equals_whenEquals_returnsTrue() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
         Card firstCard = Card.fromString(CardTest.JSON_CARD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD);
+
         assertEquals(firstCard, secondCard);
         // Just confirming for sanity
         assertFalse(firstCard == secondCard);
@@ -42,6 +45,8 @@ public class StripeJsonModelTest {
 
     @Test
     public void equals_whenNotEquals_returnsFalse() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
         Card firstCard = Card.fromString(CardTest.JSON_CARD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD);
 
@@ -57,15 +62,20 @@ public class StripeJsonModelTest {
 
     @Test
     public void hashCode_whenEquals_returnsSameValue() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
         Card firstCard = Card.fromString(CardTest.JSON_CARD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD);
         assertNotNull(firstCard);
         assertNotNull(secondCard);
+
         assertEquals(firstCard.hashCode(), secondCard.hashCode());
     }
 
     @Test
     public void hashCode_whenNotEquals_returnsDifferentValues() {
+        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+
         Card firstCard = Card.fromString(CardTest.JSON_CARD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD);
 
