@@ -90,7 +90,6 @@ public class LauncherActivity extends AppCompatActivity {
                 ArrayList<String> hiddenFields = new ArrayList<>();
                 hiddenFields.add(AddAddressWidget.NAME_FIELD);
                 ArrayList<String> optionalFields = new ArrayList<>();
-                optionalFields.add(AddAddressWidget.ADDRESS_LINE_TWO_FIELD);
                 optionalFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
                 Address address = new Address.Builder().setCity("San Francisco").build();
                 Intent intent = AddAddressActivity.newIntent(LauncherActivity.this , optionalFields, hiddenFields, address);

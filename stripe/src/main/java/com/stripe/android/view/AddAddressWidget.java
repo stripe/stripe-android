@@ -26,7 +26,7 @@ public class AddAddressWidget extends LinearLayout {
      * optional or hidden.
      */
     public static final String ADDRESS_LINE_ONE_FIELD = "address_line_one";
-    public static final String ADDRESS_LINE_TWO_FIELD = "address_line_two";
+    public static final String ADDRESS_LINE_TWO_FIELD = "address_line_two"; // address line two is optional by default
     public static final String CITY_FIELD = "city";
     public static final String NAME_FIELD = "name";
     public static final String POSTAL_CODE_FIELD = "postal_code";
@@ -154,9 +154,6 @@ public class AddAddressWidget extends LinearLayout {
         boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD) && !mHiddenAddressFields.contains(ADDRESS_LINE_ONE_FIELD);
         mAddressEditText.setShouldShowError(requiredAddressLine1Empty);
 
-        boolean requiredAddressLine2Empty = mAddressEditText2.getText().toString().isEmpty() && !mOptionalAddressFields.contains(ADDRESS_LINE_TWO_FIELD) && !mHiddenAddressFields.contains(ADDRESS_LINE_TWO_FIELD);
-        mAddressEditText2.setShouldShowError(requiredAddressLine2Empty);
-
         boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(CITY_FIELD) && !mHiddenAddressFields.contains(CITY_FIELD);
         mCityEditText.setShouldShowError(requiredCityEmpty);
 
@@ -223,10 +220,11 @@ public class AddAddressWidget extends LinearLayout {
         mNameEditText.setErrorMessageListener(new ErrorListener(mNameTextInputLayout));
         mPostalCodeEditText.setErrorMessageListener(new ErrorListener(mPostalCodeTextInputLayout));
         mStateEditText.setErrorMessageListener(new ErrorListener(mStateTextInputLayout));
+        mPhoneNumberEditText.setErrorMessageListener(new ErrorListener(mPhoneNumberTextInputLayout));
         mAddressEditText.setErrorMessage(getResources().getString(R.string.address_required));
         mCityEditText.setErrorMessage(getResources().getString(R.string.address_city_required));
         mNameEditText.setErrorMessage(getResources().getString(R.string.address_name_required));
-//        mPhoneNumberEditText.setErrorMessage(getResources().getString(R.string.address_phone_required));
+        mPhoneNumberEditText.setErrorMessage(getResources().getString(R.string.address_phone_number_required));
     }
 
     private void renderLabels() {
@@ -297,11 +295,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_TWO_FIELD)) {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
-        } else {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
-        }
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_code_optional));
         } else {
@@ -322,11 +316,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1));
         }
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_TWO_FIELD)) {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
-        } else {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2));
-        }
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postcode_optional));
         } else {
@@ -347,11 +337,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_TWO_FIELD)) {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
-        } else {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
-        }
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postal_code_optional));
         } else {
@@ -373,11 +359,7 @@ public class AddAddressWidget extends LinearLayout {
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1));
         }
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_TWO_FIELD)) {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
-        } else {
-            mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2));
-        }
+        mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
         if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_postal_code_optional));
         } else {
