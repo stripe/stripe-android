@@ -5,6 +5,8 @@
     <color name="accent_color_default">#ff2296f3</color>
     <color name="control_normal_color_default">#ff90A4AE</color>
     <color name="color_text_secondary_default">#ff32325d</color>
+    <color name="color_text_unselected_secondary_default">#80323232</color>
+    <color name="color_text_unselected_primary_default">#ff000000</color>
     <color name="slate_50">#3332325d</color>
     <color name="toolbar_color_default">#ff3f51b5</color>
 </resources>

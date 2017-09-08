@@ -3,7 +3,10 @@ package com.stripe.android.view;
 import android.support.annotation.NonNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -31,6 +34,15 @@ class CountryUtils {
 
     static boolean isUKPostcodeValid(@NonNull String postcode) {
         return Pattern.matches("^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$", postcode);
+    }
+
+    static Map<String, String> getCountryNameToCodeMap() {
+        Map<String, String> displayNameToCountryCode = new HashMap<>();
+        for (String countryCode : Locale.getISOCountries()) {
+            Locale locale = new Locale("", countryCode);
+            displayNameToCountryCode.put(locale.getDisplayCountry(), countryCode);
+        }
+        return displayNameToCountryCode;
     }
 
 }

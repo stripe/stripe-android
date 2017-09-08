@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        >
 
     <TextView
         android:id="@+id/tv_label_smv"
@@ -12,7 +17,7 @@
         android:layout_toLeftOf="@+id/tv_amount_smv"
         android:layout_toStartOf="@+id/tv_amount_smv"
         android:paddingTop="@dimen/shipping_widget_vertical_margin"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
         />
 
     <TextView
@@ -26,7 +31,7 @@
         android:layout_toLeftOf="@+id/tv_amount_smv"
         android:layout_toStartOf="@+id/tv_amount_smv"
         android:paddingBottom="@dimen/shipping_widget_vertical_margin"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
         />
 
     <TextView
@@ -38,7 +43,7 @@
         android:layout_marginRight="@dimen/shipping_widget_horizontal_margin"
         android:layout_toLeftOf="@+id/iv_selected_icon"
         android:layout_toStartOf="@+id/iv_selected_icon"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
         />
 
     <android.support.v7.widget.AppCompatImageView
@@ -50,4 +55,5 @@
         android:layout_centerVertical="true"
         android:background="@drawable/ic_checkmark_tinted"
         />
+    </RelativeLayout>
 </merge>

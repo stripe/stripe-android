@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="activity_total_margin">8dp</dimen>
+    <dimen name="add_address_vertical_margin">16dp</dimen>
     <dimen name="add_card_element_vertical_margin">12dp</dimen>
     <dimen name="add_card_expiry_middle_margin">8dp</dimen>
     <dimen name="add_card_total_margin">16dp</dimen>
@@ -23,6 +24,6 @@
     <dimen name="masked_card_row_end_padding">8dp</dimen>
     <dimen name="masked_card_row_height">48dp</dimen>
     <dimen name="toolbar_elevation">4dp</dimen>
-    <dimen name="shipping_widget_vertical_margin">6dp</dimen>
-    <dimen name="shipping_widget_horizontal_margin">12dp</dimen>
+    <dimen name="shipping_widget_vertical_margin">4dp</dimen>
+    <dimen name="shipping_widget_horizontal_margin">16dp</dimen>
 </resources>

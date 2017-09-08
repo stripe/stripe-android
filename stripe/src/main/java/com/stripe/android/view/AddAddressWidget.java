@@ -4,10 +4,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
@@ -36,6 +33,7 @@ public class AddAddressWidget extends LinearLayout {
     private List<String> mOptionalAddressFields = new ArrayList<>();
     private List<String> mHiddenAddressFields = new ArrayList<>();
 
+    private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
     private TextInputLayout mAddressLine1TextInputLayout;
     private TextInputLayout mAddressLine2TextInputLayout;
     private TextInputLayout mCityTextInputLayout;
@@ -50,7 +48,8 @@ public class AddAddressWidget extends LinearLayout {
     private StripeEditText mPostalCodeEditText;
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneNumberEditText;
-    private String mCountrySelected; 
+    private String mCountrySelected;
+
 
     public AddAddressWidget(Context context) {
         super(context);
@@ -179,8 +178,7 @@ public class AddAddressWidget extends LinearLayout {
     private void initView() {
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.add_address_widget, this);
-
-        Spinner countrySpinner = findViewById(R.id.spinner_country_aaw);
+        mCountryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw);
         mAddressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw);
         mAddressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw);
         mCityTextInputLayout = findViewById(R.id.tl_city_aaw);
@@ -195,26 +193,19 @@ public class AddAddressWidget extends LinearLayout {
         mStateEditText = findViewById(R.id.et_state_aaw);
         mPhoneNumberEditText = findViewById(R.id.et_phone_number_aaw);
         mPhoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw);
-
-        setupErrorHandling();
-
-        final CountryAdapter countryAdapter = new CountryAdapter(getContext());
-        countrySpinner.setAdapter(countryAdapter);
-        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mCountrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
+        mCountryAutoCompleteTextView.setCountryChangeListener(new CountryAutoCompleteTextView.CountryChangeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mCountrySelected = countryAdapter.getItem(i).first;
+            public void onCountryChanged(String countryCode) {
+                mCountrySelected = countryCode;
                 renderCountrySpecificLabels(mCountrySelected);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
         });
-        mCountrySelected = countryAdapter.getItem(0).first;
+        setupErrorHandling();
         renderLabels();
         renderCountrySpecificLabels(mCountrySelected);
     }
+
 
     private void setupErrorHandling() {
         mAddressEditText.setErrorMessageListener(new ErrorListener(mAddressLine1TextInputLayout));

@@ -1,9 +1,7 @@
 package com.stripe.android.view;
 
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.util.Pair;
 import android.view.View;
-import android.widget.Spinner;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
@@ -48,9 +46,7 @@ public class AddAddressWidgetTest {
     private StripeEditText mNameEditText;
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneEditText;
-    private Spinner mCountrySpinner;
-    private CountryAdapter mCountryAdapter;
-    private List<Pair<String, String>> mOrderedCountries;
+    private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
 
     private String mNoPostalCodeCountry = "ZW"; // Zimbabwe
     private Address mAddress;
@@ -75,9 +71,7 @@ public class AddAddressWidgetTest {
         mPostalEditText = mAddAddressWidget.findViewById(R.id.et_postal_code_aaw);
         mStateEditText = mAddAddressWidget.findViewById(R.id.et_state_aaw);
         mPhoneEditText = mAddAddressWidget.findViewById(R.id.et_phone_number_aaw);
-        mCountrySpinner = mAddAddressWidget.findViewById(R.id.spinner_country_aaw);
-        mCountryAdapter = (CountryAdapter) mCountrySpinner.getAdapter();
-        mOrderedCountries = mCountryAdapter.getOrderedCountries();
+        mCountryAutoCompleteTextView = mAddAddressWidget.findViewById(R.id.country_autocomplete_aaw);
         mAddress = new Address.Builder()
                 .setCity("San Francisco")
                 .setName("Fake Name")
@@ -92,33 +86,25 @@ public class AddAddressWidgetTest {
 
     @Test
     public void addAddressWidget_whenCountryChanged_fieldsRenderCorrectly() {
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address));
         assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_zip_code));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_state));
 
-        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
-        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
-        mCountrySpinner.setSelection(canadaIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address));
         assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_apt_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postal_code));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_province));
 
-        Pair<String, String> ukPair = new Pair(Locale.UK.getCountry(), Locale.UK.getDisplayCountry());
-        int ukIndex = mOrderedCountries.indexOf(ukPair);
-        mCountrySpinner.setSelection(ukIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.UK.getDisplayCountry());
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line1));
         assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2_optional));
         assertEquals(mPostalCodeTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_postcode));
         assertEquals(mStateTextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_county));
 
-        Pair<String, String> noPostalCodePair = new Pair(mNoPostalCodeCountry, new Locale("", mNoPostalCodeCountry).getDisplayCountry());
-        int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
-        mCountrySpinner.setSelection(noPostalCodeIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
         assertEquals(mAddressLine1TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line1));
         assertEquals(mAddressLine2TextInputLayout.getHint(), mAddAddressWidget.getResources().getString(R.string.address_label_address_line2_optional));
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
@@ -127,9 +113,7 @@ public class AddAddressWidgetTest {
 
     @Test
     public void addAddressWidget_addressSaved_validationTriggers() {
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         assertFalse(mAddAddressWidget.validateAllFields());
         mAddressLine1EditText.setText("123 Fake Address");
         mNameEditText.setText("Fake Name");
@@ -142,17 +126,13 @@ public class AddAddressWidgetTest {
         assertFalse(mAddAddressWidget.validateAllFields());
         mPostalEditText.setText("ABCDEF");
         assertFalse(mAddAddressWidget.validateAllFields());
-        Pair<String, String> noPostalCodePair = new Pair(mNoPostalCodeCountry, new Locale("", mNoPostalCodeCountry).getDisplayCountry());
-        int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
-        mCountrySpinner.setSelection(noPostalCodeIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
         assertTrue(mAddAddressWidget.validateAllFields());
     }
 
     @Test
     public void addAddressTest_whenValidationFails_errorTextRenders() {
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertTrue(mAddressLine1TextInputLayout.isErrorEnabled());
         assertTrue(mCityTextInputLayout.isErrorEnabled());
@@ -173,39 +153,29 @@ public class AddAddressWidgetTest {
         mPostalEditText.setText("");
         mAddAddressWidget.validateAllFields();
         assertTrue(mPostalCodeTextInputLayout.isErrorEnabled());
-        Pair<String, String> noPostalCodePair = new Pair(mNoPostalCodeCountry, new Locale("", mNoPostalCodeCountry).getDisplayCountry());
-        int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
-        mCountrySpinner.setSelection(noPostalCodeIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertFalse(mStateTextInputLayout.isErrorEnabled());
     }
 
     @Test
     public void addAddressWidget_whenErrorOccurs_errorsRenderInternationalized() {
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertEquals(mStateTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_state_required));
         assertEquals(mPostalCodeTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_zip_invalid));
 
-        Pair<String, String> ukPair = new Pair(Locale.UK.getCountry(), Locale.UK.getDisplayCountry());
-        int ukIndex = mOrderedCountries.indexOf(ukPair);
-        mCountrySpinner.setSelection(ukIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.UK.getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertEquals(mStateTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_county_required));
         assertEquals(mPostalCodeTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_postcode_invalid));
 
-        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
-        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
-        mCountrySpinner.setSelection(canadaIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered( Locale.CANADA.getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertEquals(mStateTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_province_required));
         assertEquals(mPostalCodeTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_postal_code_invalid));
 
-        Pair<String, String> noPostalCodePair = new Pair(mNoPostalCodeCountry, new Locale("", mNoPostalCodeCountry).getDisplayCountry());
-        int noPostalCodeIndex = mOrderedCountries.indexOf(noPostalCodePair);
-        mCountrySpinner.setSelection(noPostalCodeIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
         mAddAddressWidget.validateAllFields();
         assertEquals(mStateTextInputLayout.getError(), mAddAddressWidget.getResources().getString(R.string.address_region_generic_required));
     }
@@ -220,9 +190,7 @@ public class AddAddressWidgetTest {
         mAddAddressWidget.setOptionalFields(optionalFields);
         assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_zip_code_optional));
         assertEquals(mNameTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_name_optional));
-        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
-        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
-        mCountrySpinner.setSelection(canadaIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
         assertEquals(mStateTextInputLayout.getHint().toString(), mAddAddressWidget.getResources().getString(R.string.address_label_province));
         optionalFields.add(AddAddressWidget.STATE_FIELD);
         mAddAddressWidget.setOptionalFields(optionalFields);
@@ -239,9 +207,7 @@ public class AddAddressWidgetTest {
         mAddAddressWidget.setHiddenFields(hiddenFields);
         assertEquals(mNameTextInputLayout.getVisibility(), View.GONE);
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
-        Pair<String, String> canadaPair = new Pair(Locale.CANADA.getCountry(), Locale.CANADA.getDisplayCountry());
-        int canadaIndex = mOrderedCountries.indexOf(canadaPair);
-        mCountrySpinner.setSelection(canadaIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
     }
 
@@ -271,9 +237,7 @@ public class AddAddressWidgetTest {
         mNameEditText.setText("Fake Name");
         mPhoneEditText.setText("(123) 456 - 7890");
         mPostalEditText.setText("12345");
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         Address inputAddress = mAddAddressWidget.getAddress();
         assertEquals(inputAddress.toMap(), mAddress.toMap());
     }
@@ -288,10 +252,7 @@ public class AddAddressWidgetTest {
         assertEquals(mPhoneEditText.getText().toString(), "(123) 456 - 7890");
         assertEquals(mPostalEditText.getText().toString(), "12345");
         assertEquals(mNameEditText.getText().toString(), "Fake Name");
-        Pair<String, String> usPair = new Pair(Locale.US.getCountry(), Locale.US.getDisplayCountry());
-        int usIndex = mOrderedCountries.indexOf(usPair);
-        mCountrySpinner.setSelection(usIndex);
-        assertEquals(mCountrySpinner.getSelectedItemPosition(), usIndex);
+        assertEquals(mCountryAutoCompleteTextView.getSelectedCountryCode(), "US");
     }
 
     @Test
