@@ -171,6 +171,9 @@ class ViewUtils {
     @NonNull
     static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
                                                     @NonNull @Card.CardBrand String brand) {
+        if (spacelessCardNumber.length() > 16) {
+            spacelessCardNumber = spacelessCardNumber.substring(0, 16);
+        }
         String[] numberGroups;
         if (brand.equals(Card.AMERICAN_EXPRESS)) {
             numberGroups = new String[3];

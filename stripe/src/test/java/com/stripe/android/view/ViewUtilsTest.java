@@ -9,10 +9,8 @@ import com.stripe.android.model.Card;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
@@ -268,5 +266,13 @@ public class ViewUtilsTest {
         assertTrue(ViewUtils.isColorDark(darkPurple));
         assertTrue(ViewUtils.isColorDark(darkishRed));
         assertTrue(ViewUtils.isColorDark(Color.BLACK));
+    }
+
+    @Test
+    public void separateCardNumberGroups_forLongInputs_doesNotCrash() {
+        String testCardNumber = "1234567890123456789";
+        String[] groups = ViewUtils.separateCardNumberGroups(
+                testCardNumber, Card.VISA);
+        assertEquals(4, groups.length);
     }
 }
