@@ -16,18 +16,13 @@
         android:theme="@style/ToolBarStyle"
         />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar_as"
-        >
 
-        <ViewStub
-            android:id="@+id/widget_viewstub_as"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-    </ScrollView>
+    <ViewStub
+        android:id="@+id/widget_viewstub_as"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_as"
+        />
 
     <ProgressBar
         android:id="@+id/progress_bar_as"
