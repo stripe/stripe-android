@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,7 +21,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public class Address extends StripeJsonModel {
+public class Address extends StripeJsonModel implements Parcelable{
 
     @IntDef({
             RequiredBillingAddressFields.NONE,
@@ -30,6 +32,17 @@ public class Address extends StripeJsonModel {
         int NONE = 0;
         int ZIP = 1;
         int FULL = 2;
+    }
+
+    private Address(Parcel in) {
+        mCity = in.readString();
+        mCountry = in.readString();
+        mLine1 = in.readString();
+        mLine2 = in.readString();
+        mName = in.readString();
+        mPhoneNumber = in.readString();
+        mPostalCode = in.readString();
+        mState = in.readString();
     }
 
     private static final String FIELD_CITY = "city";
@@ -135,6 +148,14 @@ public class Address extends StripeJsonModel {
         mState = state;
     }
 
+    public String getName() {
+        return mName;
+    }
+
+    public String getPhoneNumber() {
+        return mPhoneNumber;
+    }
+
     @NonNull
     @Override
     public Map<String, Object> toMap() {
@@ -190,6 +211,37 @@ public class Address extends StripeJsonModel {
         String state = optString(jsonObject, FIELD_STATE);
 
         return new Address(city, country, line1, line2, name, phoneNumber, postalCode, state);
+    }
+
+    static final Parcelable.Creator<Address> CREATOR
+            = new Parcelable.Creator<Address>() {
+
+        @Override
+        public Address createFromParcel(Parcel in) {
+            return new Address(in);
+        }
+
+        @Override
+        public Address[] newArray(int size) {
+            return new Address[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mCity);
+        out.writeString(mCountry);
+        out.writeString(mLine1);
+        out.writeString(mLine2);
+        out.writeString(mName);
+        out.writeString(mPhoneNumber);
+        out.writeString(mPostalCode);
+        out.writeString(mState);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static class Builder {

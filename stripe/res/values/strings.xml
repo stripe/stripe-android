@@ -16,12 +16,8 @@
     <string name="address_label_address_line1">Address line 1</string>
     <!--Label for input requesting the first line of an address where , used for international addresses-->
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
-    <!--Label for input requesting apartment number (address line 2), used for US and Canadian addresses-->
-    <string name="address_label_apt">Apt. </string>
     <!--Label for input requesting apartment number (address line 2) where input is optional, used for US addresses-->
     <string name="address_label_apt_optional">Apt. (optional)</string>
-    <!--Label for input requesting address line 2, used for international addresses-->
-    <string name="address_label_address_line2">Address line 2</string>
     <!--Label for input requesting address line 2 where input in optional used for international addresses-->
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
     <!--Label for input requesting city, used for all locations-->
