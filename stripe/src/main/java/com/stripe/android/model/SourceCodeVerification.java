@@ -45,7 +45,7 @@ public class SourceCodeVerification extends StripeJsonModel {
         mStatus = status;
     }
 
-    int getAttemptsRemaining() {
+    public int getAttemptsRemaining() {
         return mAttemptsRemaining;
     }
 
@@ -54,7 +54,7 @@ public class SourceCodeVerification extends StripeJsonModel {
     }
 
     @Status
-    String getStatus() {
+    public String getStatus() {
         return mStatus;
     }
 
