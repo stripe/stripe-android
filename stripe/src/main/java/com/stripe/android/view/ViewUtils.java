@@ -67,6 +67,19 @@ class ViewUtils {
         return outValue;
     }
 
+    static TypedValue getThemeTextColorPrimary(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.textColorPrimary;
+        } else {
+            //Get textColorPrimary defined for AppCompat
+            colorAttr = android.R.color.primary_text_light;
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue;
+    }
+
     @SuppressWarnings("deprecation")
     static Drawable getTintedIcon(
             @NonNull Context context,
@@ -213,6 +226,10 @@ class ViewUtils {
             numberGroups[i] = spacelessCardNumber.substring(previousStart);
         }
         return numberGroups;
+    }
+
+    static int getPxFromDp(Context context, int dp) {
+        return (int) (dp * context.getResources().getDisplayMetrics().density);
     }
 
 }

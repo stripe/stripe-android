@@ -2,19 +2,18 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.SpinnerAdapter;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.TextView;
 
 import com.stripe.android.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,24 +22,61 @@ import java.util.Locale;
 /**
  * Adapter that populates a list of countries for a spinner.
  */
-class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
+class CountryAdapter extends ArrayAdapter {
 
-    private List<Pair<String, String>> mCountryToDisplayName;
+    @VisibleForTesting
+    List<String> mCountries;
+    @VisibleForTesting
+    List<String> mSuggestions;
+    private Filter mFilter;
+
     private Context mContext;
 
-    public CountryAdapter(Context context) {
+    CountryAdapter(Context context, List<String> countries) {
+        super(context, R.layout.menu_text_view);
         mContext = context;
-        mCountryToDisplayName = getOrderedCountries();
+        mCountries = getOrderedCountries(countries);
+        mSuggestions = mCountries;
+        mFilter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults filterResults = new FilterResults();
+                List<String> suggestedCountries = new ArrayList<>();
+                if (charSequence == null) {
+                    filterResults.values = mCountries;
+                    return filterResults;
+                }
+                String charSequenceLowercase = charSequence.toString().toLowerCase();
+                for (String country : mCountries) {
+                    if (country.toLowerCase().startsWith(charSequenceLowercase)) {
+                        suggestedCountries.add(country);
+                    }
+                }
+                if (suggestedCountries.size() == 0 ||
+                        (suggestedCountries.size() == 1 && suggestedCountries.get(0).equals(charSequence))) {
+                    suggestedCountries = mCountries;
+                }
+                filterResults.values = suggestedCountries;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                List<String> suggestions = (List<String>) filterResults.values;
+                mSuggestions = suggestions;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     @Override
     public int getCount() {
-        return mCountryToDisplayName.size();
+        return mSuggestions.size();
     }
 
     @Override
-    public Pair<String, String> getItem(int i) {
-        return mCountryToDisplayName.get(i);
+    public String getItem(int i) {
+        return mSuggestions.get(i);
     }
 
     @Override
@@ -51,36 +87,33 @@ class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         if (view != null && view instanceof TextView) {
-            ((TextView) view).setText(getItem(i).second);
+            ((TextView) view).setText(getItem(i));
             return view;
         } else {
-            TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(R.layout.spinner_text_view, viewGroup, false);
-            countryText.setText(getItem(i).second);
+            TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(R.layout.menu_text_view, viewGroup, false);
+            countryText.setText(getItem(i));
             return countryText;
         }
     }
 
+    @NonNull
+    @Override
+    public Filter getFilter() {
+        return mFilter;
+    }
+
     @VisibleForTesting
-     List getOrderedCountries() {
+    List getOrderedCountries(List<String> countries) {
         // Show user's current locale first, followed by countries alphabetized by display name
-        List<String> countries = new ArrayList<>(Arrays.asList(Locale.getISOCountries()));
-        List<Pair<String, String>> countriesToDisplayName = new ArrayList<>();
-        for (String country: countries) {
-            Locale locale = new Locale("", country);
-            countriesToDisplayName.add(new Pair<>(country, locale.getDisplayCountry()));
-        }
-        Collections.sort(countriesToDisplayName, new Comparator<Pair<String, String>>() {
+        Collections.sort(countries, new Comparator<String>() {
             @Override
-            public int compare(Pair<String, String> pair1, Pair<String, String> pair2) {
-                return pair1.second.compareTo(pair2.second);
+            public int compare(String s, String t1) {
+                return s.toLowerCase().compareTo(t1.toLowerCase());
             }
         });
-
-        Pair<String, String> currentCountryToDisplay = new Pair<>(getCurrentLocale().getCountry(), getCurrentLocale().getDisplayCountry());
-        if (countriesToDisplayName.remove(currentCountryToDisplay)) {
-            countriesToDisplayName.add(0, currentCountryToDisplay);
-        }
-        return countriesToDisplayName;
+        countries.remove(getCurrentLocale().getDisplayCountry());
+        countries.add(0, getCurrentLocale().getDisplayCountry());
+        return countries;
     }
 
     @VisibleForTesting
@@ -91,4 +124,5 @@ class CountryAdapter extends BaseAdapter implements SpinnerAdapter {
             return mContext.getResources().getConfiguration().locale;
         }
     }
+
 }
