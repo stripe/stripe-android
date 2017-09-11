@@ -109,6 +109,7 @@ class ShippingMethodView extends RelativeLayout {
                     : mUnselectedTextColorSecondaryInt;
         }
     }
+
     void setShippingMethod(@NonNull ShippingMethod shippingMethod) {
         mShippingMethod = shippingMethod;
         mLabel.setText(mShippingMethod.getLabel());

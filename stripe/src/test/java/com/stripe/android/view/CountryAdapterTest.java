@@ -54,17 +54,31 @@ public class CountryAdapterTest {
     }
 
     @Test
-    public void filter_whenCountryInput_filtersCorrectly() {
+    public void filter_whenCountryInputNoMatch_showsAllResults() {
         Filter filter = mCountryAdapter.getFilter();
         filter.filter("NONEXISTANT COUNTRY");
         int countryLength = mCountryAdapter.mCountries.size();
         assertEquals(mCountryAdapter.mSuggestions.size(), countryLength);
+    }
+
+    @Test
+    public void filter_whenCountryInputMatches_filters() {
+        Filter filter = mCountryAdapter.getFilter();
+        int countryLength = mCountryAdapter.mCountries.size();
         filter.filter("a");
         assertTrue(mCountryAdapter.mSuggestions.size() < countryLength);
         for (String suggestedCountry: mCountryAdapter.mSuggestions) {
             assertTrue(suggestedCountry.toLowerCase().startsWith("a"));
         }
+    }
+
+    @Test
+    public void filter_whenCountryInputMatchesExactly_showsAllResults() {
+        Filter filter = mCountryAdapter.getFilter();
+        int countryLength = mCountryAdapter.mCountries.size();
         filter.filter("Uganda");
         assertEquals(mCountryAdapter.mSuggestions.size(), countryLength);
     }
+
+
 }

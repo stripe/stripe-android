@@ -26,4 +26,5 @@
     <dimen name="toolbar_elevation">4dp</dimen>
     <dimen name="shipping_widget_vertical_margin">4dp</dimen>
     <dimen name="shipping_widget_horizontal_margin">16dp</dimen>
+    <dimen name="shipping_widget_outer_margin">12dp</dimen>
 </resources>

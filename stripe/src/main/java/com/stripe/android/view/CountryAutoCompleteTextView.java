@@ -22,7 +22,6 @@ class CountryAutoCompleteTextView extends FrameLayout {
     private String mCountrySelected;
     private CountryChangeListener mCountryChangeListener;
 
-
     public CountryAutoCompleteTextView(Context context) {
         super(context);
         initView();
@@ -36,10 +35,6 @@ class CountryAutoCompleteTextView extends FrameLayout {
     public CountryAutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView();
-    }
-
-    interface CountryChangeListener {
-        void onCountryChanged(String countryCode);
     }
 
     /**
@@ -109,5 +104,9 @@ class CountryAutoCompleteTextView extends FrameLayout {
         } else {
             mCountryTextInputLayout.setError(getResources().getString(R.string.address_country_invalid));
         }
+    }
+
+    interface CountryChangeListener {
+        void onCountryChanged(String countryCode);
     }
 }

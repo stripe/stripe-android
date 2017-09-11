@@ -46,8 +46,9 @@ class CountryAdapter extends ArrayAdapter {
                     filterResults.values = mCountries;
                     return filterResults;
                 }
+                String charSequenceLowercase = charSequence.toString().toLowerCase();
                 for (String country : mCountries) {
-                    if (country.toLowerCase().startsWith(charSequence.toString().toLowerCase())) {
+                    if (country.toLowerCase().startsWith(charSequenceLowercase)) {
                         suggestedCountries.add(country);
                     }
                 }
