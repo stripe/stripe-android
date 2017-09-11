@@ -102,4 +102,8 @@
     <string name="title_add_an_address">Add an Address</string>
     <!--Screen title telling users they should select a shipping address-->
     <string name="title_select_shipping_method">Select Shipping Method</string>
+    <!--Text informing user there are no existing payment methods in the application-->
+    <string name="no_payment_methods">No payment methods.</string>
+    <!--Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application-->
+    <string name="add_card">Add a new debit or credit card to make purchases in this app.</string>
 </resources>
