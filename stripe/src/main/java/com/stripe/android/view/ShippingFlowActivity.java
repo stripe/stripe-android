@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 
@@ -11,6 +12,7 @@ import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Activity containing a two-part shipping flow that allows users to provide a shipping address
@@ -24,17 +26,23 @@ public class ShippingFlowActivity extends StripeActivity {
     static final String EXTRA_SHIPPING_FLOW_CONFIG = "shipping_flow_config";
 
     public static class IntentBuilder {
-        private ArrayList<String> mHiddenAddressFields;
-        private ArrayList<String> mOptionalAddressFields;
+        private List mHiddenAddressFields;
+        private List mOptionalAddressFields;
         private Address mPrepopulatedAddress;
         private boolean mHideAddressScreen;
         private boolean mHideShippingScreen;
+
+        public IntentBuilder() {
+            mHiddenAddressFields = new ArrayList();
+            mOptionalAddressFields = new ArrayList();
+            mPrepopulatedAddress = new Address.Builder().build();
+        }
 
         /**
          * @param hiddenAddressFields sets address fields that should be hidden on the address
          *                            screen. Hidden fields are automatically optional.
          */
-        public IntentBuilder setHiddenAddressFields(ArrayList<String> hiddenAddressFields) {
+        public IntentBuilder setHiddenAddressFields(@NonNull List hiddenAddressFields) {
             mHiddenAddressFields = hiddenAddressFields;
             return this;
         }
@@ -42,7 +50,7 @@ public class ShippingFlowActivity extends StripeActivity {
         /**
          * @param optionalAddressFields sets address fields that should be optional.
          */
-        public IntentBuilder setOptionalAddressFields(ArrayList<String> optionalAddressFields) {
+        public IntentBuilder setOptionalAddressFields(@NonNull List optionalAddressFields) {
             mOptionalAddressFields = optionalAddressFields;
             return this;
         }
@@ -52,7 +60,7 @@ public class ShippingFlowActivity extends StripeActivity {
          * @param prepopulatedAddress set an address to be prepopulated into the add address input
          *                            fields.
          */
-        public IntentBuilder setPrepopulatedAddress(Address prepopulatedAddress) {
+        public IntentBuilder setPrepopulatedAddress(@NonNull Address prepopulatedAddress) {
             mPrepopulatedAddress = prepopulatedAddress;
             return this;
         }
@@ -60,16 +68,16 @@ public class ShippingFlowActivity extends StripeActivity {
         /**
          * Sets the add shipping address screen to be skipped.
          */
-        public IntentBuilder setHideAddressScreen() {
-            mHideAddressScreen = true;
+        public IntentBuilder setHideAddressScreen(boolean isHideAddressScreen) {
+            mHideAddressScreen = isHideAddressScreen;
             return this;
         }
 
         /**
          * Sets the select shipping method screen to be skipped.
          */
-        public IntentBuilder setHideShippingScreen() {
-            mHideShippingScreen = true;
+        public IntentBuilder setHideShippingScreen(boolean isHideShippingScreen) {
+            mHideShippingScreen = isHideShippingScreen;
             return this;
         }
 
@@ -133,6 +141,7 @@ public class ShippingFlowActivity extends StripeActivity {
             setCommunicatingProgress(true);
             // TODO: Call into payment context
             setCommunicatingProgress(false);
+            mShippingFlowPagerAdapter.setAddressSaved(true);
             if (hasNextPage()) {
                 mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
             } else {

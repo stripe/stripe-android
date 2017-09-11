@@ -48,8 +48,6 @@ public class AddAddressWidget extends LinearLayout {
     private StripeEditText mPostalCodeEditText;
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneNumberEditText;
-    private String mCountrySelected;
-
 
     public AddAddressWidget(Context context) {
         super(context);
@@ -76,7 +74,7 @@ public class AddAddressWidget extends LinearLayout {
             mOptionalAddressFields = new ArrayList<>();
         }
         renderLabels();
-        renderCountrySpecificLabels(mCountrySelected);
+        renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
     /**
@@ -90,7 +88,7 @@ public class AddAddressWidget extends LinearLayout {
             mHiddenAddressFields = new ArrayList<>();
         }
         renderLabels();
-        renderCountrySpecificLabels(mCountrySelected);
+        renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
     /**
@@ -103,7 +101,7 @@ public class AddAddressWidget extends LinearLayout {
 
         Address address = new Address.Builder()
                 .setCity(mCityEditText.getText().toString())
-                .setCountry(mCountrySelected)
+                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode())
                 .setLine1(mAddressEditText.getText().toString())
                 .setLine2(mAddressEditText2.getText().toString())
                 .setName(mNameEditText.getText().toString())
@@ -121,7 +119,9 @@ public class AddAddressWidget extends LinearLayout {
             return;
         }
         mCityEditText.setText(address.getCity());
-        mCountrySelected = address.getCountry();
+        if (address.getCountry() != null && !address.getCountry().isEmpty()) {
+            mCountryAutoCompleteTextView.setCountrySelected(address.getCountry());
+        }
         mAddressEditText.setText(address.getLine1());
         mAddressEditText2.setText(address.getLine2());
         mNameEditText.setText(address.getName());
@@ -136,18 +136,18 @@ public class AddAddressWidget extends LinearLayout {
      * @return {@code true} if all shown fields are valid, {@code false} otherwise
      */
     public boolean validateAllFields() {
-
         boolean postalCodeValid = true;
+        String countrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
         if (mPostalCodeEditText.getText().toString().isEmpty() &&
                 (mOptionalAddressFields.contains(POSTAL_CODE_FIELD) || mHiddenAddressFields.contains(POSTAL_CODE_FIELD))) {
             postalCodeValid = true;
-        } else if (mCountrySelected.equals(Locale.US.getCountry())) {
+        } else if (countrySelected.equals(Locale.US.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText().toString().trim());
-        } else if (mCountrySelected.equals(Locale.UK.getCountry())) {
+        } else if (countrySelected.equals(Locale.UK.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText().toString().trim());
-        } else if (mCountrySelected.equals(Locale.CANADA.getCountry())) {
+        } else if (countrySelected.equals(Locale.CANADA.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText().toString().trim());
-        } else if (CountryUtils.doesCountryUsePostalCode(mCountrySelected)){
+        } else if (CountryUtils.doesCountryUsePostalCode(countrySelected)){
             postalCodeValid = !mPostalCodeEditText.getText().toString().isEmpty();
         }
         mPostalCodeEditText.setShouldShowError(!postalCodeValid);
@@ -193,17 +193,15 @@ public class AddAddressWidget extends LinearLayout {
         mStateEditText = findViewById(R.id.et_state_aaw);
         mPhoneNumberEditText = findViewById(R.id.et_phone_number_aaw);
         mPhoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw);
-        mCountrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
         mCountryAutoCompleteTextView.setCountryChangeListener(new CountryAutoCompleteTextView.CountryChangeListener() {
             @Override
             public void onCountryChanged(String countryCode) {
-                mCountrySelected = countryCode;
-                renderCountrySpecificLabels(mCountrySelected);
+                renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
             }
         });
         setupErrorHandling();
         renderLabels();
-        renderCountrySpecificLabels(mCountrySelected);
+        renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
 

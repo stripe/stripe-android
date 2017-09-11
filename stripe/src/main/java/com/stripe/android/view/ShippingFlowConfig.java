@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.model.Address;
 
@@ -16,7 +17,12 @@ class ShippingFlowConfig implements Parcelable {
     private boolean mHideAddressScreen;
     private boolean mHideShippingScreen;
 
-    public ShippingFlowConfig(List<String> hiddenAddressFields, List<String> optionalAddressFields, Address prepopulatedAddress, boolean hideAddressScreen, boolean hideShippingScreen) {
+    public ShippingFlowConfig(
+            @NonNull List<String> hiddenAddressFields,
+            @NonNull List<String> optionalAddressFields,
+            @NonNull Address prepopulatedAddress,
+            boolean hideAddressScreen,
+            boolean hideShippingScreen) {
         mHiddenAddressFields = hiddenAddressFields;
         mOptionalAddressFields = optionalAddressFields;
         mPrepopulatedAddress = prepopulatedAddress;
@@ -47,11 +53,11 @@ class ShippingFlowConfig implements Parcelable {
         return mPrepopulatedAddress;
     }
 
-    public boolean hideAddressScreen() {
+    public boolean isHideAddressScreen() {
         return mHideAddressScreen;
     }
 
-    public boolean hideShippingScreen() {
+    public boolean isHideShippingScreen() {
         return mHideShippingScreen;
     }
 

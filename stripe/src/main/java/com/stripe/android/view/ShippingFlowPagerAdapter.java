@@ -18,18 +18,30 @@ class ShippingFlowPagerAdapter extends PagerAdapter {
     private Context mContext;
     private ShippingFlowConfig mShippingFlowConfig;
     private List<ShippingFlowPagerEnum> mPages;
-
+    private boolean mAddressSaved;
 
     ShippingFlowPagerAdapter(Context context, ShippingFlowConfig shippingFlowConfig) {
         mContext = context;
         mShippingFlowConfig = shippingFlowConfig;
         mPages = new ArrayList<>();
-        if (!mShippingFlowConfig.hideAddressScreen()) {
+        if (!mShippingFlowConfig.isHideAddressScreen()) {
             mPages.add(ShippingFlowPagerEnum.ADDRESS);
         }
-        if (!mShippingFlowConfig.hideShippingScreen()) {
+        if (!shouldHideShippingScreen()) {
             mPages.add(ShippingFlowPagerEnum.SHIPPING_METHOD);
         }
+    }
+
+    private boolean shouldHideShippingScreen() {
+        return mShippingFlowConfig.isHideShippingScreen() || (!mShippingFlowConfig.isHideAddressScreen() && !mAddressSaved);
+    }
+
+    void setAddressSaved(boolean addressSaved) {
+        mAddressSaved = addressSaved;
+        if (!shouldHideShippingScreen()) {
+            mPages.add(ShippingFlowPagerEnum.SHIPPING_METHOD);
+        }
+        notifyDataSetChanged();
     }
 
     @Override

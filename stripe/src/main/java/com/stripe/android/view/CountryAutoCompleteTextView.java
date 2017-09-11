@@ -49,7 +49,6 @@ class CountryAutoCompleteTextView extends FrameLayout {
      *                    the full country display name.
      */
     void setCountrySelected(String countryCode) {
-        mCountrySelected = countryCode;
         updateUIForCountryEntered(mCountrySelected);
     }
 
