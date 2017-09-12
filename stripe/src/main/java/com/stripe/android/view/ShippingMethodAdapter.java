@@ -1,11 +1,13 @@
 package com.stripe.android.view;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.stripe.android.model.ShippingMethod;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,8 +15,8 @@ import java.util.List;
  */
 class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder> {
 
-    private List<ShippingMethod> mShippingMethods;
-    private int mSelectedIndex = 0;
+    @NonNull private List<ShippingMethod> mShippingMethods = new ArrayList<>();
+    @NonNull private int mSelectedIndex = 0;
 
     ShippingMethodAdapter() {}
 

@@ -12,7 +12,7 @@ import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.view.AddAddressActivity;
 import com.stripe.android.view.AddAddressWidget;
-import com.stripe.android.view.SelectShippingMethodActivity;
+import com.stripe.android.view.ShippingFlowActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -101,7 +101,7 @@ public class LauncherActivity extends AppCompatActivity {
         selectShippingAddressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LauncherActivity.this, SelectShippingMethodActivity.class);
+                Intent intent = new ShippingFlowActivity.IntentBuilder().build(LauncherActivity.this);
                 startActivity(intent);
             }
         });

@@ -25,6 +25,13 @@
             android:theme="@style/StripeDefaultTheme"
             >
         </activity>
+
+        <activity
+            android:name=".view.ShippingFlowActivity"
+            android:theme="@style/StripeDefaultTheme"
+            >
+        </activity>
+
         <activity
             android:name=".view.SelectShippingMethodActivity"
             android:theme="@style/StripeDefaultTheme">

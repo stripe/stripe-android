@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import com.stripe.android.R;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 
 class CountryAutoCompleteTextView extends FrameLayout {
@@ -49,8 +50,8 @@ class CountryAutoCompleteTextView extends FrameLayout {
      *                    the full country display name.
      */
     void setCountrySelected(String countryCode) {
-        mCountrySelected = countryCode;
-        updateUIForCountryEntered(mCountrySelected);
+        Locale locale = new Locale("", countryCode);
+        updateUIForCountryEntered(locale.getDisplayCountry());
     }
 
     void setCountryChangeListener(CountryChangeListener countryChangeListener) {
@@ -69,9 +70,7 @@ class CountryAutoCompleteTextView extends FrameLayout {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String countryEntered =  mCountryAutocomplete.getText().toString();
-                if (mCountryNameToCode.containsKey(countryEntered)) {
-                    updateUIForCountryEntered(countryEntered);
-                }
+                updateUIForCountryEntered(countryEntered);
             }
         });
         String defaultCountryEntered = (String) countryAdapter.getItem(0);
@@ -92,8 +91,8 @@ class CountryAutoCompleteTextView extends FrameLayout {
 
     @VisibleForTesting
     void updateUIForCountryEntered(String displayCountryEntered) {
-        if (mCountryNameToCode.containsKey(displayCountryEntered)) {
-            String countryCodeEntered = mCountryNameToCode.get(displayCountryEntered);
+        String countryCodeEntered = mCountryNameToCode.get(displayCountryEntered);
+        if (countryCodeEntered != null) {
             if (mCountrySelected == null || !mCountrySelected.equals(countryCodeEntered)) {
                 mCountrySelected = countryCodeEntered;
                 if (mCountryChangeListener != null) {
