@@ -52,15 +52,15 @@ public class CountryAutoCompleteTextViewTest {
     @Test
     public void updateUIForCountryEntered_whenInvalidCountry_rendersError() {
         assertTrue( mAutoCompleteTextView.getError() == null);
-        mCountryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY");
+        mCountryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE");
         assertEquals(mAutoCompleteTextView.getResources().getString(R.string.address_country_invalid), mCountryTextInputLayout.getError());
     }
 
     @Test
     public void updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(mCountryAutoCompleteTextView.getSelectedCountryCode(), Locale.US.getCountry());
+        assertEquals(Locale.US.getCountry(), mCountryAutoCompleteTextView.getSelectedCountryCode());
         mCountryAutoCompleteTextView.setCountrySelected(Locale.UK.getCountry());
-        assertEquals(mCountryAutoCompleteTextView.getSelectedCountryCode(), Locale.UK.getCountry());
+        assertEquals(Locale.UK.getCountry(), mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
     @Test

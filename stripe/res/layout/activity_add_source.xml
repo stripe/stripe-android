@@ -14,6 +14,7 @@
             android:id="@+id/add_source_card_entry_widget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:layout_margin="@dimen/add_card_total_margin"
             />
 

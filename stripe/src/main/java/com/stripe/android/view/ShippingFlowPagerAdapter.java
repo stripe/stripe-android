@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
@@ -15,12 +16,12 @@ import java.util.List;
 
 class ShippingFlowPagerAdapter extends PagerAdapter {
 
-    private Context mContext;
-    private ShippingFlowConfig mShippingFlowConfig;
-    private List<ShippingFlowPagerEnum> mPages;
+    @NonNull private Context mContext;
+    @NonNull private ShippingFlowConfig mShippingFlowConfig;
+    @NonNull private List<ShippingFlowPagerEnum> mPages;
     private boolean mAddressSaved;
 
-    ShippingFlowPagerAdapter(Context context, ShippingFlowConfig shippingFlowConfig) {
+    ShippingFlowPagerAdapter(@NonNull Context context, @NonNull ShippingFlowConfig shippingFlowConfig) {
         mContext = context;
         mShippingFlowConfig = shippingFlowConfig;
         mPages = new ArrayList<>();

@@ -11,9 +11,9 @@ import java.util.List;
 
 class ShippingFlowConfig implements Parcelable {
 
-    private List<String> mHiddenAddressFields;
-    private List<String> mOptionalAddressFields;
-    private Address mPrepopulatedAddress;
+    @NonNull private List<String> mHiddenAddressFields;
+    @NonNull private List<String> mOptionalAddressFields;
+    @NonNull private Address mPrepopulatedAddress;
     private boolean mHideAddressScreen;
     private boolean mHideShippingScreen;
 
@@ -40,24 +40,51 @@ class ShippingFlowConfig implements Parcelable {
         mHideShippingScreen = in.readInt() == 1;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-    public List<String> getHiddenAddressFields() {
+        ShippingFlowConfig that = (ShippingFlowConfig) o;
+
+        if (isHideAddressScreen() != that.isHideAddressScreen()) return false;
+        if (isHideShippingScreen() != that.isHideShippingScreen()) return false;
+        if (!getHiddenAddressFields().equals(that.getHiddenAddressFields())) return false;
+        if (!getOptionalAddressFields().equals(that.getOptionalAddressFields())) return false;
+        return getPrepopulatedAddress().equals(that.getPrepopulatedAddress());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeStringList(mHiddenAddressFields);
+        parcel.writeStringList(mOptionalAddressFields);
+        parcel.writeParcelable(mPrepopulatedAddress, flags);
+        parcel.writeInt(mHideAddressScreen ? 1 : 0);
+        parcel.writeInt(mHideShippingScreen? 1: 0);
+    }
+
+    @NonNull List<String> getHiddenAddressFields() {
         return mHiddenAddressFields;
     }
 
-    public List<String> getOptionalAddressFields() {
+    @NonNull List<String> getOptionalAddressFields() {
         return mOptionalAddressFields;
     }
 
-    public Address getPrepopulatedAddress() {
+    @NonNull Address getPrepopulatedAddress() {
         return mPrepopulatedAddress;
     }
 
-    public boolean isHideAddressScreen() {
+    boolean isHideAddressScreen() {
         return mHideAddressScreen;
     }
 
-    public boolean isHideShippingScreen() {
+    boolean isHideShippingScreen() {
         return mHideShippingScreen;
     }
 
@@ -74,18 +101,4 @@ class ShippingFlowConfig implements Parcelable {
             return new ShippingFlowConfig[size];
         }
     };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeStringList(mHiddenAddressFields);
-        parcel.writeStringList(mOptionalAddressFields);
-        parcel.writeParcelable(mPrepopulatedAddress, flags);
-        parcel.writeInt(mHideAddressScreen ? 1 : 0);
-        parcel.writeInt(mHideShippingScreen? 1: 0);
-    }
 }
