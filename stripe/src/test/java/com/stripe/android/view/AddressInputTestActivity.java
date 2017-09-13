@@ -12,18 +12,18 @@ import com.stripe.android.R;
  */
 public class AddressInputTestActivity extends AppCompatActivity {
 
-    private AddAddressWidget mAddAddressWidget;
+    private ShippingInfoWidget mShippingInfoWidget;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.StripeDefaultTheme);
-        mAddAddressWidget = new AddAddressWidget(this);
+        mShippingInfoWidget = new ShippingInfoWidget(this);
         LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.addView(mAddAddressWidget);
+        linearLayout.addView(mShippingInfoWidget);
         setContentView(linearLayout);
     }
 
-    public AddAddressWidget getAddAddressWidget() {
-        return mAddAddressWidget;
+    public ShippingInfoWidget getShippingInfoWidget() {
+        return mShippingInfoWidget;
     }
 }

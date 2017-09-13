@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +14,14 @@ class ShippingFlowConfig implements Parcelable {
 
     @NonNull private List<String> mHiddenAddressFields;
     @NonNull private List<String> mOptionalAddressFields;
-    @NonNull private Address mPrepopulatedAddress;
+    @NonNull private ShippingInformation mPrepopulatedAddress;
     private boolean mHideAddressScreen;
     private boolean mHideShippingScreen;
 
     public ShippingFlowConfig(
             @NonNull List<String> hiddenAddressFields,
             @NonNull List<String> optionalAddressFields,
-            @NonNull Address prepopulatedAddress,
+            @NonNull ShippingInformation prepopulatedAddress,
             boolean hideAddressScreen,
             boolean hideShippingScreen) {
         mHiddenAddressFields = hiddenAddressFields;
@@ -51,7 +52,7 @@ class ShippingFlowConfig implements Parcelable {
         if (isHideShippingScreen() != that.isHideShippingScreen()) return false;
         if (!getHiddenAddressFields().equals(that.getHiddenAddressFields())) return false;
         if (!getOptionalAddressFields().equals(that.getOptionalAddressFields())) return false;
-        return getPrepopulatedAddress().equals(that.getPrepopulatedAddress());
+        return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
     }
 
     @Override
@@ -76,7 +77,8 @@ class ShippingFlowConfig implements Parcelable {
         return mOptionalAddressFields;
     }
 
-    @NonNull Address getPrepopulatedAddress() {
+    @NonNull
+    ShippingInformation getPrepopulatedShippingInfo() {
         return mPrepopulatedAddress;
     }
 

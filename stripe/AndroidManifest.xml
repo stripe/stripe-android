@@ -21,12 +21,6 @@
         </activity>
 
         <activity
-            android:name=".view.AddAddressActivity"
-            android:theme="@style/StripeDefaultTheme"
-            >
-        </activity>
-
-        <activity
             android:name=".view.ShippingFlowActivity"
             android:theme="@style/StripeDefaultTheme"
             >

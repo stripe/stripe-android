@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     >
 
-    <com.stripe.android.view.AddAddressWidget
+    <com.stripe.android.view.ShippingInfoWidget
         android:id="@+id/add_address_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

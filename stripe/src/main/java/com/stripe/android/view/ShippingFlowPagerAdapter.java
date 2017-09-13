@@ -55,10 +55,10 @@ class ShippingFlowPagerAdapter extends PagerAdapter {
             selectShippingMethodWidget.setShippingMethods(PaymentConfiguration.getInstance().getShippingMethods());
         }
         if (shippingFlowPagerEnum.equals(ShippingFlowPagerEnum.ADDRESS)) {
-            AddAddressWidget addAddressWidget = layout.findViewById(R.id.add_address_widget);
-            addAddressWidget.setHiddenFields(mShippingFlowConfig.getHiddenAddressFields());
-            addAddressWidget.setOptionalFields(mShippingFlowConfig.getOptionalAddressFields());
-            addAddressWidget.populateAddress(mShippingFlowConfig.getPrepopulatedAddress());
+            ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.add_address_widget);
+            shippingInfoWidget.setHiddenFields(mShippingFlowConfig.getHiddenAddressFields());
+            shippingInfoWidget.setOptionalFields(mShippingFlowConfig.getOptionalAddressFields());
+            shippingInfoWidget.populateShippingInfo(mShippingFlowConfig.getPrepopulatedShippingInfo());
         }
 
         collection.addView(layout);

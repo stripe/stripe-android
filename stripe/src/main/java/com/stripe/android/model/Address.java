@@ -39,8 +39,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         mCountry = in.readString();
         mLine1 = in.readString();
         mLine2 = in.readString();
-        mName = in.readString();
-        mPhoneNumber = in.readString();
         mPostalCode = in.readString();
         mState = in.readString();
     }
@@ -59,8 +57,6 @@ public class Address extends StripeJsonModel implements Parcelable{
     private String mCountry;
     private String mLine1;
     private String mLine2;
-    private String mName;
-    private String mPhoneNumber;
     private String mPostalCode;
     private String mState;
 
@@ -69,16 +65,12 @@ public class Address extends StripeJsonModel implements Parcelable{
             String country,
             String line1,
             String line2,
-            String name,
-            String phoneNumber,
             String postalCode,
             String state) {
         mCity = city;
         mCountry = country;
         mLine1 = line1;
         mLine2 = line2;
-        mName = name;
-        mPhoneNumber = phoneNumber;
         mPostalCode = postalCode;
         mState = state;
     }
@@ -88,8 +80,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         mCountry = addressBuilder.mCountry;
         mLine1 = addressBuilder.mLine1;
         mLine2 = addressBuilder.mLine2;
-        mName = addressBuilder.mName;
-        mPhoneNumber = addressBuilder.mPhoneNumber;
         mPostalCode = addressBuilder.mPostalCode;
         mState = addressBuilder.mState;
     }
@@ -148,14 +138,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         mState = state;
     }
 
-    public String getName() {
-        return mName;
-    }
-
-    public String getPhoneNumber() {
-        return mPhoneNumber;
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toMap() {
@@ -177,8 +159,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
         putStringIfNotNull(jsonObject, FIELD_LINE_1, mLine1);
         putStringIfNotNull(jsonObject, FIELD_LINE_2, mLine2);
-        putStringIfNotNull(jsonObject, FIELD_NAME, mName);
-        putStringIfNotNull(jsonObject, FIELD_PHONE_NUMBER, mPhoneNumber);
         putStringIfNotNull(jsonObject, FIELD_POSTAL_CODE, mPostalCode);
         putStringIfNotNull(jsonObject, FIELD_STATE, mState);
         return jsonObject;
@@ -203,12 +183,10 @@ public class Address extends StripeJsonModel implements Parcelable{
         String country = optString(jsonObject, FIELD_COUNTRY);
         String line1 = optString(jsonObject, FIELD_LINE_1);
         String line2 = optString(jsonObject, FIELD_LINE_2);
-        String name = optString(jsonObject, FIELD_NAME);
-        String phoneNumber = optString(jsonObject, FIELD_PHONE_NUMBER);
         String postalCode = optString(jsonObject, FIELD_POSTAL_CODE);
         String state = optString(jsonObject, FIELD_STATE);
 
-        return new Address(city, country, line1, line2, name, phoneNumber, postalCode, state);
+        return new Address(city, country, line1, line2, postalCode, state);
     }
 
     static final Parcelable.Creator<Address> CREATOR
@@ -231,8 +209,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         out.writeString(mCountry);
         out.writeString(mLine1);
         out.writeString(mLine2);
-        out.writeString(mName);
-        out.writeString(mPhoneNumber);
         out.writeString(mPostalCode);
         out.writeString(mState);
     }
@@ -247,8 +223,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         private String mCountry;
         private String mLine1;
         private String mLine2;
-        private String mName;
-        private String mPhoneNumber;
         private String mPostalCode;
         private String mState;
 
@@ -269,16 +243,6 @@ public class Address extends StripeJsonModel implements Parcelable{
 
         public Builder setLine2(String line2) {
             mLine2 = line2;
-            return this;
-        }
-
-        public Builder setName(String name) {
-            mName = name;
-            return this;
-        }
-
-        public Builder setPhoneNumber(String phoneNumber) {
-            mPhoneNumber = phoneNumber;
             return this;
         }
 
