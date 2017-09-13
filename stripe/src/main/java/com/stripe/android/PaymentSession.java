@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentMethodsActivity;
 
@@ -24,6 +24,7 @@ public class PaymentSession {
     @NonNull private Activity mHostActivity;
     @NonNull private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
+    @Nullable private AddressSubmittedListener mAddressSubmittedListener;
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -143,6 +144,12 @@ public class PaymentSession {
         mPaymentSessionData.setCartTotal(cartTotal);
     }
 
+    public void onAddressSubmitted(Address address) {
+        if (mAddressSubmittedListener != null) {
+            mAddressSubmittedListener.onAddressDataSubmitted(address);
+        }
+    }
+
     private void fetchCustomer() {
         if (mPaymentSessionListener != null) {
             mPaymentSessionListener.onCommunicatingStateChanged(true);
@@ -199,6 +206,15 @@ public class PaymentSession {
          * @param data the updated {@link PaymentSessionData}
          */
         void onPaymentSessionDataChanged(@NonNull PaymentSessionData data);
+
+    }
+
+    public interface AddressSubmittedListener {
+        /**
+         * Notification method called when the a user has submitted an {@link Address} via the
+         * {@link com.stripe.android.view.ShippingFlowActivity}
+         */
+        void onAddressDataSubmitted(@NonNull Address address);
     }
 
 }

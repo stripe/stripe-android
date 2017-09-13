@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,26 @@ public class AddAddressWidget extends LinearLayout {
                 .setPostalCode(mPostalCodeEditText.getText().toString())
                 .setState(mStateEditText.getText().toString()).build();
         return address;
+    }
+
+    public ShippingInformation getShippingInformation() {
+        if (!validateAllFields()) {
+            return null;
+        }
+
+        Address address = new Address.Builder()
+                .setCity(mCityEditText.getText().toString())
+                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode())
+                .setLine1(mAddressEditText.getText().toString())
+                .setLine2(mAddressEditText2.getText().toString())
+                .setName(mNameEditText.getText().toString())
+                .setPhoneNumber(mPhoneNumberEditText.getText().toString())
+                .setPostalCode(mPostalCodeEditText.getText().toString())
+                .setState(mStateEditText.getText().toString()).build();
+        ShippingInformation shippingInformation = new ShippingInformation();
+        shippingInformation.mAddress = address;
+        shippingInformation.mName = "fake name";
+        return shippingInformation;
     }
 
     /**

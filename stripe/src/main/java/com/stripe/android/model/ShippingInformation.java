@@ -22,9 +22,9 @@ public class ShippingInformation extends StripeJsonModel {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_PHONE = "phone";
 
-    private @Nullable
-    Address mAddress;
-    private @Nullable String mName;
+    //TODO: TEMP publics
+    public @Nullable Address mAddress;
+    public @Nullable String mName;
     private @Nullable String mPhone;
 
     @Nullable

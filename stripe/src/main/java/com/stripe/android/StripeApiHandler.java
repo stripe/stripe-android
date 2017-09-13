@@ -17,6 +17,7 @@ import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
@@ -31,11 +32,9 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -351,6 +350,45 @@ class StripeApiHandler {
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
         return Customer.fromString(response.getResponseBody());
     }
+
+    @Nullable
+    static Customer setCustomerShippingAddress(
+            @Nullable Context context,
+            @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull ShippingInformation shippingInformation,
+            @NonNull String secret,
+            @Nullable LoggingResponseListener listener)
+            throws InvalidRequestException, APIConnectionException, APIException {
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("shipping", shippingInformation.toMap());
+
+        // Context can be nullable because this action is performed with only a weak reference
+        if (context != null) {
+            RequestOptions loggingOptions = RequestOptions.builder(publicKey)
+                    .setApiVersion(API_VERSION)
+                    .build();
+
+            Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
+                    context,
+                    productUsageTokens,
+                    null,
+                    null,
+                    publicKey,
+                    LoggingUtils.EVENT_SET_ADDRESS);
+
+            logApiCall(loggingParameters, loggingOptions, listener);
+        }
+
+        StripeResponse response = getStripeResponse(
+                POST,
+                getRetrieveCustomerUrl(customerId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        return Customer.fromString(response.getResponseBody());
+    }
+
 
     @Nullable
     static Customer retrieveCustomer(@NonNull String customerId, @NonNull String secret)

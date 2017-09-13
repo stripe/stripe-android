@@ -164,8 +164,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         hashMap.put(FIELD_COUNTRY, mCountry);
         hashMap.put(FIELD_LINE_1, mLine1);
         hashMap.put(FIELD_LINE_2, mLine2);
-        hashMap.put(FIELD_NAME, mName);
-        hashMap.put(FIELD_PHONE_NUMBER, mPhoneNumber);
         hashMap.put(FIELD_POSTAL_CODE, mPostalCode);
         hashMap.put(FIELD_STATE, mState);
         return hashMap;

@@ -6,9 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.ArrayList;
@@ -136,17 +139,19 @@ public class ShippingFlowActivity extends StripeActivity {
 
     private void onAddressSave() {
         AddAddressWidget addAddressWidget = findViewById(R.id.add_address_widget);
-        Address address = addAddressWidget.getAddress();
-        if (address !=  null) {
-            setCommunicatingProgress(true);
-            // TODO: Call into payment context
-            setCommunicatingProgress(false);
-            mShippingFlowPagerAdapter.setAddressSaved(true);
-            if (hasNextPage()) {
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-            } else {
-                finish();
-            }
+        ShippingInformation shippingInformation = addAddressWidget.getShippingInformation();
+        if (shippingInformation !=  null) {
+            CustomerSession.getInstance().setCustomerShippingInformation(this, shippingInformation, new CustomerSession.AddressSetListener() {
+                @Override
+                public void onAddressSet() {
+                    Log.d("ksun", "address set!!" );
+                }
+
+                @Override
+                public void onError(@NonNull int errorCode, @Nullable String errorMessage) {
+
+                }
+            });
         }
     }
 
@@ -166,6 +171,26 @@ public class ShippingFlowActivity extends StripeActivity {
         // TODO: Call into payment context and save shipping method
         finish();
     }
+
+    public void onAddressProcessed(boolean isAddressValid, String error, List<ShippingMethod> validShippingMethods, ShippingMethod defaultShippingMethod) {
+        setCommunicatingProgress(false);
+        if (isAddressValid) {
+            // TODO: Call into payment context and save
+            mShippingFlowPagerAdapter.setAddressSaved(true);
+            if (hasNextPage()) {
+                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+            } else {
+                finish();
+            }
+        } else {
+            if (!StringUtils.isNullOrEmpty(error)) {
+                showError(error);
+            } else {
+                showError(getString(R.string.shipping_address_invalid));
+            }
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
