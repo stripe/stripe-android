@@ -5,6 +5,11 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.ShippingMethod;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
  */
@@ -15,6 +20,8 @@ public class PaymentSessionData implements Parcelable {
     private long mCartTotal = 0L;
     @NonNull private String mSelectedPaymentMethodId = NO_PAYMENT;
     private long mShippingTotal = 0L;
+    private List<ShippingMethod> mValidShippingMethods = new ArrayList<>();
+    private ShippingMethod mSelectedShippingMethod;
 
     PaymentSessionData() { }
 
@@ -45,6 +52,13 @@ public class PaymentSessionData implements Parcelable {
         return mShippingTotal;
     }
 
+    public void setValidShippingMethods(List<ShippingMethod> validShippingMethods) {
+        mValidShippingMethods = validShippingMethods;
+    }
+
+    public void setSelectedShippingMethod(ShippingMethod selectedShippingMethod) {
+        mSelectedShippingMethod = selectedShippingMethod;
+    }
     void setCartTotal(long cartTotal) {
         mCartTotal = cartTotal;
     }

@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.Locale;
 /**
  * A widget used to collect address data from a user.
  */
-public class AddAddressWidget extends LinearLayout {
+public class ShippingInfoWidget extends LinearLayout {
 
     /**
      * Constants used to specify fields in the AddAddressWidget. Can be used to mark fields as
@@ -25,7 +26,6 @@ public class AddAddressWidget extends LinearLayout {
     public static final String ADDRESS_LINE_ONE_FIELD = "address_line_one";
     public static final String ADDRESS_LINE_TWO_FIELD = "address_line_two"; // address line two is optional by default
     public static final String CITY_FIELD = "city";
-    public static final String NAME_FIELD = "name";
     public static final String POSTAL_CODE_FIELD = "postal_code";
     public static final String STATE_FIELD = "state";
     public static final String PHONE_FIELD = "phone";
@@ -49,17 +49,17 @@ public class AddAddressWidget extends LinearLayout {
     private StripeEditText mStateEditText;
     private StripeEditText mPhoneNumberEditText;
 
-    public AddAddressWidget(Context context) {
+    public ShippingInfoWidget(Context context) {
         super(context);
         initView();
     }
 
-    public AddAddressWidget(Context context, AttributeSet attrs) {
+    public ShippingInfoWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
     }
 
-    public AddAddressWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ShippingInfoWidget(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView();
     }
@@ -91,10 +91,7 @@ public class AddAddressWidget extends LinearLayout {
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
-    /**
-     * @return An {@link Address} object with the information the user has entered if it is valid, {@code null} otherwise
-     */
-    public @Nullable Address getAddress() {
+    public ShippingInformation getShippingInformation() {
         if (!validateAllFields()) {
             return null;
         }
@@ -104,30 +101,33 @@ public class AddAddressWidget extends LinearLayout {
                 .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode())
                 .setLine1(mAddressEditText.getText().toString())
                 .setLine2(mAddressEditText2.getText().toString())
-                .setName(mNameEditText.getText().toString())
-                .setPhoneNumber(mPhoneNumberEditText.getText().toString())
                 .setPostalCode(mPostalCodeEditText.getText().toString())
                 .setState(mStateEditText.getText().toString()).build();
-        return address;
+        ShippingInformation shippingInformation = new ShippingInformation(address,mNameEditText.getText().toString(), mPhoneNumberEditText.getText().toString() );
+        return shippingInformation;
     }
 
     /**
-     * @param address address to populated into the widget input fields.
+     * @param shippingInformation shippingInformation to populated into the widget input fields.
      */
-    public void populateAddress(@Nullable Address address) {
-        if (address == null) {
+    public void populateShippingInfo(@Nullable ShippingInformation shippingInformation) {
+        if (shippingInformation == null) {
             return;
         }
-        mCityEditText.setText(address.getCity());
-        if (address.getCountry() != null && !address.getCountry().isEmpty()) {
-            mCountryAutoCompleteTextView.setCountrySelected(address.getCountry());
+        Address address = shippingInformation.getAddress();
+        if (address !=  null) {
+            mCityEditText.setText(address.getCity());
+            if (address.getCountry() != null && !address.getCountry().isEmpty()) {
+                mCountryAutoCompleteTextView.setCountrySelected(address.getCountry());
+            }
+            mAddressEditText.setText(address.getLine1());
+            mAddressEditText2.setText(address.getLine2());
+            mPostalCodeEditText.setText(address.getPostalCode());
+            mStateEditText.setText(address.getState());
         }
-        mAddressEditText.setText(address.getLine1());
-        mAddressEditText2.setText(address.getLine2());
-        mNameEditText.setText(address.getName());
-        mPhoneNumberEditText.setText(address.getPhoneNumber());
-        mPostalCodeEditText.setText(address.getPostalCode());
-        mStateEditText.setText(address.getState());
+        mNameEditText.setText(shippingInformation.getName());
+        mPhoneNumberEditText.setText(shippingInformation.getPhone());
+
     }
 
     /**
@@ -158,7 +158,7 @@ public class AddAddressWidget extends LinearLayout {
         boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(CITY_FIELD) && !mHiddenAddressFields.contains(CITY_FIELD);
         mCityEditText.setShouldShowError(requiredCityEmpty);
 
-        boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(NAME_FIELD) && !mHiddenAddressFields.contains(NAME_FIELD);
+        boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty();
         mNameEditText.setShouldShowError(requiredNameEmpty);
 
         boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(STATE_FIELD) && !mHiddenAddressFields.contains(STATE_FIELD);
@@ -219,11 +219,7 @@ public class AddAddressWidget extends LinearLayout {
     }
 
     private void renderLabels() {
-        if (mOptionalAddressFields.contains(NAME_FIELD)) {
-            mNameTextInputLayout.setHint(getResources().getString(R.string.address_label_name_optional));
-        } else {
-            mNameTextInputLayout.setHint(getResources().getString(R.string.address_label_name));
-        }
+        mNameTextInputLayout.setHint(getResources().getString(R.string.address_label_name));
         if (mOptionalAddressFields.contains(CITY_FIELD)) {
             mCityTextInputLayout.setHint(getResources().getString(R.string.address_label_city_optional));
         } else {
@@ -238,9 +234,6 @@ public class AddAddressWidget extends LinearLayout {
     }
 
     private void hideHiddenFields() {
-        if (mHiddenAddressFields.contains(NAME_FIELD)) {
-            mNameTextInputLayout.setVisibility(GONE);
-        }
         if (mHiddenAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setVisibility(GONE);
         }

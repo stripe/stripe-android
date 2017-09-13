@@ -22,6 +22,7 @@
     <string name="changeDetails">Change payment details</string>
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Launch Customer Session</string>
+    <string name="launch_payment_session">Launch Payment Session</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
@@ -29,7 +30,7 @@
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
     <string name="selectSampleActivity">Select sample activity</string>
-    <string name="selectShippingMethod">Select Shipping Method</string>
+    <string name="setShippingInfo">Set shipping info</string>
     <string name="startPolling">Start polling</string>
     <string name="tryThreeDSecure">Try 3DS</string>
     <string name="verify">Verify</string>

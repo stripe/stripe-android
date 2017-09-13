@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
-import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.ArrayList;
@@ -22,20 +24,23 @@ public class ShippingFlowActivity extends StripeActivity {
 
     private ViewPager mViewPager;
     private ShippingFlowPagerAdapter mShippingFlowPagerAdapter;
+    public static final String SHIPPING_INFO_SUBMITTED_EVENT = "shipping_info_submitted_event";
+    public static final String SHIPPING_INFO_DATA = "shipping_info_data";
+
 
     static final String EXTRA_SHIPPING_FLOW_CONFIG = "shipping_flow_config";
 
     public static class IntentBuilder {
         private List mHiddenAddressFields;
         private List mOptionalAddressFields;
-        private Address mPrepopulatedAddress;
+        private ShippingInformation mPrepopulatedShippingInfo;
         private boolean mHideAddressScreen;
         private boolean mHideShippingScreen;
 
         public IntentBuilder() {
             mHiddenAddressFields = new ArrayList();
             mOptionalAddressFields = new ArrayList();
-            mPrepopulatedAddress = new Address.Builder().build();
+            mPrepopulatedShippingInfo = new ShippingInformation();
         }
 
         /**
@@ -57,11 +62,11 @@ public class ShippingFlowActivity extends StripeActivity {
 
         /**
          *
-         * @param prepopulatedAddress set an address to be prepopulated into the add address input
+         * @param prepopulatedShippingInfo set an address to be prepopulated into the add address input
          *                            fields.
          */
-        public IntentBuilder setPrepopulatedAddress(@NonNull Address prepopulatedAddress) {
-            mPrepopulatedAddress = prepopulatedAddress;
+        public IntentBuilder setPrepopulatedShippingInfo(@NonNull ShippingInformation prepopulatedShippingInfo) {
+            mPrepopulatedShippingInfo = prepopulatedShippingInfo;
             return this;
         }
 
@@ -87,7 +92,7 @@ public class ShippingFlowActivity extends StripeActivity {
                     new ShippingFlowConfig(
                             mHiddenAddressFields,
                             mOptionalAddressFields,
-                            mPrepopulatedAddress,
+                            mPrepopulatedShippingInfo,
                             mHideAddressScreen,
                             mHideShippingScreen);
             intent.putExtra(EXTRA_SHIPPING_FLOW_CONFIG, shippingFlowConfig);
@@ -122,32 +127,33 @@ public class ShippingFlowActivity extends StripeActivity {
             }
         });
         setTitle(mShippingFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
+        CustomerSession.getInstance().setShippingFlowUpdateListener(new CustomerSession.ShippingFlowUpdateListener() {
+            @Override
+            public void onError(@NonNull int errorCode, @Nullable String errorMessage) {
+                if (!StringUtils.isNullOrEmpty(errorMessage)) {
+                    showError(errorMessage);
+                }
+            }
+        });
     }
 
 
     @Override
     protected void onActionSave() {
         if (mShippingFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(ShippingFlowPagerEnum.ADDRESS)) {
-            onAddressSave();
+            onShippingInfoSubmitted();
         } else {
             onShippingMethodSave();
         }
     }
 
-    private void onAddressSave() {
-        AddAddressWidget addAddressWidget = findViewById(R.id.add_address_widget);
-        Address address = addAddressWidget.getAddress();
-        if (address !=  null) {
-            setCommunicatingProgress(true);
-            // TODO: Call into payment context
-            setCommunicatingProgress(false);
-            mShippingFlowPagerAdapter.setAddressSaved(true);
-            if (hasNextPage()) {
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-            } else {
-                finish();
-            }
-        }
+    private void onShippingInfoSubmitted() {
+        setCommunicatingProgress(true);
+        ShippingInfoWidget shippingInfoWidget = findViewById(R.id.set_shipping_info_widget);
+        ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
+        Intent intent = new Intent(SHIPPING_INFO_SUBMITTED_EVENT);
+        intent.putExtra(SHIPPING_INFO_DATA, shippingInformation);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private boolean hasNextPage() {
@@ -159,12 +165,22 @@ public class ShippingFlowActivity extends StripeActivity {
         return currentPageIndex != 0 && currentPageIndex >= mShippingFlowPagerAdapter.getCount();
     }
 
+
     private void onShippingMethodSave() {
         SelectShippingMethodWidget selectShippingMethodWidget = findViewById(R.id.select_shipping_method_widget);
         setCommunicatingProgress(true);
         ShippingMethod shippingMethod = selectShippingMethodWidget.getSelectedShippingMethod();
-        // TODO: Call into payment context and save shipping method
         finish();
+    }
+
+    private void onShippingInfoSaved() {
+        setCommunicatingProgress(false);
+        mShippingFlowPagerAdapter.setAddressSaved(true);
+        if (hasNextPage()) {
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+        } else {
+            finish();
+        }
     }
 
     @Override

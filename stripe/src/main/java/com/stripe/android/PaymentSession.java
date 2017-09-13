@@ -6,10 +6,15 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.ShippingInformation;
+import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.ShippingFlowActivity;
+import com.stripe.android.view.StringUtils;
+
+import java.util.List;
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -24,7 +29,8 @@ public class PaymentSession {
     @NonNull private Activity mHostActivity;
     @NonNull private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
-
+    private @Nullable
+    CustomerSession.ShippingFlowUpdateListener mShippingFlowUpdateListener;
     /**
      * Create a PaymentSession attached to the given host Activity.
      *
@@ -63,6 +69,34 @@ public class PaymentSession {
 
         return false;
     }
+
+    public void onShippingInfoProcessed(
+            ShippingInformation shippingInformation,
+            boolean isShippingInfoValid,
+            String error,
+            List<ShippingMethod> validShippingMethods,
+            ShippingMethod defaultShippingMethod) {
+        if (isShippingInfoValid) {
+            CustomerSession.getInstance().setCustomerShippingInformation( mHostActivity, shippingInformation);
+
+            mPaymentSessionData.setValidShippingMethods(validShippingMethods);
+            mPaymentSessionData.setSelectedShippingMethod(defaultShippingMethod);
+        } else {
+            if (StringUtils.isNullOrEmpty(error)) {
+                CustomerSession.getInstance().notifyCustomerShippingInformationInvalid(
+                        mHostActivity.getString(R.string.shipping_address_invalid));
+            } else {
+                CustomerSession.getInstance().notifyCustomerShippingInformationInvalid(error);
+            }
+        }
+    }
+
+    public void launchShippingFlow(ShippingInfoSubmittedListener shippingInfoSubmittedListener) {
+        Intent intent = new ShippingFlowActivity.IntentBuilder().build(mHostActivity);
+        mHostActivity.startActivity(intent);
+        CustomerSession.getInstance().setShippingInfoSubmittedListener(shippingInfoSubmittedListener);
+    }
+
 
     /**
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
@@ -199,6 +233,14 @@ public class PaymentSession {
          * @param data the updated {@link PaymentSessionData}
          */
         void onPaymentSessionDataChanged(@NonNull PaymentSessionData data);
+
     }
+
+    public interface ShippingInfoSubmittedListener {
+        void onShippingInfoSubmitted(@NonNull ShippingInformation shippingInformation);
+    }
+
+
+
 
 }

@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -16,16 +18,30 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model representing a shipping address object
  */
-public class ShippingInformation extends StripeJsonModel {
+public class ShippingInformation extends StripeJsonModel implements Parcelable {
 
     private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_PHONE = "phone";
 
-    private @Nullable
-    Address mAddress;
+    private @Nullable Address mAddress;
     private @Nullable String mName;
     private @Nullable String mPhone;
+
+    public ShippingInformation() {}
+
+    public ShippingInformation(@Nullable Address address, @Nullable String name, @Nullable String phone) {
+        mAddress = address;
+        mName = name;
+        mPhone = phone;
+    }
+
+    private ShippingInformation(Parcel in) {
+        mAddress = in.readParcelable(Address.class.getClassLoader());
+        mName = in.readString();
+        mPhone = in.readString();
+    }
+
 
     @Nullable
     public Address getAddress() {
@@ -75,5 +91,31 @@ public class ShippingInformation extends StripeJsonModel {
         putStripeJsonModelMapIfNotNull(map, FIELD_ADDRESS, mAddress);
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
+    }
+
+    static final Parcelable.Creator<ShippingInformation> CREATOR
+            = new Parcelable.Creator<ShippingInformation>() {
+
+        @Override
+        public ShippingInformation createFromParcel(Parcel in) {
+            return new ShippingInformation(in);
+        }
+
+        @Override
+        public ShippingInformation[] newArray(int size) {
+            return new ShippingInformation[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeParcelable(mAddress, flags);
+        out.writeString(mName);
+        out.writeString(mPhone);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

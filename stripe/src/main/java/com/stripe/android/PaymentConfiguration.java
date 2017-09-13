@@ -69,13 +69,6 @@ public class PaymentConfiguration {
         return this;
     }
 
-    /**
-     * Set the shipping methods to allow for payments made with this configuration.
-     */
-    public PaymentConfiguration setShippingMethods(List<ShippingMethod> shippingMethods) {
-        mShippingMethods = shippingMethods;
-        return this;
-    }
 
     /**
      * @return The shipping methods to allow for payments made with this configuration.
