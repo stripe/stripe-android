@@ -326,35 +326,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withAlipayReusableParams_passesIntegrationTest() {
-        Stripe stripe = getNonLoggingStripe(mContext);
-        SourceParams alipayParams = SourceParams.createAlipayReusableParams(
-                "usd",
-                "Example Payer",
-                "abc@def.com",
-                "stripe://start");
-
-        try {
-            Source alipaySource =
-                    stripe.createSourceSynchronous(alipayParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
-            assertNotNull(alipaySource);
-            assertNotNull(alipaySource.getId());
-            assertNotNull(alipaySource.getClientSecret());
-            assertEquals(Source.ALIPAY, alipaySource.getType());
-            assertEquals("redirect", alipaySource.getFlow());
-            assertNotNull(alipaySource.getOwner());
-            assertEquals("Example Payer", alipaySource.getOwner().getName());
-            assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
-            assertEquals("usd", alipaySource.getCurrency());
-            assertEquals(Source.REUSABLE, alipaySource.getUsage());
-            assertNotNull(alipaySource.getRedirect());
-            assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
-    }
-
-    @Test
     public void createSourceSynchronous_withAlipaySingleUseParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams alipayParams = SourceParams.createAlipaySingleUseParams(

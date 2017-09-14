@@ -81,46 +81,6 @@ public class SourceParamsTest {
     }
 
     @Test
-    public void createAlipayReusableParams_withAllFields_hasExpectedFields() {
-        SourceParams params = SourceParams.createAlipayReusableParams(
-                "usd",
-                "Jean Valjean",
-                "jdog@lesmis.net",
-                "stripe://start");
-
-        assertEquals(Source.ALIPAY, params.getType());
-        assertEquals(Source.REUSABLE, params.getUsage());
-        assertNull(params.getAmount());
-        assertEquals("usd", params.getCurrency());
-        assertNotNull(params.getRedirect());
-        assertEquals("stripe://start", params.getRedirect().get("return_url"));
-
-        assertNotNull(params.getOwner());
-        assertEquals("Jean Valjean", params.getOwner().get("name"));
-        assertEquals("jdog@lesmis.net", params.getOwner().get("email"));
-    }
-
-    @Test
-    public void createAlipayReusableParams_withOnlyName_hasOnlyExpectedFields() {
-        SourceParams params = SourceParams.createAlipayReusableParams(
-                "cad",
-                "Harry Seldon",
-                null,
-                "stripe://start");
-
-        assertEquals(Source.ALIPAY, params.getType());
-        assertEquals(Source.REUSABLE, params.getUsage());
-        assertNull(params.getAmount());
-        assertEquals("cad", params.getCurrency());
-        assertNotNull(params.getRedirect());
-        assertEquals("stripe://start", params.getRedirect().get("return_url"));
-
-        assertNotNull(params.getOwner());
-        assertEquals("Harry Seldon", params.getOwner().get("name"));
-        assertFalse(params.getOwner().containsKey("email"));
-    }
-
-    @Test
     public void createBancontactParams_hasExpectedFields() {
         SourceParams params = SourceParams.createBancontactParams(
                 1000L,
