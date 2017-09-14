@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
@@ -139,7 +140,7 @@ public class ShippingFlowActivity extends StripeActivity {
         ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
         if (shippingInformation !=  null) {
             setCommunicatingProgress(true);
-            // TODO: Call into payment context
+            CustomerSession.getInstance().setCustomerShippingInformation(this, shippingInformation);
             setCommunicatingProgress(false);
             mShippingFlowPagerAdapter.setAddressSaved(true);
             if (hasNextPage()) {
