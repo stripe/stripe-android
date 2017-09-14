@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link SourceParams}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class SourceParamsTest {
 
     private static Card FULL_FIELDS_VISA_CARD =
@@ -38,6 +39,46 @@ public class SourceParamsTest {
                     "94107",
                     "US",
                     "usd");
+
+    @Test
+    public void createAlipaySingleUseParams_withAllFields_hasExpectedFields() {
+        SourceParams params = SourceParams.createAlipaySingleUseParams(
+                1000L,
+                "aud",
+                "Jane Tester",
+                "jane@test.com",
+                "stripe://testactivity");
+
+        assertEquals(Source.ALIPAY, params.getType());
+        assertNotNull(params.getAmount());
+        assertEquals(1000L, params.getAmount().longValue());
+        assertEquals("aud", params.getCurrency());
+        assertNotNull(params.getOwner());
+        assertEquals("Jane Tester", params.getOwner().get("name"));
+        assertEquals("jane@test.com", params.getOwner().get("email"));
+        assertNotNull(params.getRedirect());
+        assertEquals("stripe://testactivity", params.getRedirect().get("return_url"));
+    }
+
+    @Test
+    public void createAlipaySingleUseParams_withoutOwner_hasNoOwnerFields() {
+        SourceParams params = SourceParams.createAlipaySingleUseParams(
+                555L,
+                "eur",
+                null,
+                null,
+                "stripe://testactivity2");
+
+        assertEquals(Source.ALIPAY, params.getType());
+        assertNotNull(params.getAmount());
+        assertEquals(555L, params.getAmount().longValue());
+        assertEquals("eur", params.getCurrency());
+
+        assertNull(params.getOwner());
+
+        assertNotNull(params.getRedirect());
+        assertEquals("stripe://testactivity2", params.getRedirect().get("return_url"));
+    }
 
     @Test
     public void createBancontactParams_hasExpectedFields() {

@@ -326,6 +326,38 @@ public class StripeTest {
     }
 
     @Test
+    public void createSourceSynchronous_withAlipaySingleUseParams_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        SourceParams alipayParams = SourceParams.createAlipaySingleUseParams(
+                1000L,
+                "usd",
+                "Example Payer",
+                "abc@def.com",
+                "stripe://start");
+
+        try {
+            Source alipaySource =
+                    stripe.createSourceSynchronous(alipayParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(alipaySource);
+            assertNotNull(alipaySource.getId());
+            assertNotNull(alipaySource.getClientSecret());
+            assertNotNull(alipaySource.getAmount());
+            assertEquals(1000L, alipaySource.getAmount().longValue());
+            assertEquals(Source.ALIPAY, alipaySource.getType());
+            assertEquals("redirect", alipaySource.getFlow());
+            assertNotNull(alipaySource.getOwner());
+            assertEquals("Example Payer", alipaySource.getOwner().getName());
+            assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
+            assertEquals("usd", alipaySource.getCurrency());
+            assertEquals(Source.SINGLE_USE, alipaySource.getUsage());
+            assertNotNull(alipaySource.getRedirect());
+            assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void createSourceSynchronous_withBitcoinParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams bitcoinParams = SourceParams.createBitcoinParams(1000L, "usd", "abc@def.com");

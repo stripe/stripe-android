@@ -25,6 +25,7 @@ public class SourceParams {
     static final String API_PARAM_REDIRECT = "redirect";
     static final String API_PARAM_TYPE = "type";
     static final String API_PARAM_TOKEN = "token";
+    static final String API_PARAM_USAGE = "usage";
 
     static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
@@ -55,9 +56,45 @@ public class SourceParams {
     private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
     private String mToken;
+    @Nullable @Source.Usage private String mUsage;
     @SourceType private String mType;
 
     private SourceParams() {}
+
+
+    /**
+     * Create a source to be used with the Alipay SDK for single-use payments.
+     *
+     * @param amount the amount of the purchase
+     * @param currency the currency code of the purchase
+     * @param name the user's name
+     * @param email the user's email
+     * @param returnUrl the return url to reopen the activity
+     * @return a {@link SourceParams} that can be used to create an Alipay single-use source
+     */
+    @NonNull
+    public static SourceParams createAlipaySingleUseParams(
+            @IntRange(from = 0) long amount,
+            @NonNull String currency,
+            @Nullable String name,
+            @Nullable String email,
+            @NonNull String returnUrl) {
+        SourceParams params = new SourceParams()
+                .setType(Source.ALIPAY)
+                .setCurrency(currency)
+                .setAmount(amount)
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+
+        Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put(FIELD_NAME, name);
+        ownerMap.put(FIELD_EMAIL, email);
+        removeNullAndEmptyParams(ownerMap);
+        if (ownerMap.keySet().size() > 0) {
+            params.setOwner(ownerMap);
+        }
+
+        return params;
+    }
 
     /**
      * Create a set of parameters used for a Bancontact source.
@@ -397,6 +434,15 @@ public class SourceParams {
     }
 
     /**
+     * @return the current usage of this source, if one has been set
+     */
+    @Nullable
+    @Source.Usage
+    public String getUsage() {
+        return mUsage;
+    }
+
+    /**
      * @return the custom metadata set on these params
      */
     public Map<String, String> getMetaData() {
@@ -520,6 +566,19 @@ public class SourceParams {
     }
 
     /**
+     * Sets a usage value on the parameters. Used for Alipay, and should be
+     * either "single_use" or "reusable". Not setting this value defaults
+     * to "single_use".
+     *
+     * @param usage either "single_use" or "reusable"
+     * @return {@code this} for chaining purposes
+     */
+    public SourceParams setUsage(@NonNull @Source.Usage String usage) {
+        mUsage = usage;
+        return this;
+    }
+
+    /**
      * Create a string-keyed map representing this object that is
      * ready to be sent over the network.
      *
@@ -537,6 +596,7 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
         networkReadyMap.put(API_PARAM_TOKEN, mToken);
+        networkReadyMap.put(API_PARAM_USAGE, mUsage);
         StripeNetworkUtils.removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }
