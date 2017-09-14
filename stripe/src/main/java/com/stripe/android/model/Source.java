@@ -58,7 +58,6 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     static {
         MODELED_TYPES.add(CARD);
         MODELED_TYPES.add(SEPA_DEBIT);
-        MODELED_TYPES.add(ALIPAY);
     }
 
     @Retention(RetentionPolicy.SOURCE)
