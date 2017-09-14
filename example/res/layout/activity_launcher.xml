@@ -68,15 +68,6 @@
             />
 
         <Button
-            android:id="@+id/btn_add_address_launch"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:text="@string/addAddress"
-            />
-
-        <Button
             android:id="@+id/btn_select_shipping_method_launch"
             android:layout_width="200dp"
             android:layout_height="wrap_content"

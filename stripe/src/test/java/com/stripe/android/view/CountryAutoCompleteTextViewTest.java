@@ -36,8 +36,8 @@ public class CountryAutoCompleteTextViewTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
-        ActivityController<AddressInputTestActivity> activityController =
-                Robolectric.buildActivity(AddressInputTestActivity.class).create().start();
+        ActivityController<ShippingInfoTestActivity> activityController =
+                Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();
         mCountryAutoCompleteTextView = activityController.get().findViewById(R.id.country_autocomplete_aaw);
         mCountryTextInputLayout = mCountryAutoCompleteTextView.findViewById(R.id.tl_country_cat);
         mAutoCompleteTextView = mCountryAutoCompleteTextView.findViewById(R.id.autocomplete_country_cat);

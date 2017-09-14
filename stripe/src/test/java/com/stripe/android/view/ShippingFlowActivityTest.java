@@ -6,6 +6,7 @@ import com.stripe.android.BuildConfig;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import org.junit.Test;
@@ -32,29 +33,29 @@ import static org.robolectric.Shadows.shadowOf;
 public class ShippingFlowActivityTest {
     private ActivityController<ShippingFlowActivity> mActivityController;
     private ShadowActivity mShadowActivity;
-    private AddAddressWidget mAddAddressWidget;
+    private ShippingInfoWidget mShippingInfoWidget;
 
     @Test
     public void intentBuilder_withEmptyConstructor_buildsCorrectly() {
         Intent emptyStateIntent = new ShippingFlowActivity.IntentBuilder().build(RuntimeEnvironment.application);
         List<String> hiddenAddressFields = new ArrayList<>();
         List<String> optionalAddressFields = new ArrayList<>();
-        Address emptyAddress = new Address.Builder().build();
-        ShippingFlowConfig emptyShippingFlowConfig = new ShippingFlowConfig(hiddenAddressFields, optionalAddressFields, emptyAddress, false, false);
+        ShippingInformation empty = new ShippingInformation();
+        ShippingFlowConfig emptyShippingFlowConfig = new ShippingFlowConfig(hiddenAddressFields, optionalAddressFields, empty, false, false);
         assertEquals(emptyShippingFlowConfig, emptyStateIntent.getParcelableExtra(ShippingFlowActivity.EXTRA_SHIPPING_FLOW_CONFIG));
     }
 
     @Test
     public void intentBuilder_withPopulatedConstructor_buildsCorrectly() {
         List<String> hiddenAddressFields = new ArrayList<>();
-        hiddenAddressFields.add(AddAddressWidget.PHONE_FIELD);
+        hiddenAddressFields.add(ShippingInfoWidget.PHONE_FIELD);
         List<String> optionalAddressFields = new ArrayList<>();
-        optionalAddressFields.add(AddAddressWidget.POSTAL_CODE_FIELD);
-        Address address = getExampleAddress();
+        optionalAddressFields.add(ShippingInfoWidget.POSTAL_CODE_FIELD);
+        ShippingInformation address = getExampleShippingInfo();
         Intent emptyStateIntent = new ShippingFlowActivity.IntentBuilder()
                 .setHiddenAddressFields(hiddenAddressFields)
                 .setOptionalAddressFields(optionalAddressFields)
-                .setPrepopulatedAddress(address)
+                .setPrepopulatedShippingInformation(address)
                 .setHideAddressScreen(true)
                 .setHideShippingScreen(true)
                 .build(RuntimeEnvironment.application);
@@ -63,13 +64,13 @@ public class ShippingFlowActivityTest {
     }
 
     @Test
-    public void launchShippingFlowActivity_withHideAddressConfig_hidesAddressView() {
+    public void launchShippingFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
         initializePaymentConfig();
         Intent intent = new ShippingFlowActivity.IntentBuilder()
                 .setHideAddressScreen(true).build(RuntimeEnvironment.application);
         mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
                 .create().start().resume().visible();
-        assertNull(mActivityController.get().findViewById(R.id.add_address_widget));
+        assertNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
         assertNotNull(mActivityController.get().findViewById(R.id.select_shipping_method_widget));
     }
 
@@ -80,55 +81,55 @@ public class ShippingFlowActivityTest {
         mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
-        mAddAddressWidget = mActivityController.get().findViewById(R.id.add_address_widget);
-        assertNotNull(mAddAddressWidget);
-        mAddAddressWidget.populateAddress(getExampleAddress());
+        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
+        assertNotNull(mShippingInfoWidget);
+        mShippingInfoWidget.populateShippingInfo(getExampleShippingInfo());
         ShippingFlowActivity shippingFlowActivity = mActivityController.get();
         shippingFlowActivity.onActionSave();
         assertTrue(mShadowActivity.isFinishing());
     }
 
     @Test
-    public void onAddressSave_whenAddressNotPopulated_doesNotFinish() {
+    public void onShippingInfoSave_whenShippingNotPopulated_doesNotFinish() {
         Intent intent = new ShippingFlowActivity.IntentBuilder()
                 .setHideShippingScreen(true).build(RuntimeEnvironment.application);
         mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
-        mAddAddressWidget = mActivityController.get().findViewById(R.id.add_address_widget);
-        assertNotNull(mAddAddressWidget);
+        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
+        assertNotNull(mShippingInfoWidget);
         ShippingFlowActivity shippingFlowActivity = mActivityController.get();
         shippingFlowActivity.onActionSave();
         assertFalse(mShadowActivity.isFinishing());
     }
 
     @Test
-    public void onAddressSave_whenAddressNotPopulated_doesNotContinue() {
+    public void onShippingInfoSave_whenShippingInfoNotPopulated_doesNotContinue() {
         Intent intent = new ShippingFlowActivity.IntentBuilder()
                 .build(RuntimeEnvironment.application);
         mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
-        mAddAddressWidget = mActivityController.get().findViewById(R.id.add_address_widget);
-        assertNotNull(mAddAddressWidget);
+        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
+        assertNotNull(mShippingInfoWidget);
         ShippingFlowActivity shippingFlowActivity = mActivityController.get();
         shippingFlowActivity.onActionSave();
         assertFalse(mShadowActivity.isFinishing());
-        assertNotNull(mActivityController.get().findViewById(R.id.add_address_widget));
+        assertNotNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
     }
 
     @Test
-    public void onAddressSave_whenAddressPopulated_showsShippingMethod() {
+    public void onShippingInfoSave_whenShippingInfoPopulated_showsShippingMethod() {
         initializePaymentConfig();
         Intent intent = new ShippingFlowActivity.IntentBuilder()
                 .build(RuntimeEnvironment.application);
         mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
-        mAddAddressWidget = mActivityController.get().findViewById(R.id.add_address_widget);
-        assertNotNull(mAddAddressWidget);
+        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
+        assertNotNull(mShippingInfoWidget);
         ShippingFlowActivity shippingFlowActivity = mActivityController.get();
-        mAddAddressWidget.populateAddress(getExampleAddress());
+        mShippingInfoWidget.populateShippingInfo(getExampleShippingInfo());
         assertFalse(mShadowActivity.isFinishing());
         shippingFlowActivity.onActionSave();
         assertNotNull(mActivityController.get().findViewById(R.id.select_shipping_method_widget));
@@ -144,17 +145,15 @@ public class ShippingFlowActivityTest {
         PaymentConfiguration.getInstance().setShippingMethods(shippingMethods);
     }
 
-    private Address getExampleAddress() {
-        return new Address.Builder()
+    private ShippingInformation getExampleShippingInfo() {
+        Address address = new Address.Builder()
                 .setCity("San Francisco")
                 .setCountry("US")
                 .setLine1("123 Market St")
                 .setLine2("#345")
                 .setPostalCode("94107")
                 .setState("CA")
-                .setName("Fake Name")
-                .setPhoneNumber("(123) 456 - 7890")
                 .build();
-
+        return new ShippingInformation(address, "Fake Name", "6504604645");
     }
 }
