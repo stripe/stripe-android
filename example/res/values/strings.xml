@@ -22,6 +22,7 @@
     <string name="changeDetails">Change payment details</string>
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Launch Customer Session</string>
+    <string name="launchPaymentSession">Launch Payment Session</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
@@ -35,6 +36,7 @@
     <string name="verify">Verify</string>
     <string name="updatedSources">Source results</string>
     <string name="cvc">CVC</string>
+    <string name="startPaymentFlow">Start Payment Flow</string>
 
     <string name="load_items">Load Items</string>
     <string name="ok">OK</string>

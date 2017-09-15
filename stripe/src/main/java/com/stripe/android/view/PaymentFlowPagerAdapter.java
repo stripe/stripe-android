@@ -25,7 +25,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         mContext = context;
         mPaymentFlowConfig = paymentFlowConfig;
         mPages = new ArrayList<>();
-        if (!mPaymentFlowConfig.isHideAddressScreen()) {
+        if (!mPaymentFlowConfig.isHideShippingInfoScreen()) {
             mPages.add(PaymentFlowPagerEnum.ADDRESS);
         }
         if (!shouldHideShippingScreen()) {
@@ -34,7 +34,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
     private boolean shouldHideShippingScreen() {
-        return mPaymentFlowConfig.isHideShippingScreen() || (!mPaymentFlowConfig.isHideAddressScreen() && !mAddressSaved);
+        return mPaymentFlowConfig.isHideShippingMethodsScreen() || (!mPaymentFlowConfig.isHideShippingInfoScreen() && !mAddressSaved);
     }
 
     void setAddressSaved(boolean addressSaved) {
@@ -56,8 +56,8 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         }
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
-            shippingInfoWidget.setHiddenFields(mPaymentFlowConfig.getHiddenAddressFields());
-            shippingInfoWidget.setOptionalFields(mPaymentFlowConfig.getOptionalAddressFields());
+            shippingInfoWidget.setHiddenFields(mPaymentFlowConfig.getHiddenShippingInfoFields());
+            shippingInfoWidget.setOptionalFields(mPaymentFlowConfig.getOptionalShippingInfoFields());
             shippingInfoWidget.populateShippingInfo(mPaymentFlowConfig.getPrepopulatedShippingInfo());
         }
 
