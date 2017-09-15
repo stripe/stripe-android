@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
@@ -77,6 +78,32 @@ public class CustomerSessionTest {
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
                     "  \"default_source\": \"abc123\",\n" +
+                    "  \"sources\": {\n" +
+                    "    \"object\": \"list\",\n" +
+                    "    \"data\": [\n" +
+                    "\n" +
+                    "    ],\n" +
+                    "    \"has_more\": false,\n" +
+                    "    \"total_count\": 0,\n" +
+                    "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
+                    "  }\n" +
+                    "}";
+    public static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
+            "{\n" +
+                    "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
+                    "  \"object\": \"customer\",\n" +
+                    "  \"default_source\": \"abc123\",\n" +
+                    "  \"shipping\": { \n" +
+                    "     \"address\": { \n" +
+                    "        \"city\": \"San Francisco\", \n" +
+                    "            \"country\": \"US\", \n" +
+                    "            \"line1\": \"185 Berry St\", \n" +
+                    "            \"line2\": null, \n" +
+                    "            \"postal_code\": \"94087\", \n" +
+                    "            \"state\": \"CA\" \n" +
+                    "                  }, \n" +
+                    "     \"name\": \"Kathy\", \n" +
+                    "     \"phone\": \"1234567890\" }, \n" +
                     "  \"sources\": {\n" +
                     "    \"object\": \"list\",\n" +
                     "    \"data\": [\n" +
@@ -211,6 +238,37 @@ public class CustomerSessionTest {
                     firstKey.getCustomerId(), firstKey.getSecret());
             assertNotNull(session.getCustomer());
             assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
+        }
+    }
+
+    @Test
+    public void setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs(){
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        Calendar proxyCalendar = Calendar.getInstance();
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        Customer customerWithShippingInfo = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO);
+        ShippingInformation shippingInformation = customerWithShippingInfo.getShippingInformation();
+        session.setCustomerShippingInformation(RuntimeEnvironment.application, shippingInformation);
+        ArgumentCaptor<List> listArgumentCaptor =
+                ArgumentCaptor.forClass(List.class);
+        try {
+            verify(mStripeApiProxy, times(1)).setCustomerShippingInfoWithKey(
+                    eq(RuntimeEnvironment.application),
+                    eq(mFirstCustomer.getId()),
+                    eq("pk_test_abc123"),
+                    listArgumentCaptor.capture(),
+                    eq(shippingInformation),
+                    eq(firstKey.getSecret()));
+            List productUsage = listArgumentCaptor.getValue();
+            assertTrue(productUsage.contains("PaymentMethodsActivity"));
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }
