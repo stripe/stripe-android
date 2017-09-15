@@ -14,51 +14,51 @@ import com.stripe.android.R;
 import java.util.ArrayList;
 import java.util.List;
 
-class ShippingFlowPagerAdapter extends PagerAdapter {
+class PaymentFlowPagerAdapter extends PagerAdapter {
 
     @NonNull private Context mContext;
-    @NonNull private ShippingFlowConfig mShippingFlowConfig;
-    @NonNull private List<ShippingFlowPagerEnum> mPages;
+    @NonNull private PaymentFlowConfig mPaymentFlowConfig;
+    @NonNull private List<PaymentFlowPagerEnum> mPages;
     private boolean mAddressSaved;
 
-    ShippingFlowPagerAdapter(@NonNull Context context, @NonNull ShippingFlowConfig shippingFlowConfig) {
+    PaymentFlowPagerAdapter(@NonNull Context context, @NonNull PaymentFlowConfig paymentFlowConfig) {
         mContext = context;
-        mShippingFlowConfig = shippingFlowConfig;
+        mPaymentFlowConfig = paymentFlowConfig;
         mPages = new ArrayList<>();
-        if (!mShippingFlowConfig.isHideAddressScreen()) {
-            mPages.add(ShippingFlowPagerEnum.ADDRESS);
+        if (!mPaymentFlowConfig.isHideAddressScreen()) {
+            mPages.add(PaymentFlowPagerEnum.ADDRESS);
         }
         if (!shouldHideShippingScreen()) {
-            mPages.add(ShippingFlowPagerEnum.SHIPPING_METHOD);
+            mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
         }
     }
 
     private boolean shouldHideShippingScreen() {
-        return mShippingFlowConfig.isHideShippingScreen() || (!mShippingFlowConfig.isHideAddressScreen() && !mAddressSaved);
+        return mPaymentFlowConfig.isHideShippingScreen() || (!mPaymentFlowConfig.isHideAddressScreen() && !mAddressSaved);
     }
 
     void setAddressSaved(boolean addressSaved) {
         mAddressSaved = addressSaved;
         if (!shouldHideShippingScreen()) {
-            mPages.add(ShippingFlowPagerEnum.SHIPPING_METHOD);
+            mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
         }
         notifyDataSetChanged();
     }
 
     @Override
     public Object instantiateItem(ViewGroup collection, int position) {
-        ShippingFlowPagerEnum shippingFlowPagerEnum = mPages.get(position);
+        PaymentFlowPagerEnum paymentFlowPagerEnum = mPages.get(position);
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        ViewGroup layout = (ViewGroup) inflater.inflate(shippingFlowPagerEnum.getLayoutResId(), collection, false);
-        if (shippingFlowPagerEnum.equals(ShippingFlowPagerEnum.SHIPPING_METHOD)) {
+        ViewGroup layout = (ViewGroup) inflater.inflate(paymentFlowPagerEnum.getLayoutResId(), collection, false);
+        if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_METHOD)) {
             SelectShippingMethodWidget selectShippingMethodWidget = layout.findViewById(R.id.select_shipping_method_widget);
             selectShippingMethodWidget.setShippingMethods(PaymentConfiguration.getInstance().getShippingMethods());
         }
-        if (shippingFlowPagerEnum.equals(ShippingFlowPagerEnum.ADDRESS)) {
+        if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
-            shippingInfoWidget.setHiddenFields(mShippingFlowConfig.getHiddenAddressFields());
-            shippingInfoWidget.setOptionalFields(mShippingFlowConfig.getOptionalAddressFields());
-            shippingInfoWidget.populateShippingInfo(mShippingFlowConfig.getPrepopulatedShippingInfo());
+            shippingInfoWidget.setHiddenFields(mPaymentFlowConfig.getHiddenAddressFields());
+            shippingInfoWidget.setOptionalFields(mPaymentFlowConfig.getOptionalAddressFields());
+            shippingInfoWidget.populateShippingInfo(mPaymentFlowConfig.getPrepopulatedShippingInfo());
         }
 
         collection.addView(layout);
@@ -75,7 +75,8 @@ class ShippingFlowPagerAdapter extends PagerAdapter {
         return mPages.size();
     }
 
-    @Nullable ShippingFlowPagerEnum getPageAt(int position) {
+    @Nullable
+    PaymentFlowPagerEnum getPageAt(int position) {
         if (position < mPages.size()) {
             return mPages.get(position);
         }

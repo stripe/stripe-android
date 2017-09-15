@@ -9,7 +9,7 @@ import android.widget.Button;
 import com.google.android.gms.wallet.Cart;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.view.ShippingFlowActivity;
+import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.example.R;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
@@ -84,7 +84,7 @@ public class LauncherActivity extends AppCompatActivity {
         selectShippingAddressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new ShippingFlowActivity.IntentBuilder().build(LauncherActivity.this);
+                Intent intent = new PaymentFlowActivity.IntentBuilder().build(LauncherActivity.this);
                 startActivity(intent);
             }
         });

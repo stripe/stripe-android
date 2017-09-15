@@ -2,7 +2,7 @@ package com.stripe.android.view;
 
 import com.stripe.android.R;
 
-enum ShippingFlowPagerEnum {
+enum PaymentFlowPagerEnum {
 
     ADDRESS(R.string.title_add_an_address, R.layout.activity_add_address),
     SHIPPING_METHOD(R.string.title_select_shipping_method, R.layout.activity_select_shipping_method);
@@ -10,7 +10,7 @@ enum ShippingFlowPagerEnum {
     private int mTitleResId;
     private int mLayoutResId;
 
-    ShippingFlowPagerEnum(int titleResId, int layoutResId) {
+    PaymentFlowPagerEnum(int titleResId, int layoutResId) {
         mTitleResId = titleResId;
         mLayoutResId = layoutResId;
     }
