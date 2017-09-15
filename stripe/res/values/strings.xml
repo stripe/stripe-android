@@ -6,8 +6,6 @@
     <string name="acc_label_zip_short">ZIP</string>
     <!--Label for input requesting the name of a customer-->
     <string name="address_label_name">Name</string>
-    <!--Label for input requesting the name of a customer where input is optional-->
-    <string name="address_label_name_optional">Name (optional)</string>
     <!--Label for input requesting the first line of an address, used for US and Canadian addresses-->
     <string name="address_label_address">Address</string>
     <!--Label for input requesting the first line of an address where input is optional, used for US and Canadian addresses-->

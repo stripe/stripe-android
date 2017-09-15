@@ -5,27 +5,28 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class ShippingFlowConfig implements Parcelable {
+public class ShippingFlowConfig implements Parcelable {
 
     @NonNull private List<String> mHiddenAddressFields;
     @NonNull private List<String> mOptionalAddressFields;
-    @NonNull private Address mPrepopulatedAddress;
+    @NonNull private ShippingInformation mShippingInformation;
     private boolean mHideAddressScreen;
     private boolean mHideShippingScreen;
 
     public ShippingFlowConfig(
             @NonNull List<String> hiddenAddressFields,
             @NonNull List<String> optionalAddressFields,
-            @NonNull Address prepopulatedAddress,
+            @NonNull ShippingInformation shippingInformation,
             boolean hideAddressScreen,
             boolean hideShippingScreen) {
         mHiddenAddressFields = hiddenAddressFields;
         mOptionalAddressFields = optionalAddressFields;
-        mPrepopulatedAddress = prepopulatedAddress;
+        mShippingInformation = shippingInformation;
         mHideAddressScreen = hideAddressScreen;
         mHideShippingScreen = hideShippingScreen;
     }
@@ -35,7 +36,7 @@ class ShippingFlowConfig implements Parcelable {
         in.readStringList(mHiddenAddressFields);
         mOptionalAddressFields = new ArrayList<>();
         in.readStringList(mOptionalAddressFields);
-        mPrepopulatedAddress = in.readParcelable(Address.class.getClassLoader());
+        mShippingInformation = in.readParcelable(Address.class.getClassLoader());
         mHideAddressScreen = in.readInt() == 1;
         mHideShippingScreen = in.readInt() == 1;
     }
@@ -51,7 +52,7 @@ class ShippingFlowConfig implements Parcelable {
         if (isHideShippingScreen() != that.isHideShippingScreen()) return false;
         if (!getHiddenAddressFields().equals(that.getHiddenAddressFields())) return false;
         if (!getOptionalAddressFields().equals(that.getOptionalAddressFields())) return false;
-        return getPrepopulatedAddress().equals(that.getPrepopulatedAddress());
+        return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
     }
 
     @Override
@@ -63,7 +64,7 @@ class ShippingFlowConfig implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeStringList(mHiddenAddressFields);
         parcel.writeStringList(mOptionalAddressFields);
-        parcel.writeParcelable(mPrepopulatedAddress, flags);
+        parcel.writeParcelable(mShippingInformation, flags);
         parcel.writeInt(mHideAddressScreen ? 1 : 0);
         parcel.writeInt(mHideShippingScreen? 1: 0);
     }
@@ -76,8 +77,9 @@ class ShippingFlowConfig implements Parcelable {
         return mOptionalAddressFields;
     }
 
-    @NonNull Address getPrepopulatedAddress() {
-        return mPrepopulatedAddress;
+    @NonNull
+    ShippingInformation getPrepopulatedShippingInfo() {
+        return mShippingInformation;
     }
 
     boolean isHideAddressScreen() {

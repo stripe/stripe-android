@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Address;
+import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.ArrayList;
@@ -28,14 +28,14 @@ public class ShippingFlowActivity extends StripeActivity {
     public static class IntentBuilder {
         private List mHiddenAddressFields;
         private List mOptionalAddressFields;
-        private Address mPrepopulatedAddress;
+        private ShippingInformation mPrepopulatedShippingInfo;
         private boolean mHideAddressScreen;
         private boolean mHideShippingScreen;
 
         public IntentBuilder() {
             mHiddenAddressFields = new ArrayList();
             mOptionalAddressFields = new ArrayList();
-            mPrepopulatedAddress = new Address.Builder().build();
+            mPrepopulatedShippingInfo = new ShippingInformation();
         }
 
         /**
@@ -57,11 +57,11 @@ public class ShippingFlowActivity extends StripeActivity {
 
         /**
          *
-         * @param prepopulatedAddress set an address to be prepopulated into the add address input
+         * @param shippingInformation set an address to be prepopulated into the add address input
          *                            fields.
          */
-        public IntentBuilder setPrepopulatedAddress(@NonNull Address prepopulatedAddress) {
-            mPrepopulatedAddress = prepopulatedAddress;
+        public IntentBuilder setPrepopulatedShippingInformation(@NonNull ShippingInformation shippingInformation) {
+            mPrepopulatedShippingInfo = shippingInformation;
             return this;
         }
 
@@ -87,7 +87,7 @@ public class ShippingFlowActivity extends StripeActivity {
                     new ShippingFlowConfig(
                             mHiddenAddressFields,
                             mOptionalAddressFields,
-                            mPrepopulatedAddress,
+                            mPrepopulatedShippingInfo,
                             mHideAddressScreen,
                             mHideShippingScreen);
             intent.putExtra(EXTRA_SHIPPING_FLOW_CONFIG, shippingFlowConfig);
@@ -135,9 +135,9 @@ public class ShippingFlowActivity extends StripeActivity {
     }
 
     private void onAddressSave() {
-        AddAddressWidget addAddressWidget = findViewById(R.id.add_address_widget);
-        Address address = addAddressWidget.getAddress();
-        if (address !=  null) {
+        ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
+        ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
+        if (shippingInformation !=  null) {
             setCommunicatingProgress(true);
             // TODO: Call into payment context
             setCommunicatingProgress(false);

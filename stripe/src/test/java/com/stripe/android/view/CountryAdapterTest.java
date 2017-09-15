@@ -33,8 +33,8 @@ public class CountryAdapterTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        ActivityController<AddressInputTestActivity> activityController =
-                Robolectric.buildActivity(AddressInputTestActivity.class).create().start();
+        ActivityController<ShippingInfoTestActivity> activityController =
+                Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();
         List<String> countries = new ArrayList<>(CountryUtils.getCountryNameToCodeMap().keySet());
         mCountryAdapter = new CountryAdapter(activityController.get(), countries);
     }

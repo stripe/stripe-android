@@ -82,13 +82,6 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.AddAddressExampleActivity"
-            android:theme="@style/SampleThemeDefault">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
