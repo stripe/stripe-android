@@ -163,6 +163,7 @@ public class StripeEditText extends TextInputEditText {
         if (mErrorMessage != null && mErrorMessageListener != null) {
             String errorMessage = shouldShowError ? mErrorMessage : null;
             mErrorMessageListener.displayErrorMessage(errorMessage);
+            mShouldShowError = shouldShowError;
         } else {
             mShouldShowError = shouldShowError;
             if (mShouldShowError) {

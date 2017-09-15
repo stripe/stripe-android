@@ -56,7 +56,6 @@ public class CardMultilineWidget extends LinearLayout {
     private boolean mShouldShowPostalCode;
     private boolean mHasAdjustedDrawable;
 
-    private @DrawableRes int mCachedIconResource;
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
 
@@ -80,6 +79,21 @@ public class CardMultilineWidget extends LinearLayout {
         super(context);
         mShouldShowPostalCode = shouldShowPostalCode;
         initView(null);
+    }
+
+    /**
+     * Clear all entered data and hide all error messages.
+     */
+    public void clear() {
+        mCardNumberEditText.setText("");
+        mExpiryDateEditText.setText("");
+        mCvcEditText.setText("");
+        mPostalCodeEditText.setText("");
+        mCardNumberEditText.setShouldShowError(false);
+        mExpiryDateEditText.setShouldShowError(false);
+        mCvcEditText.setShouldShowError(false);
+        mPostalCodeEditText.setShouldShowError(false);
+        updateBrand(Card.UNKNOWN);
     }
 
     /**
