@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
@@ -16,7 +18,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model representing a shipping method in the Android SDK
  */
-public class ShippingMethod extends StripeJsonModel {
+public class ShippingMethod extends StripeJsonModel implements Parcelable{
 
     private static final String FIELD_AMOUNT = "amount";
     /*ISO Currency Code*/
@@ -106,5 +108,39 @@ public class ShippingMethod extends StripeJsonModel {
         map.put(FIELD_IDENTIFIER, mIdentifier);
         map.put(FIELD_LABEL, mLabel);
         return map;
+    }
+
+    /************** Parcelable *********************/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(mAmount);
+        parcel.writeString(mCurrencyCode);
+        parcel.writeString(mDetail);
+        parcel.writeString(mLabel);
+        parcel.writeString(mIdentifier);
+    }
+
+    public static final Parcelable.Creator<ShippingMethod> CREATOR
+            = new Parcelable.Creator<ShippingMethod>() {
+        public ShippingMethod createFromParcel(Parcel in) {
+            return new ShippingMethod(in);
+        }
+
+        public ShippingMethod[] newArray(int size) {
+            return new ShippingMethod[size];
+        }
+    };
+
+    private ShippingMethod(Parcel in) {
+        mAmount = in.readLong();
+        mCurrencyCode = in.readString();
+        mDetail = in.readString();
+        mLabel = in.readString();
+        mIdentifier = in.readString();
     }
 }
