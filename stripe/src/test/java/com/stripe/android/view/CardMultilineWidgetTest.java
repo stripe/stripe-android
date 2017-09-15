@@ -208,6 +208,54 @@ public class CardMultilineWidgetTest {
     }
 
     @Test
+    public void clear_whenZipRequiredAndAllFieldsEntered_clearsAllfields() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mFullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        mCardMultilineWidget.clear();
+
+        assertEquals("", mFullGroup.cardNumberEditText.getText().toString());
+        assertEquals("", mFullGroup.expiryDateEditText.getText().toString());
+        assertEquals("", mFullGroup.cvcEditText.getText().toString());
+        assertEquals("", mFullGroup.postalCodeEditText.getText().toString());
+    }
+
+    @Test
+    public void clear_whenFieldsInErrorState_clearsFieldsAndHidesErrors() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        String badVisa = VALID_VISA_WITH_SPACES.substring(VALID_VISA_WITH_SPACES.length() - 1);
+        badVisa += 3; // Makes this 4242 4242 4242 4243
+        mFullGroup.cardNumberEditText.setText(badVisa);
+
+        mFullGroup.expiryDateEditText.append("01");
+        mFullGroup.expiryDateEditText.append("11");
+        mFullGroup.cvcEditText.append("12");
+        mFullGroup.postalCodeEditText.append("1234");
+
+        mCardMultilineWidget.validateAllFields();
+
+        assertTrue(mFullGroup.cardNumberEditText.getShouldShowError());
+        assertTrue(mFullGroup.expiryDateEditText.getShouldShowError());
+        assertTrue(mFullGroup.cvcEditText.getShouldShowError());
+        assertTrue(mFullGroup.postalCodeEditText.getShouldShowError());
+
+        mCardMultilineWidget.clear();
+
+        assertFalse(mFullGroup.cardNumberEditText.getShouldShowError());
+        assertFalse(mFullGroup.expiryDateEditText.getShouldShowError());
+        assertFalse(mFullGroup.cvcEditText.getShouldShowError());
+        assertFalse(mFullGroup.postalCodeEditText.getShouldShowError());
+    }
+
+    @Test
     public void initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
         assertEquals(View.VISIBLE, mFullGroup.postalCodeInputLayout.getVisibility());
         mCardMultilineWidget.setShouldShowPostalCode(false);
