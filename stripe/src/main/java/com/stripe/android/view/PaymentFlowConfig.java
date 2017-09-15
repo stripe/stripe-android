@@ -110,6 +110,16 @@ public class PaymentFlowConfig implements Parcelable {
         if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) return false;
         return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
     }
+    
+    @Override
+    public int hashCode() {
+        int result = getHiddenShippingInfoFields().hashCode();
+        result = 31 * result + getOptionalShippingInfoFields().hashCode();
+        result = 31 * result + mShippingInformation.hashCode();
+        result = 31 * result + (isHideShippingInfoScreen() ? 1 : 0);
+        result = 31 * result + (isHideShippingMethodsScreen() ? 1 : 0);
+        return result;
+    }
 
     @Override
     public int describeContents() {
