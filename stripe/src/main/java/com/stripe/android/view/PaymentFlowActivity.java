@@ -23,7 +23,7 @@ public class PaymentFlowActivity extends StripeActivity {
     private ViewPager mViewPager;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
 
-    static final String EXTRA_SHIPPING_FLOW_CONFIG = "shipping_flow_config";
+    static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
 
     public static class IntentBuilder {
         private List mHiddenAddressFields;
@@ -90,7 +90,7 @@ public class PaymentFlowActivity extends StripeActivity {
                             mPrepopulatedShippingInfo,
                             mHideAddressScreen,
                             mHideShippingScreen);
-            intent.putExtra(EXTRA_SHIPPING_FLOW_CONFIG, paymentFlowConfig);
+            intent.putExtra(EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
             return intent;
         }
 
@@ -102,7 +102,7 @@ public class PaymentFlowActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
-        PaymentFlowConfig paymentFlowConfig = getIntent().getParcelableExtra(EXTRA_SHIPPING_FLOW_CONFIG);
+        PaymentFlowConfig paymentFlowConfig = getIntent().getParcelableExtra(EXTRA_PAYMENT_FLOW_CONFIG);
         mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentFlowConfig);
         mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {

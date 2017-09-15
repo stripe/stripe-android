@@ -42,7 +42,7 @@ public class PaymentFlowActivityTest {
         List<String> optionalAddressFields = new ArrayList<>();
         ShippingInformation empty = new ShippingInformation();
         PaymentFlowConfig emptyPaymentFlowConfig = new PaymentFlowConfig(hiddenAddressFields, optionalAddressFields, empty, false, false);
-        assertEquals(emptyPaymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_SHIPPING_FLOW_CONFIG));
+        assertEquals(emptyPaymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class PaymentFlowActivityTest {
                 .setHideShippingScreen(true)
                 .build(RuntimeEnvironment.application);
         PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig(hiddenAddressFields, optionalAddressFields, address, true, true);
-        assertEquals(paymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_SHIPPING_FLOW_CONFIG));
+        assertEquals(paymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG));
     }
 
     @Test
