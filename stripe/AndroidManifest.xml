@@ -21,7 +21,7 @@
         </activity>
 
         <activity
-            android:name=".view.ShippingFlowActivity"
+            android:name=".view.PaymentFlowActivity"
             android:theme="@style/StripeDefaultTheme"
             >
         </activity>

@@ -10,7 +10,7 @@ import com.stripe.android.model.ShippingInformation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShippingFlowConfig implements Parcelable {
+public class PaymentFlowConfig implements Parcelable {
 
     @NonNull private List<String> mHiddenAddressFields;
     @NonNull private List<String> mOptionalAddressFields;
@@ -18,7 +18,7 @@ public class ShippingFlowConfig implements Parcelable {
     private boolean mHideAddressScreen;
     private boolean mHideShippingScreen;
 
-    public ShippingFlowConfig(
+    public PaymentFlowConfig(
             @NonNull List<String> hiddenAddressFields,
             @NonNull List<String> optionalAddressFields,
             @NonNull ShippingInformation shippingInformation,
@@ -31,7 +31,7 @@ public class ShippingFlowConfig implements Parcelable {
         mHideShippingScreen = hideShippingScreen;
     }
 
-    private ShippingFlowConfig(Parcel in) {
+    private PaymentFlowConfig(Parcel in) {
         mHiddenAddressFields = new ArrayList<>();
         in.readStringList(mHiddenAddressFields);
         mOptionalAddressFields = new ArrayList<>();
@@ -46,7 +46,7 @@ public class ShippingFlowConfig implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ShippingFlowConfig that = (ShippingFlowConfig) o;
+        PaymentFlowConfig that = (PaymentFlowConfig) o;
 
         if (isHideAddressScreen() != that.isHideAddressScreen()) return false;
         if (isHideShippingScreen() != that.isHideShippingScreen()) return false;
@@ -90,17 +90,17 @@ public class ShippingFlowConfig implements Parcelable {
         return mHideShippingScreen;
     }
 
-    static final Parcelable.Creator<ShippingFlowConfig> CREATOR
-            = new Parcelable.Creator<ShippingFlowConfig>() {
+    static final Parcelable.Creator<PaymentFlowConfig> CREATOR
+            = new Parcelable.Creator<PaymentFlowConfig>() {
 
         @Override
-        public ShippingFlowConfig createFromParcel(Parcel in) {
-            return new ShippingFlowConfig(in);
+        public PaymentFlowConfig createFromParcel(Parcel in) {
+            return new PaymentFlowConfig(in);
         }
 
         @Override
-        public ShippingFlowConfig[] newArray(int size) {
-            return new ShippingFlowConfig[size];
+        public PaymentFlowConfig[] newArray(int size) {
+            return new PaymentFlowConfig[size];
         }
     };
 }

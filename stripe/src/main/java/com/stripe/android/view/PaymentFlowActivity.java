@@ -15,15 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity containing a two-part shipping flow that allows users to provide a shipping address
+ * Activity containing a two-part payment flow that allows users to provide a shipping address
  * as well as select a shipping method.
  */
-public class ShippingFlowActivity extends StripeActivity {
+public class PaymentFlowActivity extends StripeActivity {
 
     private ViewPager mViewPager;
-    private ShippingFlowPagerAdapter mShippingFlowPagerAdapter;
+    private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
 
-    static final String EXTRA_SHIPPING_FLOW_CONFIG = "shipping_flow_config";
+    static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
 
     public static class IntentBuilder {
         private List mHiddenAddressFields;
@@ -82,15 +82,15 @@ public class ShippingFlowActivity extends StripeActivity {
         }
 
         public Intent build(Context context) {
-            Intent intent = new Intent(context, ShippingFlowActivity.class);
-            ShippingFlowConfig shippingFlowConfig =
-                    new ShippingFlowConfig(
+            Intent intent = new Intent(context, PaymentFlowActivity.class);
+            PaymentFlowConfig paymentFlowConfig =
+                    new PaymentFlowConfig(
                             mHiddenAddressFields,
                             mOptionalAddressFields,
                             mPrepopulatedShippingInfo,
                             mHideAddressScreen,
                             mHideShippingScreen);
-            intent.putExtra(EXTRA_SHIPPING_FLOW_CONFIG, shippingFlowConfig);
+            intent.putExtra(EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
             return intent;
         }
 
@@ -102,9 +102,9 @@ public class ShippingFlowActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
-        ShippingFlowConfig shippingFlowConfig = getIntent().getParcelableExtra(EXTRA_SHIPPING_FLOW_CONFIG);
-        mShippingFlowPagerAdapter = new ShippingFlowPagerAdapter(this, shippingFlowConfig);
-        mViewPager.setAdapter(mShippingFlowPagerAdapter);
+        PaymentFlowConfig paymentFlowConfig = getIntent().getParcelableExtra(EXTRA_PAYMENT_FLOW_CONFIG);
+        mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentFlowConfig);
+        mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -121,13 +121,13 @@ public class ShippingFlowActivity extends StripeActivity {
 
             }
         });
-        setTitle(mShippingFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
+        setTitle(mPaymentFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
     }
 
 
     @Override
     protected void onActionSave() {
-        if (mShippingFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(ShippingFlowPagerEnum.ADDRESS)) {
+        if (mPaymentFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.ADDRESS)) {
             onAddressSave();
         } else {
             onShippingMethodSave();
@@ -141,7 +141,7 @@ public class ShippingFlowActivity extends StripeActivity {
             setCommunicatingProgress(true);
             // TODO: Call into payment context
             setCommunicatingProgress(false);
-            mShippingFlowPagerAdapter.setAddressSaved(true);
+            mPaymentFlowPagerAdapter.setAddressSaved(true);
             if (hasNextPage()) {
                 mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
             } else {
@@ -151,12 +151,12 @@ public class ShippingFlowActivity extends StripeActivity {
     }
 
     private boolean hasNextPage() {
-        return mViewPager.getCurrentItem() + 1 < mShippingFlowPagerAdapter.getCount();
+        return mViewPager.getCurrentItem() + 1 < mPaymentFlowPagerAdapter.getCount();
     }
 
     private boolean hasPreviousPage() {
         int currentPageIndex = mViewPager.getCurrentItem();
-        return currentPageIndex != 0 && currentPageIndex >= mShippingFlowPagerAdapter.getCount();
+        return currentPageIndex != 0 && currentPageIndex >= mPaymentFlowPagerAdapter.getCount();
     }
 
     private void onShippingMethodSave() {

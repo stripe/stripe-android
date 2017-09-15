@@ -30,19 +30,19 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 25)
-public class ShippingFlowActivityTest {
-    private ActivityController<ShippingFlowActivity> mActivityController;
+public class PaymentFlowActivityTest {
+    private ActivityController<PaymentFlowActivity> mActivityController;
     private ShadowActivity mShadowActivity;
     private ShippingInfoWidget mShippingInfoWidget;
 
     @Test
     public void intentBuilder_withEmptyConstructor_buildsCorrectly() {
-        Intent emptyStateIntent = new ShippingFlowActivity.IntentBuilder().build(RuntimeEnvironment.application);
+        Intent emptyStateIntent = new PaymentFlowActivity.IntentBuilder().build(RuntimeEnvironment.application);
         List<String> hiddenAddressFields = new ArrayList<>();
         List<String> optionalAddressFields = new ArrayList<>();
         ShippingInformation empty = new ShippingInformation();
-        ShippingFlowConfig emptyShippingFlowConfig = new ShippingFlowConfig(hiddenAddressFields, optionalAddressFields, empty, false, false);
-        assertEquals(emptyShippingFlowConfig, emptyStateIntent.getParcelableExtra(ShippingFlowActivity.EXTRA_SHIPPING_FLOW_CONFIG));
+        PaymentFlowConfig emptyPaymentFlowConfig = new PaymentFlowConfig(hiddenAddressFields, optionalAddressFields, empty, false, false);
+        assertEquals(emptyPaymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG));
     }
 
     @Test
@@ -52,68 +52,68 @@ public class ShippingFlowActivityTest {
         List<String> optionalAddressFields = new ArrayList<>();
         optionalAddressFields.add(ShippingInfoWidget.POSTAL_CODE_FIELD);
         ShippingInformation address = getExampleShippingInfo();
-        Intent emptyStateIntent = new ShippingFlowActivity.IntentBuilder()
+        Intent emptyStateIntent = new PaymentFlowActivity.IntentBuilder()
                 .setHiddenAddressFields(hiddenAddressFields)
                 .setOptionalAddressFields(optionalAddressFields)
                 .setPrepopulatedShippingInformation(address)
                 .setHideAddressScreen(true)
                 .setHideShippingScreen(true)
                 .build(RuntimeEnvironment.application);
-        ShippingFlowConfig shippingFlowConfig = new ShippingFlowConfig(hiddenAddressFields, optionalAddressFields, address, true, true);
-        assertEquals(shippingFlowConfig, emptyStateIntent.getParcelableExtra(ShippingFlowActivity.EXTRA_SHIPPING_FLOW_CONFIG));
+        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig(hiddenAddressFields, optionalAddressFields, address, true, true);
+        assertEquals(paymentFlowConfig, emptyStateIntent.getParcelableExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG));
     }
 
     @Test
-    public void launchShippingFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
+    public void launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
         initializePaymentConfig();
-        Intent intent = new ShippingFlowActivity.IntentBuilder()
+        Intent intent = new PaymentFlowActivity.IntentBuilder()
                 .setHideAddressScreen(true).build(RuntimeEnvironment.application);
-        mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         assertNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
         assertNotNull(mActivityController.get().findViewById(R.id.select_shipping_method_widget));
     }
 
     @Test
-    public void launchShippingFlowActivity_withHideShippingMethodConfig_hidesShippingMethodView() {
-        Intent intent = new ShippingFlowActivity.IntentBuilder()
+    public void launchPaymentFlowActivity_withHideShippingMethodConfig_hidesShippingMethodView() {
+        Intent intent = new PaymentFlowActivity.IntentBuilder()
                 .setHideShippingScreen(true).build(RuntimeEnvironment.application);
-        mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
         mShippingInfoWidget.populateShippingInfo(getExampleShippingInfo());
-        ShippingFlowActivity shippingFlowActivity = mActivityController.get();
-        shippingFlowActivity.onActionSave();
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+        paymentFlowActivity.onActionSave();
         assertTrue(mShadowActivity.isFinishing());
     }
 
     @Test
     public void onShippingInfoSave_whenShippingNotPopulated_doesNotFinish() {
-        Intent intent = new ShippingFlowActivity.IntentBuilder()
+        Intent intent = new PaymentFlowActivity.IntentBuilder()
                 .setHideShippingScreen(true).build(RuntimeEnvironment.application);
-        mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
-        ShippingFlowActivity shippingFlowActivity = mActivityController.get();
-        shippingFlowActivity.onActionSave();
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+        paymentFlowActivity.onActionSave();
         assertFalse(mShadowActivity.isFinishing());
     }
 
     @Test
     public void onShippingInfoSave_whenShippingInfoNotPopulated_doesNotContinue() {
-        Intent intent = new ShippingFlowActivity.IntentBuilder()
+        Intent intent = new PaymentFlowActivity.IntentBuilder()
                 .build(RuntimeEnvironment.application);
-        mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
-        ShippingFlowActivity shippingFlowActivity = mActivityController.get();
-        shippingFlowActivity.onActionSave();
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+        paymentFlowActivity.onActionSave();
         assertFalse(mShadowActivity.isFinishing());
         assertNotNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
     }
@@ -121,19 +121,19 @@ public class ShippingFlowActivityTest {
     @Test
     public void onShippingInfoSave_whenShippingInfoPopulated_showsShippingMethod() {
         initializePaymentConfig();
-        Intent intent = new ShippingFlowActivity.IntentBuilder()
+        Intent intent = new PaymentFlowActivity.IntentBuilder()
                 .build(RuntimeEnvironment.application);
-        mActivityController = Robolectric.buildActivity(ShippingFlowActivity.class, intent)
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
-        ShippingFlowActivity shippingFlowActivity = mActivityController.get();
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
         mShippingInfoWidget.populateShippingInfo(getExampleShippingInfo());
         assertFalse(mShadowActivity.isFinishing());
-        shippingFlowActivity.onActionSave();
+        paymentFlowActivity.onActionSave();
         assertNotNull(mActivityController.get().findViewById(R.id.select_shipping_method_widget));
-        shippingFlowActivity.onActionSave();
+        paymentFlowActivity.onActionSave();
         assertTrue(mShadowActivity.isFinishing());
     }
 
