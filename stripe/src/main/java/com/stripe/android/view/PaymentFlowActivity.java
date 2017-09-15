@@ -16,12 +16,12 @@ import com.stripe.android.model.ShippingMethod;
  */
 public class PaymentFlowActivity extends StripeActivity {
 
+    public static final String EXTRA_IS_SHIPPING_INFO_VALID = "shipping_is_shipping_info_valid";
     public static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
     public static final String EXTRA_PAYMENT_SESSION_DATA = "payment_session_data";
     public static final String EXTRA_SHIPPING_INFO_DATA = "shipping_info_data";
-    public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
     public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
-    public static final String EXTRA_IS_SHIPPING_INFO_VALID = "shipping_is_shipping_info_valid";
+    public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
 
     private ViewPager mViewPager;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;

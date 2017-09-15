@@ -32,12 +32,12 @@ import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO
  */
 public class PaymentSessionActivity extends AppCompatActivity {
 
-
-    private Button mStartPaymentFlowButton;
-    private ProgressBar mProgressBar;
+    private BroadcastReceiver mBroadcastReceiver;
     private ErrorDialogHandler mErrorDialogHandler;
     private PaymentSession mPaymentSession;
-    private BroadcastReceiver mMessageReceiver;
+    private ProgressBar mProgressBar;
+    private Button mStartPaymentFlowButton;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         setupCustomerSession();
         setupPaymentSession();
-        mMessageReceiver = new BroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 intent = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
@@ -58,12 +58,12 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 LocalBroadcastManager.getInstance(PaymentSessionActivity.this).sendBroadcast(intent);
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
         mStartPaymentFlowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPaymentSession.launchShippingFlow(new PaymentFlowConfig.Builder().build());
+                mPaymentSession.presentShippingFlow(new PaymentFlowConfig.Builder().build());
             }
         });
 

@@ -150,7 +150,7 @@ public class PaymentSession {
      * @param paymentFlowConfig config that allows the {@link PaymentFlowActivity} to know what UI
      *                          to render.
      */
-    public void launchShippingFlow(PaymentFlowConfig paymentFlowConfig) {
+    public void presentShippingFlow(PaymentFlowConfig paymentFlowConfig) {
         Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
         intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
         intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_SESSION_DATA, mPaymentSessionData);
