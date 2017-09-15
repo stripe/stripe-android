@@ -1,6 +1,8 @@
 package com.stripe.android;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -8,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.stripe.android.exception.APIConnectionException;
@@ -36,6 +39,9 @@ import java.util.concurrent.TimeUnit;
  * Represents a logged-in session of a single Customer.
  */
 public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
+
+    public static final String ACTION_API_EXCEPTION = "action_api_exception";
+    public static final String EXTRA_EXCEPTION = "exception";
 
     private static final String ACTION_ADD_SOURCE = "add_source";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
@@ -267,6 +273,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return mEphemeralKey;
     }
 
+    @VisibleForTesting
+    void setStripeApiProxy(@Nullable StripeApiProxy proxy) {
+        mStripeApiProxy = proxy;
+    }
 
     @VisibleForTesting
     Set<String> getProductUsageTokens() {
@@ -349,7 +359,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = retrieveCustomerWithKey(key, mStripeApiProxy);
+                Customer customer = retrieveCustomerWithKey(
+                        mCachedContextReference,
+                        key,
+                        mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
                 mUiThreadHandler.sendMessage(message);
             }
@@ -515,6 +528,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+            if (contextWeakReference.get() != null) {
+                LocalBroadcastManager.getInstance(contextWeakReference.get())
+                        .sendBroadcast(generateErrorIntent(stripeException));
+            }
         }
         return source;
     }
@@ -548,6 +565,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+            if (contextWeakReference.get() != null) {
+                LocalBroadcastManager.getInstance(contextWeakReference.get())
+                        .sendBroadcast(generateErrorIntent(stripeException));
+            }
         }
         return customer;
     }
@@ -584,6 +605,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+            if (contextWeakReference.get() != null) {
+                LocalBroadcastManager.getInstance(contextWeakReference.get())
+                        .sendBroadcast(generateErrorIntent(stripeException));
+            }
         }
         return customer;
     }
@@ -594,12 +619,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      * Use {@link #updateCustomer(EphemeralKey)} to validate the key
      * before refreshing the customer.
      *
+     * @param errorContext a {@link WeakReference} to a {@link Context}
+     *                     that can be used for broadcasting errors.
      * @param key the {@link EphemeralKey} used for this access
      * @param proxy a {@link StripeApiProxy} to intercept calls to the real servers
      * @return a {@link Customer} if one can be found with this key, or {@code null} if one cannot.
      */
     @Nullable
     static Customer retrieveCustomerWithKey(
+            @Nullable WeakReference<Context> errorContext,
             @NonNull EphemeralKey key,
             @Nullable StripeApiProxy proxy) {
         Customer customer = null;
@@ -615,8 +643,21 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
+            if (errorContext != null && errorContext.get() != null) {
+                LocalBroadcastManager.getInstance(errorContext.get())
+                        .sendBroadcast(generateErrorIntent(stripeException));
+            }
         }
         return customer;
+    }
+
+    @NonNull
+    static Intent generateErrorIntent(@NonNull StripeException exception) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(EXTRA_EXCEPTION, exception);
+        Intent intent = new Intent(ACTION_API_EXCEPTION);
+        intent.putExtras(bundle);
+        return intent;
     }
 
     public interface CustomerRetrievalListener {
