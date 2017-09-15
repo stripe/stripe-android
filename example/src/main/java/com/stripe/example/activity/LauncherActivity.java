@@ -7,12 +7,10 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.wallet.Cart;
-import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.view.ShippingFlowActivity;
 import com.stripe.example.R;
-import com.stripe.example.service.ExampleEphemeralKeyProvider;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
 import com.stripe.wrap.pay.utils.CartContentException;
@@ -29,22 +27,12 @@ public class LauncherActivity extends AppCompatActivity {
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY =
-            "pk_test_GM1935gITkCi5UwpnUFIhXP8";
+            "put your key here";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
-        CustomerSession.initCustomerSession(
-                new ExampleEphemeralKeyProvider(
-                        new ExampleEphemeralKeyProvider.ProgressListener() {
-                            @Override
-                            public void onStringResponse(String string) {
-                                if (string.startsWith("Error: ")) {
-
-                                }
-                            }
-                        }));
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
         PaymentConfiguration.getInstance().setShippingMethods(createSampleShippingMethods());

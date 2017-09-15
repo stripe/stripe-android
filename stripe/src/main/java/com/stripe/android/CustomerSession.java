@@ -246,8 +246,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
     }
 
-
-
     void clearUsageTokens() {
         mProductUsageTokens.clear();
     }
