@@ -30,8 +30,8 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     private long mAmount;
     private String mCurrencyCode;
     private @Nullable String mDetail;
-    private String mLabel;
     private String mIdentifier;
+    private String mLabel;
 
     public ShippingMethod(@NonNull String label, @NonNull String identifier, @NonNull long amount, @NonNull String currencyCode) {
         this(label, identifier, null, amount, currencyCode);
@@ -121,8 +121,8 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
         parcel.writeLong(mAmount);
         parcel.writeString(mCurrencyCode);
         parcel.writeString(mDetail);
-        parcel.writeString(mLabel);
         parcel.writeString(mIdentifier);
+        parcel.writeString(mLabel);
     }
 
     public static final Parcelable.Creator<ShippingMethod> CREATOR
@@ -140,7 +140,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
         mAmount = in.readLong();
         mCurrencyCode = in.readString();
         mDetail = in.readString();
-        mLabel = in.readString();
         mIdentifier = in.readString();
+        mLabel = in.readString();
     }
 }
