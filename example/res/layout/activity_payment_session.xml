@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+    >
+
     <ProgressBar
         android:id="@+id/customer_progress_bar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -15,9 +17,30 @@
         android:id="@+id/btn_start_payment_flow"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/example_vertical_spacing"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
         android:text="@string/startPaymentFlow"
+        />
+
+    <TextView
+        android:id="@+id/tv_payment_session_data_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="16dp"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:text="@string/updatedShippingInfo"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:visibility="invisible"
+        />
+
+    <TextView
+        android:id="@+id/tv_payment_session_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="16dp"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
 </LinearLayout>
