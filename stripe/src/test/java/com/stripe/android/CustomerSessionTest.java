@@ -1,7 +1,14 @@
 package com.stripe.android;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
@@ -10,6 +17,8 @@ import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.CardInputTestActivity;
 
+import org.apache.tools.ant.taskdefs.Local;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -132,16 +141,26 @@ public class CustomerSessionTest {
                     "}";
 
     @Mock CustomerSession.StripeApiProxy mStripeApiProxy;
+    @Mock CustomerSession.StripeApiProxy mErrorProxy;
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
     private Customer mFirstCustomer;
     private Customer mSecondCustomer;
 
     private Source mAddedSource;
+
+    @Mock BroadcastReceiver mBroadcastReceiver;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
+
+        LocalBroadcastManager instance =
+                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+        instance.registerReceiver(
+                mBroadcastReceiver,
+                new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
 
         mFirstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(mFirstCustomer);
@@ -164,6 +183,20 @@ public class CustomerSessionTest {
                     anyString(),
                     anyString()))
                     .thenReturn(mAddedSource);
+
+            when(mErrorProxy.addCustomerSourceWithKey(
+                    any(Context.class),
+                    anyString(),
+                    anyString(),
+                    ArgumentMatchers.<String>anyList(),
+                    anyString(),
+                    anyString(),
+                    anyString()))
+                    .thenThrow(new APIException(
+                            "The card is invalid",
+                            "request_123",
+                            404,
+                            null));
             when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -173,9 +206,25 @@ public class CustomerSessionTest {
                     anyString(),
                     anyString()))
                     .thenReturn(mSecondCustomer);
+
+            when(mErrorProxy.setDefaultCustomerSourceWithKey(
+                    any(Context.class),
+                    anyString(),
+                    anyString(),
+                    ArgumentMatchers.<String>anyList(),
+                    anyString(),
+                    anyString(),
+                    anyString()))
+                    .thenThrow(new APIException("auth error", "reqId", 405, null));
         } catch (StripeException exception) {
             fail("Exception when accessing mock api proxy: " + exception.getMessage());
         }
+    }
+
+    @After
+    public void teardown() {
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .unregisterReceiver(mBroadcastReceiver);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -455,6 +504,56 @@ public class CustomerSessionTest {
     }
 
     @Test
+    public void addSourceToCustomer_whenApiThrowsError_broadcastsException() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("AddSourceActivity");
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.SourceRetrievalListener mockListener =
+                mock(CustomerSession.SourceRetrievalListener.class);
+
+        session.setStripeApiProxy(mErrorProxy);
+        session.addCustomerSource(RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
+    }
+
+    @Test
     public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsExpectedCustomer() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
@@ -513,5 +612,55 @@ public class CustomerSessionTest {
         Customer capturedCustomer = customerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
+    }
+
+    @Test
+    public void setDefaultSourceForCustomer_whenApiThrowsException_broadcastsException() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.CustomerRetrievalListener mockListener =
+                mock(CustomerSession.CustomerRetrievalListener.class);
+
+        session.setStripeApiProxy(mErrorProxy);
+        session.setCustomerDefaultSource(
+                RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
     }
 }
