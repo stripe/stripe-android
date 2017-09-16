@@ -6,9 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.stripe.android.model.Customer;
+import com.stripe.android.view.PaymentFlowActivity;
+import com.stripe.android.view.PaymentFlowConfig;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 /**
@@ -141,6 +142,21 @@ public class PaymentSession {
      */
     public void setCartTotal(@IntRange(from = 0) long cartTotal) {
         mPaymentSessionData.setCartTotal(cartTotal);
+    }
+
+    /**
+     * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
+     *
+     * @param paymentFlowConfig config that allows the {@link PaymentFlowActivity} to know what UI
+     *                          to render.
+     */
+    public void presentShippingFlow(PaymentFlowConfig paymentFlowConfig) {
+        Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
+        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_SESSION_DATA, mPaymentSessionData);
+        mHostActivity.startActivityForResult(
+                intent,
+                PAYMENT_METHOD_REQUEST);
     }
 
     private void fetchCustomer() {

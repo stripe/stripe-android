@@ -1,18 +1,14 @@
 package com.stripe.android.view;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -20,81 +16,15 @@ import java.util.List;
  */
 public class PaymentFlowActivity extends StripeActivity {
 
+    public static final String EXTRA_IS_SHIPPING_INFO_VALID = "shipping_is_shipping_info_valid";
+    public static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
+    public static final String EXTRA_PAYMENT_SESSION_DATA = "payment_session_data";
+    public static final String EXTRA_SHIPPING_INFO_DATA = "shipping_info_data";
+    public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
+    public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
+
     private ViewPager mViewPager;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
-
-    static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
-
-    public static class IntentBuilder {
-        private List mHiddenAddressFields;
-        private List mOptionalAddressFields;
-        private ShippingInformation mPrepopulatedShippingInfo;
-        private boolean mHideAddressScreen;
-        private boolean mHideShippingScreen;
-
-        public IntentBuilder() {
-            mHiddenAddressFields = new ArrayList();
-            mOptionalAddressFields = new ArrayList();
-            mPrepopulatedShippingInfo = new ShippingInformation();
-        }
-
-        /**
-         * @param hiddenAddressFields sets address fields that should be hidden on the address
-         *                            screen. Hidden fields are automatically optional.
-         */
-        public IntentBuilder setHiddenAddressFields(@NonNull List hiddenAddressFields) {
-            mHiddenAddressFields = hiddenAddressFields;
-            return this;
-        }
-
-        /**
-         * @param optionalAddressFields sets address fields that should be optional.
-         */
-        public IntentBuilder setOptionalAddressFields(@NonNull List optionalAddressFields) {
-            mOptionalAddressFields = optionalAddressFields;
-            return this;
-        }
-
-        /**
-         *
-         * @param shippingInformation set an address to be prepopulated into the add address input
-         *                            fields.
-         */
-        public IntentBuilder setPrepopulatedShippingInformation(@NonNull ShippingInformation shippingInformation) {
-            mPrepopulatedShippingInfo = shippingInformation;
-            return this;
-        }
-
-        /**
-         * Sets the add shipping address screen to be skipped.
-         */
-        public IntentBuilder setHideAddressScreen(boolean isHideAddressScreen) {
-            mHideAddressScreen = isHideAddressScreen;
-            return this;
-        }
-
-        /**
-         * Sets the select shipping method screen to be skipped.
-         */
-        public IntentBuilder setHideShippingScreen(boolean isHideShippingScreen) {
-            mHideShippingScreen = isHideShippingScreen;
-            return this;
-        }
-
-        public Intent build(Context context) {
-            Intent intent = new Intent(context, PaymentFlowActivity.class);
-            PaymentFlowConfig paymentFlowConfig =
-                    new PaymentFlowConfig(
-                            mHiddenAddressFields,
-                            mOptionalAddressFields,
-                            mPrepopulatedShippingInfo,
-                            mHideAddressScreen,
-                            mHideShippingScreen);
-            intent.putExtra(EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
-            return intent;
-        }
-
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -139,15 +69,14 @@ public class PaymentFlowActivity extends StripeActivity {
         ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
         if (shippingInformation !=  null) {
             setCommunicatingProgress(true);
-            // TODO: Call into payment context
-            setCommunicatingProgress(false);
-            mPaymentFlowPagerAdapter.setAddressSaved(true);
-            if (hasNextPage()) {
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-            } else {
-                finish();
-            }
+            broadcastShippingInfoSubmitted(shippingInformation);
         }
+    }
+
+    private void broadcastShippingInfoSubmitted(ShippingInformation shippingInformation) {
+        Intent intent = new Intent(EVENT_SHIPPING_INFO_SUBMITTED);
+        intent.putExtra(EXTRA_SHIPPING_INFO_DATA, shippingInformation);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private boolean hasNextPage() {
