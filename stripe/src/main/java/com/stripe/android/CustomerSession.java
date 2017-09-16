@@ -274,13 +274,13 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     @VisibleForTesting
-    void setStripeApiProxy(@Nullable StripeApiProxy proxy) {
-        mStripeApiProxy = proxy;
+    Set<String> getProductUsageTokens() {
+        return mProductUsageTokens;
     }
 
     @VisibleForTesting
-    Set<String> getProductUsageTokens() {
-        return mProductUsageTokens;
+    void setStripeApiProxy(@Nullable StripeApiProxy proxy) {
+        mStripeApiProxy = proxy;
     }
 
     private void addCustomerSource(
