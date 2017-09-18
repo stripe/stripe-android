@@ -1,10 +1,13 @@
 package com.stripe.android.view;
 
 import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
+import com.stripe.android.exception.APIException;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
@@ -20,9 +23,13 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
+import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
@@ -78,6 +85,29 @@ public class PaymentFlowActivityTest {
         paymentFlowActivity.onActionSave();
         assertFalse(mShadowActivity.isFinishing());
         assertNotNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
+    }
+
+    @Test
+    public void onErrorBroadcast_displaysAlertDialog() {
+        Intent intent = new Intent();
+        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+                .build();
+        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
+
+        PaymentFlowActivity.AlertMessageListener alertMessageListener =
+                mock(PaymentFlowActivity.AlertMessageListener.class);
+        mActivityController.get().setAlertMessageListener(alertMessageListener);
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(EXTRA_EXCEPTION, new APIException("Something's wrong", "ID123", 400, null));
+        Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
+        errorIntent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(mActivityController.get())
+                .sendBroadcast(errorIntent);
+
+        verify(alertMessageListener).onUserAlert("Something's wrong");
     }
 
     private void initializePaymentConfig() {
