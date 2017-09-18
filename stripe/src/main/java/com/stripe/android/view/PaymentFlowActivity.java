@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
@@ -32,7 +29,6 @@ public class PaymentFlowActivity extends StripeActivity {
     public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
 
     private BroadcastReceiver mAlertBroadcastReceiver;
-    @Nullable private AlertMessageListener mAlertMessageListener;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
     private ViewPager mViewPager;
 
@@ -96,11 +92,6 @@ public class PaymentFlowActivity extends StripeActivity {
                         new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
     }
 
-    @VisibleForTesting
-    void setAlertMessageListener(@NonNull AlertMessageListener listener) {
-        mAlertMessageListener = listener;
-    }
-
     private void onAddressSave() {
         ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
         ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
@@ -138,16 +129,7 @@ public class PaymentFlowActivity extends StripeActivity {
             return;
         }
 
-        String alertMessage = exception.getLocalizedMessage();
-
-        if (mAlertMessageListener != null) {
-            mAlertMessageListener.onUserAlert(alertMessage);
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setMessage(alertMessage)
-                .setNeutralButton(android.R.string.ok, null);
-        builder.show();
+        showError(exception.getLocalizedMessage());
     }
 
     @Override
@@ -157,9 +139,5 @@ public class PaymentFlowActivity extends StripeActivity {
             return;
         }
         super.onBackPressed();
-    }
-
-    interface AlertMessageListener {
-        void onUserAlert(String message);
     }
 }

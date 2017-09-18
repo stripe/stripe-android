@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.PaymentConfiguration;
@@ -19,6 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.shadows.ShadowAlertDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,9 +98,9 @@ public class PaymentFlowActivityTest {
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
 
-        PaymentFlowActivity.AlertMessageListener alertMessageListener =
-                mock(PaymentFlowActivity.AlertMessageListener.class);
-        mActivityController.get().setAlertMessageListener(alertMessageListener);
+        StripeActivity.AlertMessageListener mockListener =
+                mock(StripeActivity.AlertMessageListener.class);
+        mActivityController.get().setAlertMessageListener(mockListener);
 
         Bundle bundle = new Bundle();
         bundle.putSerializable(EXTRA_EXCEPTION, new APIException("Something's wrong", "ID123", 400, null));
@@ -107,7 +109,7 @@ public class PaymentFlowActivityTest {
         LocalBroadcastManager.getInstance(mActivityController.get())
                 .sendBroadcast(errorIntent);
 
-        verify(alertMessageListener).onUserAlert("Something's wrong");
+        verify(mockListener).onAlertMessageDisplayed("Something's wrong");
     }
 
     private void initializePaymentConfig() {
