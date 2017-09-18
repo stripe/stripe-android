@@ -1,12 +1,17 @@
 package com.stripe.android.view;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
@@ -23,8 +28,9 @@ public class PaymentFlowActivity extends StripeActivity {
     public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
     public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
 
-    private ViewPager mViewPager;
+    private BroadcastReceiver mAlertBroadcastReceiver;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,8 +58,16 @@ public class PaymentFlowActivity extends StripeActivity {
             }
         });
         setTitle(mPaymentFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
-    }
 
+        mAlertBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                StripeException exception = (StripeException)
+                        intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+                alertUser(exception);
+            }
+        };
+    }
 
     @Override
     protected void onActionSave() {
@@ -62,6 +76,20 @@ public class PaymentFlowActivity extends StripeActivity {
         } else {
             onShippingMethodSave();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mAlertBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(mAlertBroadcastReceiver,
+                        new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
     }
 
     private void onAddressSave() {
@@ -94,6 +122,14 @@ public class PaymentFlowActivity extends StripeActivity {
         ShippingMethod shippingMethod = selectShippingMethodWidget.getSelectedShippingMethod();
         // TODO: Call into payment context and save shipping method
         finish();
+    }
+
+    private void alertUser(@Nullable StripeException exception) {
+        if (exception == null) {
+            return;
+        }
+
+        showError(exception.getLocalizedMessage());
     }
 
     @Override

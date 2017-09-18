@@ -21,6 +21,7 @@ import com.stripe.android.R;
  */
 abstract class StripeActivity extends AppCompatActivity {
 
+    @Nullable AlertMessageListener mAlertMessageListener;
     boolean mCommunicating;
     Toolbar mToolbar;
     ProgressBar mProgressBar;
@@ -89,7 +90,15 @@ abstract class StripeActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
     }
 
+    void setAlertMessageListener(@Nullable AlertMessageListener listener) {
+        mAlertMessageListener = listener;
+    }
+
     void showError(@NonNull String error) {
+        if (mAlertMessageListener != null) {
+            mAlertMessageListener.onAlertMessageDisplayed(error);
+        }
+
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setMessage(error)
                 .setCancelable(true)
@@ -103,4 +112,7 @@ abstract class StripeActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    interface AlertMessageListener {
+        void onAlertMessageDisplayed(String message);
+    }
 }
