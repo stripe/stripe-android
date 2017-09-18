@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.PaymentConfiguration;
@@ -20,7 +19,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.shadows.ShadowAlertDialog;
 
 import java.util.ArrayList;
 import java.util.List;
