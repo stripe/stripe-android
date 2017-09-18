@@ -19,7 +19,5 @@ licenses:
     - 'google-gdk-license-.+'
     - '.+'
 
-group: deprecated-2017Q3
-
 script:
   - ./gradlew clean test
