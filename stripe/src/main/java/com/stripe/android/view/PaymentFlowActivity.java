@@ -36,7 +36,6 @@ public class PaymentFlowActivity extends StripeActivity {
     public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
     public static final String EXTRA_VALID_SHIPPING_METHODS = "valid_shipping_methods";
 
-    private BroadcastReceiver mAlertBroadcastReceiver;
     private BroadcastReceiver mBroadcastReceiver;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
     private ViewPager mViewPager;
@@ -95,15 +94,6 @@ public class PaymentFlowActivity extends StripeActivity {
             }
         };
         setTitle(mPaymentFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
-
-        mAlertBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                StripeException exception = (StripeException)
-                        intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
-                alertUser(exception);
-            }
-        };
     }
 
     @Override
@@ -118,16 +108,12 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mAlertBroadcastReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(mAlertBroadcastReceiver,
-                        new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_PROCESSED));
     }
@@ -178,14 +164,6 @@ public class PaymentFlowActivity extends StripeActivity {
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    private void alertUser(@Nullable StripeException exception) {
-        if (exception == null) {
-            return;
-        }
-
-        showError(exception.getLocalizedMessage());
     }
 
     @Override
