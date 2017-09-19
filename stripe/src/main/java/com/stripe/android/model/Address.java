@@ -41,8 +41,6 @@ public class Address extends StripeJsonModel implements Parcelable {
     private static final String FIELD_LINE_2 = "line2";
     private static final String FIELD_POSTAL_CODE = "postal_code";
     private static final String FIELD_STATE = "state";
-    private static final String FIELD_NAME = "name";
-    private static final String FIELD_PHONE_NUMBER = "phone_number";
 
     @Nullable private String mCity;
     @Nullable private String mCountry;

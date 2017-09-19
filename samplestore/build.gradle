@@ -36,7 +36,7 @@ dependencies {
     compile 'com.android.support:design:' + android_support_version
 
     /* This line is all you need for the stripe-android bindings */
-    compile 'com.stripe:stripe-android:4.1.6'
+    compile project(':stripe')
 
     /* To use the Stripe android pay wrapper, you need these two lines */
     compile 'com.stripe:stripe-android-pay:4.1.6'

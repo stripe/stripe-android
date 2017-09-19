@@ -4,7 +4,9 @@
     <string name="confirm_purchase">Confirm Purchase</string>
     <string name="completing_purchase">Completing purchase&#8230;</string>
     <string name="enter_details">Enter card details</string>
+    <string name="enter_shipping_details">Enter shipping details</string>
     <string name="purchase_successful">Your purchase was a success!</string>
     <string name="total">Total</string>
     <string name="or">or</string>
+    <string name="display_ending_in">" ending in "</string>
 </resources>

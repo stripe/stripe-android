@@ -1,10 +1,10 @@
 package com.stripe.samplestore;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.stripe.android.CustomerSession;
+import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider;
 import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 public class StoreActivity
@@ -42,10 +44,10 @@ public class StoreActivity
 
         initAndroidPay();
 
-        mGoToCartButton = (FloatingActionButton) findViewById(R.id.fab_checkout);
+        mGoToCartButton = findViewById(R.id.fab_checkout);
         mStoreAdapter = new StoreAdapter(this);
         ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_store_items);
+        RecyclerView recyclerView = findViewById(R.id.rv_store_items);
 
 
         mGoToCartButton.hide();
@@ -63,6 +65,7 @@ public class StoreActivity
                 mStoreAdapter.launchPurchaseActivityWithCart();
             }
         });
+        setupCustomerSession();
     }
 
     @Override
@@ -99,14 +102,28 @@ public class StoreActivity
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.purchase_complete_notification, null);
 
-        TextView emojiView = (TextView) dialogView.findViewById(R.id.dlg_emoji_display);
+        TextView emojiView = dialogView.findViewById(R.id.dlg_emoji_display);
         // Show a smiley face!
         emojiView.setText(StoreUtils.getEmojiByUnicode(0x1F642));
-        TextView priceView = (TextView) dialogView.findViewById(R.id.dlg_price_display);
+        TextView priceView = dialogView.findViewById(R.id.dlg_price_display);
         priceView.setText(StoreUtils.getPriceString(price, null));
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void setupCustomerSession() {
+        // CustomerSession only needs to be initialized once per app.
+        CustomerSession.initCustomerSession(
+                new SampleStoreEphemeralKeyProvider(
+                        new SampleStoreEphemeralKeyProvider.ProgressListener() {
+                            @Override
+                            public void onStringResponse(String string) {
+                                if (string.startsWith("Error: ")) {
+                                    new AlertDialog.Builder(StoreActivity.this).setMessage(string).show();
+                                }
+                            }
+                        }));
     }
 }
