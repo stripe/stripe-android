@@ -52,7 +52,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private static final Set<String> VALID_TOKENS =
             new HashSet<>(Arrays.asList("AddSourceActivity",
                     "PaymentMethodsActivity",
-                    "PaymentSession"));
+                    "PaymentFlowActivity",
+                    "PaymentSession",
+                    "ShippingInfoScreen",
+                    "ShippingMethodScreen"));
 
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;

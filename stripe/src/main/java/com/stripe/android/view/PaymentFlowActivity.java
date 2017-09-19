@@ -37,6 +37,9 @@ public class PaymentFlowActivity extends StripeActivity {
     public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
     public static final String EXTRA_VALID_SHIPPING_METHODS = "valid_shipping_methods";
 
+    static final String TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity";
+
+    private BroadcastReceiver mAlertBroadcastReceiver;
     private BroadcastReceiver mBroadcastReceiver;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
     private ViewPager mViewPager;
@@ -46,6 +49,7 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);

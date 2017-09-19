@@ -16,7 +16,7 @@ import com.stripe.android.view.PaymentMethodsActivity;
  */
 public class PaymentSession {
 
-    public static final int PAYMENT_SHIPPING_DETAILS_REQUEST = 3004;
+    static final int PAYMENT_SHIPPING_DETAILS_REQUEST = 3004;
     static final int PAYMENT_METHOD_REQUEST = 3003;
     static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
 
@@ -90,7 +90,7 @@ public class PaymentSession {
         paymentSessionData.setPaymentReadyToCharge(true);
         return true;
     }
-    
+
     /**
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
      * data changes.
