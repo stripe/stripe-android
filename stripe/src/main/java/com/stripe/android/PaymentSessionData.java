@@ -16,6 +16,7 @@ public class PaymentSessionData implements Parcelable {
     private static final String NO_PAYMENT = "NO_PAYMENT";
 
     private long mCartTotal = 0L;
+    private boolean mIsPaymentReadyToCharge;
     @NonNull private String mSelectedPaymentMethodId = NO_PAYMENT;
     private long mShippingTotal = 0L;
     private ShippingInformation mShippingInformation;
@@ -42,6 +43,25 @@ public class PaymentSessionData implements Parcelable {
     }
 
     /**
+     * Get the whether the all the payment data is ready for making a charge. This can be used to
+     * set a buy button to enabled for prompt a user to fill in more information.
+     *
+     * @return whether the payment data is ready for making a charge.
+     */
+    public boolean isPaymentReadyToCharge() {
+        return mIsPaymentReadyToCharge;
+    }
+
+    /**
+     * Set whether the payment data is ready for making a charge.
+     *
+     * @param paymentReadyToCharge whether the payment data is ready for making a charge.
+     */
+    public void setPaymentReadyToCharge(boolean paymentReadyToCharge) {
+        mIsPaymentReadyToCharge = paymentReadyToCharge;
+    }
+
+    /**
      * Get the value of shipping items in the associated {@link PaymentSession}
      *
      * @return the current value of the shipping items in the cart
@@ -50,18 +70,40 @@ public class PaymentSessionData implements Parcelable {
         return mShippingTotal;
     }
 
+    /**
+     * Get the {@link ShippingInformation} collected as part of the associated {@link PaymentSession}
+     * payment flow.
+     *
+     * @return {@link ShippingInformation} where the items being purchased should be shipped.
+     */
     public ShippingInformation getShippingInformation() {
         return mShippingInformation;
     }
 
+    /**
+     * Set the {@link ShippingInformation} for the associated {@link PaymentSession}
+     *
+     * @param shippingInformation where the items being purchased should be shipped.
+     */
     public void setShippingInformation(ShippingInformation shippingInformation) {
         mShippingInformation = shippingInformation;
     }
 
+    /**
+     * Get the {@link ShippingMethod} collected as part of the associated {@link PaymentSession}
+     * payment flow.
+     *
+     * @return {@link ShippingMethod} how the items being purchased should be shipped.
+     */
     public ShippingMethod getShippingMethod() {
         return mShippingMethod;
     }
 
+    /**
+     * Set the {@link ShippingMethod} for the associated {@link PaymentSession}
+     *
+     * @param shippingMethod how the items being purchased should be shipped.
+     */
     public void setShippingMethod(ShippingMethod shippingMethod) {
         mShippingMethod = shippingMethod;
     }
@@ -89,6 +131,7 @@ public class PaymentSessionData implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(mCartTotal);
+        parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeString(mSelectedPaymentMethodId);
         parcel.writeLong(mShippingTotal);
         parcel.writeParcelable(mShippingInformation, i);
@@ -108,6 +151,7 @@ public class PaymentSessionData implements Parcelable {
 
     private PaymentSessionData(Parcel in) {
         mCartTotal = in.readLong();
+        mIsPaymentReadyToCharge = in.readInt() == 1;
         mSelectedPaymentMethodId = in.readString();
         mShippingTotal = in.readLong();
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());

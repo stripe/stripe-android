@@ -182,7 +182,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, PaymentSessionConfig);
 
         // We have already tested the functionality up to here.
         reset(mockListener);

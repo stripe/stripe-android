@@ -10,6 +10,7 @@ import android.view.View;
 
 import com.stripe.android.BuildConfig;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.R;
 import com.stripe.android.exception.APIException;
@@ -33,6 +34,7 @@ import org.robolectric.shadows.ShadowActivity;
 
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
+import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
@@ -72,10 +74,10 @@ public class PaymentFlowActivityTest {
     public void launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
         PaymentConfiguration.init("FAKE PUBLISHABLE KEY");
         Intent intent = new Intent();
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
-                .setHideShippingInfoScreen(true)
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
+                .setRequireShippingInfo(false)
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         assertNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
@@ -85,9 +87,9 @@ public class PaymentFlowActivityTest {
     @Test
     public void onShippingInfoSave_whenShippingNotPopulated_doesNotFinish() {
         Intent intent = new Intent();
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
@@ -101,9 +103,9 @@ public class PaymentFlowActivityTest {
     @Test
     public void onShippingInfoSave_whenShippingInfoNotPopulated_doesNotContinue() {
         Intent intent = new Intent();
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
@@ -118,10 +120,10 @@ public class PaymentFlowActivityTest {
     @Test
     public void onShippingInfoSave_whenShippingPopulated_sendsCorrectIntent() {
         Intent intent = new Intent();
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
@@ -139,9 +141,9 @@ public class PaymentFlowActivityTest {
     @Test
     public void onErrorBroadcast_displaysAlertDialog() {
         Intent intent = new Intent();
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
 
@@ -162,10 +164,10 @@ public class PaymentFlowActivityTest {
     @Test
     public void onShippingInfoProcessed_whenShippingInfoSubmitted_rendersCorrectly() {
         Intent intent = new Intent(RuntimeEnvironment.application, PaymentFlowActivity.class);
-        PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
                 .build();
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         PaymentSessionData paymentSessionData = Mockito.mock(PaymentSessionData.class);
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)

@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentFlowActivity;
-import com.stripe.android.view.PaymentFlowConfig;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 /**
@@ -22,10 +21,12 @@ public class PaymentSession {
     static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
 
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
+    public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
     @NonNull private Activity mHostActivity;
     @NonNull private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
+    @NonNull private PaymentSessionConfig mPaymentSessionConfig;
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -61,6 +62,7 @@ public class PaymentSession {
                 case PAYMENT_SHIPPING_DETAILS_REQUEST:
                     PaymentSessionData paymentSessionData = data.getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
                     mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
+                    updateIsPaymentReadyToCharge(mPaymentSessionConfig, paymentSessionData);
                     return true;
                 default:
                     break;
@@ -70,6 +72,25 @@ public class PaymentSession {
     }
 
     /**
+     * Function that looks at the {@link PaymentSessionConfig} and determines whether the data in
+     * the provided {@link PaymentSessionData} is ready to charge.
+     * Return with whether the data is ready to charge.
+     *
+     * @param paymentSessionConfig specifies what data is required.
+     * @param paymentSessionData holds the data that has been collected.
+     * @return whether the data in the provided {@link PaymentSessionData} is ready to charge.
+     */
+    public boolean updateIsPaymentReadyToCharge(PaymentSessionConfig paymentSessionConfig, PaymentSessionData paymentSessionData) {
+        if (StripeTextUtils.isBlank(paymentSessionData.getSelectedPaymentMethodId()) ||
+                (paymentSessionConfig.isRequireShippingInfo() && paymentSessionData.getShippingInformation() == null) ||
+                (paymentSessionConfig.isRequireShippingMethods() && paymentSessionData.getShippingMethod() == null)) {
+            paymentSessionData.setPaymentReadyToCharge(false);
+            return false;
+        }
+        paymentSessionData.setPaymentReadyToCharge(true);
+        return true;
+    }
+    /**
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
      * data changes.
      *
@@ -78,8 +99,8 @@ public class PaymentSession {
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
      * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
      */
-    public boolean init(@NonNull PaymentSessionListener listener) {
-        return init(listener, null);
+    public boolean init(@NonNull PaymentSessionListener listener, @NonNull PaymentSessionConfig paymentSessionConfig) {
+        return init(listener, paymentSessionConfig, null);
     }
 
     /**
@@ -95,6 +116,7 @@ public class PaymentSession {
      */
     public boolean init(
             @NonNull PaymentSessionListener listener,
+            @NonNull PaymentSessionConfig paymentSessionConfig,
             @Nullable Bundle savedInstanceState) {
 
         // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
@@ -114,6 +136,7 @@ public class PaymentSession {
                 mPaymentSessionData = data;
             }
         }
+        mPaymentSessionConfig = paymentSessionConfig;
         fetchCustomer();
         return true;
     }
@@ -150,13 +173,10 @@ public class PaymentSession {
 
     /**
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
-     *
-     * @param paymentFlowConfig config that allows the {@link PaymentFlowActivity} to know what UI
-     *                          to render.
      */
-    public void presentShippingFlow(PaymentFlowConfig paymentFlowConfig) {
+    public void presentShippingFlow() {
         Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        intent.putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig);
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
         mHostActivity.startActivityForResult(
                 intent,
@@ -173,7 +193,7 @@ public class PaymentSession {
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         String paymentId = customer.getDefaultSource();
                         mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
-
+                        updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener
                                     .onPaymentSessionDataChanged(mPaymentSessionData);
