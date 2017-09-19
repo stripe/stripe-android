@@ -75,7 +75,7 @@ public class PaymentFlowActivityTest {
         PaymentConfiguration.init("FAKE PUBLISHABLE KEY");
         Intent intent = new Intent();
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setRequireShippingInfo(false)
+                .setShippingInfoRequired(false)
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)

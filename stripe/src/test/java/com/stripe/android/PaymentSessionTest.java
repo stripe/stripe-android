@@ -114,7 +114,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         Set<String> tokenSet = CustomerSession.getInstance().getProductUsageTokens();
         assertTrue(tokenSet.contains(PaymentSession.TOKEN_PAYMENT_SESSION));
@@ -136,7 +136,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
         verify(mockListener).onCommunicatingStateChanged(eq(true));
         verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
         verify(mockListener).onCommunicatingStateChanged(eq(false));
@@ -156,7 +156,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         ArgumentCaptor<PaymentSessionData> dataArgumentCaptor = getDataCaptor();
 
@@ -182,7 +182,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener, PaymentSessionConfig);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         // We have already tested the functionality up to here.
         reset(mockListener);
@@ -208,7 +208,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
 
         paymentSession.selectPaymentMethod();
@@ -233,7 +233,7 @@ public class PaymentSessionTest {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
-        paymentSession.init(mockListener);
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         ArgumentCaptor<PaymentSessionData> paySessionDataCaptor = getDataCaptor();
         paymentSession.setCartTotal(300L);
@@ -246,7 +246,7 @@ public class PaymentSessionTest {
                 mock(PaymentSession.PaymentSessionListener.class);
         ArgumentCaptor<PaymentSessionData> secondSessionDataCaptor = getDataCaptor();
 
-        paymentSession.init(secondListener, bundle);
+        paymentSession.init(secondListener, new PaymentSessionConfig.Builder().build(), bundle);
         verify(secondListener).onPaymentSessionDataChanged(secondSessionDataCaptor.capture());
 
         PaymentSessionData firstData = paySessionDataCaptor.getValue();

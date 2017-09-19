@@ -82,8 +82,8 @@ public class PaymentSession {
      */
     public boolean updateIsPaymentReadyToCharge(PaymentSessionConfig paymentSessionConfig, PaymentSessionData paymentSessionData) {
         if (StripeTextUtils.isBlank(paymentSessionData.getSelectedPaymentMethodId()) ||
-                (paymentSessionConfig.isRequireShippingInfo() && paymentSessionData.getShippingInformation() == null) ||
-                (paymentSessionConfig.isRequireShippingMethods() && paymentSessionData.getShippingMethod() == null)) {
+                (paymentSessionConfig.isShippingInfoRequired() && paymentSessionData.getShippingInformation() == null) ||
+                (paymentSessionConfig.isShippingMethodRequired() && paymentSessionData.getShippingMethod() == null)) {
             paymentSessionData.setPaymentReadyToCharge(false);
             return false;
         }

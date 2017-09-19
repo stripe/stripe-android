@@ -19,12 +19,12 @@ public class PaymentSessionConfig implements Parcelable {
     @NonNull private List<String> mHiddenShippingInfoFields;
     @NonNull private List<String> mOptionalShippingInfoFields;
     @NonNull private ShippingInformation mShippingInformation;
-    private boolean mRequireShippingInfo;
-    private boolean mRequireShippingMethods;
+    private boolean mShippingInfoRequired;
+    private boolean mShippingMethodRequired;
 
      public static class Builder {
-        private boolean mRequireShippingInfo = true;
-        private boolean mRequireShippingMethods = true;
+        private boolean mShippingInfoRequired = true;
+        private boolean mShippingMethodsRequired = true;
         @NonNull private List<String> mHiddenShippingInfoFields;
         @NonNull private List<String> mOptionalShippingInfoFields;
         @NonNull private ShippingInformation mShippingInformation;
@@ -55,23 +55,23 @@ public class PaymentSessionConfig implements Parcelable {
         }
 
         /**
-         * @param requireShippingInfo whether a {@link ShippingInformation} should be required. If it is
+         * @param shippingInfoRequired whether a {@link ShippingInformation} should be required. If it is
          *                            required, a screen with a {@link ShippingInfoWidget} can be
          *                            shown to collect it.
          */
-        public Builder setRequireShippingInfo(boolean requireShippingInfo) {
-            mRequireShippingInfo = requireShippingInfo;
+        public Builder setShippingInfoRequired(boolean shippingInfoRequired) {
+            mShippingInfoRequired = shippingInfoRequired;
             return this;
         }
 
         /**
-         * @param requireShippingMethods whether a {@link com.stripe.android.model.ShippingMethod}
+         * @param shippingMethodsRequired whether a {@link com.stripe.android.model.ShippingMethod}
          *                               should be required. If it is required, a screen with a
          *                               {@link com.stripe.android.view.SelectShippingMethodWidget}
          *                               can be shown to collect it.
          */
-        public Builder setRequireShippingMethods(boolean requireShippingMethods) {
-            mRequireShippingMethods = requireShippingMethods;
+        public Builder setShippingMethodsRequired(boolean shippingMethodsRequired) {
+            mShippingMethodsRequired = shippingMethodsRequired;
             return this;
         }
 
@@ -85,8 +85,8 @@ public class PaymentSessionConfig implements Parcelable {
         mHiddenShippingInfoFields = builder.mHiddenShippingInfoFields;
         mOptionalShippingInfoFields = builder.mOptionalShippingInfoFields;
         mShippingInformation = builder.mShippingInformation;
-        mRequireShippingInfo = builder.mRequireShippingInfo;
-        mRequireShippingMethods = builder.mRequireShippingMethods;
+        mShippingInfoRequired = builder.mShippingInfoRequired;
+        mShippingMethodRequired = builder.mShippingMethodsRequired;
     }
 
     private PaymentSessionConfig(Parcel in) {
@@ -95,8 +95,8 @@ public class PaymentSessionConfig implements Parcelable {
         mOptionalShippingInfoFields = new ArrayList<>();
         in.readStringList(mOptionalShippingInfoFields);
         mShippingInformation = in.readParcelable(Address.class.getClassLoader());
-        mRequireShippingInfo = in.readInt() == 1;
-        mRequireShippingMethods = in.readInt() == 1;
+        mShippingInfoRequired = in.readInt() == 1;
+        mShippingMethodRequired = in.readInt() == 1;
     }
 
     @Override
@@ -106,8 +106,8 @@ public class PaymentSessionConfig implements Parcelable {
 
         PaymentSessionConfig that = (PaymentSessionConfig) o;
 
-        if (isRequireShippingInfo() != that.isRequireShippingInfo()) return false;
-        if (isRequireShippingMethods() != that.isRequireShippingMethods()) return false;
+        if (isShippingInfoRequired() != that.isShippingInfoRequired()) return false;
+        if (isShippingMethodRequired() != that.isShippingMethodRequired()) return false;
         if (!getHiddenShippingInfoFields().equals(that.getHiddenShippingInfoFields())) return false;
         if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) return false;
         return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
@@ -118,8 +118,8 @@ public class PaymentSessionConfig implements Parcelable {
         int result = getHiddenShippingInfoFields().hashCode();
         result = 31 * result + getOptionalShippingInfoFields().hashCode();
         result = 31 * result + mShippingInformation.hashCode();
-        result = 31 * result + (isRequireShippingInfo() ? 1 : 0);
-        result = 31 * result + (isRequireShippingMethods() ? 1 : 0);
+        result = 31 * result + (isShippingInfoRequired() ? 1 : 0);
+        result = 31 * result + (isShippingMethodRequired() ? 1 : 0);
         return result;
     }
 
@@ -133,8 +133,8 @@ public class PaymentSessionConfig implements Parcelable {
         parcel.writeStringList(mHiddenShippingInfoFields);
         parcel.writeStringList(mOptionalShippingInfoFields);
         parcel.writeParcelable(mShippingInformation, flags);
-        parcel.writeInt(mRequireShippingInfo ? 1 : 0);
-        parcel.writeInt(mRequireShippingMethods ? 1: 0);
+        parcel.writeInt(mShippingInfoRequired ? 1 : 0);
+        parcel.writeInt(mShippingMethodRequired ? 1: 0);
     }
 
     public @NonNull List<String> getHiddenShippingInfoFields() {
@@ -150,12 +150,12 @@ public class PaymentSessionConfig implements Parcelable {
         return mShippingInformation;
     }
 
-    public boolean isRequireShippingInfo() {
-        return mRequireShippingInfo;
+    public boolean isShippingInfoRequired() {
+        return mShippingInfoRequired;
     }
 
-    public boolean isRequireShippingMethods() {
-        return mRequireShippingMethods;
+    public boolean isShippingMethodRequired() {
+        return mShippingMethodRequired;
     }
 
     static final Parcelable.Creator<PaymentSessionConfig> CREATOR

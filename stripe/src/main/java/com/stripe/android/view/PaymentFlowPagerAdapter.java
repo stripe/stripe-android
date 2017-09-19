@@ -29,7 +29,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         mContext = context;
         mPaymentSessionConfig = paymentSessionConfig;
         mPages = new ArrayList<>();
-        if (mPaymentSessionConfig.isRequireShippingInfo()) {
+        if (mPaymentSessionConfig.isShippingInfoRequired()) {
             mPages.add(PaymentFlowPagerEnum.ADDRESS);
         }
         if (shouldAddShippingScreen()) {
@@ -38,8 +38,8 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
     private boolean shouldAddShippingScreen() {
-        return mPaymentSessionConfig.isRequireShippingMethods() &&
-                ((mPaymentSessionConfig.isRequireShippingInfo() && mAddressSaved) || !mPaymentSessionConfig.isRequireShippingInfo()) &&
+        return mPaymentSessionConfig.isShippingMethodRequired() &&
+                ((mPaymentSessionConfig.isShippingInfoRequired() && mAddressSaved) || !mPaymentSessionConfig.isShippingInfoRequired()) &&
                     !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
     }
 
