@@ -461,13 +461,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     case SOURCE_RETRIEVED:
                         if (messageObject instanceof Source && mSourceRetrievalListener != null) {
                             mSourceRetrievalListener.onSourceRetrieved((Source) messageObject);
-                            mSourceRetrievalListener = null;
-                        } else {
-                            if (mSourceRetrievalListener != null) {
-                                mSourceRetrievalListener.onError(400, "Not a source");
-                                mSourceRetrievalListener = null;
-                            }
                         }
+
+                        // A source listener only listens once.
+                        mSourceRetrievalListener = null;
                         // Clear our context reference so we don't use a stale one.
                         mCachedContextReference = null;
                         break;

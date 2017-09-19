@@ -1,10 +1,15 @@
 package com.stripe.android.view;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,13 +19,16 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.ProgressBar;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
+import com.stripe.android.exception.StripeException;
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.
  */
 abstract class StripeActivity extends AppCompatActivity {
 
+    BroadcastReceiver mAlertBroadcastReceiver;
     @Nullable AlertMessageListener mAlertMessageListener;
     boolean mCommunicating;
     Toolbar mToolbar;
@@ -42,6 +50,28 @@ abstract class StripeActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         setCommunicatingProgress(false);
+        mAlertBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                StripeException exception = (StripeException)
+                        intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+                showError(exception.getLocalizedMessage());
+            }
+        };
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mAlertBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(mAlertBroadcastReceiver,
+                        new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
     }
 
     @Override
