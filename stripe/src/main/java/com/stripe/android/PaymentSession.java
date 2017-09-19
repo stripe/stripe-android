@@ -97,10 +97,13 @@ public class PaymentSession {
      *
      * @param listener a {@link PaymentSessionListener} that will receive notifications of changes
      *                 in payment session status, including networking status
+     * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
+     *                             necessary in the PaymentSession.
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
      * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
      */
-    public boolean init(@NonNull PaymentSessionListener listener, @NonNull PaymentSessionConfig paymentSessionConfig) {
+    public boolean init(@NonNull PaymentSessionListener listener,
+                        @NonNull PaymentSessionConfig paymentSessionConfig) {
         return init(listener, paymentSessionConfig, null);
     }
 
@@ -110,6 +113,8 @@ public class PaymentSession {
      *
      * @param listener a {@link PaymentSessionListener} that will receive notifications of changes
      *                 in payment session status, including networking status
+     * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
+     *                             necessary in the PaymentSession.
      * @param savedInstanceState a {@link Bundle} containing the saved state of a PaymentSession
      *                           that was stored in {@link #savePaymentSessionInstanceState(Bundle)}
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
@@ -123,6 +128,9 @@ public class PaymentSession {
         // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
         // will throw a runtime exception if none is ready.
         try {
+            if (savedInstanceState == null) {
+                CustomerSession.getInstance().clearUsageTokens();
+            }
             CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         } catch (IllegalStateException illegalState) {
             mPaymentSessionListener = null;
@@ -130,6 +138,7 @@ public class PaymentSession {
         }
 
         mPaymentSessionListener = listener;
+
         if (savedInstanceState != null) {
             PaymentSessionData data =
                     savedInstanceState.getParcelable(PAYMENT_SESSION_DATA_KEY);
@@ -146,7 +155,7 @@ public class PaymentSession {
      * Launch the {@link PaymentMethodsActivity} to allow the user to select a payment method,
      * or to add a new one.
      */
-    public void selectPaymentMethod() {
+    public void presentPaymentMethodSelection() {
         mHostActivity.startActivityForResult(
                 PaymentMethodsActivity.newIntent(mHostActivity),
                 PAYMENT_METHOD_REQUEST);
