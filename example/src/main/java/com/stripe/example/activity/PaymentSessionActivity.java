@@ -67,7 +67,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 ShippingInformation shippingInformation = intent.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA);
                 Intent shippingInfoProcessedIntent = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
-                if (shippingInformation.getAddress()== null || !shippingInformation.getAddress().getCountry().equals(Locale.US.getCountry())) {
+                if (shippingInformation.getAddress() == null || !shippingInformation.getAddress().getCountry().equals(Locale.US.getCountry())) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 } else {
                     ArrayList<ShippingMethod> shippingMethods = createSampleShippingMethods();

@@ -3,9 +3,8 @@ package com.stripe.android.view;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
@@ -32,14 +31,8 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
-import java.util.ArrayList;
-
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
@@ -49,6 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -121,6 +115,7 @@ public class PaymentFlowActivityTest {
         assertNotNull(mActivityController.get().findViewById(R.id.shipping_info_widget));
     }
 
+    @Test
     public void onShippingInfoSave_whenShippingPopulated_sendsCorrectIntent() {
         Intent intent = new Intent();
         PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
@@ -129,12 +124,26 @@ public class PaymentFlowActivityTest {
         intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
+        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
+        assertNotNull(mShippingInfoWidget);
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+        paymentFlowActivity.onActionSave();
+        ArgumentCaptor<Intent> intentArgumentCaptor =
+                ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(any(Context.class), intentArgumentCaptor.capture());
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertEquals(captured.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA), getExampleShippingInfo());
     }
 
     @Test
     public void onErrorBroadcast_displaysAlertDialog() {
         Intent intent = new Intent();
         PaymentFlowConfig paymentFlowConfig = new PaymentFlowConfig.Builder()
+                .build();
+        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
 
         StripeActivity.AlertMessageListener mockListener =
                 mock(StripeActivity.AlertMessageListener.class);
@@ -148,21 +157,6 @@ public class PaymentFlowActivityTest {
                 .sendBroadcast(errorIntent);
 
         verify(mockListener).onAlertMessageDisplayed("Something's wrong");
-    }
-
-    private void initializePaymentConfig() {
-        List<ShippingMethod> shippingMethods = new ArrayList<>();
-        mShadowActivity = shadowOf(mActivityController.get());
-        mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
-        assertNotNull(mShippingInfoWidget);
-        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
-        paymentFlowActivity.onActionSave();
-        ArgumentCaptor<Intent> intentArgumentCaptor =
-                ArgumentCaptor.forClass(Intent.class);
-        verify(mBroadcastReceiver).onReceive(any(Context.class), intentArgumentCaptor.capture());
-        Intent captured = intentArgumentCaptor.getValue();
-        assertNotNull(captured);
-        assertEquals(captured.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA), getExampleShippingInfo());
     }
 
     @Test

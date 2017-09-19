@@ -66,7 +66,7 @@ public class StripeAndroidPayActivityTest {
             "    \"brand\": \"Visa\",\n" +
             "    \"country\": \"US\",\n" +
             "    \"cvc_check\": null,\n" +
-            "    \"dynamic_last4\": null,\n" +
+            "    \"dynamic_last4z\": null,\n" +
             "    \"exp_month\": 8,\n" +
             "    \"exp_year\": 2017,\n" +
             "    \"funding\": \"credit\",\n" +
