@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingMethod;
 
@@ -17,18 +18,18 @@ import java.util.List;
 class PaymentFlowPagerAdapter extends PagerAdapter {
 
     @NonNull private Context mContext;
-    @NonNull private PaymentFlowConfig mPaymentFlowConfig;
+    @NonNull private PaymentSessionConfig mPaymentSessionConfig;
     @NonNull private List<PaymentFlowPagerEnum> mPages;
 
     private boolean mAddressSaved;
     private List<ShippingMethod> mValidShippingMethods = new ArrayList<>();
     private ShippingMethod mDefaultShippingMethod;
 
-    PaymentFlowPagerAdapter(@NonNull Context context, @NonNull PaymentFlowConfig paymentFlowConfig) {
+    PaymentFlowPagerAdapter(@NonNull Context context, @NonNull PaymentSessionConfig paymentSessionConfig) {
         mContext = context;
-        mPaymentFlowConfig = paymentFlowConfig;
+        mPaymentSessionConfig = paymentSessionConfig;
         mPages = new ArrayList<>();
-        if (!mPaymentFlowConfig.isHideShippingInfoScreen()) {
+        if (mPaymentSessionConfig.isShippingInfoRequired()) {
             mPages.add(PaymentFlowPagerEnum.ADDRESS);
         }
         if (shouldAddShippingScreen()) {
@@ -37,8 +38,8 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
     private boolean shouldAddShippingScreen() {
-        return !mPaymentFlowConfig.isHideShippingMethodsScreen() &&
-                ((!mPaymentFlowConfig.isHideShippingInfoScreen() && mAddressSaved) || mPaymentFlowConfig.isHideShippingInfoScreen()) &&
+        return mPaymentSessionConfig.isShippingMethodRequired() &&
+                ((mPaymentSessionConfig.isShippingInfoRequired() && mAddressSaved) || !mPaymentSessionConfig.isShippingInfoRequired()) &&
                     !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
     }
 
@@ -72,9 +73,9 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         }
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
-            shippingInfoWidget.setHiddenFields(mPaymentFlowConfig.getHiddenShippingInfoFields());
-            shippingInfoWidget.setOptionalFields(mPaymentFlowConfig.getOptionalShippingInfoFields());
-            shippingInfoWidget.populateShippingInfo(mPaymentFlowConfig.getPrepopulatedShippingInfo());
+            shippingInfoWidget.setHiddenFields(mPaymentSessionConfig.getHiddenShippingInfoFields());
+            shippingInfoWidget.setOptionalFields(mPaymentSessionConfig.getOptionalShippingInfoFields());
+            shippingInfoWidget.populateShippingInfo(mPaymentSessionConfig.getPrepopulatedShippingInfo());
         }
         collection.addView(layout);
         return layout;

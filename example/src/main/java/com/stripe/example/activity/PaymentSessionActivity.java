@@ -21,7 +21,7 @@ import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.view.PaymentFlowConfig;
+import com.stripe.android.PaymentSessionConfig;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
@@ -60,7 +60,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mStartPaymentFlowButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
-        mResultTextView =  findViewById(R.id.tv_payment_session_data);
+        mResultTextView = findViewById(R.id.tv_payment_session_data);
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -83,10 +83,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mStartPaymentFlowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPaymentSession.presentShippingFlow(
-                        new PaymentFlowConfig.Builder()
-                                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                                .build());
+                mPaymentSession.presentShippingFlow();
             }
         });
 
@@ -142,7 +139,9 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 mResultTitleTextView.setVisibility(View.VISIBLE);
                 mResultTextView.setText(formatStringResults(data));
             }
-        });
+        }, new PaymentSessionConfig.Builder()
+                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                .build());
         if (paymentSessionInitialized) {
             mStartPaymentFlowButton.setEnabled(true);
         }

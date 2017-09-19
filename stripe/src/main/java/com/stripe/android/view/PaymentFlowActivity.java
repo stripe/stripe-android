@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
 import com.stripe.android.CustomerSession;
+import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.R;
 import com.stripe.android.exception.StripeException;
@@ -19,6 +20,7 @@ import com.stripe.android.model.ShippingMethod;
 
 import java.util.List;
 
+import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 
 /**
@@ -29,7 +31,6 @@ public class PaymentFlowActivity extends StripeActivity {
 
     public static final String EXTRA_DEFAULT_SHIPPING_METHOD = "default_shipping_method";
     public static final String EXTRA_IS_SHIPPING_INFO_VALID = "shipping_is_shipping_info_valid";
-    public static final String EXTRA_PAYMENT_FLOW_CONFIG = "payment_flow_config";
     public static final String EXTRA_SHIPPING_INFO_DATA = "shipping_info_data";
     public static final String EXTRA_SHIPPING_INFO_ERROR = "shipping_info_error";
     public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
@@ -48,9 +49,9 @@ public class PaymentFlowActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
-        final PaymentFlowConfig paymentFlowConfig = getIntent().getParcelableExtra(EXTRA_PAYMENT_FLOW_CONFIG);
+        final PaymentSessionConfig paymentSessionConfig = getIntent().getParcelableExtra(PAYMENT_SESSION_CONFIG);
         mPaymentSessionData = getIntent().getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
-        mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentFlowConfig);
+        mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentSessionConfig);
         mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

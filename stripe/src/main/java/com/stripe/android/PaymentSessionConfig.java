@@ -1,4 +1,4 @@
-package com.stripe.android.view;
+package com.stripe.android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,25 +6,25 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
+import com.stripe.android.view.ShippingInfoWidget;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class that tells {@link PaymentFlowActivity} what UI to render
+ * Class that tells {@link com.stripe.android.PaymentSession} what functionality it is supporting.
  */
-public class PaymentFlowConfig implements Parcelable {
-
+public class PaymentSessionConfig implements Parcelable {
 
     @NonNull private List<String> mHiddenShippingInfoFields;
     @NonNull private List<String> mOptionalShippingInfoFields;
     @NonNull private ShippingInformation mShippingInformation;
-    private boolean mHideShippingInfoScreen;
-    private boolean mHideShippingMethodsScreen;
+    private boolean mShippingInfoRequired;
+    private boolean mShippingMethodRequired;
 
      public static class Builder {
-        private boolean mHideShippingInfoScreen;
-        private boolean mHideShippingMethodsScreen;
+        private boolean mShippingInfoRequired = true;
+        private boolean mShippingMethodsRequired = true;
         @NonNull private List<String> mHiddenShippingInfoFields;
         @NonNull private List<String> mOptionalShippingInfoFields;
         @NonNull private ShippingInformation mShippingInformation;
@@ -46,7 +46,6 @@ public class PaymentFlowConfig implements Parcelable {
         }
 
         /**
-         *
          * @param shippingInfo that should be prepopulated into the {@link ShippingInfoWidget}
          * @return
          */
@@ -56,45 +55,48 @@ public class PaymentFlowConfig implements Parcelable {
         }
 
         /**
-         * @param hideShippingInfoScreen whether a screen with a {@link ShippingInfoWidget} to collect
-         *                               {@link ShippingInformation} should be shown.
+         * @param shippingInfoRequired whether a {@link ShippingInformation} should be required. If it is
+         *                            required, a screen with a {@link ShippingInfoWidget} can be
+         *                            shown to collect it.
          */
-        public Builder setHideShippingInfoScreen(boolean hideShippingInfoScreen) {
-            mHideShippingInfoScreen = hideShippingInfoScreen;
+        public Builder setShippingInfoRequired(boolean shippingInfoRequired) {
+            mShippingInfoRequired = shippingInfoRequired;
             return this;
         }
 
         /**
-         * @param hideShippingMethodsScreen whether a screen with a {@link SelectShippingMethodWidget}
-         *                                  to select a {@link com.stripe.android.model.ShippingMethod}
+         * @param shippingMethodsRequired whether a {@link com.stripe.android.model.ShippingMethod}
+         *                               should be required. If it is required, a screen with a
+         *                               {@link com.stripe.android.view.SelectShippingMethodWidget}
+         *                               can be shown to collect it.
          */
-        public Builder setHideShippingMethodsScreen(boolean hideShippingMethodsScreen) {
-            mHideShippingMethodsScreen = hideShippingMethodsScreen;
+        public Builder setShippingMethodsRequired(boolean shippingMethodsRequired) {
+            mShippingMethodsRequired = shippingMethodsRequired;
             return this;
         }
 
-        public PaymentFlowConfig build() {
-            return new PaymentFlowConfig(this);
+        public PaymentSessionConfig build() {
+            return new PaymentSessionConfig(this);
         }
 
     }
 
-    PaymentFlowConfig(Builder builder) {
+    PaymentSessionConfig(Builder builder) {
         mHiddenShippingInfoFields = builder.mHiddenShippingInfoFields;
         mOptionalShippingInfoFields = builder.mOptionalShippingInfoFields;
         mShippingInformation = builder.mShippingInformation;
-        mHideShippingInfoScreen = builder.mHideShippingInfoScreen;
-        mHideShippingMethodsScreen = builder.mHideShippingMethodsScreen;
+        mShippingInfoRequired = builder.mShippingInfoRequired;
+        mShippingMethodRequired = builder.mShippingMethodsRequired;
     }
 
-    private PaymentFlowConfig(Parcel in) {
+    private PaymentSessionConfig(Parcel in) {
         mHiddenShippingInfoFields = new ArrayList<>();
         in.readStringList(mHiddenShippingInfoFields);
         mOptionalShippingInfoFields = new ArrayList<>();
         in.readStringList(mOptionalShippingInfoFields);
         mShippingInformation = in.readParcelable(Address.class.getClassLoader());
-        mHideShippingInfoScreen = in.readInt() == 1;
-        mHideShippingMethodsScreen = in.readInt() == 1;
+        mShippingInfoRequired = in.readInt() == 1;
+        mShippingMethodRequired = in.readInt() == 1;
     }
 
     @Override
@@ -102,10 +104,10 @@ public class PaymentFlowConfig implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PaymentFlowConfig that = (PaymentFlowConfig) o;
+        PaymentSessionConfig that = (PaymentSessionConfig) o;
 
-        if (isHideShippingInfoScreen() != that.isHideShippingInfoScreen()) return false;
-        if (isHideShippingMethodsScreen() != that.isHideShippingMethodsScreen()) return false;
+        if (isShippingInfoRequired() != that.isShippingInfoRequired()) return false;
+        if (isShippingMethodRequired() != that.isShippingMethodRequired()) return false;
         if (!getHiddenShippingInfoFields().equals(that.getHiddenShippingInfoFields())) return false;
         if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) return false;
         return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
@@ -116,8 +118,8 @@ public class PaymentFlowConfig implements Parcelable {
         int result = getHiddenShippingInfoFields().hashCode();
         result = 31 * result + getOptionalShippingInfoFields().hashCode();
         result = 31 * result + mShippingInformation.hashCode();
-        result = 31 * result + (isHideShippingInfoScreen() ? 1 : 0);
-        result = 31 * result + (isHideShippingMethodsScreen() ? 1 : 0);
+        result = 31 * result + (isShippingInfoRequired() ? 1 : 0);
+        result = 31 * result + (isShippingMethodRequired() ? 1 : 0);
         return result;
     }
 
@@ -131,42 +133,42 @@ public class PaymentFlowConfig implements Parcelable {
         parcel.writeStringList(mHiddenShippingInfoFields);
         parcel.writeStringList(mOptionalShippingInfoFields);
         parcel.writeParcelable(mShippingInformation, flags);
-        parcel.writeInt(mHideShippingInfoScreen ? 1 : 0);
-        parcel.writeInt(mHideShippingMethodsScreen ? 1: 0);
+        parcel.writeInt(mShippingInfoRequired ? 1 : 0);
+        parcel.writeInt(mShippingMethodRequired ? 1: 0);
     }
 
-    @NonNull List<String> getHiddenShippingInfoFields() {
+    public @NonNull List<String> getHiddenShippingInfoFields() {
         return mHiddenShippingInfoFields;
     }
 
-    @NonNull List<String> getOptionalShippingInfoFields() {
+    public @NonNull List<String> getOptionalShippingInfoFields() {
         return mOptionalShippingInfoFields;
     }
 
     @NonNull
-    ShippingInformation getPrepopulatedShippingInfo() {
+    public ShippingInformation getPrepopulatedShippingInfo() {
         return mShippingInformation;
     }
 
-    boolean isHideShippingInfoScreen() {
-        return mHideShippingInfoScreen;
+    public boolean isShippingInfoRequired() {
+        return mShippingInfoRequired;
     }
 
-    boolean isHideShippingMethodsScreen() {
-        return mHideShippingMethodsScreen;
+    public boolean isShippingMethodRequired() {
+        return mShippingMethodRequired;
     }
 
-    static final Parcelable.Creator<PaymentFlowConfig> CREATOR
-            = new Parcelable.Creator<PaymentFlowConfig>() {
+    static final Parcelable.Creator<PaymentSessionConfig> CREATOR
+            = new Parcelable.Creator<PaymentSessionConfig>() {
 
         @Override
-        public PaymentFlowConfig createFromParcel(Parcel in) {
-            return new PaymentFlowConfig(in);
+        public PaymentSessionConfig createFromParcel(Parcel in) {
+            return new PaymentSessionConfig(in);
         }
 
         @Override
-        public PaymentFlowConfig[] newArray(int size) {
-            return new PaymentFlowConfig[size];
+        public PaymentSessionConfig[] newArray(int size) {
+            return new PaymentSessionConfig[size];
         }
     };
 }
