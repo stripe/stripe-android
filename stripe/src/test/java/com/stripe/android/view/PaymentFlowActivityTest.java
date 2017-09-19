@@ -9,6 +9,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
 import com.stripe.android.BuildConfig;
+import com.stripe.android.CustomerSession;
+import com.stripe.android.EphemeralKeyProvider;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
@@ -55,6 +57,8 @@ public class PaymentFlowActivityTest {
     private ActivityController<PaymentFlowActivity> mActivityController;
     private ShadowActivity mShadowActivity;
     private ShippingInfoWidget mShippingInfoWidget;
+    @Mock
+    EphemeralKeyProvider mEphemeralKeyProvider;
 
     @Mock BroadcastReceiver mBroadcastReceiver;
 
@@ -63,6 +67,8 @@ public class PaymentFlowActivityTest {
         MockitoAnnotations.initMocks(this);
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
         localBroadcastManager.registerReceiver(mBroadcastReceiver, new IntentFilter(PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED));
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider);
     }
 
     @After

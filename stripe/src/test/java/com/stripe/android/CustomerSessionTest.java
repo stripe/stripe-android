@@ -7,8 +7,6 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.APIException;
-import com.stripe.android.exception.AuthenticationException;
-import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
@@ -16,8 +14,8 @@ import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.CardInputTestActivity;
+import com.stripe.android.view.PaymentFlowActivity;
 
-import org.apache.tools.ant.taskdefs.Local;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -36,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
  * Test class for {@link CustomerSession}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
+@Config(constants=BuildConfig.class, sdk = 25)
 public class CustomerSessionTest {
 
     public static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
@@ -662,5 +662,38 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
+    }
+
+    @Test
+    public void shippingInfoScreen_whenLaunched_logs() {
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+        Intent intent = new Intent();
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
+                .build();
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
+        List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+        assertTrue(actualTokens.contains("ShippingInfoScreen"));
+    }
+
+    @Test
+    public void shippingMethodScreen_whenLaunched_logs() {
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+        Intent intent = new Intent();
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(false)
+                .build();
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
+        List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+        assertTrue(actualTokens.contains("ShippingMethodScreen"));
     }
 }
