@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingMethod;
@@ -24,6 +25,9 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     private boolean mAddressSaved;
     private List<ShippingMethod> mValidShippingMethods = new ArrayList<>();
     private ShippingMethod mDefaultShippingMethod;
+
+    private static final String TOKEN_SHIPPING_INFO_SCREEN = "ShippingInfoScreen";
+    private static final String TOKEN_SHIPPING_METHOD_SCREEN = "ShippingMethodScreen";
 
     PaymentFlowPagerAdapter(@NonNull Context context, @NonNull PaymentSessionConfig paymentSessionConfig) {
         mContext = context;
@@ -68,10 +72,12 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         ViewGroup layout = (ViewGroup) inflater.inflate(paymentFlowPagerEnum.getLayoutResId(), collection, false);
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_METHOD)) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_SHIPPING_METHOD_SCREEN);
             SelectShippingMethodWidget selectShippingMethodWidget = layout.findViewById(R.id.select_shipping_method_widget);
             selectShippingMethodWidget.setShippingMethods(mValidShippingMethods, mDefaultShippingMethod);
         }
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_SHIPPING_INFO_SCREEN);
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
             shippingInfoWidget.setHiddenFields(mPaymentSessionConfig.getHiddenShippingInfoFields());
             shippingInfoWidget.setOptionalFields(mPaymentSessionConfig.getOptionalShippingInfoFields());
