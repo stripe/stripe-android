@@ -33,6 +33,7 @@ import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
 import static com.stripe.android.CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT;
 import static com.stripe.android.CustomerSessionTest.SECOND_TEST_CUSTOMER_OBJECT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -211,12 +212,64 @@ public class PaymentSessionTest {
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
 
-        paymentSession.selectPaymentMethod();
+        paymentSession.presentPaymentMethodSelection();
         ShadowActivity.IntentForResult intentForResult =
                 mShadowActivity.getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
+    }
+
+    @Test
+    public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+
+        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
+
+        PaymentSession.PaymentSessionListener mockListener =
+                mock(PaymentSession.PaymentSessionListener.class);
+        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+
+        // The init removes PaymentMethodsActivity, but then adds PaymentSession
+        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        assertEquals(1, loggingTokens.size());
+        assertFalse(loggingTokens.contains("PaymentMethodsActivity"));
+        assertTrue(loggingTokens.contains("PaymentSession"));
+    }
+
+    @Test
+    public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+
+        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
+
+        PaymentSession.PaymentSessionListener mockListener =
+                mock(PaymentSession.PaymentSessionListener.class);
+        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        // If it is given any saved state at all, the tokens are not cleared out.
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
+
+        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        assertEquals(2, loggingTokens.size());
+        assertTrue(loggingTokens.contains("PaymentMethodsActivity"));
+        assertTrue(loggingTokens.contains("PaymentSession"));
     }
 
     @Test
