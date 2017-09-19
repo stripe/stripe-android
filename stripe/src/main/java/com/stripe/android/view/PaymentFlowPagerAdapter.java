@@ -8,8 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
+import com.stripe.android.model.ShippingMethod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,10 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     @NonNull private Context mContext;
     @NonNull private PaymentFlowConfig mPaymentFlowConfig;
     @NonNull private List<PaymentFlowPagerEnum> mPages;
+
     private boolean mAddressSaved;
+    private List<ShippingMethod> mValidShippingMethods = new ArrayList<>();
+    private ShippingMethod mDefaultShippingMethod;
 
     PaymentFlowPagerAdapter(@NonNull Context context, @NonNull PaymentFlowConfig paymentFlowConfig) {
         mContext = context;
@@ -28,20 +31,33 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         if (!mPaymentFlowConfig.isHideShippingInfoScreen()) {
             mPages.add(PaymentFlowPagerEnum.ADDRESS);
         }
-        if (!shouldHideShippingScreen()) {
+        if (shouldAddShippingScreen()) {
             mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
         }
     }
 
-    private boolean shouldHideShippingScreen() {
-        return mPaymentFlowConfig.isHideShippingMethodsScreen() || (!mPaymentFlowConfig.isHideShippingInfoScreen() && !mAddressSaved);
+    private boolean shouldAddShippingScreen() {
+        return !mPaymentFlowConfig.isHideShippingMethodsScreen() &&
+                ((!mPaymentFlowConfig.isHideShippingInfoScreen() && mAddressSaved) || mPaymentFlowConfig.isHideShippingInfoScreen()) &&
+                    !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
     }
+
 
     void setAddressSaved(boolean addressSaved) {
         mAddressSaved = addressSaved;
-        if (!shouldHideShippingScreen()) {
+        if (shouldAddShippingScreen()) {
             mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
         }
+        notifyDataSetChanged();
+    }
+
+    void setShippingMethods(List<ShippingMethod> validShippingMethods, ShippingMethod defaultShippingMethod) {
+        mValidShippingMethods = validShippingMethods;
+        mDefaultShippingMethod = defaultShippingMethod;
+    }
+
+    void hideShippingPage() {
+        mPages.remove(PaymentFlowPagerEnum.SHIPPING_METHOD);
         notifyDataSetChanged();
     }
 
@@ -52,7 +68,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         ViewGroup layout = (ViewGroup) inflater.inflate(paymentFlowPagerEnum.getLayoutResId(), collection, false);
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_METHOD)) {
             SelectShippingMethodWidget selectShippingMethodWidget = layout.findViewById(R.id.select_shipping_method_widget);
-            selectShippingMethodWidget.setShippingMethods(PaymentConfiguration.getInstance().getShippingMethods());
+            selectShippingMethodWidget.setShippingMethods(mValidShippingMethods, mDefaultShippingMethod);
         }
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
@@ -60,7 +76,6 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
             shippingInfoWidget.setOptionalFields(mPaymentFlowConfig.getOptionalShippingInfoFields());
             shippingInfoWidget.populateShippingInfo(mPaymentFlowConfig.getPrepopulatedShippingInfo());
         }
-
         collection.addView(layout);
         return layout;
     }

@@ -35,6 +35,8 @@
     <string name="tryThreeDSecure">Try 3DS</string>
     <string name="verify">Verify</string>
     <string name="updatedSources">Source results</string>
+    <string name="updatedShippingInfo">Shipping detail results</string>
+
     <string name="cvc">CVC</string>
     <string name="startPaymentFlow">Start Payment Flow</string>
 

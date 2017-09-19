@@ -25,14 +25,6 @@
             android:theme="@style/StripeDefaultTheme"
             >
         </activity>
-
-        <activity
-            android:name=".view.SelectShippingMethodActivity"
-            android:theme="@style/StripeDefaultTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

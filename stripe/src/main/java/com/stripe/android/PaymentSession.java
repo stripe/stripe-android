@@ -17,10 +17,11 @@ import com.stripe.android.view.PaymentMethodsActivity;
  */
 public class PaymentSession {
 
+    public static final int PAYMENT_SHIPPING_DETAILS_REQUEST = 3004;
     static final int PAYMENT_METHOD_REQUEST = 3003;
     static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
 
-    private static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
+    public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
 
     @NonNull private Activity mHostActivity;
     @NonNull private PaymentSessionData mPaymentSessionData;
@@ -57,11 +58,14 @@ public class PaymentSession {
                 case PAYMENT_METHOD_REQUEST:
                     fetchCustomer();
                     return true;
+                case PAYMENT_SHIPPING_DETAILS_REQUEST:
+                    PaymentSessionData paymentSessionData = data.getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
+                    mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
+                    return true;
                 default:
                     break;
             }
         }
-
         return false;
     }
 
@@ -153,10 +157,10 @@ public class PaymentSession {
     public void presentShippingFlow(PaymentFlowConfig paymentFlowConfig) {
         Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
         intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_FLOW_CONFIG, paymentFlowConfig);
-        intent.putExtra(PaymentFlowActivity.EXTRA_PAYMENT_SESSION_DATA, mPaymentSessionData);
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
         mHostActivity.startActivityForResult(
                 intent,
-                PAYMENT_METHOD_REQUEST);
+                PAYMENT_SHIPPING_DETAILS_REQUEST);
     }
 
     private void fetchCustomer() {
