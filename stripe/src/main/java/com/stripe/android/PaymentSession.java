@@ -184,6 +184,20 @@ public class PaymentSession {
                 PAYMENT_SHIPPING_DETAILS_REQUEST);
     }
 
+    /**
+     * @return the data associated with the instance of this class.
+     */
+    public PaymentSessionData getPaymentSessionData() {
+        return mPaymentSessionData;
+    }
+
+    /**
+     * Should be called during the host {@link Activity}'s onDestroy to detach listeners.
+     */
+    public void onDestroy() {
+       mPaymentSessionListener = null;
+    }
+
     private void fetchCustomer() {
         if (mPaymentSessionListener != null) {
             mPaymentSessionListener.onCommunicatingStateChanged(true);

@@ -174,6 +174,13 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mPaymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPaymentSession.onDestroy();
+    }
+
     private ShippingInformation getExampleShippingInfo() {
         Address address = new Address.Builder()
                 .setCity("San Francisco")
