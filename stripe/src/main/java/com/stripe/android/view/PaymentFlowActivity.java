@@ -114,9 +114,6 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(mAlertBroadcastReceiver,
-                        new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_PROCESSED));
     }
