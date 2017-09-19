@@ -90,6 +90,7 @@ public class PaymentSession {
         paymentSessionData.setPaymentReadyToCharge(true);
         return true;
     }
+    
     /**
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
      * data changes.
