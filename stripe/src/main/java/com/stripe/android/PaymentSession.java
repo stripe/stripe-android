@@ -42,6 +42,21 @@ public class PaymentSession {
     }
 
     /**
+     * Complete a payment using the given provider.
+     * @param provider a {@link PaymentCompletionProvider} that connects to a server and completes
+     *                 a charge on a background thread.
+     */
+    public void completePayment(@NonNull PaymentCompletionProvider provider) {
+        provider.completePayment(mPaymentSessionData,
+                                 new PaymentResultListener() {
+            @Override
+            public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
+                
+            }
+        });
+    }
+
+    /**
      * Method to handle Activity results from Stripe activities. Pass data here from your
      * host Activity's {@link Activity#onActivityResult(int, int, Intent)} function.
      *
