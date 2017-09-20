@@ -196,6 +196,6 @@ public class PaymentFlowActivityTest {
                 .setPostalCode("94107")
                 .setState("CA")
                 .build();
-        return new ShippingInformation(address, "Fake Name", "6504604645");
+        return new ShippingInformation(address, "Fake Name", "(650) 460-4645");
     }
 }

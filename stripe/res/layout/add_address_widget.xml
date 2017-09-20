@@ -111,8 +111,6 @@
             android:id="@+id/et_phone_number_aaw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:digits="@string/valid_digits"
-            android:inputType="number"
             />
     </android.support.design.widget.TextInputLayout>
 

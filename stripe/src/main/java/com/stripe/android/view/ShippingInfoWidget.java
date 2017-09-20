@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
@@ -198,6 +199,7 @@ public class ShippingInfoWidget extends LinearLayout {
                 renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
             }
         });
+        mPhoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
         setupErrorHandling();
         renderLabels();
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
