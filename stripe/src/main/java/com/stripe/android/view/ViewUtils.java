@@ -150,11 +150,7 @@ class ViewUtils {
 
         // Because the colors are all hex integers.
         double luminescencePercentage = luminescence / 255;
-        if (luminescencePercentage > 0.5) {
-            return false;
-        } else {
-            return true;
-        }
+        return luminescencePercentage <= 0.5;
     }
 
     static boolean isCvcMaximalLength(

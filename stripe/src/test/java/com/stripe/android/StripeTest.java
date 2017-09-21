@@ -123,13 +123,13 @@ public class StripeTest {
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNull() {
         Stripe stripe = new Stripe(mContext);
-        stripe.createToken((Card) null, null);
+        stripe.createToken(null, null);
     }
 
     @Test(expected = RuntimeException.class)
     public void createTokenShouldFailWithNullCard() {
         Stripe stripe = new Stripe(mContext);
-        stripe.createToken((Card) null, DEFAULT_TOKEN_CALLBACK);
+        stripe.createToken(null, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test(expected = RuntimeException.class)
