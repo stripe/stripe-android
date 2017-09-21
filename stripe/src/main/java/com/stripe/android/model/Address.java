@@ -14,6 +14,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.stripe.android.ParcelUtils.readNullableString;
+import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -21,7 +23,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public class Address extends StripeJsonModel implements Parcelable{
+public class Address extends StripeJsonModel implements Parcelable {
 
     @IntDef({
             RequiredBillingAddressFields.NONE,
@@ -34,15 +36,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         int FULL = 2;
     }
 
-    private Address(Parcel in) {
-        mCity = in.readString();
-        mCountry = in.readString();
-        mLine1 = in.readString();
-        mLine2 = in.readString();
-        mPostalCode = in.readString();
-        mState = in.readString();
-    }
-
     private static final String FIELD_CITY = "city";
     /* 2 Character Country Code */
     private static final String FIELD_COUNTRY = "country";
@@ -53,12 +46,12 @@ public class Address extends StripeJsonModel implements Parcelable{
     private static final String FIELD_NAME = "name";
     private static final String FIELD_PHONE_NUMBER = "phone_number";
 
-    private String mCity;
-    private String mCountry;
-    private String mLine1;
-    private String mLine2;
-    private String mPostalCode;
-    private String mState;
+    @Nullable private String mCity;
+    @Nullable private String mCountry;
+    @Nullable private String mLine1;
+    @Nullable private String mLine2;
+    @Nullable private String mPostalCode;
+    @Nullable private String mState;
 
     Address(
             String city,
@@ -84,6 +77,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mState = addressBuilder.mState;
     }
 
+    @Nullable
     public String getCity() {
         return mCity;
     }
@@ -93,6 +87,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mCity = city;
     }
 
+    @Nullable
     public String getCountry() {
         return mCountry;
     }
@@ -102,6 +97,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mCountry = country;
     }
 
+    @Nullable
     public String getLine1() {
         return mLine1;
     }
@@ -111,6 +107,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mLine1 = line1;
     }
 
+    @Nullable
     public String getLine2() {
         return mLine2;
     }
@@ -120,6 +117,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mLine2 = line2;
     }
 
+    @Nullable
     public String getPostalCode() {
         return mPostalCode;
     }
@@ -129,6 +127,7 @@ public class Address extends StripeJsonModel implements Parcelable{
         mPostalCode = postalCode;
     }
 
+    @Nullable
     public String getState() {
         return mState;
     }
@@ -188,35 +187,6 @@ public class Address extends StripeJsonModel implements Parcelable{
         return new Address(city, country, line1, line2, postalCode, state);
     }
 
-    static final Parcelable.Creator<Address> CREATOR
-            = new Parcelable.Creator<Address>() {
-
-        @Override
-        public Address createFromParcel(Parcel in) {
-            return new Address(in);
-        }
-
-        @Override
-        public Address[] newArray(int size) {
-            return new Address[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mCity);
-        out.writeString(mCountry);
-        out.writeString(mLine1);
-        out.writeString(mLine2);
-        out.writeString(mPostalCode);
-        out.writeString(mState);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public static class Builder {
         private String mCity;
         private String mCountry;
@@ -259,5 +229,44 @@ public class Address extends StripeJsonModel implements Parcelable{
             return new Address(this);
         }
 
+    }
+
+    /************** Parcelable *********************/
+    static final Parcelable.Creator<Address> CREATOR
+            = new Parcelable.Creator<Address>() {
+
+        @Override
+        public Address createFromParcel(Parcel in) {
+            return new Address(in);
+        }
+
+        @Override
+        public Address[] newArray(int size) {
+            return new Address[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        writeNullableString(out, mCity);
+        writeNullableString(out, mCountry);
+        writeNullableString(out, mLine1);
+        writeNullableString(out, mLine2);
+        writeNullableString(out, mPostalCode);
+        writeNullableString(out, mState);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    protected Address(Parcel in) {
+        mCity = readNullableString(in);
+        mCountry = readNullableString(in);
+        mLine1 = readNullableString(in);
+        mLine2 = readNullableString(in);
+        mPostalCode = readNullableString(in);
+        mState = readNullableString(in);
     }
 }

@@ -12,6 +12,8 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.stripe.android.ParcelUtils.readNullableString;
+import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -28,16 +30,23 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     private static final String FIELD_LABEL = "label";
 
     private long mAmount;
-    private String mCurrencyCode;
+    private @NonNull @Size(min=0, max=3) String mCurrencyCode;
     private @Nullable String mDetail;
-    private String mIdentifier;
-    private String mLabel;
+    private @NonNull String mIdentifier;
+    private @NonNull String mLabel;
 
-    public ShippingMethod(@NonNull String label, @NonNull String identifier, @NonNull long amount, @NonNull String currencyCode) {
+    public ShippingMethod(@NonNull String label,
+                          @NonNull String identifier,
+                          @NonNull long amount,
+                          @NonNull @Size(min=0, max=3) String currencyCode) {
         this(label, identifier, null, amount, currencyCode);
     }
 
-    public ShippingMethod(@NonNull String label, @NonNull String identifier, @Nullable String detail, @NonNull long amount, @NonNull @Size(min=0, max=3) String currencyCode) {
+    public ShippingMethod(@NonNull String label,
+                          @NonNull String identifier,
+                          @Nullable String detail,
+                          @NonNull long amount,
+                          @NonNull @Size(min=0, max=3) String currencyCode) {
         mLabel = label;
         mIdentifier = identifier;
         mDetail = detail;
@@ -58,7 +67,6 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
      * {@link com.stripe.android.PaymentConfiguration}. For example, cents in the USA and yen in
      * Japan.
      */
-    @NonNull
     public long getAmount() {
         return mAmount;
     }
@@ -82,6 +90,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     /**
      * @return Identifier for the shipping method.
      */
+    @NonNull
     public String getIdentifier() {
         return mIdentifier;
     }
@@ -120,7 +129,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(mAmount);
         parcel.writeString(mCurrencyCode);
-        parcel.writeString(mDetail);
+        writeNullableString(parcel, mDetail);
         parcel.writeString(mIdentifier);
         parcel.writeString(mLabel);
     }
@@ -139,7 +148,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     private ShippingMethod(Parcel in) {
         mAmount = in.readLong();
         mCurrencyCode = in.readString();
-        mDetail = in.readString();
+        mDetail = readNullableString(in);
         mIdentifier = in.readString();
         mLabel = in.readString();
     }

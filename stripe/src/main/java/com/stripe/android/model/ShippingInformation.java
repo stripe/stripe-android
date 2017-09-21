@@ -12,6 +12,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.stripe.android.ParcelUtils.readNullableParcelable;
+import static com.stripe.android.ParcelUtils.readNullableString;
+import static com.stripe.android.ParcelUtils.writeNullableParcelable;
+import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -35,13 +39,6 @@ public class ShippingInformation extends StripeJsonModel implements Parcelable {
         mName = name;
         mPhone = phone;
     }
-
-    private ShippingInformation(Parcel in) {
-        mAddress = in.readParcelable(Address.class.getClassLoader());
-        mName = in.readString();
-        mPhone = in.readString();
-    }
-
 
     @Nullable
     public Address getAddress() {
@@ -93,12 +90,29 @@ public class ShippingInformation extends StripeJsonModel implements Parcelable {
         return map;
     }
 
-    static final Parcelable.Creator<ShippingInformation> CREATOR
-            = new Parcelable.Creator<ShippingInformation>() {
+    /************** Parcelable *********************/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        writeNullableParcelable(dest, flags, mAddress);
+        writeNullableString(dest, mName);
+        writeNullableString(dest, mPhone);
+    }
+
+    protected ShippingInformation(Parcel in) {
+        mAddress = readNullableParcelable(in, Address.class);
+        mName = readNullableString(in);
+        mPhone = readNullableString(in);
+    }
+
+    public static final Creator<ShippingInformation> CREATOR = new Creator<ShippingInformation>() {
         @Override
-        public ShippingInformation createFromParcel(Parcel in) {
-            return new ShippingInformation(in);
+        public ShippingInformation createFromParcel(Parcel source) {
+            return new ShippingInformation(source);
         }
 
         @Override
@@ -106,16 +120,4 @@ public class ShippingInformation extends StripeJsonModel implements Parcelable {
             return new ShippingInformation[size];
         }
     };
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mAddress, flags);
-        out.writeString(mName);
-        out.writeString(mPhone);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 }

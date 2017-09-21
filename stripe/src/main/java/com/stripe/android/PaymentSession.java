@@ -211,6 +211,7 @@ public class PaymentSession {
     /**
      * @return the data associated with the instance of this class.
      */
+<<<<<<< HEAD
     public PaymentSessionData getPaymentSessionData() {
         return mPaymentSessionData;
     }
@@ -220,6 +221,21 @@ public class PaymentSession {
      */
     public void onDestroy() {
        mPaymentSessionListener = null;
+=======
+    public void completePayment(@NonNull PaymentCompletionProvider provider) {
+        provider.completePayment(mPaymentSessionData,
+                new PaymentResultListener() {
+                    @Override
+                    public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
+                        mPaymentSessionData.setPaymentResult(paymentResult);
+                        CustomerSession.getInstance().clearUsageTokens();
+                        if (mPaymentSessionListener != null) {
+                            mPaymentSessionListener
+                                    .onPaymentSessionDataChanged(mPaymentSessionData);
+                        }
+                    }
+                });
+>>>>>>> fixing all the recent parcelable things
     }
 
     private void fetchCustomer() {

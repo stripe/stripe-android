@@ -3,6 +3,7 @@ package com.stripe.android;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.android.exception.StripeException;
@@ -270,6 +271,47 @@ public class PaymentSessionTest {
         assertEquals(2, loggingTokens.size());
         assertTrue(loggingTokens.contains("PaymentMethodsActivity"));
         assertTrue(loggingTokens.contains("PaymentSession"));
+    }
+
+    @Test
+    public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                mStripeApiProxy,
+                null);
+
+        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
+
+        PaymentSession.PaymentSessionListener mockListener =
+                mock(PaymentSession.PaymentSessionListener.class);
+        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        // If it is given any saved state at all, the tokens are not cleared out.
+        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
+
+        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        assertEquals(2, loggingTokens.size());
+
+        reset(mockListener);
+        paymentSession.completePayment(new PaymentCompletionProvider() {
+            @Override
+            public void completePayment(@NonNull PaymentSessionData data,
+                                        @NonNull PaymentResultListener listener) {
+                listener.onPaymentResult(PaymentResultListener.SUCCESS);
+            }
+        });
+
+        ArgumentCaptor<PaymentSessionData> dataArgumentCaptor =
+                ArgumentCaptor.forClass(PaymentSessionData.class);
+        verify(mockListener).onPaymentSessionDataChanged(dataArgumentCaptor.capture());
+        PaymentSessionData capturedData = dataArgumentCaptor.getValue();
+        assertNotNull(capturedData);
+        assertEquals(PaymentResultListener.SUCCESS, capturedData.getPaymentResult());
+        assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
     }
 
     @Test

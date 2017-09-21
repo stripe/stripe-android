@@ -15,12 +15,14 @@ public interface PaymentResultListener {
     @StringDef({
             SUCCESS,
             USER_CANCELLED,
-            ERROR
+            ERROR,
+            INCOMPLETE
     })
     @interface PaymentResult { }
     String SUCCESS = "success";
     String USER_CANCELLED = "user_cancelled";
     String ERROR = "error";
+    String INCOMPLETE = "incomplete";
 
     /**
      * Called to notify the listener of the result of the payment.
