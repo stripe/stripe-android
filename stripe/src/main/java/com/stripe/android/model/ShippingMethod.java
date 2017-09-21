@@ -12,8 +12,6 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.ParcelUtils.readNullableString;
-import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -129,7 +127,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(mAmount);
         parcel.writeString(mCurrencyCode);
-        writeNullableString(parcel, mDetail);
+        parcel.writeString(mDetail);
         parcel.writeString(mIdentifier);
         parcel.writeString(mLabel);
     }
@@ -148,7 +146,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     private ShippingMethod(Parcel in) {
         mAmount = in.readLong();
         mCurrencyCode = in.readString();
-        mDetail = readNullableString(in);
+        mDetail = in.readString();
         mIdentifier = in.readString();
         mLabel = in.readString();
     }

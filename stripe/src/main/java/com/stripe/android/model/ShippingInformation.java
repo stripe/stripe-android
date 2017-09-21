@@ -12,10 +12,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.ParcelUtils.readNullableParcelable;
-import static com.stripe.android.ParcelUtils.readNullableString;
-import static com.stripe.android.ParcelUtils.writeNullableParcelable;
-import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -98,15 +94,15 @@ public class ShippingInformation extends StripeJsonModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        writeNullableParcelable(dest, flags, mAddress);
-        writeNullableString(dest, mName);
-        writeNullableString(dest, mPhone);
+        dest.writeParcelable(mAddress, flags);
+        dest.writeString(mName);
+        dest.writeString(mPhone);
     }
 
     protected ShippingInformation(Parcel in) {
-        mAddress = readNullableParcelable(in, Address.class);
-        mName = readNullableString(in);
-        mPhone = readNullableString(in);
+        mAddress = in.readParcelable(Address.class.getClassLoader());
+        mName = in.readString();
+        mPhone = in.readString();
     }
 
     public static final Creator<ShippingInformation> CREATOR = new Creator<ShippingInformation>() {

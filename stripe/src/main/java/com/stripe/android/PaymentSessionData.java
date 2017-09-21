@@ -8,9 +8,6 @@ import android.support.annotation.Nullable;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
-import static com.stripe.android.ParcelUtils.readNullableParcelable;
-import static com.stripe.android.ParcelUtils.writeNullableParcelable;
-
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
  */
@@ -191,8 +188,8 @@ public class PaymentSessionData implements Parcelable {
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeString(mPaymentResult);
         parcel.writeString(mSelectedPaymentMethodId);
-        writeNullableParcelable(parcel, i, mShippingInformation);
-        writeNullableParcelable(parcel, i, mShippingMethod);
+        parcel.writeParcelable(mShippingInformation, i);
+        parcel.writeParcelable(mShippingMethod, i);
         parcel.writeLong(mShippingTotal);
 
     }
@@ -213,8 +210,8 @@ public class PaymentSessionData implements Parcelable {
         mIsPaymentReadyToCharge = in.readInt() == 1;
         mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
         mSelectedPaymentMethodId = in.readString();
-        mShippingInformation = readNullableParcelable(in, ShippingInformation.class);
-        mShippingMethod = readNullableParcelable(in, ShippingMethod.class);
+        mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
+        mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());
         mShippingTotal = in.readLong();
     }
 }

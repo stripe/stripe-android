@@ -14,8 +14,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.ParcelUtils.readNullableString;
-import static com.stripe.android.ParcelUtils.writeNullableString;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
@@ -248,12 +246,12 @@ public class Address extends StripeJsonModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        writeNullableString(out, mCity);
-        writeNullableString(out, mCountry);
-        writeNullableString(out, mLine1);
-        writeNullableString(out, mLine2);
-        writeNullableString(out, mPostalCode);
-        writeNullableString(out, mState);
+        out.writeString(mCity);
+        out.writeString(mCountry);
+        out.writeString(mLine1);
+        out.writeString(mLine2);
+        out.writeString(mPostalCode);
+        out.writeString(mState);
     }
 
     @Override
@@ -262,11 +260,11 @@ public class Address extends StripeJsonModel implements Parcelable {
     }
 
     protected Address(Parcel in) {
-        mCity = readNullableString(in);
-        mCountry = readNullableString(in);
-        mLine1 = readNullableString(in);
-        mLine2 = readNullableString(in);
-        mPostalCode = readNullableString(in);
-        mState = readNullableString(in);
+        mCity = in.readString();
+        mCountry = in.readString();
+        mLine1 = in.readString();
+        mLine2 = in.readString();
+        mPostalCode = in.readString();
+        mState = in.readString();
     }
 }
