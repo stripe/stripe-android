@@ -16,9 +16,11 @@ import com.stripe.android.view.PaymentMethodsActivity;
  */
 public class PaymentSession {
 
+    public static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
+    public static final String EXTRA_PAYMENT_SESSION_ACTIVE = "payment_session_active";
+
     static final int PAYMENT_SHIPPING_DETAILS_REQUEST = 3004;
     static final int PAYMENT_METHOD_REQUEST = 3003;
-    static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
 
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
@@ -52,7 +54,7 @@ public class PaymentSession {
                     @Override
                     public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
                         mPaymentSessionData.setPaymentResult(paymentResult);
-                        CustomerSession.getInstance().clearUsageTokens();
+                        CustomerSession.getInstance().resetUsageTokens();
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener
                                     .onPaymentSessionDataChanged(mPaymentSessionData);
@@ -149,7 +151,7 @@ public class PaymentSession {
         // will throw a runtime exception if none is ready.
         try {
             if (savedInstanceState == null) {
-                CustomerSession.getInstance().clearUsageTokens();
+                CustomerSession.getInstance().resetUsageTokens();
             }
             CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         } catch (IllegalStateException illegalState) {
@@ -176,9 +178,9 @@ public class PaymentSession {
      * or to add a new one.
      */
     public void presentPaymentMethodSelection() {
-        mHostActivity.startActivityForResult(
-                PaymentMethodsActivity.newIntent(mHostActivity),
-                PAYMENT_METHOD_REQUEST);
+        Intent paymentMethodsIntent = PaymentMethodsActivity.newIntent(mHostActivity);
+        paymentMethodsIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        mHostActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
     }
 
     /**
@@ -208,6 +210,7 @@ public class PaymentSession {
         Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
         intent.putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig);
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
+        intent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mHostActivity.startActivityForResult(
                 intent,
                 PAYMENT_SHIPPING_DETAILS_REQUEST);

@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
@@ -16,7 +17,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
-class CountryAutoCompleteTextView extends FrameLayout {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public class CountryAutoCompleteTextView extends FrameLayout {
     private AutoCompleteTextView mCountryAutocomplete;
     private TextInputLayout mCountryTextInputLayout;
     private Map<String, String> mCountryNameToCode;
