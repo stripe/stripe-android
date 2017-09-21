@@ -34,7 +34,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         mPaymentSessionConfig = paymentSessionConfig;
         mPages = new ArrayList<>();
         if (mPaymentSessionConfig.isShippingInfoRequired()) {
-            mPages.add(PaymentFlowPagerEnum.ADDRESS);
+            mPages.add(PaymentFlowPagerEnum.SHIPPING_INFO);
         }
         if (shouldAddShippingScreen()) {
             mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
@@ -48,7 +48,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
 
-    void setAddressSaved(boolean addressSaved) {
+    void setShippingInfoSaved(boolean addressSaved) {
         mAddressSaved = addressSaved;
         if (shouldAddShippingScreen()) {
             mPages.add(PaymentFlowPagerEnum.SHIPPING_METHOD);
@@ -76,7 +76,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
             SelectShippingMethodWidget selectShippingMethodWidget = layout.findViewById(R.id.select_shipping_method_widget);
             selectShippingMethodWidget.setShippingMethods(mValidShippingMethods, mDefaultShippingMethod);
         }
-        if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.ADDRESS)) {
+        if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
             CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_SHIPPING_INFO_SCREEN);
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
             shippingInfoWidget.setHiddenFields(mPaymentSessionConfig.getHiddenShippingInfoFields());

@@ -43,6 +43,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";
 
+    public static final String EVENT_SHIPPING_INFO_SAVED = "shipping_info_saved";
+
     private static final String ACTION_ADD_SOURCE = "add_source";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
     private static final String ACTION_SET_CUSTOMER_SHIPPING_INFO = "set_shipping_info";
@@ -474,7 +476,9 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     case CUSTOMER_SHIPPING_INFO_SAVED:
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
-                            // TODO Notify shipping info saved
+                            Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
+                            LocalBroadcastManager.getInstance(mCachedContextReference.get())
+                                    .sendBroadcast(intent);
                         }
                 }
             }
