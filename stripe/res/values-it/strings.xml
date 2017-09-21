@@ -14,4 +14,102 @@
     <string name="payment_method_add_new_card">Aggiungi una nuova carta&#8230;</string>
     <string name="title_add_a_card">Aggiungi una carta</string>
     <string name="title_payment_method">Metodo di pagamento</string>
+    <!-- Error text indicating that city is required, used for all locations -->
+    <string name="address_city_required">Inserisci la città</string>
+    <!-- Error text indicating that county is required, used for UK addresses -->
+    <string name="address_county_required">Inserisci la contea</string>
+    <!-- Label for input requesting the first line of an address, used for US and Canada addresses -->
+    <string name="address_label_address">Indirizzo</string>
+    <!-- Label for input requesting the first line of an address, used for international addresses -->
+    <string name="address_label_address_line1">Indirizzo riga 1</string>
+    <!-- Label for input requesting the first line of an address where , used for international addresses -->
+    <string name="address_label_address_line1_optional">Indirizzo riga 1 (facoltativo)</string>
+    <!-- Label for input requesting address line 2, used for international addresses -->
+    <string name="address_label_address_line2">Indirizzo riga 2</string>
+    <!-- Label for input requesting address line 2 where input in optional used for international addresses -->
+    <string name="address_label_address_line2_optional">Indirizzo riga 2 (facoltativo)</string>
+    <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+    <string name="address_label_address_optional">Indirizzo (facoltativo) </string>
+    <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
+    <string name="address_label_apt">Appart.</string>
+    <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+    <string name="address_label_apt_optional">Appart. (facoltativo)</string>
+    <!-- Label for input requesting city, used for all locations -->
+    <string name="address_label_city">Città</string>
+    <!-- Label for input requesting city where input is optional, used for all locations -->
+    <string name="address_label_city_optional">Città (facoltativo)</string>
+    <!-- Label for input requesting country, used for all locations -->
+    <string name="address_label_country">Paese</string>
+    <!-- Label for input requesting county, used for UK based addresses -->
+    <string name="address_label_county">Regione</string>
+    <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+    <string name="address_label_county_optional">Regione (facoltativo)</string>
+    <!-- Label for input requesting the name of a customer -->
+    <string name="address_label_name">Nome</string>
+    <!-- Label for input requesting the name of a customer where input is optional -->
+    <string name="address_label_name_optional">Nome (facoltativo)</string>
+    <!-- Label for input requesting phone number, used for all locations -->
+    <string name="address_label_phone_number">Numero di telefono</string>
+    <!-- Label for input requesting phone number where input is optional, used for all locations -->
+    <string name="address_label_phone_number_optional">Numero di telefono (facoltativo)</string>
+    <!-- Label for input requesting postal code, used for Canada based addresses -->
+    <string name="address_label_postal_code">Codice postale</string>
+    <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+    <string name="address_label_postal_code_optional">Codice postale (facoltativo)</string>
+    <!-- Label for input requesting postcode, used for UK based addresses -->
+    <string name="address_label_postcode">Codice postale</string>
+    <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+    <string name="address_label_postcode_optional">Codice postale (facoltativo)</string>
+    <!-- Label for input requesting province, used for canadian addresses -->
+    <string name="address_label_province">Provincia</string>
+    <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+    <string name="address_label_province_optional">Provincia (facoltativo)</string>
+    <!-- Label for input requesting the region, used for international addresses -->
+    <string name="address_label_region_generic"> Stato / Provincia / Regione</string>
+    <!-- Label for input requesting the region where input is optional, used for international addresses -->
+    <string name="address_label_region_generic_optional">Stato / Provincia / Regione (facoltativo)</string>
+    <!-- Label for input requesting state, used for US based addreses -->
+    <string name="address_label_state">Stato</string>
+    <!-- Label for input requesting state where input is optional, used for US based addresses -->
+    <string name="address_label_state_optional">Stato (facoltativo)</string>
+    <!-- Label for input requesting zip code, used for US based addreses -->
+    <string name="address_label_zip_code">Codice postale</string>
+    <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+    <string name="address_label_zip_code_optional">Codice postale (facoltativo)</string>
+    <!-- Label for input requesting postal code, used for international addresses -->
+    <string name="address_label_zip_postal_code">CAP/Codice postale</string>
+    <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+    <string name="address_label_zip_postal_code_optional">CAP/Codice postale (facoltativo)</string>
+    <!-- Error text indicating name is required -->
+    <string name="address_name_required">Inserisci il tuo nome</string>
+    <!-- Error text indicating that phone number is required, used for all addresses -->
+    <string name="address_phone_number_required">Inserisci il tuo numero di telefono</string>
+    <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+    <string name="address_postal_code_invalid">Il codice postale non è valido</string>
+    <!-- Error text indicating postcode is invalid, used for UK addresses -->
+    <string name="address_postcode_invalid">Il codice postale non è valido</string>
+    <!-- Error text indicating that province is required, used for Canada addresses -->
+    <string name="address_province_required">Inserisci la provincia</string>
+    <!-- Error text indicating that region is required, used for international addresses -->
+    <string name="address_region_generic_required">Inserisci lo Stato/Provincia/Regione</string>
+    <!-- Error text indicating that address is required, used for all locations -->
+    <string name="address_required">Inserisci il tuo indirizzo</string>
+    <!-- title of a screen prompting user to enter a shipping address -->
+    <string name="address_shipping_address">Indirizzo di spedizione</string>
+    <!-- Error text indicating that state is required, used for US addresses -->
+    <string name="address_state_required">Inserisci lo stato</string>
+    <!-- Error text indicating zip code is invalid, used for US addresses -->
+    <string name="address_zip_invalid">Il codice postale non è valido.</string>
+    <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+    <string name="address_zip_postal_invalid">Il CAP/codice postale non è valido</string>
+    <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+    <string name="add_card">Aggiungi una nuova carta di credito o di debito per fare acquisti in questa app.</string>
+    <!-- Text informing user there are no existing payment methods in the application -->
+    <string name="no_payment_methods">Nessuna modalità di pagamento.</string>
+    <!-- Human friendly label for something with $0 price -->
+    <string name="price_free">Gratuito</string>
+    <!-- Screen title telling users they should add an address -->
+    <string name="title_add_an_address">Aggiungi un indirizzo</string>
+    <!-- Screen title telling users they should select a shipping address -->
+    <string name="title_select_shipping_method">Seleziona metodo di spedizione</string>
 </resources>
