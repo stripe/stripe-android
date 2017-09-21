@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Error text indicating that city is required, used for all locations -->
+    <string name="address_city_required">Kirjoita paikkakunta</string>
+    <!-- Error text indicating that county is required, used for UK addresses -->
+    <string name="address_county_required">Kirjoita lääni</string>
+    <!-- Label for input requesting the first line of an address, used for US and Canada addresses -->
+    <string name="address_label_address">Osoite</string>
+    <!-- Label for input requesting the first line of an address, used for international addresses -->
+    <string name="address_label_address_line1">Osoiterivi 1</string>
+    <!-- Label for input requesting the first line of an address where , used for international addresses -->
+    <string name="address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
+    <!-- Label for input requesting address line 2, used for international addresses -->
+    <string name="address_label_address_line2">Osoiterivi 2</string>
+    <!-- Label for input requesting address line 2 where input in optional used for international addresses -->
+    <string name="address_label_address_line2_optional">Osoiterivi 2 (valinnainen)</string>
+    <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+    <string name="address_label_address_optional">Osoite (valinnainen) </string>
+    <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
+    <string name="address_label_apt">Asunto </string>
+    <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+    <string name="address_label_apt_optional">Asunto (valinnainen)</string>
+    <!-- Label for input requesting city, used for all locations -->
+    <string name="address_label_city">Paikkakunta</string>
+    <!-- Label for input requesting city where input is optional, used for all locations -->
+    <string name="address_label_city_optional">Paikkakunta (valinnainen)</string>
+    <!-- Label for input requesting country, used for all locations -->
+    <string name="address_label_country">Maa</string>
+    <!-- Label for input requesting county, used for UK based addresses -->
+    <string name="address_label_county">Lääni</string>
+    <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+    <string name="address_label_county_optional">Lääni (valinnainen)</string>
+    <!-- Label for input requesting the name of a customer -->
+    <string name="address_label_name">Nimi</string>
+    <!-- Label for input requesting the name of a customer where input is optional -->
+    <string name="address_label_name_optional">Nimi (valinnainen)</string>
+    <!-- Label for input requesting phone number, used for all locations -->
+    <string name="address_label_phone_number">Puhelinnumero</string>
+    <!-- Label for input requesting phone number where input is optional, used for all locations -->
+    <string name="address_label_phone_number_optional">Puhelinnumero (valinnainen)</string>
+    <!-- Label for input requesting postal code, used for Canada based addresses -->
+    <string name="address_label_postal_code">Postinumero</string>
+    <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+    <string name="address_label_postal_code_optional">Postinumero (valinnainen)</string>
+    <!-- Label for input requesting postcode, used for UK based addresses -->
+    <string name="address_label_postcode">Postinumero</string>
+    <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+    <string name="address_label_postcode_optional">Postinumero (valinnainen)</string>
+    <!-- Label for input requesting province, used for canadian addresses -->
+    <string name="address_label_province">Provinssi</string>
+    <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+    <string name="address_label_province_optional">Maakunta (valinnainen)</string>
+    <!-- Label for input requesting the region, used for international addresses -->
+    <string name="address_label_region_generic"> Osavaltio/maakunta/alue</string>
+    <!-- Label for input requesting the region where input is optional, used for international addresses -->
+    <string name="address_label_region_generic_optional">Osavaltio/maakunta/alue (valinnainen)</string>
+    <!-- Label for input requesting state, used for US based addreses -->
+    <string name="address_label_state">Osavaltio</string>
+    <!-- Label for input requesting state where input is optional, used for US based addresses -->
+    <string name="address_label_state_optional">Osavaltio (valinnainen)</string>
+    <!-- Label for input requesting zip code, used for US based addreses -->
+    <string name="address_label_zip_code">Postinumero</string>
+    <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+    <string name="address_label_zip_code_optional">Postinumero (valinnainen)</string>
+    <!-- Label for input requesting postal code, used for international addresses -->
+    <string name="address_label_zip_postal_code">Postinumero</string>
+    <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+    <string name="address_label_zip_postal_code_optional">Postinumero (valinnainen)</string>
+    <!-- Error text indicating name is required -->
+    <string name="address_name_required">Kirjoita nimesi</string>
+    <!-- Error text indicating that phone number is required, used for all addresses -->
+    <string name="address_phone_number_required">Kirjoita puhelinnumerosi</string>
+    <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+    <string name="address_postal_code_invalid">Postinumerosi ei kelpaa</string>
+    <!-- Error text indicating postcode is invalid, used for UK addresses -->
+    <string name="address_postcode_invalid">Postinumerosi ei kelpaa</string>
+    <!-- Error text indicating that province is required, used for Canada addresses -->
+    <string name="address_province_required">Kirjoita maakunta</string>
+    <!-- Error text indicating that region is required, used for international addresses -->
+    <string name="address_region_generic_required">Kirjoita osavaltio/maakunta/alue</string>
+    <!-- Error text indicating that address is required, used for all locations -->
+    <string name="address_required">Kirjoita osoite</string>
+    <!-- title of a screen prompting user to enter a shipping address -->
+    <string name="address_shipping_address">Lähetysosoite</string>
+    <!-- Error text indicating that state is required, used for US addresses -->
+    <string name="address_state_required">Kirjoita osavaltio</string>
+    <!-- Error text indicating zip code is invalid, used for US addresses -->
+    <string name="address_zip_invalid">Postinumero ei kelpaa.</string>
+    <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+    <string name="address_zip_postal_invalid">Postinumero ei kelpaa</string>
+    <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+    <string name="add_card">Lisää uusi pankki- tai luottokortti, jotta voit tehdä ostoksia tämän sovelluksen kautta.</string>
+    <!-- Text informing user there are no existing payment methods in the application -->
+    <string name="no_payment_methods">Ei maksumenetelmiä.</string>
+    <!-- Human friendly label for something with $0 price -->
+    <string name="price_free">Maksuton</string>
+    <!-- Screen title telling users they should add an address -->
+    <string name="title_add_an_address">Lisää osoite</string>
+    <!-- Screen title telling users they should select a shipping address -->
+    <string name="title_select_shipping_method">Valitse lähetysmenetelmä</string>
+</resources>
