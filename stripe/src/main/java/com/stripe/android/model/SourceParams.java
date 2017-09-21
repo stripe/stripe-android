@@ -61,6 +61,36 @@ public class SourceParams {
 
     private SourceParams() {}
 
+    /**
+     * Create parameters used to generate a reusable Alipay source.
+     *
+     * @param currency the currency code that this source will be charged in
+     * @param name the user's name
+     * @param email the user's email
+     * @param returnUrl a url used to reopen the application
+     * @return a {@link SourceParams} that can be used to create an Alipay reusable source
+     */
+    public static SourceParams createAlipayReusableParams(
+            @NonNull String currency,
+            @Nullable String name,
+            @Nullable String email,
+            @NonNull String returnUrl) {
+        SourceParams params = new SourceParams()
+                .setType(Source.ALIPAY)
+                .setCurrency(currency)
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setUsage(Source.REUSABLE);
+
+        Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put(FIELD_NAME, name);
+        ownerMap.put(FIELD_EMAIL, email);
+        removeNullAndEmptyParams(ownerMap);
+        if (ownerMap.keySet().size() > 0) {
+            params.setOwner(ownerMap);
+        }
+
+        return params;
+    }
 
     /**
      * Create a source to be used with the Alipay SDK for single-use payments.
