@@ -32,8 +32,6 @@ import com.stripe.android.StripeTextUtils;
 import java.util.Locale;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
-import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
-import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -202,6 +200,20 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText.setEnabled(isEnabled);
         mExpiryDateEditText.setEnabled(isEnabled);
         mCvcNumberEditText.setEnabled(isEnabled);
+    }
+
+    /**
+     * Override of {@link View#isEnabled()} that returns {@code true} only
+     * if all three sub-controls are enabled.
+     *
+     * @return {@code true} if the card number field, expiry field, and cvc field are enabled,
+     * {@code false} otherwise
+     */
+    @Override
+    public boolean isEnabled() {
+        return mCardNumberEditText.isEnabled() &&
+                mExpiryDateEditText.isEnabled() &&
+                mCvcNumberEditText.isEnabled();
     }
 
     @Override
