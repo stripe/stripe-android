@@ -19,7 +19,7 @@ public class PaymentSessionData implements Parcelable {
     private boolean mIsPaymentReadyToCharge;
     @NonNull private String mSelectedPaymentMethodId = NO_PAYMENT;
     private long mShippingTotal = 0L;
-    @NonNull @PaymentResultListener.PaymentResult String mPaymentResult =
+    @NonNull @PaymentResultListener.PaymentResult private String mPaymentResult =
             PaymentResultListener.INCOMPLETE;
     @Nullable private ShippingInformation mShippingInformation;
     @Nullable private ShippingMethod mShippingMethod;
@@ -161,7 +161,6 @@ public class PaymentSessionData implements Parcelable {
         return mShippingMethod != null
                 ? mShippingMethod.equals(that.mShippingMethod)
                 : that.mShippingMethod == null;
-
     }
 
     @Override
