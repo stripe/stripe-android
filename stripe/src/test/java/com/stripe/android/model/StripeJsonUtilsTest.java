@@ -1,13 +1,11 @@
 package com.stripe.android.model;
 
-import com.stripe.android.model.StripeJsonUtils;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.experimental.theories.internal.BooleanSupplier;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -19,16 +17,14 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link StripeJsonUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class StripeJsonUtilsTest {
 
     private static final String SIMPLE_JSON_TEST_OBJECT =
