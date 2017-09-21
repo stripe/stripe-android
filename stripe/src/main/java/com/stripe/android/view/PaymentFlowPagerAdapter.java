@@ -43,7 +43,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
 
     private boolean shouldAddShippingScreen() {
         return mPaymentSessionConfig.isShippingMethodRequired() &&
-                ((mPaymentSessionConfig.isShippingInfoRequired() && mAddressSaved) || !mPaymentSessionConfig.isShippingInfoRequired()) &&
+                (!mPaymentSessionConfig.isShippingInfoRequired() || mAddressSaved) &&
                     !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
     }
 

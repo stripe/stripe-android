@@ -48,7 +48,7 @@ public class CardNumberEditTextTest {
                 Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
         mCardNumberEditText =
-                ((CardInputTestActivity) activityController.get()).getCardNumberEditText();
+                activityController.get().getCardNumberEditText();
         mCardNumberEditText.setText("");
         mCardNumberEditText.setCardNumberCompleteListener(mCardNumberCompleteListener);
         mCardNumberEditText.setCardBrandChangeListener(mCardBrandChangeListener);
