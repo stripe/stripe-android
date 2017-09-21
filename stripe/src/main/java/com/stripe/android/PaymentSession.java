@@ -48,12 +48,17 @@ public class PaymentSession {
      */
     public void completePayment(@NonNull PaymentCompletionProvider provider) {
         provider.completePayment(mPaymentSessionData,
-                                 new PaymentResultListener() {
-            @Override
-            public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
-                
-            }
-        });
+                new PaymentResultListener() {
+                    @Override
+                    public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
+                        mPaymentSessionData.setPaymentResult(paymentResult);
+                        CustomerSession.getInstance().clearUsageTokens();
+                        if (mPaymentSessionListener != null) {
+                            mPaymentSessionListener
+                                    .onPaymentSessionDataChanged(mPaymentSessionData);
+                        }
+                    }
+                });
     }
 
     /**
@@ -211,7 +216,6 @@ public class PaymentSession {
     /**
      * @return the data associated with the instance of this class.
      */
-<<<<<<< HEAD
     public PaymentSessionData getPaymentSessionData() {
         return mPaymentSessionData;
     }
@@ -220,22 +224,7 @@ public class PaymentSession {
      * Should be called during the host {@link Activity}'s onDestroy to detach listeners.
      */
     public void onDestroy() {
-       mPaymentSessionListener = null;
-=======
-    public void completePayment(@NonNull PaymentCompletionProvider provider) {
-        provider.completePayment(mPaymentSessionData,
-                new PaymentResultListener() {
-                    @Override
-                    public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
-                        mPaymentSessionData.setPaymentResult(paymentResult);
-                        CustomerSession.getInstance().clearUsageTokens();
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener
-                                    .onPaymentSessionDataChanged(mPaymentSessionData);
-                        }
-                    }
-                });
->>>>>>> fixing all the recent parcelable things
+        mPaymentSessionListener = null;
     }
 
     private void fetchCustomer() {
