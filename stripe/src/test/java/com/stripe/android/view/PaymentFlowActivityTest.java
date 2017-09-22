@@ -60,23 +60,25 @@ public class PaymentFlowActivityTest {
     private ActivityController<PaymentFlowActivity> mActivityController;
     private ShadowActivity mShadowActivity;
     private ShippingInfoWidget mShippingInfoWidget;
-    @Mock
-    EphemeralKeyProvider mEphemeralKeyProvider;
-
+    @Mock EphemeralKeyProvider mEphemeralKeyProvider;
     @Mock BroadcastReceiver mBroadcastReceiver;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
-        localBroadcastManager.registerReceiver(mBroadcastReceiver, new IntentFilter(PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED));
+        LocalBroadcastManager localBroadcastManager =
+                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+        localBroadcastManager.registerReceiver(
+                mBroadcastReceiver,
+                new IntentFilter(PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED));
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider);
     }
 
     @After
     public void tearDown() {
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .unregisterReceiver(mBroadcastReceiver);
         mActivityController = null;
     }
 
@@ -152,7 +154,9 @@ public class PaymentFlowActivityTest {
         verify(mBroadcastReceiver).onReceive(any(Context.class), intentArgumentCaptor.capture());
         Intent captured = intentArgumentCaptor.getValue();
         assertNotNull(captured);
-        assertEquals(captured.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA), getExampleShippingInfo());
+        assertEquals(
+                captured.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA),
+                getExampleShippingInfo());
     }
 
     @Test
@@ -171,7 +175,8 @@ public class PaymentFlowActivityTest {
         mActivityController.get().setAlertMessageListener(mockListener);
 
         Bundle bundle = new Bundle();
-        bundle.putSerializable(EXTRA_EXCEPTION, new APIException("Something's wrong", "ID123", 400, null));
+        bundle.putSerializable(EXTRA_EXCEPTION,
+                new APIException("Something's wrong", "ID123", 400, null));
         Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
         errorIntent.putExtras(bundle);
         LocalBroadcastManager.getInstance(mActivityController.get())
@@ -181,7 +186,7 @@ public class PaymentFlowActivityTest {
     }
 
     @Test
-    public void onShippingInfoProcessed_whenShippingInfoSubmitted_rendersCorrectly() {
+    public void onShippingInfoProcessed_whenInvalidShippingInfoSubmitted_rendersCorrectly() {
         Intent intent = new Intent(RuntimeEnvironment.application, PaymentFlowActivity.class);
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
@@ -198,8 +203,23 @@ public class PaymentFlowActivityTest {
         assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.VISIBLE);
         Intent onShippingInfoProcessedInvalid = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
         onShippingInfoProcessedInvalid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(onShippingInfoProcessedInvalid);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(onShippingInfoProcessedInvalid);
         assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.GONE);
+    }
+
+    @Test
+    public void onShippingInfoProcessed_whenValidShippingInfoSubmitted_rendersCorrectly() {
+        Intent intent = new Intent(RuntimeEnvironment.application, PaymentFlowActivity.class);
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
+                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                .build();
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
 
         // valid result
         paymentFlowActivity.onActionSave();
@@ -208,10 +228,12 @@ public class PaymentFlowActivityTest {
         ArrayList<ShippingMethod> shippingMethods = new ArrayList<>();
         shippingMethods.add(new ShippingMethod("label", "id", 0, "USD"));
         onShippingInfoProcessedValid.putExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(onShippingInfoProcessedValid);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(onShippingInfoProcessedValid);
         assertEquals(View.VISIBLE, paymentFlowActivity.mProgressBar.getVisibility());
         Intent shippingInfoSaved = new Intent(EVENT_SHIPPING_INFO_SAVED);
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(shippingInfoSaved);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(shippingInfoSaved);
         assertEquals(View.GONE, paymentFlowActivity.mProgressBar.getVisibility());
     }
 
