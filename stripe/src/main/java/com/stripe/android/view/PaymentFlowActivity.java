@@ -113,8 +113,8 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onActionSave() {
         if (mPaymentFlowPagerAdapter.getPageAt(
-                mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.ADDRESS)) {
-            onAddressSave();
+                mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
+            onShippingInfoSubmitted();
         } else {
             onShippingMethodSave();
         }
