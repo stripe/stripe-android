@@ -57,8 +57,15 @@ public class PaymentFlowActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
-        final PaymentSessionConfig paymentSessionConfig = getIntent().getParcelableExtra(PAYMENT_SESSION_CONFIG);
+        final PaymentSessionConfig paymentSessionConfig =
+                getIntent().getParcelableExtra(PAYMENT_SESSION_CONFIG);
         mPaymentSessionData = getIntent().getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
+
+        if (mPaymentSessionData == null) {
+            throw new IllegalArgumentException(
+                    "PaymentFlowActivity launched without PaymentSessionData");
+        }
+
         mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentSessionConfig);
         mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -83,11 +90,15 @@ public class PaymentFlowActivity extends StripeActivity {
         mShippingInfoSubmittedBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                boolean isShippingInfoValid = intent.getBooleanExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
+                boolean isShippingInfoValid = intent.getBooleanExtra(
+                        EXTRA_IS_SHIPPING_INFO_VALID,
+                        false);
                 if (isShippingInfoValid) {
                     onShippingInfoValidated();
-                    mValidShippingMethods = intent.getParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS);
-                    mDefaultShippingMethod = intent.getParcelableExtra(EXTRA_DEFAULT_SHIPPING_METHOD);
+                    mValidShippingMethods =
+                            intent.getParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS);
+                    mDefaultShippingMethod =
+                            intent.getParcelableExtra(EXTRA_DEFAULT_SHIPPING_METHOD);
                 } else {
                     setCommunicatingProgress(false);
                     String shippingInfoError = intent.getStringExtra(EXTRA_SHIPPING_INFO_ERROR);
@@ -123,19 +134,27 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mShippingInfoSubmittedBroadcastReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mShippingInfoSavedBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mShippingInfoSubmittedBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mShippingInfoSavedBroadcastReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mShippingInfoSubmittedBroadcastReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mShippingInfoSubmittedBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_PROCESSED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mShippingInfoSavedBroadcastReceiver, new IntentFilter(EVENT_SHIPPING_INFO_SAVED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mShippingInfoSavedBroadcastReceiver,
+                new IntentFilter(EVENT_SHIPPING_INFO_SAVED));
     }
+
     private void onShippingInfoValidated() {
-        CustomerSession.getInstance().setCustomerShippingInformation(this, mShippingInformationSubmitted);
+        CustomerSession.getInstance().setCustomerShippingInformation(
+                this,
+                mShippingInformationSubmitted);
     }
 
     private void onShippingMethodsReady(
@@ -177,7 +196,8 @@ public class PaymentFlowActivity extends StripeActivity {
     }
 
     private void onShippingMethodSave() {
-        SelectShippingMethodWidget selectShippingMethodWidget = findViewById(R.id.select_shipping_method_widget);
+        SelectShippingMethodWidget selectShippingMethodWidget =
+                findViewById(R.id.select_shipping_method_widget);
         ShippingMethod shippingMethod = selectShippingMethodWidget.getSelectedShippingMethod();
         mPaymentSessionData.setShippingMethod(shippingMethod);
         Intent intent = new Intent();

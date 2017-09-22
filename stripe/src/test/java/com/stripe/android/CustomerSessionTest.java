@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
+import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -680,6 +681,7 @@ public class CustomerSessionTest {
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
         Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
@@ -697,6 +699,7 @@ public class CustomerSessionTest {
                 .setShippingInfoRequired(false)
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
         Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
