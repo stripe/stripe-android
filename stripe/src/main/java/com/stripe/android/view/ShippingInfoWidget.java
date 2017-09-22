@@ -31,8 +31,8 @@ public class ShippingInfoWidget extends LinearLayout {
     public static final String STATE_FIELD = "state";
     public static final String PHONE_FIELD = "phone";
 
-    private List<String> mOptionalAddressFields = new ArrayList<>();
-    private List<String> mHiddenAddressFields = new ArrayList<>();
+    private List<String> mOptionalShippingInfoFields = new ArrayList<>();
+    private List<String> mHiddenShippingInfoFields = new ArrayList<>();
 
     private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
     private TextInputLayout mAddressLine1TextInputLayout;
@@ -70,9 +70,9 @@ public class ShippingInfoWidget extends LinearLayout {
      */
     public void setOptionalFields(@Nullable List<String> optionalAddressFields) {
         if (optionalAddressFields != null) {
-            mOptionalAddressFields = optionalAddressFields;
+            mOptionalShippingInfoFields = optionalAddressFields;
         } else {
-            mOptionalAddressFields = new ArrayList<>();
+            mOptionalShippingInfoFields = new ArrayList<>();
         }
         renderLabels();
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
@@ -84,9 +84,9 @@ public class ShippingInfoWidget extends LinearLayout {
      */
     public void setHiddenFields(@Nullable List<String> hiddenAddressFields) {
         if (hiddenAddressFields !=  null) {
-            mHiddenAddressFields = hiddenAddressFields;
+            mHiddenShippingInfoFields = hiddenAddressFields;
         } else {
-            mHiddenAddressFields = new ArrayList<>();
+            mHiddenShippingInfoFields = new ArrayList<>();
         }
         renderLabels();
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
@@ -139,7 +139,7 @@ public class ShippingInfoWidget extends LinearLayout {
         boolean postalCodeValid = true;
         String countrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
         if (mPostalCodeEditText.getText().toString().isEmpty() &&
-                (mOptionalAddressFields.contains(POSTAL_CODE_FIELD) || mHiddenAddressFields.contains(POSTAL_CODE_FIELD))) {
+                (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD) || mHiddenShippingInfoFields.contains(POSTAL_CODE_FIELD))) {
             postalCodeValid = true;
         } else if (countrySelected.equals(Locale.US.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText().toString().trim());
@@ -152,19 +152,19 @@ public class ShippingInfoWidget extends LinearLayout {
         }
         mPostalCodeEditText.setShouldShowError(!postalCodeValid);
 
-        boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD) && !mHiddenAddressFields.contains(ADDRESS_LINE_ONE_FIELD);
+        boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() && !mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD) && !mHiddenShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD);
         mAddressEditText.setShouldShowError(requiredAddressLine1Empty);
 
-        boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(CITY_FIELD) && !mHiddenAddressFields.contains(CITY_FIELD);
+        boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() && !mOptionalShippingInfoFields.contains(CITY_FIELD) && !mHiddenShippingInfoFields.contains(CITY_FIELD);
         mCityEditText.setShouldShowError(requiredCityEmpty);
 
         boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty();
         mNameEditText.setShouldShowError(requiredNameEmpty);
 
-        boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(STATE_FIELD) && !mHiddenAddressFields.contains(STATE_FIELD);
+        boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() && !mOptionalShippingInfoFields.contains(STATE_FIELD) && !mHiddenShippingInfoFields.contains(STATE_FIELD);
         mStateEditText.setShouldShowError(requiredStateEmpty);
 
-        boolean requiredPhoneNumberEmpty = mPhoneNumberEditText.getText().toString().isEmpty() && !mOptionalAddressFields.contains(PHONE_FIELD) && !mHiddenAddressFields.contains(PHONE_FIELD);
+        boolean requiredPhoneNumberEmpty = mPhoneNumberEditText.getText().toString().isEmpty() && !mOptionalShippingInfoFields.contains(PHONE_FIELD) && !mHiddenShippingInfoFields.contains(PHONE_FIELD);
         mPhoneNumberEditText.setShouldShowError(requiredPhoneNumberEmpty);
 
         return postalCodeValid &&
@@ -221,12 +221,12 @@ public class ShippingInfoWidget extends LinearLayout {
 
     private void renderLabels() {
         mNameTextInputLayout.setHint(getResources().getString(R.string.address_label_name));
-        if (mOptionalAddressFields.contains(CITY_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(CITY_FIELD)) {
             mCityTextInputLayout.setHint(getResources().getString(R.string.address_label_city_optional));
         } else {
             mCityTextInputLayout.setHint(getResources().getString(R.string.address_label_city));
         }
-        if (mOptionalAddressFields.contains(PHONE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(PHONE_FIELD)) {
             mPhoneNumberTextInputLayout.setHint(getResources().getString(R.string.address_label_phone_number_optional));
         } else {
             mPhoneNumberTextInputLayout.setHint(getResources().getString(R.string.address_label_phone_number));
@@ -235,22 +235,22 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void hideHiddenFields() {
-        if (mHiddenAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setVisibility(GONE);
         }
-        if (mHiddenAddressFields.contains(ADDRESS_LINE_TWO_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(ADDRESS_LINE_TWO_FIELD)) {
             mAddressLine2TextInputLayout.setVisibility(GONE);
         }
-        if (mHiddenAddressFields.contains(STATE_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(STATE_FIELD)) {
             mStateTextInputLayout.setVisibility(GONE);
         }
-        if (mHiddenAddressFields.contains(CITY_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(CITY_FIELD)) {
             mCityTextInputLayout.setVisibility(GONE);
         }
-        if (mHiddenAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setVisibility(GONE);
         }
-        if (mHiddenAddressFields.contains(PHONE_FIELD)) {
+        if (mHiddenShippingInfoFields.contains(PHONE_FIELD)) {
             mPhoneNumberTextInputLayout.setVisibility(GONE);
         }
     }
@@ -267,7 +267,7 @@ public class ShippingInfoWidget extends LinearLayout {
         }
 
         if (CountryUtils.doesCountryUsePostalCode(countrySelected) &&
-                !mHiddenAddressFields.contains(POSTAL_CODE_FIELD)) {
+                !mHiddenShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setVisibility(VISIBLE);
         } else {
             mPostalCodeTextInputLayout.setVisibility(GONE);
@@ -275,18 +275,18 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void renderUSForm() {
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_optional));
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
         mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
-        if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_code_optional));
         } else {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_code));
         }
-        if (mOptionalAddressFields.contains(STATE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(STATE_FIELD)) {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_state_optional));
         } else {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_state));
@@ -296,18 +296,18 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void renderGreatBritainForm() {
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1_optional));
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1));
         }
         mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
-        if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postcode_optional));
         } else {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postcode));
         }
-        if (mOptionalAddressFields.contains(STATE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(STATE_FIELD)) {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_county_optional));
         } else {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_county));
@@ -317,18 +317,18 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void renderCanadianForm() {
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_optional));
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address));
         }
         mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_apt_optional));
-        if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postal_code_optional));
         } else {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_postal_code));
         }
-        if (mOptionalAddressFields.contains(STATE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(STATE_FIELD)) {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_province_optional));
         } else {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_province));
@@ -339,18 +339,18 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void renderInternationalForm() {
-        if (mOptionalAddressFields.contains(ADDRESS_LINE_ONE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD)) {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1_optional));
         } else {
             mAddressLine1TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line1));
         }
         mAddressLine2TextInputLayout.setHint(getResources().getString(R.string.address_label_address_line2_optional));
-        if (mOptionalAddressFields.contains(POSTAL_CODE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD)) {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_postal_code_optional));
         } else {
             mPostalCodeTextInputLayout.setHint(getResources().getString(R.string.address_label_zip_postal_code));
         }
-        if (mOptionalAddressFields.contains(STATE_FIELD)) {
+        if (mOptionalShippingInfoFields.contains(STATE_FIELD)) {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_region_generic_optional));
         } else {
             mStateTextInputLayout.setHint(getResources().getString(R.string.address_label_region_generic));

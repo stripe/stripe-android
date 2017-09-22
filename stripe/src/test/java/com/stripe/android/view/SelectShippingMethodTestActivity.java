@@ -12,19 +12,19 @@ import com.stripe.android.R;
  */
 public class SelectShippingMethodTestActivity extends AppCompatActivity {
 
-    private SelectShippingMethodWidget mSelectShippingAddressWidget;
+    private SelectShippingMethodWidget mSelectShippingMethodWidget;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.StripeDefaultTheme);
-        mSelectShippingAddressWidget = new SelectShippingMethodWidget(this);
+        mSelectShippingMethodWidget = new SelectShippingMethodWidget(this);
         LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.addView(mSelectShippingAddressWidget);
+        linearLayout.addView(mSelectShippingMethodWidget);
         setContentView(linearLayout);
     }
 
-    public SelectShippingMethodWidget getSelectShippingAddressWidget() {
-        return mSelectShippingAddressWidget;
+    public SelectShippingMethodWidget getSelectShippingMethodWidget() {
+        return mSelectShippingMethodWidget;
     }
 }
