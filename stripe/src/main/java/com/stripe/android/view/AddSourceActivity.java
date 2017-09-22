@@ -18,6 +18,9 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
+import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
+import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
+
 /**
  * Activity used to display a {@link CardMultilineWidget} and receive the resulting
  * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of the launching activity.
@@ -35,6 +38,7 @@ public class AddSourceActivity extends StripeActivity {
     FrameLayout mErrorLayout;
     StripeProvider mStripeProvider;
 
+    private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
 
     /**
@@ -65,12 +69,21 @@ public class AddSourceActivity extends StripeActivity {
         mErrorLayout = findViewById(R.id.add_source_error_container);
         boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
+        mStartedFromPaymentSession =
+                getIntent().getBooleanExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
         if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
-            CustomerSession.getInstance().addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+            initCustomerSessionTokens();
         }
+
         setTitle(R.string.title_add_a_card);
+    }
+
+    @VisibleForTesting
+    void initCustomerSessionTokens() {
+        logToCustomerSessionIf(ADD_SOURCE_ACTIVITY, mUpdatesCustomer);
+        logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
     }
 
     @Override
@@ -143,6 +156,23 @@ public class AddSourceActivity extends StripeActivity {
         }
     }
 
+    private void logToCustomerSessionIf(@NonNull String logToken, boolean condition) {
+        if (mCustomerSessionProxy != null) {
+            logToProxyIf(logToken, condition);
+            return;
+        }
+
+        if (condition) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(logToken);
+        }
+    }
+
+    private void logToProxyIf(@NonNull String logToken, boolean condition) {
+        if (mCustomerSessionProxy != null && condition) {
+            mCustomerSessionProxy.addProductUsageTokenIfValid(logToken);
+        }
+    }
+
     private void finishWithSource(@NonNull Source source) {
         setCommunicatingProgress(false);
         Intent intent = new Intent();
@@ -182,6 +212,7 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     interface CustomerSessionProxy {
+        void addProductUsageTokenIfValid(String token);
         void addCustomerSource(String sourceId, CustomerSession.SourceRetrievalListener listener);
     }
 }

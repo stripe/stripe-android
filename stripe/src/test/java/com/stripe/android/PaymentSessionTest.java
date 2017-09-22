@@ -33,6 +33,7 @@ import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
 import static com.stripe.android.CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT;
 import static com.stripe.android.CustomerSessionTest.SECOND_TEST_CUSTOMER_OBJECT;
+import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -197,7 +198,7 @@ public class PaymentSessionTest {
     }
 
     @Test
-    public void selectPaymentMethod_launchesPaymentMethodsActivity() {
+    public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -212,13 +213,14 @@ public class PaymentSessionTest {
         PaymentSession paymentSession = new PaymentSession(mActivityController.get());
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
-
         paymentSession.presentPaymentMethodSelection();
+
         ShadowActivity.IntentForResult intentForResult =
                 mShadowActivity.getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
+        assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
 
     @Test

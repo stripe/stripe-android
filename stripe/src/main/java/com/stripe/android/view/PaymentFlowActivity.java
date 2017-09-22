@@ -22,6 +22,7 @@ import java.util.List;
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
+import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -51,6 +52,7 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
@@ -77,7 +79,6 @@ public class PaymentFlowActivity extends StripeActivity {
             public void onPageScrollStateChanged(int i) {
 
             }
-
         });
         mShippingInfoSubmittedBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -111,7 +112,8 @@ public class PaymentFlowActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-        if (mPaymentFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
+        if (mPaymentFlowPagerAdapter.getPageAt(
+                mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
             onShippingInfoSubmitted();
         } else {
             onShippingMethodSave();

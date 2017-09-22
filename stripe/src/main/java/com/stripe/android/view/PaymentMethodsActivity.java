@@ -26,6 +26,9 @@ import com.stripe.android.model.CustomerSource;
 
 import java.util.List;
 
+import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
+import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
+
 /**
  * An activity that allows a user to select from a customer's available payment methods, or
  * to add new ones.
@@ -44,6 +47,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
+    private boolean mStartedFromPaymentSession;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PaymentMethodsActivity.class);
@@ -62,10 +66,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        startActivityForResult(
-                                AddSourceActivity.newIntent(PaymentMethodsActivity.this,
-                                        false, true),
-                                REQUEST_CODE_ADD_CARD);
+                        Intent addSourceIntent = AddSourceActivity.newIntent(
+                                PaymentMethodsActivity.this,
+                                false,
+                                true);
+                        if (mStartedFromPaymentSession) {
+                            addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+                        }
+                        startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
                     }
                 });
 
@@ -81,6 +89,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
+        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
     }
 
     @Override
@@ -88,6 +97,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
             setCommunicatingProgress(true);
+            initLoggingTokens();
             CustomerSession.CustomerRetrievalListener listener =
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
@@ -147,14 +157,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     @VisibleForTesting
     void initializeCustomerSourceData() {
-        Customer cachedCustomer;
-        if (mCustomerSessionProxy == null) {
-            cachedCustomer = CustomerSession.getInstance().getCachedCustomer();
-            CustomerSession.getInstance().addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
-        } else {
-            cachedCustomer = mCustomerSessionProxy.getCachedCustomer();
-            mCustomerSessionProxy.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
-        }
+        Customer cachedCustomer = mCustomerSessionProxy == null
+                ? CustomerSession.getInstance().getCachedCustomer()
+                : mCustomerSessionProxy.getCachedCustomer();
 
         if (cachedCustomer != null) {
             mCustomer = cachedCustomer;
@@ -167,6 +172,20 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @VisibleForTesting
     void setCustomerSessionProxy(CustomerSessionProxy proxy) {
         mCustomerSessionProxy = proxy;
+    }
+
+    private void initLoggingTokens() {
+        if (mCustomerSessionProxy == null) {
+            if (mStartedFromPaymentSession) {
+                CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+            }
+            CustomerSession.getInstance().addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
+        } else {
+            if (mStartedFromPaymentSession) {
+                mCustomerSessionProxy.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+            }
+            mCustomerSessionProxy.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
+        }
     }
 
     /**

@@ -51,11 +51,12 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private static final String KEY_SOURCE = "source";
     private static final String KEY_SOURCE_TYPE = "source_type";
     private static final String KEY_SHIPPING_INFO = "shipping_info";
+    private static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
     private static final Set<String> VALID_TOKENS =
             new HashSet<>(Arrays.asList("AddSourceActivity",
                     "PaymentMethodsActivity",
                     "PaymentFlowActivity",
-                    "PaymentSession",
+                    TOKEN_PAYMENT_SESSION,
                     "ShippingInfoScreen",
                     "ShippingMethodScreen"));
 
@@ -119,6 +120,16 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         return mInstance;
     }
 
+    /**
+     * End the singleton instance of a {@link CustomerSession}.
+     * Calls to {@link CustomerSession#getInstance()} will throw an {@link IllegalStateException}
+     * after this call, until the user calls
+     * {@link CustomerSession#initCustomerSession(EphemeralKeyProvider)} again.
+     */
+    public static void endCustomerSession() {
+        clearInstance();
+    }
+
     @VisibleForTesting
     static void initCustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
@@ -129,6 +140,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     @VisibleForTesting
     static void clearInstance() {
+        if (mInstance == null) {
+            return;
+        }
+        mInstance.mThreadPoolExecutor.shutdownNow();
         mInstance = null;
     }
 
@@ -257,7 +272,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
     }
 
-    void clearUsageTokens() {
+    void resetUsageTokens() {
         mProductUsageTokens.clear();
     }
 
@@ -292,14 +307,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull final WeakReference<Context> contextWeakReference,
             @NonNull final EphemeralKey key,
             @NonNull final String sourceId,
-            @NonNull final String sourceType) {
+            @NonNull final String sourceType,
+            @NonNull final List<String> productUsageTokens) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 Source source = addCustomerSourceWithKey(
                         contextWeakReference,
                         key,
-                        new ArrayList<>(mProductUsageTokens),
+                        new ArrayList<>(productUsageTokens),
                         sourceId,
                         sourceType,
                         mStripeApiProxy);
@@ -321,14 +337,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull final WeakReference<Context> contextWeakReference,
             @NonNull final EphemeralKey key,
             @NonNull final String sourceId,
-            @NonNull final String sourceType) {
+            @NonNull final String sourceType,
+            @NonNull final List<String> productUsageTokens) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 Customer customer = setCustomerSourceDefaultWithKey(
                         contextWeakReference,
                         key,
-                        new ArrayList<>(mProductUsageTokens),
+                        new ArrayList<>(productUsageTokens),
                         sourceId,
                         sourceType,
                         mStripeApiProxy);
@@ -343,14 +360,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private void setCustomerShippingInformation(
             @NonNull final WeakReference<Context> contextWeakReference,
             @NonNull final EphemeralKey key,
-            @NonNull final ShippingInformation shippingInformation) {
+            @NonNull final ShippingInformation shippingInformation,
+            @NonNull final List<String> productUsageTokens) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 Customer customer = setCustomerShippingInfoWithKey(
                         contextWeakReference,
                         key,
-                        new ArrayList<>(mProductUsageTokens),
+                        new ArrayList<>(productUsageTokens),
                         shippingInformation,
                         mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customer);
@@ -405,7 +423,9 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         mCachedContextReference,
                         mEphemeralKey,
                         (String) arguments.get(KEY_SOURCE),
-                        (String) arguments.get(KEY_SOURCE_TYPE));
+                        (String) arguments.get(KEY_SOURCE_TYPE),
+                        new ArrayList<>(mProductUsageTokens));
+                resetUsageTokens();
             } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
                     && mCachedContextReference != null
                     && arguments != null
@@ -415,7 +435,9 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         mCachedContextReference,
                         mEphemeralKey,
                         (String) arguments.get(KEY_SOURCE),
-                        (String) arguments.get(KEY_SOURCE_TYPE));
+                        (String) arguments.get(KEY_SOURCE_TYPE),
+                        new ArrayList<>(mProductUsageTokens));
+                resetUsageTokens();
             } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString)
                     && mCachedContextReference != null
                     && arguments != null
@@ -423,8 +445,9 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 setCustomerShippingInformation(
                         mCachedContextReference,
                         mEphemeralKey,
-                        (ShippingInformation) arguments.get(KEY_SHIPPING_INFO)
-                );
+                        (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                        new ArrayList<>(mProductUsageTokens));
+                resetUsageTokens();
             }
         }
     }

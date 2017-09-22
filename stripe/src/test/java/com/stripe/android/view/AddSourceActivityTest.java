@@ -32,6 +32,9 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
+import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
+import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
+import static com.stripe.android.view.AddSourceActivity.ADD_SOURCE_ACTIVITY;
 import static com.stripe.android.view.AddSourceActivity.EXTRA_PROXY_DELAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -89,6 +92,7 @@ public class AddSourceActivityTest {
     private void setUpForProxySessionTest() {
         Intent intent = AddSourceActivity.newIntent(RuntimeEnvironment.application, true, true);
         intent.putExtra(EXTRA_PROXY_DELAY, true);
+        intent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mActivityController = Robolectric.buildActivity(AddSourceActivity.class, intent)
                 .create().start().resume().visible();
         mCardMultilineWidget = mActivityController.get()
@@ -107,6 +111,7 @@ public class AddSourceActivityTest {
                 };
         mActivityController.get().setStripeProvider(mockStripeProvider);
         mActivityController.get().setCustomerSessionProxy(mCustomerSessionProxy);
+        mActivityController.get().initCustomerSessionTokens();
     }
 
     @Test
@@ -209,6 +214,8 @@ public class AddSourceActivityTest {
         ArgumentCaptor<String> sourceIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<CustomerSession.SourceRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.SourceRetrievalListener.class);
+        verify(mCustomerSessionProxy).addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+        verify(mCustomerSessionProxy).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSessionProxy).addCustomerSource(
                 sourceIdCaptor.capture(),
                 listenerArgumentCaptor.capture());
