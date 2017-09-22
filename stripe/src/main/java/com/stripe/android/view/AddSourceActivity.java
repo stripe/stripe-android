@@ -73,12 +73,17 @@ public class AddSourceActivity extends StripeActivity {
                 getIntent().getBooleanExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mCardMultilineWidget.setShouldShowPostalCode(showZip);
 
-        if (!getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
-            logToCustomerSessionIf(ADD_SOURCE_ACTIVITY, mUpdatesCustomer);
-            logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
+        if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
+            initCustomerSessionTokens();
         }
 
         setTitle(R.string.title_add_a_card);
+    }
+
+    @VisibleForTesting
+    void initCustomerSessionTokens() {
+        logToCustomerSessionIf(ADD_SOURCE_ACTIVITY, mUpdatesCustomer);
+        logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
     }
 
     @Override
@@ -152,8 +157,19 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     private void logToCustomerSessionIf(@NonNull String logToken, boolean condition) {
+        if (mCustomerSessionProxy != null) {
+            logToProxyIf(logToken, condition);
+            return;
+        }
+
         if (condition) {
             CustomerSession.getInstance().addProductUsageTokenIfValid(logToken);
+        }
+    }
+
+    private void logToProxyIf(@NonNull String logToken, boolean condition) {
+        if (mCustomerSessionProxy != null && condition) {
+            mCustomerSessionProxy.addProductUsageTokenIfValid(logToken);
         }
     }
 
@@ -196,6 +212,7 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     interface CustomerSessionProxy {
+        void addProductUsageTokenIfValid(String token);
         void addCustomerSource(String sourceId, CustomerSession.SourceRetrievalListener listener);
     }
 }

@@ -31,10 +31,12 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_PROXY_DELAY;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT;
 import static com.stripe.android.view.PaymentMethodsActivity.REQUEST_CODE_ADD_CARD;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -148,7 +150,7 @@ public class PaymentMethodsActivityTest {
     }
 
     @Test
-    public void onClickAddSourceView_launchesAddSourceActivity() {
+    public void onClickAddSourceView_withoutPaymentSessoin_launchesAddSourceActivityWithoutLog() {
         Customer customer = Customer.fromString(CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT);
         when(mCustomerSessionProxy.getCachedCustomer()).thenReturn(customer);
         mActivityController.get().initializeCustomerSourceData();
@@ -159,6 +161,32 @@ public class PaymentMethodsActivityTest {
         assertNotNull(intentForResult);
         assertEquals(AddSourceActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
+        assertFalse(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+    }
+
+    @Test
+    public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
+        Intent intent = PaymentMethodsActivity.newIntent(RuntimeEnvironment.application);
+        intent.putExtra(EXTRA_PROXY_DELAY, true);
+        intent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        mActivityController = Robolectric.buildActivity(PaymentMethodsActivity.class, intent)
+                .create().start().resume().visible();
+        mActivityController.get().setCustomerSessionProxy(mCustomerSessionProxy);
+        mShadowActivity = Shadows.shadowOf(mActivityController.get());
+
+        mAddCardView = mActivityController.get().findViewById(R.id.payment_methods_add_payment_container);
+
+        Customer customer = Customer.fromString(CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT);
+        when(mCustomerSessionProxy.getCachedCustomer()).thenReturn(customer);
+        mActivityController.get().initializeCustomerSourceData();
+
+        mAddCardView.performClick();
+        ShadowActivity.IntentForResult intentForResult =
+                mShadowActivity.getNextStartedActivityForResult();
+        assertNotNull(intentForResult);
+        assertEquals(AddSourceActivity.class.getName(),
+                intentForResult.intent.getComponent().getClassName());
+        assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
 
     @Test

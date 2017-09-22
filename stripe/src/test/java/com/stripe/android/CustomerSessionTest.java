@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -225,6 +226,7 @@ public class CustomerSessionTest {
     public void teardown() {
         LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
                 .unregisterReceiver(mBroadcastReceiver);
+        CustomerSession.endCustomerSession();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -442,7 +444,7 @@ public class CustomerSessionTest {
     }
 
     @Test
-    public void addSourceToCustomer_withUnExpiredCustomer_returnsAddedSource() {
+    public void addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -466,6 +468,7 @@ public class CustomerSessionTest {
         long firstCustomerCacheTime = session.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
+        CustomerSession.getInstance().addProductUsageTokenIfValid("AddSourceActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -477,6 +480,7 @@ public class CustomerSessionTest {
                 Source.CARD,
                 mockListener);
 
+        assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         ArgumentCaptor<List> listArgumentCaptor =
                 ArgumentCaptor.forClass(List.class);
         try {
@@ -554,7 +558,7 @@ public class CustomerSessionTest {
     }
 
     @Test
-    public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsExpectedCustomer() {
+    public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -573,6 +577,7 @@ public class CustomerSessionTest {
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
         session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertFalse(session.getProductUsageTokens().isEmpty());
 
         long firstCustomerCacheTime = session.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -589,6 +594,7 @@ public class CustomerSessionTest {
                 Source.CARD,
                 mockListener);
 
+        assertTrue(session.getProductUsageTokens().isEmpty());
         ArgumentCaptor<List> listArgumentCaptor =
                 ArgumentCaptor.forClass(List.class);
         try {
