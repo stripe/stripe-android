@@ -92,8 +92,6 @@
     <string name="address_region_generic_required">Please enter your State/Province/Region</string>
     <!--Error text indicating that phone number is required, used for all addresses-->
     <string name="address_phone_number_required">Please enter your phone number</string>
-    <!--Error text indicating that country is invalid, used for all addresses-->
-    <string name="address_country_invalid">Your country is invalid.</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>

@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
-import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class CountryAutoCompleteTextView extends FrameLayout {
     private AutoCompleteTextView mCountryAutocomplete;
-    private TextInputLayout mCountryTextInputLayout;
     private Map<String, String> mCountryNameToCode;
     private String mCountrySelected;
     private CountryChangeListener mCountryChangeListener;
@@ -63,7 +61,6 @@ public class CountryAutoCompleteTextView extends FrameLayout {
     private void initView() {
         inflate(getContext(), R.layout.country_autocomplete_textview, this);
         mCountryAutocomplete = findViewById(R.id.autocomplete_country_cat);
-        mCountryTextInputLayout = findViewById(R.id.tl_country_cat);
         mCountryNameToCode = CountryUtils.getCountryNameToCodeMap();
         final ArrayAdapter countryAdapter = new CountryAdapter(getContext(), new ArrayList<>(mCountryNameToCode.keySet()));
         mCountryAutocomplete.setThreshold(0);
@@ -101,9 +98,11 @@ public class CountryAutoCompleteTextView extends FrameLayout {
                     mCountryChangeListener.onCountryChanged(mCountrySelected);
                 }
             }
-            mCountryTextInputLayout.setErrorEnabled(false);
+            mCountryAutocomplete.setText(displayCountryEntered);
         } else {
-            mCountryTextInputLayout.setError(getResources().getString(R.string.address_country_invalid));
+            // Revert back to last valid country if country is not recognized.
+            String displayCountry = new Locale("", mCountrySelected).getDisplayCountry();
+            mCountryAutocomplete.setText(displayCountry);
         }
     }
 
