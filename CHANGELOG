@@ -1,3 +1,8 @@
+5.1.0 2017-09-22
+    Adding the PaymentSession for end-to-end session handling
+    Adding Alipay source handling
+    Adding controls to enter customer shipping address and custom shipping methods
+
 5.0.0 2017-08-25
     Adding the CustomerSession and EphemeralKeyProvider classes
     Adding CardMultilineWidget class for adding Card data in material design
