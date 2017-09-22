@@ -137,7 +137,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
             @Override
             public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
                 mResultTitleTextView.setVisibility(View.VISIBLE);
-                mResultTextView.setText(formatStringResults(data));
+                mResultTextView.setText(formatStringResults(mPaymentSession.getPaymentSessionData()));
             }
         }, new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
