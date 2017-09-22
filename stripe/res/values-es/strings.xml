@@ -31,7 +31,7 @@
     <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
     <string name="address_label_address_optional">Dirección (opcional) </string>
     <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
-    <string name="address_label_apt">Apto.  </string>
+    <string name="address_label_apt">Apto.</string>
     <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
     <string name="address_label_apt_optional">Apto. (opcional)</string>
     <!-- Label for input requesting city, used for all locations -->
@@ -112,4 +112,5 @@
     <string name="title_add_an_address">Añade una dirección</string>
     <!-- Screen title telling users they should select a shipping address -->
     <string name="title_select_shipping_method">Selecciona el método de envío</string>
+    <string name="invalid_shipping_information">Dirección de envío no válida</string>
 </resources>

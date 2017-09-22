@@ -200,7 +200,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         return mType;
     }
 
-    static final Parcelable.Creator<EphemeralKey> CREATOR
+    public static final Parcelable.Creator<EphemeralKey> CREATOR
             = new Parcelable.Creator<EphemeralKey>() {
 
         @Override
