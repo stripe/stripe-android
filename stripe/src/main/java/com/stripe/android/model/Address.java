@@ -230,7 +230,7 @@ public class Address extends StripeJsonModel implements Parcelable {
     }
 
     /************** Parcelable *********************/
-    static final Parcelable.Creator<Address> CREATOR
+    public static final Parcelable.Creator<Address> CREATOR
             = new Parcelable.Creator<Address>() {
 
         @Override

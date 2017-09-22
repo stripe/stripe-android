@@ -112,7 +112,7 @@ public class PaymentSessionConfig implements Parcelable {
         if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) return false;
         return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
     }
-    
+
     @Override
     public int hashCode() {
         int result = getHiddenShippingInfoFields().hashCode();
@@ -158,7 +158,7 @@ public class PaymentSessionConfig implements Parcelable {
         return mShippingMethodRequired;
     }
 
-    static final Parcelable.Creator<PaymentSessionConfig> CREATOR
+    public static final Parcelable.Creator<PaymentSessionConfig> CREATOR
             = new Parcelable.Creator<PaymentSessionConfig>() {
 
         @Override
