@@ -6,6 +6,8 @@
     <string name="acc_label_zip_short">ZIP</string>
     <!--Label for input requesting the name of a customer-->
     <string name="address_label_name">Name</string>
+    <!-- Label for input requesting the name of a customer where input is optional -->
+    <string name="address_label_name_optional">Name (optional)</string>
     <!--Label for input requesting the first line of an address, used for US and Canadian addresses-->
     <string name="address_label_address">Address</string>
     <!--Label for input requesting the first line of an address where input is optional, used for US and Canadian addresses-->
@@ -16,8 +18,12 @@
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
     <!--Label for input requesting apartment number (address line 2) where input is optional, used for US addresses-->
     <string name="address_label_apt_optional">Apt. (optional)</string>
+    <!-- Label for input requesting address line 2, used for international addresses -->
+    <string name="address_label_address_line2">Address line 2</string>
     <!--Label for input requesting address line 2 where input in optional used for international addresses-->
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
+    <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
+    <string name="address_label_apt">Apt.</string>
     <!--Label for input requesting city, used for all locations-->
     <string name="address_label_city">City</string>
     <!--Label for input requesting city where input is optional, used for all locations-->
@@ -52,6 +58,8 @@
     <string name="address_label_zip_postal_code">ZIP/Postal code</string>
     <!--Label for input requesting postal code where input is optional, used for international addresses-->
     <string name="address_label_zip_postal_code_optional">ZIP / Postal code (optional)</string>
+    <!-- title of a screen prompting user to enter a shipping address -->
+    <string name="address_shipping_address">Shipping Address</string>
     <!--Error text indicating zip code is invalid, used for US addresses-->
     <string name="address_zip_invalid">Your ZIP code is invalid.</string>
     <!--Error text indicating postcode is invalid, used for UK addresses-->
