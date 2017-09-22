@@ -143,9 +143,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         if (mInstance == null) {
             return;
         }
-        mInstance.mThreadPoolExecutor.shutdown();
-        mInstance.mProductUsageTokens.clear();
-        mInstance.mNetworkQueue.clear();
+        mInstance.mThreadPoolExecutor.shutdownNow();
         mInstance = null;
     }
 
