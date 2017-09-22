@@ -11,13 +11,13 @@ import android.view.View;
 import com.stripe.android.BuildConfig;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.EphemeralKeyProvider;
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.R;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
+import com.stripe.android.model.ShippingMethod;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -34,17 +33,21 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
+import java.util.ArrayList;
+
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
+import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_SHIPPING_INFO_DATA;
+import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_METHODS;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -74,15 +77,17 @@ public class PaymentFlowActivityTest {
     @After
     public void tearDown() {
         LocalBroadcastManager.getInstance(RuntimeEnvironment.application).unregisterReceiver(mBroadcastReceiver);
+        mActivityController = null;
     }
 
     @Test
     public void launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
-        PaymentConfiguration.init("FAKE PUBLISHABLE KEY");
         Intent intent = new Intent();
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .setShippingInfoRequired(false)
                 .build();
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
@@ -96,6 +101,8 @@ public class PaymentFlowActivityTest {
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
@@ -112,6 +119,8 @@ public class PaymentFlowActivityTest {
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShadowActivity = shadowOf(mActivityController.get());
@@ -130,6 +139,8 @@ public class PaymentFlowActivityTest {
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         mShippingInfoWidget = mActivityController.get().findViewById(R.id.shipping_info_widget);
@@ -150,6 +161,8 @@ public class PaymentFlowActivityTest {
         PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
 
@@ -174,17 +187,32 @@ public class PaymentFlowActivityTest {
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
                 .build();
         intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
-        PaymentSessionData paymentSessionData = Mockito.mock(PaymentSessionData.class);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
         mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
         PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+
+        // invalid result
         paymentFlowActivity.onActionSave();
         assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.VISIBLE);
         Intent onShippingInfoProcessedInvalid = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
         onShippingInfoProcessedInvalid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
         LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(onShippingInfoProcessedInvalid);
         assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.GONE);
+
+        // valid result
+        paymentFlowActivity.onActionSave();
+        Intent onShippingInfoProcessedValid = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
+        onShippingInfoProcessedValid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
+        ArrayList<ShippingMethod> shippingMethods = new ArrayList<>();
+        shippingMethods.add(new ShippingMethod("label", "id", 0, "USD"));
+        onShippingInfoProcessedValid.putExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(onShippingInfoProcessedValid);
+        assertEquals(View.VISIBLE, paymentFlowActivity.mProgressBar.getVisibility());
+        Intent shippingInfoSaved = new Intent(EVENT_SHIPPING_INFO_SAVED);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application).sendBroadcast(shippingInfoSaved);
+        assertEquals(View.GONE, paymentFlowActivity.mProgressBar.getVisibility());
     }
 
     private ShippingInformation getExampleShippingInfo() {

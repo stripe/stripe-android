@@ -14,12 +14,12 @@ import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.R;
-import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.List;
 
+import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 
@@ -39,12 +39,14 @@ public class PaymentFlowActivity extends StripeActivity {
 
     static final String TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity";
 
-    private BroadcastReceiver mAlertBroadcastReceiver;
-    private BroadcastReceiver mBroadcastReceiver;
+    private BroadcastReceiver mShippingInfoSavedBroadcastReceiver;
+    private BroadcastReceiver mShippingInfoSubmittedBroadcastReceiver;
     private PaymentFlowPagerAdapter mPaymentFlowPagerAdapter;
     private ViewPager mViewPager;
     private PaymentSessionData mPaymentSessionData;
     private ShippingInformation mShippingInformationSubmitted;
+    private List<ShippingMethod> mValidShippingMethods;
+    private ShippingMethod mDefaultShippingMethod;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class PaymentFlowActivity extends StripeActivity {
             @Override
             public void onPageSelected(int i) {
                 setTitle(mViewPager.getAdapter().getPageTitle(i));
-                if (mPaymentFlowPagerAdapter.getPageAt(i) == PaymentFlowPagerEnum.ADDRESS) {
+                if (mPaymentFlowPagerAdapter.getPageAt(i) == PaymentFlowPagerEnum.SHIPPING_INFO) {
                     mPaymentFlowPagerAdapter.hideShippingPage();
                 }
             }
@@ -77,17 +79,16 @@ public class PaymentFlowActivity extends StripeActivity {
             }
 
         });
-        mBroadcastReceiver = new BroadcastReceiver() {
+        mShippingInfoSubmittedBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setCommunicatingProgress(false);
                 boolean isShippingInfoValid = intent.getBooleanExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 if (isShippingInfoValid) {
-                    List<ShippingMethod> validShippingMethods = intent.getParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS);
-                    ShippingMethod shippingMethod = intent.getParcelableExtra(EXTRA_DEFAULT_SHIPPING_METHOD);
-                    onShippingMethodsReady(validShippingMethods, shippingMethod);
-                    mPaymentSessionData.setShippingInformation(mShippingInformationSubmitted);
+                    onShippingInfoValidated();
+                    mValidShippingMethods = intent.getParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS);
+                    mDefaultShippingMethod = intent.getParcelableExtra(EXTRA_DEFAULT_SHIPPING_METHOD);
                 } else {
+                    setCommunicatingProgress(false);
                     String shippingInfoError = intent.getStringExtra(EXTRA_SHIPPING_INFO_ERROR);
                     if (shippingInfoError != null && !shippingInfoError.isEmpty()) {
                         showError(shippingInfoError);
@@ -98,13 +99,20 @@ public class PaymentFlowActivity extends StripeActivity {
                 }
             }
         };
+        mShippingInfoSavedBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onShippingMethodsReady(mValidShippingMethods, mDefaultShippingMethod);
+                mPaymentSessionData.setShippingInformation(mShippingInformationSubmitted);
+            }
+        };
         setTitle(mPaymentFlowPagerAdapter.getPageTitle(mViewPager.getCurrentItem()));
     }
 
     @Override
     protected void onActionSave() {
-        if (mPaymentFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.ADDRESS)) {
-            onAddressSave();
+        if (mPaymentFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
+            onShippingInfoSubmitted();
         } else {
             onShippingMethodSave();
         }
@@ -113,21 +121,27 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mShippingInfoSubmittedBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mShippingInfoSavedBroadcastReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(mShippingInfoSubmittedBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_PROCESSED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mShippingInfoSavedBroadcastReceiver, new IntentFilter(EVENT_SHIPPING_INFO_SAVED));
+    }
+    private void onShippingInfoValidated() {
+        CustomerSession.getInstance().setCustomerShippingInformation(this, mShippingInformationSubmitted);
     }
 
     private void onShippingMethodsReady(
             @NonNull List<ShippingMethod> validShippingMethods,
             @Nullable ShippingMethod defaultShippingMethod) {
+        setCommunicatingProgress(false);
         mPaymentFlowPagerAdapter.setShippingMethods(validShippingMethods, defaultShippingMethod);
-        mPaymentFlowPagerAdapter.setAddressSaved(true);
+        mPaymentFlowPagerAdapter.setShippingInfoSaved(true);
         if (hasNextPage()) {
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
         } else {
@@ -135,7 +149,7 @@ public class PaymentFlowActivity extends StripeActivity {
         }
     }
 
-    private void onAddressSave() {
+    private void onShippingInfoSubmitted() {
         ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
         ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
         if (shippingInformation !=  null) {
@@ -162,7 +176,6 @@ public class PaymentFlowActivity extends StripeActivity {
 
     private void onShippingMethodSave() {
         SelectShippingMethodWidget selectShippingMethodWidget = findViewById(R.id.select_shipping_method_widget);
-        setCommunicatingProgress(true);
         ShippingMethod shippingMethod = selectShippingMethodWidget.getSelectedShippingMethod();
         mPaymentSessionData.setShippingMethod(shippingMethod);
         Intent intent = new Intent();
