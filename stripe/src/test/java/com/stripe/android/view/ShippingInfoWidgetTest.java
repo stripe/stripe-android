@@ -210,7 +210,7 @@ public class ShippingInfoWidgetTest {
     }
 
     @Test
-    public void getAddress_whenAddressInvalid_returnsNull() {
+    public void getShippingInfo_whenShippingInfoInvalid_returnsNull() {
         assertNull(mShippingInfoWidget.getShippingInformation());
     }
 

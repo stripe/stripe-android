@@ -31,7 +31,7 @@ public class SelectShippingMethodWidgetTest {
     public void setup() {
         ActivityController<SelectShippingMethodTestActivity> activityController =
                 Robolectric.buildActivity(SelectShippingMethodTestActivity.class).create().start();
-        mSelectShippingMethodWidget = activityController.get().getSelectShippingAddressWidget();
+        mSelectShippingMethodWidget = activityController.get().getSelectShippingMethodWidget();
         mShippingMethods = new ArrayList<>();
         ShippingMethod ups = new ShippingMethod("UPS Ground", "ups-ground", "Arrives in 3-5 days", 0, "USD");
         ShippingMethod fedEx = new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
