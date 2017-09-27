@@ -7,8 +7,10 @@ import android.support.annotation.NonNull;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.view.ShippingInfoWidget;
+import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,16 +34,16 @@ public class PaymentSessionConfig implements Parcelable {
         /**
          * @param hiddenShippingInfoFields that should be hidden in the {@link ShippingInfoWidget}.
          */
-        public Builder setHiddenShippingInfoFields(List<String> hiddenShippingInfoFields) {
-            mHiddenShippingInfoFields = hiddenShippingInfoFields;
+        public Builder setHiddenShippingInfoFields(@CustomizableShippingField String ... hiddenShippingInfoFields) {
+            mHiddenShippingInfoFields = Arrays.asList(hiddenShippingInfoFields);
             return this;
         }
 
         /**
          * @param optionalShippingInfoFields that should be optional in the {@link ShippingInfoWidget}
          */
-        public Builder setOptionalShippingInfoFields(List<String> optionalShippingInfoFields) {
-            mOptionalShippingInfoFields = optionalShippingInfoFields;
+        public Builder setOptionalShippingInfoFields(@CustomizableShippingField String ... optionalShippingInfoFields) {
+            mOptionalShippingInfoFields = Arrays.asList(optionalShippingInfoFields);
             return this;
         }
 
@@ -91,9 +93,9 @@ public class PaymentSessionConfig implements Parcelable {
 
     private PaymentSessionConfig(Parcel in) {
         mHiddenShippingInfoFields = new ArrayList<>();
-        in.readStringList(mHiddenShippingInfoFields);
+        in.readList(mHiddenShippingInfoFields, String.class.getClassLoader());
         mOptionalShippingInfoFields = new ArrayList<>();
-        in.readStringList(mOptionalShippingInfoFields);
+        in.readList(mOptionalShippingInfoFields, String.class.getClassLoader());
         mShippingInformation = in.readParcelable(Address.class.getClassLoader());
         mShippingInfoRequired = in.readInt() == 1;
         mShippingMethodRequired = in.readInt() == 1;
@@ -130,8 +132,8 @@ public class PaymentSessionConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeStringList(mHiddenShippingInfoFields);
-        parcel.writeStringList(mOptionalShippingInfoFields);
+        parcel.writeList(mHiddenShippingInfoFields);
+        parcel.writeList(mOptionalShippingInfoFields);
         parcel.writeParcelable(mShippingInformation, flags);
         parcel.writeInt(mShippingInfoRequired ? 1 : 0);
         parcel.writeInt(mShippingMethodRequired ? 1: 0);

@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.design.widget.TextInputLayout;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.AttributeSet;
@@ -11,6 +12,8 @@ import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -21,9 +24,19 @@ import java.util.Locale;
 public class ShippingInfoWidget extends LinearLayout {
 
     /**
-     * Constants used to specify fields in the AddAddressWidget. Can be used to mark fields as
-     * optional or hidden.
+     * Constants that can be used to mark fields in this widget as optional or hidden.
+     * Some fields cannot be hidden.
      */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            ADDRESS_LINE_ONE_FIELD,
+            ADDRESS_LINE_TWO_FIELD,
+            CITY_FIELD,
+            POSTAL_CODE_FIELD,
+            STATE_FIELD,
+            PHONE_FIELD
+    })
+    public @interface CustomizableShippingField { }
     public static final String ADDRESS_LINE_ONE_FIELD = "address_line_one";
     public static final String ADDRESS_LINE_TWO_FIELD = "address_line_two"; // address line two is optional by default
     public static final String CITY_FIELD = "city";
