@@ -40,6 +40,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             IDEAL,
             SOFORT,
             BANCONTACT,
+            P24,
             UNKNOWN
     })
     public @interface SourceType { }
@@ -52,6 +53,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     public static final String IDEAL = "ideal";
     public static final String SOFORT = "sofort";
     public static final String BANCONTACT = "bancontact";
+    public static final String P24 = "p24";
     public static final String UNKNOWN = "unknown";
 
     public static final Set<String> MODELED_TYPES = new HashSet<>();
@@ -558,6 +560,8 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             return BANCONTACT;
         } else if (ALIPAY.equals(sourceType)) {
             return ALIPAY;
+        } else if (P24.equals(sourceType)) {
+            return P24;
         } else if (UNKNOWN.equals(sourceType)) {
             return UNKNOWN;
         }
