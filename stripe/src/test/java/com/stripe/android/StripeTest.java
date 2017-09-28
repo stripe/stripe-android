@@ -607,6 +607,36 @@ public class StripeTest {
     }
 
     @Test
+    public void createSourceSynchronous_withP24Params_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        SourceParams p24Params = SourceParams.createP24Params(
+                100,
+                "eur",
+                "Example Payer",
+                "abc@def.com",
+                "stripe://start");
+
+        try {
+            Source p24Source =
+                    stripe.createSourceSynchronous(p24Params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(p24Source);
+            assertNotNull(p24Source.getId());
+            assertNotNull(p24Source.getClientSecret());
+            assertEquals(Source.P24, p24Source.getType());
+            assertEquals("redirect", p24Source.getFlow());
+            assertNotNull(p24Source.getOwner());
+            assertEquals("Example Payer", p24Source.getOwner().getName());
+            assertEquals("abc@def.com", p24Source.getOwner().getEmail());
+            assertEquals("eur", p24Source.getCurrency());
+            assertEquals(Source.SINGLE_USE, p24Source.getUsage());
+            assertNotNull(p24Source.getRedirect());
+            assertEquals("stripe://start", p24Source.getRedirect().getReturnUrl());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void createSourceSynchronous_withSepaDebitParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         String validIban = "DE89370400440532013000";
