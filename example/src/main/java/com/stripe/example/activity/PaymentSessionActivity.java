@@ -16,12 +16,13 @@ import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSession;
+import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.PaymentSessionConfig;
+import com.stripe.android.view.ShippingInfoWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
@@ -141,6 +142,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
             }
         }, new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD, ShippingInfoWidget.CITY_FIELD)
                 .build());
         if (paymentSessionInitialized) {
             mStartPaymentFlowButton.setEnabled(true);
