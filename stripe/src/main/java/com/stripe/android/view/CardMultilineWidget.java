@@ -11,6 +11,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.StyleRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -58,6 +59,7 @@ public class CardMultilineWidget extends LinearLayout {
 
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
+    private @StyleRes int mErrorTextAppearance;
 
     public CardMultilineWidget(Context context) {
         super(context);
@@ -228,6 +230,8 @@ public class CardMultilineWidget extends LinearLayout {
             try {
                 mShouldShowPostalCode =
                         a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false);
+                mErrorTextAppearance =
+                        a.getResourceId(R.styleable.CardMultilineWidget_cardErrorTextAppearance, 0);
             } finally {
                 a.recycle();
             }
@@ -292,6 +296,7 @@ public class CardMultilineWidget extends LinearLayout {
                 mExpiryTextInputLayout,
                 mCvcTextInputLayout,
                 mPostalInputLayout);
+        initTextInputLayoutErrorTextAppearance();
 
         initErrorMessages();
         initFocusChangeListeners();
@@ -386,6 +391,15 @@ public class CardMultilineWidget extends LinearLayout {
         mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
         mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
         mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
+    }
+
+    private void initTextInputLayoutErrorTextAppearance() {
+        if (mErrorTextAppearance != 0) {
+            mCardNumberTextInputLayout.setErrorTextAppearance(mErrorTextAppearance);
+            mExpiryTextInputLayout.setErrorTextAppearance(mErrorTextAppearance);
+            mCvcTextInputLayout.setErrorTextAppearance(mErrorTextAppearance);
+            mPostalInputLayout.setErrorTextAppearance(mErrorTextAppearance);
+        }
     }
 
     private void initFocusChangeListeners() {
