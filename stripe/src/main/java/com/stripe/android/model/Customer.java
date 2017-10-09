@@ -41,14 +41,16 @@ public class Customer extends StripeJsonModel {
     private static final String VALUE_LIST = "list";
     private static final String VALUE_CUSTOMER = "customer";
 
-    private String mId;
-    private String mDefaultSource;
-    private ShippingInformation mShippingInformation;
+    private static final String VALUE_APPLE_PAY = "apple_pay";
 
-    private List<CustomerSource> mSources = new ArrayList<>();
-    private Boolean mHasMore;
-    private Integer mTotalCount;
-    private String mUrl;
+    private @Nullable String mId;
+    private @Nullable String mDefaultSource;
+    private @Nullable ShippingInformation mShippingInformation;
+
+    private @NonNull List<CustomerSource> mSources = new ArrayList<>();
+    private @Nullable Boolean mHasMore;
+    private @Nullable Integer mTotalCount;
+    private @Nullable String mUrl;
 
     private Customer() { }
 
@@ -64,6 +66,7 @@ public class Customer extends StripeJsonModel {
         return mShippingInformation;
     }
 
+    @NonNull
     public List<CustomerSource> getSources() {
         return mSources;
     }
@@ -175,8 +178,12 @@ public class Customer extends StripeJsonModel {
             JSONArray dataArray = sources.optJSONArray(FIELD_DATA);
             for (int i = 0; i < dataArray.length(); i++) {
                 try {
-                    CustomerSource sourceData =
-                            CustomerSource.fromJson(dataArray.getJSONObject(i));
+                    JSONObject customerSourceObject = dataArray.getJSONObject(i);
+                    CustomerSource sourceData = CustomerSource.fromJson(customerSourceObject);
+                    if (sourceData == null ||
+                            VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
+                        continue;
+                    }
                     sourceDataList.add(sourceData);
                 } catch (JSONException ignored) { }
             }

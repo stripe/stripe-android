@@ -26,7 +26,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Card}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class CardTest {
     private static final int YEAR_IN_FUTURE = 2100;
 

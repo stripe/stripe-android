@@ -11,6 +11,7 @@ import org.robolectric.annotation.Config;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.stripe.android.model.SourceCardDataTest.EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY;
 import static com.stripe.android.model.SourceCodeVerificationTest.EXAMPLE_JSON_CODE_VERIFICATION;
 import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_JSON_OWNER_WITHOUT_NULLS;
 import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_MAP_OWNER;
@@ -28,7 +29,7 @@ import static org.junit.Assert.fail;
  * Test class for {@link Source} model.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = 25)
 public class SourceTest {
 
     static final String EXAMPLE_BITCOIN_SOURCE = "{\n" +
@@ -95,16 +96,9 @@ public class SourceTest {
             "\"amount_returned\": 0\n"+
             "},\n"+
             "\"status\": \"pending\",\n"+
-            "\"type\": \"bitcoin\",\n"+
+            "\"type\": \"card\",\n"+
             "\"usage\": \"single_use\",\n"+
-            "\"bitcoin\": {\n" +
-            "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
-            "\"amount\": 2371000,\n" +
-            "\"amount_charged\": 0,\n" +
-            "\"amount_received\": 0,\n" +
-            "\"amount_returned\": 0,\n" +
-            "\"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
-            "}" +
+            "\"card\": " + EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY + "\n"+
             "}";
 
     private static final String DOGE_COIN = "dogecoin";

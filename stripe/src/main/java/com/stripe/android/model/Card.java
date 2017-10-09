@@ -121,6 +121,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_LAST4 = "last4";
     private static final String FIELD_ID = "id";
+    private static final String FIELD_TOKENIZATION_METHOD = "tokenization_method";
 
     private String number;
     private String cvc;
@@ -145,6 +146,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     private String cvcCheck;
     private String id;
     @NonNull private List<String> loggingTokens = new ArrayList<>();
+    @Nullable private String tokenizationMethod;
 
     /**
      * Builder class for a {@link Card} model.
@@ -172,6 +174,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         private String customer;
         private String cvcCheck;
         private String id;
+        private String tokenizationMethod;
 
         /**
          * Constructor with most common {@link Card} fields.
@@ -192,93 +195,117 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
             this.cvc = cvc;
         }
 
+        @NonNull
         public Builder name(String name) {
             this.name = name;
             return this;
         }
 
+        @NonNull
         public Builder addressLine1(String address) {
             this.addressLine1 = address;
             return this;
         }
 
+        @NonNull
         public Builder addressLine1Check(String addressLine1Check) {
             this.addressLine1Check = addressLine1Check;
             return this;
         }
 
+        @NonNull
         public Builder addressLine2(String address) {
             this.addressLine2 = address;
             return this;
         }
 
+        @NonNull
         public Builder addressCity(String city) {
             this.addressCity = city;
             return this;
         }
 
+        @NonNull
         public Builder addressState(String state) {
             this.addressState = state;
             return this;
         }
 
+        @NonNull
         public Builder addressZip(String zip) {
             this.addressZip = zip;
             return this;
         }
 
+        @NonNull
         public Builder addressZipCheck(String zipCheck) {
             this.addressZipCheck = zipCheck;
             return this;
         }
 
+        @NonNull
         public Builder addressCountry(String country) {
             this.addressCountry = country;
             return this;
         }
 
+        @NonNull
         public Builder brand(@CardBrand String brand) {
             this.brand = brand;
             return this;
         }
 
+        @NonNull
         public Builder fingerprint(String fingerprint) {
             this.fingerprint = fingerprint;
             return this;
         }
 
+        @NonNull
         public Builder funding(@FundingType String funding) {
             this.funding = funding;
             return this;
         }
 
+        @NonNull
         public Builder country(String country) {
             this.country = country;
             return this;
         }
 
+        @NonNull
         public Builder currency(String currency) {
             this.currency = currency;
             return this;
         }
 
+        @NonNull
         public Builder customer(String customer) {
             this.customer = customer;
             return this;
         }
 
+        @NonNull
         public Builder cvcCheck(String cvcCheck) {
             this.cvcCheck = cvcCheck;
             return this;
         }
 
+        @NonNull
         public Builder last4(String last4) {
             this.last4 = last4;
             return this;
         }
 
+        @NonNull
         public Builder id(String id) {
             this.id = id;
+            return this;
+        }
+
+        @NonNull
+        public Builder tokenizationMethod(@Nullable String tokenizationMethod) {
+            this.tokenizationMethod = tokenizationMethod;
             return this;
         }
 
@@ -403,6 +430,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         builder.id(optString(jsonObject, FIELD_ID));
         builder.last4(optString(jsonObject, FIELD_LAST4));
         builder.name(optString(jsonObject, FIELD_NAME));
+        builder.tokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD));
 
         return builder.build();
     }
@@ -950,6 +978,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         putStringIfNotNull(object, FIELD_CVC_CHECK, cvcCheck);
         putStringIfNotNull(object, FIELD_LAST4, last4);
         putStringIfNotNull(object, FIELD_ID, id);
+        putStringIfNotNull(object, FIELD_TOKENIZATION_METHOD, tokenizationMethod);
         putStringIfNotNull(object, FIELD_OBJECT, VALUE_CARD);
         return object;
     }
@@ -978,9 +1007,15 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         map.put(FIELD_FUNDING, funding);
         map.put(FIELD_ID, id);
         map.put(FIELD_LAST4, last4);
+        map.put(FIELD_TOKENIZATION_METHOD, tokenizationMethod);
         map.put(FIELD_OBJECT, VALUE_CARD);
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
+    }
+
+    @Nullable
+    String getTokenizationMethod() {
+        return this.tokenizationMethod;
     }
 
     boolean validateCard(Calendar now) {
@@ -1028,6 +1063,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         this.customerId = StripeTextUtils.nullIfBlank(builder.customer);
         this.cvcCheck = StripeTextUtils.nullIfBlank(builder.cvcCheck);
         this.id = StripeTextUtils.nullIfBlank(builder.id);
+        this.tokenizationMethod = StripeTextUtils.nullIfBlank(builder.tokenizationMethod);
     }
 
     private String normalizeCardNumber(String number) {
