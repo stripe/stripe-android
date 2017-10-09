@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.StripeNetworkUtils;
 
@@ -43,14 +44,14 @@ public class Customer extends StripeJsonModel {
 
     private static final String VALUE_APPLE_PAY = "apple_pay";
 
-    private String mId;
-    private String mDefaultSource;
-    private ShippingInformation mShippingInformation;
+    private @Nullable String mId;
+    private @Nullable String mDefaultSource;
+    private @Nullable ShippingInformation mShippingInformation;
 
-    private List<CustomerSource> mSources = new ArrayList<>();
-    private Boolean mHasMore;
-    private Integer mTotalCount;
-    private String mUrl;
+    private @NonNull List<CustomerSource> mSources = new ArrayList<>();
+    private @Nullable Boolean mHasMore;
+    private @Nullable Integer mTotalCount;
+    private @Nullable String mUrl;
 
     private Customer() { }
 
@@ -66,6 +67,7 @@ public class Customer extends StripeJsonModel {
         return mShippingInformation;
     }
 
+    @NonNull
     public List<CustomerSource> getSources() {
         return mSources;
     }
@@ -80,6 +82,16 @@ public class Customer extends StripeJsonModel {
 
     public String getUrl() {
         return mUrl;
+    }
+
+    @VisibleForTesting
+    void addSource(@NonNull CustomerSource customerSource) {
+        mSources.add(customerSource);
+        if (mTotalCount == null) {
+            mTotalCount = 1;
+        } else {
+            mTotalCount++;
+        }
     }
 
     @Nullable
@@ -177,8 +189,8 @@ public class Customer extends StripeJsonModel {
             JSONArray dataArray = sources.optJSONArray(FIELD_DATA);
             for (int i = 0; i < dataArray.length(); i++) {
                 try {
-                    CustomerSource sourceData =
-                            CustomerSource.fromJson(dataArray.getJSONObject(i));
+                    JSONObject customerSourceObject = dataArray.getJSONObject(i);
+                    CustomerSource sourceData = CustomerSource.fromJson(customerSourceObject);
                     if (sourceData == null ||
                             VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
                         continue;

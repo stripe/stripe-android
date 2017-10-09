@@ -430,6 +430,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         builder.id(optString(jsonObject, FIELD_ID));
         builder.last4(optString(jsonObject, FIELD_LAST4));
         builder.name(optString(jsonObject, FIELD_NAME));
+        builder.tokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD));
 
         return builder.build();
     }
