@@ -41,6 +41,8 @@ public class Customer extends StripeJsonModel {
     private static final String VALUE_LIST = "list";
     private static final String VALUE_CUSTOMER = "customer";
 
+    private static final String VALUE_APPLE_PAY = "apple_pay";
+
     private String mId;
     private String mDefaultSource;
     private ShippingInformation mShippingInformation;
@@ -177,6 +179,10 @@ public class Customer extends StripeJsonModel {
                 try {
                     CustomerSource sourceData =
                             CustomerSource.fromJson(dataArray.getJSONObject(i));
+                    if (sourceData == null ||
+                            VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
+                        continue;
+                    }
                     sourceDataList.add(sourceData);
                 } catch (JSONException ignored) { }
             }

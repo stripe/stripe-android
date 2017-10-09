@@ -42,6 +42,21 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
     }
 
     @Nullable
+    public String getTokenizationMethod() {
+        Source paymentAsSource = asSource();
+        Card paymentAsCard = asCard();
+        if (paymentAsSource != null && paymentAsSource.getType().equals(Source.CARD)) {
+            SourceCardData cardData = (SourceCardData) paymentAsSource.getSourceTypeModel();
+            if (cardData != null) {
+                return cardData.getTokenizationMethod();
+            }
+        } else if (paymentAsCard != null) {
+            return paymentAsCard.getTokenizationMethod();
+        }
+        return null;
+    }
+
+    @Nullable
     public Card asCard() {
         if (mStripePaymentSource instanceof Card) {
             return (Card) mStripePaymentSource;
