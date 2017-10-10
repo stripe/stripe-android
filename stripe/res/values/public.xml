@@ -3,6 +3,7 @@
 
     <!-- Public Styles -->
     <public name='StripeDefaultTheme' type='style'/>
+    <public name='ToolBarStyle' type='style'/>
 
     <!-- Styleable Attributes should all be public -->
     <public name='cardTextErrorColor' type='attr' />
