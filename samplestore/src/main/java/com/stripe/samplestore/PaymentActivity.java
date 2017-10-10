@@ -332,6 +332,7 @@ public class PaymentActivity extends AppCompatActivity {
         params.put("shipping", shippingInformation.toMap());
         return params;
     }
+
     private void completePurchase(String sourceId, String customerId) {
         Retrofit retrofit = RetrofitFactory.getInstance();
         StripeService stripeService = retrofit.create(StripeService.class);
@@ -343,6 +344,7 @@ public class PaymentActivity extends AppCompatActivity {
             // CartManager.setTotalPrice.
             return;
         }
+
         ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData().getShippingInformation();
 
         Observable<Void> stripeResponse = stripeService.createQueryCharge(createParams(price, sourceId, customerId, shippingInformation));
