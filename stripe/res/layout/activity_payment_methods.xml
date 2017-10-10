@@ -13,7 +13,7 @@
         android:background="?attr/colorPrimary"
         android:elevation="@dimen/toolbar_elevation"
         app:title="@string/title_payment_method"
-        android:theme="@style/ToolBarStyle"
+        android:theme="@style/StripeToolBarStyle"
         />
 
     <ProgressBar
