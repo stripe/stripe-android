@@ -85,8 +85,8 @@ public class PaymentSession {
                 case PAYMENT_SHIPPING_DETAILS_REQUEST:
                     PaymentSessionData paymentSessionData = data.getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
                     mPaymentSessionData = paymentSessionData;
-                    mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
                     updateIsPaymentReadyToCharge(mPaymentSessionConfig, paymentSessionData);
+                    mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
                     return true;
                 default:
                     break;
