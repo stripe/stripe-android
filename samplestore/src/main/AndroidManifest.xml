@@ -28,7 +28,6 @@
 
         <activity
             android:name=".PaymentActivity"
-            android:windowSoftInputMode = "stateVisible"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
