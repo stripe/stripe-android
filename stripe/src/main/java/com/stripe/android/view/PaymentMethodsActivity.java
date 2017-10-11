@@ -148,8 +148,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return true;
         } else {
             boolean handled = super.onOptionsItemSelected(item);
-            if (!handled) {
+            if (!handled && mCommunicating) {
                 onBackPressed();
+            } else {
+                setSelectionAndFinish();
+                return true;
             }
             return handled;
         }
@@ -183,9 +186,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 if (receivedCustomer == null) {
                     return;
                 }
+                mCustomer = receivedCustomer;
                 updateOutgoingMessages(false);
                 // Only finish with this source if it is the one we are expecting.
-                // TODO: decide what to do with this customer, or see if we should finish.
                 if (mExpectingDefaultUpdate) {
                     mExpectingDefaultUpdate = false;
                     updateAdapterWithCustomer(receivedCustomer);
@@ -200,8 +203,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mErrorBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                // TODO: decide whether or not we should ever ignore them here
-
                 updateOutgoingMessages(false);
                 String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
                 String displayedError = errorMessage == null ? "" : errorMessage;
