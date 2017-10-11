@@ -457,9 +457,23 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 .sendBroadcast(intent);
     }
 
+    private void broadcastCustomerSource(@NonNull Source source) {
+        if (mCachedContextReference == null || mCachedContextReference.get() == null) {
+            return;
+        }
+        Intent intent = new Intent(EVENT_SOURCE_RETRIEVED);
+        intent.putExtra(EXTRA_CUSTOMER_SOURCE_RETRIEVED, source.toString());
+        LocalBroadcastManager.getInstance(mCachedContextReference.get())
+                .sendBroadcast(intent);
+
+    }
     private void broadcastCustomer(@NonNull Customer customer) {
+        if (mCachedContextReference == null || mCachedContextReference.get() == null) {
+            return;
+        }
         Intent intent = new Intent(EVENT_CUSTOMER_RETRIEVED);
         intent.putExtra(EXTRA_CUSTOMER_RETRIEVED, customer.toString());
+        LocalBroadcastManager.getInstance(mCachedContextReference.get()).sendBroadcast(intent);
     }
 
     private Handler createMainThreadHandler() {
@@ -469,29 +483,31 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 super.handleMessage(msg);
                 Object messageObject = msg.obj;
 
-                if (mCachedContextReference.get() == null) {
-                    return;
-                }
                 switch (msg.what) {
                     case CUSTOMER_RETRIEVED:
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
                             mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
                             broadcastCustomer(mCustomer);
+                        } else {
+
                         }
                         break;
                     case SOURCE_RETRIEVED:
                         if (messageObject instanceof Source) {
                             Source retrievedSource = (Source) messageObject;
-                            Intent intent = new Intent(EVENT_SOURCE_RETRIEVED);
-                            intent.putExtra(EXTRA_CUSTOMER_SOURCE_RETRIEVED, retrievedSource.toString());
-                            LocalBroadcastManager.getInstance(mCachedContextReference.get())
-                                    .sendBroadcast(intent);
+                            broadcastCustomerSource(retrievedSource);
+                        } else {
+
                         }
                         break;
                     case CUSTOMER_SHIPPING_INFO_SAVED:
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
+                            if (mCachedContextReference == null
+                                    || mCachedContextReference.get() == null) {
+                                return;
+                            }
                             Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
                             LocalBroadcastManager.getInstance(mCachedContextReference.get())
                                     .sendBroadcast(intent);
@@ -544,8 +560,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     sourceType,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
             if (contextWeakReference.get() != null) {
@@ -581,8 +595,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     shippingInformation,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
             if (contextWeakReference.get() != null) {
@@ -621,8 +633,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     sourceType,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
             if (contextWeakReference.get() != null) {
@@ -659,8 +669,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             customer = StripeApiHandler.retrieveCustomer(
                     key.getCustomerId(),
                     key.getSecret());
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
             if (errorContext != null && errorContext.get() != null) {

@@ -56,6 +56,7 @@ abstract class StripeActivity extends AppCompatActivity {
                 StripeException exception = (StripeException)
                         intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
                 showError(exception.getLocalizedMessage());
+                setCommunicatingProgress(false);
             }
         };
     }

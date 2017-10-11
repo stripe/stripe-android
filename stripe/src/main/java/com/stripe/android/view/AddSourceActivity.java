@@ -21,6 +21,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
+import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
 import static com.stripe.android.CustomerSession.EVENT_SOURCE_RETRIEVED;
 import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_SOURCE_RETRIEVED;
@@ -114,6 +115,7 @@ public class AddSourceActivity extends StripeActivity {
                     // created.
                     return;
                 }
+
                 String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
                 String displayedError = errorMessage == null ? "" : errorMessage;
                 setCommunicatingProgress(false);

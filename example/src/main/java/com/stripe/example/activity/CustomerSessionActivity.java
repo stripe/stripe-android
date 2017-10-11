@@ -54,6 +54,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs);
         mSelectSourceButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        initializeReceivers();
         CustomerSession.initCustomerSession(
                 new ExampleEphemeralKeyProvider(
                     new ExampleEphemeralKeyProvider.ProgressListener() {
@@ -65,8 +66,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
                         }
                     }));
 
+        CustomerSession.getInstance().retrieveCurrentCustomer(this);
         mProgressBar.setVisibility(View.VISIBLE);
-        initializeReceivers();
         mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
