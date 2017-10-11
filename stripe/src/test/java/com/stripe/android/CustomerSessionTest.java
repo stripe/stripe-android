@@ -478,8 +478,7 @@ public class CustomerSessionTest {
 
         session.addCustomerSource(RuntimeEnvironment.application,
                 "abc123",
-                Source.CARD,
-                mockListener);
+                Source.CARD);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         ArgumentCaptor<List> listArgumentCaptor =
@@ -542,8 +541,7 @@ public class CustomerSessionTest {
         session.setStripeApiProxy(mErrorProxy);
         session.addCustomerSource(RuntimeEnvironment.application,
                 "abc123",
-                Source.CARD,
-                mockListener);
+                Source.CARD);
 
         ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mBroadcastReceiver).onReceive(

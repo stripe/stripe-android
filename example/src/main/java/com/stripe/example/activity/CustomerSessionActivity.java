@@ -1,8 +1,12 @@
 package com.stripe.example.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +23,12 @@ import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
 
+import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
+import static com.stripe.android.CustomerSession.EVENT_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_CODE;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_MESSAGE;
+
 /**
  * An example activity that handles working with a {@link CustomerSession}, allowing you to
  * add and select sources for the current customer.
@@ -27,10 +37,12 @@ public class CustomerSessionActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_SELECT_SOURCE = 55;
 
+    @Nullable private BroadcastReceiver mCustomerReceiver;
+    @Nullable private BroadcastReceiver mErrorReceiver;
+    private ErrorDialogHandler mErrorDialogHandler;
+    private ProgressBar mProgressBar;
     private Button mSelectSourceButton;
     private TextView mSelectedSourceTextView;
-    private ProgressBar mProgressBar;
-    private ErrorDialogHandler mErrorDialogHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,28 +66,53 @@ public class CustomerSessionActivity extends AppCompatActivity {
                     }));
 
         mProgressBar.setVisibility(View.VISIBLE);
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mSelectSourceButton.setEnabled(true);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        mSelectSourceButton.setEnabled(false);
-                        mErrorDialogHandler.showError(errorMessage);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-
+        initializeReceivers();
         mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 launchWithCustomer();
             }
         });
+    }
+
+    private void initializeReceivers() {
+        mCustomerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mSelectSourceButton.setEnabled(true);
+                mProgressBar.setVisibility(View.INVISIBLE);
+            }
+        };
+
+        mErrorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                mSelectSourceButton.setEnabled(false);
+                mErrorDialogHandler.showError(errorMessage);
+                mProgressBar.setVisibility(View.INVISIBLE);
+            }
+        };
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mErrorReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mCustomerReceiver,
+                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mErrorReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mCustomerReceiver);
     }
 
     private void launchWithCustomer() {

@@ -1,12 +1,15 @@
 package com.stripe.android.view;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,9 +26,14 @@ import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.Source;
 
 import java.util.List;
 
+import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
+import static com.stripe.android.CustomerSession.EVENT_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_MESSAGE;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
@@ -42,12 +50,17 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
     private Customer mCustomer;
+    private BroadcastReceiver mCustomerBroadcastReceiver;
     private CustomerSessionProxy mCustomerSessionProxy;
+    private BroadcastReceiver mErrorBroadcastReceiver;
+    private boolean mExpectingDefaultUpdate;
     private MaskedCardAdapter mMaskedCardAdapter;
+    private int mOutgoingCommunicationAttempts;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
+    private boolean mWaitingToFinish;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PaymentMethodsActivity.class);
@@ -90,32 +103,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
         mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
+        initializeBroadcastReceivers();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
-            setCommunicatingProgress(true);
+            updateOutgoingMessages(true);
             initLoggingTokens();
-            CustomerSession.CustomerRetrievalListener listener =
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            updateCustomerAndSetDefaultSourceIfNecessary(customer);
-                        }
-
-                        @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
-                            String displayedError = errorMessage == null ? "" : errorMessage;
-                            showError(displayedError);
-                            setCommunicatingProgress(false);
-                        }
-                    };
             if (mCustomerSessionProxy == null) {
-                CustomerSession.getInstance().updateCurrentCustomer(listener);
+                CustomerSession.getInstance().updateCurrentCustomer(this);
             } else {
-                mCustomerSessionProxy.updateCurrentCustomer(listener);
+                mCustomerSessionProxy.updateCurrentCustomer(this);
             }
         }
     }
@@ -174,6 +174,63 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mCustomerSessionProxy = proxy;
     }
 
+    private void initializeBroadcastReceivers() {
+        mCustomerBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Customer receivedCustomer =
+                        Customer.fromString(intent.getStringExtra(EXTRA_CUSTOMER_RETRIEVED));
+                if (receivedCustomer == null) {
+                    return;
+                }
+                updateOutgoingMessages(false);
+                // Only finish with this source if it is the one we are expecting.
+                // TODO: decide what to do with this customer, or see if we should finish.
+                if (mExpectingDefaultUpdate) {
+                    mExpectingDefaultUpdate = false;
+                    updateAdapterWithCustomer(receivedCustomer);
+                } else if (mWaitingToFinish) {
+                    finishWithSelection(receivedCustomer.getDefaultSource());
+                } else {
+                    updateCustomerAndSetDefaultSourceIfNecessary(receivedCustomer);
+                }
+            }
+        };
+
+        mErrorBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // TODO: decide whether or not we should ever ignore them here
+
+                updateOutgoingMessages(false);
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                String displayedError = errorMessage == null ? "" : errorMessage;
+                setCommunicatingProgress(false);
+                showError(displayedError);
+            }
+        };
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mErrorBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mCustomerBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mErrorBroadcastReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mCustomerBroadcastReceiver,
+                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
+    }
+
     private void initLoggingTokens() {
         if (mCustomerSessionProxy == null) {
             if (mStartedFromPaymentSession) {
@@ -199,25 +256,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         // An inverted early return - we don't need to talk to the CustomerSession if there is
         // already a default source selected or we have no or more than one customer sources in our
         // list.
-        if (!TextUtils.isEmpty(customer.getDefaultSource()) || customer.getSources().size() != 1) {
+        if (!TextUtils.isEmpty(customer.getDefaultSource())
+                || customer.getSources().size() != 1) {
             updateAdapterWithCustomer(customer);
             return;
         }
-
-        CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        updateAdapterWithCustomer(customer);
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        String displayedError = errorMessage == null ? "" : errorMessage;
-                        showError(displayedError);
-                        setCommunicatingProgress(false);
-                    }
-                };
 
         // We only activate this if there is a single source in the list
         CustomerSource customerSource = customer.getSources().get(0);
@@ -230,17 +273,17 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
+        updateOutgoingMessages(true);
         if (mCustomerSessionProxy == null) {
             CustomerSession.getInstance().setCustomerDefaultSource(
                     this,
                     customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
+                    customerSource.getSourceType());
         } else {
+            mExpectingDefaultUpdate = true;
             mCustomerSessionProxy.setCustomerDefaultSource(
                     customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
+                    customerSource.getSourceType());
         }
     }
 
@@ -290,26 +333,28 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void getCustomerFromSession() {
-        CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        createListFromCustomerSources();
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        setCommunicatingProgress(false);
-                    }
-                };
-
-        setCommunicatingProgress(true);
+        updateOutgoingMessages(true);
         if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().retrieveCurrentCustomer(listener);
+            CustomerSession.getInstance().retrieveCurrentCustomer(this);
         } else {
-            mCustomerSessionProxy.retrieveCurrentCustomer(listener);
+            mCustomerSessionProxy.retrieveCurrentCustomer(this);
         }
+    }
+
+    /**
+     * Add or remove from the count of outgoing messages, and update the communication status
+     * accordingly.
+     *
+     * @param starting {@code true} if we are sending a new message, otherwise {@code false}.
+     */
+    private void updateOutgoingMessages(boolean starting) {
+        mOutgoingCommunicationAttempts = starting
+                ? mOutgoingCommunicationAttempts + 1
+                : mOutgoingCommunicationAttempts - 1;
+        if (mOutgoingCommunicationAttempts < 0) {
+            mOutgoingCommunicationAttempts = 0;
+        }
+        setCommunicatingProgress(mOutgoingCommunicationAttempts > 0);
     }
 
     private void setCommunicatingProgress(boolean communicating) {
@@ -329,35 +374,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
-        CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        finishWithSelection(customer.getDefaultSource());
-                        setCommunicatingProgress(false);
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        String displayedError = errorMessage == null ? "" : errorMessage;
-                        showError(displayedError);
-                        setCommunicatingProgress(false);
-                    }
-                };
         if (selectedSource == null || selectedSource.getId() == null) {
             return;
         }
+        mWaitingToFinish = true;
+        updateOutgoingMessages(true);
         if (mCustomerSessionProxy == null) {
             CustomerSession.getInstance().setCustomerDefaultSource(
-                    this, selectedSource.getId(), selectedSource.getSourceType(), listener);
+                    this, selectedSource.getId(), selectedSource.getSourceType());
         } else {
             mCustomerSessionProxy.setCustomerDefaultSource(
                     selectedSource.getId(),
-                    selectedSource.getSourceType(),
-                    listener);
+                    selectedSource.getSourceType());
         }
-        setCommunicatingProgress(true);
     }
 
     private void showError(@NonNull String error) {
@@ -382,11 +411,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     interface CustomerSessionProxy {
         void addProductUsageTokenIfValid(String token);
         @Nullable Customer getCachedCustomer();
-        void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
+        void retrieveCurrentCustomer(@NonNull Context context);
         void setCustomerDefaultSource(
                 @NonNull String sourceId,
-                @NonNull String sourceType,
-                @Nullable CustomerSession.CustomerRetrievalListener listener);
-        void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
+                @NonNull String sourceType);
+        void updateCurrentCustomer(@NonNull Context context);
     }
 }

@@ -1,11 +1,14 @@
 package com.stripe.android.view;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.FrameLayout;
 
 import com.stripe.android.CustomerSession;
@@ -18,6 +21,10 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
+import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
+import static com.stripe.android.CustomerSession.EVENT_SOURCE_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_SOURCE_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_MESSAGE;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
@@ -38,6 +45,9 @@ public class AddSourceActivity extends StripeActivity {
     FrameLayout mErrorLayout;
     StripeProvider mStripeProvider;
 
+    private @Nullable String mCachedSourceId;
+    private BroadcastReceiver mErrorBroadcastReceiver;
+    private BroadcastReceiver mSourceUpdateBroadcastReceiver;
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
 
@@ -77,7 +87,59 @@ public class AddSourceActivity extends StripeActivity {
             initCustomerSessionTokens();
         }
 
+        initializeBroadcastReceivers();
         setTitle(R.string.title_add_a_card);
+    }
+
+    private void initializeBroadcastReceivers() {
+        mSourceUpdateBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Source receivedSource =
+                        Source.fromString(intent.getStringExtra(EXTRA_CUSTOMER_SOURCE_RETRIEVED));
+                // Only finish with this source if it is the one we are expecting.
+                if (receivedSource != null
+                        && mCachedSourceId != null
+                        && mCachedSourceId.equals(receivedSource.getId())) {
+                    finishWithSource(receivedSource);
+                }
+            }
+        };
+
+        mErrorBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mCachedSourceId == null) {
+                    // Don't listen for random errors that this Activity can't have
+                    // created.
+                    return;
+                }
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                String displayedError = errorMessage == null ? "" : errorMessage;
+                setCommunicatingProgress(false);
+                showError(displayedError);
+            }
+        };
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mErrorBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mSourceUpdateBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mErrorBroadcastReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mSourceUpdateBroadcastReceiver,
+                new IntentFilter(EVENT_SOURCE_RETRIEVED));
     }
 
     @VisibleForTesting
@@ -120,21 +182,7 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     private void attachCardToCustomer(StripePaymentSource source) {
-        CustomerSession.SourceRetrievalListener listener =
-                new CustomerSession.SourceRetrievalListener() {
-                    @Override
-                    public void onSourceRetrieved(@NonNull Source source) {
-                        finishWithSource(source);
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        String displayedError = errorMessage == null ? "" : errorMessage;
-                        setCommunicatingProgress(false);
-                        showError(displayedError);
-                    }
-                };
-
+        mCachedSourceId = source.getId();
         if (mCustomerSessionProxy == null) {
             @Source.SourceType String sourceType;
             if (source instanceof Source) {
@@ -146,13 +194,13 @@ public class AddSourceActivity extends StripeActivity {
                 sourceType = Source.UNKNOWN;
             }
 
+            // TODO: Hook up the LBM
             CustomerSession.getInstance().addCustomerSource(
                     this,
                     source.getId(),
-                    sourceType,
-                    listener);
+                    sourceType);
         } else {
-            mCustomerSessionProxy.addCustomerSource(source.getId(), listener);
+            mCustomerSessionProxy.addCustomerSource(source.getId());
         }
     }
 
@@ -175,6 +223,7 @@ public class AddSourceActivity extends StripeActivity {
 
     private void finishWithSource(@NonNull Source source) {
         setCommunicatingProgress(false);
+        mCachedSourceId = null;
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NEW_SOURCE, source.toString());
         setResult(RESULT_OK, intent);
@@ -213,6 +262,6 @@ public class AddSourceActivity extends StripeActivity {
 
     interface CustomerSessionProxy {
         void addProductUsageTokenIfValid(String token);
-        void addCustomerSource(String sourceId, CustomerSession.SourceRetrievalListener listener);
+        void addCustomerSource(String sourceId);
     }
 }

@@ -30,6 +30,9 @@ import com.stripe.example.service.ExampleEphemeralKeyProvider;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
+import static com.stripe.android.CustomerSession.EVENT_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_MESSAGE;
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_DEFAULT_SHIPPING_METHOD;
@@ -43,7 +46,9 @@ import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_M
  */
 public class PaymentSessionActivity extends AppCompatActivity {
 
-    private BroadcastReceiver mBroadcastReceiver;
+    @Nullable private BroadcastReceiver mBroadcastReceiver;
+    @Nullable private BroadcastReceiver mCustomerReceiver;
+    @Nullable private BroadcastReceiver mErrorReceiver;
     private ErrorDialogHandler mErrorDialogHandler;
     private PaymentSession mPaymentSession;
     private ProgressBar mProgressBar;
@@ -63,6 +68,42 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
+
+        mStartPaymentFlowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPaymentSession.presentShippingFlow();
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mBroadcastReceiver,
+                new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mCustomerReceiver,
+                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mErrorReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mCustomerReceiver);
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(mErrorReceiver);
+    }
+
+    private void initializeBroadcastReceivers() {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -79,15 +120,24 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 LocalBroadcastManager.getInstance(PaymentSessionActivity.this).sendBroadcast(shippingInfoProcessedIntent);
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
-        mStartPaymentFlowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mPaymentSession.presentShippingFlow();
-            }
-        });
 
+        mCustomerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mProgressBar.setVisibility(View.INVISIBLE);
+                setupPaymentSession();
+            }
+        };
+
+        mErrorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                mStartPaymentFlowButton.setEnabled(false);
+                mErrorDialogHandler.showError(errorMessage);
+                mProgressBar.setVisibility(View.INVISIBLE);
+            }
+        };
     }
 
     private void setupCustomerSession() {
@@ -101,21 +151,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                                 }
                             }
                         }));
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                        setupPaymentSession();
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        mStartPaymentFlowButton.setEnabled(false);
-                        mErrorDialogHandler.showError(errorMessage);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
+        CustomerSession.getInstance().retrieveCurrentCustomer(this);
     }
 
     private void setupPaymentSession() {

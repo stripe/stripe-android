@@ -1,15 +1,25 @@
 package com.stripe.android;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
+
+import static com.stripe.android.CustomerSession.EVENT_API_ERROR;
+import static com.stripe.android.CustomerSession.EVENT_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_CODE;
+import static com.stripe.android.CustomerSession.EXTRA_ERROR_MESSAGE;
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -25,6 +35,8 @@ public class PaymentSession {
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
+    @Nullable private BroadcastReceiver mCustomerReceiver;
+    @Nullable private BroadcastReceiver mErrorReceiver;
     @NonNull private Activity mHostActivity;
     @NonNull private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
@@ -162,7 +174,6 @@ public class PaymentSession {
         }
 
         mPaymentSessionListener = listener;
-
         if (savedInstanceState != null) {
             PaymentSessionData data =
                     savedInstanceState.getParcelable(PAYMENT_SESSION_DATA_KEY);
@@ -171,8 +182,50 @@ public class PaymentSession {
             }
         }
         mPaymentSessionConfig = paymentSessionConfig;
+        initializeAndRegisterReceivers();
         fetchCustomer();
         return true;
+    }
+
+    private void initializeAndRegisterReceivers() {
+        mCustomerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Customer customer = Customer.fromString(
+                        intent.getStringExtra(EXTRA_CUSTOMER_RETRIEVED));
+                if (customer == null) {
+                    return;
+                }
+
+                String paymentId = customer.getDefaultSource();
+                mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
+                updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
+                if (mPaymentSessionListener != null) {
+                    mPaymentSessionListener
+                            .onPaymentSessionDataChanged(mPaymentSessionData);
+                    mPaymentSessionListener.onCommunicatingStateChanged(false);
+                }
+            }
+        };
+
+        mErrorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int errorCode = intent.getIntExtra(EXTRA_ERROR_CODE, -1);
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                if (mPaymentSessionListener != null) {
+                    mPaymentSessionListener.onError(errorCode, errorMessage);
+                    mPaymentSessionListener.onCommunicatingStateChanged(false);
+                }
+            }
+        };
+
+        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
+                mErrorReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
+                mCustomerReceiver,
+                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
     }
 
     /**
@@ -221,6 +274,7 @@ public class PaymentSession {
     /**
      * @return the data associated with the instance of this class.
      */
+    @NonNull
     public PaymentSessionData getPaymentSessionData() {
         return mPaymentSessionData;
     }
@@ -230,34 +284,17 @@ public class PaymentSession {
      */
     public void onDestroy() {
         mPaymentSessionListener = null;
+        LocalBroadcastManager.getInstance(mHostActivity)
+                .unregisterReceiver(mErrorReceiver);
+        LocalBroadcastManager.getInstance(mHostActivity)
+                .unregisterReceiver(mCustomerReceiver);
     }
 
     private void fetchCustomer() {
         if (mPaymentSessionListener != null) {
             mPaymentSessionListener.onCommunicatingStateChanged(true);
         }
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        String paymentId = customer.getDefaultSource();
-                        mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
-                        updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener
-                                    .onPaymentSessionDataChanged(mPaymentSessionData);
-                            mPaymentSessionListener.onCommunicatingStateChanged(false);
-                        }
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener.onError(errorCode, errorMessage);
-                            mPaymentSessionListener.onCommunicatingStateChanged(false);
-                        }
-                    }
-                });
+        CustomerSession.getInstance().retrieveCurrentCustomer(mHostActivity);
     }
 
     /**
