@@ -160,9 +160,13 @@ public class CustomerSessionTest {
 
         LocalBroadcastManager instance =
                 LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+        IntentFilter sessionIntentFilter = new IntentFilter();
+        sessionIntentFilter.addAction(CustomerSession.ACTION_API_EXCEPTION);
+        sessionIntentFilter.addAction(CustomerSession.EVENT_CUSTOMER_RETRIEVED);
+        sessionIntentFilter.addAction(CustomerSession.EVENT_SOURCE_RETRIEVED);
         instance.registerReceiver(
                 mBroadcastReceiver,
-                new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
+                sessionIntentFilter);
 
         mFirstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(mFirstCustomer);
@@ -364,13 +368,18 @@ public class CustomerSessionTest {
 
         // The key manager should think it is necessary to update the key,
         // because the first one was expired.
-        CustomerSession.CustomerRetrievalListener mockListener =
-                mock(CustomerSession.CustomerRetrievalListener.class);
-        session.retrieveCurrentCustomer(mockListener);
+        session.retrieveCurrentCustomer(RuntimeEnvironment.application);
 
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(mBroadcastReceiver).onReceive(any(Context.class), intentArgumentCaptor.capture());
+
+        Intent capturedIntent = intentArgumentCaptor.getValue();
+        assertEquals(CustomerSession.EVENT_CUSTOMER_RETRIEVED, capturedIntent.getAction());
+        assertTrue(capturedIntent.hasExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
+
+        Customer capturedCustomer = Customer.fromString(
+                capturedIntent.getStringExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
         assertNotNull(session.getCustomer());
@@ -428,13 +437,19 @@ public class CustomerSessionTest {
 
         // The key manager should think it is necessary to update the key,
         // because the first one was expired.
-        CustomerSession.CustomerRetrievalListener mockListener =
-                mock(CustomerSession.CustomerRetrievalListener.class);
-        session.retrieveCurrentCustomer(mockListener);
+        session.retrieveCurrentCustomer(RuntimeEnvironment.application);
 
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(mBroadcastReceiver, times(1)).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+        Intent capturedIntent = intentArgumentCaptor.getValue();
+        assertNotNull(capturedIntent);
+        assertEquals(CustomerSession.EVENT_CUSTOMER_RETRIEVED, capturedIntent.getAction());
+        assertTrue(capturedIntent.hasExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
+        Customer capturedCustomer = Customer.fromString(capturedIntent
+                .getStringExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
 
         assertNotNull(capturedCustomer);
         assertEquals(mFirstCustomer.getId(), capturedCustomer.getId());
@@ -473,8 +488,6 @@ public class CustomerSessionTest {
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
-        CustomerSession.SourceRetrievalListener mockListener =
-                mock(CustomerSession.SourceRetrievalListener.class);
 
         session.addCustomerSource(RuntimeEnvironment.application,
                 "abc123",
@@ -500,9 +513,18 @@ public class CustomerSessionTest {
             fail(unexpected.getMessage());
         }
 
-        ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
-        Source capturedSource = sourceArgumentCaptor.getValue();
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertEquals(CustomerSession.EVENT_SOURCE_RETRIEVED, captured.getAction());
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_CUSTOMER_SOURCE_RETRIEVED));
+
+        Source capturedSource = Source.fromString(
+                captured.getStringExtra(CustomerSession.EXTRA_CUSTOMER_SOURCE_RETRIEVED));
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
     }
@@ -535,8 +557,6 @@ public class CustomerSessionTest {
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
-        CustomerSession.SourceRetrievalListener mockListener =
-                mock(CustomerSession.SourceRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
         session.addCustomerSource(RuntimeEnvironment.application,
@@ -584,14 +604,11 @@ public class CustomerSessionTest {
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
-        CustomerSession.CustomerRetrievalListener mockListener =
-                mock(CustomerSession.CustomerRetrievalListener.class);
 
         session.setCustomerDefaultSource(
                 RuntimeEnvironment.application,
                 "abc123",
-                Source.CARD,
-                mockListener);
+                Source.CARD);
 
         assertTrue(session.getProductUsageTokens().isEmpty());
         ArgumentCaptor<List> listArgumentCaptor =
@@ -613,8 +630,18 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertEquals(CustomerSession.EVENT_CUSTOMER_RETRIEVED, captured.getAction());
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
+
+        Customer capturedCustomer = Customer.fromString(
+                captured.getStringExtra(CustomerSession.EXTRA_CUSTOMER_RETRIEVED));
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
     }
@@ -646,15 +673,12 @@ public class CustomerSessionTest {
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
-        CustomerSession.CustomerRetrievalListener mockListener =
-                mock(CustomerSession.CustomerRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
         session.setCustomerDefaultSource(
                 RuntimeEnvironment.application,
                 "abc123",
-                Source.CARD,
-                mockListener);
+                Source.CARD);
 
         ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mBroadcastReceiver).onReceive(

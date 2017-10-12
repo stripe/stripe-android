@@ -1,19 +1,21 @@
 package com.stripe.android.view;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import com.stripe.android.BuildConfig;
-import com.stripe.android.CustomerSession;
 import com.stripe.android.CustomerSessionTest;
 import com.stripe.android.R;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.Source;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,8 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.stripe.android.CustomerSession.EVENT_CUSTOMER_RETRIEVED;
+import static com.stripe.android.CustomerSession.EXTRA_CUSTOMER_RETRIEVED;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_PROXY_DELAY;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT;
@@ -109,6 +113,14 @@ public class PaymentMethodsActivityTest {
         mAddCardView = mActivityController.get().findViewById(R.id.payment_methods_add_payment_container);
     }
 
+    @After
+    public void teardown() {
+        mActivityController.pause();
+        mActivityController.stop();
+        mActivityController.destroy();
+        mActivityController = null;
+    }
+
     @Test
     public void onCreate_withCachedCustomer_showsUi() {
         Customer customer = Customer.fromString(CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT);
@@ -128,23 +140,21 @@ public class PaymentMethodsActivityTest {
         Customer customer = Customer.fromString(CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(customer);
         when(mCustomerSessionProxy.getCachedCustomer()).thenReturn(null);
-        ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
 
         assertNotNull(mProgressBar);
         assertNotNull(mRecyclerView);
         assertNotNull(mAddCardView);
 
         mActivityController.get().initializeCustomerSourceData();
-        verify(mCustomerSessionProxy).retrieveCurrentCustomer(listenerArgumentCaptor.capture());
+        verify(mCustomerSessionProxy).retrieveCurrentCustomer(mActivityController.get());
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(View.VISIBLE, mAddCardView.getVisibility());
         assertEquals(View.VISIBLE, mRecyclerView.getVisibility());
 
-        CustomerSession.CustomerRetrievalListener listener = listenerArgumentCaptor.getValue();
-        assertNotNull(listener);
-
-        listener.onCustomerRetrieved(customer);
+        Intent customerIntent = new Intent(EVENT_CUSTOMER_RETRIEVED);
+        customerIntent.putExtra(EXTRA_CUSTOMER_RETRIEVED, customer.toString());
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(customerIntent);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
     }
@@ -201,22 +211,21 @@ public class PaymentMethodsActivityTest {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toString());
 
-        ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
-
         mActivityController.get().onActivityResult(REQUEST_CODE_ADD_CARD, RESULT_OK, resultIntent);
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
-        verify(mCustomerSessionProxy).updateCurrentCustomer(listenerArgumentCaptor.capture());
+        verify(mCustomerSessionProxy).updateCurrentCustomer(mActivityController.get());
 
-        CustomerSession.CustomerRetrievalListener listener = listenerArgumentCaptor.getValue();
-        assertNotNull(listener);
 
         // Note - this doesn't make sense as the actual update; just testing that the customer
         // changes
         Customer updatedCustomer = Customer.fromString(TEST_CUSTOMER_OBJECT_WITH_SOURCES);
         assertNotNull(updatedCustomer);
 
-        listener.onCustomerRetrieved(updatedCustomer);
+        Intent customerIntent = new Intent(EVENT_CUSTOMER_RETRIEVED);
+        customerIntent.putExtra(EXTRA_CUSTOMER_RETRIEVED, updatedCustomer.toString());
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(customerIntent);
+
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertEquals(2, mRecyclerView.getAdapter().getItemCount());
     }
@@ -233,15 +242,10 @@ public class PaymentMethodsActivityTest {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toString());
 
-        ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
-
         mActivityController.get().onActivityResult(REQUEST_CODE_ADD_CARD, RESULT_OK, resultIntent);
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
-        verify(mCustomerSessionProxy).updateCurrentCustomer(listenerArgumentCaptor.capture());
+        verify(mCustomerSessionProxy).updateCurrentCustomer(mActivityController.get());
 
-        CustomerSession.CustomerRetrievalListener listener = listenerArgumentCaptor.getValue();
-        assertNotNull(listener);
 
         // Note - this doesn't make sense as the actual update; just testing that the customer
         // changes and sending an appropriate customer for continuing the flow of the test
@@ -249,28 +253,25 @@ public class PaymentMethodsActivityTest {
                 Customer.fromString(TEST_CUSTOMER_OBJECT_WITH_ONE_SOURCE_NO_SELECTION);
         assertNotNull(updatedCustomer);
 
-        ArgumentCaptor<CustomerSession.CustomerRetrievalListener> selectionCaptor =
-                ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
+        broadcastCustomerUpdate(updatedCustomer);
+
         ArgumentCaptor<String> stringArgumentCaptor =
                 ArgumentCaptor.forClass(String.class);
-        listener.onCustomerRetrieved(updatedCustomer);
         // Progress bar stays visible because we have another server trip to make
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
 
         verify(mCustomerSessionProxy).setCustomerDefaultSource(
+                eq(mActivityController.get()),
                 stringArgumentCaptor.capture(),
-                eq(Source.CARD),
-                selectionCaptor.capture());
+                eq(Source.CARD));
 
-        CustomerSession.CustomerRetrievalListener updateListener = selectionCaptor.getValue();
         assertEquals(updatedCustomer.getSources().get(0).getId(), stringArgumentCaptor.getValue());
-        assertNotNull(updateListener);
 
         // Finally, just make sure we update the adapter and turn off the progress bar
         Customer anotherCustomer = Customer.fromString(TEST_CUSTOMER_OBJECT_WITH_SOURCES);
         assertNotNull(anotherCustomer);
 
-        updateListener.onCustomerRetrieved(anotherCustomer);
+        broadcastCustomerUpdate(anotherCustomer);
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertEquals(2, mRecyclerView.getAdapter().getItemCount());
     }
@@ -293,24 +294,21 @@ public class PaymentMethodsActivityTest {
         MenuItem menuItem = mock(MenuItem.class);
         when(menuItem.getItemId()).thenReturn(R.id.action_save);
         ArgumentCaptor<String> selectionArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
 
         mActivityController.get().onOptionsItemSelected(menuItem);
 
         verify(mCustomerSessionProxy).setCustomerDefaultSource(
+                eq(mActivityController.get()),
                 selectionArgumentCaptor.capture(),
-                eq(Source.CARD),
-                listenerArgumentCaptor.capture());
+                eq(Source.CARD));
 
         assertEquals(customer.getDefaultSource(), selectionArgumentCaptor.getValue());
-        CustomerSession.CustomerRetrievalListener listener = listenerArgumentCaptor.getValue();
-        assertNotNull(listener);
 
         // We should be displaying the progress bar now.
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
 
-        listener.onCustomerRetrieved(customer);
+        broadcastCustomerUpdate(customer);
+
         // Now it should be gone.
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mShadowActivity.isFinishing());
@@ -322,4 +320,12 @@ public class PaymentMethodsActivityTest {
         assertNotNull(customerSource);
         assertEquals(customerSource.toString(), intent.getStringExtra(EXTRA_SELECTED_PAYMENT));
     }
+
+    private static void broadcastCustomerUpdate(@NonNull Customer customer) {
+        Intent customerIntent = new Intent(EVENT_CUSTOMER_RETRIEVED);
+        customerIntent.putExtra(EXTRA_CUSTOMER_RETRIEVED, customer.toString());
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(customerIntent);
+    }
+
 }

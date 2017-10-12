@@ -220,6 +220,9 @@ public class PaymentSession {
             }
         };
 
+        // In case these are pre-registered, remove them.
+        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mErrorReceiver);
+        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mCustomerReceiver);
         LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
                 mErrorReceiver,
                 new IntentFilter(EVENT_API_ERROR));

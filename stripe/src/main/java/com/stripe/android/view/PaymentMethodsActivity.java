@@ -191,11 +191,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 // Only finish with this source if it is the one we are expecting.
                 if (mExpectingDefaultUpdate) {
                     mExpectingDefaultUpdate = false;
-                    updateAdapterWithCustomer(receivedCustomer);
+                    updateAdapterWithCustomer(mCustomer);
                 } else if (mWaitingToFinish) {
-                    finishWithSelection(receivedCustomer.getDefaultSource());
+                    finishWithSelection(mCustomer.getDefaultSource());
                 } else {
-                    updateCustomerAndSetDefaultSourceIfNecessary(receivedCustomer);
+                    updateCustomerAndSetDefaultSourceIfNecessary(mCustomer);
                 }
             }
         };
@@ -275,14 +275,15 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         updateOutgoingMessages(true);
+        mExpectingDefaultUpdate = true;
         if (mCustomerSessionProxy == null) {
             CustomerSession.getInstance().setCustomerDefaultSource(
                     this,
                     customerSource.getId(),
                     customerSource.getSourceType());
         } else {
-            mExpectingDefaultUpdate = true;
             mCustomerSessionProxy.setCustomerDefaultSource(
+                    this,
                     customerSource.getId(),
                     customerSource.getSourceType());
         }
@@ -385,6 +386,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     this, selectedSource.getId(), selectedSource.getSourceType());
         } else {
             mCustomerSessionProxy.setCustomerDefaultSource(
+                    this,
                     selectedSource.getId(),
                     selectedSource.getSourceType());
         }
@@ -405,6 +407,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void updateAdapterWithCustomer(@NonNull Customer customer) {
+        if (mMaskedCardAdapter == null) {
+            createListFromCustomerSources();
+            if (mCustomer == null) {
+                return;
+            }
+        }
         mMaskedCardAdapter.updateCustomer(customer);
         setCommunicatingProgress(false);
     }
@@ -414,6 +422,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         @Nullable Customer getCachedCustomer();
         void retrieveCurrentCustomer(@NonNull Context context);
         void setCustomerDefaultSource(
+                @NonNull Context context,
                 @NonNull String sourceId,
                 @NonNull String sourceType);
         void updateCurrentCustomer(@NonNull Context context);

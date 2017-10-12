@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -13,6 +14,7 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
+import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
@@ -211,20 +213,18 @@ public class AddSourceActivityTest {
         assertNotNull(expectedSource);
         callback.onSuccess(expectedSource);
 
-        ArgumentCaptor<String> sourceIdCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<CustomerSession.SourceRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.SourceRetrievalListener.class);
         verify(mCustomerSessionProxy).addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
         verify(mCustomerSessionProxy).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSessionProxy).addCustomerSource(
-                sourceIdCaptor.capture(),
-                listenerArgumentCaptor.capture());
+                mActivityController.get(),
+                expectedSource.getId(),
+                expectedSource.getType());
 
-        assertEquals(expectedSource.getId(), sourceIdCaptor.getValue());
-        CustomerSession.SourceRetrievalListener listener = listenerArgumentCaptor.getValue();
-        assertNotNull(listener);
-
-        listener.onSourceRetrieved(expectedSource);
+        Intent sourceIntent = new Intent(CustomerSession.EVENT_SOURCE_RETRIEVED);
+        sourceIntent.putExtra(CustomerSession.EXTRA_CUSTOMER_SOURCE_RETRIEVED,
+                expectedSource.toString());
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(sourceIntent);
 
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();

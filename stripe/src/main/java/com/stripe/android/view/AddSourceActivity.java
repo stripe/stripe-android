@@ -185,24 +185,25 @@ public class AddSourceActivity extends StripeActivity {
 
     private void attachCardToCustomer(StripePaymentSource source) {
         mCachedSourceId = source.getId();
+        @Source.SourceType String sourceType;
+        if (source instanceof Source) {
+            sourceType = ((Source) source).getType();
+        } else if (source instanceof Card){
+            sourceType = Source.CARD;
+        } else {
+            // This isn't possible from this activity.
+            sourceType = Source.UNKNOWN;
+        }
         if (mCustomerSessionProxy == null) {
-            @Source.SourceType String sourceType;
-            if (source instanceof Source) {
-                sourceType = ((Source) source).getType();
-            } else if (source instanceof Card){
-                sourceType = Source.CARD;
-            } else {
-                // This isn't possible from this activity.
-                sourceType = Source.UNKNOWN;
-            }
-
-            // TODO: Hook up the LBM
             CustomerSession.getInstance().addCustomerSource(
                     this,
                     source.getId(),
                     sourceType);
         } else {
-            mCustomerSessionProxy.addCustomerSource(source.getId());
+            mCustomerSessionProxy.addCustomerSource(
+                    this,
+                    source.getId(),
+                    sourceType);
         }
     }
 
@@ -264,6 +265,8 @@ public class AddSourceActivity extends StripeActivity {
 
     interface CustomerSessionProxy {
         void addProductUsageTokenIfValid(String token);
-        void addCustomerSource(String sourceId);
+        void addCustomerSource(@NonNull Context context,
+                               String sourceId,
+                               @Source.SourceType String sourceType);
     }
 }
