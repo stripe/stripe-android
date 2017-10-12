@@ -48,6 +48,7 @@ public class IconTextInputLayout extends TextInputLayout {
      * and the variable and method names change. We should remove usage of reflection
      * at the first opportunity.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     @VisibleForTesting
     void init() {
         try {
