@@ -667,7 +667,7 @@ class StripeApiHandler {
             if (listener != null) {
                 listener.onLoggingResponse(response);
             }
-        } catch(StripeException stripeException) {
+        } catch (StripeException stripeException) {
             if (listener != null) {
                 listener.onStripeException(stripeException);
             }
@@ -695,7 +695,7 @@ class StripeApiHandler {
     private static List<Parameter> flattenParamsList(List<Object> params, String keyPrefix)
             throws InvalidRequestException {
         List<Parameter> flatParams = new LinkedList<Parameter>();
-        Iterator<?> it = ((List<?>)params).iterator();
+        Iterator<?> it = ((List<?>) params).iterator();
         String newPrefix = String.format("%s[]", keyPrefix);
 
         // Because application/x-www-form-urlencoded cannot represent an empty
@@ -744,10 +744,10 @@ class StripeApiHandler {
         } else if (value instanceof List<?>) {
             flatParams = flattenParamsList((List<Object>) value, keyPrefix);
         } else if ("".equals(value)) {
-            throw new InvalidRequestException("You cannot set '"+keyPrefix+"' to an empty string. "+
-                    "We interpret empty strings as null in requests. "+
-                    "You may set '"+keyPrefix+"' to null to delete the property.",
-                    keyPrefix, null, 0, null);
+            throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty " +
+                    "string. " + "We interpret empty strings as null in requests. " + "You may " +
+                    "set '" + keyPrefix + "' to null to delete the property.", keyPrefix, null,
+                    0, null);
         } else if (value == null) {
             flatParams = new LinkedList<>();
             flatParams.add(new Parameter(keyPrefix, ""));
@@ -903,7 +903,8 @@ class StripeApiHandler {
             case 403:
                 throw new PermissionException(stripeError.message, requestId, rCode);
             case 429:
-                throw new RateLimitException(stripeError.message, stripeError.param, requestId, rCode, null);
+                throw new RateLimitException(stripeError.message, stripeError.param, requestId,
+                        rCode, null);
             default:
                 throw new APIException(stripeError.message, requestId, rCode, null);
         }
@@ -936,11 +937,10 @@ class StripeApiHandler {
 
         String apiKey = options.getPublishableApiKey();
         if (apiKey.trim().isEmpty()) {
-            throw new AuthenticationException(
-                    "No API key provided. (HINT: set your API key using 'Stripe.apiKey = <API-KEY>'. "
-                            + "You can generate API keys from the Stripe web interface. "
-                            + "See https://stripe.com/api for details or email support@stripe.com if you have questions.",
-                    null, 0);
+            throw new AuthenticationException("No API key provided. (HINT: set your API key using" +
+                    " 'Stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe" +
+                    " web interface. See https://stripe.com/api for details or email " +
+                    "support@stripe.com if you have questions.", null, 0);
         }
 
         StripeResponse response = getStripeResponse(method, url, params, options);
@@ -1018,8 +1018,7 @@ class StripeApiHandler {
         // to us actually making a request to /v1/foo/null
         if (str == null) {
             return null;
-        }
-        else {
+        } else {
             return URLEncoder.encode(str, CHARSET);
         }
     }

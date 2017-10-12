@@ -371,7 +371,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         new ArrayList<>(productUsageTokens),
                         shippingInformation,
                         mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customer);
+                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED,
+                        customer);
                 mUiThreadHandler.sendMessage(message);
             }
         };

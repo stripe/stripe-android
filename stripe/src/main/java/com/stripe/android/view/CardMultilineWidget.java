@@ -19,9 +19,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.stripe.android.CardUtils;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
-import com.stripe.android.CardUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -207,7 +207,7 @@ public class CardMultilineWidget extends LinearLayout {
         LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
         linearParams.setMargins(0, 0, marginPixels, 0);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             linearParams.setMarginEnd(marginPixels);
         }
 

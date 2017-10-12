@@ -39,11 +39,6 @@ page at http://checkstyle.sourceforge.net/config.html -->
         <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
     </module>
 
-    <module name="JavadocPackage">
-        <!-- Checks that each Java package has a Javadoc file used for commenting.
-          Only allows a package-info.java, not package.html. -->
-    </module>
-
     <!-- All Java AST specific tests live under TreeWalker module. -->
     <module name="TreeWalker">
 
@@ -88,7 +83,9 @@ page at http://checkstyle.sourceforge.net/config.html -->
         <module name="ConstantName"/>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
-        <module name="MemberName"/>
+        <!--<module name="MemberName">-->
+            <!--<property name="format" value="^m[A-Z][a-zA-Z0-9]*$"/>-->
+        <!--</module>-->
         <module name="MethodName"/>
         <module name="ParameterName"/>
         <module name="StaticVariableName"/>

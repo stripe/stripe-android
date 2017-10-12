@@ -144,9 +144,8 @@ class ViewUtils {
         // grayscale version would be.
         // See https://www.w3.org/TR/AERT#color-contrast and
         // http://paulbourke.net/texture_colour/colourspace/ for further reading.
-        double luminescence = 0.299* Color.red(color)
-                + 0.587*Color.green(color)
-                + 0.114* Color.blue(color);
+        double luminescence = 0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 *
+                Color.blue(color);
 
         // Because the colors are all hex integers.
         double luminescencePercentage = luminescence / 255;
@@ -211,7 +210,7 @@ class ViewUtils {
             numberGroups = new String[4];
             int i = 0;
             int previousStart = 0;
-            while((i + 1) * 4 < spacelessCardNumber.length()) {
+            while ((i + 1) * 4 < spacelessCardNumber.length()) {
                 String group = spacelessCardNumber.substring(previousStart, (i + 1) * 4);
                 numberGroups[i] = group;
                 previousStart = (i + 1) * 4;

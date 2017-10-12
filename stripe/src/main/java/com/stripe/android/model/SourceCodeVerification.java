@@ -78,7 +78,7 @@ public class SourceCodeVerification extends StripeJsonModel {
     public JSONObject toJson() {
         JSONObject jsonObject = new JSONObject();
 
-        try{
+        try {
             jsonObject.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
             StripeJsonUtils.putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
         } catch (JSONException ignored) { }

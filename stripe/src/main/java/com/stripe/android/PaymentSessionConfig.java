@@ -34,15 +34,18 @@ public class PaymentSessionConfig implements Parcelable {
         /**
          * @param hiddenShippingInfoFields that should be hidden in the {@link ShippingInfoWidget}.
          */
-        public Builder setHiddenShippingInfoFields(@CustomizableShippingField String ... hiddenShippingInfoFields) {
+        public Builder setHiddenShippingInfoFields(
+                @CustomizableShippingField String ... hiddenShippingInfoFields) {
             mHiddenShippingInfoFields = Arrays.asList(hiddenShippingInfoFields);
             return this;
         }
 
         /**
-         * @param optionalShippingInfoFields that should be optional in the {@link ShippingInfoWidget}
+         * @param optionalShippingInfoFields that should be optional in the
+         * {@link ShippingInfoWidget}
          */
-        public Builder setOptionalShippingInfoFields(@CustomizableShippingField String ... optionalShippingInfoFields) {
+        public Builder setOptionalShippingInfoFields(
+                @CustomizableShippingField String ... optionalShippingInfoFields) {
             mOptionalShippingInfoFields = Arrays.asList(optionalShippingInfoFields);
             return this;
         }
@@ -57,9 +60,9 @@ public class PaymentSessionConfig implements Parcelable {
         }
 
         /**
-         * @param shippingInfoRequired whether a {@link ShippingInformation} should be required. If it is
-         *                            required, a screen with a {@link ShippingInfoWidget} can be
-         *                            shown to collect it.
+         * @param shippingInfoRequired whether a {@link ShippingInformation} should be required.
+         *                             If it is required, a screen with a {@link ShippingInfoWidget}
+         *                             can be shown to collect it.
          */
         public Builder setShippingInfoRequired(boolean shippingInfoRequired) {
             mShippingInfoRequired = shippingInfoRequired;
@@ -111,7 +114,9 @@ public class PaymentSessionConfig implements Parcelable {
         if (isShippingInfoRequired() != that.isShippingInfoRequired()) return false;
         if (isShippingMethodRequired() != that.isShippingMethodRequired()) return false;
         if (!getHiddenShippingInfoFields().equals(that.getHiddenShippingInfoFields())) return false;
-        if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) return false;
+        if (!getOptionalShippingInfoFields().equals(that.getOptionalShippingInfoFields())) {
+            return false;
+        }
         return getPrepopulatedShippingInfo().equals(that.getPrepopulatedShippingInfo());
     }
 
@@ -136,14 +141,18 @@ public class PaymentSessionConfig implements Parcelable {
         parcel.writeList(mOptionalShippingInfoFields);
         parcel.writeParcelable(mShippingInformation, flags);
         parcel.writeInt(mShippingInfoRequired ? 1 : 0);
-        parcel.writeInt(mShippingMethodRequired ? 1: 0);
+        parcel.writeInt(mShippingMethodRequired ? 1 : 0);
     }
 
-    public @NonNull List<String> getHiddenShippingInfoFields() {
+    public
+    @NonNull
+    List<String> getHiddenShippingInfoFields() {
         return mHiddenShippingInfoFields;
     }
 
-    public @NonNull List<String> getOptionalShippingInfoFields() {
+    public
+    @NonNull
+    List<String> getOptionalShippingInfoFields() {
         return mOptionalShippingInfoFields;
     }
 
@@ -160,8 +169,8 @@ public class PaymentSessionConfig implements Parcelable {
         return mShippingMethodRequired;
     }
 
-    public static final Parcelable.Creator<PaymentSessionConfig> CREATOR
-            = new Parcelable.Creator<PaymentSessionConfig>() {
+    public static final Parcelable.Creator<PaymentSessionConfig> CREATOR = new Parcelable
+            .Creator<PaymentSessionConfig>() {
 
         @Override
         public PaymentSessionConfig createFromParcel(Parcel in) {

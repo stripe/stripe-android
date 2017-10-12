@@ -84,7 +84,8 @@ public class PaymentSessionData implements Parcelable {
     }
 
     /**
-     * Get the {@link ShippingInformation} collected as part of the associated {@link PaymentSession}
+     * Get the {@link ShippingInformation} collected as part of the associated
+     * {@link PaymentSession}
      * payment flow.
      *
      * @return {@link ShippingInformation} where the items being purchased should be shipped.

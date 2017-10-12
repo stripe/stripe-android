@@ -203,7 +203,7 @@ class StripeJsonUtils {
         }
         Map<String, Object> map = new HashMap<>();
         Iterator<String> keyIterator = jsonObject.keys();
-        while(keyIterator.hasNext()) {
+        while (keyIterator.hasNext()) {
             String key = keyIterator.next();
             Object value = jsonObject.opt(key);
             if (NULL.equals(value) || value == null) {

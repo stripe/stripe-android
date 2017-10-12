@@ -101,7 +101,7 @@ public class SourceReceiver extends StripeJsonModel {
 
     @Nullable
     public static SourceReceiver fromString(@Nullable String jsonString) {
-        try{
+        try {
             JSONObject jsonObject = new JSONObject(jsonString);
             return fromJson(jsonObject);
         } catch (JSONException ignored) {

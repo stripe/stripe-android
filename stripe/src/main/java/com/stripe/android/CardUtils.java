@@ -102,7 +102,7 @@ public class CardUtils {
     static boolean isValidCardLength(
             @Nullable String cardNumber,
             @NonNull @CardBrand String cardBrand) {
-        if(cardNumber == null || Card.UNKNOWN.equals(cardBrand)) {
+        if (cardNumber == null || Card.UNKNOWN.equals(cardBrand)) {
             return false;
         }
 

@@ -8,7 +8,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -221,7 +220,8 @@ public class MaskedCardView extends LinearLayout {
             icon = getResources().getDrawable(resourceId);
         }
 
-        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt : mUnselectedColorInt;
+        @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt :
+                mUnselectedColorInt;
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), tintColor);
         imageView.setImageDrawable(compatIcon);

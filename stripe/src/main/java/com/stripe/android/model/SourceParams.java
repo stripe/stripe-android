@@ -5,13 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 
-import com.stripe.android.StripeNetworkUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.model.Source.SourceType;
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.model.Source.SourceType;
 
 /**
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.
@@ -657,7 +655,7 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
         networkReadyMap.put(API_PARAM_TOKEN, mToken);
         networkReadyMap.put(API_PARAM_USAGE, mUsage);
-        StripeNetworkUtils.removeNullAndEmptyParams(networkReadyMap);
+        removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }
 

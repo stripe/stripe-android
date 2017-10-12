@@ -2,16 +2,10 @@ package com.stripe.android;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -25,6 +19,10 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
@@ -700,13 +698,11 @@ public class Stripe {
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
         if (result.token != null) {
             callback.onSuccess(result.token);
-        }
-        else if (result.error != null) {
+        } else if (result.error != null) {
             callback.onError(result.error);
-        }
-        else {
-            callback.onError(new RuntimeException(
-                    "Somehow got neither a token response or an error response"));
+        } else {
+            callback.onError(new RuntimeException("Somehow got neither a token response or an " +
+                    "error response"));
         }
     }
 

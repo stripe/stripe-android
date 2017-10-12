@@ -15,11 +15,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
+import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information
@@ -382,7 +382,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             putStringIfNotNull(jsonObject, FIELD_FLOW, mFlow);
             jsonObject.put(FIELD_LIVEMODE, mLiveMode);
 
-            JSONObject metaDataObject = StripeJsonUtils.mapToJsonObject(mMetaData);
+            JSONObject metaDataObject = mapToJsonObject(mMetaData);
             if (metaDataObject != null) {
                 jsonObject.put(FIELD_METADATA, metaDataObject);
             }

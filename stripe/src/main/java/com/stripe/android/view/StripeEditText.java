@@ -2,7 +2,6 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
@@ -25,8 +24,8 @@ import com.stripe.android.R;
 import static com.stripe.android.view.ViewUtils.isColorDark;
 
 /**
- * Extension of {@link AppCompatEditText} that listens for users pressing the delete key when there is
- * no text present. Google has actually made this
+ * Extension of {@link AppCompatEditText} that listens for users pressing the delete key when
+ * there is no text present. Google has actually made this
  * <a href="https://code.google.com/p/android/issues/detail?id=42904">somewhat difficult</a>,
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
@@ -258,7 +257,7 @@ public class StripeEditText extends TextInputEditText {
 
     private class SoftDeleteInputConnection extends InputConnectionWrapper {
 
-        public SoftDeleteInputConnection(InputConnection target, boolean mutable) {
+        SoftDeleteInputConnection(InputConnection target, boolean mutable) {
             super(target, mutable);
         }
 

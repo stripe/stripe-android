@@ -83,7 +83,8 @@ public class PaymentSession {
                     fetchCustomer();
                     return true;
                 case PAYMENT_SHIPPING_DETAILS_REQUEST:
-                    PaymentSessionData paymentSessionData = data.getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
+                    PaymentSessionData paymentSessionData = data.getParcelableExtra(
+                            PAYMENT_SESSION_DATA_KEY);
                     updateIsPaymentReadyToCharge(mPaymentSessionConfig, paymentSessionData);
                     mPaymentSessionData = paymentSessionData;
                     mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
@@ -104,10 +105,13 @@ public class PaymentSession {
      * @param paymentSessionData holds the data that has been collected.
      * @return whether the data in the provided {@link PaymentSessionData} is ready to charge.
      */
-    public boolean updateIsPaymentReadyToCharge(PaymentSessionConfig paymentSessionConfig, PaymentSessionData paymentSessionData) {
+    public boolean updateIsPaymentReadyToCharge(PaymentSessionConfig paymentSessionConfig,
+                                                PaymentSessionData paymentSessionData) {
         if (StripeTextUtils.isBlank(paymentSessionData.getSelectedPaymentMethodId()) ||
-                (paymentSessionConfig.isShippingInfoRequired() && paymentSessionData.getShippingInformation() == null) ||
-                (paymentSessionConfig.isShippingMethodRequired() && paymentSessionData.getShippingMethod() == null)) {
+                (paymentSessionConfig.isShippingInfoRequired() &&
+                        paymentSessionData.getShippingInformation() == null) ||
+                (paymentSessionConfig.isShippingMethodRequired() &&
+                        paymentSessionData.getShippingMethod() == null)) {
             paymentSessionData.setPaymentReadyToCharge(false);
             return false;
         }

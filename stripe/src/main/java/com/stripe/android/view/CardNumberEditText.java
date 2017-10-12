@@ -10,9 +10,9 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 
-import com.stripe.android.model.Card;
 import com.stripe.android.CardUtils;
 import com.stripe.android.StripeTextUtils;
+import com.stripe.android.model.Card;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -112,7 +112,8 @@ public class CardNumberEditText extends StripeEditText {
      *
      * @param newLength the post-edit length of the string
      * @param editActionStart the position in the string at which the edit action starts
-     * @param editActionAddition the number of new characters going into the string (zero for delete)
+     * @param editActionAddition the number of new characters going into the string (zero for
+     *                           delete)
      * @return an index within the string at which to put the cursor
      */
     @VisibleForTesting
