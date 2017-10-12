@@ -1,4 +1,9 @@
 apply plugin: 'com.android.library'
+apply plugin: 'checkstyle'
+
+preBuild.dependsOn('checkstyle')
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
 
 def android_support_version = '26.0.1'
 
