@@ -18,7 +18,8 @@ class CountryUtils {
             "HK", "IE", "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU",
             "MW", "NR", "NU", "PA", "QA", "RW", "SA", "SB", "SC", "SL", "SO", "SR", "ST", "SY",
             "TF", "TK", "TL", "TO", "TT", "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"};
-    static final Set<String> NO_POSTAL_CODE_COUNTRIES_SET = new HashSet<>(Arrays.asList(NO_POSTAL_CODE_COUNTRIES));
+    static final Set<String> NO_POSTAL_CODE_COUNTRIES_SET = new HashSet<>(Arrays.asList
+            (NO_POSTAL_CODE_COUNTRIES));
 
     static boolean doesCountryUsePostalCode(@NonNull String countryCode) {
         return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);

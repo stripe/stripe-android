@@ -12,7 +12,8 @@ public class CardException extends StripeException {
     private String declineCode;
     private String charge;
 
-    public CardException(String message, String requestId, String code, String param, String declineCode, String charge, Integer statusCode, Throwable e) {
+    public CardException(String message, String requestId, String code, String param,
+                         String declineCode, String charge, Integer statusCode, Throwable e) {
         super(message, requestId, statusCode, e);
         this.code = code;
         this.param = param;

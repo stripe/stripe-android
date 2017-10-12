@@ -84,7 +84,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
     public static final String[] PREFIXES_DISCOVER = {"60", "62", "64", "65"};
     public static final String[] PREFIXES_JCB = {"35"};
-    public static final String[] PREFIXES_DINERS_CLUB = {"300", "301", "302", "303", "304", "305", "309", "36", "38", "39"};
+    public static final String[] PREFIXES_DINERS_CLUB = {"300", "301", "302", "303", "304",
+            "305", "309", "36", "38", "39"};
     public static final String[] PREFIXES_VISA = {"4"};
     public static final String[] PREFIXES_MASTERCARD = {
         "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229",

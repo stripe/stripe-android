@@ -45,7 +45,8 @@ public class SelectShippingMethodWidget extends FrameLayout {
     /**
      * Specify the shipping methods to show.
      */
-    public void setShippingMethods(List<ShippingMethod> shippingMethods, ShippingMethod defaultShippingMethod) {
+    public void setShippingMethods(List<ShippingMethod> shippingMethods,
+                                   ShippingMethod defaultShippingMethod) {
         mShippingMethodAdapter.setShippingMethods(shippingMethods, defaultShippingMethod);
     }
 

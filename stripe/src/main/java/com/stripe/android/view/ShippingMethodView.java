@@ -35,17 +35,17 @@ class ShippingMethodView extends RelativeLayout {
     @ColorInt int mUnselectedTextColorSecondaryInt;
     @ColorInt int mUnselectedTextColorPrimaryInt;
 
-    public ShippingMethodView(Context context) {
+    ShippingMethodView(Context context) {
         super(context);
         initView();
     }
 
-    public ShippingMethodView(Context context, AttributeSet attrs) {
+    ShippingMethodView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
     }
 
-    public ShippingMethodView(Context context, AttributeSet attrs, int defStyleAttr) {
+    ShippingMethodView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView();
     }
@@ -75,7 +75,8 @@ class ShippingMethodView extends RelativeLayout {
         mUnselectedTextColorPrimaryInt = getThemeTextColorPrimary(getContext()).data;
         mUnselectedTextColorSecondaryInt =  getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams
+                .MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(Gravity.CENTER_VERTICAL);
         params.height = ViewUtils.getPxFromDp(getContext(), 72);
         setLayoutParams(params);
@@ -87,26 +88,28 @@ class ShippingMethodView extends RelativeLayout {
         Context context = getContext();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default, context.getTheme())
-                    : mSelectedColorInt;
-            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent(mUnselectedTextColorPrimaryInt)
-                    ? res.getColor(R.color.color_text_unselected_primary_default, context.getTheme())
-                    : mUnselectedTextColorPrimaryInt;
-            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent(mUnselectedTextColorSecondaryInt)
-                    ? res.getColor(R.color.color_text_unselected_secondary_default, context.getTheme())
-                    : mUnselectedTextColorSecondaryInt;
+                    ? res.getColor(R.color.accent_color_default, context.getTheme()) :
+                    mSelectedColorInt;
+            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
+                    (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
+                    .color_text_unselected_primary_default, context.getTheme()) :
+                    mUnselectedTextColorPrimaryInt;
+            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
+                    (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
+                    .color_text_unselected_secondary_default, context.getTheme()) :
+                    mUnselectedTextColorSecondaryInt;
         } else {
             // This method still triggers the "deprecation" warning, despite the other
             // one not being allowed for SDK < 23
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
                     ? res.getColor(R.color.accent_color_default)
                     : mSelectedColorInt;
-            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent(mUnselectedTextColorPrimaryInt)
-                    ? res.getColor(R.color.color_text_unselected_primary_default)
-                    : mUnselectedTextColorPrimaryInt;
-            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent(mUnselectedTextColorSecondaryInt)
-                    ? res.getColor(R.color.color_text_unselected_secondary_default)
-                    : mUnselectedTextColorSecondaryInt;
+            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
+                    (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
+                    .color_text_unselected_primary_default) : mUnselectedTextColorPrimaryInt;
+            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
+                    (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
+                    .color_text_unselected_secondary_default) : mUnselectedTextColorSecondaryInt;
         }
     }
 

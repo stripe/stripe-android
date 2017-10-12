@@ -30,7 +30,8 @@ public class ShippingInformation extends StripeJsonModel implements Parcelable {
 
     public ShippingInformation() {}
 
-    public ShippingInformation(@Nullable Address address, @Nullable String name, @Nullable String phone) {
+    public ShippingInformation(@Nullable Address address, @Nullable String name,
+                               @Nullable String phone) {
         mAddress = address;
         mName = name;
         mPhone = phone;

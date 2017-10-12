@@ -98,7 +98,7 @@ public class StripeTextUtils {
             digest.update(bytes, 0, bytes.length);
             bytes = digest.digest();
             hash = bytesToHex(bytes);
-        } catch(NoSuchAlgorithmException noSuchAlgorithm) {
+        } catch (NoSuchAlgorithmException noSuchAlgorithm) {
             return null;
         } catch (UnsupportedEncodingException unsupportedCoding) {
             return null;
@@ -109,11 +109,11 @@ public class StripeTextUtils {
 
     private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[ bytes.length * 2 ];
-        for(int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < bytes.length; i++) {
             int v = bytes[i] & 0xFF;
             hexChars[ i * 2 ] = HEX_ARRAY[ v >>> 4 ];
             hexChars[ i * 2 + 1 ] = HEX_ARRAY[ v & 0x0F ];
         }
-        return new String( hexChars );
+        return new String(hexChars);
     }
 }

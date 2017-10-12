@@ -16,9 +16,9 @@ import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
- * Model representing a shipping method in the Android SDK
+ * Model representing a shipping method in the Android SDK.
  */
-public class ShippingMethod extends StripeJsonModel implements Parcelable{
+public class ShippingMethod extends StripeJsonModel implements Parcelable {
 
     private static final String FIELD_AMOUNT = "amount";
     /*ISO Currency Code*/
@@ -28,23 +28,25 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     private static final String FIELD_LABEL = "label";
 
     private long mAmount;
-    private @NonNull @Size(min=0, max=3) String mCurrencyCode;
+    private @NonNull @Size(min = 0, max = 3) String mCurrencyCode;
     private @Nullable String mDetail;
     private @NonNull String mIdentifier;
     private @NonNull String mLabel;
 
     public ShippingMethod(@NonNull String label,
                           @NonNull String identifier,
-                          @NonNull long amount,
-                          @NonNull @Size(min=0, max=3) String currencyCode) {
+                          long amount,
+                          @NonNull @Size(min = 0, max = 3) String
+                                  currencyCode) {
         this(label, identifier, null, amount, currencyCode);
     }
 
     public ShippingMethod(@NonNull String label,
                           @NonNull String identifier,
                           @Nullable String detail,
-                          @NonNull long amount,
-                          @NonNull @Size(min=0, max=3) String currencyCode) {
+                          long amount,
+                          @NonNull @Size(min = 0, max = 3) String
+                                  currencyCode) {
         mLabel = label;
         mIdentifier = identifier;
         mDetail = detail;
@@ -78,7 +80,8 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable{
     }
 
     /**
-     * @return Human friendly information such as estimated shipping times that can be shown in the UI
+     * @return Human friendly information such as estimated shipping times that can be shown in
+     * the UI
      */
     @Nullable
     public String getDetail() {
