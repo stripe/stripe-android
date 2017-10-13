@@ -1,7 +1,9 @@
 package com.stripe.android;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +23,6 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -68,11 +69,12 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     "ShippingInfoScreen",
                     "ShippingMethodScreen"));
 
+    private @NonNull QueryableBroadcastReceiver mApiErrorBroadcastReceiver;
+    private @Nullable Context mApplicationContext;
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
     private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
     private @Nullable SourceRetrievalListener mSourceRetrievalListener;
-    private @Nullable Context mApplicationContext;
 
     private @Nullable EphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyManager mEphemeralKeyManager;
@@ -107,11 +109,29 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
+     * @deprecated Use {@link #initCustomerSession(EphemeralKeyProvider, Context)} to ensure
+     * notification of all errors.
+     *
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
      * {@link EphemeralKey EphemeralKeys} as needed
      */
+    @Deprecated
     public static void initCustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
-        initCustomerSession(keyProvider, null, null);
+        initCustomerSession(keyProvider, null, null, null);
+    }
+
+    /**
+     * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
+     *
+     * @param keyProvider an {@link EphemeralKeyProvider} used to get
+     * {@link EphemeralKey EphemeralKeys} as needed
+     * @param context a {@link Context} whose application-level context will
+     *                be used to send local broadcasts
+     */
+    public static void initCustomerSession(
+            @NonNull EphemeralKeyProvider keyProvider,
+            @NonNull Context context) {
+        initCustomerSession(keyProvider, context, null, null);
     }
 
     /**
@@ -141,9 +161,14 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     @VisibleForTesting
     static void initCustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
+            @Nullable Context context,
             @Nullable StripeApiProxy stripeApiProxy,
             @Nullable Calendar proxyNowCalendar) {
-        mInstance = new CustomerSession(keyProvider, stripeApiProxy, proxyNowCalendar);
+        mInstance = new CustomerSession(
+                keyProvider,
+                context,
+                stripeApiProxy,
+                proxyNowCalendar);
     }
 
     @VisibleForTesting
@@ -152,11 +177,13 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             return;
         }
         mInstance.mThreadPoolExecutor.shutdownNow();
+        mInstance.unregisterBroadcastReceivers();
         mInstance = null;
     }
 
     private CustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
+            @Nullable Context context,
             @Nullable StripeApiProxy stripeApiProxy,
             @Nullable Calendar proxyNowCalendar) {
         mThreadPoolExecutor = createThreadPoolExecutor();
@@ -169,6 +196,36 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar);
+        mApiErrorBroadcastReceiver = new QueryableBroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.hasExtra(EXTRA_EXCEPTION)) {
+                    StripeException exception = (StripeException)
+                            intent.getSerializableExtra(EXTRA_EXCEPTION);
+                    if (exception == null) {
+                        return;
+                    }
+
+                    if (mCustomerRetrievalListener != null) {
+                        mCustomerRetrievalListener.onError(
+                                exception.getStatusCode(),
+                                exception.getLocalizedMessage());
+                        mCustomerRetrievalListener = null;
+                    }
+                    if (mSourceRetrievalListener != null) {
+                        mSourceRetrievalListener.onError(
+                                exception.getStatusCode(),
+                                exception.getLocalizedMessage());
+                        mSourceRetrievalListener = null;
+                    }
+                }
+            }
+        };
+
+        if (context != null) {
+            mApplicationContext = context.getApplicationContext();
+            registerBroadcastReceiversIfNecessary();
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -265,6 +322,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) {
         mApplicationContext = context.getApplicationContext();
+        registerBroadcastReceiversIfNecessary();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -285,6 +343,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull @Source.SourceType String sourceType,
             @Nullable SourceRetrievalListener listener) {
         mApplicationContext = context.getApplicationContext();
+        registerBroadcastReceiversIfNecessary();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -302,6 +361,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull Context context,
             @NonNull ShippingInformation shippingInformation) {
         mApplicationContext = context.getApplicationContext();
+        registerBroadcastReceiversIfNecessary();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SHIPPING_INFO, shippingInformation);
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments);
@@ -318,6 +378,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) {
         mApplicationContext = context.getApplicationContext();
+        registerBroadcastReceiversIfNecessary();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -409,6 +470,17 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         executeRunnable(fetchCustomerRunnable);
     }
 
+    private void registerBroadcastReceiversIfNecessary() {
+        if (mApplicationContext == null || mApiErrorBroadcastReceiver.isRegistered()) {
+            return;
+        }
+
+        LocalBroadcastManager.getInstance(mApplicationContext)
+                .registerReceiver(mApiErrorBroadcastReceiver,
+                        new IntentFilter(ACTION_API_EXCEPTION));
+        mApiErrorBroadcastReceiver.setRegistered();
+    }
+
     private void setCustomerShippingInformation(
             @NonNull final Context applicationContext,
             @NonNull final EphemeralKey key,
@@ -430,6 +502,14 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         executeRunnable(runnable);
     }
 
+    private void unregisterBroadcastReceivers() {
+        if (mApplicationContext == null) {
+            return;
+        }
+        LocalBroadcastManager.getInstance(mApplicationContext)
+                .unregisterReceiver(mApiErrorBroadcastReceiver);
+    }
+
     private void updateCustomer(@NonNull final EphemeralKey key) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
@@ -447,7 +527,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     private void executeRunnable(@NonNull Runnable runnable) {
-
         // In automation, run on the main thread.
         if (mStripeApiProxy != null) {
             runnable.run();
@@ -534,6 +613,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 .sendBroadcast(intent);
 
     }
+
     private void broadcastCustomer(@NonNull Customer customer) {
         if (mApplicationContext == null) {
             return;
@@ -763,6 +843,22 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     public interface SourceRetrievalListener {
         void onSourceRetrieved(@NonNull Source source);
         void onError(int errorCode, @Nullable String errorMessage);
+    }
+
+    abstract class QueryableBroadcastReceiver extends BroadcastReceiver {
+        boolean mIsRegistered;
+
+        QueryableBroadcastReceiver() {
+            super();
+        }
+
+        void setRegistered() {
+            mIsRegistered = true;
+        }
+
+        boolean isRegistered() {
+            return mIsRegistered;
+        }
     }
 
     interface StripeApiProxy {

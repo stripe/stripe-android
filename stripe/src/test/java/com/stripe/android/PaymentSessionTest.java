@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -71,7 +72,12 @@ public class PaymentSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider, mStripeApiProxy, null);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                null);
+
         mActivityController =
                 Robolectric.buildActivity(AppCompatActivity.class).create().start();
         mShadowActivity = Shadows.shadowOf(mActivityController.get());
@@ -134,6 +140,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -155,6 +162,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -182,6 +190,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -209,6 +218,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -236,6 +246,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -263,6 +274,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -290,6 +302,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -332,6 +345,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 

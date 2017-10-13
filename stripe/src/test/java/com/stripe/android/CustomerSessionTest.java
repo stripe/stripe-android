@@ -245,6 +245,7 @@ public class CustomerSessionTest {
     public void addProductUsageTokenIfValid_whenValid_addsExpectedTokens() {
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
         CustomerSession.getInstance().addProductUsageTokenIfValid("AddSourceActivity");
@@ -268,6 +269,7 @@ public class CustomerSessionTest {
     public void addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
         CustomerSession.getInstance().addProductUsageTokenIfValid("SomeUnknownActivity");
@@ -283,6 +285,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
         CustomerSession session = CustomerSession.getInstance();
@@ -306,6 +309,7 @@ public class CustomerSessionTest {
         Calendar proxyCalendar = Calendar.getInstance();
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -347,6 +351,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -412,6 +417,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -475,6 +481,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -545,6 +552,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -592,6 +600,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -662,6 +671,7 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
@@ -697,6 +707,7 @@ public class CustomerSessionTest {
     public void shippingInfoScreen_whenLaunched_logs() {
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
         Intent intent = new Intent();
@@ -714,6 +725,7 @@ public class CustomerSessionTest {
     public void shippingMethodScreen_whenLaunched_logs() {
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
         Intent intent = new Intent();
