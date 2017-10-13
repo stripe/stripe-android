@@ -183,54 +183,10 @@ public class PaymentSession {
             }
         }
         mPaymentSessionConfig = paymentSessionConfig;
-        initializeAndRegisterReceivers();
+        initializeReceivers();
+        registerReceivers();
         fetchCustomer();
         return true;
-    }
-
-    private void initializeAndRegisterReceivers() {
-        mCustomerReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Customer customer = Customer.fromString(
-                        intent.getStringExtra(EXTRA_CUSTOMER_RETRIEVED));
-                if (customer == null) {
-                    return;
-                }
-
-                String paymentId = customer.getDefaultSource();
-                CustomerSource source = customer.getSourceById(paymentId);
-                mPaymentSessionData.setSelectedPaymentSource(source);
-                updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
-                if (mPaymentSessionListener != null) {
-                    mPaymentSessionListener
-                            .onPaymentSessionDataChanged(mPaymentSessionData);
-                    mPaymentSessionListener.onCommunicatingStateChanged(false);
-                }
-            }
-        };
-
-        mErrorReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int errorCode = intent.getIntExtra(EXTRA_ERROR_CODE, -1);
-                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
-                if (mPaymentSessionListener != null) {
-                    mPaymentSessionListener.onError(errorCode, errorMessage);
-                    mPaymentSessionListener.onCommunicatingStateChanged(false);
-                }
-            }
-        };
-
-        // In case these are pre-registered, remove them.
-        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mErrorReceiver);
-        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mCustomerReceiver);
-        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
-                mErrorReceiver,
-                new IntentFilter(EVENT_API_ERROR));
-        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
-                mCustomerReceiver,
-                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
     }
 
     /**
@@ -300,6 +256,54 @@ public class PaymentSession {
             mPaymentSessionListener.onCommunicatingStateChanged(true);
         }
         CustomerSession.getInstance().retrieveCurrentCustomer(mHostActivity);
+    }
+
+    private void initializeReceivers() {
+        mCustomerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Customer customer = Customer.fromString(
+                        intent.getStringExtra(EXTRA_CUSTOMER_RETRIEVED));
+                if (customer == null) {
+                    return;
+                }
+
+                String paymentId = customer.getDefaultSource();
+                CustomerSource source = customer.getSourceById(paymentId);
+                mPaymentSessionData.setSelectedPaymentSource(source);
+                updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
+                if (mPaymentSessionListener != null) {
+                    mPaymentSessionListener
+                            .onPaymentSessionDataChanged(mPaymentSessionData);
+                    mPaymentSessionListener.onCommunicatingStateChanged(false);
+                }
+            }
+        };
+
+        mErrorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int errorCode = intent.getIntExtra(EXTRA_ERROR_CODE, -1);
+                String errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE);
+                if (mPaymentSessionListener != null) {
+                    mPaymentSessionListener.onError(errorCode, errorMessage);
+                    mPaymentSessionListener.onCommunicatingStateChanged(false);
+                }
+            }
+        };
+
+    }
+
+    private void registerReceivers() {
+        // In case these are pre-registered, remove them.
+        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mErrorReceiver);
+        LocalBroadcastManager.getInstance(mHostActivity).unregisterReceiver(mCustomerReceiver);
+        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
+                mErrorReceiver,
+                new IntentFilter(EVENT_API_ERROR));
+        LocalBroadcastManager.getInstance(mHostActivity).registerReceiver(
+                mCustomerReceiver,
+                new IntentFilter(EVENT_CUSTOMER_RETRIEVED));
     }
 
     /**
