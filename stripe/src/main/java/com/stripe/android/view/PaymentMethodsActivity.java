@@ -387,7 +387,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
 
-        void setCustomerDefaultSource(@NonNull String sourceId, @NonNull String sourceType,
+        void setCustomerDefaultSource(@NonNull String sourceId,
+                                      @NonNull String sourceType,
                                       @Nullable CustomerSession.CustomerRetrievalListener listener);
 
         void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);

@@ -29,8 +29,12 @@ class LoggingUtils {
     static final String NO_CONTEXT = "no_context";
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({EVENT_TOKEN_CREATION, EVENT_SOURCE_CREATION, EVENT_ADD_SOURCE,
-            EVENT_DEFAULT_SOURCE, EVENT_SET_SHIPPING_INFO})
+    @StringDef({
+            EVENT_TOKEN_CREATION,
+            EVENT_SOURCE_CREATION,
+            EVENT_ADD_SOURCE,
+            EVENT_DEFAULT_SOURCE,
+            EVENT_SET_SHIPPING_INFO})
     @interface LoggingEventName {
     }
 

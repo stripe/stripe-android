@@ -78,8 +78,9 @@ class EphemeralKeyManager {
     }
 
     interface KeyManagerListener {
-        void onKeyUpdate(@Nullable EphemeralKey ephemeralKey, @Nullable String action, @Nullable
-                Map<String, Object> arguments);
+        void onKeyUpdate(@Nullable EphemeralKey ephemeralKey,
+                         @Nullable String action,
+                         @Nullable Map<String, Object> arguments);
 
         void onKeyError(int errorCode, @Nullable String errorMessage);
     }
