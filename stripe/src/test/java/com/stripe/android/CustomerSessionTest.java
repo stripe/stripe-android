@@ -43,6 +43,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -335,6 +336,68 @@ public class CustomerSessionTest {
     }
 
     @Test
+    public void retrieveCustomerUsingListener_withExpiredCache_updatesCustomer() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        EphemeralKey secondKey = EphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
+        assertNotNull(secondKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis - 100L);
+
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+
+        assertNotNull(session.getEphemeralKey());
+        assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
+        assertEquals(firstKey.getCustomerId(), mFirstCustomer.getId());
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        assertEquals(firstExpiryTimeInMillis - 100L, firstCustomerCacheTime);
+        long timeForCustomerToExpire = TimeUnit.MINUTES.toMillis(2);
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + timeForCustomerToExpire);
+        assertEquals(firstCustomerCacheTime + timeForCustomerToExpire,
+                proxyCalendar.getTimeInMillis());
+
+        // We want to make sure that the next ephemeral key will be different.
+        mEphemeralKeyProvider.setNextRawEphemeralKey(SECOND_SAMPLE_KEY_RAW);
+
+        // The key manager should think it is necessary to update the key,
+        // because the first one was expired.
+        CustomerSession.CustomerRetrievalListener mockListener =
+                mock(CustomerSession.CustomerRetrievalListener.class);
+        session.retrieveCurrentCustomer(mockListener);
+
+        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        assertNotNull(capturedCustomer);
+        assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
+        assertNotNull(session.getCustomer());
+        //  Make sure the value is cached.
+        assertEquals(mSecondCustomer.getId(), session.getCustomer().getId());
+
+        try {
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    firstKey.getCustomerId(), firstKey.getSecret());
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    secondKey.getCustomerId(), secondKey.getSecret());
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
+        }
+    }
+
+    @Test
     public void retrieveCustomer_withExpiredCache_updatesCustomer() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
@@ -399,6 +462,64 @@ public class CustomerSessionTest {
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
         }
+    }
+
+    @Test
+    public void retrieveCustomerUsingListener_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+
+        // Make sure we're in a good state and that we have the expected customer
+        assertNotNull(session.getCustomer());
+        assertEquals(firstKey.getCustomerId(), mFirstCustomer.getId());
+        assertEquals(firstKey.getCustomerId(), session.getCustomer().getId());
+
+        try {
+            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+                    firstKey.getCustomerId(), firstKey.getSecret());
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
+        }
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+
+        // The key manager should think it is necessary to update the key,
+        // because the first one was expired.
+        CustomerSession.CustomerRetrievalListener mockListener =
+                mock(CustomerSession.CustomerRetrievalListener.class);
+        session.retrieveCurrentCustomer(mockListener);
+
+        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        Customer capturedCustomer = customerArgumentCaptor.getValue();
+
+        assertNotNull(capturedCustomer);
+        assertEquals(mFirstCustomer.getId(), capturedCustomer.getId());
+        assertNotNull(session.getCustomer());
+        //  Make sure the value is cached.
+        assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
+        verifyNoMoreInteractions(mStripeApiProxy);
     }
 
     @Test
@@ -537,6 +658,71 @@ public class CustomerSessionTest {
     }
 
     @Test
+    public void addSourceToCustomerWithListener_withUnExpiredCustomer_returnsSourceEmptiesLogs() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("AddSourceActivity");
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        CustomerSession.getInstance().addProductUsageTokenIfValid("AddSourceActivity");
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.SourceRetrievalListener mockListener =
+                mock(CustomerSession.SourceRetrievalListener.class);
+
+        session.addCustomerSource(RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
+
+        assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
+        ArgumentCaptor<List> listArgumentCaptor =
+                ArgumentCaptor.forClass(List.class);
+        try {
+            verify(mStripeApiProxy, times(1)).addCustomerSourceWithKey(
+                    eq(RuntimeEnvironment.application),
+                    eq(mFirstCustomer.getId()),
+                    eq("pk_test_abc123"),
+                    listArgumentCaptor.capture(),
+                    eq("abc123"),
+                    eq(Source.CARD),
+                    eq(firstKey.getSecret()));
+            List productUsage = listArgumentCaptor.getValue();
+            assertEquals(2, productUsage.size());
+            assertTrue(productUsage.contains("AddSourceActivity"));
+            assertTrue(productUsage.contains("PaymentMethodsActivity"));
+        } catch (StripeException unexpected) {
+            fail(unexpected.getMessage());
+        }
+
+        ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
+        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
+        Source capturedSource = sourceArgumentCaptor.getValue();
+        assertNotNull(capturedSource);
+        assertEquals(mAddedSource.getId(), capturedSource.getId());
+    }
+
+    @Test
     public void addSourceToCustomer_whenApiThrowsError_broadcastsException() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
@@ -582,6 +768,59 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
+    }
+
+    @Test
+    public void addSourceToCustomerWithListener_whenApiThrowsError_notifiesListener() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("AddSourceActivity");
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.SourceRetrievalListener mockListener =
+                mock(CustomerSession.SourceRetrievalListener.class);
+
+        session.setStripeApiProxy(mErrorProxy);
+        session.addCustomerSource(RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
+
+        verify(mockListener).onError(404, "The card is invalid");
     }
 
     @Test
@@ -701,6 +940,58 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
+    }
+
+    @Test
+    public void setDefaultSourceForCustomerWithListener_whenApiThrowsException_notifiesListener() {
+        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                proxyCalendar);
+        CustomerSession session = CustomerSession.getInstance();
+        session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = session.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.CustomerRetrievalListener mockListener =
+                mock(CustomerSession.CustomerRetrievalListener.class);
+
+        session.setStripeApiProxy(mErrorProxy);
+        session.setCustomerDefaultSource(
+                RuntimeEnvironment.application,
+                "abc123",
+                Source.CARD,
+                mockListener);
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mBroadcastReceiver).onReceive(
+                any(Context.class),
+                intentArgumentCaptor.capture());
+
+        Intent captured = intentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
+        verify(mockListener).onError(405, "auth error");
     }
 
     @Test

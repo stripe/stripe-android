@@ -385,6 +385,27 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
     }
 
+    /**
+     * Set the default source of the current customer object.
+     *
+     * @param context a {@link Context} to use for resources
+     * @param sourceId the ID of the source to be set
+     * @param listener a {@link CustomerRetrievalListener} to be notified about an update to the
+     *                 customer
+     */
+    public void setCustomerDefaultSource(
+            @NonNull Context context,
+            @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
+            @Nullable CustomerRetrievalListener listener) {
+        mApplicationContext = context.getApplicationContext();
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_SOURCE, sourceId);
+        arguments.put(KEY_SOURCE_TYPE, sourceType);
+        mCustomerRetrievalListener = listener;
+        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
+    }
+
     void resetUsageTokens() {
         mProductUsageTokens.clear();
     }
