@@ -1,9 +1,5 @@
 package com.stripe.android;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -11,6 +7,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Wraps a SSLSocketFactory and enables more TLS versions on older versions of Android.
@@ -21,7 +22,7 @@ class StripeSSLSocketFactory extends SSLSocketFactory {
     private final SSLSocketFactory under;
     private final boolean tlsv11Supported, tlsv12Supported;
 
-    private static final String TLSv11Proto = "TLSv1.1", TLSv12Proto = "TLSv1.2";
+    private static final String TLS_V11_PROTO = "TLSv1.1", TLS_V12_PROTO = "TLSv1.2";
 
     /**
      * Constructor for a socket factory instance.
@@ -40,9 +41,9 @@ class StripeSSLSocketFactory extends SSLSocketFactory {
         }
 
         for (String proto : supportedProtocols) {
-            if (proto.equals(TLSv11Proto)) {
+            if (proto.equals(TLS_V11_PROTO)) {
                 tlsv11Supported = true;
-            } else if (proto.equals(TLSv12Proto)) {
+            } else if (proto.equals(TLS_V12_PROTO)) {
                 tlsv12Supported = true;
             }
         }
@@ -108,10 +109,10 @@ class StripeSSLSocketFactory extends SSLSocketFactory {
 
         Set<String> protos = new HashSet<>(Arrays.asList(sslSock.getEnabledProtocols()));
         if (tlsv11Supported) {
-            protos.add(TLSv11Proto);
+            protos.add(TLS_V11_PROTO);
         }
         if (tlsv12Supported) {
-            protos.add(TLSv12Proto);
+            protos.add(TLS_V12_PROTO);
         }
 
         sslSock.setEnabledProtocols(protos.toArray(new String[0]));

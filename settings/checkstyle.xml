@@ -8,6 +8,7 @@ what the following rules do, please see the checkstyle configuration
 page at http://checkstyle.sourceforge.net/config.html -->
 
 <module name="Checker">
+    <module name="SuppressWarningsFilter" />
 
     <module name="FileTabCharacter">
         <!-- Checks that there are no tab characters in the file.
@@ -41,18 +42,18 @@ page at http://checkstyle.sourceforge.net/config.html -->
 
     <!-- All Java AST specific tests live under TreeWalker module. -->
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
 
         <!--
         IMPORT CHECKS
         -->
-
         <module name="RedundantImport">
             <!-- Checks for redundant import statements. -->
             <property name="severity" value="error"/>
         </module>
 
         <module name="ImportOrder">
-            <property name="groups" value="*,javax,java"/>
+            <property name="groups" value="*,java, javax"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="false"/>
             <property name="option" value="bottom"/>

@@ -468,6 +468,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private Handler createMainThreadHandler() {
         return new Handler(Looper.getMainLooper()) {
             @Override
