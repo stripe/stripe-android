@@ -625,7 +625,6 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
-<<<<<<< HEAD
     private void broadcastCustomerSource(@NonNull Source source) {
         if (mApplicationContext == null) {
             return;
