@@ -52,8 +52,8 @@ class CountryAdapter extends ArrayAdapter {
                         suggestedCountries.add(country);
                     }
                 }
-                if (suggestedCountries.size() == 0 ||
-                        (suggestedCountries.size() == 1 && suggestedCountries.get(0).equals(charSequence))) {
+                if (suggestedCountries.size() == 0 || (suggestedCountries.size() == 1 &&
+                        suggestedCountries.get(0).equals(charSequence))) {
                     suggestedCountries = mCountries;
                 }
                 filterResults.values = suggestedCountries;
@@ -90,7 +90,8 @@ class CountryAdapter extends ArrayAdapter {
             ((TextView) view).setText(getItem(i));
             return view;
         } else {
-            TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(R.layout.menu_text_view, viewGroup, false);
+            TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(
+                    R.layout.menu_text_view, viewGroup, false);
             countryText.setText(getItem(i));
             return countryText;
         }

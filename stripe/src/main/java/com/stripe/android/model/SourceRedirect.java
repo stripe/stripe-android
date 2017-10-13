@@ -12,9 +12,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-redirect">redirect</a> object
@@ -95,7 +95,7 @@ public class SourceRedirect extends StripeJsonModel {
 
     @Nullable
     public static SourceRedirect fromString(@Nullable String jsonString) {
-        try{
+        try {
             JSONObject jsonObject = new JSONObject(jsonString);
             return fromJson(jsonObject);
         } catch (JSONException ignored) {

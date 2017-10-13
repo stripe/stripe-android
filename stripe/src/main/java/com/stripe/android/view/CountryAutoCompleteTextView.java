@@ -62,7 +62,8 @@ public class CountryAutoCompleteTextView extends FrameLayout {
         inflate(getContext(), R.layout.country_autocomplete_textview, this);
         mCountryAutocomplete = findViewById(R.id.autocomplete_country_cat);
         mCountryNameToCode = CountryUtils.getCountryNameToCodeMap();
-        final ArrayAdapter countryAdapter = new CountryAdapter(getContext(), new ArrayList<>(mCountryNameToCode.keySet()));
+        final ArrayAdapter countryAdapter = new CountryAdapter(getContext(),
+                new ArrayList<>(mCountryNameToCode.keySet()));
         mCountryAutocomplete.setThreshold(0);
         mCountryAutocomplete.setAdapter(countryAdapter);
         mCountryAutocomplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -26,8 +26,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Card;
 import com.stripe.android.StripeTextUtils;
+import com.stripe.android.model.Card;
 
 import java.util.Locale;
 
@@ -311,13 +311,14 @@ public class CardInputWidget extends LinearLayout {
             if (touchX < frameStart + mPlacementParameters.peekCardWidth) {
                 // This was a touch on the card number editor, so we don't need to handle it.
                 return null;
-            } else if( touchX < mPlacementParameters.cardTouchBufferLimit) {
+            } else if (touchX < mPlacementParameters.cardTouchBufferLimit) {
                 // Then we need to act like the user touched the card editor
                 return mCardNumberEditText;
             } else if (touchX < mPlacementParameters.dateStartPosition) {
                 // Then we need to act like this was a touch on the date editor
                 return mExpiryDateEditText;
-            } else if (touchX < mPlacementParameters.dateStartPosition + mPlacementParameters.dateWidth) {
+            } else if (touchX < mPlacementParameters.dateStartPosition +
+                    mPlacementParameters.dateWidth) {
                 // Just a regular touch on the date editor.
                 return null;
             } else if (touchX < mPlacementParameters.dateRightTouchBufferLimit) {
@@ -519,18 +520,18 @@ public class CardInputWidget extends LinearLayout {
             }
         });
 
-        mCvcNumberEditText.setAfterTextChangedListener(new StripeEditText.AfterTextChangedListener() {
-            @Override
-            public void onTextChanged(String text) {
-                if (mCardInputListener != null
-                        && ViewUtils.isCvcMaximalLength(mCardNumberEditText.getCardBrand(), text)) {
-                    mCardInputListener.onCvcComplete();
-                }
-                updateIconCvc(
-                        mCardNumberEditText.getCardBrand(),
-                        mCvcNumberEditText.hasFocus(),
-                        text);
-            }
+        mCvcNumberEditText.setAfterTextChangedListener(
+                new StripeEditText.AfterTextChangedListener() {
+                    @Override
+                    public void onTextChanged(String text) {
+                        if (mCardInputListener != null && ViewUtils.isCvcMaximalLength
+                                (mCardNumberEditText.getCardBrand(), text)) {
+                            mCardInputListener.onCvcComplete();
+                        }
+                        updateIconCvc(mCardNumberEditText.getCardBrand(),
+                                mCvcNumberEditText.hasFocus(),
+                                text);
+                    }
         });
 
         mCardNumberEditText.setCardNumberCompleteListener(
@@ -554,14 +555,15 @@ public class CardInputWidget extends LinearLayout {
                     }
                 });
 
-        mExpiryDateEditText.setExpiryDateEditListener(new ExpiryDateEditText.ExpiryDateEditListener() {
-            @Override
-            public void onExpiryDateComplete() {
-                mCvcNumberEditText.requestFocus();
-                if (mCardInputListener != null) {
-                    mCardInputListener.onExpirationComplete();
-                }
-            }
+        mExpiryDateEditText.setExpiryDateEditListener(
+                new ExpiryDateEditText.ExpiryDateEditListener() {
+                    @Override
+                    public void onExpiryDateComplete() {
+                        mCvcNumberEditText.requestFocus();
+                        if (mCardInputListener != null) {
+                            mCardInputListener.onExpirationComplete();
+                        }
+                    }
         });
 
         mCardNumberEditText.requestFocus();

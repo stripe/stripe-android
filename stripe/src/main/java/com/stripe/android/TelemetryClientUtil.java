@@ -94,10 +94,10 @@ class TelemetryClientUtil {
     @NonNull
     private static String getAndroidVersionString() {
         StringBuilder builder = new StringBuilder();
-        final String DELIMITER = " ";
-        builder.append("Android").append(DELIMITER)
-                .append(Build.VERSION.RELEASE).append(DELIMITER)
-                .append(Build.VERSION.CODENAME).append(DELIMITER)
+        final String delimiter = " ";
+        builder.append("Android").append(delimiter)
+                .append(Build.VERSION.RELEASE).append(delimiter)
+                .append(Build.VERSION.CODENAME).append(delimiter)
                 .append(Build.VERSION.SDK_INT);
         return builder.toString();
     }

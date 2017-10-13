@@ -516,7 +516,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         new ArrayList<>(productUsageTokens),
                         shippingInformation,
                         mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customer);
+                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED,
+                        customer);
                 mUiThreadHandler.sendMessage(message);
             }
         };
@@ -624,6 +625,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
+<<<<<<< HEAD
     private void broadcastCustomerSource(@NonNull Source source) {
         if (mApplicationContext == null) {
             return;
@@ -644,6 +646,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         LocalBroadcastManager.getInstance(mApplicationContext).sendBroadcast(intent);
     }
 
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private Handler createMainThreadHandler() {
         return new Handler(Looper.getMainLooper()) {
             @Override

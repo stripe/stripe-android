@@ -112,7 +112,7 @@ abstract class StripeSourceTypeModel extends StripeJsonModel {
             return;
         }
 
-        for(String key : additionalFields.keySet()) {
+        for (String key : additionalFields.keySet()) {
             map.put(key, additionalFields.get(key));
         }
     }

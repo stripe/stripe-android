@@ -48,6 +48,7 @@ public class IconTextInputLayout extends TextInputLayout {
      * and the variable and method names change. We should remove usage of reflection
      * at the first opportunity.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     @VisibleForTesting
     void init() {
         try {
@@ -81,8 +82,7 @@ public class IconTextInputLayout extends TextInputLayout {
         try {
             mBounds.left = getEditText().getLeft() + getEditText().getPaddingLeft();
             mRecalculateMethod.invoke(mCollapsingTextHelper);
-        }
-        catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+        } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
             // No need to overreact here - this will result in the animation rendering differently
             e.printStackTrace();
         }

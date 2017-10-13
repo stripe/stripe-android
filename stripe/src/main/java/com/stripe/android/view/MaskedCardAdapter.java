@@ -100,7 +100,7 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
             return;
         }
 
-        for(CustomerSource customerSource : customerSources) {
+        for (CustomerSource customerSource : customerSources) {
             if (customerSource.asCard() != null || canDisplaySource(customerSource.asSource())) {
                 // If it's a card, we can display it.
                 mCustomerSourceList.add(customerSource);

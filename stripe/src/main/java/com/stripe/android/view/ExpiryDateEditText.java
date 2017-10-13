@@ -108,7 +108,7 @@ public class ExpiryDateEditText extends StripeEditText {
 
                 String rawNumericInput = s.toString().replaceAll("/", "");
 
-                if(rawNumericInput.length() == 1
+                if (rawNumericInput.length() == 1
                         && latestChangeStart == 0
                         && latestInsertionSize == 1) {
                     char first = rawNumericInput.charAt(0);
@@ -198,7 +198,8 @@ public class ExpiryDateEditText extends StripeEditText {
      *
      * @param newLength the post-edit length of the string
      * @param editActionStart the position in the string at which the edit action starts
-     * @param editActionAddition the number of new characters going into the string (zero for delete)
+     * @param editActionAddition the number of new characters going into the string (zero for
+     *                           delete)
      * @return an index within the string at which to put the cursor
      */
     @VisibleForTesting
