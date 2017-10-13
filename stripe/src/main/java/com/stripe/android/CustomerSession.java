@@ -18,6 +18,7 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
@@ -70,6 +71,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private @Nullable Customer mCustomer;
     private long mCustomerCacheTime;
+    private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
+    private @Nullable SourceRetrievalListener mSourceRetrievalListener;
     private @Nullable WeakReference<Context> mCachedContextReference;
 
     private @Nullable EphemeralKey mEphemeralKey;
@@ -183,6 +186,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      *
      * @param context {@link Context} to grab application context from and use for broadcasts
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public void retrieveCurrentCustomer(@NonNull Context context) {
         mCachedContextReference = new WeakReference<>(context.getApplicationContext());
         Customer cachedCustomer = getCachedCustomer();
@@ -194,13 +198,44 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     /**
+     * Retrieve the current {@link Customer}. If the cached value at {@link #mCustomer} is not
+     * stale, this returns immediately with the cache. If not, it fetches a new value and returns
+     * that to the listener.
+     *
+     * @param listener a {@link CustomerRetrievalListener} to invoke with the result of getting the
+     *                 customer, either from the cache or from the server
+     */
+    public void retrieveCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
+        if (canUseCachedCustomer()) {
+            listener.onCustomerRetrieved(getCachedCustomer());
+        } else {
+            mCustomer = null;
+            mCustomerRetrievalListener = listener;
+            mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+        }
+    }
+
+    /**
      * Force an update of the current customer, regardless of how much time has passed.
      *
      * @param context {@link Context} to grab application context from and use for broadcasts
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public void updateCurrentCustomer(@NonNull Context context) {
         mCachedContextReference = new WeakReference<>(context.getApplicationContext());
         mCustomer = null;
+        mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+    }
+
+    /**
+     * Force an update of the current customer, regardless of how much time has passed.
+     *
+     * @param listener a {@link CustomerRetrievalListener} to invoke with the result of getting
+     *                 the customer from the server
+     */
+    public void updateCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
+        mCustomer = null;
+        mCustomerRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(null, null);
     }
 
@@ -225,6 +260,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      * @param context the {@link Context} to use for resources
      * @param sourceId the ID of the source to be added
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public void addCustomerSource(
             @NonNull Context context,
             @NonNull String sourceId,
@@ -233,6 +269,27 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
+        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
+    }
+
+    /**
+     * Add the input source to the current customer object.
+     *
+     * @param context the {@link Context} to use for resources
+     * @param sourceId the ID of the source to be added
+     * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
+     *                 complete
+     */
+    public void addCustomerSource(
+            @NonNull Context context,
+            @NonNull String sourceId,
+            @NonNull @Source.SourceType String sourceType,
+            @Nullable SourceRetrievalListener listener) {
+        mCachedContextReference = new WeakReference<>(context);
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_SOURCE, sourceId);
+        arguments.put(KEY_SOURCE_TYPE, sourceType);
+        mSourceRetrievalListener = listener;
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
     }
 
@@ -450,11 +507,22 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     @Override
     public void onKeyError(int errorCode, @Nullable String errorMessage) {
+        // Broadcast the error for internal classes.
         Intent intent = new Intent(EVENT_API_ERROR);
         intent.putExtra(EXTRA_ERROR_CODE, errorCode);
         intent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
         LocalBroadcastManager.getInstance(mCachedContextReference.get())
                 .sendBroadcast(intent);
+        // Return message to listeners if something goes wrong.
+        if (mCustomerRetrievalListener != null) {
+            mCustomerRetrievalListener.onError(errorCode, errorMessage);
+            mCustomerRetrievalListener = null;
+        }
+
+        if (mSourceRetrievalListener != null) {
+            mSourceRetrievalListener.onError(errorCode, errorMessage);
+            mSourceRetrievalListener = null;
+        }
     }
 
     private void broadcastCustomerSource(@NonNull Source source) {
@@ -488,17 +556,24 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
                             mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
+                            // Broadcast for internal listeners.
                             broadcastCustomer(mCustomer);
-                        } else {
-
+                            // Also dispatch to any external listeners.
+                            if (mCustomerRetrievalListener != null) {
+                                mCustomerRetrievalListener.onCustomerRetrieved(mCustomer);
+                                // Eliminate reference to retrieval listener after use.
+                                mCustomerRetrievalListener = null;
+                            }
                         }
                         break;
                     case SOURCE_RETRIEVED:
                         if (messageObject instanceof Source) {
                             Source retrievedSource = (Source) messageObject;
                             broadcastCustomerSource(retrievedSource);
-                        } else {
-
+                            if (mSourceRetrievalListener != null) {
+                                mSourceRetrievalListener.onSourceRetrieved((Source) messageObject);
+                                mSourceRetrievalListener = null;
+                            }
                         }
                         break;
                     case CUSTOMER_SHIPPING_INFO_SAVED:
@@ -686,6 +761,16 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Intent intent = new Intent(ACTION_API_EXCEPTION);
         intent.putExtras(bundle);
         return intent;
+    }
+
+    public interface CustomerRetrievalListener {
+        void onCustomerRetrieved(@NonNull Customer customer);
+        void onError (int errorCode, @Nullable String errorMessage);
+    }
+
+    public interface SourceRetrievalListener {
+        void onSourceRetrieved(@NonNull Source source);
+        void onError(int errorCode, @Nullable String errorMessage);
     }
 
     interface StripeApiProxy {

@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.CustomerSource;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
@@ -198,7 +199,8 @@ public class PaymentSession {
                 }
 
                 String paymentId = customer.getDefaultSource();
-                mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
+                CustomerSource source = customer.getSourceById(paymentId);
+                mPaymentSessionData.setSelectedPaymentSource(source);
                 updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
                 if (mPaymentSessionListener != null) {
                     mPaymentSessionListener

@@ -5,8 +5,10 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
+import com.stripe.android.model.Source;
 
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
@@ -18,6 +20,7 @@ public class PaymentSessionData implements Parcelable {
     private long mCartTotal = 0L;
     private boolean mIsPaymentReadyToCharge;
     @NonNull private String mSelectedPaymentMethodId = NO_PAYMENT;
+    @Nullable private CustomerSource mSelectedPaymentSource = null;
     private long mShippingTotal = 0L;
     @NonNull @PaymentResultListener.PaymentResult private String mPaymentResult =
             PaymentResultListener.INCOMPLETE;
@@ -33,6 +36,11 @@ public class PaymentSessionData implements Parcelable {
     @Nullable
     public String getSelectedPaymentMethodId() {
         return mSelectedPaymentMethodId.equals(NO_PAYMENT) ? null : mSelectedPaymentMethodId;
+    }
+
+    @Nullable
+    public CustomerSource getSelectedPaymentSource() {
+        return mSelectedPaymentSource;
     }
 
     /**
@@ -137,6 +145,15 @@ public class PaymentSessionData implements Parcelable {
                 : selectedPaymentMethodId;
     }
 
+    void setSelectedPaymentSource(@Nullable CustomerSource selectedPaymentSource) {
+        mSelectedPaymentSource = selectedPaymentSource;
+        if (mSelectedPaymentSource != null) {
+            setSelectedPaymentMethodId(mSelectedPaymentSource.getId());
+        } else {
+            setSelectedPaymentMethodId(null);
+        }
+    }
+
     void setShippingTotal(long shippingTotal) {
         mShippingTotal = shippingTotal;
     }
@@ -158,6 +175,12 @@ public class PaymentSessionData implements Parcelable {
                 : that.mShippingInformation != null) {
             return false;
         }
+
+        if (mSelectedPaymentSource != null
+                ? !mSelectedPaymentSource.equals(that.mSelectedPaymentSource)
+                : that.mSelectedPaymentSource != null) {
+            return false;
+        }
         return mShippingMethod != null
                 ? mShippingMethod.equals(that.mShippingMethod)
                 : that.mShippingMethod == null;
@@ -171,6 +194,9 @@ public class PaymentSessionData implements Parcelable {
         result = 31 * result + (int) (mShippingTotal ^ (mShippingTotal >>> 32));
         result = 31 * result + mPaymentResult.hashCode();
         result = 31 * result + (mShippingInformation != null ? mShippingInformation.hashCode() : 0);
+        result = 31 * result + (mSelectedPaymentSource != null
+                ? mSelectedPaymentSource.hashCode()
+                : 0);
         result = 31 * result + (mShippingMethod != null ? mShippingMethod.hashCode() : 0);
         return result;
     }
@@ -187,6 +213,12 @@ public class PaymentSessionData implements Parcelable {
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeString(mPaymentResult);
         parcel.writeString(mSelectedPaymentMethodId);
+        if (mSelectedPaymentSource != null) {
+            parcel.writeByte((byte) 0x01);
+            parcel.writeString(mSelectedPaymentSource.toString());
+        } else {
+            parcel.writeByte((byte) 0x00);
+        }
         parcel.writeParcelable(mShippingInformation, i);
         parcel.writeParcelable(mShippingMethod, i);
         parcel.writeLong(mShippingTotal);
@@ -209,6 +241,11 @@ public class PaymentSessionData implements Parcelable {
         mIsPaymentReadyToCharge = in.readInt() == 1;
         mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
         mSelectedPaymentMethodId = in.readString();
+        byte sourceByte = in.readByte();
+        if (sourceByte == (byte) 0x01) {
+            String customerSourceString = in.readString();
+            mSelectedPaymentSource = CustomerSource.fromString(customerSourceString);
+        }
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());
         mShippingTotal = in.readLong();
