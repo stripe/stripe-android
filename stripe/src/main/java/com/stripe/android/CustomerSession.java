@@ -18,7 +18,6 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
@@ -73,7 +72,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private long mCustomerCacheTime;
     private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
     private @Nullable SourceRetrievalListener mSourceRetrievalListener;
-    private @Nullable WeakReference<Context> mCachedContextReference;
+    private @Nullable Context mApplicationContext;
 
     private @Nullable EphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyManager mEphemeralKeyManager;
@@ -188,7 +187,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     public void retrieveCurrentCustomer(@NonNull Context context) {
-        mCachedContextReference = new WeakReference<>(context.getApplicationContext());
+        mApplicationContext = context.getApplicationContext();
         Customer cachedCustomer = getCachedCustomer();
         if (cachedCustomer != null) {
             broadcastCustomer(cachedCustomer);
@@ -222,7 +221,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     public void updateCurrentCustomer(@NonNull Context context) {
-        mCachedContextReference = new WeakReference<>(context.getApplicationContext());
+        mApplicationContext = context.getApplicationContext();
         mCustomer = null;
         mEphemeralKeyManager.retrieveEphemeralKey(null, null);
     }
@@ -265,7 +264,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull Context context,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) {
-        mCachedContextReference = new WeakReference<>(context.getApplicationContext());
+        mApplicationContext = context.getApplicationContext();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -285,7 +284,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
             @Nullable SourceRetrievalListener listener) {
-        mCachedContextReference = new WeakReference<>(context);
+        mApplicationContext = context.getApplicationContext();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -302,7 +301,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     public void setCustomerShippingInformation(
             @NonNull Context context,
             @NonNull ShippingInformation shippingInformation) {
-        mCachedContextReference = new WeakReference<>(context.getApplicationContext());
+        mApplicationContext = context.getApplicationContext();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SHIPPING_INFO, shippingInformation);
         mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments);
@@ -318,7 +317,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull Context context,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) {
-        mCachedContextReference = new WeakReference<>(context.getApplicationContext());
+        mApplicationContext = context.getApplicationContext();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
@@ -357,7 +356,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     private void addCustomerSource(
-            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final Context applicationContext,
             @NonNull final EphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
@@ -366,7 +365,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @Override
             public void run() {
                 Source source = addCustomerSourceWithKey(
-                        contextWeakReference,
+                        applicationContext,
                         key,
                         new ArrayList<>(productUsageTokens),
                         sourceId,
@@ -387,7 +386,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     private void setCustomerSourceDefault(
-            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final Context applicationContext,
             @NonNull final EphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
@@ -396,7 +395,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @Override
             public void run() {
                 Customer customer = setCustomerSourceDefaultWithKey(
-                        contextWeakReference,
+                        applicationContext,
                         key,
                         new ArrayList<>(productUsageTokens),
                         sourceId,
@@ -411,7 +410,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     private void setCustomerShippingInformation(
-            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final Context applicationContext,
             @NonNull final EphemeralKey key,
             @NonNull final ShippingInformation shippingInformation,
             @NonNull final List<String> productUsageTokens) {
@@ -419,7 +418,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @Override
             public void run() {
                 Customer customer = setCustomerShippingInfoWithKey(
-                        contextWeakReference,
+                        applicationContext,
                         key,
                         new ArrayList<>(productUsageTokens),
                         shippingInformation,
@@ -436,7 +435,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @Override
             public void run() {
                 Customer customer = retrieveCustomerWithKey(
-                        mCachedContextReference,
+                        mApplicationContext,
                         key,
                         mStripeApiProxy);
                 Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
@@ -468,35 +467,35 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             if (actionString == null) {
                 updateCustomer(mEphemeralKey);
             } else if (ACTION_ADD_SOURCE.equals(actionString)
-                    && mCachedContextReference != null
+                    && mApplicationContext != null
                     && arguments != null
                     && arguments.containsKey(KEY_SOURCE)
                     && arguments.containsKey(KEY_SOURCE_TYPE)) {
                 addCustomerSource(
-                        mCachedContextReference,
+                        mApplicationContext,
                         mEphemeralKey,
                         (String) arguments.get(KEY_SOURCE),
                         (String) arguments.get(KEY_SOURCE_TYPE),
                         new ArrayList<>(mProductUsageTokens));
                 resetUsageTokens();
             } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
-                    && mCachedContextReference != null
+                    && mApplicationContext != null
                     && arguments != null
                     && arguments.containsKey(KEY_SOURCE)
                     && arguments.containsKey(KEY_SOURCE_TYPE)) {
                 setCustomerSourceDefault(
-                        mCachedContextReference,
+                        mApplicationContext,
                         mEphemeralKey,
                         (String) arguments.get(KEY_SOURCE),
                         (String) arguments.get(KEY_SOURCE_TYPE),
                         new ArrayList<>(mProductUsageTokens));
                 resetUsageTokens();
             } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString)
-                    && mCachedContextReference != null
+                    && mApplicationContext != null
                     && arguments != null
                     && arguments.containsKey(KEY_SHIPPING_INFO)) {
                 setCustomerShippingInformation(
-                        mCachedContextReference,
+                        mApplicationContext,
                         mEphemeralKey,
                         (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
                         new ArrayList<>(mProductUsageTokens));
@@ -511,7 +510,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Intent intent = new Intent(EVENT_API_ERROR);
         intent.putExtra(EXTRA_ERROR_CODE, errorCode);
         intent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
-        LocalBroadcastManager.getInstance(mCachedContextReference.get())
+        LocalBroadcastManager.getInstance(mApplicationContext)
                 .sendBroadcast(intent);
         // Return message to listeners if something goes wrong.
         if (mCustomerRetrievalListener != null) {
@@ -526,22 +525,22 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     private void broadcastCustomerSource(@NonNull Source source) {
-        if (mCachedContextReference == null || mCachedContextReference.get() == null) {
+        if (mApplicationContext == null) {
             return;
         }
         Intent intent = new Intent(EVENT_SOURCE_RETRIEVED);
         intent.putExtra(EXTRA_CUSTOMER_SOURCE_RETRIEVED, source.toString());
-        LocalBroadcastManager.getInstance(mCachedContextReference.get())
+        LocalBroadcastManager.getInstance(mApplicationContext)
                 .sendBroadcast(intent);
 
     }
     private void broadcastCustomer(@NonNull Customer customer) {
-        if (mCachedContextReference == null || mCachedContextReference.get() == null) {
+        if (mApplicationContext == null) {
             return;
         }
         Intent intent = new Intent(EVENT_CUSTOMER_RETRIEVED);
         intent.putExtra(EXTRA_CUSTOMER_RETRIEVED, customer.toString());
-        LocalBroadcastManager.getInstance(mCachedContextReference.get()).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(mApplicationContext).sendBroadcast(intent);
     }
 
     private Handler createMainThreadHandler() {
@@ -579,12 +578,11 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     case CUSTOMER_SHIPPING_INFO_SAVED:
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
-                            if (mCachedContextReference == null
-                                    || mCachedContextReference.get() == null) {
+                            if (mApplicationContext == null) {
                                 return;
                             }
                             Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
-                            LocalBroadcastManager.getInstance(mCachedContextReference.get())
+                            LocalBroadcastManager.getInstance(mApplicationContext)
                                     .sendBroadcast(intent);
                         }
                 }
@@ -607,7 +605,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     static Source addCustomerSourceWithKey(
-            @NonNull WeakReference<Context> contextWeakReference,
+            @NonNull Context applicationContext,
             @NonNull EphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
@@ -617,7 +615,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         try {
             if (proxy != null) {
                 return proxy.addCustomerSourceWithKey(
-                        contextWeakReference.get(),
+                        applicationContext,
                         key.getCustomerId(),
                         PaymentConfiguration.getInstance().getPublishableKey(),
                         productUsageTokens,
@@ -627,7 +625,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             }
 
             source = StripeApiHandler.addCustomerSource(
-                    contextWeakReference.get(),
+                    applicationContext,
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
                     productUsageTokens,
@@ -637,16 +635,14 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     null);
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
+            LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(generateErrorIntent(stripeException));
         }
         return source;
     }
 
     static Customer setCustomerShippingInfoWithKey(
-            @NonNull WeakReference<Context> contextWeakReference,
+            @NonNull Context applicationContext,
             @NonNull EphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
@@ -655,7 +651,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         try {
             if (proxy != null) {
                 return proxy.setCustomerShippingInfoWithKey(
-                        contextWeakReference.get(),
+                       applicationContext,
                         key.getCustomerId(),
                         PaymentConfiguration.getInstance().getPublishableKey(),
                         productUsageTokens,
@@ -663,7 +659,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         key.getSecret());
             }
             customer = StripeApiHandler.setCustomerShippingInfo(
-                    contextWeakReference.get(),
+                    applicationContext,
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
                     productUsageTokens,
@@ -672,16 +668,14 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     null);
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
+            LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(generateErrorIntent(stripeException));
         }
         return customer;
     }
 
     static Customer setCustomerSourceDefaultWithKey(
-            @NonNull WeakReference<Context> contextWeakReference,
+            @NonNull Context applicationContext,
             @NonNull EphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
@@ -691,7 +685,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         try {
             if (proxy != null) {
                 return proxy.setDefaultCustomerSourceWithKey(
-                        contextWeakReference.get(),
+                        applicationContext,
                         key.getCustomerId(),
                         PaymentConfiguration.getInstance().getPublishableKey(),
                         productUsageTokens,
@@ -700,7 +694,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         key.getSecret());
             }
             customer = StripeApiHandler.setDefaultCustomerSource(
-                    contextWeakReference.get(),
+                    applicationContext,
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
                     productUsageTokens,
@@ -710,10 +704,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     null);
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
+            LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcast(generateErrorIntent(stripeException));
         }
         return customer;
     }
@@ -724,7 +716,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      * Use {@link #updateCustomer(EphemeralKey)} to validate the key
      * before refreshing the customer.
      *
-     * @param errorContext a {@link WeakReference} to a {@link Context}
+     * @param applicationContext the application-level {@link Context}
      *                     that can be used for broadcasting errors.
      * @param key the {@link EphemeralKey} used for this access
      * @param proxy a {@link StripeApiProxy} to intercept calls to the real servers
@@ -732,7 +724,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      */
     @Nullable
     static Customer retrieveCustomerWithKey(
-            @Nullable WeakReference<Context> errorContext,
+            @Nullable Context applicationContext,
             @NonNull EphemeralKey key,
             @Nullable StripeApiProxy proxy) {
         Customer customer = null;
@@ -746,8 +738,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     key.getSecret());
         } catch (StripeException stripeException) {
             Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (errorContext != null && errorContext.get() != null) {
-                LocalBroadcastManager.getInstance(errorContext.get())
+            if (applicationContext != null) {
+                LocalBroadcastManager.getInstance(applicationContext)
                         .sendBroadcast(generateErrorIntent(stripeException));
             }
         }
