@@ -29,14 +29,11 @@ class LoggingUtils {
     static final String NO_CONTEXT = "no_context";
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            EVENT_TOKEN_CREATION,
-            EVENT_SOURCE_CREATION,
-            EVENT_ADD_SOURCE,
-            EVENT_DEFAULT_SOURCE,
-            EVENT_SET_SHIPPING_INFO
-    })
-    @interface LoggingEventName { }
+    @StringDef({EVENT_TOKEN_CREATION, EVENT_SOURCE_CREATION, EVENT_ADD_SOURCE,
+            EVENT_DEFAULT_SOURCE, EVENT_SET_SHIPPING_INFO})
+    @interface LoggingEventName {
+    }
+
     static final String EVENT_TOKEN_CREATION = "token_creation";
     static final String EVENT_SOURCE_CREATION = "source_creation";
     static final String EVENT_ADD_SOURCE = "add_source";
@@ -57,6 +54,7 @@ class LoggingUtils {
     static final String FIELD_SOURCE_TYPE = "source_type";
     static final String FIELD_TOKEN_TYPE = "token_type";
     static final Set<String> VALID_PARAM_FIELDS = new HashSet<>();
+
     static {
         VALID_PARAM_FIELDS.add(FIELD_ANALYTICS_UA);
         VALID_PARAM_FIELDS.add(FIELD_APP_NAME);

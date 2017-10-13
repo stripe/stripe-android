@@ -57,6 +57,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     public static final String UNKNOWN = "unknown";
 
     public static final Set<String> MODELED_TYPES = new HashSet<>();
+
     static {
         MODELED_TYPES.add(CARD);
         MODELED_TYPES.add(SEPA_DEBIT);

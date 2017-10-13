@@ -213,6 +213,7 @@ public class AddSourceActivity extends StripeActivity {
 
     interface CustomerSessionProxy {
         void addProductUsageTokenIfValid(String token);
+
         void addCustomerSource(String sourceId, CustomerSession.SourceRetrievalListener listener);
     }
 }

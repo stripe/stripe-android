@@ -275,7 +275,6 @@ public class CardMultilineWidget extends LinearLayout {
         // This sets the value of mShouldShowPostalCode
         checkAttributeSet(attrs);
 
-
         mCardNumberTextInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         mExpiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.

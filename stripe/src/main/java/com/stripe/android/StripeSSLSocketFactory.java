@@ -20,9 +20,11 @@ import javax.net.ssl.SSLSocketFactory;
 class StripeSSLSocketFactory extends SSLSocketFactory {
 
     private final SSLSocketFactory under;
-    private final boolean tlsv11Supported, tlsv12Supported;
+    private final boolean tlsv11Supported;
+    private final boolean tlsv12Supported;
 
-    private static final String TLS_V11_PROTO = "TLSv1.1", TLS_V12_PROTO = "TLSv1.2";
+    private static final String TLS_V11_PROTO = "TLSv1.1";
+    private static final String TLS_V12_PROTO = "TLSv1.2";
 
     /**
      * Constructor for a socket factory instance.

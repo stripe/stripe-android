@@ -205,6 +205,10 @@ page at http://checkstyle.sourceforge.net/config.html -->
         </module>
         <module name="GenericWhitespace"/>
 
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
+        </module>
 
         <!-- Checks for common coding problems               -->
         <!-- See http://checkstyle.sf.net/config_coding.html -->
