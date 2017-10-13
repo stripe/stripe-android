@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -71,7 +72,12 @@ public class PaymentSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider, mStripeApiProxy, null);
+        CustomerSession.initCustomerSession(
+                mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
+                mStripeApiProxy,
+                null);
+
         mActivityController =
                 Robolectric.buildActivity(AppCompatActivity.class).create().start();
         mShadowActivity = Shadows.shadowOf(mActivityController.get());
@@ -123,6 +129,7 @@ public class PaymentSessionTest {
         assertTrue(tokenSet.contains(PaymentSession.TOKEN_PAYMENT_SESSION));
 
         verify(mockListener).onCommunicatingStateChanged(eq(true));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -133,6 +140,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -143,6 +151,7 @@ public class PaymentSessionTest {
         verify(mockListener).onCommunicatingStateChanged(eq(true));
         verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
         verify(mockListener).onCommunicatingStateChanged(eq(false));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -153,6 +162,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -169,6 +179,7 @@ public class PaymentSessionTest {
         PaymentSessionData data = dataArgumentCaptor.getValue();
         assertNotNull(data);
         assertEquals(500L, data.getCartTotal());
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -179,6 +190,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -195,6 +207,7 @@ public class PaymentSessionTest {
 
         assertTrue(handled);
         verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -205,6 +218,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -221,6 +235,7 @@ public class PaymentSessionTest {
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
         assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -231,6 +246,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -247,6 +263,7 @@ public class PaymentSessionTest {
         assertEquals(1, loggingTokens.size());
         assertFalse(loggingTokens.contains("PaymentMethodsActivity"));
         assertTrue(loggingTokens.contains("PaymentSession"));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -257,6 +274,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -273,6 +291,7 @@ public class PaymentSessionTest {
         assertEquals(2, loggingTokens.size());
         assertTrue(loggingTokens.contains("PaymentMethodsActivity"));
         assertTrue(loggingTokens.contains("PaymentSession"));
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -283,6 +302,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -314,6 +334,7 @@ public class PaymentSessionTest {
         assertNotNull(capturedData);
         assertEquals(PaymentResultListener.SUCCESS, capturedData.getPaymentResult());
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
+        paymentSession.onDestroy();
     }
 
     @Test
@@ -324,6 +345,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.initCustomerSession(
                 mEphemeralKeyProvider,
+                RuntimeEnvironment.application,
                 mStripeApiProxy,
                 null);
 
@@ -338,6 +360,7 @@ public class PaymentSessionTest {
         verify(mockListener).onPaymentSessionDataChanged(paySessionDataCaptor.capture());
         Bundle bundle = new Bundle();
         paymentSession.savePaymentSessionInstanceState(bundle);
+        paymentSession.onDestroy();
 
         PaymentSession.PaymentSessionListener secondListener =
                 mock(PaymentSession.PaymentSessionListener.class);
@@ -351,6 +374,7 @@ public class PaymentSessionTest {
         assertEquals(firstData.getCartTotal(), secondData.getCartTotal());
         assertEquals(firstData.getSelectedPaymentMethodId(),
                 secondData.getSelectedPaymentMethodId());
+        paymentSession.onDestroy();
     }
 
     private ArgumentCaptor<PaymentSessionData> getDataCaptor() {

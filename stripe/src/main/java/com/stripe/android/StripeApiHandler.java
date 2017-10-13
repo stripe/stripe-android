@@ -286,7 +286,12 @@ class StripeApiHandler {
             @NonNull @Source.SourceType String sourceType,
             @NonNull String secret,
             @Nullable LoggingResponseListener listener)
-            throws InvalidRequestException, APIConnectionException, APIException {
+            throws
+            InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("source", sourceId);
 
@@ -309,6 +314,9 @@ class StripeApiHandler {
                 getAddCustomerSourceUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+
+        // Method throws if errors are found, so no return value occurs.
+        handlePossibleErrors(response);
         return Source.fromString(response.getResponseBody());
     }
 
@@ -322,7 +330,12 @@ class StripeApiHandler {
             @NonNull @Source.SourceType String sourceType,
             @NonNull String secret,
             @Nullable LoggingResponseListener listener)
-            throws InvalidRequestException, APIConnectionException, APIException {
+            throws
+            InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("default_source", sourceId);
 
@@ -348,6 +361,7 @@ class StripeApiHandler {
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        handlePossibleErrors(response);
         return Customer.fromString(response.getResponseBody());
     }
 
@@ -360,7 +374,12 @@ class StripeApiHandler {
             @NonNull ShippingInformation shippingInformation,
             @NonNull String secret,
             @Nullable LoggingResponseListener listener)
-            throws InvalidRequestException, APIConnectionException, APIException {
+            throws
+            InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("shipping", shippingInformation.toMap());
 
@@ -386,18 +405,25 @@ class StripeApiHandler {
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        handlePossibleErrors(response);
         return Customer.fromString(response.getResponseBody());
     }
 
 
     @Nullable
     static Customer retrieveCustomer(@NonNull String customerId, @NonNull String secret)
-            throws InvalidRequestException, APIConnectionException, APIException {
+            throws
+            InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
         StripeResponse response = getStripeResponse(
                 GET,
                 getRetrieveCustomerUrl(customerId),
                 null,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        handlePossibleErrors(response);
         return Customer.fromString(response.getResponseBody());
     }
 
@@ -456,6 +482,26 @@ class StripeApiHandler {
         }
 
         return headers;
+    }
+
+    static void handlePossibleErrors(StripeResponse response) throws
+            InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        int rCode = response.getResponseCode();
+        String rBody = response.getResponseBody();
+        String requestId = null;
+        Map<String, List<String>> headers = response.getResponseHeaders();
+        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+        if (requestIdList != null && requestIdList.size() > 0) {
+            requestId = requestIdList.get(0);
+        }
+
+        if (rCode < 200 || rCode >= 300) {
+            handleAPIError(rBody, rCode, requestId);
+        }
     }
 
     @VisibleForTesting
