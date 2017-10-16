@@ -691,11 +691,13 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     public interface CustomerRetrievalListener {
         void onCustomerRetrieved(@NonNull Customer customer);
+
         void onError(int errorCode, @Nullable String errorMessage);
     }
 
     public interface SourceRetrievalListener {
         void onSourceRetrieved(@NonNull Source source);
+
         void onError(int errorCode, @Nullable String errorMessage);
     }
 

@@ -772,7 +772,6 @@ public class CardInputWidget extends LinearLayout {
                     ? 0 : -1 * mPlacementParameters.hiddenCardWidth;
             setLayoutValues(mPlacementParameters.cardWidth, cardLeftMargin, mCardNumberEditText);
 
-
             int dateMargin = mCardNumberIsViewed
                     ? mPlacementParameters.cardWidth + mPlacementParameters.cardDateSeparation
                     : mPlacementParameters.peekCardWidth + mPlacementParameters.cardDateSeparation;
@@ -875,6 +874,7 @@ public class CardInputWidget extends LinearLayout {
     @VisibleForTesting
     interface DimensionOverrideSettings {
         int getPixelWidth(@NonNull String text, @NonNull EditText editText);
+
         int getFrameWidth();
     }
 

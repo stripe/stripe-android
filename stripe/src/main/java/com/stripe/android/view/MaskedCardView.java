@@ -59,7 +59,8 @@ public class MaskedCardView extends LinearLayout {
     @ColorInt int mUnselectedTextAlphaColorInt;
     @ColorInt int mUnselectedTextColorInt;
 
-    static final Map<String , Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+    static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+
     static {
         TEMPLATE_RESOURCE_MAP.put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.DINERS_CLUB, R.drawable.ic_diners_template_32);

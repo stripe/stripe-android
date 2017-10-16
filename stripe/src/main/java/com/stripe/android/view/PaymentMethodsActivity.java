@@ -381,12 +381,16 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     interface CustomerSessionProxy {
         void addProductUsageTokenIfValid(String token);
-        @Nullable Customer getCachedCustomer();
+
+        @Nullable
+        Customer getCachedCustomer();
+
         void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
-        void setCustomerDefaultSource(
-                @NonNull String sourceId,
-                @NonNull String sourceType,
-                @Nullable CustomerSession.CustomerRetrievalListener listener);
+
+        void setCustomerDefaultSource(@NonNull String sourceId,
+                                      @NonNull String sourceType,
+                                      @Nullable CustomerSession.CustomerRetrievalListener listener);
+
         void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
     }
 }

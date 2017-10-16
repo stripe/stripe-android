@@ -181,6 +181,7 @@ public class StripeNetworkUtils {
     @VisibleForTesting
     interface UidProvider {
         String getUid();
+
         String getPackageName();
     }
 }

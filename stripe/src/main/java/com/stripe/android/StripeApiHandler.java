@@ -1025,7 +1025,9 @@ class StripeApiHandler {
 
     interface LoggingResponseListener {
         boolean shouldLogTest();
+
         void onLoggingResponse(StripeResponse response);
+
         void onStripeException(StripeException exception);
     }
 
