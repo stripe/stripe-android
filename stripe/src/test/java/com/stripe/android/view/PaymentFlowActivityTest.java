@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +48,7 @@ import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_M
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -235,6 +237,37 @@ public class PaymentFlowActivityTest {
         LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
                 .sendBroadcast(shippingInfoSaved);
         assertEquals(View.GONE, paymentFlowActivity.mProgressBar.getVisibility());
+    }
+
+    @Test
+    public void onShippingInfoSaved_whenOnlyShippingInfo_finishWithSuccess() {
+        Intent intent = new Intent(RuntimeEnvironment.application, PaymentFlowActivity.class);
+        PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
+                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                .setShippingMethodsRequired(false)
+                .build();
+        intent.putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
+        PaymentSessionData paymentSessionData = new PaymentSessionData();
+        intent.putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData);
+        mActivityController = Robolectric.buildActivity(PaymentFlowActivity.class, intent)
+                .create().start().resume().visible();
+        mShadowActivity = shadowOf(mActivityController.get());
+        PaymentFlowActivity paymentFlowActivity = mActivityController.get();
+
+        // valid result
+        paymentFlowActivity.onActionSave();
+        Intent onShippingInfoProcessedValid = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
+        onShippingInfoProcessedValid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(onShippingInfoProcessedValid);
+        Intent shippingInfoSaved = new Intent(EVENT_SHIPPING_INFO_SAVED);
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+                .sendBroadcast(shippingInfoSaved);
+        assertTrue(mShadowActivity.isFinishing());
+        assertEquals(mShadowActivity.getResultCode(), Activity.RESULT_OK);
+        PaymentSessionData resultSessionData = mShadowActivity.getResultIntent().getExtras()
+                .getParcelable(PAYMENT_SESSION_DATA_KEY);
+        assertEquals(resultSessionData.getShippingInformation(), getExampleShippingInfo());
     }
 
     private ShippingInformation getExampleShippingInfo() {

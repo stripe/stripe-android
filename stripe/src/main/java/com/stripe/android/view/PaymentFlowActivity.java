@@ -166,6 +166,10 @@ public class PaymentFlowActivity extends StripeActivity {
         if (hasNextPage()) {
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
         } else {
+            mPaymentSessionData.setShippingInformation(mShippingInformationSubmitted);
+            Intent intent = new Intent();
+            intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
+            setResult(RESULT_OK, intent);
             finish();
         }
     }
