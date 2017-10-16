@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -81,8 +81,10 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private @NonNull ThreadPoolExecutor mThreadPoolExecutor;
 
     private static final int CUSTOMER_RETRIEVED = 7;
+    private static final int CUSTOMER_ERROR = 11;
     private static final int SOURCE_RETRIEVED = 13;
-    private static final int CUSTOMER_SHIPPING_INFO_SAVED = 17;
+    private static final int SOURCE_ERROR = 17;
+    private static final int CUSTOMER_SHIPPING_INFO_SAVED = 19;
 
     // The maximum number of active threads we support
     private static final int THREAD_POOL_SIZE = 3;
@@ -312,15 +314,22 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Source source = addCustomerSourceWithKey(
-                        contextWeakReference,
-                        key,
-                        new ArrayList<>(productUsageTokens),
-                        sourceId,
-                        sourceType,
-                        mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
-                mUiThreadHandler.sendMessage(message);
+                try {
+                    Source source = addCustomerSourceWithKey(
+                            contextWeakReference,
+                            key,
+                            new ArrayList<>(productUsageTokens),
+                            sourceId,
+                            sourceType,
+                            mStripeApiProxy);
+                    Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
+                    mUiThreadHandler.sendMessage(message);
+
+                } catch (StripeException stripeEx) {
+                    Message message = mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx);
+                    mUiThreadHandler.sendMessage(message);
+                    sendErrorIntent(contextWeakReference, stripeEx);
+                }
             }
         };
 
@@ -342,15 +351,21 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = setCustomerSourceDefaultWithKey(
-                        contextWeakReference,
-                        key,
-                        new ArrayList<>(productUsageTokens),
-                        sourceId,
-                        sourceType,
-                        mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
-                mUiThreadHandler.sendMessage(message);
+                try {
+                    Customer customer = setCustomerSourceDefaultWithKey(
+                            contextWeakReference,
+                            key,
+                            new ArrayList<>(productUsageTokens),
+                            sourceId,
+                            sourceType,
+                            mStripeApiProxy);
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
+                    mUiThreadHandler.sendMessage(message);
+                } catch (StripeException stripeEx) {
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
+                    mUiThreadHandler.sendMessage(message);
+                    sendErrorIntent(contextWeakReference, stripeEx);
+                }
             }
         };
 
@@ -365,15 +380,21 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = setCustomerShippingInfoWithKey(
-                        contextWeakReference,
-                        key,
-                        new ArrayList<>(productUsageTokens),
-                        shippingInformation,
-                        mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED,
-                        customer);
-                mUiThreadHandler.sendMessage(message);
+                try {
+                    Customer customer = setCustomerShippingInfoWithKey(
+                            contextWeakReference,
+                            key,
+                            new ArrayList<>(productUsageTokens),
+                            shippingInformation,
+                            mStripeApiProxy);
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED,
+                            customer);
+                    mUiThreadHandler.sendMessage(message);
+                } catch (StripeException stripeEx) {
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
+                    mUiThreadHandler.sendMessage(message);
+                    sendErrorIntent(contextWeakReference, stripeEx);
+                }
             }
         };
         executeRunnable(runnable);
@@ -383,12 +404,17 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
-                Customer customer = retrieveCustomerWithKey(
-                        mCachedContextReference,
-                        key,
-                        mStripeApiProxy);
-                Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
-                mUiThreadHandler.sendMessage(message);
+                try {
+                    Customer customer = retrieveCustomerWithKey(
+                            mCachedContextReference,
+                            key,
+                            mStripeApiProxy);
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
+                    mUiThreadHandler.sendMessage(message);
+                } catch (StripeException stripeEx) {
+                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
+                    mUiThreadHandler.sendMessage(message);
+                }
             }
         };
 
@@ -505,6 +531,35 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                             LocalBroadcastManager.getInstance(mCachedContextReference.get())
                                     .sendBroadcast(intent);
                         }
+                        break;
+                    case CUSTOMER_ERROR:
+                        if (messageObject instanceof StripeException) {
+                            StripeException exception = (StripeException) messageObject;
+                            if (mCustomerRetrievalListener != null) {
+                                int errorCode = exception.getStatusCode() == null
+                                        ? 400
+                                        : exception.getStatusCode();
+                                mCustomerRetrievalListener.onError(
+                                        errorCode,
+                                        exception.getLocalizedMessage());
+                                mCustomerRetrievalListener = null;
+                            }
+                            resetUsageTokens();
+                        }
+                        break;
+                    case SOURCE_ERROR:
+                        StripeException exception = (StripeException) messageObject;
+                        if (mSourceRetrievalListener != null) {
+                            int errorCode = exception.getStatusCode() == null
+                                    ? 400
+                                    : exception.getStatusCode();
+                            mSourceRetrievalListener.onError(
+                                    errorCode,
+                                    exception.getLocalizedMessage());
+                            mSourceRetrievalListener = null;
+                            resetUsageTokens();
+                        }
+                        break;
                 }
             }
         };
@@ -530,21 +585,18 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @Nullable StripeApiProxy proxy) {
-        Source source = null;
-        try {
-            if (proxy != null) {
-                return proxy.addCustomerSourceWithKey(
-                        contextWeakReference.get(),
-                        key.getCustomerId(),
-                        PaymentConfiguration.getInstance().getPublishableKey(),
-                        productUsageTokens,
-                        sourceId,
-                        sourceType,
-                        key.getSecret());
-            }
-
-            source = StripeApiHandler.addCustomerSource(
+            @Nullable StripeApiProxy proxy) throws StripeException {
+        if (proxy != null) {
+            return proxy.addCustomerSourceWithKey(
+                    contextWeakReference.get(),
+                    key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
+                    sourceId,
+                    sourceType,
+                    key.getSecret());
+        } else {
+            return StripeApiHandler.addCustomerSource(
                     contextWeakReference.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -553,16 +605,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     sourceType,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
-        } catch (StripeException stripeException) {
-            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
         }
-        return source;
     }
 
     static Customer setCustomerShippingInfoWithKey(
@@ -570,19 +613,17 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull EphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
-            @Nullable StripeApiProxy proxy) {
-        Customer customer = null;
-        try {
-            if (proxy != null) {
-                return proxy.setCustomerShippingInfoWithKey(
-                        contextWeakReference.get(),
-                        key.getCustomerId(),
-                        PaymentConfiguration.getInstance().getPublishableKey(),
-                        productUsageTokens,
-                        shippingInformation,
-                        key.getSecret());
-            }
-            customer = StripeApiHandler.setCustomerShippingInfo(
+            @Nullable StripeApiProxy proxy) throws StripeException {
+        if (proxy != null) {
+            return proxy.setCustomerShippingInfoWithKey(
+                    contextWeakReference.get(),
+                    key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
+                    shippingInformation,
+                    key.getSecret());
+        } else {
+            return StripeApiHandler.setCustomerShippingInfo(
                     contextWeakReference.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -590,16 +631,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     shippingInformation,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
-        } catch (StripeException stripeException) {
-            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
         }
-        return customer;
     }
 
     static Customer setCustomerSourceDefaultWithKey(
@@ -608,20 +640,18 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @Nullable StripeApiProxy proxy) {
-        Customer customer = null;
-        try {
-            if (proxy != null) {
-                return proxy.setDefaultCustomerSourceWithKey(
-                        contextWeakReference.get(),
-                        key.getCustomerId(),
-                        PaymentConfiguration.getInstance().getPublishableKey(),
-                        productUsageTokens,
-                        sourceId,
-                        sourceType,
-                        key.getSecret());
-            }
-            customer = StripeApiHandler.setDefaultCustomerSource(
+            @Nullable StripeApiProxy proxy) throws StripeException {
+        if (proxy != null) {
+            return proxy.setDefaultCustomerSourceWithKey(
+                    contextWeakReference.get(),
+                    key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
+                    sourceId,
+                    sourceType,
+                    key.getSecret());
+        } else {
+            return StripeApiHandler.setDefaultCustomerSource(
                     contextWeakReference.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -630,16 +660,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                     sourceType,
                     key.getSecret(),
                     null);
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
-        } catch (StripeException stripeException) {
-            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (contextWeakReference.get() != null) {
-                LocalBroadcastManager.getInstance(contextWeakReference.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
         }
-        return customer;
     }
 
     /**
@@ -658,35 +679,27 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     static Customer retrieveCustomerWithKey(
             @Nullable WeakReference<Context> errorContext,
             @NonNull EphemeralKey key,
-            @Nullable StripeApiProxy proxy) {
-        Customer customer = null;
-
-        try {
-            if (proxy != null) {
-                return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
-            }
-            customer = StripeApiHandler.retrieveCustomer(
+            @Nullable StripeApiProxy proxy) throws StripeException {
+        if (proxy != null) {
+            return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
+        } else {
+            return StripeApiHandler.retrieveCustomer(
                     key.getCustomerId(),
                     key.getSecret());
-        } catch (InvalidRequestException invalidException) {
-            // Then the key is invalid
-        } catch (StripeException stripeException) {
-            Log.e(CustomerSession.class.getName(), stripeException.getMessage());
-            if (errorContext != null && errorContext.get() != null) {
-                LocalBroadcastManager.getInstance(errorContext.get())
-                        .sendBroadcast(generateErrorIntent(stripeException));
-            }
         }
-        return customer;
     }
 
     @NonNull
-    static Intent generateErrorIntent(@NonNull StripeException exception) {
+    static void sendErrorIntent(@Nullable WeakReference<Context> errorContext,
+                                  @NonNull StripeException exception) {
+        if (errorContext == null || errorContext.get() == null) {
+            return;
+        }
         Bundle bundle = new Bundle();
         bundle.putSerializable(EXTRA_EXCEPTION, exception);
         Intent intent = new Intent(ACTION_API_EXCEPTION);
         intent.putExtras(bundle);
-        return intent;
+        LocalBroadcastManager.getInstance(errorContext.get()).sendBroadcast(intent);
     }
 
     public interface CustomerRetrievalListener {

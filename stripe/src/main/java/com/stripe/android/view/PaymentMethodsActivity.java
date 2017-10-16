@@ -375,6 +375,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void updateAdapterWithCustomer(@NonNull Customer customer) {
+        if (mMaskedCardAdapter == null) {
+            createListFromCustomerSources();
+            if (mCustomer == null) {
+                return;
+            }
+        }
         mMaskedCardAdapter.updateCustomer(customer);
         setCommunicatingProgress(false);
     }
