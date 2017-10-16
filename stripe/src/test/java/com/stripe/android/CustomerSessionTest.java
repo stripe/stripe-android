@@ -509,7 +509,7 @@ public class CustomerSessionTest {
     }
 
     @Test
-    public void addSourceToCustomer_whenApiThrowsError_broadcastsException() {
+    public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -529,6 +529,7 @@ public class CustomerSessionTest {
         CustomerSession session = CustomerSession.getInstance();
         session.addProductUsageTokenIfValid("AddSourceActivity");
         session.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertFalse(session.getProductUsageTokens().isEmpty());
 
         long firstCustomerCacheTime = session.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -556,6 +557,9 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
+
+        verify(mockListener).onError(404, "The card is invalid");
+        assertTrue(session.getProductUsageTokens().isEmpty());
     }
 
     @Test
@@ -622,7 +626,7 @@ public class CustomerSessionTest {
     }
 
     @Test
-    public void setDefaultSourceForCustomer_whenApiThrowsException_broadcastsException() {
+    public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
         EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -669,6 +673,8 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
+        verify(mockListener).onError(405, "auth error");
+        assertTrue(session.getProductUsageTokens().isEmpty());
     }
 
     @Test
