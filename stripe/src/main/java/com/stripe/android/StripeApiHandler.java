@@ -314,7 +314,7 @@ class StripeApiHandler {
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
         // Method throws if errors are found, so no return value occurs.
-        handlePossibleErrors(response);
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Source.fromString(response.getResponseBody());
     }
 
@@ -360,7 +360,7 @@ class StripeApiHandler {
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
 
         // Method throws if errors are found, so no return value occurs.
-        handlePossibleErrors(response);
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
     }
 
@@ -404,7 +404,7 @@ class StripeApiHandler {
                 paramsMap,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
         // Method throws if errors are found, so no return value occurs.
-        handlePossibleErrors(response);
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
     }
 
@@ -421,7 +421,7 @@ class StripeApiHandler {
                 getRetrieveCustomerUrl(customerId),
                 null,
                 RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
-        handlePossibleErrors(response);
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
     }
 
@@ -517,7 +517,7 @@ class StripeApiHandler {
         return String.format("%s/%s", getApiUrl(), tokenId);
     }
 
-    static void handlePossibleErrors(StripeResponse response) throws
+    static void convertErrorsToExceptionsAndThrowIfNecessary(StripeResponse response) throws
             InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -528,6 +528,7 @@ class StripeApiHandler {
         String requestId = null;
         Map<String, List<String>> headers = response.getResponseHeaders();
         List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+
         if (requestIdList != null && requestIdList.size() > 0) {
             requestId = requestIdList.get(0);
         }
