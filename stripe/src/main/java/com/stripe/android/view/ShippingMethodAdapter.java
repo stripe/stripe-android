@@ -47,9 +47,11 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
         return mShippingMethods.get(mSelectedIndex);
     }
 
-    void setShippingMethods(List<ShippingMethod> shippingMethods, ShippingMethod
-            defaultShippingMethod) {
-        mShippingMethods = shippingMethods;
+    void setShippingMethods(List<ShippingMethod> shippingMethods,
+                            ShippingMethod defaultShippingMethod) {
+        if (shippingMethods != null) {
+            mShippingMethods = shippingMethods;
+        }
         if (defaultShippingMethod == null) {
             mSelectedIndex = 0;
         } else {
