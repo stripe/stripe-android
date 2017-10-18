@@ -61,6 +61,7 @@ def make_translations_hash(filename, included_strings)
 end
 
 def replace_updated_translations(filename, translations_hash)
+	puts "▸ Updating strings that have changed"
 	strings_doc = File.open(filename) { |f| Nokogiri::XML(f) }
 	translation_nodes = strings_doc.xpath('//string').to_a
 	for translation in translation_nodes
@@ -116,12 +117,14 @@ puts "▸ Removing translations for languages we do not yet support"
 language_dirs = Dir.glob 'stripe/res/values-*'
 for dir in language_dirs
 	if not @langs.include? dir.split('-')[1]
-		FileUtils.rm_rf(dir)
+		FileUtils.rm_rf(dir) 
 	end
 end
 
 for lang in @langs
-	puts "▸ Working on" + lang
+	puts "=================== "
+	puts "Working on: " + lang
+	puts "=================== "
 	downloaded_filename = 'stripe/res/values-'+lang+'/strings-temp.xml'
 	translations_hash = make_translations_hash(downloaded_filename, included_strings)
 	current_translations_filename = 'stripe/res/values-'+lang+'/strings.xml'
@@ -130,7 +133,3 @@ for lang in @langs
 	add_new_translations(current_translations_filename, translations_hash)
 	File.delete(downloaded_filename)
 end 
-
-
-
-

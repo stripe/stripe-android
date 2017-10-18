@@ -15,4 +15,3 @@ phraseapp:
         file_format: xml
         convert_emoji: true
         encoding: UTF-8
-        
