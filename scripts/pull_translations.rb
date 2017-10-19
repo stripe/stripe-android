@@ -34,13 +34,11 @@ def remove_excess_strings(filename, included_strings)
   puts '▸ Removing translations for unused strings'
   strings_doc = File.open(filename) { |f| Nokogiri::XML(f) }
   translation_nodes = strings_doc.xpath('//string').to_a
-  all_strings = strings_doc.xpath('//string/@name').to_a.to_set do |node_attr| 
-    node_attr.text
-  end
+  all_strings = strings_doc.xpath('//string/@name').to_a.to_set(&:text)
   excess_strings = all_strings - included_strings
   for translation in translation_nodes
     if excess_strings.include? translation['name']
-      puts 'translation '+ translation 
+      puts 'translation ' + translation
       remove_translation_and_comment(translation)
     end
   end
@@ -48,7 +46,7 @@ def remove_excess_strings(filename, included_strings)
 end
 
 Struct.new(
-  'Translation', 
+  'Translation',
   :translated_string,
   :description_comment,
   :string_node
@@ -79,18 +77,16 @@ def replace_updated_translations(filename, translations_hash)
   strings_doc = File.open(filename) { |f| Nokogiri::XML(f) }
   translation_nodes = strings_doc.xpath('//string').to_a
   translation_nodes.each do |translation|
-    translation_comment = nil
-    if translations_hash.key?(translation['name'])
-      key = translation['name']
-      if !translation.previous.previous.nil? && translation.previous.previous.comment?
-        translation_comment = translation.previous.previous
-        unless translation_comment.text.eql? translations_hash[key].description_comment.text
-          translation_comment.replace(translations_hash[key].description_comment)
-        end
-        unless translation.content.eql? translations_hash[key].translated_string
-          translation.content = translations_hash[key].translated_string
-        end
-      end
+    translation_comment
+    next unless translations_hash.key?(translation['name'])
+    key = translation['name']
+    next unless !translation.previous.previous.nil? && translation.previous.previous.comment?
+    translation_comment = translation.previous.previous
+    unless translation_comment.text.eql? translations_hash[key].description_comment.text
+      translation_comment.replace(translations_hash[key].description_comment)
+    end
+    unless translation.content.eql? translations_hash[key].translated_string
+      translation.content = translations_hash[key].translated_string
     end
   end
   File.write(filename, strings_doc.to_xml)
