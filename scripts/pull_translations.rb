@@ -80,7 +80,8 @@ def replace_updated_translations(filename, translations_hash)
     translation_comment
     next unless translations_hash.key?(translation['name'])
     key = translation['name']
-    next unless !translation.previous.previous.nil? && translation.previous.previous.comment?
+    next unless !translation.previous.previous.nil? && 
+                translation.previous.previous.comment?
     translation_comment = translation.previous.previous
     unless translation_comment.text.eql? translations_hash[key].description_comment.text
       translation_comment.replace(translations_hash[key].description_comment)
@@ -115,35 +116,41 @@ def add_new_translations(filename, translations_hash)
   File.write(filename, strings_doc.to_xml)
 end
 
+def update_translations(default_strings_file, supported_languages)
+  puts '▸ Building set of locally added strings'
+  default_strings_doc = File.open(default_strings_file) { |f| Nokogiri::XML(f) }
+  included_strings = default_strings_doc.xpath('//string/@name')
+                                        .to_a.to_set(&:text)
+  puts '▸ Downloading all translations from PhraseApp'
+  `phraseapp pull -t #{ARGV[0]}`
+  puts '▸ Removing translations for languages we do not yet support'
+  language_dirs = Dir.glob 'stripe/res/values-*'
+  language_dirs.each do |dir|
+    FileUtils.rm_rf(dir) unless supported_languages.include? dir.split('-')[1]
+  end
+
+  supported_languages.each do |lang|
+    puts '==================='
+    puts 'Working on: ' + lang
+    puts '==================='
+    downloaded_filename = 'stripe/res/values-' + lang + '/strings-temp.xml'
+    translations_hash = make_translations_hash(
+      downloaded_filename,
+      included_strings
+    )
+    current_translations_filename = 'stripe/res/values-' + lang + '/strings.xml'
+    remove_excess_strings(current_translations_filename, included_strings)
+    replace_updated_translations(current_translations_filename, translations_hash)
+    add_new_translations(current_translations_filename, translations_hash)
+    File.delete(downloaded_filename)
+  end
+end
+
 DEFAULT_STRINGS_FILE = 'stripe/res/values/strings.xml'.freeze
 @langs = %w(de es fr it ja nl zh)
 
-puts '▸ Building set of locally added strings'
-default_strings_doc = File.open(DEFAULT_STRINGS_FILE) { |f| Nokogiri::XML(f) }
-included_strings = default_strings_doc.xpath('//string/@name')
-                                      .to_a.to_set(&:text)
+update_translations(DEFAULT_STRINGS_FILE, @langs)
 
-puts '▸ Downloading all translations from PhraseApp'
-`phraseapp pull -t #{ARGV[0]}`
 
-puts '▸ Removing translations for languages we do not yet support'
-language_dirs = Dir.glob 'stripe/res/values-*'
-language_dirs.each do |dir|
-  FileUtils.rm_rf(dir) unless @langs.include? dir.split('-')[1]
-end
 
-@langs.each do |lang|
-  puts '==================='
-  puts 'Working on: ' + lang
-  puts '==================='
-  downloaded_filename = 'stripe/res/values-' + lang + '/strings-temp.xml'
-  translations_hash = make_translations_hash(
-    downloaded_filename,
-    included_strings
-  )
-  current_translations_filename = 'stripe/res/values-' + lang + '/strings.xml'
-  remove_excess_strings(current_translations_filename, included_strings)
-  replace_updated_translations(current_translations_filename, translations_hash)
-  add_new_translations(current_translations_filename, translations_hash)
-  File.delete(downloaded_filename)
-end
+
