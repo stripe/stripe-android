@@ -36,7 +36,7 @@ def remove_excess_strings(filename, included_strings)
   translation_nodes = strings_doc.xpath('//string').to_a
   all_strings = strings_doc.xpath('//string/@name').to_a.to_set(&:text)
   excess_strings = all_strings - included_strings
-  for translation in translation_nodes
+  translation_nodes.each do |translation|
     if excess_strings.include? translation['name']
       puts 'translation ' + translation
       remove_translation_and_comment(translation)
@@ -80,7 +80,7 @@ def replace_updated_translations(filename, translations_hash)
     translation_comment
     next unless translations_hash.key?(translation['name'])
     key = translation['name']
-    next unless !translation.previous.previous.nil? && 
+    next unless !translation.previous.previous.nil? &&
                 translation.previous.previous.comment?
     translation_comment = translation.previous.previous
     unless translation_comment.text.eql? translations_hash[key].description_comment.text
@@ -150,7 +150,3 @@ DEFAULT_STRINGS_FILE = 'stripe/res/values/strings.xml'.freeze
 @langs = %w(de es fr it ja nl zh)
 
 update_translations(DEFAULT_STRINGS_FILE, @langs)
-
-
-
-

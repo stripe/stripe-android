@@ -1,13 +1,6 @@
 phraseapp:
   project_id: d2a63bc2ab1c63e5732b6e77fff1fbd1
   file_format: strings
-  push:
-    sources:
-    - file: Stripe/Resources/Localizations/en.lproj/Localizable.strings
-      params:
-        locale_id: de84834fe809e8f3f90a5e2239ac3711
-        update_translations: true
-        convert_emoji: true
   pull:
     targets:
     - file: stripe/res/values-<locale_code>/strings-temp.xml
