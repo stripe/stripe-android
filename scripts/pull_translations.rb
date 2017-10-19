@@ -58,14 +58,15 @@ def make_translations_hash(filename, included_strings)
   strings_doc = File.open(filename) { |f| Nokogiri::XML(f) }
   translation_nodes = strings_doc.xpath('//string').to_a
   translations_hash = {}
-  for translation in translation_nodes
+  translation_nodes.each do |translation|
     translation_comment = nil
     if translation.previous.previous.comment?
       translation_comment = translation.previous.previous
     end
     if included_strings.include? translation['name']
       translations_hash[translation['name']] = Struct::Translation.new(
-        translation.content, translation_comment, translation)
+        translation.content, translation_comment, translation
+      )
     else
       puts 'not adding' + translation['name']
     end
@@ -99,9 +100,7 @@ def add_new_translations(filename, translations_hash)
   puts '▸ Adding new translations'
   strings_doc = File.open(filename) { |f| Nokogiri::XML(f) }
   translation_nodes = strings_doc.xpath('//string')
-  existing_strings = strings_doc.xpath('//string/@name').to_a.to_set {
-    |node_attr| node_attr.text
-  }
+  existing_strings = strings_doc.xpath('//string/@name').to_a.to_set(&:text)
   new_strings = translations_hash.keys.to_set - existing_strings
   # Grab a new line node to use for formatting
   new_line_node = translation_nodes.first.next.dup
@@ -120,14 +119,13 @@ def add_new_translations(filename, translations_hash)
   File.write(filename, strings_doc.to_xml)
 end
 
-DEFAULT_STRINGS_FILE = 'stripe/res/values/strings.xml'
+DEFAULT_STRINGS_FILE = 'stripe/res/values/strings.xml'.freeze
 @langs = %w(de es fr it ja nl zh)
 
 puts '▸ Building set of locally added strings'
 default_strings_doc = File.open(DEFAULT_STRINGS_FILE) { |f| Nokogiri::XML(f) }
-included_strings = default_strings_doc.xpath('//string/@name').to_a.to_set {
-  |node_attr| node_attr.text
-}
+included_strings = default_strings_doc.xpath('//string/@name')
+                                      .to_a.to_set(&:text)
 
 puts '▸ Downloading all translations from PhraseApp'
 `phraseapp pull -t #{ARGV[0]}`
