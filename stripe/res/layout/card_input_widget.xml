@@ -112,6 +112,8 @@
             android:hint="@string/cvc_number_hint"
             android:inputType="number"
             android:maxLength="4"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:layout_marginLeft="@dimen/card_cvc_initial_margin"
             android:layout_marginStart="@dimen/card_cvc_initial_margin"
             android:layout_gravity="left"

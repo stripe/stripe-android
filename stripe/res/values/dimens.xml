@@ -7,7 +7,7 @@
     <dimen name="add_card_total_margin">16dp</dimen>
     <dimen name="add_payment_method_vertical_padding">8dp</dimen>
     <dimen name="card_icon_padding">12dp</dimen>
-    <dimen name="card_widget_min_width">320dp</dimen>
+    <dimen name="card_widget_min_width">360dp</dimen>
     <dimen name="card_expiry_initial_margin">200dp</dimen>
     <dimen name="card_cvc_initial_margin">1000dp</dimen>
     <dimen name="android_pay_button_layout_margin">24dp</dimen>
