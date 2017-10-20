@@ -1,0 +1,10 @@
+phraseapp:
+  project_id: d2a63bc2ab1c63e5732b6e77fff1fbd1
+  file_format: strings
+  pull:
+    targets:
+    - file: stripe/res/values-<locale_code>/strings-temp.xml
+      params:
+        file_format: xml
+        convert_emoji: true
+        encoding: UTF-8
