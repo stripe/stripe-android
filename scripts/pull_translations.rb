@@ -39,7 +39,7 @@ def remove_excess_strings(filename, included_strings, show_info)
   translation_nodes.each do |translation|
     if excess_strings.include? translation['name']
       remove_translation_and_comment(translation)
-      puts "Removed translation %s" % translation if show_info
+      puts "Removed translation #{translation}" if show_info
     end
   end
   File.write(filename, strings_doc.to_xml)
@@ -81,11 +81,11 @@ def replace_updated_translations(filename, translations_hash, show_info)
                 translation.previous.previous.comment?
     translation_comment = translation.previous.previous
     unless translation_comment.text.eql? translations_hash[key].description_comment.text
-      puts "Updating translation comment for %s" % translation_comment if show_info
+      puts "Updating translation comment for #{translation_comment}" if show_info
       translation_comment.replace(translations_hash[key].description_comment)
     end
     unless translation.content.eql? translations_hash[key].translated_string
-      puts "Updating translation to %s" % translation if show_info
+      puts "Updating translation to #{translation}" if show_info
       translation.content = translations_hash[key].translated_string
     end
   end
@@ -110,7 +110,7 @@ def add_new_translations(filename, translations_hash, show_info)
     end
     strings_doc.root.add_child(new_line_node.dup)
     strings_doc.root.add_child(translation.string_node)
-    puts "Added translation for %s" % translation.string_node if show_info
+    puts "Added translation for #{translation.string_node}" % if show_info
   end
   strings_doc.root.add_child(last_newline_node)
   File.write(filename, strings_doc.to_xml)
@@ -136,7 +136,7 @@ def update_translations(default_strings_file, supported_languages, show_info=tru
     puts '==================='
     puts 'Working on: ' + lang
     puts '==================='
-    downloaded_filename = 'stripe/res/values-' + lang + '/strings-temp.xml'
+    downloaded_filename = "stripe/res/values-#{lang}/strings-temp.xml" 
     translations_hash = make_translations_hash(
       downloaded_filename,
       included_strings
@@ -162,6 +162,6 @@ def update_translations(default_strings_file, supported_languages, show_info=tru
 end
 
 DEFAULT_STRINGS_FILE = 'stripe/res/values/strings.xml'
-@langs = %w(de es fr it ja nl zh)
+langs = %w(de es fr it ja nl zh)
 
-update_translations(DEFAULT_STRINGS_FILE, @langs)
+update_translations(DEFAULT_STRINGS_FILE, langs)
