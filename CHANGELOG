@@ -1,3 +1,10 @@
+5.1.1 2017-10-24
+    Adding P24 support
+    Upgrades Gradle wrapper version to 4.2.1
+    Surfaces error handling in API errors from Stripe
+    Make resource namespaces private to prevent collisions
+    Fixing a bug for PaymentFlowActivity not returning success when collecting shipping info without method
+
 5.1.0 2017-09-22
     Adding the PaymentSession for end-to-end session handling
     Adding Alipay source handling
