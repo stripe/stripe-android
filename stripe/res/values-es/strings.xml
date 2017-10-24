@@ -11,7 +11,7 @@
     <string name="invalid_expiry_year">El año de vencimiento de la tarjeta no es válido.</string>
     <string name="invalid_cvc">El código de seguridad de la tarjeta no es válido.</string>
     <string name="invalid_zip">Código postal incompleto.</string>
-    <string name="payment_method_add_new_card">Añadir tarjeta nueva&#8230;</string>
+    <string name="payment_method_add_new_card">Añadir tarjeta nueva…</string>
     <string name="title_add_a_card">Añadir una tarjeta</string>
     <string name="title_payment_method">Método de pago</string>
     <!-- Error text indicating that city is required, used for all locations -->
@@ -31,7 +31,7 @@
     <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
     <string name="address_label_address_optional">Dirección (opcional) </string>
     <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
-    <string name="address_label_apt">Apto.</string>
+    <string name="address_label_apt">Apto.  </string>
     <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
     <string name="address_label_apt_optional">Apto. (opcional)</string>
     <!-- Label for input requesting city, used for all locations -->

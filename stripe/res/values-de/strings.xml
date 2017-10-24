@@ -11,106 +11,106 @@
     <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
     <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
     <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
-    <string name="payment_method_add_new_card">Neue Karte hinzufügen&#8230;</string>
+    <string name="payment_method_add_new_card">Neue Karte hinzufügen…</string>
     <string name="title_add_a_card">Karte hinzufügen</string>
     <string name="title_payment_method">Zahlungsmethode</string>
     <!-- Error text indicating that city is required, used for all locations -->
-    <string name="address_city_required">Indtast din by</string>
+    <string name="address_city_required">Bitte geben Sie Ihren Ort ein</string>
     <!-- Error text indicating that county is required, used for UK addresses -->
-    <string name="address_county_required">Indtast dit county</string>
+    <string name="address_county_required">Bitte geben Sie Ihr Land ein</string>
     <!-- Label for input requesting the first line of an address, used for US and Canada addresses -->
     <string name="address_label_address">Adresse</string>
     <!-- Label for input requesting the first line of an address, used for international addresses -->
-    <string name="address_label_address_line1">Adresselinje 1</string>
+    <string name="address_label_address_line1">Adresszeile 1</string>
     <!-- Label for input requesting the first line of an address where , used for international addresses -->
-    <string name="address_label_address_line1_optional">Adresselinie 1 (valgfrit)</string>
+    <string name="address_label_address_line1_optional">Adresszeile 1 (optional)</string>
     <!-- Label for input requesting address line 2, used for international addresses -->
-    <string name="address_label_address_line2">Adresselinje 2</string>
+    <string name="address_label_address_line2">Adresszeile 2</string>
     <!-- Label for input requesting address line 2 where input in optional used for international addresses -->
-    <string name="address_label_address_line2_optional">Adresselinie 2 (valgfrit)</string>
+    <string name="address_label_address_line2_optional">Adresszeile 2 (optional)</string>
     <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
-    <string name="address_label_address_optional">Adresse (valgfrit) </string>
+    <string name="address_label_address_optional">Adresse (optional) </string>
     <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
-    <string name="address_label_apt">Lejl.</string>
+    <string name="address_label_apt">Wohnung/Gebäude</string>
     <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
-    <string name="address_label_apt_optional">Lejl. (valgfrit)</string>
+    <string name="address_label_apt_optional">Wohnung/Gebäude (optional)</string>
     <!-- Label for input requesting city, used for all locations -->
-    <string name="address_label_city">By</string>
+    <string name="address_label_city">Ort</string>
     <!-- Label for input requesting city where input is optional, used for all locations -->
-    <string name="address_label_city_optional">By (valgfrit)</string>
+    <string name="address_label_city_optional">Ort (optional)</string>
     <!-- Label for input requesting country, used for all locations -->
     <string name="address_label_country">Land</string>
     <!-- Label for input requesting county, used for UK based addresses -->
-    <string name="address_label_county">Amt</string>
+    <string name="address_label_county">Kreis/Bezirk</string>
     <!-- Label for input requesting county where input is optional , used for UK based addresses -->
-    <string name="address_label_county_optional">County (valgfrit)</string>
+    <string name="address_label_county_optional">Kreis/Bezirk (optional)</string>
     <!-- Label for input requesting the name of a customer -->
-    <string name="address_label_name">Navn</string>
+    <string name="address_label_name">Name</string>
     <!-- Label for input requesting the name of a customer where input is optional -->
-    <string name="address_label_name_optional">Navn (valgfrit)</string>
+    <string name="address_label_name_optional">Name (optional)</string>
     <!-- Label for input requesting phone number, used for all locations -->
-    <string name="address_label_phone_number">Telefonnr.</string>
+    <string name="address_label_phone_number">Telefonnummer</string>
     <!-- Label for input requesting phone number where input is optional, used for all locations -->
-    <string name="address_label_phone_number_optional">Telefonnr. (valgfrit)</string>
+    <string name="address_label_phone_number_optional">Telefonnummer (optional)</string>
     <!-- Label for input requesting postal code, used for Canada based addresses -->
-    <string name="address_label_postal_code">Postnr.</string>
+    <string name="address_label_postal_code">Postleitzahl</string>
     <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
-    <string name="address_label_postal_code_optional">Postnr. (valgfrit)</string>
+    <string name="address_label_postal_code_optional">Postleitzahl (optional)</string>
     <!-- Label for input requesting postcode, used for UK based addresses -->
-    <string name="address_label_postcode">Postnr.</string>
+    <string name="address_label_postcode">Postleitzahl</string>
     <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
-    <string name="address_label_postcode_optional">Postnr. (valgfrit)</string>
+    <string name="address_label_postcode_optional">Postleitzahl (optional)</string>
     <!-- Label for input requesting province, used for canadian addresses -->
-    <string name="address_label_province">Provins</string>
+    <string name="address_label_province">Kanton</string>
     <!-- Label for input requesting province where province is optional, used for canadian addresses -->
-    <string name="address_label_province_optional">Provins (valgfrit)</string>
+    <string name="address_label_province_optional">Kanton (optional)</string>
     <!-- Label for input requesting the region, used for international addresses -->
-    <string name="address_label_region_generic"> Stat/provins/region</string>
+    <string name="address_label_region_generic"> Bundesland / Kanton / Region</string>
     <!-- Label for input requesting the region where input is optional, used for international addresses -->
-    <string name="address_label_region_generic_optional">Stat/provins/region (valgfrit)</string>
+    <string name="address_label_region_generic_optional">Bundesland / Kanton / Region (optional)</string>
     <!-- Label for input requesting state, used for US based addreses -->
-    <string name="address_label_state">Stat</string>
+    <string name="address_label_state">Bundesland</string>
     <!-- Label for input requesting state where input is optional, used for US based addresses -->
-    <string name="address_label_state_optional">Stat (valgfrit)</string>
+    <string name="address_label_state_optional">Bundesland (optional)</string>
     <!-- Label for input requesting zip code, used for US based addreses -->
-    <string name="address_label_zip_code">ZIP-kode</string>
+    <string name="address_label_zip_code">Postleitzahl</string>
     <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
-    <string name="address_label_zip_code_optional">ZIP-kode (valgfrit)</string>
+    <string name="address_label_zip_code_optional">Postleitzahl (optional)</string>
     <!-- Label for input requesting postal code, used for international addresses -->
-    <string name="address_label_zip_postal_code">ZIP-kode/Postnr.</string>
+    <string name="address_label_zip_postal_code">Postleitzahl</string>
     <!-- Label for input requesting postal code where input is optional, used for international addresses -->
-    <string name="address_label_zip_postal_code_optional">ZIP-kode/Postnr. (valgfrit)</string>
+    <string name="address_label_zip_postal_code_optional">Postleitzahl (optional)</string>
     <!-- Error text indicating name is required -->
-    <string name="address_name_required">Indtast dit navn</string>
+    <string name="address_name_required">Bitte geben Sie Ihren Namen ein</string>
     <!-- Error text indicating that phone number is required, used for all addresses -->
-    <string name="address_phone_number_required">Indtast dit telefonnr.</string>
+    <string name="address_phone_number_required">Bitte gehen Sie Ihre Telefonnummer ein</string>
     <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-    <string name="address_postal_code_invalid">Postnummeret er ugyldigt.</string>
+    <string name="address_postal_code_invalid">Ihre Postleitzahl ist ungültig</string>
     <!-- Error text indicating postcode is invalid, used for UK addresses -->
-    <string name="address_postcode_invalid">Postnummeret er ugyldigt.</string>
+    <string name="address_postcode_invalid">Ihre Postleitzahl ist ungültig</string>
     <!-- Error text indicating that province is required, used for Canada addresses -->
-    <string name="address_province_required">Indtast din provins</string>
+    <string name="address_province_required">Bitte geben Sie Ihren Kanton ein</string>
     <!-- Error text indicating that region is required, used for international addresses -->
-    <string name="address_region_generic_required">Indtast din stat/provins/region</string>
+    <string name="address_region_generic_required">Bitte gehen Sie Ihr(e/n) Bundesland / Kanton / Region ein</string>
     <!-- Error text indicating that address is required, used for all locations -->
-    <string name="address_required">Indtast din adresse</string>
+    <string name="address_required">Bitte geben Sie Ihre Adresse ein</string>
     <!-- title of a screen prompting user to enter a shipping address -->
-    <string name="address_shipping_address">Forsendelsesadresse</string>
+    <string name="address_shipping_address">Versandadresse</string>
     <!-- Error text indicating that state is required, used for US addresses -->
-    <string name="address_state_required">Indtast din stat</string>
+    <string name="address_state_required">Bitte geben Sie Ihren Bundesland ein</string>
     <!-- Error text indicating zip code is invalid, used for US addresses -->
-    <string name="address_zip_invalid">ZIP-koden er ugyldig.</string>
+    <string name="address_zip_invalid">Ihre Postleitzahl ist ungültig.</string>
     <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-    <string name="address_zip_postal_invalid">ZIP-kode/Postnr. er ugyldigt</string>
+    <string name="address_zip_postal_invalid">Ihre Postleitzahl ist ungültig</string>
     <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <string name="add_card">Tilføj et nyt hævekort eller kreditkort for at foretage køb i denne app.</string>
+    <string name="add_card">Fügen Sie eine neue Debit- oder Kreditkarte hinzu, um in dieser App Käufe zu tätigen.</string>
     <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="no_payment_methods">Ingen betalingsmetoder.</string>
+    <string name="no_payment_methods">Keine Zahlungsmethoden.</string>
     <!-- Human friendly label for something with $0 price -->
     <string name="price_free">Gratis</string>
     <!-- Screen title telling users they should add an address -->
-    <string name="title_add_an_address">Tilføj en adresse</string>
+    <string name="title_add_an_address">Adresse hinzufügen</string>
     <!-- Screen title telling users they should select a shipping address -->
-    <string name="title_select_shipping_method">Vælg forsendelsesmetode</string>
+    <string name="title_select_shipping_method">Versandmethode auswählen</string>
     <string name="invalid_shipping_information">Ungültige Versandadresse</string>
 </resources>

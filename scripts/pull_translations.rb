@@ -110,7 +110,7 @@ def add_new_translations(filename, translations_hash, show_info)
     end
     strings_doc.root.add_child(new_line_node.dup)
     strings_doc.root.add_child(translation.string_node)
-    puts "Added translation for #{translation.string_node}" % if show_info
+    puts "Added translation for #{translation.string_node}" if show_info
   end
   strings_doc.root.add_child(last_newline_node)
   File.write(filename, strings_doc.to_xml)
