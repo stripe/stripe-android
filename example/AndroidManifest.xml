@@ -60,13 +60,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.AndroidPayActivity"
-            android:theme="@style/SampleTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".activity.CustomerSessionActivity"
