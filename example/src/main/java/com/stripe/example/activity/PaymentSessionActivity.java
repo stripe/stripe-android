@@ -178,7 +178,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
             @Override
             public void onCustomerRetrieved(@NonNull Customer customer) {
                 mCustomer = customer;
-
                 mProgressBar.setVisibility(View.INVISIBLE);
 
                 if (mPaymentSessionData != null) {
@@ -201,9 +200,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (data.getSelectedPaymentMethodId() != null && mCustomer != null) {
-
             CustomerSource source = mCustomer.getSourceById(data.getSelectedPaymentMethodId());
-
             if (source != null) {
                 Source cardSource = source.asSource();
                 stringBuilder.append("Payment Info:\n");
