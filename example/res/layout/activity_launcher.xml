@@ -76,6 +76,15 @@
             android:text="@string/launchPaymentSession"
             />
 
+        <Button
+            android:id="@+id/btn_payment_with_google_launch"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="@string/launch_pay_with_google"
+            />
+
     </LinearLayout>
 
 </ScrollView>

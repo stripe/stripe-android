@@ -9,6 +9,8 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/appName">
+
+        <!-- Enables the Google Payment API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
             android:value="true"/>
@@ -60,7 +62,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.CustomerSessionActivity"
             android:theme="@style/SampleThemeDefault">
@@ -72,14 +73,20 @@
             android:name=".activity.PaymentMultilineActivity"
             android:theme="@style/SampleThemeDefault">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".activity.PaymentSessionActivity"
             android:theme="@style/SampleThemeDefault">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.PayWithGoogleActivity"
+                  android:theme="@style/SampleThemeDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
     </application>

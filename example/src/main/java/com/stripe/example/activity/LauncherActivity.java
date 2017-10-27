@@ -70,6 +70,14 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
+        Button payWithGoogleButton = findViewById(R.id.btn_payment_with_google_launch);
+        payWithGoogleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LauncherActivity.this, PayWithGoogleActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 }
