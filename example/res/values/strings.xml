@@ -38,6 +38,9 @@
     <string name="updatedShippingInfo">Shipping detail results</string>
 
     <string name="cvc">CVC</string>
+    <string name="payment_session_select_payment">Select Payment Method</string>
+    <string name="payment_session_select_shipping">Set Shipping Information</string>
+    <string name="payment_session_data">Payment Session Data</string>
     <string name="startPaymentFlow">Start Payment Flow</string>
 
     <string name="load_items">Load Items</string>
