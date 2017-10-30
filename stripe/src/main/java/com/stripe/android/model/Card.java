@@ -92,7 +92,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         "223", "224", "225", "226", "227", "228", "229",
         "23", "24", "25", "26",
         "270", "271", "2720",
-        "50", "51", "52", "53", "54", "55"
+        "50", "51", "52", "53", "54", "55", "6020", "6304", "6703", "6759", "6761", "6761", "6762", "6763"
     };
 
     public static final int MAX_LENGTH_STANDARD = 16;
