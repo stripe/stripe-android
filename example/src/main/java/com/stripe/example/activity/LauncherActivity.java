@@ -6,13 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.wallet.Cart;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
-import com.stripe.wrap.pay.AndroidPayConfiguration;
-import com.stripe.wrap.pay.activity.StripeAndroidPayActivity;
-import com.stripe.wrap.pay.utils.CartContentException;
-import com.stripe.wrap.pay.utils.CartManager;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -57,14 +52,6 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        Button androidPayButton = findViewById(R.id.btn_android_pay_launch);
-        androidPayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createSampleCartAndLaunchAndroidPayActivity();
-            }
-        });
-
         Button customerSessionButton = findViewById(R.id.btn_customer_session_launch);
         customerSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,25 +70,14 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    private void createSampleCartAndLaunchAndroidPayActivity() {
-        AndroidPayConfiguration.init(PUBLISHABLE_KEY, "USD");
-        AndroidPayConfiguration androidPayConfiguration = AndroidPayConfiguration.getInstance();
-        androidPayConfiguration.setShippingAddressRequired(true);
-        CartManager cartManager = new CartManager("USD");
-        cartManager.addLineItem("Llama Food", 5000L);
-        cartManager.addLineItem("Llama Shoes", 4, 2000L);
-        cartManager.addShippingLineItem("Domestic shipping estimate", 1000L);
-
-        try {
-            Cart cart = cartManager.buildCart();
-            Intent intent = new Intent(this, AndroidPayActivity.class)
-                    .putExtra(StripeAndroidPayActivity.EXTRA_CART, cart);
-            startActivity(intent);
-        } catch (CartContentException unexpected) {
-            // Ignore for now.
-        }
+        Button payWithGoogleButton = findViewById(R.id.btn_payment_with_google_launch);
+        payWithGoogleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LauncherActivity.this, PayWithGoogleActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 }
