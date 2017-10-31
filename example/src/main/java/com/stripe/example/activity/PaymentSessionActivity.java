@@ -15,19 +15,26 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
+import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
+import com.stripe.android.model.Source;
+import com.stripe.android.model.SourceCardData;
 import com.stripe.android.view.ShippingInfoWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Locale;
 
 import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
@@ -44,12 +51,15 @@ import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_M
 public class PaymentSessionActivity extends AppCompatActivity {
 
     private BroadcastReceiver mBroadcastReceiver;
+    private Customer mCustomer;
     private ErrorDialogHandler mErrorDialogHandler;
     private PaymentSession mPaymentSession;
     private ProgressBar mProgressBar;
     private TextView mResultTextView;
     private TextView mResultTitleTextView;
-    private Button mStartPaymentFlowButton;
+    private Button mSelectPaymentButton;
+    private Button mSelectShippingButton;
+    private PaymentSessionData mPaymentSessionData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,8 +67,10 @@ public class PaymentSessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment_session);
         mProgressBar = findViewById(R.id.customer_progress_bar);
         mProgressBar.setVisibility(View.VISIBLE);
-        mStartPaymentFlowButton = findViewById(R.id.btn_start_payment_flow);
-        mStartPaymentFlowButton.setEnabled(false);
+        mSelectPaymentButton = findViewById(R.id.btn_select_payment_method_aps);
+        mSelectPaymentButton.setEnabled(false);
+        mSelectShippingButton = findViewById(R.id.btn_start_payment_flow);
+        mSelectShippingButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
@@ -81,7 +93,13 @@ public class PaymentSessionActivity extends AppCompatActivity {
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
-        mStartPaymentFlowButton.setOnClickListener(new View.OnClickListener() {
+        mSelectPaymentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPaymentSession.presentPaymentMethodSelection();
+            }
+        });
+        mSelectShippingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mPaymentSession.presentShippingFlow();
@@ -105,13 +123,16 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
+                        mCustomer = customer;
                         mProgressBar.setVisibility(View.INVISIBLE);
                         setupPaymentSession();
                     }
 
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
-                        mStartPaymentFlowButton.setEnabled(false);
+                        mCustomer = null;
+                        mSelectPaymentButton.setEnabled(false);
+                        mSelectShippingButton.setEnabled(false);
                         mErrorDialogHandler.showError(errorMessage);
                         mProgressBar.setVisibility(View.INVISIBLE);
                     }
@@ -137,20 +158,64 @@ public class PaymentSessionActivity extends AppCompatActivity {
 
             @Override
             public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
-                mResultTitleTextView.setVisibility(View.VISIBLE);
-                mResultTextView.setText(formatStringResults(mPaymentSession.getPaymentSessionData()));
+                mPaymentSessionData = data;
+                checkForCustomerUpdates();
             }
         }, new PaymentSessionConfig.Builder()
                 .setPrepopulatedShippingInfo(getExampleShippingInfo())
                 .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD, ShippingInfoWidget.CITY_FIELD)
                 .build());
         if (paymentSessionInitialized) {
-            mStartPaymentFlowButton.setEnabled(true);
+            mSelectPaymentButton.setEnabled(true);
+            mSelectShippingButton.setEnabled(true);
+            mPaymentSession.setCartTotal(2000L);
         }
     }
 
+    private void checkForCustomerUpdates() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        CustomerSession.getInstance().retrieveCurrentCustomer(
+                new CustomerSession.CustomerRetrievalListener() {
+            @Override
+            public void onCustomerRetrieved(@NonNull Customer customer) {
+                mCustomer = customer;
+                mProgressBar.setVisibility(View.INVISIBLE);
+
+                if (mPaymentSessionData != null) {
+                    mResultTitleTextView.setVisibility(View.VISIBLE);
+                    mResultTextView.setText(formatStringResults(mPaymentSessionData));
+                }
+            }
+
+            @Override
+            public void onError(int errorCode, @Nullable String errorMessage) {
+                mProgressBar.setVisibility(View.INVISIBLE);
+
+            }
+        });
+    }
+
     private String formatStringResults(PaymentSessionData data) {
+        Currency currency = Currency.getInstance("USD");
         StringBuilder stringBuilder = new StringBuilder();
+
+        if (data.getSelectedPaymentMethodId() != null && mCustomer != null) {
+            CustomerSource source = mCustomer.getSourceById(data.getSelectedPaymentMethodId());
+            if (source != null) {
+                Source cardSource = source.asSource();
+                stringBuilder.append("Payment Info:\n");
+                if (cardSource != null) {
+                    SourceCardData scd = (SourceCardData) cardSource.getSourceTypeModel();
+                    stringBuilder.append(scd.getBrand())
+                            .append(" ending in ")
+                            .append(scd.getLast4());
+                } else {
+                    stringBuilder.append('\n').append(source.toString()).append('\n');
+                }
+                String isOrNot = data.isPaymentReadyToCharge() ? " IS " : " IS NOT ";
+                stringBuilder.append(isOrNot).append("ready to charge.\n\n");
+            }
+        }
         if (data.getShippingInformation() != null) {
             stringBuilder.append("Shipping Info: \n");
             stringBuilder.append(data.getShippingInformation());
@@ -158,8 +223,15 @@ public class PaymentSessionActivity extends AppCompatActivity {
         }
         if (data.getShippingMethod() != null) {
             stringBuilder.append("Shipping Method: \n");
-            stringBuilder.append(data.getShippingMethod());
+            stringBuilder.append(data.getShippingMethod()).append('\n');
+            if (data.getShippingTotal() > 0) {
+                stringBuilder.append("Shipping total: ")
+                        .append(PayWithGoogleUtils.getPriceString(
+                                data.getShippingTotal(),
+                                currency));
+            }
         }
+
         return stringBuilder.toString();
     }
 
@@ -176,11 +248,11 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mPaymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mPaymentSession.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     private ShippingInformation getExampleShippingInfo() {
