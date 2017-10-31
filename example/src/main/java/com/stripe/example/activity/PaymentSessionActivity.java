@@ -195,7 +195,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
         });
     }
 
-
     private String formatStringResults(PaymentSessionData data) {
         Currency currency = Currency.getInstance("USD");
         StringBuilder stringBuilder = new StringBuilder();
@@ -248,7 +247,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         mPaymentSession.handlePaymentData(requestCode, resultCode, data);
     }
-
 
     @Override
     protected void onDestroy() {
