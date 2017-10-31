@@ -156,7 +156,7 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 .addParameter("gateway", "stripe")
                 .addParameter("stripe:publishableKey",
                         PaymentConfiguration.getInstance().getPublishableKey())
-                .addParameter("stripe:version", "5.1.1")
+                .addParameter("stripe:version", "2017-08-15")
                 .build();
     }
 
