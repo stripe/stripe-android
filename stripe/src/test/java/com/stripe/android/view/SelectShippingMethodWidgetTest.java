@@ -13,6 +13,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,6 +30,7 @@ public class SelectShippingMethodWidgetTest {
 
     @Before
     public void setup() {
+        Locale.setDefault(Locale.US);
         ActivityController<SelectShippingMethodTestActivity> activityController =
                 Robolectric.buildActivity(SelectShippingMethodTestActivity.class).create().start();
         mSelectShippingMethodWidget = activityController.get().getSelectShippingMethodWidget();
