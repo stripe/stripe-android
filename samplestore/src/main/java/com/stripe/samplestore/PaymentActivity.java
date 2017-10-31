@@ -13,23 +13,18 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.identity.intents.model.UserAddress;
-import com.google.android.gms.wallet.Cart;
-import com.google.android.gms.wallet.LineItem;
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.CustomerSession;
-import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
-import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
@@ -37,12 +32,8 @@ import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.samplestore.service.StripeService;
-import com.stripe.wrap.pay.AndroidPayConfiguration;
-import com.stripe.wrap.pay.utils.CartManager;
-import com.stripe.wrap.pay.utils.PaymentUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -61,23 +52,14 @@ import static com.stripe.android.view.PaymentFlowActivity.EXTRA_DEFAULT_SHIPPING
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_SHIPPING_INFO_DATA;
 import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_METHODS;
-import static com.stripe.wrap.pay.activity.StripeAndroidPayActivity.EXTRA_CART;
 
 public class PaymentActivity extends AppCompatActivity {
 
+    private static final String EXTRA_CART = "extra_cart";
     private static final String TOTAL_LABEL = "Total:";
-    private static final Locale LOC = Locale.US;
-
-    /*
-     * Change this to your publishable key.
-     *
-     * You can get your key here: https://dashboard.stripe.com/account/apikeys
-     */
-    private static final String PUBLISHABLE_KEY =
-            "put your publishable key here";
+    private static final String SHIPPING = "Shipping";
 
     private BroadcastReceiver mBroadcastReceiver;
-    private CartManager mCartManager;
     private CompositeSubscription mCompositeSubscription;
     private ProgressDialogFragment mProgressDialogFragment;
 
@@ -89,7 +71,10 @@ public class PaymentActivity extends AppCompatActivity {
 
     private PaymentSession mPaymentSession;
 
-    public static Intent createIntent(@NonNull Context context, @NonNull Cart cart) {
+    private StoreCart mStoreCart;
+    private long mShippingCosts = 0L;
+
+    public static Intent createIntent(@NonNull Context context, @NonNull StoreCart cart) {
         Intent intent = new Intent(context, PaymentActivity.class);
         intent.putExtra(EXTRA_CART, cart);
         return intent;
@@ -99,11 +84,9 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
-        PaymentConfiguration.init(PUBLISHABLE_KEY);
 
         Bundle extras = getIntent().getExtras();
-        Cart cart = extras.getParcelable(EXTRA_CART);
-        mCartManager = new CartManager(cart);
+        mStoreCart = extras.getParcelable(EXTRA_CART);
 
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
@@ -187,28 +170,21 @@ public class PaymentActivity extends AppCompatActivity {
 
 
     private void updateConfirmPaymentButton() {
-        Long price = mCartManager.getTotalPrice();
+        long price = mStoreCart.getTotalPrice();
 
-        if (price != null) {
-            mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
-                    "Pay %s", StoreUtils.getPriceString(price, null)));
-        }
+        mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
+                "Pay %s", StoreUtils.getPriceString(price, null)));
     }
 
     private void addCartItems() {
         mCartItemLayout.removeAllViewsInLayout();
-        String currencySymbol = AndroidPayConfiguration.getInstance()
-                .getCurrency().getSymbol(Locale.US);
+        String currencySymbol = mStoreCart.getCurrency().getSymbol(Locale.US);
 
-        Collection<LineItem> items = mCartManager.getLineItemsRegular().values();
-        addLineItems(currencySymbol, items.toArray(new LineItem[items.size()]));
+        addLineItems(currencySymbol, mStoreCart.getLineItems()
+                .toArray(new StoreLineItem[mStoreCart.getSize()]));
 
-        items = mCartManager.getLineItemsShipping().values();
-        addLineItems(currencySymbol, items.toArray(new LineItem[items.size()]));
-
-        if (mCartManager.getLineItemTax() != null) {
-            addLineItems(currencySymbol, mCartManager.getLineItemTax());
-        }
+        addLineItems(currencySymbol,
+                new StoreLineItem(SHIPPING, 1, mShippingCosts));
 
         View totalView = LayoutInflater.from(this).inflate(
                 R.layout.cart_item, mCartItemLayout, false);
@@ -218,8 +194,8 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private void addLineItems(String currencySymbol, LineItem... items) {
-        for (LineItem item : items) {
+    private void addLineItems(String currencySymbol, StoreLineItem... items) {
+        for (StoreLineItem item : items) {
             View view = LayoutInflater.from(this).inflate(
                     R.layout.cart_item, mCartItemLayout, false);
             fillOutCartItemView(item, view, currencySymbol);
@@ -227,53 +203,36 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Again, this is a toy way to determine a fake tax amount. You may need to determine
-     * taxes based on the shipping address, billing address, cost of the
-     * {@link LineItem.Role#REGULAR} items in your cart, or some combination of the three.
-     *
-     * @param address the {@link UserAddress} object returned from Android Pay
-     * @return a tax amount in the currency used, in its lowest denomination
-     */
-    private long determineTax(Address address) {
-        if (address == null) {
-            return 200L;
-        }
-        return address.getLine1().length() * 3L;
-    }
-
     private boolean fillOutTotalView(View view, String currencySymbol) {
         TextView[] itemViews = getItemViews(view);
-        Long totalPrice = mCartManager.getTotalPrice();
-        if (totalPrice != null) {
-            itemViews[0].setText(TOTAL_LABEL);
-            String priceString = PaymentUtils.getPriceString(totalPrice,
-                    AndroidPayConfiguration.getInstance().getCurrency());
-            priceString = currencySymbol + priceString;
-            itemViews[3].setText(priceString);
-            return true;
-        }
-        return false;
+        long totalPrice = mStoreCart.getTotalPrice() + mShippingCosts;
+        itemViews[0].setText(TOTAL_LABEL);
+        String priceString = PayWithGoogleUtils.getPriceString(
+                totalPrice,
+                mStoreCart.getCurrency());
+        priceString = currencySymbol + priceString;
+        itemViews[3].setText(priceString);
+        return true;
     }
 
-    private void fillOutCartItemView(LineItem item, View view, String currencySymbol) {
+    private void fillOutCartItemView(StoreLineItem item, View view, String currencySymbol) {
         TextView[] itemViews = getItemViews(view);
 
         itemViews[0].setText(item.getDescription());
-        if (!TextUtils.isEmpty(item.getQuantity())) {
+
+        if (!SHIPPING.equals(item.getDescription())) {
             String quantityPriceString = "X " + item.getQuantity() + " @";
             itemViews[1].setText(quantityPriceString);
-        }
 
-        if (!TextUtils.isEmpty(item.getUnitPrice())) {
-            String unitPriceString = currencySymbol + item.getUnitPrice();
+            String unitPriceString = currencySymbol +
+                    PayWithGoogleUtils.getPriceString(item.getUnitPrice(),
+                            mStoreCart.getCurrency());
             itemViews[2].setText(unitPriceString);
         }
 
-        if (!TextUtils.isEmpty(item.getTotalPrice())) {
-            String totalPriceString = currencySymbol + item.getTotalPrice();
-            itemViews[3].setText(totalPriceString);
-        }
+        String totalPriceString = currencySymbol +
+                PayWithGoogleUtils.getPriceString(item.getTotalPrice(), mStoreCart.getCurrency());
+        itemViews[3].setText(totalPriceString);
     }
 
     @Size(value = 4)
@@ -336,14 +295,7 @@ public class PaymentActivity extends AppCompatActivity {
     private void completePurchase(String sourceId, String customerId) {
         Retrofit retrofit = RetrofitFactory.getInstance();
         StripeService stripeService = retrofit.create(StripeService.class);
-        Long price = mCartManager.getTotalPrice();
-        if (price == null) {
-            // This should be rare, and only occur if there is somehow a mix of currencies in
-            // the CartManager (only possible if those are put in as LineItem objects manually).
-            // If this is the case, you can put in a cart total price manually by calling
-            // CartManager.setTotalPrice.
-            return;
-        }
+        long price = mStoreCart.getTotalPrice() + mShippingCosts;
 
         ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData().getShippingInformation();
 
@@ -400,13 +352,8 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void finishCharge() {
-        Long price = mCartManager.getTotalPrice();
-
-        if (price == null) {
-            return;
-        }
-
-        Intent data = StoreActivity.createPurchaseCompleteIntent(price);
+        Intent data = StoreActivity.createPurchaseCompleteIntent(
+                mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
         finish();
     }
@@ -432,7 +379,7 @@ public class PaymentActivity extends AppCompatActivity {
             public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
                 if (data.getShippingMethod() != null) {
                     mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
-                    mCartManager.setTaxLineItem("Tax", determineTax(data.getShippingInformation().getAddress()));
+                    mShippingCosts = data.getShippingMethod().getAmount();
                     addCartItems();
                     updateConfirmPaymentButton();
                 }

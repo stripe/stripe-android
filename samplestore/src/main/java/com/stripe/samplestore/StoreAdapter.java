@@ -10,10 +10,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.wallet.Cart;
-import com.stripe.wrap.pay.utils.CartContentException;
-import com.stripe.wrap.pay.utils.CartManager;
-
 import java.util.Currency;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
@@ -63,11 +59,11 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         private int mPosition;
         ViewHolder(final LinearLayout pollingLayout, Currency currency) {
             super(pollingLayout);
-            mEmojiTextView = (TextView) pollingLayout.findViewById(R.id.tv_emoji);
-            mPriceTextView = (TextView) pollingLayout.findViewById(R.id.tv_price);
-            mQuantityTextView = (TextView) pollingLayout.findViewById(R.id.tv_quantity);
-            mAddButton = (ImageButton) pollingLayout.findViewById(R.id.tv_plus);
-            mRemoveButton = (ImageButton) pollingLayout.findViewById(R.id.tv_minus);
+            mEmojiTextView = pollingLayout.findViewById(R.id.tv_emoji);
+            mPriceTextView = pollingLayout.findViewById(R.id.tv_price);
+            mQuantityTextView = pollingLayout.findViewById(R.id.tv_quantity);
+            mAddButton = pollingLayout.findViewById(R.id.tv_plus);
+            mRemoveButton = pollingLayout.findViewById(R.id.tv_minus);
 
             mCurrency = currency;
             mAddButton.setOnClickListener(new View.OnClickListener() {
@@ -172,23 +168,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     public void launchPurchaseActivityWithCart() {
-        // Generating a CartManager using the current currency in my AndroidPayConfiguration
-        CartManager cartManager = new CartManager();
+        StoreCart cart = new StoreCart(mCurrency);
         for (int i = 0; i < mQuantityOrdered.length; i++) {
             if (mQuantityOrdered[i] > 0) {
-                cartManager.addLineItem(StoreUtils.getEmojiByUnicode(EMOJI_CLOTHES[i]),
-                        (double) mQuantityOrdered[i], EMOJI_PRICES[i]);
+                cart.addStoreLineItem(
+                        StoreUtils.getEmojiByUnicode(EMOJI_CLOTHES[i]),
+                        mQuantityOrdered[i], EMOJI_PRICES[i]);
             }
         }
 
-        try {
-            Cart cart = cartManager.buildCart();
-            Intent paymentLaunchIntent = PaymentActivity.createIntent(mActivity, cart);
-            mActivity.startActivityForResult(
-                    paymentLaunchIntent, StoreActivity.PURCHASE_REQUEST);
-        } catch (CartContentException unexpected) {
-            // There shouldn't be any cart content exceptions because we used the CartManager tools.
-        }
+        Intent paymentLaunchIntent = PaymentActivity.createIntent(mActivity, cart);
+        mActivity.startActivityForResult(
+                paymentLaunchIntent, StoreActivity.PURCHASE_REQUEST);
     }
 
     public void clearItemSelections() {

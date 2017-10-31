@@ -13,14 +13,18 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider;
-import com.stripe.wrap.pay.AndroidPayConfiguration;
 
 public class StoreActivity
         extends AppCompatActivity
         implements StoreAdapter.TotalItemsChangedListener{
 
-    // Put your publishable key here. It should start with "pk_test_"
+    /*
+     * Change this to your publishable key.
+     *
+     * You can get your key here: https://dashboard.stripe.com/account/apikeys
+     */
     private static final String PUBLISHABLE_KEY =
             "put your publishable key here";
 
@@ -42,16 +46,14 @@ public class StoreActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
 
-        initAndroidPay();
-
+        PaymentConfiguration.init(PUBLISHABLE_KEY);
         mGoToCartButton = findViewById(R.id.fab_checkout);
         mStoreAdapter = new StoreAdapter(this);
         ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
         RecyclerView recyclerView = findViewById(R.id.rv_store_items);
 
-
         mGoToCartButton.hide();
-        Toolbar myToolBar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolBar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolBar);
 
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -72,7 +74,9 @@ public class StoreActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PURCHASE_REQUEST && resultCode == RESULT_OK) {
+        if (requestCode == PURCHASE_REQUEST
+                && resultCode == RESULT_OK
+                && data.getExtras() != null) {
             long price = data.getExtras().getLong(EXTRA_PRICE_PAID, -1L);
             if (price != -1L) {
                 displayPurchase(price);
@@ -88,13 +92,6 @@ public class StoreActivity
         } else {
             mGoToCartButton.hide();
         }
-    }
-
-    private void initAndroidPay() {
-        AndroidPayConfiguration payConfiguration =
-                AndroidPayConfiguration.init(PUBLISHABLE_KEY, "USD");
-        payConfiguration.setPhoneNumberRequired(false);
-        payConfiguration.setShippingAddressRequired(true);
     }
 
     private void displayPurchase(long price) {
