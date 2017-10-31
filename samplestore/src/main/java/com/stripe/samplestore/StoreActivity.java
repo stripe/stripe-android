@@ -20,9 +20,13 @@ public class StoreActivity
         extends AppCompatActivity
         implements StoreAdapter.TotalItemsChangedListener{
 
-    // Put your publishable key here. It should start with "pk_test_"
+    /*
+     * Change this to your publishable key.
+     *
+     * You can get your key here: https://dashboard.stripe.com/account/apikeys
+     */
     private static final String PUBLISHABLE_KEY =
-            "pk_test_9UVLd6CCQln8IhUSsmRyqQu4";
+            "put your publishable key here";
 
     static final int PURCHASE_REQUEST = 37;
 
