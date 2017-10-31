@@ -32,6 +32,7 @@ public class CountryAdapterTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        Locale.setDefault(Locale.US);
 
         ActivityController<ShippingInfoTestActivity> activityController =
                 Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();

@@ -1,22 +1,26 @@
 package com.stripe.android;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Currency;
 import java.util.Locale;
 
 import static com.stripe.android.PayWithGoogleUtils.getPriceString;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for {@link PayWithGoogleUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class PayWithGoogleUtilsTest {
+
+    @After
+    public void tearDown() {
+        Locale.setDefault(Locale.US);
+    }
 
     @Test
     public void getPriceString_whenCurrencyWithDecimals_returnsExpectedValue() {
