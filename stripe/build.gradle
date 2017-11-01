@@ -55,6 +55,7 @@ android {
     }
     testOptions {
         unitTests {
+            // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
         }
     }
