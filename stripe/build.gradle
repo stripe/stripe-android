@@ -6,7 +6,7 @@ apply plugin: 'com.getkeepsafe.dexcount'
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
-def android_support_version = '26.0.1'
+def android_support_version = '26.0.2'
 
 version = VERSION_NAME
 
@@ -25,8 +25,8 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-    testCompile 'org.robolectric:robolectric:3.4'
+    testCompile 'org.mockito:mockito-core:2.10.0'
+    testCompile 'org.robolectric:robolectric:3.5.1'
 
     androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestCompile 'com.android.support.test:runner:1.0.1'
@@ -34,7 +34,7 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
@@ -52,12 +52,13 @@ android {
 
         }
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
     productFlavors {
     }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
 }
 
 apply from: 'deploy.gradle'

@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
-def android_support_version = '26.0.1'
+def android_support_version = '26.0.2'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
@@ -33,7 +33,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:' + android_support_version
     compile 'com.android.support:design:' + android_support_version
 
-    /* This line is all you need for the stripe-android bindings */
     compile project(':stripe')
 
     /* Needed for RxAndroid */
@@ -54,11 +53,4 @@ dependencies {
 
     /* Used to debug your Retrofit connections */
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
-
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.3.2'
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
 }
