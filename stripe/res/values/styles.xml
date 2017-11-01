@@ -12,4 +12,8 @@
         <item name="colorControlNormal">?attr/titleTextColor</item>
     </style>
 
+    <style name="StripeErrorTextStyle">
+        <item name="android:textColor">#999999</item>
+        <item name="android:textSize">@dimen/notification_text_size</item>
+    </style>
 </resources>
