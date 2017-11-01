@@ -8,9 +8,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.2.1'
 }
 
 allprojects {

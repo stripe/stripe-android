@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
-def android_support_version = '26.0.1'
+def android_support_version = '26.0.2'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
@@ -29,36 +29,28 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:' + android_support_version
-    compile 'com.android.support:recyclerview-v7:' + android_support_version
-    compile 'com.android.support:design:' + android_support_version
+    api 'com.android.support:appcompat-v7:' + android_support_version
+    api 'com.android.support:recyclerview-v7:' + android_support_version
+    api 'com.android.support:design:' + android_support_version
 
-    /* This line is all you need for the stripe-android bindings */
-    compile project(':stripe')
+    implementation project(':stripe')
 
     /* Needed for RxAndroid */
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.3.0'
+    api 'io.reactivex:rxandroid:1.2.1'
+    api 'io.reactivex:rxjava:1.3.0'
 
     /* Needed for Rx Bindings on views */
-    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+    api 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 
     /* Used for server calls */
-    compile 'com.squareup.okio:okio:1.13.0'
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    api 'com.squareup.okio:okio:1.13.0'
+    api 'com.squareup.retrofit2:retrofit:2.3.0'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    compile 'com.google.code.gson:gson:2.8.2'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    api 'com.google.code.gson:gson:2.8.2'
+    api 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
+    api 'com.squareup.retrofit2:converter-gson:2.3.0'
 
     /* Used to debug your Retrofit connections */
-    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
-
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.3.2'
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
+    api 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 }
