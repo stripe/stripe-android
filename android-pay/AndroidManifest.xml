@@ -1,5 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.stripe.wrap.pay"
-          android:versionCode="12"
-          android:versionName="5.1.0">
-</manifest>
