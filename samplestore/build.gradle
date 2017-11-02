@@ -1,15 +1,13 @@
 apply plugin: 'com.android.application'
 
-def android_support_version = '27.0.0'
-
 android {
-    compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -31,9 +29,9 @@ android {
 dependencies {
     implementation project(':stripe')
 
-    implementation 'com.android.support:appcompat-v7:' + android_support_version
-    implementation 'com.android.support:recyclerview-v7:' + android_support_version
-    implementation 'com.android.support:design:' + android_support_version
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    implementation "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
+    implementation "com.android.support:design:${rootProject.ext.supportLibVersion}"
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex:rxandroid:1.2.1'

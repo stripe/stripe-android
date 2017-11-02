@@ -4,9 +4,6 @@
  *
  * The original can be found at
  * https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle
- * 
- * Moving this into our repository to control security and to allow
- * for finer control of javadoc and other options.
  */
 
 apply plugin: 'maven'

@@ -2,9 +2,7 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        google()
     }
 
     dependencies {
@@ -15,6 +13,7 @@ buildscript {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.3'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
 allprojects {
@@ -22,9 +21,7 @@ allprojects {
 
     repositories {
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        google()
     }
 
     task checkstyle(type: Checkstyle) {
@@ -39,6 +36,17 @@ allprojects {
         // empty classpath
         classpath = files()
     }
+}
+
+ext {
+    buildToolsVersion = "26.0.2"
+    compileSdkVersion = 27
+    supportLibVersion = "27.0.0"
+
+    javaAnnotationVersion = "1.0"
+    junitVersion = "4.12"
+    mockitoCoreVersion = "2.10.0"
+    robolectricVersion = "3.5.1"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
