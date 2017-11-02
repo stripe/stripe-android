@@ -38,11 +38,14 @@ allprojects {
 }
 
 ext {
+    buildToolsVersion = "26.0.2"
     compileSdkVersion = 27
     supportLibVersion = "27.0.0"
-    robolectricVersion = "3.5.1"
+
+    javaAnnotationVersion = "1.0"
+    junitVersion = "4.12"
     mockitoCoreVersion = "2.10.0"
-    buildToolsVersion = "26.0.2"
+    robolectricVersion = "3.5.1"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
