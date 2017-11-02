@@ -2,9 +2,7 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        google()
     }
 
     dependencies {
@@ -22,9 +20,7 @@ allprojects {
 
     repositories {
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        google()
     }
 
     task checkstyle(type: Checkstyle) {
@@ -39,6 +35,14 @@ allprojects {
         // empty classpath
         classpath = files()
     }
+}
+
+ext {
+    compileSdkVersion = 27
+    supportLibVersion = "27.0.0"
+    robolectricVersion = "3.5.1"
+    mockitoCoreVersion = "2.10.0"
+    buildToolsVersion = "26.0.2"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

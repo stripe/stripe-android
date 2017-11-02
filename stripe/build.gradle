@@ -6,8 +6,6 @@ apply plugin: 'com.getkeepsafe.dexcount'
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
-def android_support_version = '27.0.0'
-
 version = VERSION_NAME
 
 configurations {
@@ -15,30 +13,30 @@ configurations {
 }
 
 dependencies {
-    implementation 'com.android.support:support-annotations:' + android_support_version
-    implementation 'com.android.support:appcompat-v7:' + android_support_version
+    implementation "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     // Api for this import because we use reflection to alter TextInputLayout
-    api 'com.android.support:design:' + android_support_version
+    api "com.android.support:design:${rootProject.ext.supportLibVersion}"
 
-    javadocDeps 'com.android.support:support-annotations:' + android_support_version
-    javadocDeps 'com.android.support:appcompat-v7:' + android_support_version
-    javadocDeps 'com.android.support:design:' + android_support_version
+    javadocDeps "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
+    javadocDeps "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    javadocDeps "com.android.support:design:${rootProject.ext.supportLibVersion}"
     compileOnly 'javax.annotation:jsr250-api:1.0'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.10.0'
-    testImplementation 'org.robolectric:robolectric:3.5.1'
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
+    testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
 }
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
