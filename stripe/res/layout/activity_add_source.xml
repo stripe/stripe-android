@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/add_card_total_margin"
-                android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                 android:visibility="gone"
                 />
         </FrameLayout>
