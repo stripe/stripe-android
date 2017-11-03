@@ -129,9 +129,7 @@ public class AddSourceActivity extends StripeActivity {
 
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
-                        String displayedError = errorMessage == null ? "" : errorMessage;
                         setCommunicatingProgress(false);
-                        showError(displayedError);
                     }
                 };
 
