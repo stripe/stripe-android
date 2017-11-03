@@ -2,7 +2,9 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -13,6 +15,7 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
@@ -21,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -32,6 +36,8 @@ import org.robolectric.shadows.ShadowActivity;
 import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
+import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
+import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 import static com.stripe.android.view.AddSourceActivity.ADD_SOURCE_ACTIVITY;
@@ -42,6 +48,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -245,6 +252,10 @@ public class AddSourceActivityTest {
         ArgumentCaptor<SourceCallback> callbackArgumentCaptor =
                 ArgumentCaptor.forClass(SourceCallback.class);
 
+        StripeActivity.AlertMessageListener alertMessageListener =
+                Mockito.mock(StripeActivity.AlertMessageListener.class);
+        mActivityController.get().setAlertMessageListener(alertMessageListener);
+
         // Note: these values do not match what is being mock-sent back in the result.
         mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
         mWidgetControlGroup.expiryDateEditText.append("12");
@@ -269,15 +280,89 @@ public class AddSourceActivityTest {
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(Source.CARD, params.getType());
 
-        Exception error = mock(Exception.class);
+        StripeException error = mock(StripeException.class);
         final String errorMessage = "Oh no! An Error!";
         when(error.getLocalizedMessage()).thenReturn(errorMessage);
         callback.onError(error);
 
         Intent intent = mShadowActivity.getResultIntent();
         assertNull(intent);
-
         assertFalse(mShadowActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
+        verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
+    }
+
+    @Test
+    public void addCardData_whenSourceCreationWorksButAddToCustomerFails_showsErrorNotFinish() {
+        setUpForProxySessionTest();
+        ArgumentCaptor<SourceParams> paramsArgumentCaptor =
+                ArgumentCaptor.forClass(SourceParams.class);
+        ArgumentCaptor<SourceCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(SourceCallback.class);
+        StripeActivity.AlertMessageListener alertMessageListener =
+                Mockito.mock(StripeActivity.AlertMessageListener.class);
+        mActivityController.get().setAlertMessageListener(alertMessageListener);
+
+        // Note: these values do not match what is being mock-sent back in the result.
+        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
+        mWidgetControlGroup.expiryDateEditText.append("12");
+        mWidgetControlGroup.expiryDateEditText.append("50");
+        mWidgetControlGroup.cvcEditText.append("1234");
+        mWidgetControlGroup.postalCodeEditText.append("90210");
+
+        PaymentConfiguration.init("pk_test_abc123");
+        MenuItem menuItem = mock(MenuItem.class);
+        when(menuItem.getItemId()).thenReturn(R.id.action_save);
+
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+        assertTrue(mCardMultilineWidget.isEnabled());
+
+        mActivityController.get().onOptionsItemSelected(menuItem);
+        verify(mStripe).createSource(
+                paramsArgumentCaptor.capture(),
+                callbackArgumentCaptor.capture());
+        SourceParams params = paramsArgumentCaptor.getValue();
+        SourceCallback callback = callbackArgumentCaptor.getValue();
+        assertNotNull(params);
+        assertNotNull(callback);
+
+        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+        assertFalse(mCardMultilineWidget.isEnabled());
+        assertEquals(Source.CARD, params.getType());
+
+        Source expectedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(expectedSource);
+        callback.onSuccess(expectedSource);
+
+        ArgumentCaptor<String> sourceIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CustomerSession.SourceRetrievalListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(CustomerSession.SourceRetrievalListener.class);
+        verify(mCustomerSessionProxy).addProductUsageTokenIfValid(ADD_SOURCE_ACTIVITY);
+        verify(mCustomerSessionProxy).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+        verify(mCustomerSessionProxy).addCustomerSource(
+                sourceIdCaptor.capture(),
+                listenerArgumentCaptor.capture());
+
+        assertEquals(expectedSource.getId(), sourceIdCaptor.getValue());
+        CustomerSession.SourceRetrievalListener listener = listenerArgumentCaptor.getValue();
+        assertNotNull(listener);
+
+        StripeException error = mock(StripeException.class);
+        final String errorMessage = "Oh no! An Error!";
+        when(error.getLocalizedMessage()).thenReturn(errorMessage);
+        listener.onError(400, errorMessage);
+
+        // We're mocking the CustomerSession, so we have to replicate its broadcast behavior.
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(EXTRA_EXCEPTION, error);
+        Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
+        errorIntent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(mActivityController.get()).sendBroadcast(errorIntent);
+
+        Intent intent = mShadowActivity.getResultIntent();
+        assertNull(intent);
+        assertFalse(mShadowActivity.isFinishing());
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+        verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
     }
 }
