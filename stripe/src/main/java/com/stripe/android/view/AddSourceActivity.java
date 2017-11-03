@@ -105,6 +105,8 @@ public class AddSourceActivity extends StripeActivity {
             @Override
             public void onError(Exception error) {
                 setCommunicatingProgress(false);
+                // This error is independent of the CustomerSession, so
+                // we have to surface it here.
                 showError(error.getLocalizedMessage());
             }
 
@@ -129,6 +131,8 @@ public class AddSourceActivity extends StripeActivity {
 
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
+                        // No need to show this error, because it will be broadcast
+                        // from the CustomerSession
                         setCommunicatingProgress(false);
                     }
                 };

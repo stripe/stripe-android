@@ -213,6 +213,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(int errorCode, @Nullable String errorMessage) {
+                        // Note: if this Activity is changed to subclass StripeActivity,
+                        // this code will make the error message show twice, since StripeActivity
+                        // will listen to the broadcast version of the error
+                        // coming from CustomerSession
                         String displayedError = errorMessage == null ? "" : errorMessage;
                         showError(displayedError);
                         setCommunicatingProgress(false);
