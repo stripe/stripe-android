@@ -74,7 +74,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
 To get a `Card` object from the `CardMultilineWidget`, you ask the widget for its card, just like the `CardInputWidget`.
 
 ```java
-Card cardToSave = mCardMultilineWidget();
+Card cardToSave = mCardMultilineWidget().getCard();
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
     return;
