@@ -1,3 +1,8 @@
+6.0.0 2017-11-10
+    Updating gradle and wrapper to 4.3, using android build tools 3.0.0
+    Fixed double-notification bug on error in AddSourceActivity
+    Fixed compile error issue with Google support libraries 27.0.0
+
 5.1.1 2017-10-24
     Adding P24 support
     Upgrades Gradle wrapper version to 4.2.1
