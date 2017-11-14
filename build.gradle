@@ -41,7 +41,7 @@ allprojects {
 ext {
     buildToolsVersion = "26.0.2"
     compileSdkVersion = 27
-    supportLibVersion = "27.0.0"
+    supportLibVersion = "27.0.1"
 
     javaAnnotationVersion = "1.0"
     junitVersion = "4.12"
