@@ -226,8 +226,8 @@ public class CardTest {
     }
 
     @Test
-    public void shouldFailValidateNumberIfTooShort() {
-        Card card = new Card("0", null, null, null);
+    public void shouldFailValidateNumberIfTooShortAndBranded() {
+        Card card = new Card("34", null, null, null);
         assertFalse(card.validateNumber());
     }
 
