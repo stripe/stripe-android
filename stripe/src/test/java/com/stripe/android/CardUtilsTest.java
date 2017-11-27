@@ -140,11 +140,11 @@ public class CardUtilsTest {
     }
 
     @Test
-    public void isValidCardLengthWithBrand_whenBrandUnknown_alwaysReturnsFalse() {
+    public void isShortCardLength_whenCardBrandUnknown_returnsFalse() {
         String validVisa = "4242424242424242";
-        // Adding this check to ensure the input number is correct
         assertTrue(CardUtils.isValidCardLength(validVisa));
-        assertFalse(CardUtils.isValidCardLength(validVisa, Card.UNKNOWN));
+        String validDiners = "30569309025904";
+        assertFalse(CardUtils.isValidCardLength(validDiners, Card.UNKNOWN));
     }
 
     @Test
