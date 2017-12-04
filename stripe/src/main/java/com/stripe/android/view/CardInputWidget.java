@@ -14,6 +14,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Layout;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -200,6 +201,33 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText.setEnabled(isEnabled);
         mExpiryDateEditText.setEnabled(isEnabled);
         mCvcNumberEditText.setEnabled(isEnabled);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the card number is changed.
+     *
+     * @param cardNumberTextWatcher
+     */
+    public void setCardNumberTextWatcher(TextWatcher cardNumberTextWatcher) {
+        mCardNumberEditText.addTextChangedListener(cardNumberTextWatcher);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the expiry date is changed.
+     *
+     * @param expiryDateTextWatcher
+     */
+    public void setExpiryDateTextWatcher(TextWatcher expiryDateTextWatcher) {
+        mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the cvc number is changed.
+     *
+     * @param cvcNumberTextWatcher
+     */
+    public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
+        mCardNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
     }
 
     /**
