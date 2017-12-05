@@ -15,6 +15,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -169,6 +170,42 @@ public class CardMultilineWidget extends LinearLayout {
     public void setShouldShowPostalCode(boolean shouldShowPostalCode) {
         mShouldShowPostalCode = shouldShowPostalCode;
         adjustViewForPostalCodeAttribute();
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the card number is changed.
+     *
+     * @param cardNumberTextWatcher
+     */
+    public void setCardNumberTextWatcher(TextWatcher cardNumberTextWatcher) {
+        mCardNumberEditText.addTextChangedListener(cardNumberTextWatcher);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the expiry date is changed.
+     *
+     * @param expiryDateTextWatcher
+     */
+    public void setExpiryDateTextWatcher(TextWatcher expiryDateTextWatcher) {
+        mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the cvc number is changed.
+     *
+     * @param cvcNumberTextWatcher
+     */
+    public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
+        mCardNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
+    }
+
+    /**
+     * Expose a text watcher to receive updates when the cvc number is changed.
+     *
+     * @param postalCodeTextWatcher
+     */
+    public void setPostalCodeTextWatcher(TextWatcher postalCodeTextWatcher) {
+        mPostalCodeEditText.addTextChangedListener(postalCodeTextWatcher);
     }
 
     @Override
