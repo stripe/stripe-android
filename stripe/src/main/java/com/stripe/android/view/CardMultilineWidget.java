@@ -199,6 +199,15 @@ public class CardMultilineWidget extends LinearLayout {
         mCardNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
     }
 
+    /**
+     * Expose a text watcher to receive updates when the cvc number is changed.
+     *
+     * @param postalCodeTextWatcher
+     */
+    public void setPostalCodeTextWatcher(TextWatcher postalCodeTextWatcher) {
+        mPostalCodeEditText.addTextChangedListener(postalCodeTextWatcher);
+    }
+
     @Override
     public boolean isEnabled() {
         return mIsEnabled;
