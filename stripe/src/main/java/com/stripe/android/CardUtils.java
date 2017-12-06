@@ -102,10 +102,12 @@ public class CardUtils {
     static boolean isValidCardLength(
             @Nullable String cardNumber,
             @NonNull @CardBrand String cardBrand) {
-        if (cardNumber == null || Card.UNKNOWN.equals(cardBrand)) {
+        if (cardNumber == null) {
             return false;
         }
-
+        if (Card.UNKNOWN.equals(cardBrand)) {
+            return true;
+        }
         int length = cardNumber.length();
         switch (cardBrand) {
             case Card.AMERICAN_EXPRESS:
