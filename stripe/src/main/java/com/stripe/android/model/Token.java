@@ -17,11 +17,12 @@ import java.util.Date;
 public class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII})
+    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII, TYPE_ACCOUNT})
     public @interface TokenType {}
     public static final String TYPE_CARD = "card";
     public static final String TYPE_BANK_ACCOUNT = "bank_account";
     public static final String TYPE_PII = "pii";
+    public static final String TYPE_ACCOUNT = "account";
 
     // The key for these object fields is identical to their retrieved values
     // from the Type field.
@@ -85,12 +86,13 @@ public class Token implements StripePaymentSource {
      */
     public Token(
             String id,
+            String type,
             boolean livemode,
             Date created,
             Boolean used
     ) {
         mId = id;
-        mType = TYPE_PII;
+        mType = type;
         mCreated = created;
         mCard = null;
         mBankAccount = null;
@@ -192,10 +194,9 @@ public class Token implements StripePaymentSource {
             }
             Card card = Card.fromJson(cardObject);
             token = new Token(tokenId, liveMode, date, used, card);
-        } else if (Token.TYPE_PII.equals(tokenType)) {
-            token = new Token(tokenId, liveMode, date, used);
+        } else if (Token.TYPE_PII.equals(tokenType) || Token.TYPE_ACCOUNT.equals(tokenType)) {
+            token = new Token(tokenId, tokenType, liveMode, date, used);
         }
-
         return token;
     }
 
@@ -219,6 +220,8 @@ public class Token implements StripePaymentSource {
             return Token.TYPE_BANK_ACCOUNT;
         } else if (Token.TYPE_PII.equals(possibleTokenType)) {
             return Token.TYPE_PII;
+        } else if (Token.TYPE_ACCOUNT.equals(possibleTokenType)) {
+            return Token.TYPE_ACCOUNT;
         }
 
         return null;
