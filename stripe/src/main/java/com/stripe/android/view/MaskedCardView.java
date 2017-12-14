@@ -62,13 +62,13 @@ public class MaskedCardView extends LinearLayout {
     static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
 
     static {
-        TEMPLATE_RESOURCE_MAP.put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.DINERS_CLUB, R.drawable.ic_diners_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.DISCOVER, R.drawable.ic_discover_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.JCB, R.drawable.ic_jcb_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.MASTERCARD, R.drawable.ic_mastercard_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.VISA, R.drawable.ic_visa_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.ic_unknown);
+        TEMPLATE_RESOURCE_MAP.put(Card.AMERICAN_EXPRESS, R.drawable.stripe_ic_amex_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.DINERS_CLUB, R.drawable.stripe_ic_diners_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.DISCOVER, R.drawable.stripe_ic_discover_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.JCB, R.drawable.stripe_ic_jcb_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.MASTERCARD, R.drawable.stripe_ic_mastercard_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.VISA, R.drawable.stripe_ic_visa_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.stripe_ic_unknown);
     }
 
     public MaskedCardView(Context context) {
@@ -177,11 +177,11 @@ public class MaskedCardView extends LinearLayout {
     }
 
     void init() {
-        inflate(getContext(), R.layout.masked_card_view, this);
+        inflate(getContext(), R.layout.stripe_masked_card_view, this);
         setOrientation(HORIZONTAL);
-        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
+        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.stripe_card_widget_min_width));
         int paddingPixels = getContext()
-                .getResources().getDimensionPixelSize(R.dimen.masked_card_vertical_padding);
+                .getResources().getDimensionPixelSize(R.dimen.stripe_masked_card_vertical_padding);
         setPadding(0, paddingPixels, 0, paddingPixels);
 
         mCardIconImageView = findViewById(R.id.masked_icon_view);
@@ -199,7 +199,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void initializeCheckMark() {
-        updateDrawable(R.drawable.ic_checkmark, mCheckMarkImageView, true);
+        updateDrawable(R.drawable.stripe_ic_checkmark, mCheckMarkImageView, true);
     }
 
     private void updateBrandIcon() {
@@ -230,9 +230,9 @@ public class MaskedCardView extends LinearLayout {
 
     private void updateCardInformation() {
         String brandText = Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? getResources().getString(R.string.amex_short)
+                ? getResources().getString(R.string.stripe_amex_short)
                 : mCardBrand;
-        String normalText = getResources().getString(R.string.ending_in);
+        String normalText = getResources().getString(R.string.stripe_ending_in);
         int brandLength = brandText.length();
         int middleLength = normalText.length();
         int last4length = mLast4.length();
@@ -284,25 +284,25 @@ public class MaskedCardView extends LinearLayout {
         Context context = getContext();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default, context.getTheme())
+                    ? res.getColor(R.color.stripe_accent_color_default, context.getTheme())
                     : mSelectedColorInt;
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
-                    ? res.getColor(R.color.control_normal_color_default, context.getTheme())
+                    ? res.getColor(R.color.stripe_control_normal_color_default, context.getTheme())
                     : mUnselectedColorInt;
             mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
-                    ? res.getColor(R.color.color_text_secondary_default, context.getTheme())
+                    ? res.getColor(R.color.stripe_color_text_secondary_default, context.getTheme())
                     : mUnselectedTextColorInt;
         } else {
             // This method still triggers the "deprecation" warning, despite the other
             // one not being allowed for SDK < 23
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default)
+                    ? res.getColor(R.color.stripe_accent_color_default)
                     : mSelectedColorInt;
             mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
-                    ? res.getColor(R.color.control_normal_color_default)
+                    ? res.getColor(R.color.stripe_control_normal_color_default)
                     : mUnselectedColorInt;
             mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
-                    ? res.getColor(R.color.color_text_secondary_default)
+                    ? res.getColor(R.color.stripe_color_text_secondary_default)
                     : mUnselectedTextColorInt;
         }
     }
@@ -310,9 +310,9 @@ public class MaskedCardView extends LinearLayout {
     private void setLightTextColorValues() {
         mSelectedAlphaColorInt = ColorUtils.setAlphaComponent(
                 mSelectedColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
+                getResources().getInteger(R.integer.stripe_light_text_alpha_hex));
         mUnselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(
                 mUnselectedTextColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
+                getResources().getInteger(R.integer.stripe_light_text_alpha_hex));
     }
 }

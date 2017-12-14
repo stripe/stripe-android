@@ -88,28 +88,28 @@ public class ShippingInfoWidgetTest {
     @Test
     public void shippingInfoWidget_whenCountryChanged_fieldsRenderCorrectly() {
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
-        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_apt_optional));
-        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_zip_code));
-        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_state));
+        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_apt_optional));
+        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_zip_code));
+        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_state));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
-        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_apt_optional));
-        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_postal_code));
-        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_province));
+        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_apt_optional));
+        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_postal_code));
+        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_province));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.UK.getDisplayCountry());
-        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address_line1));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address_line2_optional));
-        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_postcode));
-        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_county));
+        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address_line1));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address_line2_optional));
+        assertEquals(mPostalCodeTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_postcode));
+        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_county));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
-        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address_line1));
-        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address_line2_optional));
+        assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address_line1));
+        assertEquals(mAddressLine2TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_address_line2_optional));
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
-        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_region_generic));
+        assertEquals(mStateTextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_region_generic));
     }
 
     @Test
@@ -163,38 +163,38 @@ public class ShippingInfoWidgetTest {
     public void shippingInfoWidget_whenErrorOccurs_errorsRenderInternationalized() {
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         mShippingInfoWidget.validateAllFields();
-        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_state_required));
-        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_zip_invalid));
+        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_state_required));
+        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_zip_invalid));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.UK.getDisplayCountry());
         mShippingInfoWidget.validateAllFields();
-        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_county_required));
-        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_postcode_invalid));
+        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_county_required));
+        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_postcode_invalid));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered( Locale.CANADA.getDisplayCountry());
         mShippingInfoWidget.validateAllFields();
-        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_province_required));
-        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_postal_code_invalid));
+        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_province_required));
+        assertEquals(mPostalCodeTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_postal_code_invalid));
 
         mCountryAutoCompleteTextView.updateUIForCountryEntered(new Locale("", mNoPostalCodeCountry).getDisplayCountry());
         mShippingInfoWidget.validateAllFields();
-        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.address_region_generic_required));
+        assertEquals(mStateTextInputLayout.getError(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_region_generic_required));
     }
 
     @Test
     public void shippingInfoWidget_whenFieldsOptional_markedAsOptional(){
-        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_zip_code));
-        assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_name));
+        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_zip_code));
+        assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_name));
         List<String> optionalFields = new ArrayList<>();
         optionalFields.add(ShippingInfoWidget.POSTAL_CODE_FIELD);
         mShippingInfoWidget.setOptionalFields(optionalFields);
-        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_zip_code_optional));
-        assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_name));
+        assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_zip_code_optional));
+        assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_name));
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
-        assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_province));
+        assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_province));
         optionalFields.add(ShippingInfoWidget.STATE_FIELD);
         mShippingInfoWidget.setOptionalFields(optionalFields);
-        assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_province_optional));
+        assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.stripe_address_label_province_optional));
     }
 
     @Test

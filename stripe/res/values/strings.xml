@@ -63,54 +63,54 @@
     <!--Error text indicating zip code is invalid, used for US addresses-->
     <string name="address_zip_invalid">Your ZIP code is invalid.</string>
     <!--Error text indicating postcode is invalid, used for UK addresses-->
-    <string name="address_postcode_invalid">Your postcode is invalid</string>
+    <string name="stripe_address_postcode_invalid">Your postcode is invalid</string>
     <!--Error text indicating postal code is invalid, used for Canadian addresses-->
-    <string name="address_postal_code_invalid">Your postal code is invalid</string>
+    <string name="stripe_address_postal_code_invalid">Your postal code is invalid</string>
     <!--Error text indicating zip/ postal code is invalid, used for international addresses-->
-    <string name="address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
+    <string name="stripe_address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
     <!--Label for input requesting province, used for canadian addresses-->
-    <string name="address_label_province">Province</string>
+    <string name="stripe_address_label_province">Province</string>
     <!--Label for input requesting province where province is optional, used for canadian addresses-->
-    <string name="address_label_province_optional">Province (optional)</string>
+    <string name="stripe_address_label_province_optional">Province (optional)</string>
     <!--Label for input requesting the region, used for international addresses-->
-    <string name="address_label_region_generic"> State / Province / Region</string>
+    <string name="stripe_address_label_region_generic"> State / Province / Region</string>
     <!--Label for input requesting the region where input is optional, used for international addresses-->
-    <string name="address_label_region_generic_optional">State / Province / Region (optional)</string>
+    <string name="stripe_address_label_region_generic_optional">State / Province / Region (optional)</string>
     <!--Error text indicating name is required-->
-    <string name="address_name_required">Please enter your name</string>
+    <string name="stripe_address_name_required">Please enter your name</string>
     <!--Error text indicating that address is required, used for all locations-->
-    <string name="address_required">Please enter your address</string>
+    <string name="stripe_address_required">Please enter your address</string>
     <!--Error text indicating that city is required, used for all locations-->
-    <string name="address_city_required">Please enter your city</string>
+    <string name="stripe_address_city_required">Please enter your city</string>
     <!--Error text indicating that county is required, used for UK addresses-->
-    <string name="address_county_required">Please enter your county</string>
+    <string name="stripe_address_county_required">Please enter your county</string>
     <!--Error text indicating that state is required, used for US addresses-->
-    <string name="address_state_required">Please enter your state</string>
+    <string name="stripe_address_state_required">Please enter your state</string>
     <!--Error text indicating that province is required, used for Canadian addresses-->
-    <string name="address_province_required">Please enter your province</string>
+    <string name="stripe_address_province_required">Please enter your province</string>
     <!--Error text indicating that region is required, used for international addresses-->
-    <string name="address_region_generic_required">Please enter your State/Province/Region</string>
+    <string name="stripe_address_region_generic_required">Please enter your State/Province/Region</string>
     <!--Error text indicating that phone number is required, used for all addresses-->
-    <string name="address_phone_number_required">Please enter your phone number</string>
-    <string name="expiry_date_hint">MM/YY</string>
-    <string name="expiry_label_short">Expiry</string>
-    <string name="invalid_card_number">Your card\'s number is invalid.</string>
-    <string name="invalid_expiry_month">Your card\'s expiration month is invalid.</string>
-    <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
-    <string name="invalid_cvc">Your card\'s security code is invalid.</string>
-    <string name="invalid_zip">Your postal code is incomplete.</string>
-    <string name="payment_method_add_new_card">Add new card&#8230;</string>
+    <string name="stripe_address_phone_number_required">Please enter your phone number</string>
+    <string name="stripe_expiry_date_hint">MM/YY</string>
+    <string name="stripe_expiry_label_short">Expiry</string>
+    <string name="stripe_invalid_card_number">Your card\'s number is invalid.</string>
+    <string name="stripe_invalid_expiry_month">Your card\'s expiration month is invalid.</string>
+    <string name="stripe_invalid_expiry_year">Your card\'s expiration year is invalid.</string>
+    <string name="stripe_invalid_cvc">Your card\'s security code is invalid.</string>
+    <string name="stripe_invalid_zip">Your postal code is incomplete.</string>
+    <string name="stripe_payment_method_add_new_card">Add new card&#8230;</string>
     <!--Human-friendly label for something with $0 price-->
-    <string name="price_free">Free</string>
-    <string name="title_add_a_card">Add a Card</string>
-    <string name="title_payment_method">Payment Method</string>
+    <string name="stripe_price_free">Free</string>
+    <string name="stripe_title_add_a_card">Add a Card</string>
+    <string name="stripe_title_payment_method">Payment Method</string>
     <!--Screen title telling users they should add an address-->
-    <string name="title_add_an_address">Add an Address</string>
+    <string name="stripe_title_add_an_address">Add an Address</string>
     <!--Screen title telling users they should select a shipping address-->
-    <string name="title_select_shipping_method">Select Shipping Method</string>
+    <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
     <!--Text informing user there are no existing payment methods in the application-->
-    <string name="no_payment_methods">No payment methods.</string>
+    <string name="stripe_no_payment_methods">No payment methods.</string>
     <!--Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application-->
-    <string name="add_card">Add a new debit or credit card to make purchases in this app.</string>
-    <string name="invalid_shipping_information">Invalid Shipping Address</string>
+    <string name="stripe_add_card">Add a new debit or credit card to make purchases in this app.</string>
+    <string name="stripe_invalid_shipping_information">Invalid Shipping Address</string>
 </resources>

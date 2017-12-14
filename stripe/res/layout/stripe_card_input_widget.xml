@@ -6,11 +6,11 @@
         android:id="@+id/iv_card_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/card_icon_padding"
-        android:layout_marginBottom="@dimen/card_icon_padding"
-        android:layout_marginEnd="@dimen/card_icon_padding"
-        android:layout_marginRight="@dimen/card_icon_padding"
-        android:src="@drawable/ic_unknown"
+        android:layout_marginTop="@dimen/stripe_card_icon_padding"
+        android:layout_marginBottom="@dimen/stripe_card_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_card_icon_padding"
+        android:layout_marginRight="@dimen/stripe_card_icon_padding"
+        android:src="@drawable/stripe_ic_unknown"
         />
 
     <FrameLayout
@@ -33,7 +33,7 @@
             android:focusable="false"
             tools:importantForAccessibility="no"
             android:focusableInTouchMode="false"
-            android:text="@string/acc_label_card_number"
+            android:text="@string/stripe_acc_label_card_number"
             android:visibility="gone"
             />
 
@@ -49,7 +49,7 @@
             android:clickable="false"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            android:text="@string/acc_label_expiry_date"
+            android:text="@string/stripe_acc_label_expiry_date"
             android:visibility="gone"
             />
 
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:hint="@string/card_number_hint"
+            android:hint="@string/stripe_card_number_hint"
             android:nextFocusRight="@+id/et_expiry_date"
             android:nextFocusForward="@+id/et_expiry_date"
             android:nextFocusDown="@+id/et_expiry_date"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:hint="@string/expiry_date_hint"
+            android:hint="@string/stripe_expiry_date_hint"
             tools:ignore="UnusedAttribute"
             tools:importantForAccessibility="yes"
             android:accessibilityTraversalAfter="@+id/et_expiry_date"
@@ -94,8 +94,8 @@
             android:visibility="visible"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:layout_marginLeft="@dimen/card_expiry_initial_margin"
-            android:layout_marginStart="@dimen/card_expiry_initial_margin"
+            android:layout_marginLeft="@dimen/stripe_card_expiry_initial_margin"
+            android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
             android:layout_gravity="left"
             />
 
@@ -109,13 +109,13 @@
             android:nextFocusLeft="@id/et_expiry_date"
             android:nextFocusUp="@id/et_expiry_date"
             android:background="@android:color/transparent"
-            android:hint="@string/cvc_number_hint"
+            android:hint="@string/stripe_cvc_number_hint"
             android:inputType="number"
             android:maxLength="4"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:layout_marginLeft="@dimen/card_cvc_initial_margin"
-            android:layout_marginStart="@dimen/card_cvc_initial_margin"
+            android:layout_marginLeft="@dimen/stripe_card_cvc_initial_margin"
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
             android:layout_gravity="left"
             />
 

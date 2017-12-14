@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
 import com.stripe.android.BuildConfig;
@@ -103,7 +102,7 @@ public class StripeEditTextTest {
                         .getColor(android.R.color.primary_text_dark));
         @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
         @ColorInt int expectedErrorInt =
-                mActivityController.get().getResources().getColor(R.color.error_text_dark_theme);
+                mActivityController.get().getResources().getColor(R.color.stripe_error_text_dark_theme);
         assertEquals(expectedErrorInt, colorInt);
     }
 
@@ -115,7 +114,7 @@ public class StripeEditTextTest {
                         .getColor(android.R.color.primary_text_light));
         @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
         @ColorInt int expectedErrorInt =
-                mActivityController.get().getResources().getColor(R.color.error_text_light_theme);
+                mActivityController.get().getResources().getColor(R.color.stripe_error_text_light_theme);
         assertEquals(expectedErrorInt, colorInt);
     }
 

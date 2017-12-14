@@ -225,8 +225,8 @@ public class CardMultilineWidget extends LinearLayout {
     void adjustViewForPostalCodeAttribute() {
         // Set the label/hint to the shorter value if we have three things in a row.
         @StringRes int expiryLabel = mShouldShowPostalCode
-                ? R.string.expiry_label_short
-                : R.string.acc_label_expiry_date;
+                ? R.string.stripe_expiry_label_short
+                : R.string.stripe_acc_label_expiry_date;
         mExpiryTextInputLayout.setHint(getResources().getString(expiryLabel));
 
         @IdRes int focusForward = mShouldShowPostalCode
@@ -239,7 +239,7 @@ public class CardMultilineWidget extends LinearLayout {
         mPostalInputLayout.setVisibility(visibility);
 
         int marginPixels = mShouldShowPostalCode
-                ? getResources().getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
+                ? getResources().getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
                 : 0;
         LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
@@ -259,12 +259,12 @@ public class CardMultilineWidget extends LinearLayout {
         if (attrs != null) {
             TypedArray a = getContext().getTheme().obtainStyledAttributes(
                     attrs,
-                    R.styleable.CardMultilineWidget,
+                    R.styleable.stripe_CardMultilineWidget,
                     0, 0);
 
             try {
                 mShouldShowPostalCode =
-                        a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false);
+                        a.getBoolean(R.styleable.stripe_CardMultilineWidget_shouldShowPostalCode, false);
             } finally {
                 a.recycle();
             }
@@ -277,8 +277,8 @@ public class CardMultilineWidget extends LinearLayout {
         }
 
         @DrawableRes int resourceId = Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? R.drawable.ic_cvc_amex
-                : R.drawable.ic_cvc;
+                ? R.drawable.stripe_ic_cvc_amex
+                : R.drawable.stripe_ic_cvc;
 
         updateDrawable(resourceId, true);
     }
@@ -286,13 +286,13 @@ public class CardMultilineWidget extends LinearLayout {
     @StringRes
     private int getCvcHelperText() {
         return Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? R.string.cvc_multiline_helper_amex
-                : R.string.cvc_multiline_helper;
+                ? R.string.stripe_cvc_multiline_helper_amex
+                : R.string.stripe_cvc_multiline_helper;
     }
 
     private int getDynamicBufferInPixels() {
         float pixelsToAdjust = getResources()
-                .getDimension(R.dimen.card_icon_multiline_padding_bottom);
+                .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom);
         BigDecimal bigDecimal = new BigDecimal(pixelsToAdjust);
         BigDecimal pixels = bigDecimal.setScale(0, RoundingMode.HALF_DOWN);
         return pixels.intValue();
@@ -300,7 +300,7 @@ public class CardMultilineWidget extends LinearLayout {
 
     private void initView(AttributeSet attrs) {
         setOrientation(VERTICAL);
-        inflate(getContext(), R.layout.card_multiline_widget, this);
+        inflate(getContext(), R.layout.stripe_card_multiline_widget, this);
 
         mCardNumberEditText = findViewById(R.id.et_add_source_card_number_ml);
         mExpiryDateEditText = findViewById(R.id.et_add_source_expiry_ml);
@@ -320,7 +320,7 @@ public class CardMultilineWidget extends LinearLayout {
 
         if (mShouldShowPostalCode) {
             // Set the label/hint to the shorter value if we have three things in a row.
-            mExpiryTextInputLayout.setHint(getResources().getString(R.string.expiry_label_short));
+            mExpiryTextInputLayout.setHint(getResources().getString(R.string.stripe_expiry_label_short));
         }
 
         initTextInputLayoutErrorHandlers(
@@ -418,10 +418,10 @@ public class CardMultilineWidget extends LinearLayout {
     }
 
     private void initErrorMessages() {
-        mCardNumberEditText.setErrorMessage(getContext().getString(R.string.invalid_card_number));
-        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
-        mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
-        mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
+        mCardNumberEditText.setErrorMessage(getContext().getString(R.string.stripe_invalid_card_number));
+        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.stripe_invalid_expiry_year));
+        mCvcEditText.setErrorMessage(getContext().getString(R.string.stripe_invalid_cvc));
+        mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.stripe_invalid_zip));
     }
 
     private void initFocusChangeListeners() {
@@ -430,7 +430,7 @@ public class CardMultilineWidget extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     mCardNumberEditText.setHintDelayed(
-                            R.string.card_number_hint, CARD_NUMBER_HINT_DELAY);
+                            R.string.stripe_card_number_hint, CARD_NUMBER_HINT_DELAY);
                     if (mCardInputListener != null) {
                         mCardInputListener.onFocusChange(FOCUS_CARD);
                     }
@@ -445,7 +445,7 @@ public class CardMultilineWidget extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     mExpiryDateEditText.setHintDelayed(
-                            R.string.expiry_date_hint, COMMON_HINT_DELAY);
+                            R.string.stripe_expiry_date_hint, COMMON_HINT_DELAY);
                     if (mCardInputListener != null) {
                         mCardInputListener.onFocusChange(FOCUS_EXPIRY);
                     }
@@ -483,7 +483,7 @@ public class CardMultilineWidget extends LinearLayout {
                     return;
                 }
                 if (hasFocus) {
-                    mPostalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY);
+                    mPostalCodeEditText.setHintDelayed(R.string.stripe_zip_helper, COMMON_HINT_DELAY);
                     if (mCardInputListener != null) {
                         mCardInputListener.onFocusChange(FOCUS_POSTAL);
                     }
@@ -521,12 +521,12 @@ public class CardMultilineWidget extends LinearLayout {
                     new InputFilter[]{
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
                     });
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
+            mCvcTextInputLayout.setHint(getResources().getString(R.string.stripe_cvc_amex_hint));
         } else {
             mCvcEditText.setFilters(
                     new InputFilter[]{
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
+            mCvcTextInputLayout.setHint(getResources().getString(R.string.stripe_cvc_number_hint));
         }
     }
 

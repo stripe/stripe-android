@@ -200,9 +200,9 @@ public class StripeEditText extends TextInputEditText {
         if (isColorDark(color)) {
             // Note: if the _text_ color is dark, then this is a
             // light theme, and vice-versa.
-            mDefaultErrorColorResId = R.color.error_text_light_theme;
+            mDefaultErrorColorResId = R.color.stripe_error_text_light_theme;
         } else {
-            mDefaultErrorColorResId = R.color.error_text_dark_theme;
+            mDefaultErrorColorResId = R.color.stripe_error_text_dark_theme;
         }
     }
 

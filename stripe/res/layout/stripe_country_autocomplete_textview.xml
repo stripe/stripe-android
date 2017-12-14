@@ -8,7 +8,7 @@
         android:id="@+id/tl_country_cat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/address_label_country"
+        android:hint="@string/stripe_address_label_country"
         >
 
         <AutoCompleteTextView

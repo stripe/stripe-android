@@ -456,7 +456,7 @@ public class CardInputWidget extends LinearLayout {
     }
 
     private void initView(AttributeSet attrs) {
-        inflate(getContext(), R.layout.card_input_widget, this);
+        inflate(getContext(), R.layout.stripe_card_input_widget, this);
 
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -465,7 +465,7 @@ public class CardInputWidget extends LinearLayout {
         }
 
         setOrientation(LinearLayout.HORIZONTAL);
-        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
+        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.stripe_card_widget_min_width));
         mPlacementParameters = new PlacementParameters();
         mCardIconImageView = findViewById(R.id.iv_card_icon);
         mCardNumberEditText = findViewById(R.id.et_card_number);
@@ -480,16 +480,16 @@ public class CardInputWidget extends LinearLayout {
         if (attrs != null) {
             TypedArray a = getContext().getTheme().obtainStyledAttributes(
                     attrs,
-                    R.styleable.CardInputView,
+                    R.styleable.stripe_CardInputView,
                     0, 0);
 
             try {
                 mErrorColorInt =
-                        a.getColor(R.styleable.CardInputView_cardTextErrorColor, mErrorColorInt);
+                        a.getColor(R.styleable.stripe_CardInputView_cardTextErrorColor, mErrorColorInt);
                 mTintColorInt =
-                        a.getColor(R.styleable.CardInputView_cardTint, mTintColorInt);
+                        a.getColor(R.styleable.stripe_CardInputView_cardTint, mTintColorInt);
                 mCardHintText =
-                        a.getString(R.styleable.CardInputView_cardHintText);
+                        a.getString(R.styleable.stripe_CardInputView_cardHintText);
             } finally {
                 a.recycle();
             }
@@ -858,17 +858,17 @@ public class CardInputWidget extends LinearLayout {
             mCvcNumberEditText.setFilters(
                     new InputFilter[] {
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)});
-            mCvcNumberEditText.setHint(R.string.cvc_amex_hint);
+            mCvcNumberEditText.setHint(R.string.stripe_cvc_amex_hint);
         } else {
             mCvcNumberEditText.setFilters(
                     new InputFilter[] {new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
-            mCvcNumberEditText.setHint(R.string.cvc_number_hint);
+            mCvcNumberEditText.setHint(R.string.stripe_cvc_number_hint);
         }
     }
 
     private void updateIcon(@NonNull @Card.CardBrand String brand) {
         if (Card.UNKNOWN.equals(brand)) {
-            Drawable icon  = getResources().getDrawable(R.drawable.ic_unknown);
+            Drawable icon  = getResources().getDrawable(R.drawable.stripe_ic_unknown);
             mCardIconImageView.setImageDrawable(icon);
             applyTint(false);
         } else {
@@ -889,9 +889,9 @@ public class CardInputWidget extends LinearLayout {
 
     private void updateIconForCvcEntry(boolean isAmEx) {
         if (isAmEx) {
-            mCardIconImageView.setImageResource(R.drawable.ic_cvc_amex);
+            mCardIconImageView.setImageResource(R.drawable.stripe_ic_cvc_amex);
         } else {
-            mCardIconImageView.setImageResource(R.drawable.ic_cvc);
+            mCardIconImageView.setImageResource(R.drawable.stripe_ic_cvc);
         }
         applyTint(true);
     }

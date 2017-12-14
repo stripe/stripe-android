@@ -33,7 +33,7 @@ class CountryAdapter extends ArrayAdapter {
     private Context mContext;
 
     CountryAdapter(Context context, List<String> countries) {
-        super(context, R.layout.menu_text_view);
+        super(context, R.layout.stripe_menu_text_view);
         mContext = context;
         mCountries = getOrderedCountries(countries);
         mSuggestions = mCountries;
@@ -91,7 +91,7 @@ class CountryAdapter extends ArrayAdapter {
             return view;
         } else {
             TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(
-                    R.layout.menu_text_view, viewGroup, false);
+                    R.layout.stripe_menu_text_view, viewGroup, false);
             countryText.setText(getItem(i));
             return countryText;
         }

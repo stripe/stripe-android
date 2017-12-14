@@ -51,7 +51,7 @@ public class SelectShippingMethodWidget extends FrameLayout {
     }
 
     private void initView() {
-        inflate(getContext(), R.layout.select_shipping_method_widget, this);
+        inflate(getContext(), R.layout.stripe_select_shipping_method_widget, this);
         mShippingMethodRecyclerView = findViewById(R.id.rv_shipping_methods_ssmw);
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         mShippingMethodAdapter = new ShippingMethodAdapter();

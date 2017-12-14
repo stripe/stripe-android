@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_alignParentTop="true"
         android:background="?attr/colorPrimary"
-        android:elevation="@dimen/toolbar_elevation"
+        android:elevation="@dimen/stripe_toolbar_elevation"
         android:theme="@style/StripeToolBarStyle"
         />
 

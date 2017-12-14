@@ -416,7 +416,7 @@ public class PaymentActivity extends AppCompatActivity {
         if (Source.CARD.equals(source.getType())) {
             SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(sourceCardData.getBrand()).append(getString(R.string.ending_in)).append(sourceCardData.getLast4());
+            stringBuilder.append(sourceCardData.getBrand()).append(getString(R.string.stripe_ending_in)).append(sourceCardData.getLast4());
             return stringBuilder.toString();
         }
         return source.getType();

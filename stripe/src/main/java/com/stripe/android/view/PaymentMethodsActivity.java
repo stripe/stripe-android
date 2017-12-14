@@ -56,7 +56,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_payment_methods);
+        setContentView(R.layout.stripe_activity_payment_methods);
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
@@ -128,7 +128,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                         this,
                         getTheme(),
                         R.attr.titleTextColor,
-                        R.drawable.ic_checkmark);
+                        R.drawable.stripe_ic_checkmark);
         saveItem.setIcon(compatIcon);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -136,7 +136,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_source_menu, menu);
+        getMenuInflater().inflate(R.menu.stripe_add_source_menu, menu);
         menu.findItem(R.id.action_save).setEnabled(!mCommunicating);
         return true;
     }

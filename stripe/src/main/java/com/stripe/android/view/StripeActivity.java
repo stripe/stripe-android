@@ -38,7 +38,7 @@ abstract class StripeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_stripe);
+        setContentView(R.layout.stripe_activity_stripe);
         mProgressBar = findViewById(R.id.progress_bar_as);
         mToolbar = findViewById(R.id.toolbar_as);
         mViewStub = findViewById(R.id.widget_viewstub_as);
@@ -77,7 +77,7 @@ abstract class StripeActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_source_menu, menu);
+        getMenuInflater().inflate(R.menu.stripe_add_source_menu, menu);
         menu.findItem(R.id.action_save).setEnabled(!mCommunicating);
         return true;
     }
@@ -103,7 +103,7 @@ abstract class StripeActivity extends AppCompatActivity {
                 this,
                 getTheme(),
                 R.attr.titleTextColor,
-                R.drawable.ic_checkmark);
+                R.drawable.stripe_ic_checkmark);
         saveItem.setIcon(tintedIcon);
         return super.onPrepareOptionsMenu(menu);
     }
