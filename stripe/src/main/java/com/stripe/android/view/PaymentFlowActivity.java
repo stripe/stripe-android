@@ -54,7 +54,7 @@ public class PaymentFlowActivity extends StripeActivity {
         super.onCreate(savedInstanceState);
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
-        mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
+        mViewStub.setLayoutResource(R.layout.stripe_activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
         final PaymentSessionConfig paymentSessionConfig =
@@ -105,7 +105,7 @@ public class PaymentFlowActivity extends StripeActivity {
                     if (shippingInfoError != null && !shippingInfoError.isEmpty()) {
                         showError(shippingInfoError);
                     } else {
-                        showError(getString(R.string.invalid_shipping_information));
+                        showError(getString(R.string.stripe_invalid_shipping_information));
                     }
                     mShippingInformationSubmitted = null;
                 }

@@ -23,7 +23,7 @@ public class AddSourceActivityTest {
 
     @Test
     public void titleRenders() {
-        onView(withText(R.string.title_add_a_card)).check(matches(isDisplayed()));
+        onView(withText(R.string.stripe_title_add_a_card)).check(matches(isDisplayed()));
     }
 
 }

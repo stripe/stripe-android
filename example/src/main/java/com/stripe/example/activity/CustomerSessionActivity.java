@@ -98,6 +98,6 @@ public class CustomerSessionActivity extends AppCompatActivity {
     }
 
     private String buildCardString(@NonNull SourceCardData data) {
-        return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
+        return data.getBrand() + getString(R.string.stripe_ending_in) + data.getLast4();
     }
 }

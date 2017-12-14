@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_margin="@dimen/add_card_total_margin"
+            android:layout_margin="@dimen/stripe_add_card_total_margin"
             />
 
         <FrameLayout
@@ -29,7 +29,7 @@
                 android:id="@+id/tv_add_source_error"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/add_card_total_margin"
+                android:layout_margin="@dimen/stripe_add_card_total_margin"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                 android:visibility="gone"
                 />

@@ -13,7 +13,7 @@
         android:id="@+id/tl_name_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -28,7 +28,7 @@
         android:id="@+id/tl_address_line1_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -43,7 +43,7 @@
         android:id="@+id/tl_address_line2_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -58,7 +58,7 @@
         android:id="@+id/tl_city_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -74,7 +74,7 @@
         android:id="@+id/tl_state_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -89,7 +89,7 @@
         android:id="@+id/tl_postal_code_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
         >
 
         <com.stripe.android.view.StripeEditText
@@ -103,8 +103,8 @@
         android:id="@+id/tl_phone_number_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_address_vertical_margin"
-        android:hint="@string/address_label_phone_number"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
+        android:hint="@string/stripe_address_label_phone_number"
         >
 
         <com.stripe.android.view.StripeEditText

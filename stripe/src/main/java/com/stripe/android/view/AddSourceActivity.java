@@ -63,7 +63,7 @@ public class AddSourceActivity extends StripeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewStub.setLayoutResource(R.layout.activity_add_source);
+        mViewStub.setLayoutResource(R.layout.stripe_activity_add_source);
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         mErrorLayout = findViewById(R.id.add_source_error_container);
@@ -77,7 +77,7 @@ public class AddSourceActivity extends StripeActivity {
             initCustomerSessionTokens();
         }
 
-        setTitle(R.string.title_add_a_card);
+        setTitle(R.string.stripe_title_add_a_card);
     }
 
     @VisibleForTesting

@@ -66,7 +66,7 @@ class ShippingMethodView extends RelativeLayout {
     }
 
     private void initView() {
-        inflate(getContext(), R.layout.shipping_method_view, this);
+        inflate(getContext(), R.layout.stripe_shipping_method_view, this);
         mLabel = findViewById(R.id.tv_label_smv);
         mDetail = findViewById(R.id.tv_detail_smv);
         mAmount = findViewById(R.id.tv_amount_smv);
@@ -88,28 +88,28 @@ class ShippingMethodView extends RelativeLayout {
         Context context = getContext();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default, context.getTheme()) :
+                    ? res.getColor(R.color.stripe_accent_color_default, context.getTheme()) :
                     mSelectedColorInt;
             mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
                     (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
-                    .color_text_unselected_primary_default, context.getTheme()) :
+                    .stripe_color_text_unselected_primary_default, context.getTheme()) :
                     mUnselectedTextColorPrimaryInt;
             mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
                     (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
-                    .color_text_unselected_secondary_default, context.getTheme()) :
+                    .stripe_color_text_unselected_secondary_default, context.getTheme()) :
                     mUnselectedTextColorSecondaryInt;
         } else {
             // This method still triggers the "deprecation" warning, despite the other
             // one not being allowed for SDK < 23
             mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default)
+                    ? res.getColor(R.color.stripe_accent_color_default)
                     : mSelectedColorInt;
             mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
                     (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
-                    .color_text_unselected_primary_default) : mUnselectedTextColorPrimaryInt;
+                    .stripe_color_text_unselected_primary_default) : mUnselectedTextColorPrimaryInt;
             mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
                     (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
-                    .color_text_unselected_secondary_default) : mUnselectedTextColorSecondaryInt;
+                    .stripe_color_text_unselected_secondary_default) : mUnselectedTextColorSecondaryInt;
         }
     }
 
@@ -121,6 +121,6 @@ class ShippingMethodView extends RelativeLayout {
                 PaymentUtils.formatPriceStringUsingFree(
                         mShippingMethod.getAmount(),
                         mShippingMethod.getCurrency(),
-                        getContext().getString(R.string.price_free)));
+                        getContext().getString(R.string.stripe_price_free)));
     }
 }

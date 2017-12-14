@@ -100,9 +100,9 @@ public class CardMultilineWidgetTest {
                 .findViewById(R.id.tl_add_source_expiry_ml);
 
         String shortExpiryHint = mCardMultilineWidget
-                .getResources().getString(R.string.expiry_label_short);
+                .getResources().getString(R.string.stripe_expiry_label_short);
         String longExpiryHint = mCardMultilineWidget
-                .getResources().getString(R.string.acc_label_expiry_date);
+                .getResources().getString(R.string.stripe_acc_label_expiry_date);
 
         assertNotNull(shortExpiryContainer.getHint());
         assertEquals(shortExpiryHint, shortExpiryContainer.getHint().toString());
@@ -282,7 +282,7 @@ public class CardMultilineWidgetTest {
         assertEquals(View.VISIBLE, mNoZipGroup.postalCodeInputLayout.getVisibility());
 
         int expectedMargin = mNoZipCardMultilineWidget.getResources()
-                .getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin);
+                .getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin);
 
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
                 mNoZipGroup.cvcInputLayout.getLayoutParams();

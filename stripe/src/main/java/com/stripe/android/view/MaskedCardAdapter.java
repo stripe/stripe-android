@@ -65,7 +65,7 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         FrameLayout itemView = (FrameLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.masked_card_row, parent, false);
+                .inflate(R.layout.stripe_masked_card_row, parent, false);
         return new ViewHolder(itemView);
     }
 

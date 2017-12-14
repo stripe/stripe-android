@@ -59,6 +59,7 @@ android {
     }
     productFlavors {
     }
+    resourcePrefix 'stripe_'
 }
 
 apply from: 'deploy.gradle'

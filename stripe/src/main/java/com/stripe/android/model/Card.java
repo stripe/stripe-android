@@ -71,13 +71,13 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
 
     public static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
-                put(Card.DINERS_CLUB, R.drawable.ic_diners);
-                put(Card.DISCOVER, R.drawable.ic_discover);
-                put(Card.JCB, R.drawable.ic_jcb);
-                put(Card.MASTERCARD, R.drawable.ic_mastercard);
-                put(Card.VISA, R.drawable.ic_visa);
-                put(Card.UNKNOWN, R.drawable.ic_unknown);
+                put(Card.AMERICAN_EXPRESS, R.drawable.stripe_ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.stripe_ic_diners);
+                put(Card.DISCOVER, R.drawable.stripe_ic_discover);
+                put(Card.JCB, R.drawable.stripe_ic_jcb);
+                put(Card.MASTERCARD, R.drawable.stripe_ic_mastercard);
+                put(Card.VISA, R.drawable.stripe_ic_visa);
+                put(Card.UNKNOWN, R.drawable.stripe_ic_unknown);
             }};
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
