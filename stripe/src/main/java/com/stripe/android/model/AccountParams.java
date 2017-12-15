@@ -22,10 +22,15 @@ public class AccountParams {
      *                            and links to Stripe's terms of service. Tokens will only generated
      *                            when this is true.
      * @param legalEntity map that specifies the legal entity for which the connect account is being
-     *                    created. Can contain any of the field specified by legal_entity is the API
-     *                    docs.
+     *                    created. Can contain any of the fields specified by legal_entity in the
+     *                    API docs.
+     *
      *                    See {@linktourl https://stripe.com/docs/api#account_object-legal_entity}
-     * @return
+     *
+     *                    The object in the map is expected to be a string or a list or map of
+     *                    strings. All {@link StripeJsonModel} types have a toMap() function that
+     *                    can be used to convert the {@link StripeJsonModel} to map representation
+     *                    that can be passed in here.
      */
     public static AccountParams createAccountParams(
             boolean tosShownAndAccepted,
@@ -49,9 +54,15 @@ public class AccountParams {
 
     /**
      * @param legalEntity map that specifies the legal entity for which the connect account is being
-     *                    created. Can contain any of the field specified by legal_entity is the API
-     *                    docs.
+     *                    created. Can contain any of the fields specified by legal_entity in the
+     *                    API docs.
+     *                    
      *                    See {@linktourl https://stripe.com/docs/api#account_object-legal_entity}
+     *
+     *                    The object in the map is expected to be a string or a list or map of
+     *                    strings. All {@link StripeJsonModel} types have a toMap() function that
+     *                    can be used to convert the {@link StripeJsonModel} to map representation
+     *                    that can be passed in here.
      * @return {@code this}, for chaining purposes
      */
     public AccountParams setLegalEntity(Map<String, Object> legalEntity) {

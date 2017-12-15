@@ -7,6 +7,7 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
@@ -845,17 +846,13 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withValidAccount_passesIntegrationTest() {
         try {
-            final Map<String, Object> exampleMapAddress = new HashMap<String, Object>() {{
-                put("city", "San Francisco");
-                put("country", "US");
-                put("line1", "123 Market St");
-                put("line2", "#345");
-                put("postal_code", "94107");
-                put("state", "CA");
-            }};
-
+            final Address exampleAddress = new Address
+                    .Builder()
+                    .setCity("SF")
+                    .setCountry("US")
+                    .setState("CA").build();
            final Map<String, Object> exampleLegalEntity = new HashMap<String, Object>() {{
-                put("personal_address", exampleMapAddress);
+                put("personal_address", exampleAddress);
                 put("type", "individual");
                 put("ssn_last_4", "1234");
                 put("first_name", "Kathy");

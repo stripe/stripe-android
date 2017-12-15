@@ -12,7 +12,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 
 /**
- * The model of a Stripe card token.
+ * Tokenization is the process Stripe uses to collect sensitive card, bank account details, Stripe
+ * account details or personally identifiable information (PII), directly from your customers in a
+ * secure manner. A Token representing this information is returned to you to use.
  */
 public class Token implements StripePaymentSource {
 

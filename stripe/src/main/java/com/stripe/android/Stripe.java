@@ -562,7 +562,6 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey);
     }
@@ -572,7 +571,8 @@ public class Stripe {
      * thread.
      *
      * @param accountParams params to use for this token.
-     * @param publishableKey the publishable key to use with this request
+     * @param publishableKey the publishable key to use with this request. If null is passed in as
+     *                       the publishable key, we will use the default publishable key.
      * @return a {@link Token} that can be used for this account.
      *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
@@ -587,7 +587,6 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
         if (apiKey == null) {
@@ -596,14 +595,19 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(
                 publishableKey,
-                null,
+                mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
-        return StripeApiHandler.createToken(
-                mContext,
-                accountParams.toParamMap(),
-                requestOptions,
-                Token.TYPE_ACCOUNT,
-                mLoggingResponseListener);
+        try {
+            return StripeApiHandler.createToken(
+                    mContext,
+                    accountParams.toParamMap(),
+                    requestOptions,
+                    Token.TYPE_ACCOUNT,
+                    mLoggingResponseListener);
+        } catch (CardException exception) {
+            // Should never occur. CardException is only for card related requests.
+        }
+        return null;
     }
 
     public void logEventSynchronous(

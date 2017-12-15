@@ -225,7 +225,7 @@ class StripeApiHandler {
      * Create a {@link Token} using the input card parameters.
      *
      * @param context the {@link Context} in which this method is working
-     * @param cardParams a mapped set of parameters representing the object for which this token
+     * @param tokenParams a mapped set of parameters representing the object for which this token
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
      *                key, api version, etc
@@ -243,7 +243,7 @@ class StripeApiHandler {
     @SuppressWarnings("unchecked")
     static Token createToken(
             @NonNull Context context,
-            @NonNull Map<String, Object> cardParams,
+            @NonNull Map<String, Object> tokenParams,
             @NonNull RequestOptions options,
             @NonNull @Token.TokenType String tokenType,
             @Nullable LoggingResponseListener listener)
@@ -260,8 +260,8 @@ class StripeApiHandler {
             }
 
             List<String> loggingTokens =
-                    (List<String>) cardParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
-            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+                    (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
+            tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
             setTelemetryData(context, listener);
 
@@ -270,10 +270,10 @@ class StripeApiHandler {
             logApiCall(loggingParams, options, listener);
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
-            cardParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+            tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
         }
 
-        return requestToken(POST, getApiUrl(), cardParams, options);
+        return requestToken(POST, getApiUrl(), tokenParams, options);
     }
 
     @Nullable
@@ -768,7 +768,6 @@ class StripeApiHandler {
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
-
             String newPrefix = key;
             if (keyPrefix != null) {
                 newPrefix = String.format("%s[%s]", keyPrefix, key);
@@ -783,7 +782,6 @@ class StripeApiHandler {
     private static List<Parameter> flattenParamsValue(Object value, String keyPrefix)
             throws InvalidRequestException {
         List<Parameter> flatParams;
-
         if (value instanceof Map<?, ?>) {
             flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
         } else if (value instanceof List<?>) {
