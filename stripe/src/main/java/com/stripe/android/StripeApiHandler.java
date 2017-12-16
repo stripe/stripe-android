@@ -222,7 +222,7 @@ class StripeApiHandler {
     }
 
     /**
-     * Create a {@link Token} using the input card parameters.
+     * Create a {@link Token} using the input token parameters.
      *
      * @param context the {@link Context} in which this method is working
      * @param tokenParams a mapped set of parameters representing the object for which this token

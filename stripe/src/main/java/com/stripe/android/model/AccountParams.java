@@ -56,7 +56,7 @@ public class AccountParams {
      * @param legalEntity map that specifies the legal entity for which the connect account is being
      *                    created. Can contain any of the fields specified by legal_entity in the
      *                    API docs.
-     *                    
+     *
      *                    See {@linktourl https://stripe.com/docs/api#account_object-legal_entity}
      *
      *                    The object in the map is expected to be a string or a list or map of

@@ -852,7 +852,7 @@ public class StripeTest {
                     .setCountry("US")
                     .setState("CA").build();
            final Map<String, Object> exampleLegalEntity = new HashMap<String, Object>() {{
-                put("personal_address", exampleAddress);
+                put("personal_address", exampleAddress.toMap());
                 put("type", "individual");
                 put("ssn_last_4", "1234");
                 put("first_name", "Kathy");
