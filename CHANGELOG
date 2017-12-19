@@ -1,3 +1,10 @@
+6.1.0 2017-12-19
+   Add binding to support custom Stripe Connect onboarding in Europe
+   Expose interface to add text input listeners on the Card Widgets
+   Updating Android support library version to 27.0.2
+   Updating gradle 3.0.1
+   Fix typo in docs
+
 6.0.0 2017-11-10
     Updating gradle and wrapper to 4.3, using android build tools 3.0.0
     Fixed double-notification bug on error in AddSourceActivity
