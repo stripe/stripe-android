@@ -21,6 +21,9 @@ licenses:
 
 group: deprecated-2017Q3
 
+before_install:
+  - yes | sdkmanager "platforms;android-27"
+
 script:
   - ./gradlew clean test
   - ./gradlew clean :stripe:checkstyle

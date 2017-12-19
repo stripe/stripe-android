@@ -13,6 +13,7 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
@@ -29,7 +30,7 @@ import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
 
 /**
- * Class that handles {@link Token} creation from charges and {@link Card} models.
+ * Class that handles {@link Token} creation from charges, {@link Card}, and accounts.
  */
 public class Stripe {
 
@@ -541,6 +542,72 @@ public class Stripe {
                 requestOptions,
                 Token.TYPE_PII,
                 mLoggingResponseListener);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for a Connect Account. Do not call this on the UI
+     * thread or your app will crash. The method uses the currently set
+     * {@link #mDefaultPublishableKey}.
+     *
+     * @param accountParams params to use for this token.
+     * @return a {@link Token} that can be used for this account.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for a Connect Account. Do not call this on the UI
+     * thread.
+     *
+     * @param accountParams params to use for this token.
+     * @param publishableKey the publishable key to use with this request. If null is passed in as
+     *                       the publishable key, we will use the default publishable key.
+     * @return a {@link Token} that can be used for this account.
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    public Token createAccountTokenSynchronous(
+            @NonNull final AccountParams accountParams,
+            @Nullable String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return null;
+        }
+        validateKey(publishableKey);
+        RequestOptions requestOptions = RequestOptions.builder(
+                publishableKey,
+                mStripeAccount,
+                RequestOptions.TYPE_QUERY).build();
+        try {
+            return StripeApiHandler.createToken(
+                    mContext,
+                    accountParams.toParamMap(),
+                    requestOptions,
+                    Token.TYPE_ACCOUNT,
+                    mLoggingResponseListener);
+        } catch (CardException exception) {
+            // Should never occur. CardException is only for card related requests.
+        }
+        return null;
     }
 
     public void logEventSynchronous(
