@@ -196,7 +196,7 @@ public class CardMultilineWidget extends LinearLayout {
      * @param cvcNumberTextWatcher
      */
     public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
-        mCardNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
+        mCvcEditText.addTextChangedListener(cvcNumberTextWatcher);
     }
 
     /**
