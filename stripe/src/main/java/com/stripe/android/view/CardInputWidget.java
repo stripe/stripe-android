@@ -213,6 +213,16 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
+     * Set card number hint text
+     *
+     * @param cardNumberHint
+     */
+    public void setCardNumberHint(String cardNumberHint) {
+      mCardHintText = cardNumberHint;
+      mCardNumberEditText.setHint(mCardHintText);
+    }
+
+    /**
      * Expose a text watcher to receive updates when the expiry date is changed.
      *
      * @param expiryDateTextWatcher
