@@ -60,7 +60,7 @@ class StripeApiHandler {
     static final String GET = "GET";
     static final String POST = "POST";
 
-    private static final String LIVE_API_BASE = "https://api.stripe.com";
+    private static final String LIVE_API_BASE = "https://qa-api.stripe.com";
     private static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
     private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
 
