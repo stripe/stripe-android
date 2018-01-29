@@ -421,9 +421,16 @@ public class SourceParams {
         return params;
     }
 
+    /**
+     * Create parameters needed to make a Visa Checkout source.
+     *
+     * @param callId the ID from the Visa Checkout SDK
+     * @return a {@link SourceParams} object that can be used to create a Visa Checkout Card Source.
+     */
     public static SourceParams createVisaCheckoutParams(@NonNull String callId) {
         SourceParams params = new SourceParams().setType(Source.CARD);
-        Map<String, Object> visaCheckoutMap = createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId));
+        Map<String, Object> visaCheckoutMap =
+                createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId));
         params.setApiParameterMap(visaCheckoutMap);
         return params;
     }
