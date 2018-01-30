@@ -46,6 +46,9 @@ public class SourceParams {
     static final String FIELD_STATE = "state";
     static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
 
+    static final String VISA_CHECKOUT = "visa_checkout";
+    static final String CALL_ID = "callid";
+
     @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
@@ -415,6 +418,20 @@ public class SourceParams {
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
         params.setApiParameterMap(createSimpleMap(FIELD_CARD, cardID));
+        return params;
+    }
+
+    /**
+     * Create parameters needed to make a Visa Checkout source.
+     *
+     * @param callId the ID from the Visa Checkout SDK
+     * @return a {@link SourceParams} object that can be used to create a Visa Checkout Card Source.
+     */
+    public static SourceParams createVisaCheckoutParams(@NonNull String callId) {
+        SourceParams params = new SourceParams().setType(Source.CARD);
+        Map<String, Object> visaCheckoutMap =
+                createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId));
+        params.setApiParameterMap(visaCheckoutMap);
         return params;
     }
 
