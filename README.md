@@ -12,7 +12,7 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:6.1.0'
+    compile 'com.stripe:stripe-android:6.1.1'
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
@@ -81,7 +81,7 @@ if (cardToSave == null) {
 }
 ```
 
-If the returned `Card` is null, error states will show on the fields that need to be fixed. 
+If the returned `Card` is null, error states will show on the fields that need to be fixed.
 
 Once you have a non-null `Card` object from either widget, you can call [createToken](#createtoken).
 

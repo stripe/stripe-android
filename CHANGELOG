@@ -1,3 +1,7 @@
+6.1.1 2018-01-30
+  Fix Dutch Translation for MM/YY
+  Set the CardNumberEditText TextWatcher to the correct EditText
+
 6.1.0 2017-12-19
    Add binding to support custom Stripe Connect onboarding in Europe
    Expose interface to add text input listeners on the Card Widgets
