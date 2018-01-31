@@ -81,7 +81,7 @@ if (cardToSave == null) {
 }
 ```
 
-If the returned `Card` is null, error states will show on the fields that need to be fixed. 
+If the returned `Card` is null, error states will show on the fields that need to be fixed.
 
 Once you have a non-null `Card` object from either widget, you can call [createToken](#createtoken).
 
