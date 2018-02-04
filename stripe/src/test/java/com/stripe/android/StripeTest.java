@@ -643,6 +643,7 @@ public class StripeTest {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
                 validIban,
+                "sepaholder@stripe.com",
                 "123 Main St",
                 "Eureka",
                 "90210",
@@ -684,6 +685,7 @@ public class StripeTest {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
                 validIban,
+                "sepaholder@stripe.com",
                 null,
                 "Eureka",
                 "90210",

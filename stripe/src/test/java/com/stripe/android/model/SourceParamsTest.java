@@ -441,6 +441,7 @@ public class SourceParamsTest {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Jai Testa",
                 "ibaniban",
+                "sepaholder@stripe.com",
                 "44 Fourth Street",
                 "Test City",
                 "90210",
@@ -465,6 +466,7 @@ public class SourceParamsTest {
         final SourceParams params = SourceParams.createSepaDebitParams(
                 "Jai Testa",
                 "ibaniban",
+                "sepaholder@stripe.com",
                 "44 Fourth Street",
                 "Test City",
                 "90210",
@@ -483,6 +485,7 @@ public class SourceParamsTest {
         expectedMap.put("owner",
                 new HashMap<String, Object>() {{
                     put("name", "Jai Testa");
+                    put("email", "sepaholder@stripe.com");
                     put("address", addressMap);
                 }});
 
