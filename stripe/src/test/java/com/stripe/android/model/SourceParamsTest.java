@@ -440,6 +440,7 @@ public class SourceParamsTest {
     public void createSepaDebitParams_hasExpectedFields() {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Jai Testa",
+                "sepaholder@stripe.com",
                 "ibaniban",
                 "44 Fourth Street",
                 "Test City",
@@ -464,6 +465,7 @@ public class SourceParamsTest {
     public void createSepaDebitParams_toParamMap_createsExpectedMap() {
         final SourceParams params = SourceParams.createSepaDebitParams(
                 "Jai Testa",
+                "sepaholder@stripe.com",
                 "ibaniban",
                 "44 Fourth Street",
                 "Test City",
