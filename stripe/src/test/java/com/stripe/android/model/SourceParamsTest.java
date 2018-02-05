@@ -485,6 +485,7 @@ public class SourceParamsTest {
         expectedMap.put("owner",
                 new HashMap<String, Object>() {{
                     put("name", "Jai Testa");
+                    put("email", "sepaholder@stripe.com");
                     put("address", addressMap);
                 }});
 
