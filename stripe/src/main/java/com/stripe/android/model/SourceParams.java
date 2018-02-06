@@ -685,7 +685,7 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
         networkReadyMap.put(API_PARAM_TOKEN, mToken);
         networkReadyMap.put(API_PARAM_USAGE, mUsage);
-        if(mExtraParams != null)
+        if (mExtraParams != null)
             networkReadyMap.putAll(mExtraParams);
         removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
