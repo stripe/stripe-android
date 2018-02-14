@@ -1,12 +1,17 @@
 package com.stripe.android.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
@@ -41,6 +46,23 @@ public class AddSourceActivity extends StripeActivity {
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
 
+    private TextView.OnEditorActionListener mOnEditorActionListener =
+            new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        if (mCardMultilineWidget.getCard() != null) {
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(mViewStub.getWindowToken(), 0);
+                        }
+                        onActionSave();
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
+
     /**
      * Create an {@link Intent} to start a {@link AddSourceActivity}.
      *
@@ -66,6 +88,7 @@ public class AddSourceActivity extends StripeActivity {
         mViewStub.setLayoutResource(R.layout.activity_add_source);
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
+        initEnterListeners();
         mErrorLayout = findViewById(R.id.add_source_error_container);
         boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
@@ -78,6 +101,17 @@ public class AddSourceActivity extends StripeActivity {
         }
 
         setTitle(R.string.title_add_a_card);
+    }
+
+    private void initEnterListeners() {
+        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
+                .setOnEditorActionListener(mOnEditorActionListener);
+        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
+                .setOnEditorActionListener(mOnEditorActionListener);
+        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
+                .setOnEditorActionListener(mOnEditorActionListener);
+        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
+                .setOnEditorActionListener(mOnEditorActionListener);
     }
 
     @VisibleForTesting
