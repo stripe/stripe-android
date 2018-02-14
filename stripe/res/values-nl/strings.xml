@@ -104,6 +104,8 @@
     <string name="address_zip_postal_invalid">Je postcode is ongeldig</string>
     <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
     <string name="add_card">Voeg een nieuwe betaalkaart toe om aankopen te doen in deze app.</string>
+    <!--Used to display masked card numbers-->
+    <string name="ending_in">" - "</string>
     <!-- Text informing user there are no existing payment methods in the application -->
     <string name="no_payment_methods">Geen betalingsmethoden.</string>
     <!-- Human friendly label for something with $0 price -->

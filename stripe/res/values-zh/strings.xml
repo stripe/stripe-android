@@ -104,6 +104,8 @@
     <string name="address_zip_postal_invalid">您的邮政编码无效</string>
     <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
     <string name="add_card">添加一张新的借记卡或信用卡以便在此应用中进行购买。</string>
+    <!--Used to display masked card numbers-->
+    <string name="ending_in">" - "</string>
     <!-- Text informing user there are no existing payment methods in the application -->
     <string name="no_payment_methods">没有付款方式。</string>
     <!-- Human friendly label for something with $0 price -->

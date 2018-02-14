@@ -104,6 +104,8 @@
     <string name="address_zip_postal_invalid">El código postal no es válido</string>
     <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
     <string name="add_card">Añade una tarjeta de crédito o de débito nueva para realizar compras en esta aplicación.</string>
+    <!--Used to display masked card numbers-->
+    <string name="ending_in">" - "</string>
     <!-- Text informing user there are no existing payment methods in the application -->
     <string name="no_payment_methods">Ningún método de pago.</string>
     <!-- Human friendly label for something with $0 price -->
