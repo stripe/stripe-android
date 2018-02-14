@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
 
 import com.stripe.android.BuildConfig;
@@ -47,7 +48,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,6 +136,71 @@ public class AddSourceActivityTest {
         setUpForProxySessionTest();
         assertNotNull(mCardMultilineWidget);
         assertEquals(View.VISIBLE, mWidgetControlGroup.postalCodeInputLayout.getVisibility());
+    }
+
+    @Test
+    public void softEnterKey_whenDataIsValid_hidesKeyboardAndFinishesWithIntent() {
+        setUpForLocalTest();
+        ArgumentCaptor<SourceParams> paramsArgumentCaptor =
+                ArgumentCaptor.forClass(SourceParams.class);
+        ArgumentCaptor<SourceCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(SourceCallback.class);
+
+        // Note: these values do not match what is being mock-sent back in the result.
+        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
+        mWidgetControlGroup.expiryDateEditText.append("12");
+        mWidgetControlGroup.expiryDateEditText.append("50");
+        mWidgetControlGroup.cvcEditText.append("1234");
+
+        PaymentConfiguration.init("pk_test_abc123");
+        MenuItem menuItem = mock(MenuItem.class);
+        when(menuItem.getItemId()).thenReturn(R.id.action_save);
+
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+
+        mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+        verify(mStripe).createSource(
+                paramsArgumentCaptor.capture(),
+                callbackArgumentCaptor.capture());
+        SourceParams params = paramsArgumentCaptor.getValue();
+        SourceCallback callback = callbackArgumentCaptor.getValue();
+        assertNotNull(params);
+        assertNotNull(callback);
+
+        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+        assertEquals(Source.CARD, params.getType());
+
+        callback.onSuccess(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
+        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
+        Intent intent = mShadowActivity.getResultIntent();
+
+        assertTrue(mShadowActivity.isFinishing());
+        assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
+        Source source =
+                Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
+        assertNotNull(source);
+        assertEquals(Source.CARD, source.getType());
+    }
+
+    @Test
+    public void softEnterKey_whenDataIsNotValid_doesNotHideKeyboardAndDoesNotFinish() {
+        setUpForLocalTest();
+        // Note: these values do not match what is being mock-sent back in the result.
+        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
+        mWidgetControlGroup.expiryDateEditText.append("12");
+        mWidgetControlGroup.expiryDateEditText.append("50");
+        mWidgetControlGroup.cvcEditText.append("12");
+
+        PaymentConfiguration.init("pk_test_abc123");
+        MenuItem menuItem = mock(MenuItem.class);
+        when(menuItem.getItemId()).thenReturn(R.id.action_save);
+
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+
+        mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+        verify(mStripe,never()).createSource(
+                any(SourceParams.class),
+                any(SourceCallback.class));
     }
 
     @Test
