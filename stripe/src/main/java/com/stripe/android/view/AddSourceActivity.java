@@ -52,8 +52,8 @@ public class AddSourceActivity extends StripeActivity {
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         if (mCardMultilineWidget.getCard() != null) {
-                            InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(mViewStub.getWindowToken(), 0);
+                            ((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE))
+                                    .hideSoftInputFromWindow(mViewStub.getWindowToken(), 0);
                         }
                         onActionSave();
                         return true;
@@ -104,13 +104,13 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     private void initEnterListeners() {
-        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
+        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
                 .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
+        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
                 .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
+        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
                 .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView)mCardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
+        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
                 .setOnEditorActionListener(mOnEditorActionListener);
     }
 
