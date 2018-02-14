@@ -158,7 +158,6 @@ public class AddSourceActivityTest {
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        //mActivityController.get().onOptionsItemSelected(menuItem);
         mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
         verify(mStripe).createSource(
                 paramsArgumentCaptor.capture(),
@@ -198,7 +197,6 @@ public class AddSourceActivityTest {
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        //mActivityController.get().onOptionsItemSelected(menuItem);
         mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
         verify(mStripe,never()).createSource(
                 any(SourceParams.class),
