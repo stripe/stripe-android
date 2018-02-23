@@ -59,6 +59,7 @@ class StripeApiHandler {
     @interface RestMethod { }
     static final String GET = "GET";
     static final String POST = "POST";
+    static final String DELETE = "DELETE";
 
     private static final String LIVE_API_BASE = "https://api.stripe.com";
     private static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
@@ -319,6 +320,45 @@ class StripeApiHandler {
     }
 
     @Nullable
+    static Source deleteCustomerSource(
+            @Nullable Context context,
+            @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String sourceId,
+            @NonNull String secret,
+            @Nullable LoggingResponseListener listener)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        if (context != null) {
+            Map<String, Object> loggingParamsMap =
+                    LoggingUtils.getDeleteSourceParams(
+                            context,
+                            productUsageTokens,
+                            publicKey);
+
+            // We use the public key to log, so we need different RequestOptions.
+            RequestOptions loggingOptions =
+                    RequestOptions.builder(publicKey).setApiVersion(API_VERSION).build();
+            logApiCall(loggingParamsMap, loggingOptions, listener);
+        }
+
+        StripeResponse response = getStripeResponse(
+                DELETE,
+                getDeleteCustomerSourceUrl(customerId, sourceId),
+                paramsMap,
+                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return Source.fromString(response.getResponseBody());
+    }
+
+    @Nullable
     static Customer setDefaultCustomerSource(
             @Nullable Context context,
             @NonNull String customerId,
@@ -503,6 +543,12 @@ class StripeApiHandler {
     }
 
     @VisibleForTesting
+    static String getDeleteCustomerSourceUrl(@NonNull String customerId, @NonNull String sourceId) {
+        return String.format(Locale.ENGLISH,
+                "%s/%s", getAddCustomerSourceUrl(customerId), sourceId);
+    }
+
+    @VisibleForTesting
     static String getRetrieveCustomerUrl(@NonNull String customerId) {
         return String.format(Locale.ENGLISH, "%s/%s", getCustomersUrl(), customerId);
     }
@@ -621,6 +667,15 @@ class StripeApiHandler {
         if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
             connection.setRequestProperty("Cookie", "m=" + options.getGuid());
         }
+    }
+
+    private static java.net.HttpURLConnection createDeleteConnection(
+            @NonNull String url,
+            @NonNull RequestOptions options) throws IOException {
+        java.net.HttpURLConnection conn = createStripeConnection(url, options);
+        conn.setRequestMethod(DELETE);
+
+        return conn;
     }
 
     private static java.net.HttpURLConnection createGetConnection(
@@ -873,6 +928,9 @@ class StripeApiHandler {
                     break;
                 case POST:
                     conn = createPostConnection(url, params, options);
+                    break;
+                case DELETE:
+                    conn = createDeleteConnection(url, options);
                     break;
                 default:
                     throw new APIConnectionException(

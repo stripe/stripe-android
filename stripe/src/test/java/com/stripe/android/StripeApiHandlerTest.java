@@ -78,6 +78,15 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void testGetDeleteCustomerSourceUrl() {
+        String customerId = "cus_123abc";
+        String sourceId = "src_456xyz";
+        String deleteSourceUrl = StripeApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
+        assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources/" + sourceId,
+                deleteSourceUrl);
+    }
+
+    @Test
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
