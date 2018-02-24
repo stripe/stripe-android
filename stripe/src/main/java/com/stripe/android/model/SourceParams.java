@@ -56,6 +56,7 @@ public class SourceParams {
     private Map<String, Object> mOwner;
     private Map<String, String> mMetaData;
     private Map<String, Object> mRedirect;
+    private Map<String, Object> mExtraParams;
     private String mToken;
     @Nullable @Source.Usage private String mUsage;
     @SourceType private String mType;
@@ -344,6 +345,7 @@ public class SourceParams {
     public static SourceParams createSepaDebitParams(
             @NonNull String name,
             @NonNull String iban,
+            @Nullable String email,
             @Nullable String addressLine1,
             @NonNull String city,
             @NonNull String postalCode,
@@ -360,6 +362,7 @@ public class SourceParams {
 
         Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
+        ownerMap.put(FIELD_EMAIL, email);
         ownerMap.put(FIELD_ADDRESS, address);
 
         params.setOwner(ownerMap).setApiParameterMap(createSimpleMap(FIELD_IBAN, iban));
@@ -575,6 +578,16 @@ public class SourceParams {
         return this;
     }
 
+    /**
+     * Sets extra params for this source object.
+     *
+     * @param extraParams a set of params
+     * @return {@code this}, for chaining purposes
+     */
+    public SourceParams setExtraParams(final Map<String, Object> extraParams) {
+        mExtraParams = extraParams;
+        return this;
+    }
 
     /**
      * @param returnUrl a redirect URL for this source.
@@ -672,6 +685,8 @@ public class SourceParams {
         networkReadyMap.put(API_PARAM_METADATA, mMetaData);
         networkReadyMap.put(API_PARAM_TOKEN, mToken);
         networkReadyMap.put(API_PARAM_USAGE, mUsage);
+        if (mExtraParams != null)
+            networkReadyMap.putAll(mExtraParams);
         removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }
