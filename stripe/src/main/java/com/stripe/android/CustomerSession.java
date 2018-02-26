@@ -46,6 +46,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     public static final String EVENT_SHIPPING_INFO_SAVED = "shipping_info_saved";
 
     private static final String ACTION_ADD_SOURCE = "add_source";
+    private static final String ACTION_DELETE_SOURCE = "delete_source";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
     private static final String ACTION_SET_CUSTOMER_SHIPPING_INFO = "set_shipping_info";
     private static final String KEY_SOURCE = "source";
@@ -239,6 +240,24 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     }
 
     /**
+     * Delete the source from the current customer object.
+     * @param context the {@link Context} to use for resources
+     * @param sourceId the ID of the source to be deleted
+     * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
+     *                 complete. The api call will return the removed source.
+     */
+    public void deleteCustomerSource(
+            @NonNull Context context,
+            @NonNull String sourceId,
+            @Nullable SourceRetrievalListener listener) {
+        mCachedContextReference = new WeakReference<>(context);
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_SOURCE, sourceId);
+        mSourceRetrievalListener = listener;
+        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_DELETE_SOURCE, arguments);
+    }
+
+    /**
      * Set the shipping information on the current customer object.
      *
      * @param context a {@link Context} to use for resources
@@ -340,6 +359,34 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         long currentTime = getCalendarInstance().getTimeInMillis();
         return mCustomer != null &&
                 currentTime - mCustomerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS;
+    }
+
+    private void deleteCustomerSource(
+            @NonNull final WeakReference<Context> contextWeakReference,
+            @NonNull final EphemeralKey key,
+            @NonNull final String sourceId,
+            @NonNull final List<String> productUsageTokens) {
+        Runnable fetchCustomerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Source source = deleteCustomerSourceWithKey(
+                            contextWeakReference,
+                            key,
+                            new ArrayList<>(productUsageTokens),
+                            sourceId,
+                            mStripeApiProxy);
+                    Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
+                    mUiThreadHandler.sendMessage(message);
+
+                } catch (StripeException stripeEx) {
+                    Message message = mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx);
+                    mUiThreadHandler.sendMessage(message);
+                    sendErrorIntent(contextWeakReference, stripeEx);
+                }
+            }
+        };
+        executeRunnable(fetchCustomerRunnable);
     }
 
     private void setCustomerSourceDefault(
@@ -451,6 +498,16 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                         mEphemeralKey,
                         (String) arguments.get(KEY_SOURCE),
                         (String) arguments.get(KEY_SOURCE_TYPE),
+                        new ArrayList<>(mProductUsageTokens));
+                resetUsageTokens();
+            } else if (ACTION_DELETE_SOURCE.equals(actionString)
+                    && mCachedContextReference != null
+                    && arguments != null
+                    && arguments.containsKey(KEY_SOURCE)) {
+                deleteCustomerSource(
+                        mCachedContextReference,
+                        mEphemeralKey,
+                        (String) arguments.get(KEY_SOURCE),
                         new ArrayList<>(mProductUsageTokens));
                 resetUsageTokens();
             } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
@@ -608,6 +665,32 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         }
     }
 
+    static Source deleteCustomerSourceWithKey(
+            @NonNull WeakReference<Context> contextWeakReference,
+            @NonNull EphemeralKey key,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String sourceId,
+            @Nullable StripeApiProxy proxy) throws StripeException {
+        if (proxy != null) {
+            return proxy.deleteCustomerSourceWithKey(
+                    contextWeakReference.get(),
+                    key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
+                    sourceId,
+                    key.getSecret());
+        } else {
+            return StripeApiHandler.deleteCustomerSource(
+                    contextWeakReference.get(),
+                    key.getCustomerId(),
+                    PaymentConfiguration.getInstance().getPublishableKey(),
+                    productUsageTokens,
+                    sourceId,
+                    key.getSecret(),
+                    null);
+        }
+    }
+
     static Customer setCustomerShippingInfoWithKey(
             @NonNull WeakReference<Context> contextWeakReference,
             @NonNull EphemeralKey key,
@@ -725,6 +808,15 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 @NonNull List<String> productUsageTokens,
                 @NonNull String sourceId,
                 @NonNull String sourceType,
+                @NonNull String secret)
+                throws InvalidRequestException, APIConnectionException, APIException;
+
+        Source deleteCustomerSourceWithKey(
+                @Nullable Context context,
+                @NonNull String customerId,
+                @NonNull String publicKey,
+                @NonNull List<String> productUsageTokens,
+                @NonNull String sourceId,
                 @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
 
