@@ -905,10 +905,8 @@ class StripeApiHandler {
             throws IOException {
         //\A is the beginning of
         // the stream boundary
-        String rBody = new Scanner(responseStream, CHARSET)
-                .useDelimiter("\\A")
-                .next(); //
-
+        Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
+        String rBody = scanner.hasNext() ? scanner.next() : null;
         responseStream.close();
         return rBody;
     }
