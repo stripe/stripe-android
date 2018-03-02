@@ -16,6 +16,10 @@ No need to clone the repository or download any files -- just add this line to y
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
+Please note that if enabling minification in your `build.gradle` file, you must also add this line to the `proguard-rules.pro`:
+
+    -keep class com.stripe.android.** { *; }
+
 ### Eclipse
 
 Note - as Google has stopped supporting Eclipse for Android Development, we will no longer be actively testing the project's compatibility within Eclipse. You may still clone and include the library as you would any other Android library project.
