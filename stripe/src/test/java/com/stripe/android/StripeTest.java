@@ -643,6 +643,48 @@ public class StripeTest {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
                 validIban,
+                "sepaholder@stripe.com",
+                "123 Main St",
+                "Eureka",
+                "90210",
+                "EI");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
+        try {
+            Source sepaDebitSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(sepaDebitSource);
+            assertNotNull(sepaDebitSource.getClientSecret());
+            assertNotNull(sepaDebitSource.getId());
+            assertEquals(Source.SEPA_DEBIT, sepaDebitSource.getType());
+            assertNotNull(sepaDebitSource.getSourceTypeData());
+            assertNotNull(sepaDebitSource.getOwner());
+            assertNotNull(sepaDebitSource.getOwner().getAddress());
+            assertNotNull(sepaDebitSource.getSourceTypeModel());
+            assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceSepaDebitData);
+            assertEquals("eur", sepaDebitSource.getCurrency());
+            assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
+            assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
+            assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
+            assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
+            assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
+            JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withNoEmail_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        String validIban = "DE89370400440532013000";
+        SourceParams params = SourceParams.createSepaDebitParams(
+                "Sepa Account Holder",
+                validIban,
                 "123 Main St",
                 "Eureka",
                 "90210",
@@ -684,6 +726,7 @@ public class StripeTest {
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
                 validIban,
+                "sepaholder@stripe.com",
                 null,
                 "Eureka",
                 "90210",
