@@ -32,11 +32,16 @@ public class PaymentUtils {
     static String formatPriceString(double amount, @NonNull Currency currency) {
         double majorUnitAmount = amount / Math.pow(10, currency.getDefaultFractionDigits());
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-        DecimalFormatSymbols decimalFormatSymbols = ((java.text.DecimalFormat) currencyFormat)
-                .getDecimalFormatSymbols();
-        decimalFormatSymbols.setCurrencySymbol(currency.getSymbol(Locale.getDefault()));
-        ((java.text.DecimalFormat) currencyFormat).setDecimalFormatSymbols(decimalFormatSymbols);
-        return currencyFormat.format(majorUnitAmount);
+        try {
+            DecimalFormatSymbols decimalFormatSymbols = ((java.text.DecimalFormat) currencyFormat)
+                    .getDecimalFormatSymbols();
+            decimalFormatSymbols.setCurrencySymbol(currency.getSymbol(Locale.getDefault()));
+            ((java.text.DecimalFormat) currencyFormat)
+                    .setDecimalFormatSymbols(decimalFormatSymbols);
+            return currencyFormat.format(majorUnitAmount);
+        } catch (ClassCastException e) {
+            return currencyFormat.format(majorUnitAmount);
+        }
     }
 
 }
