@@ -150,6 +150,16 @@ public class CardInputWidget extends LinearLayout {
     }
 
     /**
+     * Set card number hint text
+     *
+     * @param cardNumberHint
+     */
+    public void setCardNumberHint(String cardNumberHint) {
+        mCardHintText = cardNumberHint;
+        mCardNumberEditText.setHint(mCardHintText);
+    }
+
+    /**
      * Set the expiration date. Method invokes completion listener and changes focus
      * to the CVC field if a valid date is entered.
      *
@@ -165,6 +175,25 @@ public class CardInputWidget extends LinearLayout {
             @IntRange(from = 1, to = 12) int month,
             @IntRange(from = 0, to = 9999) int year) {
         mExpiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year));
+    }
+
+    /**
+     * Set the expiration date hint. This method checks if expiry date is valid and doesn't do
+     * anything if it's not.
+     *
+     * @param month a month of the year, represented as a number between 1 and 12
+     * @param year a year number, represented as a number between 0 and 99
+     */
+    public void setExpiryHint(
+        @IntRange(from = 1, to = 12) int month,
+        @IntRange(from = 0, to = 99) int year) {
+        if (DateUtils.isExpiryDataValid(month, DateUtils.convertTwoDigitYearToFour(year))) {
+            final String normalizedMonth = String.format(Locale.US, "%02d", month);
+            final String normalizedYear = String.format(Locale.US, "%02d", year);
+
+            mExpiryDateEditText.setHint(String.format(Locale.US, "%s/%s",
+                normalizedMonth, normalizedYear));
+        }
     }
 
     /**
