@@ -68,6 +68,7 @@ public class MaskedCardView extends LinearLayout {
         TEMPLATE_RESOURCE_MAP.put(Card.JCB, R.drawable.ic_jcb_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.MASTERCARD, R.drawable.ic_mastercard_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.VISA, R.drawable.ic_visa_template_32);
+        TEMPLATE_RESOURCE_MAP.put(Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.ic_unknown);
     }
 

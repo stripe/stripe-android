@@ -60,11 +60,15 @@ public class CardUtilsTest {
     @Test
     public void getPossibleCardType_withDiscoverPrefix_returnsDiscover() {
         assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("60355"));
-        assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("62"));
         assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("6433 8 90923"));
         // This one has too many numbers on purpose. Checking for length is not part of the
         // function under test.
         assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("6523452309209340293423"));
+    }
+
+    @Test
+    public void getPossibleCardType_withUnionPayPrefix_returnsUnionPay() {
+        assertEquals(Card.UNIONPAY, CardUtils.getPossibleCardType("62"));
     }
 
     @Test
@@ -102,6 +106,11 @@ public class CardUtilsTest {
     @Test
     public void isValidCardLength_whenValidAmEx_returnsTrue() {
         assertTrue(CardUtils.isValidCardLength("378282246310005"));
+    }
+
+    @Test
+    public void isValidCardLength_whenValidUnionPay_returnsTrue() {
+        assertTrue(CardUtils.isValidCardLength("6200000000000005"));
     }
 
     @Test

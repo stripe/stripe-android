@@ -42,6 +42,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
             DINERS_CLUB,
             VISA,
             MASTERCARD,
+            UNIONPAY,
             UNKNOWN
     })
     public @interface CardBrand { }
@@ -51,6 +52,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String DINERS_CLUB = "Diners Club";
     public static final String VISA = "Visa";
     public static final String MASTERCARD = "MasterCard";
+    public static final String UNIONPAY = "UnionPay";
     public static final String UNKNOWN = "Unknown";
 
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
@@ -77,12 +79,13 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
                 put(Card.JCB, R.drawable.ic_jcb);
                 put(Card.MASTERCARD, R.drawable.ic_mastercard);
                 put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNIONPAY, R.drawable.ic_unionpay);
                 put(Card.UNKNOWN, R.drawable.ic_unknown);
             }};
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
-    public static final String[] PREFIXES_DISCOVER = {"60", "62", "64", "65"};
+    public static final String[] PREFIXES_DISCOVER = {"60", "64", "65"};
     public static final String[] PREFIXES_JCB = {"35"};
     public static final String[] PREFIXES_DINERS_CLUB = {"300", "301", "302", "303", "304",
             "305", "309", "36", "38", "39"};
@@ -94,6 +97,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         "270", "271", "2720",
         "50", "51", "52", "53", "54", "55", "67"
     };
+    public static final String[] PREFIXES_UNIONPAY = {"62"};
 
     public static final int MAX_LENGTH_STANDARD = 16;
     public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
@@ -345,6 +349,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
             return Card.JCB;
         } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
             return Card.VISA;
+        } else if (Card.UNIONPAY.equalsIgnoreCase(possibleCardType)) {
+            return Card.UNIONPAY;
         } else {
             return Card.UNKNOWN;
         }

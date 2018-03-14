@@ -112,6 +112,11 @@ public class CardTest {
     }
 
     @Test
+    public void asCardBrand_whenUnionPay_returnsUnionPay() {
+        assertEquals(Card.UNIONPAY, asCardBrand("UnionPay"));
+    }
+
+    @Test
     public void asFundingType_whenDebit_returnsDebit() {
         assertEquals(Card.FUNDING_DEBIT, asFundingType("debit"));
     }
@@ -186,6 +191,12 @@ public class CardTest {
     public void testTypeReturnsCorrectlyForMasterCard() {
         Card card = new Card("5112123412341234", null, null, null);
         assertEquals(Card.MASTERCARD, card.getBrand());
+    }
+
+    @Test
+    public void testTypeReturnsCorrectlyForUnionPay() {
+        Card card = new Card("6200000000000005", null, null, null);
+        assertEquals(Card.UNIONPAY, card.getBrand());
     }
 
     @Test
