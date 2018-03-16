@@ -142,6 +142,8 @@ public class CardUtils {
             return Card.VISA;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
             return Card.MASTERCARD;
+        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
+            return Card.UNIONPAY;
         } else {
             return Card.UNKNOWN;
         }
