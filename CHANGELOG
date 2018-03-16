@@ -1,6 +1,16 @@
+6.1.2 2018-03-16
+    Handle soft enter key in AddSourceActivity
+    Add translations for ” ending in ” in each supported language.
+    Add API bindings for removing a source from a customer.
+    Update Android support library to 27.1.0.
+    Fix invalid response from stripe api error
+    Fix proguard minification error
+    Add ability to create a source with extra parameters to support SEPA debit sources.
+    Catch possible ClassCastException when formatting currency string
+
 6.1.1 2018-01-30
-  Fix Dutch Translation for MM/YY
-  Set the CardNumberEditText TextWatcher to the correct EditText
+    Fix Dutch Translation for MM/YY
+    Set the CardNumberEditText TextWatcher to the correct EditText
 
 6.1.0 2017-12-19
    Add binding to support custom Stripe Connect onboarding in Europe
