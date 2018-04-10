@@ -49,6 +49,10 @@ public class SourceParams {
     static final String VISA_CHECKOUT = "visa_checkout";
     static final String CALL_ID = "callid";
 
+    static final String MASTERPASS = "masterpass";
+    static final String TRANSACTION_ID = "transaction_id";
+    static final String CART_ID = "cart_id";
+
     @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
     private String mCurrency;
@@ -446,6 +450,25 @@ public class SourceParams {
         Map<String, Object> visaCheckoutMap =
                 createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId));
         params.setApiParameterMap(visaCheckoutMap);
+        return params;
+    }
+
+    /**
+     * Create parameters needed to make a Masterpass source
+     * @param transactionId the ID from the Masterpass SDK
+     * @param cartID the cart ID provided when creating a cart for checkout in the Masterpass SDK
+     *
+     * @return a {@link SourceParams} object that can be used to create a Masterpass Card Source.
+     */
+    public static SourceParams createMasterpassParams(
+            @NonNull String transactionId,
+            @NonNull String cartID) {
+        SourceParams params = new SourceParams().setType(Source.CARD);
+        Map map = createSimpleMap(TRANSACTION_ID, transactionId);
+        map.put(CART_ID, cartID);
+        Map<String, Object> masterpassMap =
+                createSimpleMap(MASTERPASS, map);
+        params.setApiParameterMap(masterpassMap);
         return params;
     }
 
