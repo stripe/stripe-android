@@ -221,7 +221,7 @@ public class CardInputWidgetTest {
     }
 
     @Test
-    public void getCard_whenIncompleteCvCForAmEx_returnsNull() {
+    public void getCard_when3DigitCvCForAmEx_returnsCard() {
         // The test will be testing the wrong variable after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
 
@@ -229,6 +229,20 @@ public class CardInputWidgetTest {
         mExpiryEditText.append("12");
         mExpiryEditText.append("50");
         mCvcEditText.append("123");
+
+        Card card = mCardInputWidget.getCard();
+        assertNotNull(card);
+    }
+
+    @Test
+    public void getCard_whenIncompleteCvCForAmEx_returnsNull() {
+        // The test will be testing the wrong variable after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mExpiryEditText.append("12");
+        mExpiryEditText.append("50");
+        mCvcEditText.append("12");
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);

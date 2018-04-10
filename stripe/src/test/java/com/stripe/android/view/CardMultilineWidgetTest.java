@@ -27,6 +27,7 @@ import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
+import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
@@ -189,6 +190,50 @@ public class CardMultilineWidgetTest {
         Card card = mNoZipCardMultilineWidget.getCard();
         assertNotNull(card);
         assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, card.getExpMonth().intValue());
+        assertEquals(2050, card.getExpYear().intValue());
+        assertEquals("123", card.getCVC());
+        assertNull(card.getAddressZip());
+        assertTrue(card.validateCard());
+        assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+    }
+
+    @Test
+    public void getCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCardAndExpectedLogging() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mNoZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mNoZipGroup.expiryDateEditText.append("12");
+        mNoZipGroup.expiryDateEditText.append("50");
+        mNoZipGroup.cvcEditText.append("1234");
+        Card card = mNoZipCardMultilineWidget.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_AMEX_NO_SPACES, card.getNumber());
+        assertNotNull(card.getExpMonth());
+        assertNotNull(card.getExpYear());
+        assertEquals(12, card.getExpMonth().intValue());
+        assertEquals(2050, card.getExpYear().intValue());
+        assertEquals("1234", card.getCVC());
+        assertNull(card.getAddressZip());
+        assertTrue(card.validateCard());
+        assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+    }
+
+    @Test
+    public void getCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCardAndExpectedLogging() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mNoZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mNoZipGroup.expiryDateEditText.append("12");
+        mNoZipGroup.expiryDateEditText.append("50");
+        mNoZipGroup.cvcEditText.append("123");
+        Card card = mNoZipCardMultilineWidget.getCard();
+        assertNotNull(card);
+        assertEquals(VALID_AMEX_NO_SPACES, card.getNumber());
         assertNotNull(card.getExpMonth());
         assertNotNull(card.getExpYear());
         assertEquals(12, card.getExpMonth().intValue());

@@ -15,6 +15,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
@@ -139,8 +140,10 @@ public class CardMultilineWidget extends LinearLayout {
                 CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber());
         boolean expiryIsValid = mExpiryDateEditText.getValidDateFields() != null &&
                 mExpiryDateEditText.isDateValid();
-        boolean cvcIsValid = ViewUtils.isCvcMaximalLength(
-                mCardBrand, mCvcEditText.getText().toString());
+        int cvcLength = mCvcEditText.getText().toString().trim().length();
+        boolean cvcIsValid = cvcLength == Card.CVC_LENGTH_COMMON
+                || (TextUtils.equals(Card.AMERICAN_EXPRESS, mCardBrand)
+                && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS);
         mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
         mExpiryDateEditText.setShouldShowError(!expiryIsValid);
         mCvcEditText.setShouldShowError(!cvcIsValid);

@@ -120,9 +120,10 @@ public class CardInputWidget extends LinearLayout {
         }
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        int requiredLength = mIsAmEx ? Card.CVC_LENGTH_AMERICAN_EXPRESS : Card.CVC_LENGTH_COMMON;
-        String cvcValue = mCvcNumberEditText.getText().toString();
-        if (StripeTextUtils.isBlank(cvcValue) || cvcValue.length() != requiredLength) {
+        String cvcValue = mCvcNumberEditText.getText().toString().trim();
+        int cvcLength = cvcValue.length();
+        if (!(cvcLength == Card.CVC_LENGTH_COMMON
+                || (mIsAmEx && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS))) {
             return null;
         }
 
