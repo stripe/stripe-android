@@ -15,6 +15,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
@@ -139,8 +140,7 @@ public class CardMultilineWidget extends LinearLayout {
                 CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber());
         boolean expiryIsValid = mExpiryDateEditText.getValidDateFields() != null &&
                 mExpiryDateEditText.isDateValid();
-        boolean cvcIsValid = ViewUtils.isCvcMaximalLength(
-                mCardBrand, mCvcEditText.getText().toString());
+        boolean cvcIsValid = isCvcLengthValid();
         mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
         mExpiryDateEditText.setShouldShowError(!expiryIsValid);
         mCvcEditText.setShouldShowError(!cvcIsValid);
@@ -253,6 +253,18 @@ public class CardMultilineWidget extends LinearLayout {
 
     static boolean isPostalCodeMaximalLength(boolean isZip, @Nullable String text) {
         return isZip && text != null && text.length() == 5;
+    }
+
+    private boolean isCvcLengthValid() {
+        int cvcLength = mCvcEditText.getText().toString().trim().length();
+        if (TextUtils.equals(Card.AMERICAN_EXPRESS, mCardBrand)
+                && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
+            return true;
+        }
+        if (cvcLength == Card.CVC_LENGTH_COMMON) {
+            return true;
+        }
+        return false;
     }
 
     private void checkAttributeSet(AttributeSet attrs) {
