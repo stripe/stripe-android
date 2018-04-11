@@ -27,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.StripeTextUtils;
 import com.stripe.android.model.Card;
 
 import java.util.Locale;
@@ -122,8 +121,7 @@ public class CardInputWidget extends LinearLayout {
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
         String cvcValue = mCvcNumberEditText.getText().toString().trim();
         int cvcLength = cvcValue.length();
-        if (!(cvcLength == Card.CVC_LENGTH_COMMON
-                || (mIsAmEx && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS))) {
+        if (!isCvcLengthValid()) {
             return null;
         }
 
@@ -434,6 +432,18 @@ public class CardInputWidget extends LinearLayout {
                     + mPlacementParameters.dateWidth
                     + mPlacementParameters.dateCvcSeparation;
         }
+    }
+
+    private boolean isCvcLengthValid() {
+        String cvcValue = mCvcNumberEditText.getText().toString().trim();
+        int cvcLength = cvcValue.length();
+        if (mIsAmEx && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
+            return true;
+        }
+        if (cvcLength == Card.CVC_LENGTH_COMMON) {
+            return true;
+        }
+        return false;
     }
 
     private void setLayoutValues(int width, int margin, @NonNull StripeEditText editText) {

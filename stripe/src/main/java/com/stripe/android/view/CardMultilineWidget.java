@@ -140,10 +140,7 @@ public class CardMultilineWidget extends LinearLayout {
                 CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber());
         boolean expiryIsValid = mExpiryDateEditText.getValidDateFields() != null &&
                 mExpiryDateEditText.isDateValid();
-        int cvcLength = mCvcEditText.getText().toString().trim().length();
-        boolean cvcIsValid = cvcLength == Card.CVC_LENGTH_COMMON
-                || (TextUtils.equals(Card.AMERICAN_EXPRESS, mCardBrand)
-                && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS);
+        boolean cvcIsValid = isCvcLengthValid();
         mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
         mExpiryDateEditText.setShouldShowError(!expiryIsValid);
         mCvcEditText.setShouldShowError(!cvcIsValid);
@@ -256,6 +253,18 @@ public class CardMultilineWidget extends LinearLayout {
 
     static boolean isPostalCodeMaximalLength(boolean isZip, @Nullable String text) {
         return isZip && text != null && text.length() == 5;
+    }
+
+    private boolean isCvcLengthValid() {
+        int cvcLength = mCvcEditText.getText().toString().trim().length();
+        if (TextUtils.equals(Card.AMERICAN_EXPRESS, mCardBrand)
+                && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
+            return true;
+        }
+        if (cvcLength == Card.CVC_LENGTH_COMMON) {
+            return true;
+        }
+        return false;
     }
 
     private void checkAttributeSet(AttributeSet attrs) {
