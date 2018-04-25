@@ -12,7 +12,7 @@ import org.robolectric.annotation.Config;
 
 import static com.stripe.android.model.CardTest.JSON_CARD;
 import static com.stripe.android.model.CustomerSourceTest.JSON_APPLE_PAY_CARD;
-import static com.stripe.android.model.SourceTest.EXAMPLE_BITCOIN_SOURCE;
+import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -120,11 +120,11 @@ public class CustomerTest {
             Source sourceCardWithApplePay = Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
             // Note that we don't yet explicitly support bitcoin sources, but this data is
             // convenient for the test because it is not an apple pay source.
-            Source bitcoinSource = Source.fromString(EXAMPLE_BITCOIN_SOURCE);
+            Source alipaySource = Source.fromString(EXAMPLE_ALIPAY_SOURCE);
             assertNotNull(sourceCardWithApplePay);
-            assertNotNull(bitcoinSource);
+            assertNotNull(alipaySource);
             sourcesArray.put(sourceCardWithApplePay.toJson());
-            sourcesArray.put(bitcoinSource.toJson());
+            sourcesArray.put(alipaySource.toJson());
 
             sourcesArray.put(testCard.toJson());
             sourcesArray.put(manipulatedApplePayCard.toJson());

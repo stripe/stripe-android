@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.stripe.android.model.CardTest.JSON_CARD;
-import static com.stripe.android.model.SourceTest.EXAMPLE_BITCOIN_SOURCE;
+import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -112,8 +112,8 @@ public class CustomerSourceTest {
 
     @Test
     public void getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
-        CustomerSource bitcoinSource = CustomerSource.fromString(EXAMPLE_BITCOIN_SOURCE);
-        assertNotNull(bitcoinSource);
-        assertEquals(Source.BITCOIN, bitcoinSource.getSourceType());
+        CustomerSource alipaySource = CustomerSource.fromString(EXAMPLE_ALIPAY_SOURCE);
+        assertNotNull(alipaySource);
+        assertEquals(Source.ALIPAY, alipaySource.getSourceType());
     }
 }

@@ -32,7 +32,6 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             ALIPAY,
-            BITCOIN,
             CARD,
             THREE_D_SECURE,
             GIROPAY,
@@ -45,7 +44,6 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     })
     public @interface SourceType { }
     public static final String ALIPAY = "alipay";
-    public static final String BITCOIN = "bitcoin";
     public static final String CARD = "card";
     public static final String THREE_D_SECURE = "three_d_secure";
     public static final String GIROPAY = "giropay";
@@ -543,9 +541,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     @Nullable
     @SourceType
     static String asSourceType(@Nullable String sourceType) {
-        if (BITCOIN.equals(sourceType)) {
-            return BITCOIN;
-        } else if (CARD.equals(sourceType)) {
+        if (CARD.equals(sourceType)) {
             return CARD;
         } else if (THREE_D_SECURE.equals(sourceType)) {
             return THREE_D_SECURE;
