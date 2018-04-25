@@ -1,5 +1,10 @@
 ## Migration Guides
 
+### Migrating from versions < 7.0.0
+- Remove Bitcoin source support because Stripe no longer processes Bitcoin payments: https://stripe.com/blog/ending-bitcoin-support
+    - Sources can no longer have a "BITCOIN" source type. These sources will now be interpreted as "UNKNOWN".
+    - You can no longer `createBitcoinParams`. Please use a different payment method.
+
 ### Migrating from versions < 5.0.0
 - StripeApiHandler methods can no longer be called directly.
 - PaymentConfiguration now stores your public key and is depended upon for CustomerSession.
