@@ -205,26 +205,6 @@ public class SourceParams {
     }
 
     /**
-     * Create a set of parameters for a Bitcoin source.
-     *
-     * @param amount amount for the transaction
-     * @param currency currency of the transaction (value is converted to Bitcoin on the server)
-     * @param email owner email for the account
-     * @return a {@link SourceParams} object that can be used to create a Bitcoin source
-     */
-    @NonNull
-    public static SourceParams createBitcoinParams(
-            @IntRange(from = 0) long amount,
-            @NonNull String currency,
-            @NonNull String email) {
-        return new SourceParams()
-                .setType(Source.BITCOIN)
-                .setAmount(amount)
-                .setCurrency(currency)
-                .setOwner(createSimpleMap(FIELD_EMAIL, email));
-    }
-
-    /**
      * Create a set of parameters for a credit card source.
      *
      * @param card a {@link Card} object containing the details necessary for the source

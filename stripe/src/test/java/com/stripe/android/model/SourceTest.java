@@ -32,7 +32,7 @@ import static org.junit.Assert.fail;
 @Config(sdk = 25)
 public class SourceTest {
 
-    static final String EXAMPLE_BITCOIN_SOURCE = "{\n" +
+    static final String EXAMPLE_ALIPAY_SOURCE = "{\n" +
                     "  \"id\": \"src_1AtlSXBZqEXluyI4JgBYTq5W\",\n" +
                     "  \"object\": \"source\",\n" +
                     "  \"amount\": 1000,\n" +
@@ -63,16 +63,8 @@ public class SourceTest {
                     "  },\n" +
                     "  \"statement_descriptor\": null,\n" +
                     "  \"status\": \"pending\",\n" +
-                    "  \"type\": \"bitcoin\",\n" +
-                    "  \"usage\": \"single_use\",\n" +
-                    "  \"bitcoin\": {\n" +
-                    "    \"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
-                    "    \"amount\": 2371000,\n" +
-                    "    \"amount_charged\": 0,\n" +
-                    "    \"amount_received\": 0,\n" +
-                    "    \"amount_returned\": 0,\n" +
-                    "    \"uri\": \"bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000\"\n" +
-                    "  }\n" +
+                    "  \"type\": \"alipay\",\n" +
+                    "  \"usage\": \"single_use\"\n" +
                     "}";
 
     static final String EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = "{\n"+
