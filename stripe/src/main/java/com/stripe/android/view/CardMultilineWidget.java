@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -542,19 +543,10 @@ public class CardMultilineWidget extends LinearLayout {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void updateDrawable(
             @DrawableRes int iconResourceId,
             boolean needsTint) {
-
-        Drawable icon;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            icon = getResources().getDrawable(iconResourceId, null);
-        } else {
-            // This method still triggers the "deprecation" warning, despite the other
-            // one not being allowed for SDK < 21
-            icon = getResources().getDrawable(iconResourceId);
-        }
+        Drawable icon = ContextCompat.getDrawable(getContext(), iconResourceId);
 
         Drawable[] drawables = mCardNumberEditText.getCompoundDrawables();
         Drawable original = drawables[0];

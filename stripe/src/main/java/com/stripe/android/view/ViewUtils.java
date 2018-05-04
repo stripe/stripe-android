@@ -11,6 +11,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 
@@ -80,26 +81,17 @@ class ViewUtils {
         return outValue;
     }
 
-    @SuppressWarnings("deprecation")
     static Drawable getTintedIcon(
             @NonNull Context context,
             @DrawableRes int iconResourceId,
             @ColorRes int colorResourceId) {
-        @ColorInt int color;
-        Drawable icon;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            color = context.getResources().getColor(colorResourceId, context.getTheme());
-            icon = context.getResources().getDrawable(iconResourceId, context.getTheme());
-        }  else {
-            color = context.getResources().getColor(colorResourceId);
-            icon = context.getResources().getDrawable(iconResourceId);
-        }
+        @ColorInt int color = ContextCompat.getColor(context, colorResourceId);
+        Drawable icon = ContextCompat.getDrawable(context, iconResourceId);
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), color);
         return compatIcon;
     }
 
-    @SuppressWarnings("deprecation")
     static Drawable getTintedIconWithAttribute(
             @NonNull Context context,
             @NonNull Resources.Theme theme,
@@ -108,12 +100,7 @@ class ViewUtils {
         TypedValue typedValue = new TypedValue();
         theme.resolveAttribute(attributeResource, typedValue, true);
         @ColorInt int color = typedValue.data;
-        Drawable icon;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            icon = context.getResources().getDrawable(iconResourceId, theme);
-        } else {
-            icon = context.getResources().getDrawable(iconResourceId);
-        }
+        Drawable icon = ContextCompat.getDrawable(context, iconResourceId);
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), color);
         return compatIcon;
@@ -137,7 +124,7 @@ class ViewUtils {
      * @param color an integer representation of a color
      * @return {@code true} if the color is "dark," else {@link false}
      */
-    static boolean isColorDark(@ColorInt int color){
+    static boolean isColorDark(@ColorInt int color) {
         // Forumla comes from W3C standards and conventional theory
         // about how to calculate the "brightness" of a color, often
         // thought of as how far along the spectrum from white to black the
@@ -178,7 +165,7 @@ class ViewUtils {
      */
     @NonNull
     static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
-                                                    @NonNull @Card.CardBrand String brand) {
+                                             @NonNull @Card.CardBrand String brand) {
         if (spacelessCardNumber.length() > 16) {
             spacelessCardNumber = spacelessCardNumber.substring(0, 16);
         }

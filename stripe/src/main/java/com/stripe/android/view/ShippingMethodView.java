@@ -1,10 +1,9 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -73,7 +72,7 @@ class ShippingMethodView extends RelativeLayout {
         mCheckmark = findViewById(R.id.iv_selected_icon);
         mSelectedColorInt = getThemeAccentColor(getContext()).data;
         mUnselectedTextColorPrimaryInt = getThemeTextColorPrimary(getContext()).data;
-        mUnselectedTextColorSecondaryInt =  getThemeTextColorSecondary(getContext()).data;
+        mUnselectedTextColorSecondaryInt = getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams
                 .MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -82,35 +81,17 @@ class ShippingMethodView extends RelativeLayout {
         setLayoutParams(params);
     }
 
-    @SuppressWarnings("deprecation")
     private void useDefaultColorsIfThemeColorsAreInvisible() {
-        Resources res = getResources();
         Context context = getContext();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default, context.getTheme()) :
-                    mSelectedColorInt;
-            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
-                    (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
-                    .color_text_unselected_primary_default, context.getTheme()) :
-                    mUnselectedTextColorPrimaryInt;
-            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
-                    (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
-                    .color_text_unselected_secondary_default, context.getTheme()) :
-                    mUnselectedTextColorSecondaryInt;
-        } else {
-            // This method still triggers the "deprecation" warning, despite the other
-            // one not being allowed for SDK < 23
-            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default)
-                    : mSelectedColorInt;
-            mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
-                    (mUnselectedTextColorPrimaryInt) ? res.getColor(R.color
-                    .color_text_unselected_primary_default) : mUnselectedTextColorPrimaryInt;
-            mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
-                    (mUnselectedTextColorSecondaryInt) ? res.getColor(R.color
-                    .color_text_unselected_secondary_default) : mUnselectedTextColorSecondaryInt;
-        }
+        mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
+                ? ContextCompat.getColor(context, R.color.accent_color_default)
+                : mSelectedColorInt;
+        mUnselectedTextColorPrimaryInt = ViewUtils.isColorTransparent
+                (mUnselectedTextColorPrimaryInt) ? ContextCompat.getColor(context, R.color
+                .color_text_unselected_primary_default) : mUnselectedTextColorPrimaryInt;
+        mUnselectedTextColorSecondaryInt = ViewUtils.isColorTransparent
+                (mUnselectedTextColorSecondaryInt) ? ContextCompat.getColor(context, R.color
+                .color_text_unselected_secondary_default) : mUnselectedTextColorSecondaryInt;
     }
 
     void setShippingMethod(@NonNull ShippingMethod shippingMethod) {

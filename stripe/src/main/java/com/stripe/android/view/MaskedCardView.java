@@ -1,14 +1,13 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.AppCompatImageView;
@@ -208,19 +207,11 @@ public class MaskedCardView extends LinearLayout {
         updateDrawable(iconResourceId, mCardIconImageView, false);
     }
 
-    @SuppressWarnings("deprecation")
     private void updateDrawable(
             @DrawableRes int resourceId,
             @NonNull ImageView imageView,
             boolean isCheckMark) {
-        Drawable icon;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            icon = getResources().getDrawable(resourceId, imageView.getContext().getTheme());
-        } else {
-            // This method still triggers the "deprecation" warning, despite the other
-            // one not being allowed for SDK < 21
-            icon = getResources().getDrawable(resourceId);
-        }
+        Drawable icon = ContextCompat.getDrawable(imageView.getContext(), resourceId);
 
         @ColorInt int tintColor = mIsSelected || isCheckMark ? mSelectedColorInt :
                 mUnselectedColorInt;
@@ -279,33 +270,17 @@ public class MaskedCardView extends LinearLayout {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void useDefaultColorsIfThemeColorsAreInvisible() {
-        Resources res = getResources();
         Context context = getContext();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default, context.getTheme())
-                    : mSelectedColorInt;
-            mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
-                    ? res.getColor(R.color.control_normal_color_default, context.getTheme())
-                    : mUnselectedColorInt;
-            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
-                    ? res.getColor(R.color.color_text_secondary_default, context.getTheme())
-                    : mUnselectedTextColorInt;
-        } else {
-            // This method still triggers the "deprecation" warning, despite the other
-            // one not being allowed for SDK < 23
-            mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
-                    ? res.getColor(R.color.accent_color_default)
-                    : mSelectedColorInt;
-            mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
-                    ? res.getColor(R.color.control_normal_color_default)
-                    : mUnselectedColorInt;
-            mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
-                    ? res.getColor(R.color.color_text_secondary_default)
-                    : mUnselectedTextColorInt;
-        }
+        mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt)
+                ? ContextCompat.getColor(context, R.color.accent_color_default)
+                : mSelectedColorInt;
+        mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt)
+                ? ContextCompat.getColor(context, R.color.control_normal_color_default)
+                : mUnselectedColorInt;
+        mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt)
+                ? ContextCompat.getColor(context, R.color.color_text_secondary_default)
+                : mUnselectedTextColorInt;
     }
 
     private void setLightTextColorValues() {
