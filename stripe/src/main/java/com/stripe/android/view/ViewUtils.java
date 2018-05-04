@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 
+import com.stripe.android.R;
 import com.stripe.android.model.Card;
 
 import static com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS;
@@ -30,9 +31,7 @@ class ViewUtils {
             colorAttr = android.R.attr.colorAccent;
         } else {
             //Get colorAccent defined for AppCompat
-            colorAttr = context
-                    .getResources()
-                    .getIdentifier("colorAccent", "attr", context.getPackageName());
+            colorAttr = R.attr.colorAccent;
         }
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);
@@ -45,9 +44,7 @@ class ViewUtils {
             colorAttr = android.R.attr.colorControlNormal;
         } else {
             //Get colorControlNormal defined for AppCompat
-            colorAttr = context
-                    .getResources()
-                    .getIdentifier("colorControlNormal", "attr", context.getPackageName());
+            colorAttr = R.attr.colorControlNormal;
         }
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);
