@@ -685,7 +685,7 @@ public class StripeTest {
         }
     }
 
-        @Test
+    @Test
     public void createSourceSynchronous_withIDealParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams params = SourceParams.createIdealParams(
@@ -714,6 +714,44 @@ public class StripeTest {
             assertNull(idealSource.getSourceTypeModel());
             assertEquals("Bond", idealSource.getOwner().getName());
             assertNotNull(idealSource.getRedirect());
+            assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void createSourceSynchronous_withIDealParamsNoStatement_doesNotIgnoreBank() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        String bankName = "rabobank";
+        SourceParams params = SourceParams.createIdealParams(
+                5500L,
+                "Bond",
+                "example://return",
+                null,
+                bankName);
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
+        try {
+            Source idealSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(idealSource);
+            assertNotNull(idealSource.getClientSecret());
+            assertNotNull(idealSource.getId());
+            assertEquals(5500L, idealSource.getAmount().longValue());
+            assertEquals(Source.IDEAL, idealSource.getType());
+            assertEquals("eur", idealSource.getCurrency());
+            assertNotNull(idealSource.getSourceTypeData());
+            assertNotNull(idealSource.getOwner());
+            assertNull(idealSource.getSourceTypeModel());
+            assertEquals("Bond", idealSource.getOwner().getName());
+            assertNotNull(idealSource.getRedirect());
+            assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
             assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
             JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
         } catch (StripeException stripeEx) {

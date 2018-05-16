@@ -327,30 +327,6 @@ public class SourceParamsTest {
     }
 
     @Test
-    public void createIdealParams_whenMissingOneOptionalField_hasNoApiParams() {
-        SourceParams params1 = SourceParams.createIdealParams(
-                900L,
-                "Default Name",
-                "stripe://anotherurl",
-                null,
-                "SVB");
-
-        SourceParams params2 = SourceParams.createIdealParams(
-                900L,
-                "Default Name",
-                "stripe://anotherurl",
-                "something you bought",
-                null);
-
-        assertEquals(Source.IDEAL, params1.getType());
-        assertEquals(Source.EURO, params1.getCurrency());
-        assertEquals(Source.IDEAL, params2.getType());
-        assertEquals(Source.EURO, params2.getCurrency());
-        assertNull(params1.getApiParameterMap());
-        assertNull(params2.getApiParameterMap());
-    }
-
-    @Test
     public void createP24Params_withAllFields_hasExpectedFields() {
         SourceParams params = SourceParams.createP24Params(
                 1000L,

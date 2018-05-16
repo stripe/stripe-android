@@ -302,18 +302,20 @@ public class SourceParams {
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+        Map<String, Object> additionalParamsMap = new HashMap<>();
 
-        if (statementDescriptor != null && bank != null) {
-            Map<String, Object> additionalParamsMap =
-                    createSimpleMap(
-                            FIELD_STATEMENT_DESCRIPTOR, statementDescriptor,
-                            FIELD_BANK, bank);
+        if (statementDescriptor != null) {
+            additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+        }
+        if (bank != null) {
+            additionalParamsMap.put(FIELD_BANK, bank);
+        }
+        if (!additionalParamsMap.isEmpty()) {
             params.setApiParameterMap(additionalParamsMap);
         }
-
         return params;
     }
-    
+
     @NonNull
     public static SourceParams createSepaDebitParams(
             @NonNull String name,
