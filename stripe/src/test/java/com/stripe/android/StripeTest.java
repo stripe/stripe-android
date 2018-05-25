@@ -686,7 +686,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withIDealParams_passesIntegrationTest() {
+    public void createSourceSynchronous_withiDEALParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams params = SourceParams.createIdealParams(
                 5500L,
@@ -722,7 +722,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withIDealParamsNoStatement_doesNotIgnoreBank() {
+    public void createSourceSynchronous_withiDEALParamsNoStatement_doesNotIgnoreBank() {
         Stripe stripe = getNonLoggingStripe(mContext);
         String bankName = "rabobank";
         SourceParams params = SourceParams.createIdealParams(
@@ -758,6 +758,46 @@ public class StripeTest {
             fail("Unexpected error: " + stripeEx.getLocalizedMessage());
         }
     }
+
+
+    @Test
+    public void createSourceSynchronous_withiDEALParamsNoName_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        String bankName = "rabobank";
+        SourceParams params = SourceParams.createIdealParams(
+                5500L,
+                null,
+                "example://return",
+                null,
+                bankName);
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
+        try {
+            Source idealSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(idealSource);
+            assertNotNull(idealSource.getClientSecret());
+            assertNotNull(idealSource.getId());
+            assertEquals(5500L, idealSource.getAmount().longValue());
+            assertEquals(Source.IDEAL, idealSource.getType());
+            assertEquals("eur", idealSource.getCurrency());
+            assertNotNull(idealSource.getSourceTypeData());
+            assertNotNull(idealSource.getOwner());
+            assertNull(idealSource.getSourceTypeModel());
+            assertNotNull(idealSource.getRedirect());
+            assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
+            assertEquals(null, idealSource.getOwner().getName());
+            assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+            JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
 
     @Test
     public void createSourceSynchronous_withSofortParams_passesIntegrationTest() {

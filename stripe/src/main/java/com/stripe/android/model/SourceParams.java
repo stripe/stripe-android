@@ -292,7 +292,7 @@ public class SourceParams {
     @NonNull
     public static SourceParams createIdealParams(
             @IntRange(from = 0) long amount,
-            @NonNull String name,
+            @Nullable String name,
             @NonNull String returnUrl,
             @Nullable String statementDescriptor,
             @Nullable String bank) {
@@ -300,10 +300,11 @@ public class SourceParams {
                 .setType(Source.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(createSimpleMap(FIELD_NAME, name))
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+        if (name != null) {
+            params.setOwner(createSimpleMap(FIELD_NAME, name));
+        }
         Map<String, Object> additionalParamsMap = new HashMap<>();
-
         if (statementDescriptor != null) {
             additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
