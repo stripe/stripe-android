@@ -6,13 +6,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
+        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.2'
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.3'
+    gradleVersion = '4.4'
     distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
@@ -20,8 +20,8 @@ allprojects {
     group = GROUP
 
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
 
     task checkstyle(type: Checkstyle) {
@@ -39,7 +39,7 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "26.0.2"
+    buildToolsVersion = "27.0.3"
     compileSdkVersion = 27
     supportLibVersion = "27.1.0"
 
