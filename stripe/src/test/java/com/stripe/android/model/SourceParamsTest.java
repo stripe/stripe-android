@@ -347,12 +347,12 @@ public class SourceParamsTest {
     }
 
     @Test
-    public void createP24Params_withNullEmail_hasExpectedFields() {
+    public void createP24Params_withNullName_hasExpectedFields() {
         SourceParams params = SourceParams.createP24Params(
                 1000L,
                 "eur",
-                "Jane Tester",
                 null,
+                "jane@test.com",
                 "stripe://testactivity");
 
         assertEquals(Source.P24, params.getType());
@@ -360,8 +360,8 @@ public class SourceParamsTest {
         assertEquals(1000L, params.getAmount().longValue());
         assertEquals("eur", params.getCurrency());
         assertNotNull(params.getOwner());
-        assertEquals("Jane Tester", params.getOwner().get("name"));
-        assertNull(params.getOwner().get("email"));
+        assertNull(params.getOwner().get("name"));
+        assertEquals("jane@test.com", params.getOwner().get("email"));
         assertNotNull(params.getRedirect());
         assertEquals("stripe://testactivity", params.getRedirect().get("return_url"));
     }

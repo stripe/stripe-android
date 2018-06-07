@@ -68,25 +68,31 @@ public class SourceParams {
     private SourceParams() {}
 
     /**
-     * Create parameters used to generate a P24 source.
+     * Create parameters necessary for creating a P24 source.
      *
-     * @param currency the currency code that this source will be charged in.
-     * @param name the user's name
-     * @param email the user's email
-     * @param returnUrl a url used to reopen the application
-     * @return a {@link SourceParams} that can be used to create an Alipay reusable source
+     * @param amount A positive integer in the smallest currency unit representing the amount to
+     *               charge the customer (e.g., 1099 for a €10.99 payment).
+     * @param currency `eur` or `pln` (P24 payments must be in either Euros or Polish Zloty).
+     * @param name The name of the account holder (optional).
+     * @param email The email address of the account holder.
+     * @param returnUrl The URL the customer should be redirected to after the authorization
+     *                  process.
+     * @return a {@link SourceParams} that can be used to create a P24 source
+     *
+     * @see <a href="https://stripe.com/docs/sources/p24">https://stripe.com/docs/sources/p24</a>
      */
     public static SourceParams createP24Params(
             @IntRange(from = 0) long amount,
             @NonNull String currency,
-            @NonNull String name,
-            @Nullable String email,
+            @Nullable String name,
+            @NonNull String email,
             @NonNull String returnUrl) {
         SourceParams params = new SourceParams()
                 .setAmount(amount)
                 .setType(Source.P24)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+
         Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
@@ -94,6 +100,7 @@ public class SourceParams {
         if (ownerMap.keySet().size() > 0) {
             params.setOwner(ownerMap);
         }
+
         return params;
     }
 
