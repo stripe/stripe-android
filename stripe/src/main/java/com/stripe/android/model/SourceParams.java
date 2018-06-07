@@ -256,6 +256,41 @@ public class SourceParams {
     }
 
     /**
+     * Create parameters necessary for creating an EPS source.
+     *
+     * @param amount A positive integer in the smallest currency unit representing the amount to
+     *               charge the customer (e.g., 1099 for a €10.99 payment).
+     * @param name The full name of the account holder.
+     * @param returnUrl The URL the customer should be redirected to after the authorization
+     *                  process.
+     * @param statementDescriptor A custom statement descriptor for the payment (optional).
+     * @return a {@link SourceParams} object that can be used to create an EPS source
+     *
+     * @see <a href="https://stripe.com/docs/sources/eps">https://stripe.com/docs/sources/eps</a>
+     */
+    @NonNull
+    public static SourceParams createEPSParams(
+            @IntRange(from = 0) long amount,
+            @NonNull String name,
+            @NonNull String returnUrl,
+            @Nullable String statementDescriptor) {
+        SourceParams params = new SourceParams()
+                .setType(Source.EPS)
+                .setCurrency(Source.EURO)
+                .setAmount(amount)
+                .setOwner(createSimpleMap(FIELD_NAME, name))
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
+
+        if (statementDescriptor != null) {
+            Map<String, Object> additionalParamsMap =
+                    createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+            params.setApiParameterMap(additionalParamsMap);
+        }
+
+        return params;
+    }
+
+    /**
      * Create parameters necessary for creating a Giropay source
      *
      * @param amount amount of the transaction
@@ -321,6 +356,32 @@ public class SourceParams {
         if (!additionalParamsMap.isEmpty()) {
             params.setApiParameterMap(additionalParamsMap);
         }
+        return params;
+    }
+
+    /**
+     * Create parameters necessary to create a Multibanco source.
+     *
+     * @param amount A positive integer in the smallest currency unit representing the amount to
+     *               charge the customer (e.g., 1099 for a €10.99 payment).
+     * @param returnUrl The URL the customer should be redirected to after the authorization
+     *                  process.
+     * @param email The full email address of the customer.
+     * @return a {@link SourceParams} object that can be used to create a Multibanco source
+     *
+     * @see <a href="https://stripe.com/docs/sources/multibanco">https://stripe.com/docs/sources/multibanco</a>
+     */
+    @NonNull
+    public static SourceParams createMultibancoParams(
+            @IntRange(from = 0) long amount,
+            @NonNull String returnUrl,
+            @NonNull String email) {
+        SourceParams params = new SourceParams()
+                .setType(Source.MULTIBANCO)
+                .setCurrency(Source.EURO)
+                .setAmount(amount)
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setOwner(createSimpleMap(FIELD_EMAIL, email));
         return params;
     }
 
