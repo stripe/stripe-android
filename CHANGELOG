@@ -1,3 +1,5 @@
+    Add EPS and Multibanco support to `SourceParams` (https://github.com/stripe/stripe-android/pull/583)
+
 7.0.1 2018-05-25
     Make iDEAL params match API - `name` is optional and optional ideal `bank` and `statement_descriptor` can be set independently
 
