@@ -1,7 +1,6 @@
 package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.stripe.android.testharness.JsonTestUtils;
 
