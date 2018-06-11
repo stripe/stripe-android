@@ -26,12 +26,14 @@ public class Address extends StripeJsonModel implements Parcelable {
     @IntDef({
             RequiredBillingAddressFields.NONE,
             RequiredBillingAddressFields.ZIP,
-            RequiredBillingAddressFields.FULL})
+            RequiredBillingAddressFields.FULL,
+            RequiredBillingAddressFields.NAME})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequiredBillingAddressFields {
         int NONE = 0;
         int ZIP = 1;
         int FULL = 2;
+        int NAME = 3;
     }
 
     private static final String FIELD_CITY = "city";
