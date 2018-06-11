@@ -52,6 +52,8 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     public static final String SOFORT = "sofort";
     public static final String BANCONTACT = "bancontact";
     public static final String P24 = "p24";
+    public static final String EPS = "eps";
+    public static final String MULTIBANCO = "multibanco";
     public static final String UNKNOWN = "unknown";
 
     public static final Set<String> MODELED_TYPES = new HashSet<>();

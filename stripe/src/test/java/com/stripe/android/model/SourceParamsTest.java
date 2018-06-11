@@ -217,6 +217,65 @@ public class SourceParamsTest {
     }
 
     @Test
+    public void createEPSParams_hasExpectedFields() {
+        SourceParams params = SourceParams.createEPSParams(
+                150L,
+                "Stripe",
+                "stripe://return",
+                "stripe descriptor");
+
+        assertEquals(Source.EPS, params.getType());
+        assertEquals(Source.EURO, params.getCurrency());
+        assertEquals("Stripe", params.getOwner().get("name"));
+        assertEquals("stripe://return", params.getRedirect().get("return_url"));
+
+        Map<String, Object> apiMap = params.getApiParameterMap();
+        assertEquals("stripe descriptor", apiMap.get("statement_descriptor"));
+    }
+
+    @Test
+    public void createEPSParams_toParamMap_createsExpectedMap() {
+        SourceParams params = SourceParams.createEPSParams(
+                150L,
+                "Stripe",
+                "stripe://return",
+                "stripe descriptor");
+
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("type", Source.EPS);
+        expectedMap.put("currency", Source.EURO);
+        expectedMap.put("amount", 150L);
+        expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
+        expectedMap.put("redirect",
+                new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
+        expectedMap.put(Source.EPS,
+                new HashMap<String, Object>() {{
+                    put("statement_descriptor", "stripe descriptor");
+                }});
+
+        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+    }
+
+    @Test
+    public void createEPSParams_toParamMap_createsExpectedMap_noStatementDescriptor() {
+        SourceParams params = SourceParams.createEPSParams(
+                150L,
+                "Stripe",
+                "stripe://return",
+                null);
+
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("type", Source.EPS);
+        expectedMap.put("currency", Source.EURO);
+        expectedMap.put("amount", 150L);
+        expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
+        expectedMap.put("redirect",
+                new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
+
+        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+    }
+
+    @Test
     public void createGiropayParams_hasExpectedFields() {
         SourceParams params = SourceParams.createGiropayParams(
                 150L,
@@ -347,12 +406,12 @@ public class SourceParamsTest {
     }
 
     @Test
-    public void createP24Params_withNullEmail_hasExpectedFields() {
+    public void createP24Params_withNullName_hasExpectedFields() {
         SourceParams params = SourceParams.createP24Params(
                 1000L,
                 "eur",
-                "Jane Tester",
                 null,
+                "jane@test.com",
                 "stripe://testactivity");
 
         assertEquals(Source.P24, params.getType());
@@ -360,10 +419,43 @@ public class SourceParamsTest {
         assertEquals(1000L, params.getAmount().longValue());
         assertEquals("eur", params.getCurrency());
         assertNotNull(params.getOwner());
-        assertEquals("Jane Tester", params.getOwner().get("name"));
-        assertNull(params.getOwner().get("email"));
+        assertNull(params.getOwner().get("name"));
+        assertEquals("jane@test.com", params.getOwner().get("email"));
         assertNotNull(params.getRedirect());
         assertEquals("stripe://testactivity", params.getRedirect().get("return_url"));
+    }
+
+    @Test
+    public void createMultibancoParams_hasExpectedFields() {
+        SourceParams params = SourceParams.createMultibancoParams(
+                150L,
+                "stripe://testactivity",
+                "multibancoholder@stripe.com");
+
+        assertEquals(Source.MULTIBANCO, params.getType());
+        assertEquals(Source.EURO, params.getCurrency());
+        assertEquals(150L, params.getAmount().longValue());
+        assertEquals("stripe://testactivity", params.getRedirect().get("return_url"));
+        assertEquals("multibancoholder@stripe.com", params.getOwner().get("email"));
+    }
+
+    @Test
+    public void createMultibancoParams_toParamMap_createsExpectedMap() {
+        SourceParams params = SourceParams.createMultibancoParams(
+                150L,
+                "stripe://testactivity",
+                "multibancoholder@stripe.com");
+
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("type", Source.MULTIBANCO);
+        expectedMap.put("currency", Source.EURO);
+        expectedMap.put("amount", 150L);
+        expectedMap.put("owner",
+                new HashMap<String, Object>() {{ put("email", "multibancoholder@stripe.com"); }});
+        expectedMap.put("redirect",
+                new HashMap<String, Object>() {{ put("return_url", "stripe://testactivity"); }});
+
+        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
