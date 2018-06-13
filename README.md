@@ -1,10 +1,10 @@
-## stripe-android
+# Stripe Android SDK
 
 [![Build Status](https://api.travis-ci.org/stripe/stripe-android.svg?branch=master)](https://travis-ci.org/stripe/stripe-android)
 
-Stripe-android makes it easy to collect credit card information without having sensitive details touch your server.
+The Stripe Android SDK makes it quick and easy to build an excellent payment experience in your Android app. We provide powerful and customizable UI elements that can be used out-of-the-box to collect your users' payment details. We also expose the low-level APIs that power those UIs so that you can build fully custom experiences. See our [Android Integration Guide](https://stripe.com/docs/mobile/android) to get started!
 
-These Stripe Android bindings can be used to generate tokens in your Android application. If you are building an Android application that charges a credit card, you should use stripe-android to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
+> If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
 ## Installation
 
@@ -12,13 +12,17 @@ These Stripe Android bindings can be used to generate tokens in your Android app
 
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
-    compile 'com.stripe:stripe-android:7.1.0'
+```
+compile 'com.stripe:stripe-android:7.1.0'
+```
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
 
 Please note that if enabling minification in your `build.gradle` file, you must also add this line to the `proguard-rules.pro`:
 
-    -keep class com.stripe.android.** { *; }
+```
+-keep class com.stripe.android.** { *; }
+```
 
 ### Eclipse
 
@@ -26,11 +30,11 @@ Note - as Google has stopped supporting Eclipse for Android Development, we will
 
 ## Usage
 
-### Using the CardInputWidget
+### Using `CardInputWidget`
 
 You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
 
-First, add the CardInputWidget to your layout.
+First, add the `CardInputWidget` to your layout.
 
 ```xml
 <com.stripe.android.view.CardInputWidget
@@ -40,19 +44,20 @@ First, add the CardInputWidget to your layout.
     />
 ```
 
-Note: the minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, we assign one for you when the object is instantiated.
+Note: The minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, we assign one for you when the object is instantiated.
 
-Once this widget is in your layout, you can read the `Card` object simply by asking the widget. You'll be given a `null` object if the card data is invalid according to our client-side checks.
+Once this widget is in your layout, you can read the `Card` object simply by querying the widget. You'll be given a `null` object if the card data is invalid according to our client-side checks.
 
 ```java
 Card cardToSave = mCardInputWidget.getCard();
+
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
     return;
 }
 ```
 
-### Using the CardMultilineWidget
+### Using `CardMultilineWidget`
 
 You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
 
@@ -65,7 +70,7 @@ You can add a Material-style multiline widget to your apps that handles card dat
     />
 ```
 
-Note: a `CardMultiline` widget can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
+Note: A `CardMultiline` widget can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
 
 In order to use the `app:shouldShowPostalCode` tag, you'll need to enable the app XML namespace somewhere in the layout.
 
@@ -75,21 +80,22 @@ Note: We currently only support US ZIP in the postal code field.
 xmlns:app="http://schemas.android.com/apk/res-auto"
 ```
 
-To get a `Card` object from the `CardMultilineWidget`, you ask the widget for its card, just like the `CardInputWidget`.
+To get a `Card` object from the `CardMultilineWidget`, you query the widget for its card, just like the `CardInputWidget`.
 
 ```java
 Card cardToSave = mCardMultilineWidget.getCard();
+
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
     return;
 }
 ```
 
-If the returned `Card` is null, error states will show on the fields that need to be fixed.
+If the returned `Card` is `null`, error states will show on the fields that need to be fixed.
 
-Once you have a non-null `Card` object from either widget, you can call [createToken](#createtoken).
+Once you have a non-null `Card` object from either widget, you can call [createToken](#using-createtoken).
 
-### setDefaultPublishableKey
+### Using `setDefaultPublishableKey`
 
 A publishable key is required to identify your website when communicating with Stripe. Remember to replace the test key with your live key in production.
 
@@ -106,9 +112,9 @@ or
 new Stripe(context).setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
 ```
 
-### createToken
+### Using `createToken`
 
-createToken converts sensitive card data to a single-use token which you can safely pass to your server to charge the user. The [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
+The `stripe.createToken` converts sensitive card data into a single-use token which you can safely pass to your server to charge the user. This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
 
 ```java
 stripe.createToken(
@@ -117,30 +123,31 @@ stripe.createToken(
 );
 ```
 
-The first argument to createToken is a Card object. A Card contains the following fields:
+The first argument to `createToken` is a Card object. A Card contains the following fields:
 
-+ number: card number as a string without any separators, e.g. '4242424242424242'.
-+ expMonth: integer representing the card's expiration month, e.g. 12.
-+ expYear: integer representing the card's expiration year, e.g. 2013.
++ `number`: Card number as a string without any separators, e.g. `4242424242424242`.
++ `expMonth`: Integer representing the card's expiration month, e.g. `12`.
++ `expYear`: Integer representing the card's expiration year, e.g. `2013`.
 
 The following field is optional but recommended to help prevent fraud:
 
-+ cvc: card security code as a string, e.g. '123'.
++ `cvc`: Card security code as a string, e.g. `123`.
 
 The following fields are entirely optional — they cannot result in a token creation failing:
 
-+ name: cardholder name.
-+ addressLine1: billing address line 1.
-+ addressLine2: billing address line 2.
-+ addressCity: billing address city.
-+ addressState: billing address state.
-+ addressZip: billing zip as a string, e.g. '94301'.
-+ addressCountry: billing address country.
++ `name`: Cardholder name.
++ `addressLine1`: Billing address line 1.
++ `addressLine2`: Billing address line 2.
++ `addressCity`: Billing address city.
++ `addressState`: Billing address state.
++ `addressZip`: Billing zip as a string, e.g. `94301`.
++ `addressCountry`: Billing address country.
 
-The second argument tokenCallback is a callback you provide to handle responses from Stripe.
-It should send the token to your server for processing onSuccess, and notify the user onError.
+The second argument `tokenCallback` is a callback you provide to handle responses from Stripe.
+It should send the token to your server for processing `onSuccess`, and notify the user `onError`.
 
 Here's a sample implementation of the token callback:
+
 ```java
 stripe.createToken(
     card,
@@ -158,13 +165,16 @@ stripe.createToken(
 );
 ```
 
-`createToken` is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
+The `stripe.createToken` is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
 
-### createTokenSynchronous
+### Using `createTokenSynchronous`
 
-The `createTokenSynchronous` method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService. **Note: do not call this method on the main thread or your app will crash!**
+The `stripe.createTokenSynchronous` method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService.
+
+Note: Do not call this method on the main thread or your app will crash!
 
 #### RxJava Example
+
 ```java
 Observable<Token> tokenObservable =
     Observable.fromCallable(
@@ -211,9 +221,11 @@ tokenObservable
                 }
             });
 ```
+
 #### IntentService Example
 
 You can invoke the following from your code (where `cardToSave` is some Card object that you have created.)
+
 ```java
 Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
         mActivity,
@@ -226,6 +238,7 @@ mActivity.startService(tokenServiceIntent);
 ```
 
 Your IntentService can then perform the following in its `onHandleIntent` method.
+
 ```java
 @Override
 protected void onHandleIntent(Intent intent) {
@@ -260,6 +273,7 @@ protected void onHandleIntent(Intent intent) {
 ```
 
 Registering a local BroadcastReceiver in your activity then allows you to handle the results.
+
 ```java
 private class TokenBroadcastReceiver extends BroadcastReceiver {
 
@@ -314,7 +328,7 @@ To build and run the example apps, clone the repository and open the project. Ru
 
 ### Getting started with the Android example apps
 
-Note: both example apps require an [Android SDK](https://developer.android.com/studio/index.html) and [Gradle](https://gradle.org/) to build and run.
+Note: Both example apps require an [Android SDK](https://developer.android.com/studio/index.html) and [Gradle](https://gradle.org/) to build and run.
 
 ### Building the example project
 
