@@ -3,7 +3,7 @@
 ### 7.1.0 2018-06-11
 * Add EPS and Multibanco support to `SourceParams` [#583](https://github.com/stripe/stripe-android/pull/583)
 * Add `RequiredBillingAddressFields.NAME` option to enumeration [#586](https://github.com/stripe/stripe-android/pull/586)
-* Fix `@Nullable` and `@NonNull` annotations for `createP24Params` function [#583](https://github.com/stripe/stripe-android/pull/583/commits/d95d5969bbf4c01b61624ccb9626790c124f0647)
+* **BREAKING** Fix `@Nullable` and `@NonNull` annotations for `createP24Params` function [#583](https://github.com/stripe/stripe-android/pull/583/commits/d95d5969bbf4c01b61624ccb9626790c124f0647)
 
 ### 7.0.1 2018-05-25
 * Make iDEAL params match API - `name` is optional and optional ideal `bank` and `statement_descriptor` can be set independently
