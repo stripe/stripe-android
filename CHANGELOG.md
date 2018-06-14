@@ -1,5 +1,7 @@
 # CHANGELOG
 
+* **BREAKING** Add `preferredLanguage` parameter to `SourceParams.createBancontactParams` [#589](https://github.com/stripe/stripe-android/pull/589)
+
 ### 7.1.0 2018-06-11
 * Add EPS and Multibanco support to `SourceParams` [#583](https://github.com/stripe/stripe-android/pull/583)
 * Add `RequiredBillingAddressFields.NAME` option to enumeration [#586](https://github.com/stripe/stripe-android/pull/586)

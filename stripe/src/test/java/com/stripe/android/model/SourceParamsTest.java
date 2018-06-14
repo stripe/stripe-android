@@ -126,7 +126,8 @@ public class SourceParamsTest {
                 1000L,
                 "Stripe",
                 "return/url/3000",
-                "descriptor");
+                "descriptor",
+                "en");
 
         assertEquals(Source.BANCONTACT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
@@ -140,6 +141,7 @@ public class SourceParamsTest {
         Map<String, Object> apiMap = params.getApiParameterMap();
         assertNotNull(apiMap);
         assertEquals("descriptor", apiMap.get("statement_descriptor"));
+        assertEquals("en", apiMap.get("preferred_language"));
     }
 
     @Test
@@ -148,7 +150,8 @@ public class SourceParamsTest {
                 1000L,
                 "Stripe",
                 "return/url/3000",
-                "descriptor");
+                "descriptor",
+                "en");
 
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", Source.BANCONTACT);
@@ -158,9 +161,54 @@ public class SourceParamsTest {
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "return/url/3000"); }});
         expectedMap.put(Source.BANCONTACT,
-                new HashMap<String, Object>() {{ put("statement_descriptor", "descriptor"); }});
+                new HashMap<String, Object>() {{
+                    put("statement_descriptor", "descriptor");
+                    put("preferred_language", "en");
+        }});
 
         JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+    }
+
+    @Test
+    public void createBancontactParams_hasExpectedFields_optionalStatementDescriptor() {
+        SourceParams params = SourceParams.createBancontactParams(
+                1000L,
+                "Stripe",
+                "return/url/3000",
+                null,
+                "en");
+
+        Map<String, Object> apiMap = params.getApiParameterMap();
+        assertNotNull(apiMap);
+        assertNull(apiMap.get("statement_descriptor"));
+        assertEquals("en", apiMap.get("preferred_language"));
+    }
+
+    @Test
+    public void createBancontactParams_hasExpectedFields_optionalPreferredLanguage() {
+        SourceParams params = SourceParams.createBancontactParams(
+                1000L,
+                "Stripe",
+                "return/url/3000",
+                "descriptor",
+                null);
+
+        Map<String, Object> apiMap = params.getApiParameterMap();
+        assertNotNull(apiMap);
+        assertEquals("descriptor", apiMap.get("statement_descriptor"));
+        assertNull(apiMap.get("preferred_language"));
+    }
+
+    @Test
+    public void createBancontactParams_hasExpectedFields_optionalEverything() {
+        SourceParams params = SourceParams.createBancontactParams(
+                1000L,
+                "Stripe",
+                "return/url/3000",
+                null,
+                null);
+
+        assertNull(params.getApiParameterMap());
     }
 
     @Test

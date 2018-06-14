@@ -390,7 +390,11 @@ public class StripeTest {
     public void createSourceSynchronous_withBancontactParams_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams bancontactParams = SourceParams.createBancontactParams(
-                1000L, "John Doe", "example://path", "a statement described");
+                1000L,
+                "John Doe",
+                "example://path",
+                "a statement described",
+                "en");
         Map<String, String> metamap = new HashMap<String, String>() {{
             put("flavor", "strawberry");
             put("type", "sherbet");
