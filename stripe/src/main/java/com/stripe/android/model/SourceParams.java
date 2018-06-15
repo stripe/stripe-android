@@ -45,6 +45,7 @@ public class SourceParams {
     static final String FIELD_RETURN_URL = "return_url";
     static final String FIELD_STATE = "state";
     static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
+    static final String FIELD_PREFERRED_LANGUAGE = "preferred_language";
 
     static final String VISA_CHECKOUT = "visa_checkout";
     static final String CALL_ID = "callid";
@@ -190,6 +191,9 @@ public class SourceParams {
      * @param returnUrl The URL the customer should be redirected to after the authorization
      *                 process.
      * @param statementDescriptor A custom statement descriptor for the payment (optional).
+     * @param preferredLanguage The preferred language of the Bancontact authorization page that the
+     *                          customer is redirected to. Supported values are: en, de, fr, or nl
+     *                          (optional).
      * @return a {@link SourceParams} object that can be used to create a Bancontact source
      *
      * @see <a href="https://stripe.com/docs/sources/bancontact">https://stripe.com/docs/sources/bancontact</a>
@@ -199,7 +203,8 @@ public class SourceParams {
             @IntRange(from = 0) long amount,
             @NonNull String name,
             @NonNull String returnUrl,
-            @Nullable String statementDescriptor) {
+            @Nullable String statementDescriptor,
+            @Nullable String preferredLanguage) {
         SourceParams params = new SourceParams()
                 .setType(Source.BANCONTACT)
                 .setCurrency(Source.EURO)
@@ -207,9 +212,13 @@ public class SourceParams {
                 .setOwner(createSimpleMap(FIELD_NAME, name))
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        if (statementDescriptor != null) {
-            Map<String, Object> additionalParamsMap =
-                    createSimpleMap(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+        if (statementDescriptor != null || preferredLanguage != null) {
+            Map<String, Object> additionalParamsMap = new HashMap<>();
+
+            additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+            additionalParamsMap.put(FIELD_PREFERRED_LANGUAGE, preferredLanguage);
+            removeNullAndEmptyParams(additionalParamsMap);
+
             params.setApiParameterMap(additionalParamsMap);
         }
 
