@@ -39,7 +39,9 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     void updateCustomer(@NonNull Customer customer) {
-        mCustomerSourceList = customer.getSources();
+        mCustomerSourceList.clear();
+        CustomerSource[] customerSources = new CustomerSource[customer.getSources().size()];
+        addCustomerSourceIfSupported(customer.getSources().toArray(customerSources));
         String sourceId = customer.getDefaultSource();
         if (sourceId == null) {
             updateSelectedIndex(NO_SELECTION);
