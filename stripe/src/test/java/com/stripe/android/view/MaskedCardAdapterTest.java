@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.support.v7.widget.RecyclerView;
 
 import com.stripe.android.BuildConfig;
+import com.stripe.android.model.Card;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 
@@ -10,11 +11,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -86,6 +89,23 @@ public class MaskedCardAdapterTest {
         assertEquals(2, mMaskedCardAdapter.getItemCount());
         assertNotNull(mMaskedCardAdapter.getSelectedSource());
         assertEquals(customer.getDefaultSource(), mMaskedCardAdapter.getSelectedSource().getId());
-        verify(mAdapterDataObserver, times(3)).onChanged();
+        verify(mAdapterDataObserver, times(4)).onChanged();
+    }
+
+    @Test
+    public void updateCustomer_filtersOutNonCardSources() {
+        List<CustomerSource> customerSourceList = new ArrayList<CustomerSource>();
+        CustomerSource cardCustomerSource = Mockito.mock(CustomerSource.class);
+        Card card = Mockito.mock(Card.class);
+        Mockito.when(cardCustomerSource.asCard()).thenReturn(card);
+        CustomerSource nonCardCustomerSource = Mockito.mock(CustomerSource.class);
+        customerSourceList.add(cardCustomerSource);
+        customerSourceList.add(nonCardCustomerSource);
+        Customer customer = Mockito.mock(Customer.class);
+        Mockito.when(customer.getSources()).thenReturn(customerSourceList);
+
+        mMaskedCardAdapter.updateCustomer(customer);
+
+        assertEquals(1, mMaskedCardAdapter.getItemCount());
     }
 }

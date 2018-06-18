@@ -2,7 +2,6 @@ package com.stripe.android.view;
 
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
 
 import com.stripe.android.BuildConfig;
@@ -15,6 +14,7 @@ import com.stripe.android.model.SourceCardData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
@@ -156,5 +156,13 @@ public class MaskedCardViewTest {
         mMaskedCardView.toggleSelected();
         assertFalse(mMaskedCardView.isSelected());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
+    }
+
+    @Test
+    public void whenSourceNotCard_doesNotCrash() {
+        SourceCardData sourceCardData = Mockito.mock(SourceCardData.class);
+        Mockito.when(sourceCardData.getBrand()).thenReturn("unrecognized_brand");
+        Mockito.when(sourceCardData.getLast4()).thenReturn("");
+        mMaskedCardView.setSourceCardData(sourceCardData);
     }
 }
