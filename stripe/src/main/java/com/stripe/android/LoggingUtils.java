@@ -148,11 +148,12 @@ class LoggingUtils {
     static Map<String, Object> getPaymentIntentConfirmationParams(
             @NonNull Context context,
             @Nullable List<String> productUsageTokens,
-            @NonNull String publishableApiKey) {
+            @NonNull String publishableApiKey,
+            @Nullable @Source.SourceType String sourceType) {
         return getEventLoggingParams(
                 context,
                 productUsageTokens,
-                null,
+                sourceType,
                 null,
                 publishableApiKey,
                 EVENT_CONFIRM_PAYMENT_INTENT);

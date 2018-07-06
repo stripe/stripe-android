@@ -85,6 +85,7 @@ public class LoggingUtilsTest {
                 LoggingUtils.getPaymentIntentConfirmationParams(
                         RuntimeEnvironment.application,
                         tokenList,
+                        null,
                         DUMMY_API_KEY);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
