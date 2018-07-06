@@ -47,8 +47,8 @@ class LoggingUtils {
     static final String EVENT_DEFAULT_SOURCE = "default_source";
     static final String EVENT_DELETE_SOURCE = "delete_source";
     static final String EVENT_SET_SHIPPING_INFO = "set_shipping_info";
-    static final String EVENT_CONFIRM_PAYMENT_INTENT = "confirm_payment_intent";
-    static final String EVENT_RETRIEVE_PAYMENT_INTENT = "retrieve_payment_intent";
+    static final String EVENT_CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation";
+    static final String EVENT_RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
