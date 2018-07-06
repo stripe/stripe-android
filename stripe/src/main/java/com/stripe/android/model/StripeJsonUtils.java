@@ -568,6 +568,29 @@ class StripeJsonUtils {
         } catch (JSONException ignored) { }
     }
 
+    /**
+     * Util function for putting a {@link JSONArray} value into another JSONOBject if that
+     * value is not null. This ignores any {@link JSONException} that may be thrown due to
+     * insertion.
+     *
+     * @param jsonObject the {@link JSONObject} into which to put the field
+     * @param fieldName the field name
+     * @param value the potential field value
+     */
+    static void putArrayIfNotNull(
+            @NonNull JSONObject jsonObject,
+            @NonNull @Size(min = 1) String fieldName,
+            @Nullable JSONArray value
+    ) {
+        if (value == null) {
+            return;
+        }
+
+        try {
+            jsonObject.put(fieldName, value);
+        } catch (JSONException ignored) { }
+    }
+
     @Nullable
     static String nullIfNullOrEmpty(@Nullable String possibleNull) {
         return NULL.equals(possibleNull) || EMPTY.equals(possibleNull)
