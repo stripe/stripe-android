@@ -53,6 +53,43 @@ public class JsonTestUtils {
     }
 
     /**
+     * Assert that two {@link JSONObject JSONObjects} are equal, comparing key by key recursively.
+     * Ignores nulls.
+     *
+     * @param first the first object
+     * @param second the second object
+     */
+    public static void assertJsonEqualsExcludingNulls(JSONObject first, JSONObject second) {
+        if (assertSameNullity(first, second)) {
+            return;
+        }
+
+        Iterator<String> keyIterator = first.keys();
+        while(keyIterator.hasNext()) {
+            String key = keyIterator.next();
+            String errorMessage = getKeyErrorMessage(key);
+            if (first.opt(key) != JSONObject.NULL) {
+                assertTrue(errorMessage, second.has(key));
+            }
+            if (first.opt(key) instanceof JSONObject) {
+                assertTrue(errorMessage, second.opt(key) instanceof JSONObject);
+                assertJsonEqualsExcludingNulls(first.optJSONObject(key), second.optJSONObject(key));
+            } else if (first.opt(key) instanceof JSONArray) {
+                assertTrue(errorMessage, second.opt(key) instanceof JSONArray);
+                assertJsonArrayEquals(first.optJSONArray(key), second.optJSONArray(key));
+            } else if (first.opt(key) instanceof Number) {
+                assertTrue(errorMessage, second.opt(key) instanceof Number);
+                assertEquals(errorMessage,
+                        ((Number) first.opt(key)).longValue(),
+                        ((Number) second.opt(key)).longValue());
+            } else {
+                assertEquals(errorMessage, first.opt(key), second.opt(key));
+            }
+        }
+    }
+
+
+    /**
      * Assert that two {@link JSONArray JSONArrays} are equal, comparing index by index recursively.
      *
      * @param first the first array
