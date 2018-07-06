@@ -77,6 +77,42 @@ public class LoggingUtilsTest {
     }
 
     @Test
+    public void getPaymentIntentConfirmationParams_withValidInput_createsCorrectMap() {
+        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
+        List<String> tokenList = new ArrayList<>();
+        tokenList.add("CardInputView");
+        Map<String, Object> loggingParams =
+                LoggingUtils.getPaymentIntentConfirmationParams(
+                        RuntimeEnvironment.application,
+                        tokenList,
+                        DUMMY_API_KEY);
+        assertEquals(expectedSize, loggingParams.size());
+        assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_CONFIRM_PAYMENT_INTENT),
+                loggingParams.get(LoggingUtils.FIELD_EVENT));
+        assertEquals(LoggingUtils.getAnalyticsUa(),
+                loggingParams.get(LoggingUtils.FIELD_ANALYTICS_UA));
+    }
+
+    @Test
+    public void getPaymentIntentRetrieveParams_withValidInput_createsCorrectMap() {
+        final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
+        List<String> tokenList = new ArrayList<>();
+        tokenList.add("CardInputView");
+        Map<String, Object> loggingParams =
+                LoggingUtils.getPaymentIntentRetrieveParams(
+                        RuntimeEnvironment.application,
+                        tokenList,
+                        DUMMY_API_KEY);
+        assertEquals(expectedSize, loggingParams.size());
+        assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_RETRIEVE_PAYMENT_INTENT),
+                loggingParams.get(LoggingUtils.FIELD_EVENT));
+        assertEquals(LoggingUtils.getAnalyticsUa(),
+                loggingParams.get(LoggingUtils.FIELD_ANALYTICS_UA));
+    }
+
+    @Test
     public void getEventLoggingParams_withProductUsage_createsAllFields() {
         List<String> tokensList = new ArrayList<>();
         tokensList.add("CardInputView");
