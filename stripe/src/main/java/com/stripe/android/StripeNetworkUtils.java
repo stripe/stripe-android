@@ -122,15 +122,24 @@ public class StripeNetworkUtils {
     }
 
     @SuppressWarnings("HardwareIds")
+    static void addUidParamsToPaymentIntent(@Nullable UidProvider provider,
+                                            @NonNull Context context,
+                                            @NonNull Map<String, Object> params) {
+        if (params.containsKey("source_data") && params.get("source_data") instanceof Map) {
+            addUidParams(provider, context, (Map) params.get("source_data"));
+        }
+    }
+
+    @SuppressWarnings("HardwareIds")
     static void addUidParams(
             @Nullable UidProvider provider,
             @NonNull Context context,
             @NonNull Map<String, Object> params) {
         String guid =
                 provider == null
-                ? Settings.Secure.getString(context.getContentResolver(),
+                        ? Settings.Secure.getString(context.getContentResolver(),
                         Settings.Secure.ANDROID_ID)
-                : provider.getUid();
+                        : provider.getUid();
 
         if (StripeTextUtils.isBlank(guid)) {
             return;
