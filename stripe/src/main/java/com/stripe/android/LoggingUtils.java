@@ -35,7 +35,9 @@ class LoggingUtils {
             EVENT_ADD_SOURCE,
             EVENT_DEFAULT_SOURCE,
             EVENT_DELETE_SOURCE,
-            EVENT_SET_SHIPPING_INFO})
+            EVENT_SET_SHIPPING_INFO,
+            EVENT_CONFIRM_PAYMENT_INTENT,
+            EVENT_RETRIEVE_PAYMENT_INTENT})
     @interface LoggingEventName {
     }
 
@@ -45,6 +47,8 @@ class LoggingUtils {
     static final String EVENT_DEFAULT_SOURCE = "default_source";
     static final String EVENT_DELETE_SOURCE = "delete_source";
     static final String EVENT_SET_SHIPPING_INFO = "set_shipping_info";
+    static final String EVENT_CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation";
+    static final String EVENT_RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
@@ -138,6 +142,35 @@ class LoggingUtils {
                 null,
                 publishableKey,
                 EVENT_DELETE_SOURCE);
+    }
+
+    @NonNull
+    static Map<String, Object> getPaymentIntentConfirmationParams(
+            @NonNull Context context,
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey,
+            @Nullable @Source.SourceType String sourceType) {
+        return getEventLoggingParams(
+                context,
+                productUsageTokens,
+                sourceType,
+                null,
+                publishableApiKey,
+                EVENT_CONFIRM_PAYMENT_INTENT);
+    }
+
+    @NonNull
+    static Map<String, Object> getPaymentIntentRetrieveParams(
+            @NonNull Context context,
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey) {
+        return getEventLoggingParams(
+                context,
+                productUsageTokens,
+                null,
+                null,
+                publishableApiKey,
+                EVENT_RETRIEVE_PAYMENT_INTENT);
     }
 
     @NonNull
