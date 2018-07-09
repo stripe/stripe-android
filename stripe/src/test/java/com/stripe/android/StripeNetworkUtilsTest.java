@@ -189,6 +189,30 @@ public class StripeNetworkUtilsTest {
         assertTrue(existingMap.containsKey("guid"));
     }
 
+    @Test
+    public void addUidParamsToPaymentIntent_addParamsAtRightLevel() {
+        Map<String, Object> existingMap = new HashMap<>();
+        Map<String, Object> sourceDataMap = new HashMap<>();
+        existingMap.put("source_data", sourceDataMap);
+
+        StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+            @Override
+            public String getUid() {
+                return "abc123";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "com.example.main";
+            }
+
+        };
+        StripeNetworkUtils.addUidParamsToPaymentIntent(provider, RuntimeEnvironment.application, existingMap);
+        assertEquals(1, existingMap.size());
+        assertTrue(sourceDataMap.containsKey("muid"));
+        assertTrue(sourceDataMap.containsKey("guid"));
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
         Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(
