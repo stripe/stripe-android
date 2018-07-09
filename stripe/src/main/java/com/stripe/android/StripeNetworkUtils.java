@@ -121,7 +121,6 @@ public class StripeNetworkUtils {
         }
     }
 
-    @SuppressWarnings("HardwareIds")
     static void addUidParamsToPaymentIntent(@Nullable UidProvider provider,
                                             @NonNull Context context,
                                             @NonNull Map<String, Object> params) {
