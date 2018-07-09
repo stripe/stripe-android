@@ -267,22 +267,11 @@ public class StripeApiHandlerTest {
         }
     }
 
-
-    public void confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
-        String privateKey = "temporarily put a private key here simulate the backend";
+    public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
         try {
 
-            String jsonString = StripeApiHandler.createPaymentIntent(
-                    2500L,
-                    "usd",
-                    privateKey,
-                    null,
-                    null,
-                    null);
-
-            JSONObject jsonObject = new JSONObject(jsonString);
-            String clientSecret = jsonObject.optString("client_secret");
             Card card = new Card("4242424242424242", 1, 2050, "123");
             PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
                     SourceParams.createCardParams(card),
@@ -298,9 +287,6 @@ public class StripeApiHandlerTest {
                     null);
 
             assertNotNull(paymentIntent);
-
-        } catch (JSONException jsonEx) {
-            fail("Unexpected error: " + jsonEx.getLocalizedMessage());
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
@@ -309,23 +295,11 @@ public class StripeApiHandlerTest {
         }
     }
 
-    public void confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
-        String privateKey = "temporarily put a private key here simulate the backend";
+    public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
+        String sourceId = "id of the source created on the backend";
         try {
-            Card card = new Card("4242424242424242", 1, 2050, "123");
-            String jsonString = StripeApiHandler.createPaymentIntent(
-                    2500L,
-                    "usd",
-                    privateKey,
-                    null,
-                    SourceParams.createCardParams(card),
-                    null);
-
-            JSONObject jsonObject = new JSONObject(jsonString);
-
-            String clientSecret = jsonObject.optString("client_secret");
-            String sourceId = jsonObject.optString("source");
             PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceId(
                     sourceId,
                     clientSecret,
@@ -339,9 +313,6 @@ public class StripeApiHandlerTest {
                     null,
                     null);
             assertNotNull(paymentIntent);
-
-        } catch (JSONException jsonEx) {
-            fail("Unexpected error: " + jsonEx.getLocalizedMessage());
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
@@ -350,22 +321,11 @@ public class StripeApiHandlerTest {
         }
     }
 
-    public void confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
-        String privateKey = "temporarily put a private key here simulate the backend";
+    public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
         try {
-            Card card = new Card("4242424242424242", 1, 2050, "123");
-            String jsonString = StripeApiHandler.createPaymentIntent(
-                    2500L,
-                    "usd",
-                    privateKey,
-                    null,
-                    SourceParams.createCardParams(card),
-                    null);
 
-            JSONObject jsonObject = new JSONObject(jsonString);
-
-            String clientSecret = jsonObject.optString("client_secret");
             PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntent(
                     clientSecret
             );
@@ -377,9 +337,6 @@ public class StripeApiHandlerTest {
                     null,
                     null);
             assertNotNull(paymentIntent);
-
-        } catch (JSONException jsonEx) {
-            fail("Unexpected error: " + jsonEx.getLocalizedMessage());
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
