@@ -61,4 +61,10 @@
         <item>Unspecified</item>
         <item>USD</item>
     </string-array>
+
+    <string name="launch_payment_intent_example">Launch Payment Intent Example</string>
+    <string name="creating_payment_intent">Creating payment intent&#8230;</string>
+    <string name="confirming_payment_intent">Confirming payment intent&#8230;</string>
+    <string name="retrieving_payment_intent">Retrieving payment intent&#8230;</string>
+
 </resources>

@@ -17,7 +17,7 @@ public class LauncherActivity extends AppCompatActivity {
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY =
-            "put your key here";
+            "pk_test_GM1935gITkCi5UwpnUFIhXP8";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +25,15 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
+
+        Button paymentIntentButton = findViewById(R.id.btn_payment_intent);
+        paymentIntentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LauncherActivity.this, PaymentIntentActivity.class);
+                startActivity(intent);
+            }
+        });
         Button tokenButton = findViewById(R.id.btn_make_card_tokens);
         tokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +87,7 @@ public class LauncherActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
     }
 
 }
