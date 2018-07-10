@@ -18,4 +18,7 @@ public interface StripeService {
     @POST("ephemeral_keys")
     Observable<ResponseBody> createEphemeralKey(@FieldMap Map<String, String> apiVersionMap);
 
+    @FormUrlEncoded
+    @POST("create_intent")
+    Observable<ResponseBody> createPaymentIntent(@FieldMap Map<String, Object> params);
 }

@@ -43,7 +43,6 @@
     <string name="payment_session_select_shipping">Set Shipping Information</string>
     <string name="payment_session_data">Payment Session Data</string>
     <string name="startPaymentFlow">Start Payment Flow</string>
-
     <string name="load_items">Load Items</string>
     <string name="ok">OK</string>
 
@@ -61,4 +60,14 @@
         <item>Unspecified</item>
         <item>USD</item>
     </string-array>
+
+    <string name="launch_payment_intent_example">Launch Payment Intent Example</string>
+    <string name="creating_payment_intent">Creating payment intent&#8230;</string>
+    <string name="confirming_payment_intent">Confirming payment intent&#8230;</string>
+    <string name="retrieving_payment_intent">Retrieving payment intent&#8230;</string>
+    <string name="create_payment_intent_backend">First, create a payment intent on your backed.</string>
+    <string name="create_payment_intent">Create payment intent</string>
+    <string name="create_source_and_confirm_payment_intent">Second, create a source and confirm the payment intent</string>
+    <string name="confirm_payment_intent">Confirm payment intent</string>
+    <string name="retrieve_payment_intent">Retrieve payment intent</string>
 </resources>
