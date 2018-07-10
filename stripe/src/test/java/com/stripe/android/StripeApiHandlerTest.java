@@ -4,6 +4,8 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
@@ -257,6 +259,84 @@ public class StripeApiHandlerTest {
             List<String> accounts = response.getResponseHeaders().get("Stripe-Account");
             assertEquals(1, accounts.size());
             assertEquals(connectAccountId, accounts.get(0));
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
+        String publicKey = "put a public key that matches the private key here";
+        try {
+
+            Card card = new Card("4242424242424242", 1, 2050, "123");
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
+                    SourceParams.createCardParams(card),
+                    clientSecret,
+                    null
+            );
+            PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
+                    null,
+                    RuntimeEnvironment.application.getApplicationContext(),
+                    paymentIntentParams,
+                    publicKey,
+                    null,
+                    null);
+
+            assertNotNull(paymentIntent);
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
+        String publicKey = "put a public key that matches the private key here";
+        String sourceId = "id of the source created on the backend";
+        try {
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceId(
+                    sourceId,
+                    clientSecret,
+                    null
+            );
+            PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
+                    null,
+                    RuntimeEnvironment.application.getApplicationContext(),
+                    paymentIntentParams,
+                    publicKey,
+                    null,
+                    null);
+            assertNotNull(paymentIntent);
+        } catch (AuthenticationException authEx) {
+            fail("Unexpected error: " + authEx.getLocalizedMessage());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error when connecting to Stripe API: "
+                    + stripeEx.getLocalizedMessage());
+        }
+    }
+
+    public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
+        String clientSecret = "temporarily put a private key here simulate the backend";
+        String publicKey = "put a public key that matches the private key here";
+        try {
+
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntent(
+                    clientSecret
+            );
+            PaymentIntent paymentIntent = StripeApiHandler.retrievePaymentIntent(
+                    null,
+                    RuntimeEnvironment.application.getApplicationContext(),
+                    paymentIntentParams,
+                    publicKey,
+                    null,
+                    null);
+            assertNotNull(paymentIntent);
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {

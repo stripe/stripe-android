@@ -17,6 +17,8 @@ import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -96,10 +98,138 @@ class StripeApiHandler {
     }
 
     /**
+     * Confirm a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
+     *
+     * @param uidProvider a provider for UUID items in test
+     * @param context a {@link Context} object for acquiring resources
+     * @param paymentIntentParams contains the confirmation params
+     * @param publishableKey an API key
+     * @param stripeAccount a connected Stripe Account ID
+     * @param loggingResponseListener a listener for logging responses
+     * @return a {@link PaymentIntent} reflecting the updated state after applying the parameter
+     * provided
+     *
+     * @throws AuthenticationException
+     * @throws InvalidRequestException
+     * @throws APIConnectionException
+     * @throws APIException
+     */
+    @Nullable
+    static PaymentIntent confirmPaymentIntent(
+            @Nullable StripeNetworkUtils.UidProvider uidProvider,
+            @NonNull Context context,
+            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull String publishableKey,
+            @Nullable String stripeAccount,
+            @Nullable LoggingResponseListener loggingResponseListener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        Map<String, Object> paramMap = paymentIntentParams.toParamMap();
+        StripeNetworkUtils.addUidParamsToPaymentIntent(uidProvider, context, paramMap);
+        RequestOptions options = RequestOptions.builder(
+                publishableKey,
+                stripeAccount,
+                RequestOptions.TYPE_QUERY).build();
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            setTelemetryData(context, loggingResponseListener);
+            SourceParams sourceParams = paymentIntentParams.getSourceParams();
+            String sourceType = sourceParams != null ? sourceParams.getType() : null;
+            Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentConfirmationParams(
+                    context,
+                    null,
+                    apiKey,
+                    sourceType);
+            RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
+            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
+                    paymentIntentParams.getClientSecret());
+            StripeResponse response = requestData(
+                    POST, confirmPaymentIntentUrl(paymentIntentId), paramMap, options);
+            return PaymentIntent.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
+    }
+
+    /**
+     * Retrive a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
+     *
+     * @param uidProvider a provider for UUID items in test
+     * @param context a {@link Context} object for acquiring resources
+     * @param paymentIntentParams contains the retrieval params
+     * @param publishableKey an API key
+     * @param stripeAccount a connected Stripe Account ID
+     * @param loggingResponseListener a listener for logging responses
+     * @return
+     * @throws AuthenticationException
+     * @throws InvalidRequestException
+     * @throws APIConnectionException
+     * @throws APIException
+     */
+    @Nullable
+    static PaymentIntent retrievePaymentIntent(
+            @Nullable StripeNetworkUtils.UidProvider uidProvider,
+            @NonNull Context context,
+            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull String publishableKey,
+            @Nullable String stripeAccount,
+            @Nullable LoggingResponseListener loggingResponseListener)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        Map<String, Object> paramMap = paymentIntentParams.toParamMap();
+        RequestOptions options = RequestOptions.builder(
+                publishableKey,
+                stripeAccount,
+                RequestOptions.TYPE_QUERY).build();
+
+        try {
+            String apiKey = options.getPublishableApiKey();
+            if (StripeTextUtils.isBlank(apiKey)) {
+                return null;
+            }
+
+            setTelemetryData(context, loggingResponseListener);
+            Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentRetrieveParams(
+                    context,
+                    null,
+                    apiKey);
+            RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
+            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
+                    paymentIntentParams.getClientSecret());
+            StripeResponse response = requestData(GET,
+                    retrievePaymentIntentUrl(paymentIntentId), paramMap, options);
+            return PaymentIntent.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw new APIException(
+                    unexpected.getMessage(),
+                    unexpected.getRequestId(),
+                    unexpected.getStatusCode(),
+                    unexpected);
+        }
+    }
+
+    /**
      * Create a {@link Source} using the input {@link SourceParams}.
      *
      * @param uidProvider a provider for UUID items in test
-     * @param context a {@link Context} object for aquiring resources
+     * @param context a {@link Context} object for acquiring resources
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
@@ -529,7 +659,27 @@ class StripeApiHandler {
 
     @VisibleForTesting
     static String getSourcesUrl() {
+        //https://api.stripe.com/v1/
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    }
+
+    private static String createPaymentIntentUrl() {
+        return String.format(Locale.ENGLISH, "%s/v1/payment_intents", LIVE_API_BASE);
+    }
+
+    static String retrievePaymentIntentUrl(String paymentIntentId) {
+        return String.format(
+                Locale.ENGLISH,
+                "%s/v1/payment_intents/%s",
+                LIVE_API_BASE, paymentIntentId);
+    }
+
+    static String confirmPaymentIntentUrl(String paymentIntentId) {
+        return String.format(
+                Locale.ENGLISH,
+                "%s/v1/payment_intents/%s/confirm",
+                LIVE_API_BASE,
+                paymentIntentId);
     }
 
     @VisibleForTesting
