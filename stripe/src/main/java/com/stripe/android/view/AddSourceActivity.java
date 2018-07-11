@@ -64,7 +64,7 @@ public class AddSourceActivity extends StripeActivity {
 
 
     /**
-     * Create an {@link Intent} to start a {@link AddSoSturceActivity}.
+     * Create an {@link Intent} to start a {@link AddSourceActivity}.
      *
      * @param context the {@link Context} used to launch the activity
      * @param requirePostalField {@code true} to require a postal code field
