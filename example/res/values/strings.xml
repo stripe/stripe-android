@@ -65,9 +65,10 @@
     <string name="creating_payment_intent">Creating payment intent&#8230;</string>
     <string name="confirming_payment_intent">Confirming payment intent&#8230;</string>
     <string name="retrieving_payment_intent">Retrieving payment intent&#8230;</string>
-    <string name="create_payment_intent_backend">First, create a payment intent on your backed.</string>
+    <string name="create_payment_intent_backend">First, create a payment intent on your backend.</string>
     <string name="create_payment_intent">Create payment intent</string>
     <string name="create_source_and_confirm_payment_intent">Second, create a source and confirm the payment intent</string>
     <string name="confirm_payment_intent">Confirm payment intent</string>
     <string name="retrieve_payment_intent">Retrieve payment intent</string>
+    <string name="error_while_retrieving_payment_intent">An error occured while retrieving the payment intent</string>
 </resources>

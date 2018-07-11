@@ -64,67 +64,54 @@ public class PaymentIntent extends StripeJsonModel {
     private String mSource;
     private String mStatus;
 
-    @NonNull
     public String getId() {
         return mId;
     }
 
-    @NonNull
     public List<String> getAllowedSourceTypes() {
         return mAllowedSourceTypes;
     }
 
-    @NonNull
     public Long getAmount() {
         return mAmount;
     }
 
-    @Nullable
     public Long getCanceledAt() {
         return mCanceledAt;
     }
 
-    @Nullable
     public String getCaptureMethod() {
         return mCaptureMethod;
     }
 
-    @NonNull
     public String getClientSecret() {
         return mClientSecret;
     }
 
-    @Nullable
     public String getConfirmationMethod() {
         return mConfirmationMethod;
     }
 
-    @Nullable
     public Long getCreated() {
         return mCreated;
     }
 
-    @NonNull
     public String getCurrency() {
         return mCurrency;
     }
 
-    @Nullable
     public String getDescription() {
         return mDescription;
     }
 
-    @NonNull
     public Boolean isLiveMode() {
         return mLiveMode;
     }
 
-    @Nullable
     public Map<String, Object> getNextSourceAction() {
         return mNextSourceAction;
     }
 
-    @Nullable
     public Uri getAuthorizationUrl() {
         if ("requires_source_action".equals(mStatus) &&
                 mNextSourceAction.containsKey("type") &&

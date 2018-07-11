@@ -1,6 +1,7 @@
 package com.stripe.example.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -43,7 +44,7 @@ import rx.subscriptions.CompositeSubscription;
 public class PaymentIntentActivity extends AppCompatActivity {
     private static final String TAG = PaymentIntentActivity.class.getName();
 
-    private static final String RETURN_SCHEMA = "stripe://payment_intent_return";
+    private static final String RETURN_URL = "stripe://payment_intent_return";
     private ProgressDialogController mProgressDialogController;
     private ErrorDialogHandler mErrorDialogHandler;
     private CompositeSubscription mCompositeSubscription;
@@ -131,10 +132,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                 try {
                                     JSONObject jsonObject = new JSONObject(responseBody.string());
                                     mClientSecret = jsonObject.optString("secret");
-                                    if (mClientSecret != null) {
-                                        mConfirmPaymentIntent.setEnabled(true);
-                                        mRetrievePaymentIntent.setEnabled(true);
-                                    }
+                                    mConfirmPaymentIntent.setEnabled(mClientSecret != null);
+                                    mRetrievePaymentIntent.setEnabled(mClientSecret != null);
 
                                 } catch (IOException | JSONException exception) {
                                     Log.e(TAG, exception.toString());
@@ -157,7 +156,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                         new Callable<PaymentIntent>() {
                             @Override
                             public PaymentIntent call() throws Exception {
-                                PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntent(clientSecret);
+                                PaymentIntentParams paymentIntentParams =
+                                        PaymentIntentParams.createRetrievePaymentIntent(clientSecret);
                                 return mStripe.retrievePaymentIntentSynchronous(
                                         paymentIntentParams,
                                         PaymentConfiguration.getInstance().getPublishableKey());
@@ -179,12 +179,14 @@ public class PaymentIntentActivity extends AppCompatActivity {
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(
-                        // Because we've made the mapping above, we're now subscribing
-                        // to the result of creating a 3DS Source
                         new Action1<PaymentIntent>() {
                             @Override
                             public void call(PaymentIntent paymentIntent) {
-                                mPaymentIntentValue.setText(paymentIntent.toJson().toString());
+                                if (paymentIntent != null) {
+                                    mPaymentIntentValue.setText(paymentIntent.toJson().toString());
+                                } else {
+                                    mPaymentIntentValue.setText(R.string.error_while_retrieving_payment_intent);
+                                }
                             }
                         },
                         new Action1<Throwable>() {
@@ -208,7 +210,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                         PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
                                                 sourceParams,
                                                 clientSecret,
-                                                RETURN_SCHEMA);
+                                                RETURN_URL);
                                 return mStripe.confirmPaymentIntentSynchronous(
                                         paymentIntentParams,
                                         PaymentConfiguration.getInstance().getPublishableKey());
@@ -231,14 +233,16 @@ public class PaymentIntentActivity extends AppCompatActivity {
                     }
                 })
                 .subscribe(
-                        // to the result of creating a 3DS Source
                         new Action1<PaymentIntent>() {
                             @Override
                             public void call(PaymentIntent paymentIntent) {
-                                mPaymentIntentValue.setText(paymentIntent.toString());
-                                if (paymentIntent.getStatus().equals("requires_source_action")) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, paymentIntent.getAuthorizationUrl());
-                                    startActivity(browserIntent);
+                                if (paymentIntent != null) {
+                                    mPaymentIntentValue.setText(paymentIntent.toString());
+                                    Uri authUrl = paymentIntent.getAuthorizationUrl();
+                                    if (paymentIntent.getStatus().equals("requires_source_action") && authUrl != null) {
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, authUrl);
+                                        startActivity(browserIntent);
+                                    }
                                 }
                             }
                         },
