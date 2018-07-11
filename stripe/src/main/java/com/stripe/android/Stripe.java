@@ -16,6 +16,8 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
@@ -430,6 +432,62 @@ public class Stripe {
         }
         return StripeApiHandler.createSource(
                 null, mContext, params, apiKey, mStripeAccount, mLoggingResponseListener);
+    }
+
+    /**
+     * Blocking method to retrieve a {@link PaymentIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param paymentIntentParams a set of params with which to retrieve the Payment Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
+     *
+     * @throws AuthenticationException
+     * @throws InvalidRequestException
+     * @throws APIConnectionException
+     * @throws APIException
+     */
+    public PaymentIntent retrievePaymentIntentSynchronous(
+            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return StripeApiHandler.retrievePaymentIntent(
+                null,
+                mContext,
+                paymentIntentParams,
+                publishableKey,
+                mStripeAccount,
+                mLoggingResponseListener);
+    }
+
+    /**
+     * Blocking method to confirm a {@link PaymentIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param paymentIntentParams a set of params with which to confirm the Payment Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
+     *
+     * @throws AuthenticationException
+     * @throws InvalidRequestException
+     * @throws APIConnectionException
+     * @throws APIException
+     */
+    public PaymentIntent confirmPaymentIntentSynchronous(
+            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return StripeApiHandler.confirmPaymentIntent(
+                null,
+                mContext,
+                paymentIntentParams,
+                publishableKey,
+                mStripeAccount,
+                mLoggingResponseListener);
     }
 
     /**
