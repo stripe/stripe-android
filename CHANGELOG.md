@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 7.2.0 2018-07-12
+* Add beta support for PaymentIntents for usage with card sources []
+* Add sample integration with PaymentIntents
+* Fix crash in MaskedCardAdapter
 * **BREAKING** Add `preferredLanguage` parameter to `SourceParams.createBancontactParams` [#589](https://github.com/stripe/stripe-android/pull/589)
 
 ### 7.1.0 2018-06-11
