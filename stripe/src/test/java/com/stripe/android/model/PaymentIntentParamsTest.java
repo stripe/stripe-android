@@ -36,7 +36,7 @@ public class PaymentIntentParamsTest {
     private static String TEST_SOURCE_ID = "src_123testsourceid";
 
     @Test
-    public void createConfirmPaymentIntentWithSourceData_withAllFields_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithSourceDataParams_withAllFields_hasExpectedFields() {
         SourceParams sourceParams = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
         PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
                 sourceParams,
@@ -49,7 +49,7 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createConfirmPaymentIntentWithSourceId_withAllFields_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithSourceIdParams_withAllFields_hasExpectedFields() {
         PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceIdParams(
                 TEST_SOURCE_ID,
                 TEST_CLIENT_SECRET,
@@ -61,7 +61,7 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createRetrievePaymentIntentWithSourceId_hasExpectedFields() {
+    public void createRetrievePaymentIntentWithSourceIdParams_hasExpectedFields() {
         PaymentIntentParams params = PaymentIntentParams.createRetrievePaymentIntentParams(
                 TEST_CLIENT_SECRET);
 
@@ -73,7 +73,7 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createCustomParam_toParamMap_createsExpectedMap() {
+    public void createCustomParams_toParamMap_createsExpectedMap() {
         PaymentIntentParams paymentIntentParams = PaymentIntentParams.createCustomParams();
         paymentIntentParams
                 .setReturnUrl(TEST_RETURN_URL)
