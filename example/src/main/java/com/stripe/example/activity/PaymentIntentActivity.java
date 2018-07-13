@@ -157,7 +157,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             @Override
                             public PaymentIntent call() throws Exception {
                                 PaymentIntentParams paymentIntentParams =
-                                        PaymentIntentParams.createRetrievePaymentIntent(clientSecret);
+                                        PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
                                 return mStripe.retrievePaymentIntentSynchronous(
                                         paymentIntentParams,
                                         PaymentConfiguration.getInstance().getPublishableKey());
@@ -207,7 +207,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             @Override
                             public PaymentIntent call() throws Exception {
                                 PaymentIntentParams paymentIntentParams =
-                                        PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
+                                        PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
                                                 sourceParams,
                                                 clientSecret,
                                                 RETURN_URL);
