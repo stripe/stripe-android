@@ -273,7 +273,7 @@ public class StripeApiHandlerTest {
         try {
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
                     SourceParams.createCardParams(card),
                     clientSecret,
                     null
@@ -300,7 +300,7 @@ public class StripeApiHandlerTest {
         String publicKey = "put a public key that matches the private key here";
         String sourceId = "id of the source created on the backend";
         try {
-            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceId(
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createConfirmPaymentIntentWithSourceIdParams(
                     sourceId,
                     clientSecret,
                     null
@@ -326,7 +326,7 @@ public class StripeApiHandlerTest {
         String publicKey = "put a public key that matches the private key here";
         try {
 
-            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntent(
+            PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntentParams(
                     clientSecret
             );
             PaymentIntent paymentIntent = StripeApiHandler.retrievePaymentIntent(

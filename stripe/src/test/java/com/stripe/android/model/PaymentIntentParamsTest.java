@@ -36,9 +36,9 @@ public class PaymentIntentParamsTest {
     private static String TEST_SOURCE_ID = "src_123testsourceid";
 
     @Test
-    public void createConfirmPaymentIntentWithSourceData_withAllFields_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithSourceDataParams_withAllFields_hasExpectedFields() {
         SourceParams sourceParams = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
-        PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceData(
+        PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
                 sourceParams,
                 TEST_CLIENT_SECRET,
                 TEST_RETURN_URL);
@@ -49,8 +49,8 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createConfirmPaymentIntentWithSourceId_withAllFields_hasExpectedFields() {
-        PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceId(
+    public void createConfirmPaymentIntentWithSourceIdParams_withAllFields_hasExpectedFields() {
+        PaymentIntentParams params = PaymentIntentParams.createConfirmPaymentIntentWithSourceIdParams(
                 TEST_SOURCE_ID,
                 TEST_CLIENT_SECRET,
                 TEST_RETURN_URL);
@@ -61,8 +61,8 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createRetrievePaymentIntentWithSourceId_hasExpectedFields() {
-        PaymentIntentParams params = PaymentIntentParams.createRetrievePaymentIntent(
+    public void createRetrievePaymentIntentWithSourceIdParams_hasExpectedFields() {
+        PaymentIntentParams params = PaymentIntentParams.createRetrievePaymentIntentParams(
                 TEST_CLIENT_SECRET);
 
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
@@ -73,7 +73,7 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createCustomParam_toParamMap_createsExpectedMap() {
+    public void createCustomParams_toParamMap_createsExpectedMap() {
         PaymentIntentParams paymentIntentParams = PaymentIntentParams.createCustomParams();
         paymentIntentParams
                 .setReturnUrl(TEST_RETURN_URL)
@@ -91,7 +91,7 @@ public class PaymentIntentParamsTest {
 
     @Test
     public void toParamMap_whenExtraParamsProvided_createsExpectedMap() {
-        PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntent(
+        PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntentParams(
                 TEST_CLIENT_SECRET);
         Map<String, Object> extraParams = new HashMap<>();
         String extraParamKey1 = "extra_param_key_1";

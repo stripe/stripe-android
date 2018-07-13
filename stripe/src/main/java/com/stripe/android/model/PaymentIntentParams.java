@@ -43,7 +43,7 @@ public class PaymentIntentParams {
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
-    public static PaymentIntentParams createConfirmPaymentIntentWithSourceData(
+    public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
             @Nullable SourceParams sourceParams,
             @NonNull String clientSecret,
             @Nullable String returnUrl) {
@@ -65,7 +65,7 @@ public class PaymentIntentParams {
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
-    public static PaymentIntentParams createConfirmPaymentIntentWithSourceId(
+    public static PaymentIntentParams createConfirmPaymentIntentWithSourceIdParams(
             @Nullable String sourceId,
             @NonNull String clientSecret,
             @Nullable String returnUrl) {
@@ -82,7 +82,7 @@ public class PaymentIntentParams {
      * @return params that can be used to retrieve a PaymentIntent
      */
     @NonNull
-    public static PaymentIntentParams createRetrievePaymentIntent(
+    public static PaymentIntentParams createRetrievePaymentIntentParams(
             @NonNull String clientSecret) {
         return new PaymentIntentParams().setClientSecret(clientSecret);
     }
