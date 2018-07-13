@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### 8.0.0 2018-7-13
+* **BREAKING** Renamed PaymentIntentParams methods for readibility [#609](https://github.com/stripe/stripe-android/pull/609)
+
 ### 7.2.0 2018-07-12
 * Add beta support for PaymentIntents for usage with card sources []
 * Add sample integration with PaymentIntents
