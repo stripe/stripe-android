@@ -133,6 +133,21 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         clearInstance();
     }
 
+    /**
+     * End any async calls in process and will not invoke callback listeners.
+     * It will not clear the singleton instance of a {@link CustomerSession} so it can be
+     * safely used when a view is being removed/destroyed to avoid null pointer exceptions
+     * due to async operation delay.
+     * No need to call {@link CustomerSession#initCustomerSession(EphemeralKeyProvider)} again
+     * after this operation.
+     */
+    public static void cancelCallbacks(){
+        if (mInstance == null) {
+            return;
+        }
+        mInstance.mThreadPoolExecutor.shutdownNow();
+    }
+
     @VisibleForTesting
     static void initCustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
