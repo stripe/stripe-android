@@ -16,7 +16,7 @@ public class PaymentConfiguration {
     private @NonNull String mPublishableKey;
     private @Address.RequiredBillingAddressFields
     int mRequiredBillingAddressFields;
-    private boolean mShouldUseSourcesForCards;
+    private boolean mShouldUseSourcesForCards; // deprecated- this value is not used.
     private Currency mCurrency;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
@@ -55,10 +55,12 @@ public class PaymentConfiguration {
         return this;
     }
 
+    @Deprecated
     public boolean getShouldUseSourcesForCards() {
         return mShouldUseSourcesForCards;
     }
 
+    @Deprecated
     @NonNull
     public PaymentConfiguration setShouldUseSourcesForCards(boolean shouldUseSourcesForCards) {
         mShouldUseSourcesForCards = shouldUseSourcesForCards;
