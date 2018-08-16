@@ -44,8 +44,89 @@ public class BankAccount {
     @Nullable private String mLast4;
     @Nullable private String mRoutingNumber;
 
+    public static Builder newBuilder(
+            @NonNull String accountNumber,
+            @NonNull @Size(2) String countryCode,
+            @NonNull @Size(3) String currency,
+            @Nullable String routingNumber) {
+        return new Builder(accountNumber, routingNumber, countryCode, currency);
+    }
+
+    public static final class Builder {
+        private String accountHolderName;
+        private String accountHolderType;
+        private String accountNumber;
+        private String bankName;
+        private String countryCode;
+        private String currency;
+        private String fingerprint;
+        private String last4;
+        private String routingNumber;
+
+        private Builder(
+                @NonNull String accountNumber,
+                @Nullable String routingNumber,
+                @NonNull @Size(2) String countryCode,
+                @NonNull @Size(3) String currency
+        ) {
+            this.accountNumber = accountNumber;
+            this.routingNumber = routingNumber;
+            this.countryCode = countryCode;
+            this.currency = currency;
+        }
+
+        public Builder setAccountHolderName(String mAccountHolderName) {
+            this.accountHolderName = mAccountHolderName;
+            return this;
+        }
+
+        public Builder setAccountHolderType(String mAccountHolderType) {
+            this.accountHolderType = mAccountHolderType;
+            return this;
+        }
+
+        public Builder setAccountNumber(String mAccountNumber) {
+            this.accountNumber = mAccountNumber;
+            return this;
+        }
+
+        public Builder setBankName(String mBankName) {
+            this.bankName = mBankName;
+            return this;
+        }
+
+        public Builder setCountryCode(String mCountryCode) {
+            this.countryCode = mCountryCode;
+            return this;
+        }
+
+        public Builder setCurrency(String mCurrency) {
+            this.currency = mCurrency;
+            return this;
+        }
+
+        public Builder setFingerprint(String mFingerprint) {
+            this.fingerprint = mFingerprint;
+            return this;
+        }
+
+        public Builder setLast4(String mLast4) {
+            this.last4 = mLast4;
+            return this;
+        }
+
+        public Builder setRoutingNumber(String mRoutingNumber) {
+            this.routingNumber = mRoutingNumber;
+            return this;
+        }
+
+        public BankAccount build() {
+            return new BankAccount(this);
+        }
+    }
+
     /**
-     * Constructor used to create a BankAccount object with the required parameters
+     * Convenience constructor used to create a BankAccount object with the required parameters
      * to send to Stripe's server.
      *
      * @param accountNumber the account number for this BankAccount
@@ -57,19 +138,55 @@ public class BankAccount {
             @NonNull String accountNumber,
             @NonNull @Size(2) String countryCode,
             @NonNull @Size(3) String currency,
-            @NonNull String routingNumber) {
-        mAccountNumber = accountNumber;
-        mCountryCode = countryCode;
-        mCurrency = currency;
-        mRoutingNumber = routingNumber;
+            @Nullable String routingNumber) {
+        this(
+                null,
+                null,
+                accountNumber,
+                null,
+                countryCode,
+                currency,
+                null,
+                null,
+                routingNumber
+        );
     }
 
     /**
-     * Constructor with no account number used internally to initialize an object
-     * from JSON returned from the server.
+     * Convenience constructor used to create a BankAccount object with the required and
+     * optional parameters to send to Stripe's server.
+     *
+     * @param accountNumber the account number for this BankAccount
+     * @param countryCode the two-letter country code that this account was created in
+     * @param currency the currency of this account
+     * @param routingNumber the routing number of this account
+     */
+    public BankAccount(
+            @NonNull String accountNumber,
+            @Nullable String routingNumber,
+            @NonNull @Size(2) String countryCode,
+            @NonNull @Size(3) String currency,
+            @Nullable String accountHolderName,
+            @Nullable @BankAccountType String accountHolderType) {
+        this(
+                accountHolderName,
+                accountHolderType,
+                accountNumber,
+                null,
+                countryCode,
+                currency,
+                null,
+                null,
+                routingNumber
+        );
+    }
+
+    /**
+     * Convenience constructor with all available parameters.
      *
      * @param accountHolderName the account holder's name
      * @param accountHolderType the {@link BankAccountType}
+     * @param accountNumber the account number for this BankAccount
      * @param bankName the name of the bank
      * @param countryCode the two-letter country code of the country in which the account was opened
      * @param currency the three-letter currency code
@@ -80,6 +197,7 @@ public class BankAccount {
     public BankAccount(
             @Nullable String accountHolderName,
             @Nullable @BankAccountType String accountHolderType,
+            @Nullable String accountNumber,
             @Nullable String bankName,
             @Nullable @Size(2) String countryCode,
             @Nullable @Size(3) String currency,
@@ -88,6 +206,7 @@ public class BankAccount {
             @Nullable String routingNumber) {
         mAccountHolderName = accountHolderName;
         mAccountHolderType = accountHolderType;
+        mAccountNumber = accountNumber;
         mBankName = bankName;
         mCountryCode = countryCode;
         mCurrency = currency;
@@ -195,6 +314,7 @@ public class BankAccount {
                 StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_NAME),
                 asBankAccountType(
                         StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_TYPE)),
+                null,
                 StripeJsonUtils.optString(jsonObject, FIELD_BANK_NAME),
                 StripeJsonUtils.optCountryCode(jsonObject, FIELD_COUNTRY),
                 StripeJsonUtils.optCurrency(jsonObject, FIELD_CURRENCY),
@@ -202,4 +322,17 @@ public class BankAccount {
                 StripeJsonUtils.optString(jsonObject, FIELD_LAST4),
                 StripeJsonUtils.optString(jsonObject, FIELD_ROUTING_NUMBER));
     }
+
+    private BankAccount(Builder builder) {
+        mAccountHolderName = builder.accountHolderName;
+        mAccountHolderType = builder.accountHolderType;
+        mAccountNumber = builder.accountNumber;
+        mBankName = builder.bankName;
+        mCountryCode = builder.countryCode;
+        mCurrency = builder.currency;
+        mFingerprint = builder.fingerprint;
+        mLast4 = builder.last4;
+        mRoutingNumber = builder.routingNumber;
+    }
+
 }
