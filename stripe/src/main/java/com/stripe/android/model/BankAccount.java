@@ -46,9 +46,9 @@ public class BankAccount {
 
     public static Builder newBuilder(
             @NonNull String accountNumber,
+            @Nullable String routingNumber,
             @NonNull @Size(2) String countryCode,
-            @NonNull @Size(3) String currency,
-            @Nullable String routingNumber) {
+            @NonNull @Size(3) String currency) {
         return new Builder(accountNumber, routingNumber, countryCode, currency);
     }
 
