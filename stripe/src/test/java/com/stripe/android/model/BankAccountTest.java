@@ -34,6 +34,7 @@ public class BankAccountTest {
         BankAccount expectedAccount = new BankAccount(
                 "Jane Austen",
                 BankAccount.TYPE_INDIVIDUAL,
+                null,
                 "STRIPE TEST BANK",
                 "US",
                 "usd",
