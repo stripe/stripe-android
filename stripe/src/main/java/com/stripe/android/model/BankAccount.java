@@ -75,48 +75,48 @@ public class BankAccount {
             this.currency = currency;
         }
 
-        public Builder setAccountHolderName(String mAccountHolderName) {
-            this.accountHolderName = mAccountHolderName;
+        public Builder setAccountHolderName(String accountHolderName) {
+            this.accountHolderName = accountHolderName;
             return this;
         }
 
-        public Builder setAccountHolderType(String mAccountHolderType) {
-            this.accountHolderType = mAccountHolderType;
+        public Builder setAccountHolderType(String accountHolderType) {
+            this.accountHolderType = accountHolderType;
             return this;
         }
 
-        public Builder setAccountNumber(String mAccountNumber) {
-            this.accountNumber = mAccountNumber;
+        public Builder setAccountNumber(String accountNumber) {
+            this.accountNumber = accountNumber;
             return this;
         }
 
-        public Builder setBankName(String mBankName) {
-            this.bankName = mBankName;
+        public Builder setBankName(String bankName) {
+            this.bankName = bankName;
             return this;
         }
 
-        public Builder setCountryCode(String mCountryCode) {
-            this.countryCode = mCountryCode;
+        public Builder setCountryCode(String countryCode) {
+            this.countryCode = countryCode;
             return this;
         }
 
-        public Builder setCurrency(String mCurrency) {
-            this.currency = mCurrency;
+        public Builder setCurrency(String currency) {
+            this.currency = currency;
             return this;
         }
 
-        public Builder setFingerprint(String mFingerprint) {
-            this.fingerprint = mFingerprint;
+        public Builder setFingerprint(String fingerprint) {
+            this.fingerprint = fingerprint;
             return this;
         }
 
-        public Builder setLast4(String mLast4) {
-            this.last4 = mLast4;
+        public Builder setLast4(String last4) {
+            this.last4 = last4;
             return this;
         }
 
-        public Builder setRoutingNumber(String mRoutingNumber) {
-            this.routingNumber = mRoutingNumber;
+        public Builder setRoutingNumber(String routingNumber) {
+            this.routingNumber = routingNumber;
             return this;
         }
 
