@@ -51,13 +51,14 @@ public class BankAccount {
      * @param accountNumber the account number for this BankAccount
      * @param countryCode the two-letter country code that this account was created in
      * @param currency the currency of this account
-     * @param routingNumber the routing number of this account
+     * @param routingNumber the routing number of this account. Can be null for non US bank
+     *                      accounts.
      */
     public BankAccount(
             @NonNull String accountNumber,
             @NonNull @Size(2) String countryCode,
             @NonNull @Size(3) String currency,
-            @NonNull String routingNumber) {
+            @Nullable String routingNumber) {
         mAccountNumber = accountNumber;
         mCountryCode = countryCode;
         mCurrency = currency;
