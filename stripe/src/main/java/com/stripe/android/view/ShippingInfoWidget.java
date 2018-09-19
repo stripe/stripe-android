@@ -156,10 +156,10 @@ public class ShippingInfoWidget extends LinearLayout {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText()
                     .toString().trim());
         } else if (countrySelected.equals(Locale.UK.getCountry())) {
-            postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText()
+            postalCodeValid = CountryUtils.isUKPostcodeValid(mPostalCodeEditText.getText()
                     .toString().trim());
         } else if (countrySelected.equals(Locale.CANADA.getCountry())) {
-            postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText()
+            postalCodeValid = CountryUtils.isCanadianPostalCodeValid(mPostalCodeEditText.getText()
                     .toString().trim());
         } else if (CountryUtils.doesCountryUsePostalCode(countrySelected)) {
             postalCodeValid = !mPostalCodeEditText.getText().toString().isEmpty();
