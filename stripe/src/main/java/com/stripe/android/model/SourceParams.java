@@ -237,6 +237,20 @@ public class SourceParams {
     }
 
     /**
+     * Create parameters necessary for converting a token into a source
+     *
+     * @param tokenId the id of the {@link Token} to be converted into a source.
+     * @return a {@link SourceParams} object that can be used to create a source.
+     */
+    @NonNull
+    public static SourceParams createSourceFromTokenParams(String tokenId) {
+        SourceParams sourceParams = SourceParams.createCustomParams();
+        sourceParams.setType(Source.CARD);
+        sourceParams.setToken(tokenId);
+        return sourceParams;
+    }
+
+    /**
      * Create parameters necessary for creating a card source.
      *
      * @param card A {@link Card} object containing the details necessary for the source.
