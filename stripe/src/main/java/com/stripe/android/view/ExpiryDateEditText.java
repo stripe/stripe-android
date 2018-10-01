@@ -151,7 +151,8 @@ public class ExpiryDateEditText extends StripeEditText {
                 int cursorPosition = updateSelectionIndex(
                         formattedDate.length(),
                         latestChangeStart,
-                        latestInsertionSize);
+                        latestInsertionSize,
+                        MAX_INPUT_LENGTH);
 
                 ignoreChanges = true;
                 setText(formattedDate);
@@ -206,8 +207,8 @@ public class ExpiryDateEditText extends StripeEditText {
     int updateSelectionIndex(
             int newLength,
             int editActionStart,
-            int editActionAddition) {
-        int newPosition, gapsJumped = 0;
+            int editActionAddition,
+            int maxInputLength) { int newPosition, gapsJumped = 0;
 
         boolean skipBack = false;
         if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {
@@ -224,8 +225,8 @@ public class ExpiryDateEditText extends StripeEditText {
         if (skipBack && newPosition > 0) {
             newPosition--;
         }
-
-        return newPosition <= newLength ? newPosition : newLength;
+        int untruncatedPosition = newPosition <= newLength ? newPosition : newLength;
+        return Math.min(maxInputLength, untruncatedPosition);
     }
 
     private void updateInputValues(@NonNull @Size(2) String[] parts) {
