@@ -156,6 +156,9 @@ public class Token implements StripePaymentSource {
 
     @Nullable
     public static Token fromString(@Nullable String jsonString) {
+        if (jsonString == null) {
+            return null;
+        }
         try {
             JSONObject tokenObject = new JSONObject(jsonString);
             return fromJson(tokenObject);

@@ -151,6 +151,13 @@ public class TokenTest {
         assertNull(answerToken.getBankAccount());
     }
 
+
+    @Test
+    public void parseToken_whenNullString_returnsNull() {
+        Token parsedToken = Token.fromString(null);
+        assertNull(parsedToken);
+    }
+
     @Test
     public void parseToken_whenBankAccount_readsObject() {
         Date createdDate = new Date(1484765567L * 1000L);
