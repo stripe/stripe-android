@@ -133,17 +133,22 @@ public class ExpiryDateEditTextTest {
 
     @Test
     public void updateSelectionIndex_whenMovingAcrossTheGap_movesToEnd() {
-        assertEquals(3, mExpiryDateEditText.updateSelectionIndex(3, 1, 1));
+        assertEquals(3, mExpiryDateEditText.updateSelectionIndex(3, 1, 1, 5));
     }
 
     @Test
     public void updateSelectionIndex_atStart_onlyMovesForwardByOne() {
-        assertEquals(1, mExpiryDateEditText.updateSelectionIndex(1, 0, 1));
+        assertEquals(1, mExpiryDateEditText.updateSelectionIndex(1, 0, 1, 5));
     }
 
     @Test
     public void updateSelectionIndex_whenDeletingAcrossTheGap_staysAtEnd() {
-        assertEquals(2, mExpiryDateEditText.updateSelectionIndex(2, 4, 0));
+        assertEquals(2, mExpiryDateEditText.updateSelectionIndex(2, 4, 0, 5));
+    }
+
+    @Test
+    public void updateSelectionIndex_whenInputVeryLong_respectMaxInputLength() {
+        assertEquals(5, mExpiryDateEditText.updateSelectionIndex(6, 4, 2, 5));
     }
 
     @Test
