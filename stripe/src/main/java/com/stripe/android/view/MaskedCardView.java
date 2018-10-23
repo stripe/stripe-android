@@ -204,7 +204,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateBrandIcon() {
-        if (!TEMPLATE_RESOURCE_MAP.containsKey(mCardBrand)) {
+        if (mCardBrand == null || !TEMPLATE_RESOURCE_MAP.containsKey(mCardBrand)) {
             return;
         }
         @DrawableRes int iconResourceId = TEMPLATE_RESOURCE_MAP.get(mCardBrand);
