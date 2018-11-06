@@ -40,6 +40,8 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             SOFORT,
             BANCONTACT,
             P24,
+            EPS,
+            MULTIBANCO,
             UNKNOWN
     })
     public @interface SourceType { }

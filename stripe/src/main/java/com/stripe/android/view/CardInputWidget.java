@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -63,7 +64,7 @@ public class CardInputWidget extends LinearLayout {
 
     // This value is used to ensure that onSaveInstanceState is called
     // in the event that the user doesn't give this control an ID.
-    private static final @IdRes int DEFAULT_READER_ID = 42424242;
+    @SuppressLint("ResourceType") private static final @IdRes int DEFAULT_READER_ID = 42424242;
 
     private static final long ANIMATION_LENGTH = 150L;
 

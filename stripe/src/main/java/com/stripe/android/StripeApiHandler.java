@@ -56,7 +56,8 @@ class StripeApiHandler {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             GET,
-            POST
+            POST,
+            DELETE
     })
     @interface RestMethod { }
     static final String GET = "GET";
