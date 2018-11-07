@@ -8,7 +8,10 @@ import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
+
+import com.stripe.android.R;
 
 /**
  * An {@link EditText} that handles putting numbers around a central divider character.
@@ -34,6 +37,12 @@ public class ExpiryDateEditText extends StripeEditText {
     public ExpiryDateEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
+    }
+
+    @Override public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        String accLabel = getText().toString() + " " + getResources().getString(R.string.acc_label_expiry_date);
+        info.setText(accLabel);
     }
 
     /**
