@@ -86,13 +86,6 @@ public class ShippingInfoWidgetTest {
     }
 
     @Test
-    public void updateUIForCountryEntered_whenCountrySelectedNullAndNoLocale_doesNotCrash() {
-        Locale.setDefault(Locale.CHINA);
-        mCountryAutoCompleteTextView.mCountrySelected = null;
-        mCountryAutoCompleteTextView.updateUIForCountryEntered(null);
-    }
-
-    @Test
     public void shippingInfoWidget_whenCountryChanged_fieldsRenderCorrectly() {
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         assertEquals(mAddressLine1TextInputLayout.getHint(), mShippingInfoWidget.getResources().getString(R.string.address_label_address));
