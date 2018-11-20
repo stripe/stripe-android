@@ -41,7 +41,7 @@ public class EphemeralKeyTest {
 
     @Test
     public void fromJson_createsKeyWithExpectedValues() {
-        EphemeralKey ephemeralKey = EphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         assertEquals("ephkey_123", ephemeralKey.getId());
         assertEquals("ephemeral_key", ephemeralKey.getObject());
@@ -57,7 +57,7 @@ public class EphemeralKeyTest {
     public void fromJson_toJson_createsEqualObject() {
         try {
             JSONObject originalObject = new JSONObject(SAMPLE_KEY_RAW);
-            EphemeralKey key = EphemeralKey.fromJson(originalObject);
+            CustomerEphemeralKey key = CustomerEphemeralKey.fromJson(originalObject);
             assertNotNull(key);
             JsonTestUtils.assertJsonEquals(originalObject, key.toJson());
         } catch (JSONException unexpected) {
@@ -67,30 +67,30 @@ public class EphemeralKeyTest {
 
     @Test
     public void toMap_createsMapWithExpectedValues() {
-        EphemeralKey ephemeralKey = EphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         Map<String, Object> expectedMap = new HashMap<String, Object>() {{
-            put(EphemeralKey.FIELD_ID, "ephkey_123");
-            put(EphemeralKey.FIELD_OBJECT, "ephemeral_key");
-            put(EphemeralKey.FIELD_SECRET, "ek_test_123");
-            put(EphemeralKey.FIELD_LIVEMODE, false);
-            put(EphemeralKey.FIELD_CREATED, 1483575790L);
-            put(EphemeralKey.FIELD_EXPIRES, 1483579790L);
+            put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
+            put(CustomerEphemeralKey.FIELD_OBJECT, "ephemeral_key");
+            put(CustomerEphemeralKey.FIELD_SECRET, "ek_test_123");
+            put(CustomerEphemeralKey.FIELD_LIVEMODE, false);
+            put(CustomerEphemeralKey.FIELD_CREATED, 1483575790L);
+            put(CustomerEphemeralKey.FIELD_EXPIRES, 1483579790L);
         }};
 
         Map<String, String> subMap = new HashMap<>();
-        subMap.put(EphemeralKey.FIELD_ID, "cus_123");
-        subMap.put(EphemeralKey.FIELD_TYPE, "customer");
+        subMap.put(CustomerEphemeralKey.FIELD_ID, "cus_123");
+        subMap.put(CustomerEphemeralKey.FIELD_TYPE, "customer");
         List<Object> list = new ArrayList<>();
         list.add(subMap);
-        expectedMap.put(EphemeralKey.FIELD_ASSOCIATED_OBJECTS, list);
+        expectedMap.put(CustomerEphemeralKey.FIELD_ASSOCIATED_OBJECTS, list);
 
         JsonTestUtils.assertMapEquals(expectedMap, ephemeralKey.toMap());
     }
 
     @Test
     public void toParcel_fromParcel_createsExpectedObject() {
-        EphemeralKey ephemeralKey = EphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         Parcel parcel = Parcel.obtain();
         ephemeralKey.writeToParcel(parcel, 0);
@@ -98,7 +98,7 @@ public class EphemeralKeyTest {
         // null values off the end.
         parcel.setDataPosition(0);
 
-        EphemeralKey createdKey = EphemeralKey.CREATOR.createFromParcel(parcel);
+        CustomerEphemeralKey createdKey = CustomerEphemeralKey.CREATOR.createFromParcel(parcel);
 
         assertEquals(ephemeralKey.getId(), createdKey.getId());
         assertEquals(ephemeralKey.getCreated(), createdKey.getCreated());

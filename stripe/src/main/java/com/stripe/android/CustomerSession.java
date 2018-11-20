@@ -1,6 +1,5 @@
 package com.stripe.android;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
-public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
+public class CustomerSession implements EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
 
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";
@@ -67,7 +66,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
     private @Nullable SourceRetrievalListener mSourceRetrievalListener;
 
-    private @Nullable EphemeralKey mEphemeralKey;
+    private @Nullable
+    CustomerEphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyManager mEphemeralKeyManager;
 
     private @NonNull Handler mUiThreadHandler;
@@ -103,7 +103,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
-     * {@link EphemeralKey EphemeralKeys} as needed
+     * {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
     public static void initCustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
         initCustomerSession(keyProvider, null, null);
@@ -163,7 +163,8 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
-                proxyNowCalendar);
+                proxyNowCalendar,
+                EphemeralKey.class);
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -310,7 +311,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     @Nullable
     @VisibleForTesting
-    EphemeralKey getEphemeralKey() {
+    CustomerEphemeralKey getEphemeralKey() {
         return mEphemeralKey;
     }
 
@@ -326,7 +327,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private void addCustomerSource(
             @NonNull final WeakReference<Context> contextWeakReference,
-            @NonNull final EphemeralKey key,
+            @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
             @NonNull final List<String> productUsageTokens) {
@@ -363,7 +364,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private void deleteCustomerSource(
             @NonNull final WeakReference<Context> contextWeakReference,
-            @NonNull final EphemeralKey key,
+            @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final List<String> productUsageTokens) {
         Runnable fetchCustomerRunnable = new Runnable() {
@@ -391,7 +392,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private void setCustomerSourceDefault(
             @NonNull final WeakReference<Context> contextWeakReference,
-            @NonNull final EphemeralKey key,
+            @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
             @NonNull final List<String> productUsageTokens) {
@@ -421,7 +422,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     private void setCustomerShippingInformation(
             @NonNull final WeakReference<Context> contextWeakReference,
-            @NonNull final EphemeralKey key,
+            @NonNull final CustomerEphemeralKey key,
             @NonNull final ShippingInformation shippingInformation,
             @NonNull final List<String> productUsageTokens) {
         Runnable runnable = new Runnable() {
@@ -447,7 +448,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
         executeRunnable(runnable);
     }
 
-    private void updateCustomer(@NonNull final EphemeralKey key) {
+    private void updateCustomer(@NonNull final CustomerEphemeralKey key) {
         Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
@@ -481,7 +482,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     @Override
     public void onKeyUpdate(
-            @Nullable EphemeralKey ephemeralKey,
+            @Nullable CustomerEphemeralKey ephemeralKey,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
         mEphemeralKey = ephemeralKey;
@@ -638,7 +639,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     static Source addCustomerSourceWithKey(
             @NonNull WeakReference<Context> contextWeakReference,
-            @NonNull EphemeralKey key,
+            @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
@@ -667,7 +668,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     static Source deleteCustomerSourceWithKey(
             @NonNull WeakReference<Context> contextWeakReference,
-            @NonNull EphemeralKey key,
+            @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @Nullable StripeApiProxy proxy) throws StripeException {
@@ -693,7 +694,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     static Customer setCustomerShippingInfoWithKey(
             @NonNull WeakReference<Context> contextWeakReference,
-            @NonNull EphemeralKey key,
+            @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
             @Nullable StripeApiProxy proxy) throws StripeException {
@@ -719,7 +720,7 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
 
     static Customer setCustomerSourceDefaultWithKey(
             @NonNull WeakReference<Context> contextWeakReference,
-            @NonNull EphemeralKey key,
+            @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
@@ -749,19 +750,19 @@ public class CustomerSession implements EphemeralKeyManager.KeyManagerListener {
     /**
      * Calls the Stripe API (or a test proxy) to fetch a customer. If the provided key is expired,
      * this method <b>does not</b> update the key.
-     * Use {@link #updateCustomer(EphemeralKey)} to validate the key
+     * Use {@link #updateCustomer(CustomerEphemeralKey)} to validate the key
      * before refreshing the customer.
      *
      * @param errorContext a {@link WeakReference} to a {@link Context}
      *                     that can be used for broadcasting errors.
-     * @param key the {@link EphemeralKey} used for this access
+     * @param key the {@link CustomerEphemeralKey} used for this access
      * @param proxy a {@link StripeApiProxy} to intercept calls to the real servers
      * @return a {@link Customer} if one can be found with this key, or {@code null} if one cannot.
      */
     @Nullable
     static Customer retrieveCustomerWithKey(
             @Nullable WeakReference<Context> errorContext,
-            @NonNull EphemeralKey key,
+            @NonNull CustomerEphemeralKey key,
             @Nullable StripeApiProxy proxy) throws StripeException {
         if (proxy != null) {
             return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
