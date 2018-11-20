@@ -20,21 +20,8 @@ import java.util.Map;
 /**
  * Represents an Ephemeral Key that can be used temporarily for certain operations.
  */
-class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
+abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
 
-    public static final Parcelable.Creator<AbstractEphemeralKey> CREATOR
-            = new Parcelable.Creator<AbstractEphemeralKey>() {
-
-        @Override
-        public AbstractEphemeralKey createFromParcel(Parcel in) {
-            return new AbstractEphemeralKey(in);
-        }
-
-        @Override
-        public AbstractEphemeralKey[] newArray(int size) {
-            return new AbstractEphemeralKey[size];
-        }
-    };
     static final String FIELD_CREATED = "created";
     static final String FIELD_EXPIRES = "expires";
     static final String FIELD_SECRET = "secret";
@@ -143,7 +130,7 @@ class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
             JSONObject typeObject = associatedObjectArray.getJSONObject(0);
             String type = typeObject.getString(FIELD_TYPE);
             String objectId = typeObject.getString(FIELD_ID);
-            if (TEphemeralKey.isAssignableFrom(EphemeralKey.class)) {
+            if (TEphemeralKey.equals(EphemeralKey.class)) {
                 return (TEphemeralKey) new EphemeralKey(
                         created,
                         objectId,
@@ -153,7 +140,7 @@ class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
                         object,
                         secret,
                         type);
-            } else if (TEphemeralKey.isAssignableFrom(CustomerEphemeralKey.class)) {
+            } else if (TEphemeralKey.equals(CustomerEphemeralKey.class)) {
                 return (TEphemeralKey) new CustomerEphemeralKey(
                         created,
                         objectId,
