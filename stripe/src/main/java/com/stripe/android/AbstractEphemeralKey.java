@@ -98,21 +98,23 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     @Nullable
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromString(@Nullable String rawJson, Class TEphemeralKey) {
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromString(@Nullable String rawJson, Class ephemeralKeyClass) {
         if (rawJson == null) {
             return null;
         }
 
         try {
             JSONObject object = new JSONObject(rawJson);
-            return fromJson(object, TEphemeralKey);
+            return fromJson(object, ephemeralKeyClass);
         } catch (JSONException ignored) {
             return null;
         }
     }
 
     @Nullable
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromJson(@Nullable JSONObject jsonObject, Class TEphemeralKey) {
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
             return null;
         }
@@ -130,7 +132,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
             JSONObject typeObject = associatedObjectArray.getJSONObject(0);
             String type = typeObject.getString(FIELD_TYPE);
             String objectId = typeObject.getString(FIELD_ID);
-            if (TEphemeralKey.equals(EphemeralKey.class)) {
+            if (ephemeralKeyClass.equals(EphemeralKey.class)) {
                 return (TEphemeralKey) new EphemeralKey(
                         created,
                         objectId,
@@ -140,7 +142,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
                         object,
                         secret,
                         type);
-            } else if (TEphemeralKey.equals(CustomerEphemeralKey.class)) {
+            } else if (ephemeralKeyClass.equals(CustomerEphemeralKey.class)) {
                 return (TEphemeralKey) new CustomerEphemeralKey(
                         created,
                         objectId,
@@ -151,7 +153,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
                         secret,
                         type);
             } else {
-                throw new IllegalArgumentException("Unsupported Ephemeral key class " + TEphemeralKey);
+                throw new IllegalArgumentException("Unsupported Ephemeral key class "
+                        + ephemeralKeyClass);
             }
         } catch (JSONException ignored) {
             return null;

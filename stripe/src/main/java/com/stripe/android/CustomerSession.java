@@ -37,7 +37,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
-public class CustomerSession implements EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
+public class CustomerSession
+        implements EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
 
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";

@@ -4,7 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Size;
 
 /**
- * Represents an object that can call to a server and create {@link AbstractEphemeralKey EphemeralKeys}.
+ * Represents an object that can call to a server and create
+ * {@link AbstractEphemeralKey EphemeralKeys}.
  */
 public interface EphemeralKeyProvider {
 

@@ -23,8 +23,8 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             @NonNull KeyManagerListener keyManagerListener,
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
-            Class TEphemeralKey) {
-        mEphemeralKeyClass = TEphemeralKey;
+            Class ephemeralKeyClass) {
+        mEphemeralKeyClass = ephemeralKeyClass;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;

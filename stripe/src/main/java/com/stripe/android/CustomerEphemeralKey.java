@@ -56,11 +56,13 @@ public class CustomerEphemeralKey extends AbstractEphemeralKey {
 
     @Nullable
     static CustomerEphemeralKey fromString(@Nullable String rawJson) {
-        return (CustomerEphemeralKey) AbstractEphemeralKey.fromString(rawJson, CustomerEphemeralKey.class);
+        return (CustomerEphemeralKey) AbstractEphemeralKey
+                .fromString(rawJson, CustomerEphemeralKey.class);
     }
 
     @Nullable
     static CustomerEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
-        return (CustomerEphemeralKey) AbstractEphemeralKey.fromJson(jsonObject, CustomerEphemeralKey.class);
+        return (CustomerEphemeralKey) AbstractEphemeralKey
+                .fromJson(jsonObject, CustomerEphemeralKey.class);
     }
 }
