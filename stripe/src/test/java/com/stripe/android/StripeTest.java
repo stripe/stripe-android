@@ -636,6 +636,38 @@ public class StripeTest {
         }
     }
 
+
+    @Test
+    public void createSourceSynchronous_withSepaDebitParamsWithMinimalValues_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        String validIban = "DE89370400440532013000";
+        SourceParams params = SourceParams.createSepaDebitParams(
+                "Sepa Account Holder",
+                validIban,
+                null,
+                null,
+                null,
+                null,
+                null);
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
+        try {
+            Source sepaDebitSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(sepaDebitSource);
+            assertNotNull(sepaDebitSource.getClientSecret());
+            assertNotNull(sepaDebitSource.getId());
+            assertEquals(Source.SEPA_DEBIT, sepaDebitSource.getType());
+            JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
+
     @Test
     public void createSourceSynchronous_withNoEmail_passesIntegrationTest() {
         Stripe stripe = getNonLoggingStripe(mContext);
