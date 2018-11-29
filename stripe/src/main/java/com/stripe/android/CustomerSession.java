@@ -165,7 +165,7 @@ public class CustomerSession
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
-                EphemeralKey.class);
+                CustomerEphemeralKey.class);
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)

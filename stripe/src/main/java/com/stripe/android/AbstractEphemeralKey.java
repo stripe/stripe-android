@@ -132,17 +132,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
             JSONObject typeObject = associatedObjectArray.getJSONObject(0);
             String type = typeObject.getString(FIELD_TYPE);
             String objectId = typeObject.getString(FIELD_ID);
-            if (ephemeralKeyClass.equals(EphemeralKey.class)) {
-                return (TEphemeralKey) new EphemeralKey(
-                        created,
-                        objectId,
-                        expires,
-                        id,
-                        liveMode,
-                        object,
-                        secret,
-                        type);
-            } else if (ephemeralKeyClass.equals(CustomerEphemeralKey.class)) {
+            if (ephemeralKeyClass.equals(CustomerEphemeralKey.class)) {
                 return (TEphemeralKey) new CustomerEphemeralKey(
                         created,
                         objectId,
