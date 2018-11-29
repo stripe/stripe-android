@@ -118,6 +118,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     @Nullable
+    @SuppressWarnings({"checkstyle:LineLength", "checkstyle:IllegalCatch"})
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
@@ -125,7 +126,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         }
 
         try {
-            return (TEphemeralKey) ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
+            return (TEphemeralKey)
+                    ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
         } catch (InstantiationException e) {
             throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
         } catch (IllegalAccessException e) {
@@ -135,7 +137,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
         } catch (Exception e) {
-            if(e instanceof JSONException) {
+            if (e instanceof JSONException) {
                 // ignored
                 return null;
             }
