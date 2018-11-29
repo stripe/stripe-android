@@ -97,49 +97,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         mObjectId = typeObject.getString(FIELD_ID);
     }
 
-    @Nullable
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
-    fromString(@Nullable String rawJson, Class ephemeralKeyClass) {
-        if (rawJson == null) {
-            return null;
-        }
-
-        try {
-            JSONObject object = new JSONObject(rawJson);
-            return fromJson(object, ephemeralKeyClass);
-        } catch (JSONException ignored) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @SuppressWarnings({"checkstyle:LineLength", "checkstyle:IllegalCatch"})
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
-    fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
-        if (jsonObject == null) {
-            return null;
-        }
-
-        try {
-            return (TEphemeralKey)
-                    ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
-        } catch (Exception e) {
-            if (e instanceof JSONException) {
-                // ignored
-                return null;
-            }
-            throw e;
-        }
-    }
-
     @NonNull
     @Override
     public JSONObject toJson() {
@@ -252,5 +209,48 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     @NonNull
     String getType() {
         return mType;
+    }
+
+    @Nullable
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromString(@Nullable String rawJson, Class ephemeralKeyClass) {
+        if (rawJson == null) {
+            return null;
+        }
+
+        try {
+            JSONObject object = new JSONObject(rawJson);
+            return fromJson(object, ephemeralKeyClass);
+        } catch (JSONException ignored) {
+            return null;
+        }
+    }
+
+    @Nullable
+    @SuppressWarnings({"checkstyle:LineLength", "checkstyle:IllegalCatch"})
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
+        if (jsonObject == null) {
+            return null;
+        }
+
+        try {
+            return (TEphemeralKey)
+                    ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
+        } catch (Exception e) {
+            if (e instanceof JSONException) {
+                // ignored
+                return null;
+            }
+            throw e;
+        }
     }
 }
