@@ -32,19 +32,14 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
     static final String NULL = "null";
-    protected @NonNull
-    String mObjectId;
+    protected @NonNull String mObjectId;
     private long mCreated;
     private long mExpires;
-    private @NonNull
-    String mId;
+    private @NonNull String mId;
     private boolean mLiveMode;
-    private @NonNull
-    String mObject;
-    private @NonNull
-    String mSecret;
-    private @NonNull
-    String mType;
+    private @NonNull String mObject;
+    private @NonNull String mSecret;
+    private @NonNull String mType;
 
     /**
      * Parcel constructor for this {@link Parcelable} class.
