@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,16 +86,20 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     protected AbstractEphemeralKey(
-            AbstractEphemeralKey key
-    ) {
-        mCreated = key.mCreated;
-        mObjectId = key.mObjectId;
-        mExpires = key.mExpires;
-        mId = key.mId;
-        mLiveMode = key.mLiveMode;
-        mObject = key.mObject;
-        mSecret = key.mSecret;
-        mType = key.mType;
+            @Nullable JSONObject jsonObject
+    ) throws JSONException {
+        mCreated = jsonObject.getLong(FIELD_CREATED);
+        mExpires = jsonObject.getLong(FIELD_EXPIRES);
+        mId = jsonObject.getString(FIELD_ID);
+        mLiveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
+        mObject = jsonObject.getString(FIELD_OBJECT);
+        mSecret = jsonObject.getString(FIELD_SECRET);
+
+        // Get the values from the associated objects array first element
+        JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
+        JSONObject typeObject = associatedObjectArray.getJSONObject(0);
+        mType = typeObject.getString(FIELD_TYPE);
+        mObjectId = typeObject.getString(FIELD_ID);
     }
 
     @Nullable
@@ -120,34 +125,21 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         }
 
         try {
-            long created = jsonObject.getLong(FIELD_CREATED);
-            long expires = jsonObject.getLong(FIELD_EXPIRES);
-            String id = jsonObject.getString(FIELD_ID);
-            boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
-            String object = jsonObject.getString(FIELD_OBJECT);
-            String secret = jsonObject.getString(FIELD_SECRET);
-
-            // Get the values from the associated objects array first element
-            JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
-            JSONObject typeObject = associatedObjectArray.getJSONObject(0);
-            String type = typeObject.getString(FIELD_TYPE);
-            String objectId = typeObject.getString(FIELD_ID);
-            if (ephemeralKeyClass.equals(CustomerEphemeralKey.class)) {
-                return (TEphemeralKey) new CustomerEphemeralKey(
-                        created,
-                        objectId,
-                        expires,
-                        id,
-                        liveMode,
-                        object,
-                        secret,
-                        type);
-            } else {
-                throw new IllegalArgumentException("Unsupported Ephemeral key class "
-                        + ephemeralKeyClass);
+            return (TEphemeralKey) ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
+        } catch (Exception e) {
+            if(e instanceof JSONException) {
+                // ignored
+                return null;
             }
-        } catch (JSONException ignored) {
-            return null;
+            throw e;
         }
     }
 

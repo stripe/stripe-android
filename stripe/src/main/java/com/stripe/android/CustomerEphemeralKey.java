@@ -5,9 +5,10 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-public class CustomerEphemeralKey extends AbstractEphemeralKey {
+class CustomerEphemeralKey extends AbstractEphemeralKey {
 
     protected CustomerEphemeralKey(Parcel in) {
         super(in);
@@ -31,6 +32,13 @@ public class CustomerEphemeralKey extends AbstractEphemeralKey {
                 object,
                 secret,
                 type);
+
+    }
+
+    public CustomerEphemeralKey(
+            @Nullable JSONObject jsonObject
+    ) throws JSONException {
+        super(jsonObject);
 
     }
 
