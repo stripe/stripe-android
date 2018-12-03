@@ -625,7 +625,7 @@ public class CardTest {
     @Test
     public void last4ShouldBeNullWhenNumberIsNull() {
         Card card = new Card(null, null, null, null);
-        assertEquals(null, card.getLast4());
+        assertNull(card.getLast4());
     }
 
     @Test
@@ -676,6 +676,7 @@ public class CardTest {
                 null
         );
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+        //noinspection deprecation
         assertEquals(Card.AMERICAN_EXPRESS, card.getType());
     }
 

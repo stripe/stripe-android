@@ -88,34 +88,34 @@ public class StripeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void constructorShouldFailWithNullPublishableKey() throws AuthenticationException {
+    public void constructorShouldFailWithNullPublishableKey() {
         new Stripe(mContext, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void constructorShouldFailWithEmptyPublishableKey() throws AuthenticationException {
+    public void constructorShouldFailWithEmptyPublishableKey() {
         new Stripe(mContext, "");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void constructorShouldFailWithSecretKey() throws AuthenticationException {
+    public void constructorShouldFailWithSecretKey() {
         new Stripe(mContext, DEFAULT_SECRET_KEY);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void setDefaultPublishableKeyShouldFailWhenNull() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWhenNull() {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void setDefaultPublishableKeyShouldFailWhenEmpty() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWhenEmpty() {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey("");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void setDefaultPublishableKeyShouldFailWithSecretKey() throws AuthenticationException {
+    public void setDefaultPublishableKeyShouldFailWithSecretKey() {
         Stripe stripe = new Stripe(mContext);
         stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
     }
@@ -176,7 +176,7 @@ public class StripeTest {
     public void createTokenShouldUseExecutor() {
         final Executor expectedExecutor = new Executor() {
             @Override
-            public void execute(Runnable command) {
+            public void execute(@NonNull Runnable command) {
             }
         };
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
@@ -849,7 +849,7 @@ public class StripeTest {
             assertNull(idealSource.getSourceTypeModel());
             assertNotNull(idealSource.getRedirect());
             assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
-            assertEquals(null, idealSource.getOwner().getName());
+            assertNull(idealSource.getOwner().getName());
             assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
             JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
         } catch (StripeException stripeEx) {
@@ -1107,11 +1107,11 @@ public class StripeTest {
     }
 
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
-        boolean mShouldLogTest;
-        List<StripeResponse> responseList = new ArrayList<>();
-        List<StripeException> exceptionList = new ArrayList<>();
+        private final boolean mShouldLogTest;
+        private final List<StripeResponse> responseList = new ArrayList<>();
+        private final List<StripeException> exceptionList = new ArrayList<>();
 
-        public TestLoggingListener(boolean shouldLogTest) {
+        TestLoggingListener(boolean shouldLogTest) {
             mShouldLogTest = shouldLogTest;
         }
 

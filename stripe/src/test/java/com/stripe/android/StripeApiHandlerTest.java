@@ -12,6 +12,7 @@ import com.stripe.android.model.SourceParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -20,6 +21,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -146,7 +148,7 @@ public class StripeApiHandlerTest {
         assertNotNull(headerMap);
 
         final String expectedUserAgent =
-                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
+                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
         assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
         assertEquals("application/json", headerMap.get("Accept"));
         assertEquals("UTF-8", headerMap.get("Accept-Charset"));
@@ -267,6 +269,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
@@ -295,6 +298,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
@@ -321,6 +325,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
