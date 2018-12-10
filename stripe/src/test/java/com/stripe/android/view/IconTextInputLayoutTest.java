@@ -1,8 +1,8 @@
 package com.stripe.android.view;
 
+import android.os.Build;
 import android.support.design.widget.TextInputLayout;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 
 import org.junit.Test;
@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link IconTextInputLayout} to ensure that the Reflection doesn't break
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNotNull;
  * is no need to otherwise test the behavior.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
+@Config(sdk = Build.VERSION_CODES.N_MR1)
 public class IconTextInputLayoutTest {
 
     @Test
@@ -32,9 +32,6 @@ public class IconTextInputLayoutTest {
                 activityController.get().getCardMultilineWidget()
                         .findViewById(R.id.tl_add_source_card_number_ml);
 
-        assertNotNull(iconTextInputLayout.mCollapsingTextHelper);
-        assertNotNull(iconTextInputLayout.mBounds);
-        assertNotNull(iconTextInputLayout.mRecalculateMethod);
+        assertTrue(iconTextInputLayout.hasObtainedCollapsingTextHelper());
     }
-
 }
