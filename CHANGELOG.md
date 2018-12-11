@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### 8.1.0 2018-11-13
+* Add support for latest version of PaymentIntents
+* Fix NPEs in `CountryAutocompleteTextView`
+* Fix NPEs in `PaymentContext` experiences
+* Helper method for converting tokens to sources
+* Fix bug with Canadian and UK postal code validation
+
 ### 8.0.0 2018-7-13
 * **BREAKING** Renamed PaymentIntentParams methods for readibility [#609](https://github.com/stripe/stripe-android/pull/609)
 

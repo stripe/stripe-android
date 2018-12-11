@@ -294,7 +294,7 @@ public class CustomerSessionTest {
 
     @Test
     public void create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -318,7 +318,7 @@ public class CustomerSessionTest {
 
     @Test
     public void setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs(){
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         Calendar proxyCalendar = Calendar.getInstance();
         CustomerSession.initCustomerSession(
@@ -349,10 +349,10 @@ public class CustomerSessionTest {
 
     @Test
     public void retrieveCustomer_withExpiredCache_updatesCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
-        EphemeralKey secondKey = EphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey secondKey = CustomerEphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
         assertNotNull(secondKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -410,7 +410,7 @@ public class CustomerSessionTest {
 
     @Test
     public void retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -467,7 +467,7 @@ public class CustomerSessionTest {
 
     @Test
     public void addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -531,7 +531,7 @@ public class CustomerSessionTest {
 
     @Test
     public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -585,7 +585,7 @@ public class CustomerSessionTest {
 
     @Test
     public void removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSourceAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -647,7 +647,7 @@ public class CustomerSessionTest {
 
     @Test
     public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -700,7 +700,7 @@ public class CustomerSessionTest {
 
     @Test
     public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -763,7 +763,7 @@ public class CustomerSessionTest {
 
     @Test
     public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();

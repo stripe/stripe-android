@@ -108,4 +108,19 @@ public class MaskedCardAdapterTest {
 
         assertEquals(1, mMaskedCardAdapter.getItemCount());
     }
+
+    @Test
+    public void setCustomerSourceList_filtersOutNonCardSources() {
+        List<CustomerSource> customerSourceList = new ArrayList<CustomerSource>();
+        CustomerSource cardCustomerSource = Mockito.mock(CustomerSource.class);
+        Card card = Mockito.mock(Card.class);
+        Mockito.when(cardCustomerSource.asCard()).thenReturn(card);
+        CustomerSource nonCardCustomerSource = Mockito.mock(CustomerSource.class);
+        customerSourceList.add(cardCustomerSource);
+        customerSourceList.add(nonCardCustomerSource);
+
+        mMaskedCardAdapter.setCustomerSourceList(customerSourceList);
+
+        assertEquals(1, mMaskedCardAdapter.getItemCount());
+    }
 }

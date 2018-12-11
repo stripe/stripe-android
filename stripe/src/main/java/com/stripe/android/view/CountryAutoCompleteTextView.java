@@ -20,7 +20,8 @@ import java.util.Map;
 public class CountryAutoCompleteTextView extends FrameLayout {
     private AutoCompleteTextView mCountryAutocomplete;
     private Map<String, String> mCountryNameToCode;
-    private String mCountrySelected;
+    @VisibleForTesting
+    protected String mCountrySelected;
     private CountryChangeListener mCountryChangeListener;
 
     public CountryAutoCompleteTextView(Context context) {
@@ -50,6 +51,9 @@ public class CountryAutoCompleteTextView extends FrameLayout {
      *                    the full country display name.
      */
     void setCountrySelected(String countryCode) {
+        if (countryCode == null) {
+            return;
+        }
         Locale locale = new Locale("", countryCode);
         updateUIForCountryEntered(locale.getDisplayCountry());
     }
@@ -69,7 +73,7 @@ public class CountryAutoCompleteTextView extends FrameLayout {
         mCountryAutocomplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String countryEntered =  mCountryAutocomplete.getText().toString();
+                String countryEntered = mCountryAutocomplete.getText().toString();
                 updateUIForCountryEntered(countryEntered);
             }
         });
@@ -79,7 +83,7 @@ public class CountryAutoCompleteTextView extends FrameLayout {
         mCountryAutocomplete.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focused) {
-                String countryEntered =  mCountryAutocomplete.getText().toString();
+                String countryEntered = mCountryAutocomplete.getText().toString();
                 if (focused) {
                     mCountryAutocomplete.showDropDown();
                 } else {
@@ -100,7 +104,7 @@ public class CountryAutoCompleteTextView extends FrameLayout {
                 }
             }
             mCountryAutocomplete.setText(displayCountryEntered);
-        } else {
+        } else if (mCountrySelected != null) {
             // Revert back to last valid country if country is not recognized.
             String displayCountry = new Locale("", mCountrySelected).getDisplayCountry();
             mCountryAutocomplete.setText(displayCountry);

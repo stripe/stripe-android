@@ -5,6 +5,7 @@ import android.widget.AutoCompleteTextView;
 import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +72,18 @@ public class CountryAutoCompleteTextViewTest {
         assertFalse(mAutoCompleteTextView.isPopupShowing());
         mAutoCompleteTextView.requestFocus();
         assertTrue(mAutoCompleteTextView.isPopupShowing());
+    }
+
+    @Test
+    public void updateUIForCountryEntered_whenCountrySelectedNullAndNoLocale_doesNotCrash() {
+        Locale.setDefault(Locale.CHINA);
+        mCountryAutoCompleteTextView.mCountrySelected = null;
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(null);
+    }
+
+    @After
+    public void teardown() {
+        Locale.setDefault(Locale.US);
     }
 
 }

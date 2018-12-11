@@ -127,7 +127,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -147,7 +147,7 @@ public class PaymentSessionTest {
 
     @Test
     public void setCartTotal_setsExpectedValueAndNotifiesListener() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -173,7 +173,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -199,7 +199,7 @@ public class PaymentSessionTest {
 
     @Test
     public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -225,7 +225,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -251,7 +251,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -277,7 +277,7 @@ public class PaymentSessionTest {
 
     @Test
     public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -318,7 +318,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedState_setsPaymentSessionData() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);

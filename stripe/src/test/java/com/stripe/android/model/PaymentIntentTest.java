@@ -65,8 +65,7 @@ public class PaymentIntentTest {
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
             "  \"next_source_action\": {" +
-            "       type: \"authorize_with_url\"," +
-            "       value: {" +
+            "       authorize_with_url: {" +
         "           url: \""+ BAD_URL +"\" } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +

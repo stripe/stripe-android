@@ -131,7 +131,9 @@ class StripeApiHandler {
         RequestOptions options = RequestOptions.builder(
                 publishableKey,
                 stripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                RequestOptions.TYPE_QUERY)
+                .setApiVersion(API_VERSION)
+                .build();
 
         try {
             String apiKey = options.getPublishableApiKey();
@@ -195,7 +197,9 @@ class StripeApiHandler {
         RequestOptions options = RequestOptions.builder(
                 publishableKey,
                 stripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                RequestOptions.TYPE_QUERY)
+                .setApiVersion(API_VERSION)
+                .build();
 
         try {
             String apiKey = options.getPublishableApiKey();
