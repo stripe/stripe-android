@@ -274,7 +274,8 @@ public class MaskedCardView extends LinearLayout {
 
     private void useDefaultColorsIfThemeColorsAreInvisible() {
         mSelectedColorInt = ViewUtils.isColorTransparent(mSelectedColorInt) ?
-                ContextCompat.getColor(getContext(), R.color.accent_color_default) : mSelectedColorInt;
+                ContextCompat.getColor(getContext(), R.color.accent_color_default) :
+                mSelectedColorInt;
         mUnselectedColorInt = ViewUtils.isColorTransparent(mUnselectedColorInt) ?
                 ContextCompat.getColor(getContext(), R.color.control_normal_color_default) :
                 mUnselectedColorInt;
