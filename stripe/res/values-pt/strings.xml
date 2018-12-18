@@ -55,7 +55,7 @@
     <!--Label for input requesting postcode where input is optional, used for UK based addresses-->
     <string name="address_label_postcode_optional">Código postal (opcional)</string>
     <!--Label for input requesting postal code, used for international addresses-->
-    <string name="address_label_zip_postal_code">CEP/Código postal</string>
+    <string name="address_label_zip_postal_code">CEP / Código postal</string>
     <!--Label for input requesting postal code where input is optional, used for international addresses-->
     <string name="address_label_zip_postal_code_optional">CEP / Código postal (opcional)</string>
     <!-- title of a screen prompting user to enter a shipping address -->
@@ -73,7 +73,7 @@
     <!--Label for input requesting province where province is optional, used for canadian addresses-->
     <string name="address_label_province_optional">Província (opcional)</string>
     <!--Label for input requesting the region, used for international addresses-->
-    <string name="address_label_region_generic"> Estado / Província / Região</string>
+    <string name="address_label_region_generic">Estado / Província / Região</string>
     <!--Label for input requesting the region where input is optional, used for international addresses-->
     <string name="address_label_region_generic_optional">Estado / Província / Região (opcional)</string>
     <!--Error text indicating name is required-->
