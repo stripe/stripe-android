@@ -69,7 +69,7 @@ public class CountryAdapterTest {
         filter.filter("a");
         assertTrue(mCountryAdapter.mSuggestions.size() < countryLength);
         for (String suggestedCountry: mCountryAdapter.mSuggestions) {
-            assertTrue(suggestedCountry.toLowerCase().startsWith("a"));
+            assertTrue(suggestedCountry.toLowerCase(Locale.ROOT).startsWith("a"));
         }
     }
 

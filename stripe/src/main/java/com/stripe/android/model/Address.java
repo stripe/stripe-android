@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
@@ -51,7 +52,7 @@ public class Address extends StripeJsonModel implements Parcelable {
     @Nullable private String mPostalCode;
     @Nullable private String mState;
 
-    Address(
+    private Address(
             String city,
             String country,
             String line1,
@@ -66,7 +67,7 @@ public class Address extends StripeJsonModel implements Parcelable {
         mState = state;
     }
 
-    Address(Builder addressBuilder) {
+    private Address(@NonNull Builder addressBuilder) {
         mCity = addressBuilder.mCity;
         mCountry = addressBuilder.mCountry;
         mLine1 = addressBuilder.mLine1;
@@ -199,7 +200,7 @@ public class Address extends StripeJsonModel implements Parcelable {
         }
 
         public Builder setCountry(@NonNull String country) {
-            mCountry = country.toUpperCase();
+            mCountry = country.toUpperCase(Locale.ROOT);
             return this;
         }
 

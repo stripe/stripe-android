@@ -56,7 +56,8 @@ class StripeApiHandler {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             GET,
-            POST
+            POST,
+            DELETE
     })
     @interface RestMethod { }
     static final String GET = "GET";
@@ -167,7 +168,7 @@ class StripeApiHandler {
     }
 
     /**
-     * Retrive a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
+     * Retrieve a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
      *
      * @param uidProvider a provider for UUID items in test
      * @param context a {@link Context} object for acquiring resources
@@ -603,14 +604,12 @@ class StripeApiHandler {
             throws UnsupportedEncodingException, InvalidRequestException {
         StringBuilder queryStringBuffer = new StringBuilder();
         List<Parameter> flatParams = flattenParams(params);
-        Iterator<Parameter> it = flatParams.iterator();
 
-        while (it.hasNext()) {
+        for (Parameter flatParam : flatParams) {
             if (queryStringBuffer.length() > 0) {
                 queryStringBuffer.append("&");
             }
-            Parameter param = it.next();
-            queryStringBuffer.append(urlEncodePair(param.key, param.value));
+            queryStringBuffer.append(urlEncodePair(flatParam.key, flatParam.value));
         }
 
         return queryStringBuffer.toString();
@@ -621,7 +620,8 @@ class StripeApiHandler {
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
         headers.put("User-Agent",
-                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME));
+                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
+                        BuildConfig.VERSION_NAME));
 
         if (options != null) {
             headers.put("Authorization", String.format(Locale.ENGLISH,
@@ -714,12 +714,11 @@ class StripeApiHandler {
 
     @VisibleForTesting
     static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
-        return String.format("%s/%s", getApiUrl(), tokenId);
+        return String.format(Locale.ROOT, "%s/%s", getApiUrl(), tokenId);
     }
 
     static void convertErrorsToExceptionsAndThrowIfNecessary(StripeResponse response) throws
             InvalidRequestException,
-            APIConnectionException,
             APIException,
             AuthenticationException,
             CardException {
@@ -950,7 +949,7 @@ class StripeApiHandler {
             throws InvalidRequestException {
         List<Parameter> flatParams = new LinkedList<Parameter>();
         Iterator<?> it = ((List<?>) params).iterator();
-        String newPrefix = String.format("%s[]", keyPrefix);
+        String newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix);
 
         // Because application/x-www-form-urlencoded cannot represent an empty
         // list, convention is to take the list parameter and just set it to an
@@ -979,7 +978,7 @@ class StripeApiHandler {
             Object value = entry.getValue();
             String newPrefix = key;
             if (keyPrefix != null) {
-                newPrefix = String.format("%s[%s]", keyPrefix, key);
+                newPrefix = String.format(Locale.ROOT, "%s[%s]", keyPrefix, key);
             }
 
             flatParams.addAll(flattenParamsValue(value, newPrefix));
@@ -1017,17 +1016,16 @@ class StripeApiHandler {
         } else {
             // In some cases, URL can already contain a question mark (eg, upcoming invoice lines)
             String separator = url.contains("?") ? "&" : "?";
-            return String.format("%s%s%s", url, separator, query);
+            return String.format(Locale.ROOT, "%s%s%s", url, separator, query);
         }
     }
 
     private static String getContentType(@NonNull RequestOptions options) {
         if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-            return String.format(
-                    "application/json; charset=%s", CHARSET);
+            return String.format(Locale.ROOT, "application/json; charset=%s", CHARSET);
         } else {
-            return String.format(
-                    "application/x-www-form-urlencoded;charset=%s", CHARSET);
+            return String.format(Locale.ROOT, "application/x-www-form-urlencoded;charset=%s",
+                    CHARSET);
         }
     }
 
@@ -1070,7 +1068,7 @@ class StripeApiHandler {
             String url,
             Map<String, Object> params,
             RequestOptions options)
-            throws InvalidRequestException, APIConnectionException, APIException {
+            throws InvalidRequestException, APIConnectionException {
         // HTTPSURLConnection verifies SSL cert by default
         java.net.HttpURLConnection conn = null;
         try {
@@ -1086,7 +1084,7 @@ class StripeApiHandler {
                     break;
                 default:
                     throw new APIConnectionException(
-                            String.format(
+                            String.format(Locale.ENGLISH,
                                     "Unrecognized HTTP method %s. "
                                             + "This indicates a bug in the Stripe bindings. "
                                             + "Please contact support@stripe.com for assistance.",
@@ -1107,7 +1105,7 @@ class StripeApiHandler {
 
         } catch (IOException e) {
             throw new APIConnectionException(
-                    String.format(
+                    String.format(Locale.ENGLISH,
                             "IOException during API request to Stripe (%s): %s "
                                     + "Please check your internet connection and try again. "
                                     + "If this problem persists, you should check Stripe's "
@@ -1263,7 +1261,7 @@ class StripeApiHandler {
 
     private static String urlEncodePair(String k, String v)
             throws UnsupportedEncodingException {
-        return String.format("%s=%s", urlEncode(k), urlEncode(v));
+        return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v));
     }
 
     private static String urlEncode(String str) throws UnsupportedEncodingException {
