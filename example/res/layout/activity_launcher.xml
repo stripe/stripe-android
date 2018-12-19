@@ -65,6 +65,7 @@
             android:layout_gravity="center"
             android:layout_margin="10dp"
             android:text="@string/createAndroidPayTokens"
+            android:visibility="gone"
             />
 
         <Button
