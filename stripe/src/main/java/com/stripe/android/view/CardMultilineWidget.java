@@ -177,7 +177,7 @@ public class CardMultilineWidget extends LinearLayout {
      *
      * @param cardNumber card number to be set
      */
-    public void setCardNumber(String cardNumber) {
+    public void setCardNumber(@Nullable String cardNumber) {
         mCardNumberEditText.setText(cardNumber);
     }
 

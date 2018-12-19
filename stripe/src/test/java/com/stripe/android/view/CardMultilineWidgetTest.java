@@ -6,8 +6,8 @@ import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.stripe.android.R;
 import com.stripe.android.BuildConfig;
+import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -51,15 +51,17 @@ import static org.mockito.Mockito.verify;
 public class CardMultilineWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
-    private static final String[] EXPECTED_LOGGING_ARRAY = { CARD_MULTILINE_TOKEN };
+    private static final String[] EXPECTED_LOGGING_ARRAY = {CARD_MULTILINE_TOKEN};
 
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidget mNoZipCardMultilineWidget;
     private WidgetControlGroup mFullGroup;
     private WidgetControlGroup mNoZipGroup;
 
-    @Mock CardInputListener mFullCardListener;
-    @Mock CardInputListener mNoZipCardListener;
+    @Mock
+    CardInputListener mFullCardListener;
+    @Mock
+    CardInputListener mNoZipCardListener;
 
     @Before
     public void setup() {
@@ -491,6 +493,29 @@ public class CardMultilineWidgetTest {
 
         assertNotNull(card);
         assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+    }
+
+    @Test
+    public void validateCardNumber_whenValid_doesNotShowError() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_WITH_SPACES);
+
+        Boolean isValid = mCardMultilineWidget.validateCardNumber();
+        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+
+        assertTrue(isValid);
+        assertFalse(shouldShowError);
+    }
+
+    @Test
+    public void validateCardNumber_whenInvalid_setsShowError() {
+        String invalidNumber = "1234 1234 1234 1234";
+        mCardMultilineWidget.setCardNumber(invalidNumber);
+
+        Boolean isValid = mCardMultilineWidget.validateCardNumber();
+        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+
+        assertFalse(isValid);
+        assertTrue(shouldShowError);
     }
 
 
