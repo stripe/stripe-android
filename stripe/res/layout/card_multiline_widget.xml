@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:digits="@string/valid_digits"
                 android:imeOptions="actionDone"
-                android:inputType="number"
+                android:inputType="numberPassword"
                 android:nextFocusDown="@+id/et_add_source_postal_ml"
                 android:nextFocusForward="@+id/et_add_source_postal_ml"
                 />
