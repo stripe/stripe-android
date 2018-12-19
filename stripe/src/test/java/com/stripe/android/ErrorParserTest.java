@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
  * Test class for {@link ErrorParser}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class ErrorParserTest {
 
     private static final String RAW_INVALID_REQUEST_ERROR =

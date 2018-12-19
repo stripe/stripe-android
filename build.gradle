@@ -46,7 +46,7 @@ ext {
     javaAnnotationVersion = "1.0"
     junitVersion = "4.12"
     mockitoCoreVersion = "2.10.0"
-    robolectricVersion = "3.5.1"
+    robolectricVersion = "4.1"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

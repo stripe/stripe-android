@@ -6,7 +6,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.CustomerSessionTest;
 import com.stripe.android.R;
@@ -22,13 +21,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.List;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
@@ -48,7 +47,6 @@ import static org.mockito.Mockito.when;
  * Test class for {@link PaymentMethodsActivity}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class PaymentMethodsActivityTest {
 
     static final String TEST_CUSTOMER_OBJECT_WITH_SOURCES =
@@ -97,7 +95,7 @@ public class PaymentMethodsActivityTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        Intent intent = PaymentMethodsActivity.newIntent(RuntimeEnvironment.application);
+        Intent intent = PaymentMethodsActivity.newIntent(ApplicationProvider.getApplicationContext());
         intent.putExtra(EXTRA_PROXY_DELAY, true);
         mActivityController = Robolectric.buildActivity(PaymentMethodsActivity.class, intent)
                 .create().start().resume().visible();
@@ -166,9 +164,10 @@ public class PaymentMethodsActivityTest {
 
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
-        Intent intent = PaymentMethodsActivity.newIntent(RuntimeEnvironment.application);
-        intent.putExtra(EXTRA_PROXY_DELAY, true);
-        intent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        Intent intent = PaymentMethodsActivity
+                .newIntent(ApplicationProvider.getApplicationContext())
+                .putExtra(EXTRA_PROXY_DELAY, true)
+                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mActivityController = Robolectric.buildActivity(PaymentMethodsActivity.class, intent)
                 .create().start().resume().visible();
         mActivityController.get().setCustomerSessionProxy(mCustomerSessionProxy);

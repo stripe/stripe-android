@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,11 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class EphemeralKeyTest {
 
     private static final String SAMPLE_KEY_RAW = "{\n" +
@@ -46,7 +45,7 @@ public class EphemeralKeyTest {
         assertEquals("ephkey_123", ephemeralKey.getId());
         assertEquals("ephemeral_key", ephemeralKey.getObject());
         assertEquals("ek_test_123", ephemeralKey.getSecret());
-        assertEquals(false, ephemeralKey.isLiveMode());
+        assertFalse(ephemeralKey.isLiveMode());
         assertEquals(1483575790L, ephemeralKey.getCreated());
         assertEquals(1483579790L, ephemeralKey.getExpires());
         assertEquals("customer", ephemeralKey.getType());

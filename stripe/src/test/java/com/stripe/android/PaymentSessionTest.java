@@ -24,7 +24,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Set;
@@ -51,14 +50,9 @@ import static org.mockito.Mockito.when;
  * Test class for {@link PaymentSession}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class PaymentSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
-
-    private Customer mFirstCustomer;
-    private Customer mSecondCustomer;
-    private Source mAddedSource;
 
     private ActivityController<AppCompatActivity> mActivityController;
     private ShadowActivity mShadowActivity;
@@ -76,19 +70,19 @@ public class PaymentSessionTest {
                 Robolectric.buildActivity(AppCompatActivity.class).create().start();
         mShadowActivity = Shadows.shadowOf(mActivityController.get());
 
-        mFirstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
-        assertNotNull(mFirstCustomer);
-        mSecondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
-        assertNotNull(mSecondCustomer);
+        Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
+        assertNotNull(firstCustomer);
+        Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
+        assertNotNull(secondCustomer);
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
 
-        mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(mAddedSource);
+        Source addedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(addedSource);
 
         try {
             when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
-                    .thenReturn(mFirstCustomer, mSecondCustomer);
+                    .thenReturn(firstCustomer, secondCustomer);
             when(mStripeApiProxy.addCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -97,7 +91,7 @@ public class PaymentSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenReturn(mAddedSource);
+                    .thenReturn(addedSource);
             when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -106,7 +100,7 @@ public class PaymentSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenReturn(mSecondCustomer);
+                    .thenReturn(secondCustomer);
         } catch (StripeException exception) {
             fail("Exception when accessing mock api proxy: " + exception.getMessage());
         }

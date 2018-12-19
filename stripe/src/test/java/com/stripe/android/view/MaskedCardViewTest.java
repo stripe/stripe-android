@@ -4,7 +4,6 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CustomerSource;
@@ -18,7 +17,6 @@ import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
 
@@ -35,7 +33,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link MaskedCardView}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class MaskedCardViewTest {
 
     private MaskedCardView mMaskedCardView;

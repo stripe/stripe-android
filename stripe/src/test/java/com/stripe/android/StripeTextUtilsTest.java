@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link StripeTextUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class StripeTextUtilsTest {
 
     @Test

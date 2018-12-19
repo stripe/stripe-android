@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -12,7 +11,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -34,7 +32,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * Test class for {@link CardNumberEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class CardNumberEditTextTest {
 
     @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;

@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class SourceRedirectTest {
 
     static final String EXAMPLE_JSON_REDIRECT = "  {" +
@@ -27,7 +25,7 @@ public class SourceRedirectTest {
             "\"url\": \"examplecompany://redirect-link\"" +
             "}";
 
-    static final Map<String, Object> EXAMPLE_MAP_REDIRECT =
+    private static final Map<String, Object> EXAMPLE_MAP_REDIRECT =
             new HashMap<String, Object>() {{
                 put("return_url", "https://google.com");
                 put("status", "succeeded");

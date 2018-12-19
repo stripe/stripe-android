@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link SourceCodeVerification}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class SourceCodeVerificationTest {
 
     static final String EXAMPLE_JSON_CODE_VERIFICATION = "{" +
@@ -28,7 +26,7 @@ public class SourceCodeVerificationTest {
             "\"status\": \"pending\"" +
             "}";
 
-    static final Map<String, Object> EXAMPLE_MAP_CODE_VERIFICATION =
+    private static final Map<String, Object> EXAMPLE_MAP_CODE_VERIFICATION =
             new HashMap<String, Object>() {{
                 put("attempts_remaining", 3);
                 put("status", "pending");

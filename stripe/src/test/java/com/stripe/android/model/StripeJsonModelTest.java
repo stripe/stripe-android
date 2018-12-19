@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -28,7 +28,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeJsonModel}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class StripeJsonModelTest {
 
     @Test
@@ -40,7 +39,7 @@ public class StripeJsonModelTest {
 
         assertEquals(firstCard, secondCard);
         // Just confirming for sanity
-        assertFalse(firstCard == secondCard);
+        assertNotSame(firstCard, secondCard);
     }
 
     @Test
@@ -153,7 +152,7 @@ public class StripeJsonModelTest {
         @NonNull
         @Override
         public Map<String, Object> toMap() {
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("akey", "avalue");
             map.put("bkey", "bvalue");
             return map;

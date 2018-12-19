@@ -2,8 +2,6 @@ package com.stripe.android.view;
 
 import android.widget.Filter;
 
-import com.stripe.android.BuildConfig;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +9,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +21,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link CountryAdapter}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class CountryAdapterTest {
 
     private CountryAdapter mCountryAdapter;

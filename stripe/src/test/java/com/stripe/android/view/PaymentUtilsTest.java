@@ -1,12 +1,9 @@
 package com.stripe.android.view;
 
-import com.stripe.android.BuildConfig;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Currency;
 import java.util.Locale;
@@ -17,10 +14,7 @@ import static junit.framework.Assert.assertEquals;
  * Test class for {@link PaymentUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25, constants = BuildConfig.class)
 public class PaymentUtilsTest {
-
-
     @Before
     public void setup() {
         Locale.setDefault(Locale.US);

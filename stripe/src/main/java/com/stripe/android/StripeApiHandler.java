@@ -518,7 +518,7 @@ class StripeApiHandler {
                     .build();
 
             Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context,
+                    context.getApplicationContext(),
                     productUsageTokens,
                     sourceType,
                     null,
@@ -563,7 +563,7 @@ class StripeApiHandler {
                     .build();
 
             Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context,
+                    context.getApplicationContext(),
                     productUsageTokens,
                     null,
                     null,

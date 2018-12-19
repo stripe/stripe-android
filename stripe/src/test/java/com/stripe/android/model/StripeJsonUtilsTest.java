@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeJsonUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class StripeJsonUtilsTest {
 
     private static final String SIMPLE_JSON_TEST_OBJECT =

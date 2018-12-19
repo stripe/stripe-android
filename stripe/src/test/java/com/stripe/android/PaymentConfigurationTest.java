@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -15,7 +14,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link PaymentConfiguration}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class PaymentConfigurationTest {
 
     @Before
