@@ -466,6 +466,35 @@ public class CardMultilineWidgetTest {
     }
 
     @Test
+    public void setCardNumber_whenHasSpaces_canCreateValidCard() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_NO_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        Card card = mCardMultilineWidget.getCard();
+
+        assertNotNull(card);
+        assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+    }
+
+    @Test
+    public void setCardNumber_whenHasNoSpaces_canCreateValidCard() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        Card card = mCardMultilineWidget.getCard();
+
+        assertNotNull(card);
+        assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+    }
+
+
+    @Test
     public void setEnabled_setsEnabledPropertyOnAllChildWidgets() {
         assertTrue(mCardMultilineWidget.isEnabled());
         assertTrue(mFullGroup.cardInputLayout.isEnabled());
