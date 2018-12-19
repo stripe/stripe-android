@@ -62,13 +62,15 @@ public class ExpiryDateEditText extends StripeEditText {
             return null;
         }
 
-        int [] monthYearPair = new int[2];
-        String rawNumericInput = getText().toString().replaceAll("/", "");
-        String[] dateFields = DateUtils.separateDateStringParts(rawNumericInput);
+        final int[] monthYearPair = new int[2];
+        final String rawNumericInput = getText().toString().replaceAll("/", "");
+        final String[] dateFields = DateUtils.separateDateStringParts(rawNumericInput);
 
         try {
             monthYearPair[0] = Integer.parseInt(dateFields[0]);
-            monthYearPair[1] = DateUtils.convertTwoDigitYearToFour(Integer.parseInt(dateFields[1]));
+            final int twoDigitYear = Integer.parseInt(dateFields[1]);
+            final int fourDigitYear = DateUtils.convertTwoDigitYearToFour(twoDigitYear);
+            monthYearPair[1] = fourDigitYear;
         } catch (NumberFormatException numEx) {
             // Given that the date should already be valid when getting to this method, we should
             // not his this exception. Returning null to indicate error if we do.
