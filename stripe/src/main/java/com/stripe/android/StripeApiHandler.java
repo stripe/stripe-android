@@ -210,14 +210,14 @@ class StripeApiHandler {
            APIException {
        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
        RequestOptions options;
-        if (stripeAccount == null) {
-            options = RequestOptions.builder(publishableKey).build();
-        } else {
-            options = RequestOptions.builder(
-                    publishableKey,
-                    stripeAccount,
-                    RequestOptions.TYPE_QUERY).build();
-        }
+       if (stripeAccount == null) {
+           options = RequestOptions.builder(publishableKey).build();
+       } else {
+           options = RequestOptions.builder(
+               publishableKey,
+               stripeAccount,
+               RequestOptions.TYPE_QUERY).build();
+       }
        try {
            StripeResponse response =
                    requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
