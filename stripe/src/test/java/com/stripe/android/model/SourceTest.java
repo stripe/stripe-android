@@ -17,7 +17,6 @@ import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_JSON_OWNER_WITHOU
 import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_MAP_OWNER;
 import static com.stripe.android.model.SourceReceiverTest.EXAMPLE_MAP_RECEIVER;
 import static com.stripe.android.model.SourceRedirectTest.EXAMPLE_JSON_REDIRECT;
-
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;

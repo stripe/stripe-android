@@ -1,10 +1,10 @@
 package com.stripe.example.activity;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -20,8 +20,8 @@ import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 import com.stripe.example.adapter.RedirectAdapter;
 import com.stripe.example.controller.ErrorDialogHandler;
-import com.stripe.example.controller.RedirectDialogController;
 import com.stripe.example.controller.ProgressDialogController;
+import com.stripe.example.controller.RedirectDialogController;
 
 import java.util.concurrent.Callable;
 

@@ -12,9 +12,9 @@ public class ClassUtils {
     private ClassUtils() {}
 
     /**
-     *
-     * @param clazz         the class to search in
-     * @param whitelist     the whitelist of field names
+     * @param clazz the class to search in
+     * @param whitelist the whitelist of field names
+     * @param obj the target object whose field we are accessing
      * @return  the value of the found field, if exists, on the specified {@param obj}, or null
      */
     @Nullable
@@ -35,8 +35,8 @@ public class ClassUtils {
     }
 
     /**
-     * @param clazz         the class to search in
-     * @param whitelist     the whitelist of field names
+     * @param clazz the class to search in
+     * @param whitelist the whitelist of field names
      * @return  the {@link Field}, made accessible, if one is found, otherwise null
      */
     @Nullable
@@ -52,9 +52,9 @@ public class ClassUtils {
     }
 
     /**
-     * @param clazz         the class to search in
-     * @param whitelist     the whitelist of method names
-     * @return  the {@link Method} if one is found, otherwise null
+     * @param clazz the class to search in
+     * @param whitelist the whitelist of method names
+     * @return the {@link Method} if one is found, otherwise null
      */
     @Nullable
     public static Method findMethod(@NonNull Class clazz, @NonNull Collection<String> whitelist) {

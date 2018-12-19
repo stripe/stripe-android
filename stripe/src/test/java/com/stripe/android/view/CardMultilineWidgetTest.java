@@ -6,8 +6,8 @@ import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.stripe.android.R;
 import com.stripe.android.BuildConfig;
+import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
