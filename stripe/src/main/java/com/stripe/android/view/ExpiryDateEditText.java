@@ -208,7 +208,8 @@ public class ExpiryDateEditText extends StripeEditText {
             int newLength,
             int editActionStart,
             int editActionAddition,
-            int maxInputLength) { int newPosition, gapsJumped = 0;
+            int maxInputLength) {
+        int newPosition, gapsJumped = 0;
 
         boolean skipBack = false;
         if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {

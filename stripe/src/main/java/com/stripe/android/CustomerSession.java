@@ -80,7 +80,7 @@ public class CustomerSession
     // A queue of Runnables for doing customer updates
     private final BlockingQueue<Runnable> mNetworkQueue = new LinkedBlockingQueue<>();
 
-    private @NonNull ThreadPoolExecutor mThreadPoolExecutor;
+    private final @NonNull ThreadPoolExecutor mThreadPoolExecutor;
 
     private static final int CUSTOMER_RETRIEVED = 7;
     private static final int CUSTOMER_ERROR = 11;
@@ -144,11 +144,23 @@ public class CustomerSession
 
     @VisibleForTesting
     static void clearInstance() {
+        cancelCallbacks();
+        mInstance = null;
+    }
+
+    /**
+     * End any async calls in process and will not invoke callback listeners.
+     * It will not clear the singleton instance of a {@link CustomerSession} so it can be
+     * safely used when a view is being removed/destroyed to avoid null pointer exceptions
+     * due to async operation delay.
+     * No need to call {@link CustomerSession#initCustomerSession(EphemeralKeyProvider)} again
+     * after this operation.
+     */
+    public static void cancelCallbacks() {
         if (mInstance == null) {
             return;
         }
         mInstance.mThreadPoolExecutor.shutdownNow();
-        mInstance = null;
     }
 
     private CustomerSession(

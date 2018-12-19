@@ -113,7 +113,7 @@
             android:background="@android:color/transparent"
             android:hint="@string/cvc_number_hint"
             android:imeOptions="actionDone"
-            android:inputType="number"
+            android:inputType="numberPassword"
             android:maxLength="4"
             android:focusable="true"
             android:focusableInTouchMode="true"
