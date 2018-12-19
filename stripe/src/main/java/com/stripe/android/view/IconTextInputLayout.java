@@ -5,9 +5,15 @@ import android.graphics.Rect;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
-import java.lang.reflect.Field;
+
+import com.stripe.android.utils.ClassUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class uses Reflection to make the Support Library's floating hint text move above
@@ -16,13 +22,18 @@ import java.lang.reflect.Method;
  */
 public class IconTextInputLayout extends TextInputLayout {
 
-    private static final String BOUNDS_FIELD_NAME = "mCollapsedBounds";
-    private static final String TEXT_FIELD_NAME = "mCollapsingTextHelper";
-    private static final String RECALCULATE_METHOD_NAME = "recalculate";
+    private static final Set<String> BOUNDS_FIELD_NAMES = new HashSet<>(
+            Arrays.asList("mCollapsedBounds", "collapsedBounds")
+    );
+    private static final Set<String> TEXT_FIELD_NAMES = new HashSet<>(
+            Arrays.asList("mCollapsingTextHelper", "collapsingTextHelper")
+    );
+    private static final Set<String> RECALCULATE_METHOD_NAMES =
+            Collections.singleton("recalculate");
 
-    @VisibleForTesting Rect mBounds;
-    @VisibleForTesting Object mCollapsingTextHelper;
-    @VisibleForTesting Method mRecalculateMethod;
+    @VisibleForTesting private final Object mCollapsingTextHelper;
+    @VisibleForTesting private final Rect mBounds;
+    @VisibleForTesting private final Method mRecalculateMethod;
 
     public IconTextInputLayout(Context context) {
         this(context, null);
@@ -34,44 +45,29 @@ public class IconTextInputLayout extends TextInputLayout {
 
     public IconTextInputLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+
+        /*
+         * Note: this method will break if we upgrade our version of the support library
+         * and the variable and method names change. We should remove usage of reflection
+         * at the first opportunity.
+         */
+        mCollapsingTextHelper = ClassUtils.getInternalObject(TextInputLayout.class,
+                TEXT_FIELD_NAMES, this);
+        if (mCollapsingTextHelper == null) {
+            mBounds = null;
+            mRecalculateMethod = null;
+        } else {
+            mBounds = (Rect) ClassUtils.getInternalObject(mCollapsingTextHelper.getClass(),
+                    BOUNDS_FIELD_NAMES, mCollapsingTextHelper);
+            mRecalculateMethod = ClassUtils.findMethod(mCollapsingTextHelper.getClass(),
+                    RECALCULATE_METHOD_NAMES);
+        }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         adjustBounds();
-    }
-
-    /**
-     * Note: this method will break if we upgrade our version of the support library
-     * and the variable and method names change. We should remove usage of reflection
-     * at the first opportunity.
-     */
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    @VisibleForTesting
-    void init() {
-        try {
-            Field textHeaderField = TextInputLayout.class.getDeclaredField(TEXT_FIELD_NAME);
-            textHeaderField.setAccessible(true);
-            mCollapsingTextHelper = textHeaderField.get(this);
-
-            Field boundsField = mCollapsingTextHelper
-                    .getClass()
-                    .getDeclaredField(BOUNDS_FIELD_NAME);
-            boundsField.setAccessible(true);
-            mBounds = (Rect) boundsField.get(mCollapsingTextHelper);
-
-            mRecalculateMethod = mCollapsingTextHelper
-                    .getClass()
-                    .getDeclaredMethod(RECALCULATE_METHOD_NAME);
-
-        } catch (Exception e) {
-            mCollapsingTextHelper = null;
-            mBounds = null;
-            mRecalculateMethod = null;
-            e.printStackTrace();
-        }
     }
 
     private void adjustBounds() {
@@ -87,4 +83,10 @@ public class IconTextInputLayout extends TextInputLayout {
             e.printStackTrace();
         }
     }
+
+    @VisibleForTesting
+    boolean hasObtainedCollapsingTextHelper() {
+        return mCollapsingTextHelper != null && mBounds != null && mRecalculateMethod != null;
+    }
+
 }
