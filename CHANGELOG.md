@@ -4,6 +4,7 @@
 * Update Android SDK Build Tools to 28.0.3
 * Update Android Gradle plugin to 3.2.1
 * Update compileSdkVersion and targetSdkVersion to 28
+* Update Android Support Library to 28.0.0
 
 ### 8.1.0 2018-11-13
 * Add support for latest version of PaymentIntents
