@@ -12,7 +12,6 @@ import java.util.Map;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
-
 import static org.junit.Assert.fail;
 
 /**

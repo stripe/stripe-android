@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Card;
 
 import org.junit.Before;

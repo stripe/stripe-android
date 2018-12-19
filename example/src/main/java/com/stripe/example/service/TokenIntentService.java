@@ -9,9 +9,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
-import com.stripe.android.exception.StripeException;
 
 /**
  * An {@link IntentService} subclass for handling the creation of a {@link Token} from

@@ -25,9 +25,6 @@ import java.util.Calendar;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
-import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
-import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
-
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -35,6 +32,8 @@ import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_NO
 import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_WITH_SPACES;
+import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
+import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
