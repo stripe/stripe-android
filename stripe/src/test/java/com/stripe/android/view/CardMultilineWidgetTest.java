@@ -51,15 +51,17 @@ import static org.mockito.Mockito.verify;
 public class CardMultilineWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
-    private static final String[] EXPECTED_LOGGING_ARRAY = { CARD_MULTILINE_TOKEN };
+    private static final String[] EXPECTED_LOGGING_ARRAY = {CARD_MULTILINE_TOKEN};
 
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidget mNoZipCardMultilineWidget;
     private WidgetControlGroup mFullGroup;
     private WidgetControlGroup mNoZipGroup;
 
-    @Mock CardInputListener mFullCardListener;
-    @Mock CardInputListener mNoZipCardListener;
+    @Mock
+    CardInputListener mFullCardListener;
+    @Mock
+    CardInputListener mNoZipCardListener;
 
     @Before
     public void setup() {
@@ -464,6 +466,58 @@ public class CardMultilineWidgetTest {
         verify(mFullCardListener, times(1)).onFocusChange(FOCUS_CVC);
         assertEquals("12", mFullGroup.cvcEditText.getText().toString());
     }
+
+    @Test
+    public void setCardNumber_whenHasSpaces_canCreateValidCard() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_NO_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        Card card = mCardMultilineWidget.getCard();
+
+        assertNotNull(card);
+        assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+    }
+
+    @Test
+    public void setCardNumber_whenHasNoSpaces_canCreateValidCard() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        Card card = mCardMultilineWidget.getCard();
+
+        assertNotNull(card);
+        assertEquals(VALID_VISA_NO_SPACES, card.getNumber());
+    }
+
+    @Test
+    public void validateCardNumber_whenValid_doesNotShowError() {
+        mCardMultilineWidget.setCardNumber(VALID_VISA_WITH_SPACES);
+
+        Boolean isValid = mCardMultilineWidget.validateCardNumber();
+        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+
+        assertTrue(isValid);
+        assertFalse(shouldShowError);
+    }
+
+    @Test
+    public void validateCardNumber_whenInvalid_setsShowError() {
+        String invalidNumber = "1234 1234 1234 1234";
+        mCardMultilineWidget.setCardNumber(invalidNumber);
+
+        Boolean isValid = mCardMultilineWidget.validateCardNumber();
+        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+
+        assertFalse(isValid);
+        assertTrue(shouldShowError);
+    }
+
 
     @Test
     public void setEnabled_setsEnabledPropertyOnAllChildWidgets() {

@@ -174,6 +174,25 @@ public class CardMultilineWidget extends LinearLayout {
     }
 
     /**
+     * Set the card number. Method does not change text field focus.
+     *
+     * @param cardNumber card number to be set
+     */
+    public void setCardNumber(@Nullable String cardNumber) {
+        mCardNumberEditText.setText(cardNumber);
+    }
+
+    /**
+     * Checks whether the current card number is valid
+     */
+    public boolean validateCardNumber() {
+        boolean cardNumberIsValid =
+                CardUtils.isValidCardNumber(mCardNumberEditText.getCardNumber());
+        mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
+        return cardNumberIsValid;
+    }
+
+    /**
      * Expose a text watcher to receive updates when the card number is changed.
      *
      * @param cardNumberTextWatcher
