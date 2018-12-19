@@ -9,8 +9,10 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 
@@ -24,8 +26,9 @@ import static com.stripe.android.model.Card.CVC_LENGTH_COMMON;
  */
 class ViewUtils {
 
-    static TypedValue getThemeAccentColor(Context context) {
-        int colorAttr;
+    @NonNull
+    static TypedValue getThemeAccentColor(@NonNull Context context) {
+        @IdRes final int colorAttr;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.colorAccent;
         } else {
@@ -34,13 +37,14 @@ class ViewUtils {
                     .getResources()
                     .getIdentifier("colorAccent", "attr", context.getPackageName());
         }
-        TypedValue outValue = new TypedValue();
+        final TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);
         return outValue;
     }
 
-    static TypedValue getThemeColorControlNormal(Context context) {
-        int colorAttr;
+    @NonNull
+    static TypedValue getThemeColorControlNormal(@NonNull Context context) {
+        @IdRes final int colorAttr;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.colorControlNormal;
         } else {
@@ -54,8 +58,9 @@ class ViewUtils {
         return outValue;
     }
 
-    static TypedValue getThemeTextColorSecondary(Context context) {
-        int colorAttr;
+    @NonNull
+    static TypedValue getThemeTextColorSecondary(@NonNull Context context) {
+        @IdRes final int colorAttr;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.textColorSecondary;
         } else {
@@ -67,8 +72,9 @@ class ViewUtils {
         return outValue;
     }
 
-    static TypedValue getThemeTextColorPrimary(Context context) {
-        int colorAttr;
+    @NonNull
+    static TypedValue getThemeTextColorPrimary(@NonNull Context context) {
+        @IdRes final int colorAttr;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.textColorPrimary;
         } else {
@@ -80,41 +86,29 @@ class ViewUtils {
         return outValue;
     }
 
-    @SuppressWarnings("deprecation")
+    @NonNull
     static Drawable getTintedIcon(
             @NonNull Context context,
             @DrawableRes int iconResourceId,
             @ColorRes int colorResourceId) {
-        @ColorInt int color;
-        Drawable icon;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            color = context.getResources().getColor(colorResourceId, context.getTheme());
-            icon = context.getResources().getDrawable(iconResourceId, context.getTheme());
-        }  else {
-            color = context.getResources().getColor(colorResourceId);
-            icon = context.getResources().getDrawable(iconResourceId);
-        }
+        @ColorInt final int color = ContextCompat.getColor(context, colorResourceId);
+        final Drawable icon = ContextCompat.getDrawable(context, iconResourceId);
         Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), color);
         return compatIcon;
     }
 
-    @SuppressWarnings("deprecation")
+    @NonNull
     static Drawable getTintedIconWithAttribute(
             @NonNull Context context,
             @NonNull Resources.Theme theme,
             @AttrRes int attributeResource,
             @DrawableRes int iconResourceId) {
-        TypedValue typedValue = new TypedValue();
+        final TypedValue typedValue = new TypedValue();
         theme.resolveAttribute(attributeResource, typedValue, true);
         @ColorInt int color = typedValue.data;
-        Drawable icon;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            icon = context.getResources().getDrawable(iconResourceId, theme);
-        } else {
-            icon = context.getResources().getDrawable(iconResourceId);
-        }
-        Drawable compatIcon = DrawableCompat.wrap(icon);
+        final Drawable icon = ContextCompat.getDrawable(context, iconResourceId);
+        final Drawable compatIcon = DrawableCompat.wrap(icon);
         DrawableCompat.setTint(compatIcon.mutate(), color);
         return compatIcon;
     }
@@ -137,7 +131,7 @@ class ViewUtils {
      * @param color an integer representation of a color
      * @return {@code true} if the color is "dark," else {@link false}
      */
-    static boolean isColorDark(@ColorInt int color){
+    static boolean isColorDark(@ColorInt int color) {
         // Forumla comes from W3C standards and conventional theory
         // about how to calculate the "brightness" of a color, often
         // thought of as how far along the spectrum from white to black the
@@ -152,9 +146,8 @@ class ViewUtils {
         return luminescencePercentage <= 0.5;
     }
 
-    static boolean isCvcMaximalLength(
-            @NonNull @Card.CardBrand String cardBrand,
-            @Nullable String cvcText) {
+    static boolean isCvcMaximalLength(@NonNull @Card.CardBrand String cardBrand,
+                                      @Nullable String cvcText) {
         if (cvcText == null) {
             return false;
         }
@@ -178,7 +171,7 @@ class ViewUtils {
      */
     @NonNull
     static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
-                                                    @NonNull @Card.CardBrand String brand) {
+                                             @NonNull @Card.CardBrand String brand) {
         if (spacelessCardNumber.length() > 16) {
             spacelessCardNumber = spacelessCardNumber.substring(0, 16);
         }

@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 
 import com.stripe.android.BuildConfig;
@@ -23,10 +24,10 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ViewUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25, constants = BuildConfig.class)
+@Config(sdk = Build.VERSION_CODES.N_MR1)
 public class ViewUtilsTest {
 
-    ActivityController<CardInputTestActivity> mActivityController;
+    private ActivityController<CardInputTestActivity> mActivityController;
 
     @Before
     public void setup() {
