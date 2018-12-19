@@ -211,12 +211,16 @@ class StripeApiHandler {
        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
        RequestOptions options;
        if (stripeAccount == null) {
-           options = RequestOptions.builder(publishableKey).build();
+           options = RequestOptions.builder(publishableKey)
+               .setApiVersion(API_VERSION)
+               .build();
        } else {
            options = RequestOptions.builder(
                publishableKey,
                stripeAccount,
-               RequestOptions.TYPE_QUERY).build();
+               RequestOptions.TYPE_QUERY)
+               .setApiVersion(API_VERSION)
+               .build();
        }
        try {
            StripeResponse response =
