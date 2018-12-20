@@ -12,7 +12,6 @@
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
-    <string name="createAndroidPayTokens">Create Android Pay Tokens</string>
     <string name="createCardTokens">Create Card Tokens</string>
     <string name="createCardSources">Create Card Sources</string>
     <string name="createThreeDSecure">Create 3DS Sources</string>
@@ -70,5 +69,5 @@
     <string name="create_source_and_confirm_payment_intent">Second, create a source and confirm the payment intent</string>
     <string name="confirm_payment_intent">Confirm payment intent</string>
     <string name="retrieve_payment_intent">Retrieve payment intent</string>
-    <string name="error_while_retrieving_payment_intent">An error occured while retrieving the payment intent</string>
+    <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the payment intent</string>
 </resources>
