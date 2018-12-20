@@ -212,14 +212,12 @@ class StripeApiHandler {
        RequestOptions options;
        if (stripeAccount == null) {
            options = RequestOptions.builder(publishableKey)
-               .setApiVersion(API_VERSION)
                .build();
        } else {
            options = RequestOptions.builder(
                publishableKey,
                stripeAccount,
                RequestOptions.TYPE_QUERY)
-               .setApiVersion(API_VERSION)
                .build();
        }
        try {
