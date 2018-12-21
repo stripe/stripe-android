@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import android.support.design.widget.TextInputLayout;
 import android.view.View;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
@@ -15,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ShippingInfoWidget}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class ShippingInfoWidgetTest {
 
     private ShippingInfoWidget mShippingInfoWidget;

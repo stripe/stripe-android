@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +12,6 @@ import static org.junit.Assert.assertNull;
  * Test class for {@link SourceSepaDebitData}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class SourceSepaDebitDataTest {
 
     private static final String EXAMPLE_SEPA_JSON_DATA = "{\"bank_code\":\"37040044\"," +

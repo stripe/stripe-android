@@ -6,7 +6,6 @@ import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
@@ -19,7 +18,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
 
@@ -47,7 +45,6 @@ import static org.mockito.Mockito.verify;
  * Test class for {@link CardMultilineWidget}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class CardMultilineWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.

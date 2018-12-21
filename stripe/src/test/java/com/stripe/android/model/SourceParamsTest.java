@@ -7,7 +7,6 @@ import com.stripe.android.testharness.JsonTestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link SourceParams}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class SourceParamsTest {
 
     private static Card FULL_FIELDS_VISA_CARD =

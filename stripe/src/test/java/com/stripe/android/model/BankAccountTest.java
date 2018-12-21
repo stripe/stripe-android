@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +11,6 @@ import static org.junit.Assert.assertNotNull;
  * Test class for {@link BankAccount}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class BankAccountTest {
 
     private static final String RAW_BANK_ACCOUNT = "{\n" +

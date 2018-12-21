@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * Test class for {@link EphemeralKeyManager}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class EphemeralKeyManagerTest {
 
     private static final String FIRST_SAMPLE_KEY_RAW = "{\n" +

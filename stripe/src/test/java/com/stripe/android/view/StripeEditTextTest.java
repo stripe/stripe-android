@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 
@@ -15,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.reset;
@@ -28,7 +26,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * Test class for {@link StripeEditText}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = Build.VERSION_CODES.N_MR1)
 public class StripeEditTextTest {
 
     @Mock private StripeEditText.AfterTextChangedListener mAfterTextChangedListener;

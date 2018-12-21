@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.os.Build;
 import android.support.design.widget.TextInputLayout;
 
 import com.stripe.android.R;
@@ -10,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertTrue;
 
@@ -20,7 +18,6 @@ import static org.junit.Assert.assertTrue;
  * is no need to otherwise test the behavior.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = Build.VERSION_CODES.N_MR1)
 public class IconTextInputLayoutTest {
 
     @Test

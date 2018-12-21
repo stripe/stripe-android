@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ViewUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = Build.VERSION_CODES.N_MR1)
 public class ViewUtilsTest {
 
     private ActivityController<CardInputTestActivity> mActivityController;
@@ -41,7 +40,7 @@ public class ViewUtilsTest {
     }
 
     @Test
-    @Config(sdk = 16)
+    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeAccentColor_whenOnPreKitKatConfig_getsNonzeroColor() {
         @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
         assertTrue(Color.alpha(color) > 0);
@@ -54,7 +53,7 @@ public class ViewUtilsTest {
     }
 
     @Test
-    @Config(sdk = 16)
+    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeColorControlNormal_whenOnPreKitKatConfig_getsNonzeroColor() {
         @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
         assertTrue(Color.alpha(color) > 0);

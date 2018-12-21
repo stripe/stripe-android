@@ -16,13 +16,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,7 +35,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeApiHandler}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
 public class StripeApiHandlerTest {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
@@ -158,7 +157,7 @@ public class StripeApiHandlerTest {
     public void createQuery_withCardData_createsProperQueryString() {
         Card card = new Card.Builder("4242424242424242", 8, 2019, "123").build();
         Map<String, Object> cardMap = StripeNetworkUtils.hashMapFromCard(
-                RuntimeEnvironment.application, card);
+                ApplicationProvider.getApplicationContext(), card);
         String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
         try {
@@ -194,7 +193,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     provider,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     null,
@@ -240,7 +239,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     provider,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                     connectAccountId,
@@ -283,7 +282,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -311,7 +310,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -336,7 +335,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.retrievePaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -358,7 +357,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     null,

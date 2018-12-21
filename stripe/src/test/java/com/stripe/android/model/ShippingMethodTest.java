@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +17,9 @@ import static org.junit.Assert.fail;
  * Test class for {@link ShippingMethod}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class ShippingMethodTest {
 
-    static final String EXAMPLE_JSON_SHIPPING_ADDRESS = "{" +
+    private static final String EXAMPLE_JSON_SHIPPING_ADDRESS = "{" +
             "\"amount\": 599," +
             "\"currency_code\": \"USD\",\n" +
             "\"detail\": \"Arrives tomorrow\"," +

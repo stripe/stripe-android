@@ -1,11 +1,11 @@
 package com.stripe.android.view;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.TestFocusChangeListener;
@@ -49,19 +49,16 @@ import static org.mockito.Mockito.verify;
  * Test class for {@link CardInputWidget}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
+@Config(sdk = Build.VERSION_CODES.O_MR1)
 public class CardInputWidgetTest {
 
     // Every Card made by the CardInputView should have the card widget token.
     private static final String[] EXPECTED_LOGGING_ARRAY = {LOGGING_TOKEN};
     private CardInputWidget mCardInputWidget;
     private CardNumberEditText mCardNumberEditText;
-    private ImageView mIconView;
     private StripeEditText mExpiryEditText;
     private StripeEditText mCvcEditText;
     private TestFocusChangeListener mOnGlobalFocusChangeListener;
-
-    private CardInputWidget.DimensionOverrideSettings mDimensionOverrides;
 
     @Mock
     CardInputListener mCardInputListener;
@@ -73,22 +70,23 @@ public class CardInputWidgetTest {
                 Robolectric.buildActivity(CardInputTestActivity.class)
                         .create().start();
 
-        mDimensionOverrides = new CardInputWidget.DimensionOverrideSettings() {
-            @Override
-            public int getPixelWidth(@NonNull String text, @NonNull EditText editText) {
-                // This makes it simple to know what to expect.
-                return text.length() * 10;
-            }
+        CardInputWidget.DimensionOverrideSettings dimensionOverrides =
+                new CardInputWidget.DimensionOverrideSettings() {
+                    @Override
+                    public int getPixelWidth(@NonNull String text, @NonNull EditText editText) {
+                        // This makes it simple to know what to expect.
+                        return text.length() * 10;
+                    }
 
-            @Override
-            public int getFrameWidth() {
-                // That's a pretty small screen, but one that we theoretically support.
-                return 500;
-            }
-        };
+                    @Override
+                    public int getFrameWidth() {
+                        // That's a pretty small screen, but one that we theoretically support.
+                        return 500;
+                    }
+                };
 
         mCardInputWidget = activityController.get().getCardInputWidget();
-        mCardInputWidget.setDimensionOverrideSettings(mDimensionOverrides);
+        mCardInputWidget.setDimensionOverrideSettings(dimensionOverrides);
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
@@ -98,14 +96,14 @@ public class CardInputWidgetTest {
 
         mExpiryEditText = mCardInputWidget.findViewById(R.id.et_expiry_date);
         mCvcEditText = mCardInputWidget.findViewById(R.id.et_cvc_number);
-        mIconView = mCardInputWidget.findViewById(R.id.iv_card_icon);
+        ImageView iconView = mCardInputWidget.findViewById(R.id.iv_card_icon);
 
         // Set the width of the icon and its margin so that test calculations have
         // an expected value that is repeatable on all systems.
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mIconView.getLayoutParams();
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) iconView.getLayoutParams();
         params.width = 48;
         params.rightMargin = 12;
-        mIconView.setLayoutParams(params);
+        iconView.setLayoutParams(params);
         activityController.visible().resume();
     }
 

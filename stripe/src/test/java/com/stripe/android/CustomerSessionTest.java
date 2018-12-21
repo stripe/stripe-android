@@ -27,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
@@ -48,7 +48,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -57,7 +56,6 @@ import static org.mockito.Mockito.when;
  * Test class for {@link CustomerSession}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants=BuildConfig.class, sdk = 25)
 public class CustomerSessionTest {
 
     static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
@@ -164,7 +162,7 @@ public class CustomerSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         LocalBroadcastManager instance =
-                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+                LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
         instance.registerReceiver(
                 mBroadcastReceiver,
                 new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
@@ -249,7 +247,7 @@ public class CustomerSessionTest {
 
     @After
     public void teardown() {
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .unregisterReceiver(mBroadcastReceiver);
         CustomerSession.endCustomerSession();
     }
@@ -310,7 +308,7 @@ public class CustomerSessionTest {
         assertEquals(firstKey.getId(), Objects.requireNonNull(session.getEphemeralKey()).getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
             assertNotNull(session.getCustomer());
             assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
@@ -335,10 +333,11 @@ public class CustomerSessionTest {
                 .requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO));
         ShippingInformation shippingInformation = Objects.requireNonNull(customerWithShippingInfo
                 .getShippingInformation());
-        session.setCustomerShippingInformation(RuntimeEnvironment.application, shippingInformation);
+        session.setCustomerShippingInformation(ApplicationProvider.getApplicationContext(),
+                shippingInformation);
         try {
-            verify(mStripeApiProxy, times(1)).setCustomerShippingInfoWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).setCustomerShippingInfoWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -394,7 +393,7 @@ public class CustomerSessionTest {
         session.retrieveCurrentCustomer(mockListener);
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
@@ -403,9 +402,9 @@ public class CustomerSessionTest {
         assertEquals(mSecondCustomer.getId(), session.getCustomer().getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     secondKey.getCustomerId(), secondKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -438,7 +437,7 @@ public class CustomerSessionTest {
         assertEquals(firstKey.getCustomerId(), session.getCustomer().getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -458,7 +457,7 @@ public class CustomerSessionTest {
         session.retrieveCurrentCustomer(mockListener);
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
 
         assertNotNull(capturedCustomer);
@@ -501,15 +500,15 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.addCustomerSource(RuntimeEnvironment.application,
+        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         try {
-            verify(mStripeApiProxy, times(1)).addCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).addCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -525,7 +524,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
+        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
         Source capturedSource = sourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
@@ -564,7 +563,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.addCustomerSource(RuntimeEnvironment.application,
+        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -617,14 +616,14 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.deleteCustomerSource(RuntimeEnvironment.application,
+        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 mockListener);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         try {
-            verify(mStripeApiProxy, times(1)).deleteCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).deleteCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -639,7 +638,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
+        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
         Source capturedSource = sourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
@@ -678,7 +677,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.deleteCustomerSource(RuntimeEnvironment.application,
+        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 mockListener);
 
@@ -729,16 +728,15 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        session.setCustomerDefaultSource(
-                RuntimeEnvironment.application,
+        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
 
         assertTrue(session.getProductUsageTokens().isEmpty());
         try {
-            verify(mStripeApiProxy, times(1)).setDefaultCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).setDefaultCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -753,7 +751,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
@@ -790,8 +788,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.setCustomerDefaultSource(
-                RuntimeEnvironment.application,
+        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);

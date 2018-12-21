@@ -22,8 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,7 +43,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link Stripe}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class StripeTest {
 
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
@@ -73,7 +72,7 @@ public class StripeTest {
 
     @Before
     public void setup() {
-        mContext = RuntimeEnvironment.application;
+        mContext = ApplicationProvider.getApplicationContext();
         String cvc = "123";
         int month = 12;
         Calendar rightNow = Calendar.getInstance();

@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.ShippingMethod;
 
 import org.junit.Before;
@@ -9,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,6 @@ import static org.junit.Assert.assertEquals;
  * Test for {@link SelectShippingMethodWidget}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class SelectShippingMethodWidgetTest {
 
     private SelectShippingMethodWidget mSelectShippingMethodWidget;
