@@ -324,6 +324,7 @@ class StripeApiHandler {
      * @param sourceId the {@link Source#mId} field for the Source to query
      * @param clientSecret the {@link Source#mClientSecret} field for the Source to query
      * @param publishableKey an API key
+     * @param stripeAccount a connected Stripe Account ID
      * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
      * no such Source could be found.
      *
@@ -336,13 +337,24 @@ class StripeApiHandler {
     static Source retrieveSource(
            @NonNull String sourceId,
            @NonNull String clientSecret,
-           @NonNull String publishableKey)
+           @NonNull String publishableKey,
+           @Nullable String stripeAccount)
            throws AuthenticationException,
            InvalidRequestException,
            APIConnectionException,
            APIException {
        Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
-       RequestOptions options = RequestOptions.builder(publishableKey).build();
+       RequestOptions options;
+       if (stripeAccount == null) {
+           options = RequestOptions.builder(publishableKey)
+               .build();
+       } else {
+           options = RequestOptions.builder(
+               publishableKey,
+               stripeAccount,
+               RequestOptions.TYPE_QUERY)
+               .build();
+       }
        try {
            StripeResponse response =
                    requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
