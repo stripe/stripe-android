@@ -2,10 +2,9 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.annotation.VisibleForTesting;
-import android.support.design.widget.TextInputLayout;
 import android.util.AttributeSet;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.utils.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * This class uses Reflection to make the Support Library's floating hint text move above

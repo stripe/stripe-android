@@ -1,10 +1,10 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Currency;
+
+import androidx.annotation.NonNull;
 
 /**
  * Public utility class for common Pay with Google-related tasks.

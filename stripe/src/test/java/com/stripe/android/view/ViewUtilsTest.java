@@ -2,7 +2,6 @@ package com.stripe.android.view;
 
 import android.graphics.Color;
 import android.os.Build;
-import android.support.annotation.ColorInt;
 
 import com.stripe.android.model.Card;
 
@@ -13,6 +12,8 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+
+import androidx.annotation.ColorInt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

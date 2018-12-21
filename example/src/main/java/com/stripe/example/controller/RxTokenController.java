@@ -1,7 +1,6 @@
 package com.stripe.example.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.widget.Button;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -13,6 +12,7 @@ import com.stripe.android.view.CardInputWidget;
 
 import java.util.concurrent.Callable;
 
+import androidx.annotation.NonNull;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;

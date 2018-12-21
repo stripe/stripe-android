@@ -1,7 +1,5 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 
@@ -12,6 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;

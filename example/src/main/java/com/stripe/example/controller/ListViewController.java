@@ -1,7 +1,6 @@
 package com.stripe.example.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -12,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * A controller for the {@link ListView} used to display the results.

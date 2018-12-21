@@ -1,10 +1,10 @@
 package com.stripe.android;
 
-import android.support.annotation.Nullable;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import androidx.annotation.Nullable;
 
 /**
  * Utility class for common text-related operations on Stripe data coming from the server.

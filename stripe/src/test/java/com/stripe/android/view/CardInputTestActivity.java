@@ -1,10 +1,11 @@
 package com.stripe.android.view;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Activity used to test UI components. We add the layout programmatically to avoid needing test

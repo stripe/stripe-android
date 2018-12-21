@@ -1,10 +1,11 @@
 package com.stripe.android.model;
 
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.Calendar;
 import java.util.Locale;
+
+import androidx.annotation.Nullable;
 
 /**
  * Utilities function class for the models package.

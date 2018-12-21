@@ -1,8 +1,6 @@
 package com.stripe.android.model;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeNetworkUtils;
 
@@ -14,6 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.stripe.android.model.StripeJsonUtils.listToJsonArray;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;

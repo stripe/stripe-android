@@ -2,9 +2,6 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -14,6 +11,10 @@ import android.widget.TextView;
 
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingMethod;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import static com.stripe.android.view.ViewUtils.getThemeAccentColor;
 import static com.stripe.android.view.ViewUtils.getThemeTextColorPrimary;

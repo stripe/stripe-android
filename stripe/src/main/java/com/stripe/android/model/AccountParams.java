@@ -1,9 +1,9 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 

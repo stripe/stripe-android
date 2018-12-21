@@ -1,10 +1,10 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * A helper class for parsing errors coming from Stripe servers.

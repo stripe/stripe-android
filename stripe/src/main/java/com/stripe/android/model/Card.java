@@ -1,10 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
-import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
@@ -22,6 +17,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.StringDef;
 
 import static com.stripe.android.model.StripeJsonUtils.optCountryCode;
 import static com.stripe.android.model.StripeJsonUtils.optCurrency;

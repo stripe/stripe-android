@@ -3,8 +3,6 @@ package com.stripe.android;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
@@ -26,6 +24,9 @@ import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;

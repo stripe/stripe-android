@@ -2,7 +2,6 @@ package com.stripe.android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
@@ -12,6 +11,8 @@ import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 /**
  * Class that tells {@link com.stripe.android.PaymentSession} what functionality it is supporting.

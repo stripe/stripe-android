@@ -13,14 +13,14 @@ configurations {
 }
 
 dependencies {
-    implementation "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.annotation:annotation:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.appcompat:appcompat:${rootProject.ext.supportLibVersion}"
     // Api for this import because we use reflection to alter TextInputLayout
-    api "com.android.support:design:${rootProject.ext.supportLibVersion}"
+    api "com.google.android.material:material:${rootProject.ext.supportLibVersion}"
 
-    javadocDeps "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
-    javadocDeps "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    javadocDeps "com.android.support:design:${rootProject.ext.supportLibVersion}"
+    javadocDeps "androidx.annotation:annotation:${rootProject.ext.supportLibVersion}"
+    javadocDeps "androidx.appcompat:appcompat:${rootProject.ext.supportLibVersion}"
+    javadocDeps "com.google.android.material:material:${rootProject.ext.supportLibVersion}"
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     testImplementation "junit:junit:${rootProject.ext.junitVersion}"
@@ -28,8 +28,8 @@ dependencies {
     testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"
     testImplementation 'androidx.test:core:1.1.0'
 
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
 }
 
 android {
@@ -40,7 +40,7 @@ android {
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets {
         main {

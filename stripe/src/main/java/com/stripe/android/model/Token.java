@@ -1,7 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.text.TextUtils;
 
 import org.json.JSONException;
@@ -10,6 +8,9 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 /**
  * Tokenization is the process Stripe uses to collect sensitive card, bank account details, Stripe

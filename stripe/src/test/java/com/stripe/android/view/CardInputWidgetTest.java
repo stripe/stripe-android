@@ -1,7 +1,6 @@
 package com.stripe.android.view;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +21,8 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
+
+import androidx.annotation.NonNull;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;

@@ -5,10 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionConfig;
@@ -18,6 +14,11 @@ import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
 
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;

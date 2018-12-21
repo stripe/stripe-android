@@ -1,9 +1,6 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -17,6 +14,10 @@ import com.stripe.android.model.Card;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * An {@link EditText} that handles spacing out the digits of a credit card.

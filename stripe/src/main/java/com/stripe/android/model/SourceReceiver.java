@@ -1,8 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.stripe.android.StripeTextUtils;
 
 import org.json.JSONException;
@@ -10,6 +7,9 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-receiver">receiver</a> object in

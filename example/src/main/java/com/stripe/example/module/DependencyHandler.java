@@ -1,8 +1,6 @@
 package com.stripe.example.module;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -14,6 +12,9 @@ import com.stripe.example.controller.IntentServiceTokenController;
 import com.stripe.example.controller.ListViewController;
 import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.controller.RxTokenController;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * A dagger-free simple way to handle dependencies in the Example project. Most of this work would

@@ -1,8 +1,6 @@
 package com.stripe.android.view;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -27,6 +25,8 @@ import org.robolectric.shadows.ShadowActivity;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.core.app.ApplicationProvider;
 
 import static android.app.Activity.RESULT_OK;

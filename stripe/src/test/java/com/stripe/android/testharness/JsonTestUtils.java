@@ -1,7 +1,5 @@
 package com.stripe.android.testharness;
 
-import android.support.annotation.Nullable;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.annotation.Nullable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

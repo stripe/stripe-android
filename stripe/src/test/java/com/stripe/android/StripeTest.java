@@ -1,7 +1,6 @@
 package com.stripe.android;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;

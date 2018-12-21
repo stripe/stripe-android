@@ -2,11 +2,12 @@ package com.stripe.android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 class CustomerEphemeralKey extends AbstractEphemeralKey {
 

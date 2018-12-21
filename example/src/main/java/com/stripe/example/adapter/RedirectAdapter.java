@@ -1,6 +1,5 @@
 package com.stripe.example.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -11,6 +10,8 @@ import com.stripe.example.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * A simple {@link RecyclerView} implementation to hold our data.

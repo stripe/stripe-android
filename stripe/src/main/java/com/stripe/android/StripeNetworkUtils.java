@@ -2,9 +2,6 @@ package com.stripe.android;
 
 import android.content.Context;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import com.stripe.android.model.BankAccount;
@@ -14,6 +11,10 @@ import com.stripe.android.model.Token;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Utility class for static functions useful for networking and data transfer. You probably will

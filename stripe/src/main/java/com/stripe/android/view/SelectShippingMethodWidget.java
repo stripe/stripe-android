@@ -1,8 +1,6 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
@@ -10,6 +8,9 @@ import com.stripe.android.R;
 import com.stripe.android.model.ShippingMethod;
 
 import java.util.List;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * A widget that allows the user to select a shipping method.

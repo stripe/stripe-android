@@ -1,12 +1,12 @@
 package com.stripe.android.view;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
-import android.support.annotation.VisibleForTesting;
-
 import java.util.Calendar;
+
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.VisibleForTesting;
 
 class DateUtils {
 

@@ -1,8 +1,5 @@
 package com.stripe.android.view;
 
-import android.support.annotation.ColorInt;
-import android.support.v4.content.ContextCompat;
-
 import com.stripe.android.R;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -14,6 +11,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
+
+import androidx.annotation.ColorInt;
+import androidx.core.content.ContextCompat;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.reset;

@@ -1,7 +1,7 @@
 package com.stripe.android;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import static com.stripe.android.PaymentResultListener.ERROR;
 import static com.stripe.android.PaymentResultListener.INCOMPLETE;

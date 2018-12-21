@@ -1,7 +1,6 @@
 package com.stripe.example.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 
@@ -11,6 +10,8 @@ import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
+
+import androidx.annotation.NonNull;
 
 /**
  * Logic needed to create tokens using the {@link android.os.AsyncTask} methods included in the

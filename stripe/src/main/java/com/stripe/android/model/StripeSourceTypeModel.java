@@ -1,9 +1,6 @@
 package com.stripe.android.model;
 
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,6 +10,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 abstract class StripeSourceTypeModel extends StripeJsonModel {
 

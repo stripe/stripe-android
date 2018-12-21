@@ -3,8 +3,6 @@ package com.stripe.example.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -30,6 +28,9 @@ import com.stripe.android.model.Token;
 import com.stripe.example.R;
 
 import java.util.Arrays;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class PayWithGoogleActivity extends AppCompatActivity {
 

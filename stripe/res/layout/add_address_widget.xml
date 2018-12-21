@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_name_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,9 +22,9 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_address_line1_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,9 +37,9 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_address_line2_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,9 +52,9 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_city_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,10 +67,10 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_state_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,9 +83,9 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_postal_code_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -97,9 +97,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_phone_number_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -112,6 +112,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
 </merge>

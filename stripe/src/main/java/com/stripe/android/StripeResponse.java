@@ -1,9 +1,9 @@
 package com.stripe.android;
 
-import android.support.annotation.Nullable;
-
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.Nullable;
 
 /**
  * Represents a response from the Stripe servers.

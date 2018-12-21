@@ -1,7 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.junit.Test;
@@ -10,6 +8,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;

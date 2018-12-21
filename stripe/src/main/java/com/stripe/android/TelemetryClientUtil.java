@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -14,6 +13,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.NonNull;
 
 class TelemetryClientUtil {
 

@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.support.v7.widget.RecyclerView;
-
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
@@ -16,6 +14,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

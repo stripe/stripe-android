@@ -1,7 +1,5 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONArray;
@@ -15,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -2,13 +2,14 @@ package com.stripe.samplestore;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+
+import androidx.annotation.NonNull;
 
 public class StoreCart implements Parcelable {
 

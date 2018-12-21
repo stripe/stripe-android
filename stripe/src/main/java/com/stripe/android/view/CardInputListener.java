@@ -1,9 +1,9 @@
 package com.stripe.android.view;
 
-import android.support.annotation.StringDef;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.StringDef;
 
 /**
  * Represents a listener for card input events. Note that events are

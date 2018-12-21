@@ -1,8 +1,6 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +13,9 @@ import com.stripe.android.R;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class CountryAutoCompleteTextView extends FrameLayout {

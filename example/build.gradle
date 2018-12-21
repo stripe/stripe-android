@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation project(':stripe')
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    implementation "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.appcompat:appcompat:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.recyclerview:recyclerview:${rootProject.ext.supportLibVersion}"
 
     implementation 'com.google.android.gms:play-services-wallet:11.4.2'
-    implementation "com.android.support:support-v4:${rootProject.ext.supportLibVersion}"
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.legacy:legacy-support-v4:${rootProject.ext.supportLibVersion}"
+    implementation "androidx.appcompat:appcompat:${rootProject.ext.supportLibVersion}"
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex:rxandroid:1.2.1'

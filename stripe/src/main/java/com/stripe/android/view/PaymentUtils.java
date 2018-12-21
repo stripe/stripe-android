@@ -1,11 +1,11 @@
 package com.stripe.android.view;
 
-import android.support.annotation.NonNull;
-
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
+
+import androidx.annotation.NonNull;
 
 public class PaymentUtils {
 

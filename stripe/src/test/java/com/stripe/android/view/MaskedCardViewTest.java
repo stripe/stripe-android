@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.support.v4.graphics.ColorUtils;
-import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 
 import com.stripe.android.R;
@@ -19,6 +17,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 
 import java.util.Calendar;
+
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.graphics.ColorUtils;
 
 import static com.stripe.android.view.CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE;
 import static com.stripe.android.view.CardInputTestActivity.EXAMPLE_JSON_SOURCE_BITCOIN;

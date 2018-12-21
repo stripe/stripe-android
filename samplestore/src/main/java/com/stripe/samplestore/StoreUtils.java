@@ -1,9 +1,9 @@
 package com.stripe.samplestore;
 
-import android.support.annotation.Nullable;
-
 import java.text.DecimalFormat;
 import java.util.Currency;
+
+import androidx.annotation.Nullable;
 
 /**
  * Class for utility functions.

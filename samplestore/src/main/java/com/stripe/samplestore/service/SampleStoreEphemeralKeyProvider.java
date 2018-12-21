@@ -1,8 +1,5 @@
 package com.stripe.samplestore.service;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Size;
-
 import com.stripe.android.EphemeralKeyProvider;
 import com.stripe.android.EphemeralKeyUpdateListener;
 import com.stripe.samplestore.RetrofitFactory;
@@ -11,6 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Size;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
