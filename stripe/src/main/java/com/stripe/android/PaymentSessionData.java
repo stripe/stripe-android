@@ -27,8 +27,7 @@ public class PaymentSessionData implements Parcelable {
     public PaymentSessionData() { }
 
     /**
-     * Get the selected payment method ID for the associated {@link PaymentSession}.
-     * @return
+     * @return the selected payment method ID for the associated {@link PaymentSession}
      */
     @Nullable
     public String getSelectedPaymentMethodId() {

@@ -16,7 +16,7 @@ import java.util.List;
 class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder> {
 
     @NonNull private List<ShippingMethod> mShippingMethods = new ArrayList<>();
-    @NonNull private int mSelectedIndex = 0;
+    private int mSelectedIndex = 0;
 
     ShippingMethodAdapter() {}
 
@@ -30,14 +30,16 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
         return super.getItemId(position);
     }
 
+    @NonNull
     @Override
-    public ShippingMethodAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public ShippingMethodAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
+                                                               int i) {
         ShippingMethodView shippingMethodView = new ShippingMethodView(viewGroup.getContext());
         return new ViewHolder(shippingMethodView);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int i) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
         holder.setShippingMethod(mShippingMethods.get(i));
         holder.setIndex(i);
         holder.setUIAsSelected(i == mSelectedIndex);

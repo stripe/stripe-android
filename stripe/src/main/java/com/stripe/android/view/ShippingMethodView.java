@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -71,10 +72,15 @@ class ShippingMethodView extends RelativeLayout {
         mUnselectedTextColorPrimaryInt = getThemeTextColorPrimary(getContext()).data;
         mUnselectedTextColorSecondaryInt = getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams
+
+        final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams
                 .MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(Gravity.CENTER_VERTICAL);
-        params.height = ViewUtils.getPxFromDp(getContext(), 72);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            params.addRule(Gravity.CENTER_VERTICAL);
+        }
+        final int height = getResources()
+                .getDimensionPixelSize(R.dimen.shipping_method_view_height);
+        params.height = ViewUtils.getPxFromDp(getContext(), height);
         setLayoutParams(params);
     }
 
