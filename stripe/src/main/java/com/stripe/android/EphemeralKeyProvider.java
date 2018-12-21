@@ -1,7 +1,7 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Size;
+import androidx.annotation.NonNull;
+import androidx.annotation.Size;
 
 /**
  * Represents an object that can call to a server and create

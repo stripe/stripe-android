@@ -1,6 +1,6 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Represents a class that can call to a server and process a charge based on input payment data.

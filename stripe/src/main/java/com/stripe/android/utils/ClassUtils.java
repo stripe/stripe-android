@@ -1,7 +1,7 @@
 package com.stripe.android.utils;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,7 +15,7 @@ public class ClassUtils {
      * @param clazz the class to search in
      * @param whitelist the whitelist of field names
      * @param obj the target object whose field we are accessing
-     * @return  the value of the found field, if exists, on the specified {@param obj}, or null
+     * @return  the value of the found field, if exists, on the target object, or null
      */
     @Nullable
     public static Object getInternalObject(@NonNull Class clazz, @NonNull Set<String> whitelist,

@@ -1,6 +1,6 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
@@ -56,7 +56,7 @@ public class EphemeralKeyManagerTest {
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
 
     @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
+    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {

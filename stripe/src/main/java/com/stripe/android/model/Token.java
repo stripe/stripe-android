@@ -1,8 +1,9 @@
 package com.stripe.android.model;
 
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 import org.json.JSONException;
 import org.json.JSONObject;

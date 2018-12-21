@@ -3,12 +3,14 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
@@ -32,8 +34,6 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Calendar;
-
-import androidx.test.core.app.ApplicationProvider;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
