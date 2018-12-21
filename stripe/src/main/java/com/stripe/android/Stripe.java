@@ -37,7 +37,7 @@ import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
  */
 public class Stripe {
 
-    private SourceCreator mSourceCreator = new SourceCreator() {
+    private final SourceCreator mSourceCreator = new SourceCreator() {
         @Override
         public void create(
                 @NonNull final SourceParams sourceParams,
