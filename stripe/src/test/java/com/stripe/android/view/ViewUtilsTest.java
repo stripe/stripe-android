@@ -1,9 +1,9 @@
 package com.stripe.android.view;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.model.Card;
 
 import org.junit.Before;
@@ -23,10 +23,9 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ViewUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25, constants = BuildConfig.class)
 public class ViewUtilsTest {
 
-    ActivityController<CardInputTestActivity> mActivityController;
+    private ActivityController<CardInputTestActivity> mActivityController;
 
     @Before
     public void setup() {
@@ -41,7 +40,7 @@ public class ViewUtilsTest {
     }
 
     @Test
-    @Config(sdk = 16)
+    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeAccentColor_whenOnPreKitKatConfig_getsNonzeroColor() {
         @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
         assertTrue(Color.alpha(color) > 0);
@@ -54,7 +53,7 @@ public class ViewUtilsTest {
     }
 
     @Test
-    @Config(sdk = 16)
+    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeColorControlNormal_whenOnPreKitKatConfig_getsNonzeroColor() {
         @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
         assertTrue(Color.alpha(color) > 0);

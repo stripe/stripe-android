@@ -12,15 +12,17 @@ import com.stripe.android.model.SourceParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,7 +35,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link StripeApiHandler}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
 public class StripeApiHandlerTest {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
@@ -146,7 +147,7 @@ public class StripeApiHandlerTest {
         assertNotNull(headerMap);
 
         final String expectedUserAgent =
-                String.format("Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
+                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
         assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
         assertEquals("application/json", headerMap.get("Accept"));
         assertEquals("UTF-8", headerMap.get("Accept-Charset"));
@@ -156,7 +157,7 @@ public class StripeApiHandlerTest {
     public void createQuery_withCardData_createsProperQueryString() {
         Card card = new Card.Builder("4242424242424242", 8, 2019, "123").build();
         Map<String, Object> cardMap = StripeNetworkUtils.hashMapFromCard(
-                RuntimeEnvironment.application, card);
+                ApplicationProvider.getApplicationContext(), card);
         String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
         try {
@@ -192,7 +193,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     provider,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     null,
@@ -238,7 +239,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     provider,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                     connectAccountId,
@@ -267,6 +268,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
@@ -280,7 +282,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -295,6 +297,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
@@ -307,7 +310,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -321,6 +324,7 @@ public class StripeApiHandlerTest {
         }
     }
 
+    @Ignore
     public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
@@ -331,7 +335,7 @@ public class StripeApiHandlerTest {
             );
             PaymentIntent paymentIntent = StripeApiHandler.retrievePaymentIntent(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
                     null,
@@ -353,7 +357,7 @@ public class StripeApiHandlerTest {
             Card card = new Card("4242424242424242", 1, 2050, "123");
             Source source = StripeApiHandler.createSource(
                     null,
-                    RuntimeEnvironment.application.getApplicationContext(),
+                    ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
                     FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                     null,

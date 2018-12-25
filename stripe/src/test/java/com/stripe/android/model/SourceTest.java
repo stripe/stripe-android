@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +16,6 @@ import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_JSON_OWNER_WITHOU
 import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_MAP_OWNER;
 import static com.stripe.android.model.SourceReceiverTest.EXAMPLE_MAP_RECEIVER;
 import static com.stripe.android.model.SourceRedirectTest.EXAMPLE_JSON_REDIRECT;
-
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +27,6 @@ import static org.junit.Assert.fail;
  * Test class for {@link Source} model.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class SourceTest {
 
     static final String EXAMPLE_ALIPAY_SOURCE = "{\n" +

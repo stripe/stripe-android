@@ -3,7 +3,6 @@ package com.stripe.android;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,7 +14,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link StripeTextUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class StripeTextUtilsTest {
 
     @Test

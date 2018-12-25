@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,10 +19,9 @@ import static org.junit.Assert.fail;
  * Test class for {@link SourceReceiver}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class SourceReceiverTest {
 
-    static final String EXAMPLE_JSON_RECEIVER = "{" +
+    private static final String EXAMPLE_JSON_RECEIVER = "{" +
             "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\"," +
             "\"amount_charged\": 0," +
             "\"amount_received\": 0," +

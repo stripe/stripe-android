@@ -2,13 +2,13 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -76,21 +76,11 @@ public class StripeEditText extends TextInputEditText {
      * @return the color used for error text.
      */
     @ColorInt
-    @SuppressWarnings("deprecation")
     public int getDefaultErrorColorInt() {
-        @ColorInt int errorColor;
         // It's possible that we need to verify this value again
         // in case the user programmatically changes the text color.
         determineDefaultErrorColor();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            errorColor = getResources().getColor(mDefaultErrorColorResId, null);
-        } else {
-            // Resources#getColor(int) is deprecated, but the replacement only exists in
-            // SDK 23 and above.
-            errorColor = getResources().getColor(mDefaultErrorColorResId);
-        }
-
-        return errorColor;
+        return ContextCompat.getColor(getContext(), mDefaultErrorColorResId);
     }
 
     @Override
@@ -161,7 +151,6 @@ public class StripeEditText extends TextInputEditText {
      *
      * @param shouldShowError whether or not we should display text in an error state.
      */
-    @SuppressWarnings("deprecation")
     public void setShouldShowError(boolean shouldShowError) {
         if (mErrorMessage != null && mErrorMessageListener != null) {
             String errorMessage = shouldShowError ? mErrorMessage : null;

@@ -2,9 +2,9 @@ package com.stripe.android.view;
 
 import android.widget.AutoCompleteTextView;
 
-import com.stripe.android.BuildConfig;
 import com.stripe.android.R;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,20 +12,19 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link CountryAutoCompleteTextView}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class CountryAutoCompleteTextViewTest {
 
     private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
@@ -51,7 +50,7 @@ public class CountryAutoCompleteTextViewTest {
     public void updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
         String previousValidCountryCode = mCountryAutoCompleteTextView.getSelectedCountryCode();
         mCountryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE");
-        assertTrue( mAutoCompleteTextView.getError() == null);
+        assertNull(mAutoCompleteTextView.getError());
         assertEquals(mAutoCompleteTextView.getText().toString(), new Locale("", previousValidCountryCode).getDisplayCountry());
         mCountryAutoCompleteTextView.setCountrySelected(Locale.UK.getCountry());
         assertNotEquals(mAutoCompleteTextView.getText().toString(), new Locale("", previousValidCountryCode).getDisplayCountry());
@@ -71,6 +70,18 @@ public class CountryAutoCompleteTextViewTest {
         assertFalse(mAutoCompleteTextView.isPopupShowing());
         mAutoCompleteTextView.requestFocus();
         assertTrue(mAutoCompleteTextView.isPopupShowing());
+    }
+
+    @Test
+    public void updateUIForCountryEntered_whenCountrySelectedNullAndNoLocale_doesNotCrash() {
+        Locale.setDefault(Locale.CHINA);
+        mCountryAutoCompleteTextView.mCountrySelected = null;
+        mCountryAutoCompleteTextView.updateUIForCountryEntered(null);
+    }
+
+    @After
+    public void teardown() {
+        Locale.setDefault(Locale.US);
     }
 
 }

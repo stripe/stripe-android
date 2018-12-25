@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Map;
 /**
  * Represents an Ephemeral Key that can be used temporarily for certain operations.
  */
-class EphemeralKey extends StripeJsonModel implements Parcelable {
+abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
 
     static final String FIELD_CREATED = "created";
     static final String FIELD_EXPIRES = "expires";
@@ -30,11 +31,9 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
     static final String FIELD_ID = "id";
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
-
     static final String NULL = "null";
-
+    protected @NonNull String mObjectId;
     private long mCreated;
-    private @NonNull String mCustomerId;
     private long mExpires;
     private @NonNull String mId;
     private boolean mLiveMode;
@@ -50,9 +49,9 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
      *
      * @param in the {@link Parcel} in which this Ephemeral Key has been stored.
      */
-    private EphemeralKey(Parcel in) {
+    protected AbstractEphemeralKey(Parcel in) {
         mCreated = in.readLong();
-        mCustomerId = in.readString();
+        mObjectId = in.readString();
         mExpires = in.readLong();
         mId = in.readString();
         mLiveMode = in.readInt() == 1;
@@ -61,9 +60,9 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         mType = in.readString();
     }
 
-    private EphemeralKey(
+    protected AbstractEphemeralKey(
             long created,
-            @NonNull String customerId,
+            @NonNull String objectId,
             long expires,
             @NonNull String id,
             boolean liveMode,
@@ -72,13 +71,30 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
             @NonNull String type
     ) {
         mCreated = created;
-        mCustomerId = customerId;
+        mObjectId = objectId;
         mExpires = expires;
         mId = id;
         mLiveMode = liveMode;
         mObject = object;
         mSecret = secret;
         mType = type;
+    }
+
+    protected AbstractEphemeralKey(
+            @Nullable JSONObject jsonObject
+    ) throws JSONException {
+        mCreated = jsonObject.getLong(FIELD_CREATED);
+        mExpires = jsonObject.getLong(FIELD_EXPIRES);
+        mId = jsonObject.getString(FIELD_ID);
+        mLiveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
+        mObject = jsonObject.getString(FIELD_OBJECT);
+        mSecret = jsonObject.getString(FIELD_SECRET);
+
+        // Get the values from the associated objects array first element
+        JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
+        JSONObject typeObject = associatedObjectArray.getJSONObject(0);
+        mType = typeObject.getString(FIELD_TYPE);
+        mObjectId = typeObject.getString(FIELD_ID);
     }
 
     @NonNull
@@ -97,7 +113,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
             jsonObject.put(FIELD_LIVEMODE, mLiveMode);
 
             associatedObject.put(FIELD_TYPE, mType);
-            associatedObject.put(FIELD_ID, mCustomerId);
+            associatedObject.put(FIELD_ID, mObjectId);
             associatedObjectsArray.put(associatedObject);
 
             jsonObject.put(FIELD_ASSOCIATED_OBJECTS, associatedObjectsArray);
@@ -124,7 +140,7 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
 
         List<Object> associatedObjectsList = new ArrayList<>();
         Map<String, String> associatedObjectMap = new HashMap<>();
-        associatedObjectMap.put(FIELD_ID, mCustomerId);
+        associatedObjectMap.put(FIELD_ID, mObjectId);
         associatedObjectMap.put(FIELD_TYPE, mType);
         associatedObjectsList.add(associatedObjectMap);
 
@@ -140,15 +156,15 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
     /**
      * Write the object into a {@link Parcel}. Note that if the order of these
      * write operations is changed, an identical change must be made to
-     * {@link #EphemeralKey(Parcel)} constructor above.
+     * {@link #AbstractEphemeralKey(Parcel)} constructor above.
      *
-     * @param out a {@link Parcel} into which to write this object
+     * @param out   a {@link Parcel} into which to write this object
      * @param flags any flags (unused) for writing this object
      */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mCreated);
-        out.writeString(mCustomerId);
+        out.writeString(mObjectId);
         out.writeLong(mExpires);
         out.writeString(mId);
         // There is no writeBoolean
@@ -160,11 +176,6 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
 
     long getCreated() {
         return mCreated;
-    }
-
-    @NonNull
-    String getCustomerId() {
-        return mCustomerId;
     }
 
     long getExpires() {
@@ -200,66 +211,46 @@ class EphemeralKey extends StripeJsonModel implements Parcelable {
         return mType;
     }
 
-    public static final Parcelable.Creator<EphemeralKey> CREATOR
-            = new Parcelable.Creator<EphemeralKey>() {
-
-        @Override
-        public EphemeralKey createFromParcel(Parcel in) {
-            return new EphemeralKey(in);
-        }
-
-        @Override
-        public EphemeralKey[] newArray(int size) {
-            return new EphemeralKey[size];
-        }
-    };
-
     @Nullable
-    static EphemeralKey fromString(@Nullable String rawJson) {
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromString(@Nullable String rawJson, Class ephemeralKeyClass) {
         if (rawJson == null) {
             return null;
         }
 
         try {
             JSONObject object = new JSONObject(rawJson);
-            return fromJson(object);
+            return fromJson(object, ephemeralKeyClass);
         } catch (JSONException ignored) {
             return null;
         }
     }
 
     @Nullable
-    static EphemeralKey fromJson(@Nullable JSONObject jsonObject) {
+    @SuppressWarnings({"checkstyle:LineLength", "checkstyle:IllegalCatch"})
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
+    fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
             return null;
         }
 
         try {
-            long created = jsonObject.getLong(FIELD_CREATED);
-            long expires = jsonObject.getLong(FIELD_EXPIRES);
-            String id = jsonObject.getString(FIELD_ID);
-            boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
-            String object = jsonObject.getString(FIELD_OBJECT);
-            String secret = jsonObject.getString(FIELD_SECRET);
-
-            // Get the values from the associated objects array first element
-            JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
-            JSONObject typeObject = associatedObjectArray.getJSONObject(0);
-            String type = typeObject.getString(FIELD_TYPE);
-            String customerId = typeObject.getString(FIELD_ID);
-
-            return new EphemeralKey(
-                    created,
-                    customerId,
-                    expires,
-                    id,
-                    liveMode,
-                    object,
-                    secret,
-                    type);
-
-        } catch (JSONException ignored) {
-            return null;
+            return (TEphemeralKey)
+                    ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
+        } catch (Exception e) {
+            if (e instanceof JSONException) {
+                // ignored
+                return null;
+            }
+            throw e;
         }
     }
 }

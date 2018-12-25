@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
@@ -26,65 +25,52 @@ public class LauncherActivity extends AppCompatActivity {
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
 
-        Button paymentIntentButton = findViewById(R.id.btn_payment_intent);
-        paymentIntentButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_payment_intent).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, PaymentIntentActivity.class);
-                startActivity(intent);
-            }
-        });
-        Button tokenButton = findViewById(R.id.btn_make_card_tokens);
-        tokenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, PaymentActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, PaymentIntentActivity.class));
             }
         });
 
-        Button multilineButton = findViewById(R.id.btn_make_card_sources);
-        multilineButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_make_card_tokens).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LauncherActivity.this, PaymentActivity.class));
+            }
+        });
+
+        findViewById(R.id.btn_make_card_sources).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LauncherActivity.this, PaymentMultilineActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, PaymentMultilineActivity.class));
             }
         });
 
-        Button sourceButton = findViewById(R.id.btn_make_sources);
-        sourceButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_make_sources).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, RedirectActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, RedirectActivity.class));
             }
         });
 
-        Button customerSessionButton = findViewById(R.id.btn_customer_session_launch);
-        customerSessionButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_customer_session_launch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LauncherActivity.this, CustomerSessionActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, CustomerSessionActivity.class));
             }
         });
 
-        Button selectShippingAddressButton = findViewById(R.id.btn_payment_session_launch);
-        selectShippingAddressButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_payment_session_launch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LauncherActivity.this, PaymentSessionActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, PaymentSessionActivity.class));
             }
         });
 
-        Button payWithGoogleButton = findViewById(R.id.btn_payment_with_google_launch);
-        payWithGoogleButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_payment_with_google_launch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LauncherActivity.this, PayWithGoogleActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LauncherActivity.this, PayWithGoogleActivity.class));
             }
         });
 

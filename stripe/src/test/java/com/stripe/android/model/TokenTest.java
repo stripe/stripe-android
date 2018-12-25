@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Date;
 
@@ -15,7 +14,6 @@ import static org.junit.Assert.assertNull;
  * Test class for {@link Token}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class TokenTest {
     private static final String RAW_TOKEN = "{\n" +
             "  \"id\": \"tok_189fi32eZvKYlo2Ct0KZvU5Y\",\n" +

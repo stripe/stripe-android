@@ -67,7 +67,7 @@ public class CardInputWidget extends LinearLayout {
 
     // This value is used to ensure that onSaveInstanceState is called
     // in the event that the user doesn't give this control an ID.
-    @SuppressLint("ResourceType") private static final @IdRes int DEFAULT_READER_ID = 42424242;
+    private static final @IdRes int DEFAULT_READER_ID = R.id.default_reader_id;
 
     private static final long ANIMATION_LENGTH = 150L;
 
@@ -124,7 +124,6 @@ public class CardInputWidget extends LinearLayout {
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
         String cvcValue = mCvcNumberEditText.getText().toString().trim();
-        int cvcLength = cvcValue.length();
         if (!isCvcLengthValid()) {
             return null;
         }
@@ -208,8 +207,6 @@ public class CardInputWidget extends LinearLayout {
 
     /**
      * Expose a text watcher to receive updates when the card number is changed.
-     *
-     * @param cardNumberTextWatcher
      */
     public void setCardNumberTextWatcher(TextWatcher cardNumberTextWatcher) {
         mCardNumberEditText.addTextChangedListener(cardNumberTextWatcher);
@@ -217,8 +214,6 @@ public class CardInputWidget extends LinearLayout {
 
     /**
      * Expose a text watcher to receive updates when the expiry date is changed.
-     *
-     * @param expiryDateTextWatcher
      */
     public void setExpiryDateTextWatcher(TextWatcher expiryDateTextWatcher) {
         mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
@@ -226,8 +221,6 @@ public class CardInputWidget extends LinearLayout {
 
     /**
      * Expose a text watcher to receive updates when the cvc number is changed.
-     *
-     * @param cvcNumberTextWatcher
      */
     public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
         mCvcNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
@@ -859,12 +852,16 @@ public class CardInputWidget extends LinearLayout {
 
     @NonNull
     private String getPeekCardTextForBrand(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
-            return PEEK_TEXT_AMEX;
-        } else if (Card.DINERS_CLUB.equals(brand)) {
-            return PEEK_TEXT_DINERS;
-        } else {
-            return PEEK_TEXT_COMMON;
+        switch (brand) {
+            case Card.AMERICAN_EXPRESS: {
+                return PEEK_TEXT_AMEX;
+            }
+            case Card.DINERS_CLUB: {
+                return PEEK_TEXT_DINERS;
+            }
+            default: {
+                return PEEK_TEXT_COMMON;
+            }
         }
     }
 

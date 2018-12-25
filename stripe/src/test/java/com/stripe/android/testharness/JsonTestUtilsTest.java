@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +20,6 @@ import static org.junit.Assert.fail;
  * Test class for the test utils class {@link JsonTestUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class JsonTestUtilsTest {
 
     @Test

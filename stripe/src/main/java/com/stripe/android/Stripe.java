@@ -23,6 +23,7 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -36,7 +37,7 @@ import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
  */
 public class Stripe {
 
-    SourceCreator mSourceCreator = new SourceCreator() {
+    private final SourceCreator mSourceCreator = new SourceCreator() {
         @Override
         public void create(
                 @NonNull final SourceParams sourceParams,
@@ -44,35 +45,8 @@ public class Stripe {
                 @Nullable final String stripeAccount,
                 @Nullable Executor executor,
                 @NonNull final SourceCallback sourceCallback) {
-            AsyncTask<Void, Void, ResponseWrapper> task =
-                    new AsyncTask<Void, Void, ResponseWrapper>() {
-                        @Override
-                        protected ResponseWrapper doInBackground(Void... params) {
-                            try {
-                                Source source = StripeApiHandler.createSource(
-                                        null,
-                                        mContext,
-                                        sourceParams,
-                                        publishableKey,
-                                        stripeAccount,
-                                        null);
-                                return new ResponseWrapper(source);
-                            } catch (StripeException stripeException) {
-                                return new ResponseWrapper(stripeException);
-                            }
-                        }
-
-                        @Override
-                        protected void onPostExecute(ResponseWrapper responseWrapper) {
-                            if (responseWrapper.source != null) {
-                                sourceCallback.onSuccess(responseWrapper.source);
-                            } else if (responseWrapper.error != null) {
-                                sourceCallback.onError(responseWrapper.error);
-                            }
-                        }
-                    };
-
-            executeTask(executor, task);
+            executeTask(executor, new CreateSourceTask(mContext, sourceParams, publishableKey,
+                    stripeAccount, sourceCallback));
         }
     };
 
@@ -80,46 +54,19 @@ public class Stripe {
     TokenCreator mTokenCreator = new TokenCreator() {
         @Override
         public void create(
-                final Map<String, Object> tokenParams,
-                final String publishableKey,
-                final String stripeAccount,
-                final @NonNull @Token.TokenType String tokenType,
-                final Executor executor,
-                final TokenCallback callback) {
-            AsyncTask<Void, Void, ResponseWrapper> task =
-                    new AsyncTask<Void, Void, ResponseWrapper>() {
-                        @Override
-                        protected ResponseWrapper doInBackground(Void... params) {
-                            try {
-                                RequestOptions requestOptions =
-                                        RequestOptions.builder(
-                                                publishableKey,
-                                                stripeAccount,
-                                                RequestOptions.TYPE_QUERY).build();
-                                Token token = StripeApiHandler.createToken(
-                                        mContext,
-                                        tokenParams,
-                                        requestOptions,
-                                        tokenType,
-                                        mLoggingResponseListener);
-                                return new ResponseWrapper(token);
-                            } catch (StripeException e) {
-                                return new ResponseWrapper(e);
-                            }
-                        }
-
-                        @Override
-                        protected void onPostExecute(ResponseWrapper result) {
-                            tokenTaskPostExecution(result, callback);
-                        }
-            };
-
-            executeTask(executor, task);
+                @NonNull final Map<String, Object> tokenParams,
+                @NonNull final String publishableKey,
+                @Nullable final String stripeAccount,
+                @NonNull @Token.TokenType final String tokenType,
+                @Nullable final Executor executor,
+                @NonNull final TokenCallback callback) {
+            executeTask(executor, new CreateTokenTask(mContext, tokenParams, publishableKey,
+                    stripeAccount, tokenType, callback, mLoggingResponseListener));
         }
     };
 
-    private Context mContext;
-    private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
+    @NonNull private final Context mContext;
+    @Nullable private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
     private String mStripeAccount;
 
@@ -392,7 +339,6 @@ public class Stripe {
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
@@ -401,7 +347,6 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         return createSourceSynchronous(params, null);
     }
@@ -678,7 +623,7 @@ public class Stripe {
         }
         RequestOptions options = builder.build();
 
-        Map<String, Object> loggingMap = null;
+        final Map<String, Object> loggingMap;
         if (paymentSource instanceof Token) {
             Token token = (Token) paymentSource;
             loggingMap = LoggingUtils.getTokenCreationParams(
@@ -719,7 +664,6 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         return retrieveSourceSynchronous(sourceId, clientSecret, null);
     }
@@ -748,13 +692,12 @@ public class Stripe {
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
-            CardException,
             APIException {
         String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
         if (apiKey == null) {
             return null;
         }
-        return StripeApiHandler.retrieveSource(sourceId, clientSecret, apiKey);
+        return StripeApiHandler.retrieveSource(sourceId, clientSecret, apiKey, mStripeAccount);
     }
 
     /**
@@ -820,17 +763,6 @@ public class Stripe {
         }
     }
 
-    private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
-        if (result.token != null) {
-            callback.onSuccess(result.token);
-        } else if (result.error != null) {
-            callback.onError(result.error);
-        } else {
-            callback.onError(new RuntimeException("Somehow got neither a token response or an " +
-                    "error response"));
-        }
-    }
-
     private void executeTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
         if (executor != null) {
             task.executeOnExecutor(executor);
@@ -839,7 +771,7 @@ public class Stripe {
         }
     }
 
-    private class ResponseWrapper {
+    private static class ResponseWrapper {
         final Source source;
         final Token token;
         final Exception error;
@@ -880,5 +812,115 @@ public class Stripe {
                     @NonNull @Token.TokenType String tokenType,
                     Executor executor,
                     TokenCallback callback);
+    }
+
+    private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper> {
+        @NonNull private final WeakReference<Context> mContextRef;
+        @NonNull private final SourceParams mSourceParams;
+        @NonNull private final String mPublishableKey;
+        @Nullable private final String mStripeAccount;
+        @NonNull private final WeakReference<SourceCallback> mSourceCallbackRef;
+
+        CreateSourceTask(@NonNull Context context,
+                @NonNull SourceParams sourceParams,
+                @NonNull String publishableKey,
+                @Nullable String stripeAccount,
+                @NonNull SourceCallback sourceCallback) {
+            mContextRef = new WeakReference<>(context);
+            mSourceParams = sourceParams;
+            mPublishableKey = publishableKey;
+            mStripeAccount = stripeAccount;
+            mSourceCallbackRef = new WeakReference<>(sourceCallback);
+        }
+
+        @Override
+        protected ResponseWrapper doInBackground(Void... params) {
+            try {
+                final Source source = StripeApiHandler.createSource(
+                        null,
+                        mContextRef.get(),
+                        mSourceParams,
+                        mPublishableKey,
+                        mStripeAccount,
+                        null);
+                return new ResponseWrapper(source);
+            } catch (StripeException stripeException) {
+                return new ResponseWrapper(stripeException);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ResponseWrapper responseWrapper) {
+            final SourceCallback sourceCallback = mSourceCallbackRef.get();
+            if (sourceCallback != null) {
+                if (responseWrapper.source != null) {
+                    sourceCallback.onSuccess(responseWrapper.source);
+                } else if (responseWrapper.error != null) {
+                    sourceCallback.onError(responseWrapper.error);
+                }
+            }
+        }
+    }
+
+    private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper> {
+        @NonNull private final WeakReference<Context> mContextRef;
+        @NonNull private final Map<String, Object> mTokenParams;
+        @NonNull private final String mPublishableKey;
+        @Nullable private final String mStripeAccount;
+        @NonNull @Token.TokenType private final String mTokenType;
+        @NonNull private final WeakReference<TokenCallback> mCallbackRef;
+        @Nullable private final StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
+
+        CreateTokenTask(@NonNull Context context,
+                @NonNull final Map<String, Object> tokenParams,
+                @NonNull final String publishableKey,
+                @Nullable final String stripeAccount,
+                @NonNull @Token.TokenType final String tokenType,
+                @Nullable final TokenCallback callback,
+                @Nullable final StripeApiHandler.LoggingResponseListener loggingResponseListener) {
+            mContextRef = new WeakReference<>(context);
+            mTokenParams = tokenParams;
+            mPublishableKey = publishableKey;
+            mStripeAccount = stripeAccount;
+            mTokenType = tokenType;
+            mLoggingResponseListener = loggingResponseListener;
+            mCallbackRef = new WeakReference<>(callback);
+        }
+
+        @Override
+        protected ResponseWrapper doInBackground(Void... params) {
+            try {
+                final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
+                        mStripeAccount, RequestOptions.TYPE_QUERY).build();
+                final Token token = StripeApiHandler.createToken(
+                        mContextRef.get(),
+                        mTokenParams,
+                        requestOptions,
+                        mTokenType,
+                        mLoggingResponseListener);
+                return new ResponseWrapper(token);
+            } catch (StripeException e) {
+                return new ResponseWrapper(e);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull ResponseWrapper result) {
+            tokenTaskPostExecution(result);
+        }
+
+        private void tokenTaskPostExecution(@NonNull ResponseWrapper result) {
+            final TokenCallback callback = mCallbackRef.get();
+            if (callback != null) {
+                if (result.token != null) {
+                    callback.onSuccess(result.token);
+                } else if (result.error != null) {
+                    callback.onError(result.error);
+                } else {
+                    callback.onError(new RuntimeException("Somehow got neither a token response or"
+                            + " an error response"));
+                }
+            }
+        }
     }
 }

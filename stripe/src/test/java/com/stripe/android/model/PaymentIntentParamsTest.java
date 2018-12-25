@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,6 @@ import java.util.Map;
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class PaymentIntentParamsTest {
     private static Card FULL_FIELDS_VISA_CARD =
             new Card(VALID_VISA_NO_SPACES,

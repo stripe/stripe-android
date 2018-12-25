@@ -3,20 +3,16 @@ package com.stripe.android.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Test class for {@link SourceCardData}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class SourceCardDataTest {
 
     static final String EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY =

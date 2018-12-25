@@ -8,11 +8,11 @@ import com.stripe.android.model.Card;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link StripeNetworkUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class StripeNetworkUtilsTest {
 
     private static final String CARD_ADDRESS_L1 = "123 Main Street";
@@ -183,7 +182,8 @@ public class StripeNetworkUtilsTest {
             }
 
         };
-        StripeNetworkUtils.addUidParams(provider, RuntimeEnvironment.application, existingMap);
+        StripeNetworkUtils.addUidParams(provider, ApplicationProvider.getApplicationContext(),
+                existingMap);
         assertEquals(2, existingMap.size());
         assertTrue(existingMap.containsKey("muid"));
         assertTrue(existingMap.containsKey("guid"));
@@ -207,7 +207,8 @@ public class StripeNetworkUtilsTest {
             }
 
         };
-        StripeNetworkUtils.addUidParamsToPaymentIntent(provider, RuntimeEnvironment.application, existingMap);
+        StripeNetworkUtils.addUidParamsToPaymentIntent(provider,
+                ApplicationProvider.getApplicationContext(), existingMap);
         assertEquals(1, existingMap.size());
         assertTrue(sourceDataMap.containsKey("muid"));
         assertTrue(sourceDataMap.containsKey("guid"));
@@ -216,7 +217,7 @@ public class StripeNetworkUtilsTest {
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
         Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(
-                RuntimeEnvironment.application, card);
+                ApplicationProvider.getApplicationContext(), card);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("card");
     }
@@ -224,7 +225,7 @@ public class StripeNetworkUtilsTest {
     @SuppressWarnings("unchecked")
     private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
         Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromBankAccount(
-                RuntimeEnvironment.application, bankAccount);
+                ApplicationProvider.getApplicationContext(), bankAccount);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("bank_account");
     }

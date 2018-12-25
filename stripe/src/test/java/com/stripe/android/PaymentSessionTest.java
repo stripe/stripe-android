@@ -23,8 +23,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
-import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Set;
@@ -51,18 +49,12 @@ import static org.mockito.Mockito.when;
  * Test class for {@link PaymentSession}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class PaymentSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
-    private Customer mFirstCustomer;
-    private Customer mSecondCustomer;
-    private Source mAddedSource;
-
-    private ActivityController<AppCompatActivity> mActivityController;
-    private ShadowActivity mShadowActivity;
-    @Mock CustomerSession.StripeApiProxy mStripeApiProxy;
+    private AppCompatActivity mActivity;
+    @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
 
     @Before
     public void setup() {
@@ -72,23 +64,21 @@ public class PaymentSessionTest {
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
         CustomerSession.initCustomerSession(mEphemeralKeyProvider, mStripeApiProxy, null);
-        mActivityController =
-                Robolectric.buildActivity(AppCompatActivity.class).create().start();
-        mShadowActivity = Shadows.shadowOf(mActivityController.get());
+        mActivity = Robolectric.buildActivity(AppCompatActivity.class).create().start().get();
 
-        mFirstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
-        assertNotNull(mFirstCustomer);
-        mSecondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
-        assertNotNull(mSecondCustomer);
+        Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
+        assertNotNull(firstCustomer);
+        Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
+        assertNotNull(secondCustomer);
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
 
-        mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(mAddedSource);
+        Source addedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(addedSource);
 
         try {
             when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
-                    .thenReturn(mFirstCustomer, mSecondCustomer);
+                    .thenReturn(firstCustomer, secondCustomer);
             when(mStripeApiProxy.addCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -97,7 +87,7 @@ public class PaymentSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenReturn(mAddedSource);
+                    .thenReturn(addedSource);
             when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -106,7 +96,7 @@ public class PaymentSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenReturn(mSecondCustomer);
+                    .thenReturn(secondCustomer);
         } catch (StripeException exception) {
             fail("Exception when accessing mock api proxy: " + exception.getMessage());
         }
@@ -116,7 +106,7 @@ public class PaymentSessionTest {
     public void init_addsPaymentSessionToken_andFetchesCustomer() {
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         Set<String> tokenSet = CustomerSession.getInstance().getProductUsageTokens();
@@ -127,7 +117,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -138,7 +128,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
         verify(mockListener).onCommunicatingStateChanged(eq(true));
         verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
@@ -147,7 +137,7 @@ public class PaymentSessionTest {
 
     @Test
     public void setCartTotal_setsExpectedValueAndNotifiesListener() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -158,7 +148,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         ArgumentCaptor<PaymentSessionData> dataArgumentCaptor = getDataCaptor();
@@ -173,7 +163,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -184,7 +174,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         // We have already tested the functionality up to here.
@@ -199,7 +189,7 @@ public class PaymentSessionTest {
 
     @Test
     public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -210,13 +200,13 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         paymentSession.presentPaymentMethodSelection();
 
         ShadowActivity.IntentForResult intentForResult =
-                mShadowActivity.getNextStartedActivityForResult();
+                Shadows.shadowOf(mActivity).getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
@@ -225,7 +215,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -239,7 +229,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         // The init removes PaymentMethodsActivity, but then adds PaymentSession
@@ -251,7 +241,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -265,7 +255,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
 
@@ -277,7 +267,7 @@ public class PaymentSessionTest {
 
     @Test
     public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -291,7 +281,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
 
@@ -318,7 +308,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedState_setsPaymentSessionData() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -329,7 +319,7 @@ public class PaymentSessionTest {
 
         PaymentSession.PaymentSessionListener mockListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivityController.get());
+        PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
 
         ArgumentCaptor<PaymentSessionData> paySessionDataCaptor = getDataCaptor();

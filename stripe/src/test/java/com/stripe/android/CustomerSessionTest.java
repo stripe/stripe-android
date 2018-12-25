@@ -22,18 +22,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
@@ -46,7 +48,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -55,10 +56,9 @@ import static org.mockito.Mockito.when;
  * Test class for {@link CustomerSession}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants=BuildConfig.class, sdk = 25)
 public class CustomerSessionTest {
 
-    public static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
+    static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
             "  \"id\": \"ephkey_123\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_123\",\n" +
@@ -71,7 +71,7 @@ public class CustomerSessionTest {
             "            }]\n" +
             "}";
 
-    public static final String SECOND_SAMPLE_KEY_RAW = "{\n" +
+    private static final String SECOND_SAMPLE_KEY_RAW = "{\n" +
             "  \"id\": \"ephkey_ABC\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_456\",\n" +
@@ -99,7 +99,7 @@ public class CustomerSessionTest {
                     "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
                     "  }\n" +
                     "}";
-    public static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
+    private static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
@@ -126,7 +126,7 @@ public class CustomerSessionTest {
                     "  }\n" +
                     "}";
 
-    public static final String SECOND_TEST_CUSTOMER_OBJECT =
+    static final String SECOND_TEST_CUSTOMER_OBJECT =
             "{\n" +
                     "  \"id\": \"cus_ABC123\",\n" +
                     "  \"object\": \"customer\",\n" +
@@ -142,17 +142,19 @@ public class CustomerSessionTest {
                     "  }\n" +
                     "}";
 
-    @Mock CustomerSession.StripeApiProxy mStripeApiProxy;
-    @Mock CustomerSession.StripeApiProxy mErrorProxy;
+
+    @Mock private BroadcastReceiver mBroadcastReceiver;
+    @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
+    @Mock private CustomerSession.StripeApiProxy mErrorProxy;
+
+    @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
+
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
     private Customer mFirstCustomer;
     private Customer mSecondCustomer;
 
     private Source mAddedSource;
-    private Source mDeletedSource;
-
-    @Mock BroadcastReceiver mBroadcastReceiver;
 
     @Before
     public void setup() {
@@ -160,7 +162,7 @@ public class CustomerSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         LocalBroadcastManager instance =
-                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+                LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
         instance.registerReceiver(
                 mBroadcastReceiver,
                 new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
@@ -173,7 +175,6 @@ public class CustomerSessionTest {
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
 
         mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        mDeletedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(mAddedSource);
         try {
             when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
@@ -207,7 +208,7 @@ public class CustomerSessionTest {
                     ArgumentMatchers.<String>anyList(),
                     anyString(),
                     anyString()))
-                    .thenReturn(mDeletedSource);
+                    .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
             when(mErrorProxy.deleteCustomerSourceWithKey(
                     any(Context.class),
                     anyString(),
@@ -246,7 +247,7 @@ public class CustomerSessionTest {
 
     @After
     public void teardown() {
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application)
+        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .unregisterReceiver(mBroadcastReceiver);
         CustomerSession.endCustomerSession();
     }
@@ -294,7 +295,7 @@ public class CustomerSessionTest {
 
     @Test
     public void create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -304,10 +305,10 @@ public class CustomerSessionTest {
                 null);
         CustomerSession session = CustomerSession.getInstance();
 
-        assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
+        assertEquals(firstKey.getId(), Objects.requireNonNull(session.getEphemeralKey()).getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
             assertNotNull(session.getCustomer());
             assertEquals(mFirstCustomer.getId(), session.getCustomer().getId());
@@ -318,7 +319,8 @@ public class CustomerSessionTest {
 
     @Test
     public void setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs(){
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = Objects.requireNonNull(
+                CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW));
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         Calendar proxyCalendar = Calendar.getInstance();
         CustomerSession.initCustomerSession(
@@ -327,20 +329,21 @@ public class CustomerSessionTest {
                 proxyCalendar);
         CustomerSession session = CustomerSession.getInstance();
         session.addProductUsageTokenIfValid("PaymentMethodsActivity");
-        Customer customerWithShippingInfo = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO);
-        ShippingInformation shippingInformation = customerWithShippingInfo.getShippingInformation();
-        session.setCustomerShippingInformation(RuntimeEnvironment.application, shippingInformation);
-        ArgumentCaptor<List> listArgumentCaptor =
-                ArgumentCaptor.forClass(List.class);
+        Customer customerWithShippingInfo = Objects
+                .requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO));
+        ShippingInformation shippingInformation = Objects.requireNonNull(customerWithShippingInfo
+                .getShippingInformation());
+        session.setCustomerShippingInformation(ApplicationProvider.getApplicationContext(),
+                shippingInformation);
         try {
-            verify(mStripeApiProxy, times(1)).setCustomerShippingInfoWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).setCustomerShippingInfoWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
-                    listArgumentCaptor.capture(),
+                    mListArgumentCaptor.capture(),
                     eq(shippingInformation),
                     eq(firstKey.getSecret()));
-            List productUsage = listArgumentCaptor.getValue();
+            List productUsage = mListArgumentCaptor.getValue();
             assertTrue(productUsage.contains("PaymentMethodsActivity"));
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -349,10 +352,10 @@ public class CustomerSessionTest {
 
     @Test
     public void retrieveCustomer_withExpiredCache_updatesCustomer() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
-        EphemeralKey secondKey = EphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey secondKey = CustomerEphemeralKey.fromString(SECOND_SAMPLE_KEY_RAW);
         assertNotNull(secondKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -390,7 +393,7 @@ public class CustomerSessionTest {
         session.retrieveCurrentCustomer(mockListener);
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
@@ -399,9 +402,9 @@ public class CustomerSessionTest {
         assertEquals(mSecondCustomer.getId(), session.getCustomer().getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     secondKey.getCustomerId(), secondKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -410,7 +413,7 @@ public class CustomerSessionTest {
 
     @Test
     public void retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -434,7 +437,7 @@ public class CustomerSessionTest {
         assertEquals(firstKey.getCustomerId(), session.getCustomer().getId());
 
         try {
-            verify(mStripeApiProxy, times(1)).retrieveCustomerWithKey(
+            verify(mStripeApiProxy).retrieveCustomerWithKey(
                     firstKey.getCustomerId(), firstKey.getSecret());
         } catch (StripeException unexpected) {
             fail(unexpected.getMessage());
@@ -454,7 +457,7 @@ public class CustomerSessionTest {
         session.retrieveCurrentCustomer(mockListener);
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
 
         assertNotNull(capturedCustomer);
@@ -467,7 +470,7 @@ public class CustomerSessionTest {
 
     @Test
     public void addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -497,24 +500,22 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.addCustomerSource(RuntimeEnvironment.application,
+        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
-        ArgumentCaptor<List> listArgumentCaptor =
-                ArgumentCaptor.forClass(List.class);
         try {
-            verify(mStripeApiProxy, times(1)).addCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).addCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
-                    listArgumentCaptor.capture(),
+                    mListArgumentCaptor.capture(),
                     eq("abc123"),
                     eq(Source.CARD),
                     eq(firstKey.getSecret()));
-            List productUsage = listArgumentCaptor.getValue();
+            List<String> productUsage = mListArgumentCaptor.getValue();
             assertEquals(2, productUsage.size());
             assertTrue(productUsage.contains("AddSourceActivity"));
             assertTrue(productUsage.contains("PaymentMethodsActivity"));
@@ -523,7 +524,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
+        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
         Source capturedSource = sourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
@@ -531,7 +532,7 @@ public class CustomerSessionTest {
 
     @Test
     public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -562,7 +563,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.addCustomerSource(RuntimeEnvironment.application,
+        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -585,7 +586,7 @@ public class CustomerSessionTest {
 
     @Test
     public void removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSourceAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -615,22 +616,20 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.deleteCustomerSource(RuntimeEnvironment.application,
+        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 mockListener);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
-        ArgumentCaptor<List> listArgumentCaptor =
-                ArgumentCaptor.forClass(List.class);
         try {
-            verify(mStripeApiProxy, times(1)).deleteCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).deleteCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
-                    listArgumentCaptor.capture(),
+                    mListArgumentCaptor.capture(),
                     eq("abc123"),
                     eq(firstKey.getSecret()));
-            List productUsage = listArgumentCaptor.getValue();
+            List productUsage = mListArgumentCaptor.getValue();
             assertEquals(2, productUsage.size());
             assertTrue(productUsage.contains("AddSourceActivity"));
             assertTrue(productUsage.contains("PaymentMethodsActivity"));
@@ -639,7 +638,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener, times(1)).onSourceRetrieved(sourceArgumentCaptor.capture());
+        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
         Source capturedSource = sourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
@@ -647,7 +646,7 @@ public class CustomerSessionTest {
 
     @Test
     public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -678,7 +677,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.deleteCustomerSource(RuntimeEnvironment.application,
+        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 mockListener);
 
@@ -700,7 +699,7 @@ public class CustomerSessionTest {
 
     @Test
     public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -729,25 +728,22 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        session.setCustomerDefaultSource(
-                RuntimeEnvironment.application,
+        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
 
         assertTrue(session.getProductUsageTokens().isEmpty());
-        ArgumentCaptor<List> listArgumentCaptor =
-                ArgumentCaptor.forClass(List.class);
         try {
-            verify(mStripeApiProxy, times(1)).setDefaultCustomerSourceWithKey(
-                    eq(RuntimeEnvironment.application),
+            verify(mStripeApiProxy).setDefaultCustomerSourceWithKey(
+                    eq(ApplicationProvider.getApplicationContext()),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
-                    listArgumentCaptor.capture(),
+                    mListArgumentCaptor.capture(),
                     eq("abc123"),
                     eq(Source.CARD),
                     eq(firstKey.getSecret()));
-            List productUsage = listArgumentCaptor.getValue();
+            List<String> productUsage = mListArgumentCaptor.getValue();
             assertEquals(1, productUsage.size());
             assertTrue(productUsage.contains("PaymentMethodsActivity"));
         } catch (StripeException unexpected) {
@@ -755,7 +751,7 @@ public class CustomerSessionTest {
         }
 
         ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener, times(1)).onCustomerRetrieved(customerArgumentCaptor.capture());
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
         Customer capturedCustomer = customerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
@@ -763,7 +759,7 @@ public class CustomerSessionTest {
 
     @Test
     public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
-        EphemeralKey firstKey = EphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
@@ -792,8 +788,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
         session.setStripeApiProxy(mErrorProxy);
-        session.setCustomerDefaultSource(
-                RuntimeEnvironment.application,
+        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -826,7 +821,8 @@ public class CustomerSessionTest {
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
         Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
-        List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+        List<String> actualTokens = new ArrayList<>(
+                CustomerSession.getInstance().getProductUsageTokens());
         assertTrue(actualTokens.contains("ShippingInfoScreen"));
     }
 
@@ -844,7 +840,8 @@ public class CustomerSessionTest {
         intent.putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
         Robolectric.buildActivity(PaymentFlowActivity.class, intent)
                 .create().start().resume().visible();
-        List actualTokens = new ArrayList<>(CustomerSession.getInstance().getProductUsageTokens());
+        List<String> actualTokens = new ArrayList<>(
+                CustomerSession.getInstance().getProductUsageTokens());
         assertTrue(actualTokens.contains("ShippingMethodScreen"));
     }
 }

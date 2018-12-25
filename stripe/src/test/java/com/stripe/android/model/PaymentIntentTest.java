@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +21,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 25)
 public class PaymentIntentTest {
 
-    static final String EXAMPLE_PAYMENT_INTENT_SOURCE= "{\n" +
+    private static final String EXAMPLE_PAYMENT_INTENT_SOURCE= "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
             "  \"allowed_source_types\": [\n" +
@@ -47,9 +45,9 @@ public class PaymentIntentTest {
             "  \"status\": \"succeeded\"\n" +
             "}\n";
 
-    static final String BAD_URL = "nonsense-blahblah";
+    private static final String BAD_URL = "nonsense-blahblah";
 
-    static final String EXAMPLE_PAYMENT_INTENT_SOURCE_WITH_BAD_AUTH_URL = "{\n" +
+    private static final String EXAMPLE_PAYMENT_INTENT_SOURCE_WITH_BAD_AUTH_URL = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
             "  \"allowed_source_types\": [\n" +
@@ -65,8 +63,7 @@ public class PaymentIntentTest {
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
             "  \"next_source_action\": {" +
-            "       type: \"authorize_with_url\"," +
-            "       value: {" +
+            "       authorize_with_url: {" +
         "           url: \""+ BAD_URL +"\" } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +
@@ -79,7 +76,7 @@ public class PaymentIntentTest {
         add("card");
     }};
 
-    static final Map<String, Object> EXAMPLE_PAYMENT_INTENT_MAP = new HashMap<String, Object>() {{
+    private static final Map<String, Object> EXAMPLE_PAYMENT_INTENT_MAP = new HashMap<String, Object>() {{
         put("id", "pi_1CkiBMLENEVhOs7YMtUehLau");
         put("object", "payment_intent");
         put("allowed_source_types", ALLOWED_SOURCE_TYPES);

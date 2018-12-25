@@ -22,8 +22,9 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
- * A model class representing a source in the Android SDK. More detailed information
- * and interaction can be seen at {@url https://stripe.com/docs/api/java#source_object}.
+ * A model class representing a source in the Android SDK. More detailed information and interaction
+ * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
+ * https://stripe.com/docs/api/sources/object?lang=java</a>.
  */
 public class Source extends StripeJsonModel implements StripePaymentSource {
 
@@ -58,7 +59,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     public static final String MULTIBANCO = "multibanco";
     public static final String UNKNOWN = "unknown";
 
-    public static final Set<String> MODELED_TYPES = new HashSet<>();
+    private static final Set<String> MODELED_TYPES = new HashSet<>();
 
     static {
         MODELED_TYPES.add(CARD);
@@ -105,22 +106,22 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     static final String EURO = "eur";
     static final String USD = "usd";
 
-    static final String FIELD_ID = "id";
-    static final String FIELD_OBJECT = "object";
-    static final String FIELD_AMOUNT = "amount";
-    static final String FIELD_CLIENT_SECRET = "client_secret";
-    static final String FIELD_CODE_VERIFICATION = "code_verification";
-    static final String FIELD_CREATED = "created";
-    static final String FIELD_CURRENCY = "currency";
-    static final String FIELD_FLOW = "flow";
-    static final String FIELD_LIVEMODE = "livemode";
-    static final String FIELD_METADATA = "metadata";
-    static final String FIELD_OWNER = "owner";
-    static final String FIELD_RECEIVER = "receiver";
-    static final String FIELD_REDIRECT = "redirect";
-    static final String FIELD_STATUS = "status";
-    static final String FIELD_TYPE = "type";
-    static final String FIELD_USAGE = "usage";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_AMOUNT = "amount";
+    private static final String FIELD_CLIENT_SECRET = "client_secret";
+    private static final String FIELD_CODE_VERIFICATION = "code_verification";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_FLOW = "flow";
+    private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_METADATA = "metadata";
+    private static final String FIELD_OWNER = "owner";
+    private static final String FIELD_RECEIVER = "receiver";
+    private static final String FIELD_REDIRECT = "redirect";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_USAGE = "usage";
 
     private String mId;
     private Long mAmount;
@@ -492,7 +493,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     }
 
     @Nullable
-    static <T extends StripeJsonModel> T optStripeJsonModel(
+    private static <T extends StripeJsonModel> T optStripeJsonModel(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String key,
             Class<T> type) {
@@ -527,7 +528,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Nullable
     @SourceStatus
-    static String asSourceStatus(@Nullable String sourceStatus) {
+    private static String asSourceStatus(@Nullable String sourceStatus) {
         if (PENDING.equals(sourceStatus)) {
             return PENDING;
         } else if (CHARGEABLE.equals(sourceStatus)) {
@@ -572,7 +573,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Nullable
     @Usage
-    static String asUsage(@Nullable String usage) {
+    private static String asUsage(@Nullable String usage) {
         if (REUSABLE.equals(usage)) {
             return REUSABLE;
         } else if (SINGLE_USE.equals(usage)) {
@@ -583,7 +584,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Nullable
     @SourceFlow
-    static String asSourceFlow(@Nullable String sourceFlow) {
+    private static String asSourceFlow(@Nullable String sourceFlow) {
         if (REDIRECT.equals(sourceFlow)) {
             return REDIRECT;
         } else if (RECEIVER.equals(sourceFlow)) {

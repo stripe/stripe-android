@@ -28,14 +28,13 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
 
     MaskedCardAdapter(@NonNull List<CustomerSource> startingSources) {
         mCustomerSourceList = new ArrayList<>();
-        CustomerSource[] customerSources = new CustomerSource[startingSources.size()];
-        addCustomerSourceIfSupported(startingSources.toArray(customerSources));
+        setCustomerSourceList(startingSources);
     }
 
     void setCustomerSourceList(@NonNull List<CustomerSource> sourceList) {
         mCustomerSourceList.clear();
-        mCustomerSourceList = sourceList;
-        notifyDataSetChanged();
+        CustomerSource[] customerSources = new CustomerSource[sourceList.size()];
+        addCustomerSourceIfSupported(sourceList.toArray(customerSources));
     }
 
     void updateCustomer(@NonNull Customer customer) {

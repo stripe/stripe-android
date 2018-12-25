@@ -2,9 +2,9 @@ package com.stripe.example.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -156,7 +156,7 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 .addParameter("gateway", "stripe")
                 .addParameter("stripe:publishableKey",
                         PaymentConfiguration.getInstance().getPublishableKey())
-                .addParameter("stripe:version", "5.1.1")
+                .addParameter("stripe:version", "2018-11-08")
                 .build();
     }
 

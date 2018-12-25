@@ -1,9 +1,9 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.os.ConfigurationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,9 +46,9 @@ class CountryAdapter extends ArrayAdapter {
                     filterResults.values = mCountries;
                     return filterResults;
                 }
-                String charSequenceLowercase = charSequence.toString().toLowerCase();
+                String charSequenceLowercase = charSequence.toString().toLowerCase(Locale.ROOT);
                 for (String country : mCountries) {
-                    if (country.toLowerCase().startsWith(charSequenceLowercase)) {
+                    if (country.toLowerCase(Locale.ROOT).startsWith(charSequenceLowercase)) {
                         suggestedCountries.add(country);
                     }
                 }
@@ -62,8 +62,7 @@ class CountryAdapter extends ArrayAdapter {
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                List<String> suggestions = (List<String>) filterResults.values;
-                mSuggestions = suggestions;
+                mSuggestions = (List<String>) filterResults.values;
                 notifyDataSetChanged();
             }
         };
@@ -85,8 +84,8 @@ class CountryAdapter extends ArrayAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view != null && view instanceof TextView) {
+    public View getView(int i, View view, @NonNull ViewGroup viewGroup) {
+        if (view instanceof TextView) {
             ((TextView) view).setText(getItem(i));
             return view;
         } else {
@@ -104,12 +103,12 @@ class CountryAdapter extends ArrayAdapter {
     }
 
     @VisibleForTesting
-    List getOrderedCountries(List<String> countries) {
+    List<String> getOrderedCountries(List<String> countries) {
         // Show user's current locale first, followed by countries alphabetized by display name
         Collections.sort(countries, new Comparator<String>() {
             @Override
             public int compare(String s, String t1) {
-                return s.toLowerCase().compareTo(t1.toLowerCase());
+                return s.toLowerCase(Locale.ROOT).compareTo(t1.toLowerCase(Locale.ROOT));
             }
         });
         countries.remove(getCurrentLocale().getDisplayCountry());
@@ -119,11 +118,7 @@ class CountryAdapter extends ArrayAdapter {
 
     @VisibleForTesting
     Locale getCurrentLocale() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return mContext.getResources().getConfiguration().getLocales().get(0);
-        } else {
-            return mContext.getResources().getConfiguration().locale;
-        }
+        return ConfigurationCompat.getLocales(mContext.getResources().getConfiguration()).get(0);
     }
 
 }

@@ -9,9 +9,10 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class EphemeralKeyManager {
+class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
-    private @Nullable EphemeralKey mEphemeralKey;
+    private Class<TEphemeralKey> mEphemeralKeyClass;
+    private @Nullable TEphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyProvider mEphemeralKeyProvider;
     private @Nullable Calendar mOverrideCalendar;
     private @NonNull KeyManagerListener mListener;
@@ -21,8 +22,9 @@ class EphemeralKeyManager {
             @NonNull EphemeralKeyProvider ephemeralKeyProvider,
             @NonNull KeyManagerListener keyManagerListener,
             long timeBufferInSeconds,
-            @Nullable Calendar overrideCalendar) {
-
+            @Nullable Calendar overrideCalendar,
+            Class ephemeralKeyClass) {
+        mEphemeralKeyClass = ephemeralKeyClass;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
@@ -45,7 +47,7 @@ class EphemeralKeyManager {
 
     @Nullable
     @VisibleForTesting
-    EphemeralKey getEphemeralKey() {
+    TEphemeralKey getEphemeralKey() {
         return mEphemeralKey;
     }
 
@@ -53,7 +55,7 @@ class EphemeralKeyManager {
             @NonNull String key,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
-        mEphemeralKey = EphemeralKey.fromString(key);
+        mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
         mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }
 
@@ -63,7 +65,7 @@ class EphemeralKeyManager {
     }
 
     static boolean shouldRefreshKey(
-            @Nullable EphemeralKey key,
+            @Nullable AbstractEphemeralKey key,
             long bufferInSeconds,
             @Nullable Calendar proxyCalendar) {
 
@@ -77,8 +79,8 @@ class EphemeralKeyManager {
         return key.getExpires() < nowPlusBuffer;
     }
 
-    interface KeyManagerListener {
-        void onKeyUpdate(@Nullable EphemeralKey ephemeralKey,
+    interface KeyManagerListener<TEphemeralKey extends AbstractEphemeralKey> {
+        void onKeyUpdate(@Nullable TEphemeralKey ephemeralKey,
                          @Nullable String action,
                          @Nullable Map<String, Object> arguments);
 

@@ -465,9 +465,9 @@ public class SourceParams {
             @NonNull String iban,
             @Nullable String email,
             @Nullable String addressLine1,
-            @NonNull String city,
-            @NonNull String postalCode,
-            @NonNull @Size(2) String country) {
+            @Nullable String city,
+            @Nullable String postalCode,
+            @Nullable @Size(2) String country) {
         SourceParams params = new SourceParams()
                 .setType(Source.SEPA_DEBIT)
                 .setCurrency(Source.EURO);

@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
 
@@ -16,7 +15,6 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link DateUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
 public class DateUtilsTest {
 
     @Test
@@ -163,8 +161,8 @@ public class DateUtilsTest {
     public void isValidMonth_forProperMonths_returnsTrue() {
         String[] validMonths = {"01", "02", "03", "04", "05",
                 "06", "07", "08", "09", "10", "11", "12"};
-        for (int i = 0; i < validMonths.length; i++) {
-            assertTrue(DateUtils.isValidMonth(validMonths[i]));
+        for (String validMonth : validMonths) {
+            assertTrue(DateUtils.isValidMonth(validMonth));
         }
     }
 

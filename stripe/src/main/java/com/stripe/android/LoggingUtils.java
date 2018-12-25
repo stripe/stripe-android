@@ -92,7 +92,7 @@ class LoggingUtils {
             @NonNull String publishableApiKey,
             @Nullable String tokenType) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 tokenType,
@@ -107,7 +107,7 @@ class LoggingUtils {
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
@@ -122,7 +122,7 @@ class LoggingUtils {
             @NonNull String publishableKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
@@ -136,7 +136,7 @@ class LoggingUtils {
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 null,
@@ -151,7 +151,7 @@ class LoggingUtils {
             @NonNull String publishableApiKey,
             @Nullable @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
@@ -165,7 +165,7 @@ class LoggingUtils {
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey) {
         return getEventLoggingParams(
-                context,
+                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 null,
@@ -181,7 +181,7 @@ class LoggingUtils {
             @Nullable @Token.TokenType String tokenType,
             @NonNull String publishableApiKey,
             @NonNull @LoggingEventName String eventName) {
-        Map<String, Object> paramsObject = new HashMap<>();
+        final Map<String, Object> paramsObject = new HashMap<>();
         paramsObject.put(FIELD_ANALYTICS_UA, getAnalyticsUa());
         paramsObject.put(FIELD_EVENT, getEventParamName(eventName));
         paramsObject.put(FIELD_PUBLISHABLE_KEY, publishableApiKey);
@@ -191,7 +191,7 @@ class LoggingUtils {
         paramsObject.put(FIELD_DEVICE_TYPE, getDeviceLoggingString());
         paramsObject.put(FIELD_BINDINGS_VERSION, BuildConfig.VERSION_NAME);
 
-        addNameAndVersion(paramsObject, context);
+        addNameAndVersion(paramsObject, context.getPackageManager(), context.getPackageName());
 
         if (productUsageTokens != null) {
             paramsObject.put(FIELD_PRODUCT_USAGE, productUsageTokens);
@@ -214,17 +214,15 @@ class LoggingUtils {
 
     static void addNameAndVersion(
             @NonNull Map<String, Object> paramsObject,
-            @NonNull Context context) {
-        Context applicationContext = context.getApplicationContext();
-        if (applicationContext != null && applicationContext.getPackageManager() != null) {
+            @Nullable PackageManager packageManager,
+            @Nullable String packageName) {
+        if (packageManager != null) {
             try {
-                PackageInfo info = applicationContext.getPackageManager().getPackageInfo(
-                        applicationContext.getPackageName(), 0);
+                PackageInfo info = packageManager.getPackageInfo(packageName, 0);
 
                 String nameString = null;
                 if (info.applicationInfo != null) {
-                    CharSequence name =
-                            info.applicationInfo.loadLabel(applicationContext.getPackageManager());
+                    CharSequence name = info.applicationInfo.loadLabel(packageManager);
                     if (name != null) {
                         nameString = name.toString();
                     }
@@ -247,12 +245,8 @@ class LoggingUtils {
     }
 
     @NonNull
-    static String getDeviceLoggingString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(Build.MANUFACTURER).append('_')
-                .append(Build.BRAND).append('_')
-                .append(Build.MODEL);
-        return builder.toString();
+    private static String getDeviceLoggingString() {
+        return Build.MANUFACTURER + '_' + Build.BRAND + '_' + Build.MODEL;
     }
 
     @NonNull
