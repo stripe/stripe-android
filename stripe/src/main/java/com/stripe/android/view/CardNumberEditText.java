@@ -4,10 +4,14 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.view.AccessibilityDelegateCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
 
@@ -48,16 +52,19 @@ public class CardNumberEditText extends StripeEditText {
     public CardNumberEditText(Context context) {
         super(context);
         listenForTextChanges();
+        initAccessibility();
     }
 
     public CardNumberEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
         listenForTextChanges();
+        initAccessibility();
     }
 
     public CardNumberEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
+        initAccessibility();
     }
 
     @NonNull
@@ -84,11 +91,17 @@ public class CardNumberEditText extends StripeEditText {
         return mLengthMax;
     }
 
-
-    @Override public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        String accLabel = getText().toString() + " " + getResources().getString(R.string.acc_label_card_number);
-        info.setText(accLabel);
+    private void initAccessibility() {
+        ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegateCompat() {
+            @Override public void onInitializeAccessibilityNodeInfo(
+                View host,
+                AccessibilityNodeInfoCompat info
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                String hint = getResources().getString(R.string.acc_label_card_number);
+                info.setHintText(hint);
+            }
+        });
     }
 
     /**
