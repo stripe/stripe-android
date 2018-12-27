@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -480,12 +481,10 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText = findViewById(R.id.et_cvc_number);
 
         ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
-            @Override public void onInitializeAccessibilityNodeInfo(
-                View host,
-                AccessibilityNodeInfoCompat info
-            ) {
+            @Override public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                info.setHintText(getResources().getString(R.string.acc_label_cvc));
+                String accLabel = mCvcNumberEditText.getText().toString() + " " + getResources().getString(R.string.acc_label_cvc);
+                info.setText(accLabel);
             }
 
         });
