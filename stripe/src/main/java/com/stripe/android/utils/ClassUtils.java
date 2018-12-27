@@ -15,7 +15,7 @@ public class ClassUtils {
      * @param clazz the class to search in
      * @param whitelist the whitelist of field names
      * @param obj the target object whose field we are accessing
-     * @return  the value of the found field, if exists, on the specified {@param obj}, or null
+     * @return  the value of the found field, if exists, on the specified {@code obj}, or null
      */
     @Nullable
     public static Object getInternalObject(@NonNull Class clazz, @NonNull Set<String> whitelist,
