@@ -87,7 +87,9 @@ public class CardNumberEditText extends StripeEditText {
 
     @Override public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        String accLabel = getText().toString() + " " + getResources().getString(R.string.acc_label_card_number);
+        String accLabel = getResources().getString(
+            R.string.acc_label_card_number_node,
+            getText());
         info.setText(accLabel);
     }
 

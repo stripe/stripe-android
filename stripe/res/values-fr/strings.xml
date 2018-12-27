@@ -2,7 +2,6 @@
 <resources>
     <string name="acc_label_card_number">Numéro de carte</string>
     <string name="acc_label_expiry_date">Date d’expiration</string>
-    <string name="acc_label_cvc">Code CVC</string>
     <string name="acc_label_zip">Code postal</string>
     <string name="acc_label_zip_short">ZIP</string>
     <string name="expiry_date_hint">MM/AA</string>

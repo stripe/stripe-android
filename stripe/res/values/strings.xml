@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="acc_label_card_number">Card number</string>
+    <string name="acc_label_card_number_node">%s, Card number</string>
     <string name="acc_label_expiry_date">Expiration date</string>
-    <string name="acc_label_cvc">CVC Number</string>
+    <string name="acc_label_expiry_date_node">%s, Expiration date</string>
+    <string name="acc_label_cvc_node">%s, CVC Number</string>
     <string name="acc_label_zip">ZIP Code</string>
     <string name="acc_label_zip_short">ZIP</string>
     <!--Label for input requesting the name of a customer-->

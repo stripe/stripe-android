@@ -481,9 +481,14 @@ public class CardInputWidget extends LinearLayout {
         mCvcNumberEditText = findViewById(R.id.et_cvc_number);
 
         ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
-            @Override public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
+            @Override public void onInitializeAccessibilityNodeInfo(
+                View host,
+                AccessibilityNodeInfoCompat info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                String accLabel = mCvcNumberEditText.getText().toString() + " " + getResources().getString(R.string.acc_label_cvc);
+                String accLabel = getResources().getString(
+                    R.string.acc_label_cvc_node,
+                    mCvcNumberEditText.getText()
+                );
                 info.setText(accLabel);
             }
 
