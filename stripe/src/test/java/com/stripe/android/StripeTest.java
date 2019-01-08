@@ -60,7 +60,7 @@ public class StripeTest {
 
     private static final String FUNCTIONAL_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+            "pk_test_ILruLBeVAXDDtu4OKwijsMEW";
     private static final String TEST_CARD_NUMBER = "4242424242424242";
     private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
     private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
@@ -569,6 +569,21 @@ public class StripeTest {
         }
     }
 
+
+    @Test
+    public void createSourceSynchronous_withVisaCheckoutParams_passesIntegrationTest() {
+        Stripe stripe = getNonLoggingStripe(mContext);
+        SourceParams params = SourceParams.createVisaCheckoutParams("7625560819570122501");
+        try {
+            Source cardSource =
+                    stripe.createSourceSynchronous(params, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+
+            assertNotNull(cardSource);
+            assertNotNull(cardSource.getId());
+        } catch (StripeException stripeEx) {
+            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
+        }
+    }
     @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest() {
         Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
