@@ -77,6 +77,19 @@ class StripeApiHandler {
 
     static final String API_VERSION = "2017-06-05";
 
+    // Used for HTTP-level tests
+    private static @Nullable MockGetStripeResponse mockGetStripeResponse;
+    interface MockGetStripeResponse{
+        StripeResponse getStripeResponse(@RestMethod String method,
+                                         String url,
+                                         Map<String, Object> params,
+                                         RequestOptions options);
+    }
+    @VisibleForTesting
+    static void setMockGetStripeResponse(MockGetStripeResponse aMockGetStripeResponse){
+        mockGetStripeResponse = aMockGetStripeResponse;
+    }
+
     static void logApiCall(
             @NonNull Map<String, Object> loggingMap,
             @Nullable RequestOptions options,
@@ -612,6 +625,66 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
+    @Nullable
+    static String retrieveIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException, JSONException {
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        Map<String, Object> verificationMap = new HashMap<>();
+        verificationMap.put("id", verificationId);
+        verificationMap.put("one_time_code", userOneTimeCode);
+
+        paramsMap.put("verification", verificationMap);
+
+        StripeResponse response = getStripeResponse(
+                GET,
+                getRetrieveIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).setApiVersion(API_VERSION).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        JSONObject jsonResponse = new JSONObject(response.getResponseBody());
+        return (String) jsonResponse.get("pin");
+    }
+
+    @Nullable
+    static void updateIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String newPin,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        Map<String, Object> verificationMap = new HashMap<>();
+        verificationMap.put("id", verificationId);
+        verificationMap.put("one_time_code", userOneTimeCode);
+
+        paramsMap.put("verification", verificationMap);
+        paramsMap.put("pin", newPin);
+
+        StripeResponse response = getStripeResponse(
+                POST,
+                getUpdateIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).setApiVersion(API_VERSION).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+    }
+
     static String createQuery(Map<String, Object> params)
             throws UnsupportedEncodingException, InvalidRequestException {
         StringBuilder queryStringBuffer = new StringBuilder();
@@ -727,6 +800,16 @@ class StripeApiHandler {
     @VisibleForTesting
     static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
         return String.format(Locale.ROOT, "%s/%s", getApiUrl(), tokenId);
+    }
+
+    @VisibleForTesting
+    static String getRetrieveIssuingCardPinUrl(@NonNull String cardId) {
+        return String.format(Locale.ENGLISH, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
+    }
+
+    @VisibleForTesting
+    static String getUpdateIssuingCardPinUrl(@NonNull String cardId) {
+        return String.format(Locale.ENGLISH, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
     }
 
     static void convertErrorsToExceptionsAndThrowIfNecessary(StripeResponse response) throws
@@ -1081,6 +1164,9 @@ class StripeApiHandler {
             Map<String, Object> params,
             RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
+        if(mockGetStripeResponse != null){
+            return mockGetStripeResponse.getStripeResponse(method, url, params, options);
+        }
         // HTTPSURLConnection verifies SSL cert by default
         java.net.HttpURLConnection conn = null;
         try {
@@ -1141,6 +1227,7 @@ class StripeApiHandler {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
+                        stripeError.code,
                         requestId,
                         rCode,
                         null);
@@ -1148,6 +1235,7 @@ class StripeApiHandler {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
+                        stripeError.code,
                         requestId,
                         rCode,
                         null);

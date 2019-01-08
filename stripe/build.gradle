@@ -18,6 +18,8 @@ dependencies {
     // Api for this import because we use reflection to alter TextInputLayout
     api "com.android.support:design:${rootProject.ext.supportLibVersion}"
 
+
+
     javadocDeps "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
     javadocDeps "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     javadocDeps "com.android.support:design:${rootProject.ext.supportLibVersion}"
@@ -27,6 +29,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
     testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"
     testImplementation 'androidx.test:core:1.1.0'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.12.1'
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
