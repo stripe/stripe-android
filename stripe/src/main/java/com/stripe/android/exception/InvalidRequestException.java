@@ -9,8 +9,12 @@ public class InvalidRequestException extends StripeException {
     private final String param;
     private final String code;
 
-    public InvalidRequestException(String message, String param, String code, String requestId, Integer
-            statusCode, Throwable e) {
+    public InvalidRequestException(String message,
+                                   String param,
+                                   String code,
+                                   String requestId,
+                                   Integer statusCode,
+                                   Throwable e) {
         super(message, requestId, statusCode, e);
         this.param = param;
         this.code = code;
@@ -26,6 +30,7 @@ public class InvalidRequestException extends StripeException {
     public String getParam() {
         return param;
     }
+
     public String getCode() {
         return code;
     }

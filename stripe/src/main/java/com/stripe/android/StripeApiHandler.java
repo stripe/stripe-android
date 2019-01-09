@@ -79,12 +79,14 @@ class StripeApiHandler {
 
     // Used for HTTP-level tests
     private static @Nullable MockGetStripeResponse mockGetStripeResponse;
+
     interface MockGetStripeResponse{
         StripeResponse getStripeResponse(@RestMethod String method,
                                          String url,
                                          Map<String, Object> params,
                                          RequestOptions options);
     }
+
     @VisibleForTesting
     static void setMockGetStripeResponse(MockGetStripeResponse aMockGetStripeResponse){
         mockGetStripeResponse = aMockGetStripeResponse;
@@ -1164,7 +1166,7 @@ class StripeApiHandler {
             Map<String, Object> params,
             RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
-        if(mockGetStripeResponse != null){
+        if (mockGetStripeResponse != null){
             return mockGetStripeResponse.getStripeResponse(method, url, params, options);
         }
         // HTTPSURLConnection verifies SSL cert by default
