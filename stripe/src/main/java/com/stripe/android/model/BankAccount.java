@@ -34,15 +34,15 @@ public class BankAccount {
     private static final String FIELD_LAST4 = "last4";
     private static final String FIELD_ROUTING_NUMBER = "routing_number";
 
-    @Nullable private String mAccountHolderName;
-    @Nullable @BankAccountType private String mAccountHolderType;
-    @Nullable private String mAccountNumber;
-    @Nullable private String mBankName;
-    @Nullable @Size(2) private String mCountryCode;
-    @Nullable @Size(3) private String mCurrency;
-    @Nullable private String mFingerprint;
-    @Nullable private String mLast4;
-    @Nullable private String mRoutingNumber;
+    @Nullable private final String mAccountHolderName;
+    @Nullable @BankAccountType private final String mAccountHolderType;
+    @Nullable private final String mAccountNumber;
+    @Nullable private final String mBankName;
+    @Nullable @Size(2) private final String mCountryCode;
+    @Nullable @Size(3) private final String mCurrency;
+    @Nullable private final String mFingerprint;
+    @Nullable private final String mLast4;
+    @Nullable private final String mRoutingNumber;
 
     /**
      * Constructor used to create a BankAccount object with the required parameters
@@ -59,10 +59,8 @@ public class BankAccount {
             @NonNull @Size(2) String countryCode,
             @NonNull @Size(3) String currency,
             @Nullable String routingNumber) {
-        mAccountNumber = accountNumber;
-        mCountryCode = countryCode;
-        mCurrency = currency;
-        mRoutingNumber = routingNumber;
+        this(accountNumber, null, null, null, countryCode,
+                currency, null, null, routingNumber);
     }
 
     /**
@@ -87,6 +85,21 @@ public class BankAccount {
             @Nullable String fingerprint,
             @Nullable String last4,
             @Nullable String routingNumber) {
+        this(null, accountHolderName, accountHolderType, bankName, countryCode,
+                currency, fingerprint, last4, routingNumber);
+    }
+
+    public BankAccount(
+            @Nullable String accountNumber,
+            @Nullable String accountHolderName,
+            @Nullable @BankAccountType String accountHolderType,
+            @Nullable String bankName,
+            @Nullable @Size(2) String countryCode,
+            @Nullable @Size(3) String currency,
+            @Nullable String fingerprint,
+            @Nullable String last4,
+            @Nullable String routingNumber) {
+        mAccountNumber = accountNumber;
         mAccountHolderName = accountHolderName;
         mAccountHolderType = accountHolderType;
         mBankName = bankName;
@@ -107,22 +120,10 @@ public class BankAccount {
         return mAccountHolderName;
     }
 
-    @NonNull
-    public BankAccount setAccountHolderName(String accountHolderName) {
-        mAccountHolderName = accountHolderName;
-        return this;
-    }
-
     @Nullable
     @BankAccountType
     public String getAccountHolderType() {
         return mAccountHolderType;
-    }
-
-    @NonNull
-    public BankAccount setAccountHolderType(@BankAccountType String accountHolderType) {
-        mAccountHolderType = accountHolderType;
-        return this;
     }
 
     @Nullable

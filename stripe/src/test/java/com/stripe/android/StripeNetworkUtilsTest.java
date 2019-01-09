@@ -70,11 +70,10 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void hashMapFromBankAccount_mapsCorrectFields() {
-        BankAccount bankAccount = new BankAccount(
-                BANK_ACCOUNT_NUMBER, "US", "usd", BANK_ROUTING_NUMBER)
-                .setAccountHolderName(BANK_ACCOUNT_HOLDER_NAME)
-                .setAccountHolderType(BankAccount.TYPE_INDIVIDUAL);
-        Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER,
+                BANK_ACCOUNT_HOLDER_NAME, BankAccount.TYPE_INDIVIDUAL, null, "US",
+                "usd", null, null, BANK_ROUTING_NUMBER);
+        final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
         assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));

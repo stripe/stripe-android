@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.UnsupportedEncodingException;
@@ -66,7 +67,7 @@ public class StripeTextUtils {
      * @param prefixes the prefixes to test against
      * @return {@code true} if number begins with any of the input prefixes
      */
-    static boolean hasAnyPrefix(String number, String... prefixes) {
+    static boolean hasAnyPrefix(@Nullable String number, @NonNull String... prefixes) {
         if (number == null) {
             return false;
         }
@@ -91,28 +92,25 @@ public class StripeTextUtils {
             return null;
         }
 
-        String hash;
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            byte[] bytes = toHash.getBytes("UTF-8");
+            final MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            final byte[] bytes = toHash.getBytes("UTF-8");
             digest.update(bytes, 0, bytes.length);
-            bytes = digest.digest();
-            hash = bytesToHex(bytes);
+            return bytesToHex(digest.digest());
         } catch (NoSuchAlgorithmException noSuchAlgorithm) {
             return null;
         } catch (UnsupportedEncodingException unsupportedCoding) {
             return null;
         }
-
-        return hash;
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[ bytes.length * 2 ];
+    @NonNull
+    private static String bytesToHex(@NonNull byte[] bytes) {
+        final char[] hexChars = new char[bytes.length * 2];
         for (int i = 0; i < bytes.length; i++) {
-            int v = bytes[i] & 0xFF;
-            hexChars[ i * 2 ] = HEX_ARRAY[ v >>> 4 ];
-            hexChars[ i * 2 + 1 ] = HEX_ARRAY[ v & 0x0F ];
+            final int v = bytes[i] & 0xFF;
+            hexChars[i * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[i * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);
     }
