@@ -111,7 +111,8 @@ public class IssuingCardPinService
     public void onKeyUpdate(
             @Nullable IssuingCardEphemeralKey ephemeralKey,
             @Nullable String action,
-            @Nullable Map<String, Object> arguments) {
+            @Nullable Map<String, Object> arguments
+    ) {
 
         if (PIN_RETRIEVE.equals(action)) {
             String cardId = (String) arguments.get("cardId");
