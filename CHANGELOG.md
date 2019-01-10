@@ -1,10 +1,18 @@
 # CHANGELOG
 
-### On Deck
-* Update Android SDK Build Tools to 28.0.3
-* Update Android Gradle plugin to 3.2.1
-* Update compileSdkVersion and targetSdkVersion to 28
-* Update Android Support Library to 28.0.0
+### 8.2.0 2019-01-10
+* Add support for Android 28 [#675]
+    * Update Android SDK Build Tools to 28.0.3
+    * Update Android Gradle plugin to 3.2.1
+    * Update compileSdkVersion and targetSdkVersion to 28
+    * Update Android Support Library to 28.0.0
+* Add ability to set card number and validate on `CardMultilineWidget` [#671]
+* Add support for iDeal Source with connected account [#537]
+* Add support for Portuguese [#669]
+* Add ability to cancel callbacks without destroying `CustomerSession` instance [#624]
+* Improve accessibility on card input fields [#673]
+* Add `AccessibilityNodeInfo` to widgets [#656]
+* Fix crash in `ShippingMethodView` on API 16 [#678]
 
 ### 8.1.0 2018-11-13
 * Add support for latest version of PaymentIntents
