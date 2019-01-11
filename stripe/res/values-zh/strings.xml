@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">"有效日期"</string>
     <string name="acc_label_zip">邮政编码</string>
     <string name="acc_label_zip_short">邮政编码</string>
+    <string name="acc_label_card_number_node">%s, 卡号</string>
+    <string name="acc_label_expiry_date_node">%s, 有效日期</string>
+    <string name="acc_label_cvc_node">%s, 信用卡驗證碼</string>
     <string name="expiry_date_hint">月 / 年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="invalid_card_number">您的卡号无效。</string>
