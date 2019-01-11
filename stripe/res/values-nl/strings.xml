@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">Vervaldatum</string>
     <string name="acc_label_zip">Postcode</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_card_number_node">%s, Kaartnummer</string>
+    <string name="acc_label_expiry_date_node">%s, Vervaldatum</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Verval</string>
     <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>

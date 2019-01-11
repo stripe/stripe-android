@@ -8,9 +8,11 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
 
 import com.stripe.android.CardUtils;
+import com.stripe.android.R;
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.model.Card;
 
@@ -80,6 +82,15 @@ public class CardNumberEditText extends StripeEditText {
 
     public int getLengthMax() {
         return mLengthMax;
+    }
+
+
+    @Override public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        String accLabel = getResources().getString(
+            R.string.acc_label_card_number_node,
+            getText());
+        info.setText(accLabel);
     }
 
     /**

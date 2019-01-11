@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">Fecha de vencimiento</string>
     <string name="acc_label_zip">Código postal</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_card_number_node">%s, Número de tarjeta</string>
+    <string name="acc_label_expiry_date_node">%s, Fecha de vencimiento</string>
+    <string name="acc_label_cvc_node">%s, Código de seguridad</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Venc.</string>
     <string name="invalid_card_number">El número de tarjeta no es válido.</string>
