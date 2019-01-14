@@ -7,6 +7,7 @@ import android.support.annotation.VisibleForTesting;
 import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +61,9 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         try {
             mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
         } catch (JSONException e) {
-            mListener.onKeyError(500, "The JSON from the key could not be parse "+ e.getLocalizedMessage());
+            mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
+                    "The JSON from the key could not be parsed: "
+                            + e.getLocalizedMessage());
         }
         mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }

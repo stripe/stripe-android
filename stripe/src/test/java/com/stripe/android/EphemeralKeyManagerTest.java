@@ -1,5 +1,7 @@
 package com.stripe.android;
 
+import android.support.annotation.NonNull;
+
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
 import org.json.JSONException;
@@ -53,7 +55,8 @@ public class EphemeralKeyManagerTest {
 
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
 
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+    @NonNull
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {

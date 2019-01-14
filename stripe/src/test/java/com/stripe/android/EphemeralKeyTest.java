@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.testharness.JsonTestUtils;
 
@@ -38,7 +39,8 @@ public class EphemeralKeyTest {
             "    ]\n" +
             "}";
 
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+    @NonNull
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {

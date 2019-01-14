@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.APIException;
@@ -157,7 +158,8 @@ public class CustomerSessionTest {
 
     private Source mAddedSource;
 
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+    @NonNull
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {

@@ -57,7 +57,8 @@ public class PaymentSessionTest {
     private AppCompatActivity mActivity;
     @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
 
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+    @NonNull
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {
