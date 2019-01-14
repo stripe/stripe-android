@@ -38,9 +38,17 @@ public class EphemeralKeyTest {
             "    ]\n" +
             "}";
 
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+        try {
+            return CustomerEphemeralKey.fromString(key);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     @Test
     public void fromJson_createsKeyWithExpectedValues() {
-        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         assertEquals("ephkey_123", ephemeralKey.getId());
         assertEquals("ephemeral_key", ephemeralKey.getObject());
@@ -66,7 +74,7 @@ public class EphemeralKeyTest {
 
     @Test
     public void toMap_createsMapWithExpectedValues() {
-        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         Map<String, Object> expectedMap = new HashMap<String, Object>() {{
             put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
@@ -89,7 +97,7 @@ public class EphemeralKeyTest {
 
     @Test
     public void toParcel_fromParcel_createsExpectedObject() {
-        CustomerEphemeralKey ephemeralKey = CustomerEphemeralKey.fromString(SAMPLE_KEY_RAW);
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
         assertNotNull(ephemeralKey);
         Parcel parcel = Parcel.obtain();
         ephemeralKey.writeToParcel(parcel, 0);

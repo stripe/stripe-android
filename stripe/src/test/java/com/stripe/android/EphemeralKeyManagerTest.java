@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +53,14 @@ public class EphemeralKeyManagerTest {
 
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
 
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key){
+        try {
+            return CustomerEphemeralKey.fromString(key);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -83,7 +92,7 @@ public class EphemeralKeyManagerTest {
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsAfterBufferFromPresent_returnsFalse() {
         Calendar fixedCalendar = Calendar.getInstance();
-        CustomerEphemeralKey key = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey key = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(key);
 
         long expiryTimeInSeconds = key.getExpires();
@@ -102,7 +111,7 @@ public class EphemeralKeyManagerTest {
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsInThePast_returnsTrue() {
         Calendar fixedCalendar = Calendar.getInstance();
-        CustomerEphemeralKey key = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey key = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(key);
 
         long currentTimeInMillis = fixedCalendar.getTimeInMillis();
@@ -117,7 +126,7 @@ public class EphemeralKeyManagerTest {
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsInFutureButWithinBuffer_returnsTrue() {
         Calendar fixedCalendar = Calendar.getInstance();
-        CustomerEphemeralKey key = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey key = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(key);
 
         long parsedExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(key.getExpires());
@@ -135,7 +144,7 @@ public class EphemeralKeyManagerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void createKeyManager_updatesEphemeralKey_notifiesListener() {
-        CustomerEphemeralKey testKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(testKey);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -155,7 +164,7 @@ public class EphemeralKeyManagerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void retrieveEphemeralKey_whenUpdateNecessary_returnsUpdateAndArguments() {
-        CustomerEphemeralKey testKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(testKey);
 
         Calendar fixedCalendar = Calendar.getInstance();
@@ -204,7 +213,7 @@ public class EphemeralKeyManagerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
-        CustomerEphemeralKey testKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(testKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
