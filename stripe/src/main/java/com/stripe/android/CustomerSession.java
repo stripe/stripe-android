@@ -499,54 +499,52 @@ public class CustomerSession
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
         mEphemeralKey = ephemeralKey;
-        if (mEphemeralKey != null) {
-            if (actionString == null) {
-                updateCustomer(mEphemeralKey);
-            } else if (ACTION_ADD_SOURCE.equals(actionString)
-                    && mCachedContextReference != null
-                    && arguments != null
-                    && arguments.containsKey(KEY_SOURCE)
-                    && arguments.containsKey(KEY_SOURCE_TYPE)) {
-                addCustomerSource(
-                        mCachedContextReference,
-                        mEphemeralKey,
-                        (String) arguments.get(KEY_SOURCE),
-                        (String) arguments.get(KEY_SOURCE_TYPE),
-                        new ArrayList<>(mProductUsageTokens));
-                resetUsageTokens();
-            } else if (ACTION_DELETE_SOURCE.equals(actionString)
-                    && mCachedContextReference != null
-                    && arguments != null
-                    && arguments.containsKey(KEY_SOURCE)) {
-                deleteCustomerSource(
-                        mCachedContextReference,
-                        mEphemeralKey,
-                        (String) arguments.get(KEY_SOURCE),
-                        new ArrayList<>(mProductUsageTokens));
-                resetUsageTokens();
-            } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
-                    && mCachedContextReference != null
-                    && arguments != null
-                    && arguments.containsKey(KEY_SOURCE)
-                    && arguments.containsKey(KEY_SOURCE_TYPE)) {
-                setCustomerSourceDefault(
-                        mCachedContextReference,
-                        mEphemeralKey,
-                        (String) arguments.get(KEY_SOURCE),
-                        (String) arguments.get(KEY_SOURCE_TYPE),
-                        new ArrayList<>(mProductUsageTokens));
-                resetUsageTokens();
-            } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString)
-                    && mCachedContextReference != null
-                    && arguments != null
-                    && arguments.containsKey(KEY_SHIPPING_INFO)) {
-                setCustomerShippingInformation(
-                        mCachedContextReference,
-                        mEphemeralKey,
-                        (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
-                        new ArrayList<>(mProductUsageTokens));
-                resetUsageTokens();
-            }
+        if (actionString == null) {
+            updateCustomer(mEphemeralKey);
+        } else if (ACTION_ADD_SOURCE.equals(actionString)
+                && mCachedContextReference != null
+                && arguments != null
+                && arguments.containsKey(KEY_SOURCE)
+                && arguments.containsKey(KEY_SOURCE_TYPE)) {
+            addCustomerSource(
+                    mCachedContextReference,
+                    mEphemeralKey,
+                    (String) arguments.get(KEY_SOURCE),
+                    (String) arguments.get(KEY_SOURCE_TYPE),
+                    new ArrayList<>(mProductUsageTokens));
+            resetUsageTokens();
+        } else if (ACTION_DELETE_SOURCE.equals(actionString)
+                && mCachedContextReference != null
+                && arguments != null
+                && arguments.containsKey(KEY_SOURCE)) {
+            deleteCustomerSource(
+                    mCachedContextReference,
+                    mEphemeralKey,
+                    (String) arguments.get(KEY_SOURCE),
+                    new ArrayList<>(mProductUsageTokens));
+            resetUsageTokens();
+        } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
+                && mCachedContextReference != null
+                && arguments != null
+                && arguments.containsKey(KEY_SOURCE)
+                && arguments.containsKey(KEY_SOURCE_TYPE)) {
+            setCustomerSourceDefault(
+                    mCachedContextReference,
+                    mEphemeralKey,
+                    (String) arguments.get(KEY_SOURCE),
+                    (String) arguments.get(KEY_SOURCE_TYPE),
+                    new ArrayList<>(mProductUsageTokens));
+            resetUsageTokens();
+        } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString)
+                && mCachedContextReference != null
+                && arguments != null
+                && arguments.containsKey(KEY_SHIPPING_INFO)) {
+            setCustomerShippingInformation(
+                    mCachedContextReference,
+                    mEphemeralKey,
+                    (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                    new ArrayList<>(mProductUsageTokens));
+            resetUsageTokens();
         }
     }
 
