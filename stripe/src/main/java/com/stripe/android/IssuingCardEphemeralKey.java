@@ -34,7 +34,6 @@ class IssuingCardEphemeralKey extends AbstractEphemeralKey {
 
     }
 
-    @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
     public IssuingCardEphemeralKey(
             @Nullable JSONObject jsonObject
     ) throws JSONException {
