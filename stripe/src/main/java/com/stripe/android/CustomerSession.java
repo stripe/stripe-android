@@ -551,7 +551,9 @@ public class CustomerSession
     }
 
     @Override
-    public void onKeyError(int errorCode, @Nullable String errorMessage) {
+    public void onKeyError(int errorCode,
+                           @Nullable String errorMessage,
+                           @Nullable Map<String, Object> arguments) {
         // Any error eliminates all listeners
 
         if (mCustomerRetrievalListener != null) {

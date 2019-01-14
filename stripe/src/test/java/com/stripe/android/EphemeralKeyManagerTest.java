@@ -234,7 +234,7 @@ public class EphemeralKeyManagerTest {
         // It should be necessary to update because the key is expired.
         keyManager.retrieveEphemeralKey(null, null);
 
-        verify(mKeyManagerListener, times(1)).onKeyError(404, errorMessage);
+        verify(mKeyManagerListener, times(1)).onKeyError(404, errorMessage, null);
         verifyNoMoreInteractions(mKeyManagerListener);
         assertNull(keyManager.getEphemeralKey());
     }

@@ -59,9 +59,11 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }
 
-    private void updateKeyError(int errorCode, @Nullable String errorMessage) {
+    private void updateKeyError(int errorCode,
+                                @Nullable String errorMessage,
+                                @Nullable Map<String, Object> arguments) {
         mEphemeralKey = null;
-        mListener.onKeyError(errorCode, errorMessage);
+        mListener.onKeyError(errorCode, errorMessage, arguments);
     }
 
     static boolean shouldRefreshKey(
@@ -84,7 +86,9 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
                          @Nullable String action,
                          @Nullable Map<String, Object> arguments);
 
-        void onKeyError(int errorCode, @Nullable String errorMessage);
+        void onKeyError(int errorCode,
+                        @Nullable String errorMessage,
+                        @Nullable Map<String, Object> arguments);
     }
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
@@ -115,7 +119,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
             final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
             if (keyManager != null) {
-                keyManager.updateKeyError(responseCode, message);
+                keyManager.updateKeyError(responseCode, message, mArguments);
             }
         }
     }
