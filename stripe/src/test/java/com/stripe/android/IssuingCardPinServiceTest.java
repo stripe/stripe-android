@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 public class IssuingCardPinServiceTest {
 
-    static final String EPHEMERAL_KEY = "{\n" +
+    private static final String EPHEMERAL_KEY = "{\n" +
             "  \"id\": \"ephkey_123\",\n" +
             "  \"object\": \"ephemeral_key\",\n" +
             "  \"secret\": \"ek_test_123\",\n" +
@@ -46,7 +46,7 @@ public class IssuingCardPinServiceTest {
         StripeApiHandler.setMockGetStripeResponse(new StripeApiHandler.MockGetStripeResponse() {
             @Override
             public StripeResponse getStripeResponse(String method, String url, Map<String, Object> params, RequestOptions options) {
-                if (method != "GET") {
+                if (!"GET".equals(method)) {
                     throw new RuntimeException("Invalid method " + method);
                 }
                 if (!url.equals("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin")) {
@@ -87,7 +87,7 @@ public class IssuingCardPinServiceTest {
         StripeApiHandler.setMockGetStripeResponse(new StripeApiHandler.MockGetStripeResponse() {
             @Override
             public StripeResponse getStripeResponse(String method, String url, Map<String, Object> params, RequestOptions options) {
-                if (method != "POST") {
+                if (!"POST".equals(method)) {
                     throw new RuntimeException("Invalid method " + method);
                 }
                 if (!url.equals("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin")) {
