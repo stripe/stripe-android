@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 public class InvalidRequestException extends StripeException {
 
     private final String param;
+
+    @Nullable
     private final String code;
 
     public InvalidRequestException(String message,
@@ -24,9 +26,7 @@ public class InvalidRequestException extends StripeException {
 
     public InvalidRequestException(String message, String param, String requestId, Integer
             statusCode, Throwable e) {
-        super(message, requestId, statusCode, e);
-        this.param = param;
-        this.code = null;
+        this(message, param, null, requestId, statusCode, e);
     }
 
     public String getParam() {
