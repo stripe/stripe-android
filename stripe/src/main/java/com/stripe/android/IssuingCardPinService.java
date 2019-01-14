@@ -24,7 +24,6 @@ public class IssuingCardPinService
     private static final String PIN_RETRIEVE = "PIN_RETRIEVE";
     private static final String PIN_UPDATE = "PIN_UPDATE";
 
-    private static IssuingCardPinService mInstance;
     private @NonNull
     EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
     private IssuingCardPinRetrievalListener mCardPinRetrievalListener;
@@ -47,9 +46,8 @@ public class IssuingCardPinService
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
      *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
-    public static IssuingCardPinService init(@NonNull EphemeralKeyProvider keyProvider) {
-        mInstance = new IssuingCardPinService(keyProvider);
-        return mInstance;
+    public static IssuingCardPinService create(@NonNull EphemeralKeyProvider keyProvider) {
+        return new IssuingCardPinService(keyProvider);
     }
 
     /**

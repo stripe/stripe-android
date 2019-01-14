@@ -41,7 +41,7 @@ public class IssuingCardPinServiceTest {
     public void testRetrieval() {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
         ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY);
-        IssuingCardPinService service = IssuingCardPinService.init(ephemeralKeyProvider);
+        IssuingCardPinService service = IssuingCardPinService.create(ephemeralKeyProvider);
 
         StripeApiHandler.setMockGetStripeResponse(new StripeApiHandler.MockGetStripeResponse() {
             @Override
@@ -82,7 +82,7 @@ public class IssuingCardPinServiceTest {
     public void testUpdate() {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
         ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY);
-        IssuingCardPinService service = IssuingCardPinService.init(ephemeralKeyProvider);
+        IssuingCardPinService service = IssuingCardPinService.create(ephemeralKeyProvider);
 
         StripeApiHandler.setMockGetStripeResponse(new StripeApiHandler.MockGetStripeResponse() {
             @Override
@@ -127,7 +127,7 @@ public class IssuingCardPinServiceTest {
     public void testRetrievalFailsWithReason() {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
         ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY);
-        IssuingCardPinService service = IssuingCardPinService.init(ephemeralKeyProvider);
+        IssuingCardPinService service = IssuingCardPinService.create(ephemeralKeyProvider);
 
         StripeApiHandler.setMockGetStripeResponse(new StripeApiHandler.MockGetStripeResponse() {
             @Override
