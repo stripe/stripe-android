@@ -23,9 +23,8 @@ public class IssuingCardPinService
     private static final long KEY_REFRESH_BUFFER_IN_SECONDS = 30L;
     private static final String PIN_RETRIEVE = "PIN_RETRIEVE";
     private static final String PIN_UPDATE = "PIN_UPDATE";
-
-    private @NonNull
-    EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
+    @NonNull
+    private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
     private IssuingCardPinRetrievalListener mCardPinRetrievalListener;
     private IssuingCardPinUpdateListener mCardPinUpdateListener;
 
