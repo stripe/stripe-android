@@ -807,12 +807,12 @@ class StripeApiHandler {
 
     @VisibleForTesting
     static String getRetrieveIssuingCardPinUrl(@NonNull String cardId) {
-        return String.format(Locale.ENGLISH, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
+        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
     }
 
     @VisibleForTesting
     static String getUpdateIssuingCardPinUrl(@NonNull String cardId) {
-        return String.format(Locale.ENGLISH, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
+        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
     }
 
     static void convertErrorsToExceptionsAndThrowIfNecessary(StripeResponse response) throws
