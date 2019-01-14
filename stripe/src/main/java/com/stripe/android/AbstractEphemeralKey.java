@@ -239,7 +239,9 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         } catch (InvocationTargetException e) {
             throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
+            throw new IllegalArgumentException("Class " +
+                    ephemeralKeyClass +
+                    " does not have an accessible (JSONObject) constructor", e);
         }
     }
 }
