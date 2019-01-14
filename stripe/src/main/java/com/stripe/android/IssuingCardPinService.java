@@ -112,7 +112,8 @@ public class IssuingCardPinService
             String cardId = (String) arguments.get("cardId");
             String verificationId = (String) arguments.get("verificationId");
             String userOneTimeCode = (String) arguments.get("userOneTimeCode");
-            IssuingCardPinRetrievalListener listener = (IssuingCardPinRetrievalListener) arguments.get("listener");
+            IssuingCardPinRetrievalListener listener =
+                    (IssuingCardPinRetrievalListener) arguments.get("listener");
 
             try {
                 String pin = StripeApiHandler.retrieveIssuingCardPin(
@@ -168,7 +169,8 @@ public class IssuingCardPinService
             String newPin = (String) arguments.get("newPin");
             String verificationId = (String) arguments.get("verificationId");
             String userOneTimeCode = (String) arguments.get("userOneTimeCode");
-            IssuingCardPinUpdateListener listener = (IssuingCardPinUpdateListener) arguments.get("listener");
+            IssuingCardPinUpdateListener listener =
+                    (IssuingCardPinUpdateListener) arguments.get("listener");
 
             try {
                 StripeApiHandler.updateIssuingCardPin(
@@ -226,7 +228,7 @@ public class IssuingCardPinService
                            @Nullable String errorMessage,
                            @Nullable Map<String, Object> arguments) {
         Object listener = arguments.get("listener");
-        if(listener == null){
+        if (listener == null){
             return;
         }
         if (listener instanceof IssuingCardPinRetrievalListener) {
