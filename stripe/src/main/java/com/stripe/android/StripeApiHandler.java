@@ -1166,7 +1166,7 @@ class StripeApiHandler {
             Map<String, Object> params,
             RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
-        if (mockGetStripeResponse != null){
+        if (mockGetStripeResponse != null) {
             return mockGetStripeResponse.getStripeResponse(method, url, params, options);
         }
         // HTTPSURLConnection verifies SSL cert by default
