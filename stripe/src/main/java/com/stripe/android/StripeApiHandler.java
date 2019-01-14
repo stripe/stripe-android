@@ -627,6 +627,7 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
+    @NonNull
     static Map<String, Object> createVerificationParam(
             @NonNull String verificationId,
             @NonNull String userOneTimeCode){
@@ -636,7 +637,7 @@ class StripeApiHandler {
         return verificationMap;
     }
 
-    @Nullable
+    @NonNull
     static String retrieveIssuingCardPin(
             @NonNull String cardId,
             @NonNull String verificationId,
@@ -662,7 +663,6 @@ class StripeApiHandler {
         return jsonResponse.getString("pin");
     }
 
-    @Nullable
     static void updateIssuingCardPin(
             @NonNull String cardId,
             @NonNull String newPin,
