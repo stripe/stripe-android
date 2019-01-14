@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
+import org.json.JSONException;
+
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.Map;
@@ -55,7 +57,11 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             @NonNull String key,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
-        mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
+        try {
+            mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
+        } catch (JSONException e) {
+            mListener.onKeyError(500, "The JSON from the key could not be parse "+ e.getLocalizedMessage());
+        }
         mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }
 
@@ -80,7 +86,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
     }
 
     interface KeyManagerListener<TEphemeralKey extends AbstractEphemeralKey> {
-        void onKeyUpdate(@Nullable TEphemeralKey ephemeralKey,
+        void onKeyUpdate(@NonNull TEphemeralKey ephemeralKey,
                          @Nullable String action,
                          @Nullable Map<String, Object> arguments);
 

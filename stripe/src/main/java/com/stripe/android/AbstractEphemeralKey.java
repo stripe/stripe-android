@@ -213,17 +213,12 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
 
     @Nullable
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
-    fromString(@Nullable String rawJson, Class ephemeralKeyClass) {
+    fromString(@Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
         if (rawJson == null) {
             return null;
         }
-
-        try {
-            JSONObject object = new JSONObject(rawJson);
-            return fromJson(object, ephemeralKeyClass);
-        } catch (JSONException ignored) {
-            return null;
-        }
+        JSONObject object = new JSONObject(rawJson);
+        return fromJson(object, ephemeralKeyClass);
     }
 
     @Nullable
@@ -246,10 +241,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + ephemeralKeyClass + " does not have an accessible (JSONObject) constructor", e);
         } catch (Exception e) {
-            if (e instanceof JSONException) {
-                // ignored
-                return null;
-            }
             throw e;
         }
     }

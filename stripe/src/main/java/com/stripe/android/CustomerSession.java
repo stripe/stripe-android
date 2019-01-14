@@ -495,7 +495,7 @@ public class CustomerSession
 
     @Override
     public void onKeyUpdate(
-            @Nullable CustomerEphemeralKey ephemeralKey,
+            @NonNull CustomerEphemeralKey ephemeralKey,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
         mEphemeralKey = ephemeralKey;
