@@ -43,6 +43,7 @@ public class IssuingCardPinService
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
      *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
+    @NonNull
     public static IssuingCardPinService create(@NonNull EphemeralKeyProvider keyProvider) {
         return new IssuingCardPinService(keyProvider);
     }
