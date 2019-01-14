@@ -627,6 +627,15 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
+    static Map<String, Object> createVerificationParam(
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode){
+        Map<String, Object> verificationMap = new HashMap<>();
+        verificationMap.put("id", verificationId);
+        verificationMap.put("one_time_code", userOneTimeCode);
+        return verificationMap;
+    }
+
     @Nullable
     static String retrieveIssuingCardPin(
             @NonNull String cardId,
@@ -640,11 +649,7 @@ class StripeApiHandler {
             CardException, JSONException {
         Map<String, Object> paramsMap = new HashMap<>();
 
-        Map<String, Object> verificationMap = new HashMap<>();
-        verificationMap.put("id", verificationId);
-        verificationMap.put("one_time_code", userOneTimeCode);
-
-        paramsMap.put("verification", verificationMap);
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
         StripeResponse response = getStripeResponse(
                 GET,
@@ -671,11 +676,7 @@ class StripeApiHandler {
             CardException {
         Map<String, Object> paramsMap = new HashMap<>();
 
-        Map<String, Object> verificationMap = new HashMap<>();
-        verificationMap.put("id", verificationId);
-        verificationMap.put("one_time_code", userOneTimeCode);
-
-        paramsMap.put("verification", verificationMap);
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
         paramsMap.put("pin", newPin);
 
         StripeResponse response = getStripeResponse(
