@@ -222,7 +222,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     @Nullable
-    @SuppressWarnings({"checkstyle:LineLength", "checkstyle:IllegalCatch"})
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
