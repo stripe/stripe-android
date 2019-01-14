@@ -1,6 +1,8 @@
 package com.stripe.android.exception;
 
 
+import android.support.annotation.Nullable;
+
 /**
  * An {@link Exception} indicating that invalid parameters were used in a request.
  */
@@ -31,6 +33,7 @@ public class InvalidRequestException extends StripeException {
         return param;
     }
 
+    @Nullable
     public String getCode() {
         return code;
     }
