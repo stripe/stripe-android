@@ -654,7 +654,7 @@ class StripeApiHandler {
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         JSONObject jsonResponse = new JSONObject(response.getResponseBody());
-        return (String) jsonResponse.get("pin");
+        return jsonResponse.getString("pin");
     }
 
     @Nullable
