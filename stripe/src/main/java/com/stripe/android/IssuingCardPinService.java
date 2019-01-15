@@ -11,6 +11,7 @@ import com.stripe.android.exception.InvalidRequestException;
 
 import org.json.JSONException;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,11 @@ public class IssuingCardPinService
     private static final long KEY_REFRESH_BUFFER_IN_SECONDS = 30L;
     private static final String PIN_RETRIEVE = "PIN_RETRIEVE";
     private static final String PIN_UPDATE = "PIN_UPDATE";
+    private static final String ARGUMENT_CARD_ID = "cardId";
+    private static final String ARGUMENT_VERIFICATION_ID = "verificationId";
+    private static final String ARGUMENT_ONE_TIME_CODE = "userOneTimeCode";
+    private static final String ARGUMENT_NEW_PIN = "newPin";
+    private static final String ARGUMENT_LISTENER = "listener";
     @NonNull
     private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
 
@@ -65,12 +71,25 @@ public class IssuingCardPinService
     ) {
 
         Map<String, Object> arguments = new HashMap<>();
-        arguments.put("cardId", cardId);
-        arguments.put("verificationId", verificationId);
-        arguments.put("userOneTimeCode", userOneTimeCode);
-        arguments.put("listener", listener);
+        arguments.put(ARGUMENT_CARD_ID, cardId);
+        arguments.put(ARGUMENT_VERIFICATION_ID, verificationId);
+        arguments.put(ARGUMENT_ONE_TIME_CODE, userOneTimeCode);
+        arguments.put(ARGUMENT_LISTENER, new WeakReference<>(listener));
 
         mEphemeralKeyManager.retrieveEphemeralKey(PIN_RETRIEVE, arguments);
+    }
+
+    @Nullable
+    private <Listener> Listener getListener(@Nullable Map<String, Object> arguments) {
+        if(arguments == null){
+            return null;
+        }
+        WeakReference<Listener> listenerReference =
+                (WeakReference<Listener>) arguments.get(ARGUMENT_LISTENER);
+        if(listenerReference == null){
+            return  null;
+        }
+        return listenerReference.get();
     }
 
     /**
@@ -92,11 +111,11 @@ public class IssuingCardPinService
     ) {
 
         Map<String, Object> arguments = new HashMap<>();
-        arguments.put("cardId", cardId);
-        arguments.put("newPin", newPin);
-        arguments.put("verificationId", verificationId);
-        arguments.put("userOneTimeCode", userOneTimeCode);
-        arguments.put("listener", listener);
+        arguments.put(ARGUMENT_CARD_ID, cardId);
+        arguments.put(ARGUMENT_NEW_PIN, newPin);
+        arguments.put(ARGUMENT_VERIFICATION_ID, verificationId);
+        arguments.put(ARGUMENT_ONE_TIME_CODE, userOneTimeCode);
+        arguments.put(ARGUMENT_LISTENER, new WeakReference<>(listener));
 
         mEphemeralKeyManager.retrieveEphemeralKey(PIN_UPDATE, arguments);
     }
@@ -109,11 +128,10 @@ public class IssuingCardPinService
     ) {
 
         if (PIN_RETRIEVE.equals(action)) {
-            String cardId = (String) arguments.get("cardId");
-            String verificationId = (String) arguments.get("verificationId");
-            String userOneTimeCode = (String) arguments.get("userOneTimeCode");
-            IssuingCardPinRetrievalListener listener =
-                    (IssuingCardPinRetrievalListener) arguments.get("listener");
+            String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
+            String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
+            String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
+            IssuingCardPinRetrievalListener listener = getListener(arguments);
 
             try {
                 String pin = StripeApiHandler.retrieveIssuingCardPin(
@@ -165,12 +183,11 @@ public class IssuingCardPinService
             }
         }
         if (PIN_UPDATE.equals(action)) {
-            String cardId = (String) arguments.get("cardId");
-            String newPin = (String) arguments.get("newPin");
-            String verificationId = (String) arguments.get("verificationId");
-            String userOneTimeCode = (String) arguments.get("userOneTimeCode");
-            IssuingCardPinUpdateListener listener =
-                    (IssuingCardPinUpdateListener) arguments.get("listener");
+            String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
+            String newPin = (String) arguments.get(ARGUMENT_NEW_PIN);
+            String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
+            String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
+            IssuingCardPinUpdateListener listener = getListener(arguments);
 
             try {
                 StripeApiHandler.updateIssuingCardPin(
@@ -227,17 +244,13 @@ public class IssuingCardPinService
     public void onKeyError(int errorCode,
                            @Nullable String errorMessage,
                            @Nullable Map<String, Object> arguments) {
-        Object listener = arguments.get("listener");
-        if (listener == null){
-            return;
-        }
+        Object listener = arguments.get(ARGUMENT_LISTENER);
         if (listener instanceof IssuingCardPinRetrievalListener) {
             ((IssuingCardPinRetrievalListener) listener).onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
                     errorMessage,
                     null);
-        }
-        if (listener instanceof IssuingCardPinUpdateListener) {
+        } else if (listener instanceof IssuingCardPinUpdateListener) {
             ((IssuingCardPinUpdateListener) listener).onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
                     errorMessage,
@@ -257,7 +270,7 @@ public class IssuingCardPinService
         void onIssuingCardPinRetrieved(@NonNull String pin);
 
         void onError(
-                CardPinActionError errorCode,
+                @NonNull CardPinActionError errorCode,
                 @Nullable String errorMessage,
                 @Nullable Throwable exception);
     }
@@ -266,7 +279,7 @@ public class IssuingCardPinService
         void onIssuingCardPinUpdated();
 
         void onError(
-                CardPinActionError errorCode,
+                @NonNull CardPinActionError errorCode,
                 @Nullable String errorMessage,
                 @Nullable Throwable exception);
     }
