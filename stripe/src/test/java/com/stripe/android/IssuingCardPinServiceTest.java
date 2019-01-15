@@ -32,11 +32,6 @@ public class IssuingCardPinServiceTest {
             "            }]\n" +
             "}";
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
     public void testRetrieval() {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
