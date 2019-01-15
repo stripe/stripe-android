@@ -62,7 +62,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
         } catch (JSONException e) {
             mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
-                    "The JSON from the key could not be parsed: "
+                    "The JSON for the ephemeral key could not be parsed: "
                             + e.getLocalizedMessage(),
                     arguments);
         }
