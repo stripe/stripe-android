@@ -35,7 +35,8 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
 
     }
 
-    protected CustomerEphemeralKey(
+    @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
+    public CustomerEphemeralKey(
             @Nullable JSONObject jsonObject
     ) throws JSONException {
         super(jsonObject);
