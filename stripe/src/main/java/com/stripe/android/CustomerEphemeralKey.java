@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 class CustomerEphemeralKey extends AbstractEphemeralKey {
 
-    protected CustomerEphemeralKey(Parcel in) {
+    protected CustomerEphemeralKey(@NonNull Parcel in) {
         super(in);
     }
 
@@ -35,14 +35,12 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
 
     }
 
-    @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
-    public CustomerEphemeralKey(
+    protected CustomerEphemeralKey(
             @Nullable JSONObject jsonObject
     ) throws JSONException {
         super(jsonObject);
 
     }
-
 
     @NonNull
     String getCustomerId() {
