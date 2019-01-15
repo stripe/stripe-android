@@ -63,7 +63,7 @@ class IssuingCardEphemeralKey extends AbstractEphemeralKey {
     };
 
     @Nullable
-    static IssuingCardEphemeralKey fromString(@Nullable String rawJson) {
+    static IssuingCardEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
         return (IssuingCardEphemeralKey) AbstractEphemeralKey
                 .fromString(rawJson, IssuingCardEphemeralKey.class);
     }
