@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">Gültig bis</string>
     <string name="acc_label_zip">Postleitzahl</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_card_number_node">%s, Kartennummer de carte</string>
+    <string name="acc_label_expiry_date_node">%s, Gültig bis</string>
+    <string name="acc_label_cvc_node">%s, Kartenprüfnummer</string>
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Gültig bis</string>
     <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>

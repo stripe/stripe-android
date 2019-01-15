@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">有効期限</string>
     <string name="acc_label_zip">郵便番号</string>
     <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_card_number_node">%s, カード番号</string>
+    <string name="acc_label_expiry_date_node">%s, 有効期限</string>
+    <string name="acc_label_cvc_node">%s, セキュリティコード</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
     <string name="invalid_card_number">カードの番号が無効です。</string>

@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -12,6 +13,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.AccessibilityDelegateCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.text.InputFilter;
 import android.text.Layout;
 import android.text.TextWatcher;
@@ -475,6 +479,20 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText = findViewById(R.id.et_card_number);
         mExpiryDateEditText = findViewById(R.id.et_expiry_date);
         mCvcNumberEditText = findViewById(R.id.et_cvc_number);
+
+        ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
+            @Override public void onInitializeAccessibilityNodeInfo(
+                @NonNull View host,
+                @NonNull AccessibilityNodeInfoCompat info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                String accLabel = getResources().getString(
+                    R.string.acc_label_cvc_node,
+                    mCvcNumberEditText.getText()
+                );
+                info.setText(accLabel);
+            }
+
+        });
 
         mCardNumberIsViewed = true;
 

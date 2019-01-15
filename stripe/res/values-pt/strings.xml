@@ -4,6 +4,9 @@
     <string name="acc_label_expiry_date">Data de validade</string>
     <string name="acc_label_zip">Código postal</string>
     <string name="acc_label_zip_short">CEP</string>
+    <string name="acc_label_card_number_node">%s, Número do cartão</string>
+    <string name="acc_label_expiry_date_node">%s, Data de validade</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
     <!--Label for input requesting the name of a customer-->
     <string name="address_label_name">Nome</string>
     <!-- Label for input requesting the name of a customer where input is optional -->

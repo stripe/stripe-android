@@ -13,6 +13,7 @@ import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +57,15 @@ public class PaymentSessionTest {
     private AppCompatActivity mActivity;
     @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
 
+    @NonNull
+    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
+        try {
+            return CustomerEphemeralKey.fromString(key);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -117,7 +127,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -137,7 +147,7 @@ public class PaymentSessionTest {
 
     @Test
     public void setCartTotal_setsExpectedValueAndNotifiesListener() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -163,7 +173,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -189,7 +199,7 @@ public class PaymentSessionTest {
 
     @Test
     public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -215,7 +225,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -241,7 +251,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -267,7 +277,7 @@ public class PaymentSessionTest {
 
     @Test
     public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -308,7 +318,7 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedState_setsPaymentSessionData() {
-        CustomerEphemeralKey firstKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
