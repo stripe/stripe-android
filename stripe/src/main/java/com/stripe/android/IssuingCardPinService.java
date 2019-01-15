@@ -81,13 +81,13 @@ public class IssuingCardPinService
 
     @Nullable
     private <Listener> Listener getListener(@Nullable Map<String, Object> arguments) {
-        if(arguments == null){
+        if (arguments == null) {
             return null;
         }
         WeakReference<Listener> listenerReference =
                 (WeakReference<Listener>) arguments.get(ARGUMENT_LISTENER);
-        if(listenerReference == null){
-            return  null;
+        if (listenerReference == null) {
+            return null;
         }
         return listenerReference.get();
     }
