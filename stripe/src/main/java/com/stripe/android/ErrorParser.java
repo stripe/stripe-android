@@ -18,7 +18,7 @@ class ErrorParser {
 
     private static final String FIELD_CHARGE = "charge";
     private static final String FIELD_CODE = "code";
-    private static final String FIELD_DECLINE_CODE = "declineCode";
+    private static final String FIELD_DECLINE_CODE = "decline_code";
     private static final String FIELD_ERROR = "error";
     private static final String FIELD_MESSAGE = "message";
     private static final String FIELD_PARAM = "param";
