@@ -41,14 +41,14 @@ dependencies {
     implementation 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:1.13.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.okio:okio:1.15.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     /* Used to debug your Retrofit connections */
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0'
 }
