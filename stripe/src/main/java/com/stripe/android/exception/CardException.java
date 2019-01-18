@@ -1,5 +1,7 @@
 package com.stripe.android.exception;
 
+import android.support.annotation.Nullable;
+
 /**
  * An {@link Exception} indicating that there is a problem with a Card used for a request.
  * Card errors are the most common type of error you should expect to handle.
@@ -7,33 +9,39 @@ package com.stripe.android.exception;
  */
 public class CardException extends StripeException {
 
-    private String code;
-    private String param;
-    private String declineCode;
-    private String charge;
+    @Nullable private final String mCode;
+    @Nullable private final String mParam;
+    @Nullable private final String mDeclineCode;
+    @Nullable private final String mCharge;
 
-    public CardException(String message, String requestId, String code, String param,
-                         String declineCode, String charge, Integer statusCode, Throwable e) {
+    public CardException(@Nullable String message, @Nullable String requestId,
+                         @Nullable String code, @Nullable String param,
+                         @Nullable String declineCode, @Nullable String charge,
+                         @Nullable Integer statusCode, @Nullable Throwable e) {
         super(message, requestId, statusCode, e);
-        this.code = code;
-        this.param = param;
-        this.declineCode = declineCode;
-        this.charge = charge;
+        mCode = code;
+        mParam = param;
+        mDeclineCode = declineCode;
+        mCharge = charge;
     }
 
+    @Nullable
     public String getCode() {
-        return code;
+        return mCode;
     }
 
+    @Nullable
     public String getParam() {
-        return param;
+        return mParam;
     }
 
+    @Nullable
     public String getDeclineCode() {
-        return declineCode;
+        return mDeclineCode;
     }
 
+    @Nullable
     public String getCharge() {
-        return charge;
+        return mCharge;
     }
 }

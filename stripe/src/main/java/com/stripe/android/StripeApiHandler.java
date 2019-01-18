@@ -729,19 +729,18 @@ class StripeApiHandler {
         return String.format(Locale.ROOT, "%s/%s", getApiUrl(), tokenId);
     }
 
-    static void convertErrorsToExceptionsAndThrowIfNecessary(StripeResponse response) throws
-            InvalidRequestException,
-            APIException,
-            AuthenticationException,
-            CardException {
-        int rCode = response.getResponseCode();
-        String rBody = response.getResponseBody();
-        String requestId = null;
-        Map<String, List<String>> headers = response.getResponseHeaders();
-        List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+    static void convertErrorsToExceptionsAndThrowIfNecessary(@NonNull StripeResponse response)
+            throws InvalidRequestException, APIException, AuthenticationException, CardException {
+        final int rCode = response.getResponseCode();
+        final String rBody = response.getResponseBody();
+        final Map<String, List<String>> headers = response.getResponseHeaders();
+        final List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
 
+        final String requestId;
         if (requestIdList != null && requestIdList.size() > 0) {
             requestId = requestIdList.get(0);
+        } else {
+            requestId = null;
         }
 
         if (rCode < 200 || rCode >= 300) {
@@ -999,9 +998,10 @@ class StripeApiHandler {
         return flatParams;
     }
 
+    @NonNull
     private static List<Parameter> flattenParamsValue(Object value, String keyPrefix)
             throws InvalidRequestException {
-        List<Parameter> flatParams;
+        final List<Parameter> flatParams;
         if (value instanceof Map<?, ?>) {
             flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
         } else if (value instanceof List<?>) {
@@ -1010,7 +1010,7 @@ class StripeApiHandler {
             throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty " +
                     "string. " + "We interpret empty strings as null in requests. " + "You may " +
                     "set '" + keyPrefix + "' to null to delete the property.", keyPrefix, null,
-                    0, null);
+                    0, null, null, null);
         } else if (value == null) {
             flatParams = new LinkedList<>();
             flatParams.add(new Parameter(keyPrefix, ""));
@@ -1050,7 +1050,7 @@ class StripeApiHandler {
                 if (jsonData == null) {
                     throw new InvalidRequestException("Unable to create JSON data from parameters. "
                             + "Please contact support@stripe.com for assistance.",
-                            null, null, 0, null);
+                            null, null, 0, null, null, null);
                 }
                 return jsonData.toString().getBytes(CHARSET);
             } else {
@@ -1061,16 +1061,17 @@ class StripeApiHandler {
             throw new InvalidRequestException("Unable to encode parameters to "
                     + CHARSET
                     + ". Please contact support@stripe.com for assistance.",
-                    null, null, 0, e);
+                    null, null, 0, null, null, e);
         }
     }
 
-    private static String getResponseBody(InputStream responseStream)
+    @Nullable
+    private static String getResponseBody(@NonNull InputStream responseStream)
             throws IOException {
         //\A is the beginning of
         // the stream boundary
-        Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
-        String rBody = scanner.hasNext() ? scanner.next() : null;
+        final Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
+        final String rBody = scanner.hasNext() ? scanner.next() : null;
         responseStream.close();
         return rBody;
     }
@@ -1103,16 +1104,14 @@ class StripeApiHandler {
                                     method));
             }
             // trigger the request
-            int rCode = conn.getResponseCode();
-            String rBody;
-            Map<String, List<String>> headers;
-
+            final int rCode = conn.getResponseCode();
+            final String rBody;
             if (rCode >= 200 && rCode < 300) {
                 rBody = getResponseBody(conn.getInputStream());
             } else {
                 rBody = getResponseBody(conn.getErrorStream());
             }
-            headers = conn.getHeaderFields();
+            final Map<String, List<String>> headers = conn.getHeaderFields();
             return new StripeResponse(rCode, rBody, headers);
 
         } catch (IOException e) {
@@ -1131,45 +1130,57 @@ class StripeApiHandler {
         }
     }
 
-    private static void handleAPIError(String rBody, int rCode, String requestId)
+    private static void handleAPIError(@Nullable String rBody, int rCode,
+                                       @Nullable String requestId)
             throws InvalidRequestException, AuthenticationException,
             CardException, APIException {
 
-        ErrorParser.StripeError stripeError = ErrorParser.parseError(rBody);
+        final ErrorParser.StripeError stripeError = ErrorParser.parseError(rBody);
         switch (rCode) {
-            case 400:
+            case 400: {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
                         requestId,
                         rCode,
+                        stripeError.code,
+                        stripeError.declineCode,
                         null);
-            case 404:
+            }
+            case 404: {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
                         requestId,
                         rCode,
+                        stripeError.code,
+                        stripeError.declineCode,
                         null);
-            case 401:
+            }
+            case 401: {
                 throw new AuthenticationException(stripeError.message, requestId, rCode);
-            case 402:
+            }
+            case 402: {
                 throw new CardException(
                         stripeError.message,
                         requestId,
                         stripeError.code,
                         stripeError.param,
-                        stripeError.decline_code,
+                        stripeError.declineCode,
                         stripeError.charge,
                         rCode,
                         null);
-            case 403:
+            }
+            case 403: {
                 throw new PermissionException(stripeError.message, requestId, rCode);
-            case 429:
+            }
+            case 429: {
                 throw new RateLimitException(stripeError.message, stripeError.param, requestId,
                         rCode, null);
-            default:
+            }
+            default: {
                 throw new APIException(stripeError.message, requestId, rCode, null);
+            }
         }
     }
 

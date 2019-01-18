@@ -10,9 +10,9 @@ import java.util.Map;
  */
 class StripeResponse {
 
-    private String mResponseBody;
-    private int mResponseCode;
-    private Map<String, List<String>> mResponseHeaders;
+    @Nullable private final String mResponseBody;
+    private final int mResponseCode;
+    @Nullable private final Map<String, List<String>> mResponseHeaders;
 
     /**
      * Object constructor.
@@ -23,7 +23,7 @@ class StripeResponse {
      */
     StripeResponse(
             int responseCode,
-            String responseBody,
+            @Nullable String responseBody,
             @Nullable Map<String, List<String>> responseHeaders) {
         mResponseCode = responseCode;
         mResponseBody = responseBody;
@@ -40,6 +40,7 @@ class StripeResponse {
     /**
      * @return the {@link #mResponseBody response body}.
      */
+    @Nullable
     String getResponseBody() {
         return mResponseBody;
     }
