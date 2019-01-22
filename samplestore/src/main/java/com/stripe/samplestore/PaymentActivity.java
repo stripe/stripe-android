@@ -261,7 +261,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(int errorCode, @Nullable String errorMessage,
+            public void onError(int httpCode, @Nullable String errorMessage,
                                 @Nullable StripeError stripeError) {
                 displayError("Error getting payment method");
             }
@@ -402,7 +402,7 @@ public class PaymentActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onError(int errorCode, @Nullable String errorMessage,
+                        public void onError(int httpCode, @Nullable String errorMessage,
                                             @Nullable StripeError stripeError) {
                             displayError(errorMessage);
                         }

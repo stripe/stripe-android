@@ -548,16 +548,16 @@ public class CustomerSession
     }
 
     @Override
-    public void onKeyError(int errorCode, @Nullable String errorMessage) {
+    public void onKeyError(int httpCode, @Nullable String errorMessage) {
         // Any error eliminates all listeners
 
         if (mCustomerRetrievalListener != null) {
-            mCustomerRetrievalListener.onError(errorCode, errorMessage, null);
+            mCustomerRetrievalListener.onError(httpCode, errorMessage, null);
             mCustomerRetrievalListener = null;
         }
 
         if (mSourceRetrievalListener != null) {
-            mSourceRetrievalListener.onError(errorCode, errorMessage, null);
+            mSourceRetrievalListener.onError(httpCode, errorMessage, null);
             mSourceRetrievalListener = null;
         }
     }
@@ -806,7 +806,7 @@ public class CustomerSession
     public interface CustomerRetrievalListener {
         void onCustomerRetrieved(@NonNull Customer customer);
 
-        void onError(int errorCode, @Nullable String errorMessage,
+        void onError(int httpCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
     }
 

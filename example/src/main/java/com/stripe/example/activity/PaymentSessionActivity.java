@@ -129,7 +129,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         mCustomer = null;
                         mSelectPaymentButton.setEnabled(false);
@@ -188,7 +188,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         mProgressBar.setVisibility(View.INVISIBLE);
                     }
