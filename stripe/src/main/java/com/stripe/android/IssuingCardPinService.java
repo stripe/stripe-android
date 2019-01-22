@@ -244,7 +244,7 @@ public class IssuingCardPinService
     public void onKeyError(int errorCode,
                            @Nullable String errorMessage,
                            @Nullable Map<String, Object> arguments) {
-        Object listener = arguments.get(ARGUMENT_LISTENER);
+        Object listener = getListener(arguments);
         if (listener instanceof IssuingCardPinRetrievalListener) {
             ((IssuingCardPinRetrievalListener) listener).onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
