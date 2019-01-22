@@ -8,34 +8,31 @@ import android.support.annotation.Nullable;
  */
 public class InvalidRequestException extends StripeException {
 
-    private final String param;
+    @Nullable private final String mParam;
+    @Nullable private final String mErrorCode;
+    @Nullable private final String mErrorDeclineCode;
 
-    @Nullable
-    private final String code;
-
-    public InvalidRequestException(String message,
-                                   String param,
-                                   String code,
-                                   String requestId,
-                                   Integer statusCode,
-                                   Throwable e) {
+    public InvalidRequestException(@Nullable String message, @Nullable String param,
+                                   @Nullable String requestId, @Nullable Integer statusCode,
+                                   @Nullable String errorCode, @Nullable String errorDeclineCode,
+                                   @Nullable Throwable e) {
         super(message, requestId, statusCode, e);
-        this.param = param;
-        this.code = code;
-    }
-
-    public InvalidRequestException(String message, String param, String requestId, Integer
-            statusCode, Throwable e) {
-        this(message, param, null, requestId, statusCode, e);
-    }
-
-    public String getParam() {
-        return param;
+        mParam = param;
+        mErrorCode = errorCode;
+        mErrorDeclineCode = errorDeclineCode;
     }
 
     @Nullable
-    public String getCode() {
-        return code;
+    public String getParam() {
+        return mParam;
     }
 
+    @Nullable
+    public String getErrorCode() {
+        return mErrorCode;
+    }
+
+    public String getErrorDeclineCode() {
+        return mErrorDeclineCode;
+    }
 }

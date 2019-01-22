@@ -12,14 +12,15 @@ import java.util.regex.Pattern;
 
 class CountryUtils {
 
-    static final String[] NO_POSTAL_CODE_COUNTRIES = {
+    private static final String[] NO_POSTAL_CODE_COUNTRIES = {
             "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF",
             "CG", "CI", "CK", "CM", "DJ", "DM", "ER", "FJ", "GD", "GH", "GM", "GN", "GQ", "GY",
             "HK", "IE", "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU",
-            "MW", "NR", "NU", "PA", "QA", "RW", "SA", "SB", "SC", "SL", "SO", "SR", "ST", "SY",
-            "TF", "TK", "TL", "TO", "TT", "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"};
-    static final Set<String> NO_POSTAL_CODE_COUNTRIES_SET = new HashSet<>(Arrays.asList
-            (NO_POSTAL_CODE_COUNTRIES));
+            "MW", "NR", "NU", "PA", "QA", "RW", "SB", "SC", "SL", "SO", "SR", "ST", "SY", "TF",
+            "TK", "TL", "TO", "TT", "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
+    };
+    private static final Set<String> NO_POSTAL_CODE_COUNTRIES_SET = new HashSet<>(
+            Arrays.asList(NO_POSTAL_CODE_COUNTRIES));
 
     static boolean doesCountryUsePostalCode(@NonNull String countryCode) {
         return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);
@@ -37,10 +38,11 @@ class CountryUtils {
         return Pattern.matches("^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$", postcode);
     }
 
+    @NonNull
     static Map<String, String> getCountryNameToCodeMap() {
-        Map<String, String> displayNameToCountryCode = new HashMap<>();
+        final Map<String, String> displayNameToCountryCode = new HashMap<>();
         for (String countryCode : Locale.getISOCountries()) {
-            Locale locale = new Locale("", countryCode);
+            final Locale locale = new Locale("", countryCode);
             displayNameToCountryCode.put(locale.getDisplayCountry(), countryCode);
         }
         return displayNameToCountryCode;

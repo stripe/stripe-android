@@ -1,12 +1,15 @@
 package com.stripe.android.exception;
 
+import android.support.annotation.Nullable;
+
 /**
  * A type of {@link AuthenticationException} resulting from incorrect permissions
  * to perform the requested action.
  */
 public class PermissionException extends AuthenticationException {
 
-    public PermissionException(String message, String requestId, Integer statusCode) {
+    public PermissionException(@Nullable String message, @Nullable String requestId,
+                               @Nullable Integer statusCode) {
         super(message, requestId, statusCode);
     }
 }

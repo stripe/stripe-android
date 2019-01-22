@@ -1,15 +1,17 @@
 package com.stripe.android.exception;
 
+import android.support.annotation.Nullable;
+
 /**
  * An {@link Exception} that represents a failure to connect to Stripe's API.
  */
 public class APIConnectionException extends StripeException {
 
-    public APIConnectionException(String message) {
-        super(message, null, 0);
+    public APIConnectionException(@Nullable String message) {
+        this(message, null);
     }
 
-    public APIConnectionException(String message, Throwable e) {
+    public APIConnectionException(@Nullable String message, @Nullable Throwable e) {
         super(message, null, 0, e);
     }
 

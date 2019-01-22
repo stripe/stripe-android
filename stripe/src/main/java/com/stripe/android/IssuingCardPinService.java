@@ -145,19 +145,19 @@ public class IssuingCardPinService
                 }
             } catch (InvalidRequestException e) {
                 if (listener != null) {
-                    if ("expired".equals(e.getCode())) {
+                    if ("expired".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_EXPIRED,
                                 "The one-time code has expired",
                                 null);
                     }
-                    if ("incorrect_code".equals(e.getCode())) {
+                    if ("incorrect_code".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_INCORRECT,
                                 "The one-time code was incorrect",
                                 null);
                     }
-                    if ("too_many_attempts".equals(e.getCode())) {
+                    if ("too_many_attempts".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                                 "The verification challenge was attempted too many times",
@@ -202,19 +202,19 @@ public class IssuingCardPinService
                 }
             } catch (InvalidRequestException e) {
                 if (listener != null) {
-                    if ("expired".equals(e.getCode())) {
+                    if ("expired".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_EXPIRED,
                                 "The one-time code has expired",
                                 null);
                     }
-                    if ("incorrect_code".equals(e.getCode())) {
+                    if ("incorrect_code".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_INCORRECT,
                                 "The one-time code was incorrect",
                                 null);
                     }
-                    if ("too_many_attempts".equals(e.getCode())) {
+                    if ("too_many_attempts".equals(e.getErrorCode())) {
                         listener.onError(
                                 CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                                 "The verification challenge was attempted too many times",
