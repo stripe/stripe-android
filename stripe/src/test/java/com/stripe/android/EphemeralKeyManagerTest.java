@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -256,14 +257,14 @@ public class EphemeralKeyManagerTest {
     public void triggerCorrectErrorOnInvalidRawKey() {
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON");
-        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
                 CustomerEphemeralKey.class);
 
-        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+        verify(mKeyManagerListener, never()).onKeyUpdate(
                 (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
         verify(mKeyManagerListener, times(1)).onKeyError(
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
@@ -278,14 +279,14 @@ public class EphemeralKeyManagerTest {
     public void triggerCorrectErrorOnInvalidJsonKey() {
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("{}");
-        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
                 CustomerEphemeralKey.class);
 
-        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+        verify(mKeyManagerListener, never()).onKeyUpdate(
                 (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
         verify(mKeyManagerListener, times(1)).onKeyError(
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
@@ -300,14 +301,14 @@ public class EphemeralKeyManagerTest {
     public void triggerCorrectErrorOnNullKey() {
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(null);
-        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
                 CustomerEphemeralKey.class);
 
-        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+        verify(mKeyManagerListener, never()).onKeyUpdate(
                 (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
         verify(mKeyManagerListener, times(1)).onKeyError(
                 HttpURLConnection.HTTP_INTERNAL_ERROR,

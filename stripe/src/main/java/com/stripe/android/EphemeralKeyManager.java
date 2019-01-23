@@ -65,6 +65,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
                     "EphemeralKeyUpdateListener.onKeyUpdate was called " +
                             "with a null value");
+            return;
         }
         try {
             mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
