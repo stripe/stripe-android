@@ -290,8 +290,8 @@ public class EphemeralKeyManagerTest {
                 (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
         verify(mKeyManagerListener, times(1)).onKeyError(
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value " +
-                        "that failed to be parsed: [Improperly formatted JSON for ephemeral " +
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a JSON String " +
+                        "that was invalid: [Improperly formatted JSON for ephemeral " +
                         "key CustomerEphemeralKey - No value for created]. The raw body " +
                         "from Stripe's response should be passed");
         assertNull(keyManager.getEphemeralKey());

@@ -242,7 +242,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
             throw new IllegalArgumentException("Exception instantiating " +
                     ephemeralKeyClass.getSimpleName(), e);
         } catch (InvocationTargetException e) {
-            if (e.getTargetException() != null){
+            if (e.getTargetException() != null) {
                 throw new IllegalArgumentException("Improperly formatted JSON for ephemeral key " +
                         ephemeralKeyClass.getSimpleName() +
                         " - " + e.getTargetException().getMessage(),

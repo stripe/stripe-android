@@ -79,7 +79,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         } catch (Exception e) {
             mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
                     "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
-                            "a value that failed to be parsed: ["
+                            "a JSON String that was invalid: ["
                             + e.getLocalizedMessage() + "]. The raw body from Stripe's response" +
                             " should be passed");
         }
