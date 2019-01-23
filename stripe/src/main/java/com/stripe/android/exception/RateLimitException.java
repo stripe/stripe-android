@@ -1,6 +1,6 @@
 package com.stripe.android.exception;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * An {@link Exception} indicating that too many requests have hit the API too quickly.

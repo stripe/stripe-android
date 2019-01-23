@@ -1,9 +1,10 @@
 package com.stripe.example.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;

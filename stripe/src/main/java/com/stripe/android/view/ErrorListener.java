@@ -1,7 +1,8 @@
 package com.stripe.android.view;
 
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
+import androidx.annotation.Nullable;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 class ErrorListener implements StripeEditText.ErrorMessageListener {
 

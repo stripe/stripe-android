@@ -1,7 +1,7 @@
 package com.stripe.android.exception;
 
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * An {@link Exception} indicating that invalid parameters were used in a request.

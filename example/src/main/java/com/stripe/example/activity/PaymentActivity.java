@@ -1,9 +1,10 @@
 package com.stripe.example.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;

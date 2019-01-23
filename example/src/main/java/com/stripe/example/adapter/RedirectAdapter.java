@@ -1,10 +1,11 @@
 package com.stripe.example.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.stripe.android.model.Source;
 import com.stripe.example.R;

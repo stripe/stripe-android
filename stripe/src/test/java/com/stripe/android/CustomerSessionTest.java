@@ -4,8 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
+
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.StripeException;
@@ -36,8 +38,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import androidx.test.core.app.ApplicationProvider;
 
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
@@ -159,7 +159,7 @@ public class CustomerSessionTest {
     private Source mAddedSource;
 
     @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
+    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
         try {
             return CustomerEphemeralKey.fromString(key);
         } catch (JSONException e) {
@@ -172,7 +172,7 @@ public class CustomerSessionTest {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
 
-        LocalBroadcastManager instance =
+        final LocalBroadcastManager instance =
                 LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
         instance.registerReceiver(
                 mBroadcastReceiver,

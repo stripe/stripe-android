@@ -1,6 +1,6 @@
 package com.stripe.android.exception;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * A type of {@link AuthenticationException} resulting from incorrect permissions

@@ -1,8 +1,8 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import org.json.JSONException;
 
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
-    private Class<TEphemeralKey> mEphemeralKeyClass;
+    @NonNull private final Class<TEphemeralKey> mEphemeralKeyClass;
     private @Nullable TEphemeralKey mEphemeralKey;
     private @NonNull EphemeralKeyProvider mEphemeralKeyProvider;
     private @Nullable Calendar mOverrideCalendar;
@@ -26,7 +26,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             @NonNull KeyManagerListener keyManagerListener,
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
-            Class ephemeralKeyClass) {
+            @NonNull Class<TEphemeralKey> ephemeralKeyClass) {
         mEphemeralKeyClass = ephemeralKeyClass;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;

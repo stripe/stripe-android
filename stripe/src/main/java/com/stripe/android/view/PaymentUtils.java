@@ -1,6 +1,6 @@
 package com.stripe.android.view;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
