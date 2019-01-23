@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -248,6 +249,50 @@ public class EphemeralKeyManagerTest {
 
         verify(mKeyManagerListener, times(1)).onKeyError(404, errorMessage);
         verifyNoMoreInteractions(mKeyManagerListener);
+        assertNull(keyManager.getEphemeralKey());
+    }
+
+    @Test
+    public void triggerCorrectErrorOnInvalidRawKey() {
+
+        mTestEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON");
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                null,
+                CustomerEphemeralKey.class);
+
+        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+                (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
+        verify(mKeyManagerListener, times(1)).onKeyError(
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                        "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
+                        "cannot be converted to JSONObject] the raw body from Stripe's " +
+                        "response should be passed");
+        assertNull(keyManager.getEphemeralKey());
+    }
+
+    @Test
+    public void triggerCorrectErrorOnInvalidJsonKey() {
+
+        mTestEphemeralKeyProvider.setNextRawEphemeralKey("{}");
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                null,
+                CustomerEphemeralKey.class);
+
+        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+                (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
+        verify(mKeyManagerListener, times(1)).onKeyError(
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value " +
+                        "that failed to be parsed: [Improperly formatted JSON for ephemeral " +
+                        "key CustomerEphemeralKey - No value for created] the raw body " +
+                        "from Stripe's response should be passed");
         assertNull(keyManager.getEphemeralKey());
     }
 }

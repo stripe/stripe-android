@@ -216,7 +216,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromString(@Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
         if (rawJson == null) {
-            return null;
+            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass+ " null raw key");
         }
         JSONObject object = new JSONObject(rawJson);
         return fromJson(object, ephemeralKeyClass);
@@ -226,21 +226,32 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
-            return null;
+            throw new IllegalArgumentException("Exception instantiating " +
+                    ephemeralKeyClass.getSimpleName() +
+                    " null JSON");
         }
 
         try {
             return (TEphemeralKey)
                     ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
         } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+            throw new IllegalArgumentException("Exception instantiating " +
+                    ephemeralKeyClass.getSimpleName(), e);
         } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+            throw new IllegalArgumentException("Exception instantiating " +
+                    ephemeralKeyClass.getSimpleName(), e);
         } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass, e);
+            if (e.getTargetException() != null){
+                throw new IllegalArgumentException("Improperly formatted JSON for ephemeral key " +
+                        ephemeralKeyClass.getSimpleName() +
+                        " - " + e.getTargetException().getMessage(),
+                        e.getTargetException());
+            }
+            throw new IllegalArgumentException("Improperly formatted JSON for ephemeral key " +
+                    ephemeralKeyClass.getSimpleName(), e);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " +
-                    ephemeralKeyClass +
+                    ephemeralKeyClass.getSimpleName() +
                     " does not have an accessible (JSONObject) constructor", e);
         }
     }
