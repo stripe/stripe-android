@@ -270,7 +270,7 @@ public class EphemeralKeyManagerTest {
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
                         "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
-                        "cannot be converted to JSONObject] the raw body from Stripe's " +
+                        "cannot be converted to JSONObject]. The raw body from Stripe's " +
                         "response should be passed");
         assertNull(keyManager.getEphemeralKey());
     }
@@ -292,7 +292,7 @@ public class EphemeralKeyManagerTest {
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed a value " +
                         "that failed to be parsed: [Improperly formatted JSON for ephemeral " +
-                        "key CustomerEphemeralKey - No value for created] the raw body " +
+                        "key CustomerEphemeralKey - No value for created]. The raw body " +
                         "from Stripe's response should be passed");
         assertNull(keyManager.getEphemeralKey());
     }
