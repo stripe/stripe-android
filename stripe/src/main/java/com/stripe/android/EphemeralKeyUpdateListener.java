@@ -11,9 +11,9 @@ public interface EphemeralKeyUpdateListener {
     /**
      * Called when a key update request from your server comes back successfully.
      *
-     * @param rawKey the raw String returned from Stripe's servers
+     * @param rawJsonBodyReturnedByStripe the raw String returned from Stripe's servers
      */
-    void onKeyUpdate(@NonNull String rawKey);
+    void onKeyUpdate(@NonNull String rawJsonBodyReturnedByStripe);
 
     /**
      * Called when a key update request from your server comes back with an error.
