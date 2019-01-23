@@ -54,6 +54,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         return mEphemeralKey;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void updateKey(
             @NonNull String key,
             @Nullable String actionString,

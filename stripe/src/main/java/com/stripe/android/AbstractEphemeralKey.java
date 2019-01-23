@@ -216,7 +216,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromString(@Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
         if (rawJson == null) {
-            throw new IllegalArgumentException("Exception instantiating " + ephemeralKeyClass+ " null raw key");
+            throw new IllegalArgumentException("Exception instantiating " +
+                    ephemeralKeyClass.getSimpleName() + ": null raw key");
         }
         JSONObject object = new JSONObject(rawJson);
         return fromJson(object, ephemeralKeyClass);
