@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### 8.3.0 - On deck
+* Fix bug related to ephemeral keys introduced in 8.2.0 [#780]
+* Migrate to Android X [#778]
+* Add errorCode and errorDeclineCode fields to InvalidRequestException [#771]
+* Upgrade to Android Gradle Plugin 3.3.0 [#766]
+* Remove Saudi Arabia from the no postal code countries list [#770]
+
 ### 8.2.0 2019-01-10
 * Add support for Android 28 [#675]
     * Update Android SDK Build Tools to 28.0.3
