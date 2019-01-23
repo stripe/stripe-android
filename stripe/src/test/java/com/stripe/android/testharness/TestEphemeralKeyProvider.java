@@ -27,6 +27,9 @@ public class TestEphemeralKeyProvider implements EphemeralKeyProvider {
             keyUpdateListener.onKeyUpdate(mRawEphemeralKey);
         } else if (mErrorCode != INVALID_ERROR_CODE) {
             keyUpdateListener.onKeyUpdateFailure(mErrorCode, mErrorMessage);
+        } else {
+            // Useful to test edge cases
+            keyUpdateListener.onKeyUpdate(null);
         }
     }
 

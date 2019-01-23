@@ -295,4 +295,23 @@ public class EphemeralKeyManagerTest {
                         "from Stripe's response should be passed");
         assertNull(keyManager.getEphemeralKey());
     }
+
+    @Test
+    public void triggerCorrectErrorOnNullKey() {
+
+        mTestEphemeralKeyProvider.setNextRawEphemeralKey(null);
+        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                null,
+                CustomerEphemeralKey.class);
+
+        verify(mKeyManagerListener, times(0)).onKeyUpdate(
+                (CustomerEphemeralKey) isNull(), (String) isNull(), (Map<String, Object>) isNull());
+        verify(mKeyManagerListener, times(1)).onKeyError(
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value");
+        assertNull(keyManager.getEphemeralKey());
+    }
 }
