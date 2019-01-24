@@ -54,18 +54,35 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         return mEphemeralKey;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void updateKey(
             @NonNull String key,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
+        // Key is coming from the user, so even if it's @NonNull annotated we
+        // want to double check it
+        if (key == null) {
+            mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
+                    "EphemeralKeyUpdateListener.onKeyUpdate was called " +
+                            "with a null value");
+            return;
+        }
         try {
             mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
+            mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
         } catch (JSONException e) {
             mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
-                    "The JSON from the key could not be parsed: "
-                            + e.getLocalizedMessage());
+                    "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
+                            "a value that could not be JSON parsed: ["
+                            + e.getLocalizedMessage() + "]. The raw body from Stripe's response" +
+                            " should be passed");
+        } catch (Exception e) {
+            mListener.onKeyError(HttpURLConnection.HTTP_INTERNAL_ERROR,
+                    "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
+                            "a JSON String that was invalid: ["
+                            + e.getLocalizedMessage() + "]. The raw body from Stripe's response" +
+                            " should be passed");
         }
-        mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
     }
 
     private void updateKeyError(int errorCode, @Nullable String errorMessage) {
