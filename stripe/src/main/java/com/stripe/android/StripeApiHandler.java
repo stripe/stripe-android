@@ -599,7 +599,7 @@ class StripeApiHandler {
     }
 
     @NonNull
-    static Map<String, String> getHeaders(@NonNull RequestOptions options) {
+    static Map<String, String> getHeaders(@Nullable RequestOptions options) {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
@@ -607,8 +607,10 @@ class StripeApiHandler {
                 String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
                         BuildConfig.VERSION_NAME));
 
-        headers.put("Authorization", String.format(Locale.ENGLISH,
-                "Bearer %s", options.getPublishableApiKey()));
+        if (options != null) {
+            headers.put("Authorization", String.format(Locale.ENGLISH,
+                    "Bearer %s", options.getPublishableApiKey()));
+        }
 
         // debug headers
         final Map<String, String> propertyMap = new HashMap<>();
@@ -623,15 +625,15 @@ class StripeApiHandler {
         final JSONObject headerMappingObject = new JSONObject(propertyMap);
         headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
 
-        if (options.getApiVersion() != null) {
+        if (options != null && options.getApiVersion() != null) {
             headers.put("Stripe-Version", options.getApiVersion());
         }
 
-        if (options.getStripeAccount() != null) {
+        if (options != null && options.getStripeAccount() != null) {
             headers.put("Stripe-Account", options.getStripeAccount());
         }
 
-        if (options.getIdempotencyKey() != null) {
+        if (options != null && options.getIdempotencyKey() != null) {
             headers.put("Idempotency-Key", options.getIdempotencyKey());
         }
 
