@@ -75,12 +75,12 @@ public class PaymentMultilineActivity extends AppCompatActivity {
     }
 
     private void saveCard() {
-        Card card = mCardMultilineWidget.getCard();
+        final Card card = mCardMultilineWidget.getCard();
         if (card == null) {
             return;
         }
 
-        final Stripe stripe = new Stripe(this);
+        final Stripe stripe = new Stripe(getApplicationContext());
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.

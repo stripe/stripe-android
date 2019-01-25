@@ -77,7 +77,7 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     /**
@@ -87,7 +87,7 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, String publishableKey) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         setDefaultPublishableKey(publishableKey);
     }
 

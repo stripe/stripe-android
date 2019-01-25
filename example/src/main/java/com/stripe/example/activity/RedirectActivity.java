@@ -60,13 +60,13 @@ public class RedirectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_polling);
 
         mCompositeSubscription = new CompositeSubscription();
-        mCardInputWidget = (CardInputWidget) findViewById(R.id.card_widget_three_d);
+        mCardInputWidget = findViewById(R.id.card_widget_three_d);
         mErrorDialogHandler = new ErrorDialogHandler(this.getSupportFragmentManager());
         mProgressDialogController = new ProgressDialogController(this.getSupportFragmentManager());
         mRedirectDialogController = new RedirectDialogController(this);
-        mStripe = new Stripe(this);
+        mStripe = new Stripe(getApplicationContext());
 
-        Button threeDSecureButton = (Button) findViewById(R.id.btn_three_d_secure);
+        Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
         threeDSecureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -75,7 +75,7 @@ public class RedirectActivity extends AppCompatActivity {
                     }
                 });
 
-        Button threeDSyncButton = (Button) findViewById(R.id.btn_three_d_secure_sync);
+        Button threeDSyncButton = findViewById(R.id.btn_three_d_secure_sync);
         threeDSyncButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -83,7 +83,7 @@ public class RedirectActivity extends AppCompatActivity {
                         beginSequence();
                     }
                 });
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);

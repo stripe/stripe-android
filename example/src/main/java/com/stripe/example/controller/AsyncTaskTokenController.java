@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
@@ -19,11 +20,12 @@ import com.stripe.android.view.CardInputWidget;
  */
 public class AsyncTaskTokenController {
 
-    private CardInputWidget mCardInputWidget;
-    private Context mContext;
-    private ErrorDialogHandler mErrorDialogHandler;
-    private ListViewController mOutputListController;
-    private ProgressDialogController mProgressDialogController;
+    @NonNull private final Context mContext;
+    @NonNull private final ErrorDialogHandler mErrorDialogHandler;
+    @NonNull private ListViewController mOutputListController;
+    @NonNull private final ProgressDialogController mProgressDialogController;
+
+    @Nullable private CardInputWidget mCardInputWidget;
 
     public AsyncTaskTokenController(
             @NonNull Button button,

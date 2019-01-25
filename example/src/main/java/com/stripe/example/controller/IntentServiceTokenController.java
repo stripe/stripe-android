@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -22,13 +23,13 @@ import com.stripe.example.service.TokenIntentService;
  */
 public class IntentServiceTokenController {
 
-    private Activity mActivity;
-    private CardInputWidget mCardInputWidget;
-    private ErrorDialogHandler mErrorDialogHandler;
-    private ListViewController mOutputListViewController;
-    private ProgressDialogController mProgressDialogController;
+    @NonNull private final ErrorDialogHandler mErrorDialogHandler;
+    @NonNull private final ListViewController mOutputListViewController;
+    @NonNull private final ProgressDialogController mProgressDialogController;
 
-    private TokenBroadcastReceiver mTokenBroadcastReceiver;
+    private Activity mActivity;
+    @Nullable private CardInputWidget mCardInputWidget;
+    @Nullable private TokenBroadcastReceiver mTokenBroadcastReceiver;
 
     public IntentServiceTokenController (
             @NonNull AppCompatActivity appCompatActivity,
@@ -74,12 +75,12 @@ public class IntentServiceTokenController {
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInputWidget.getCard();
+        final Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
-        Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
+        final Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
                 mActivity,
                 cardToSave.getNumber(),
                 cardToSave.getExpMonth(),

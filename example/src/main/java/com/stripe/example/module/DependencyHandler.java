@@ -5,6 +5,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.model.Card;
@@ -22,22 +23,22 @@ import com.stripe.example.controller.RxTokenController;
  */
 public class DependencyHandler {
 
-    private AsyncTaskTokenController mAsyncTaskController;
-    private CardInputWidget mCardInputWidget;
-    private Context mContext;
-    private ErrorDialogHandler mErrorDialogHandler;
-    private IntentServiceTokenController mIntentServiceTokenController;
-    private ListViewController mListViewController;
-    private RxTokenController mRxTokenController;
-    private ProgressDialogController mProgresDialogController;
+    @Nullable private AsyncTaskTokenController mAsyncTaskController;
+    @NonNull private final CardInputWidget mCardInputWidget;
+    @NonNull private final Context mContext;
+    @NonNull private final ProgressDialogController mProgresDialogController;
+    @NonNull private final ErrorDialogHandler mErrorDialogHandler;
+    @Nullable private IntentServiceTokenController mIntentServiceTokenController;
+    @NonNull private final ListViewController mListViewController;
+    @Nullable private RxTokenController mRxTokenController;
 
     public DependencyHandler(
-            AppCompatActivity activity,
-            CardInputWidget cardInputWidget,
-            ListView outputListView) {
+            @NonNull AppCompatActivity activity,
+            @NonNull CardInputWidget cardInputWidget,
+            @NonNull ListView outputListView) {
 
         mCardInputWidget = cardInputWidget;
-        mContext = activity.getBaseContext();
+        mContext = activity.getApplicationContext();
 
         mProgresDialogController =
                 new ProgressDialogController(activity.getSupportFragmentManager());
