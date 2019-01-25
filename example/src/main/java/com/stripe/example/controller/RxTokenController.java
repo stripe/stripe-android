@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.PaymentConfiguration;
@@ -27,14 +28,15 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class RxTokenController {
 
-    private CardInputWidget mCardInputWidget;
-    private CompositeSubscription mCompositeSubscription;
-    private Context mContext;
-    private ErrorDialogHandler mErrorDialogHandler;
-    private ListViewController mOutputListController;
-    private ProgressDialogController mProgressDialogController;
+    @NonNull private final CompositeSubscription mCompositeSubscription;
+    @NonNull private final Context mContext;
+    @NonNull private final ErrorDialogHandler mErrorDialogHandler;
+    @NonNull private final ListViewController mOutputListController;
+    @NonNull private final ProgressDialogController mProgressDialogController;
 
-    public RxTokenController (
+    @Nullable private CardInputWidget mCardInputWidget;
+
+    public RxTokenController(
             @NonNull Button button,
             @NonNull CardInputWidget cardInputWidget,
             @NonNull Context context,
@@ -63,9 +65,7 @@ public class RxTokenController {
      * Release subscriptions to prevent memory leaks.
      */
     public void detach() {
-        if  (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
-        }
+        mCompositeSubscription.unsubscribe();
         mCardInputWidget = null;
     }
 

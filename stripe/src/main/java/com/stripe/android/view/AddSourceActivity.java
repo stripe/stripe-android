@@ -47,7 +47,7 @@ public class AddSourceActivity extends StripeActivity {
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
 
-    private TextView.OnEditorActionListener mOnEditorActionListener =
+    @NonNull private final TextView.OnEditorActionListener mOnEditorActionListener =
             new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -74,13 +74,13 @@ public class AddSourceActivity extends StripeActivity {
      * return a source.
      * @return an {@link Intent} that can be used to start this activity
      */
+    @NonNull
     public static Intent newIntent(@NonNull Context context,
                                    boolean requirePostalField,
                                    boolean updatesCustomer) {
-        Intent intent = new Intent(context, AddSourceActivity.class);
-        intent.putExtra(EXTRA_SHOW_ZIP, requirePostalField);
-        intent.putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
-        return intent;
+        return new Intent(context, AddSourceActivity.class)
+                .putExtra(EXTRA_SHOW_ZIP, requirePostalField)
+                .putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
     }
 
     @Override
@@ -123,17 +123,17 @@ public class AddSourceActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-        Card card = mCardMultilineWidget.getCard();
+        final Card card = mCardMultilineWidget.getCard();
         if (card == null) {
             // In this case, the error will be displayed on the card widget itself.
             return;
         }
 
         card.addLoggingToken(ADD_SOURCE_ACTIVITY);
-        Stripe stripe = getStripe();
+        final Stripe stripe = getStripe();
         stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
 
-        SourceParams sourceParams = SourceParams.createCardParams(card);
+        final SourceParams sourceParams = SourceParams.createCardParams(card);
         setCommunicatingProgress(true);
 
         stripe.createSource(sourceParams, new SourceCallback() {
@@ -173,7 +173,7 @@ public class AddSourceActivity extends StripeActivity {
                 };
 
         if (mCustomerSessionProxy == null) {
-            @Source.SourceType String sourceType;
+            @Source.SourceType final String sourceType;
             if (source instanceof Source) {
                 sourceType = ((Source) source).getType();
             } else if (source instanceof Card){
@@ -218,9 +218,10 @@ public class AddSourceActivity extends StripeActivity {
         finish();
     }
 
+    @NonNull
     private Stripe getStripe() {
         if (mStripeProvider == null) {
-            return new Stripe(this);
+            return new Stripe(getApplicationContext());
         } else {
             return mStripeProvider.getStripe(this);
         }
@@ -245,7 +246,7 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     interface StripeProvider {
-        Stripe getStripe(@NonNull Context context);
+        @NonNull Stripe getStripe(@NonNull Context context);
     }
 
     interface CustomerSessionProxy {

@@ -30,6 +30,7 @@ public class TokenIntentService extends IntentService {
     private static final String EXTRA_YEAR = "com.stripe.example.service.extra.year";
     private static final String EXTRA_CVC = "com.stripe.example.service.extra.cvc";
 
+    @NonNull
     public static Intent createTokenIntent(
             @NonNull Activity launchingActivity,
             @Nullable String cardNumber,
@@ -52,14 +53,14 @@ public class TokenIntentService extends IntentService {
         String errorMessage = null;
         Token token = null;
         if (intent != null) {
-            String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
-            Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
-            Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
-            String cvc = intent.getStringExtra(EXTRA_CVC);
+            final String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
+            final Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
+            final Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
+            final String cvc = intent.getStringExtra(EXTRA_CVC);
 
-            Card card = new Card(cardNumber, month, year, cvc);
+            final Card card = new Card(cardNumber, month, year, cvc);
 
-            Stripe stripe = new Stripe(this);
+            final Stripe stripe = new Stripe(getApplicationContext());
             try {
                 token = stripe.createTokenSynchronous(card,
                         PaymentConfiguration.getInstance().getPublishableKey());
@@ -68,7 +69,7 @@ public class TokenIntentService extends IntentService {
             }
         }
 
-        Intent localIntent = new Intent(TOKEN_ACTION);
+        final Intent localIntent = new Intent(TOKEN_ACTION);
         if (token != null) {
             localIntent.putExtra(STRIPE_CARD_LAST_FOUR, token.getCard().getLast4());
             localIntent.putExtra(STRIPE_CARD_TOKEN_ID, token.getId());

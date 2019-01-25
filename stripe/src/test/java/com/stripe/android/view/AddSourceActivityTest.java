@@ -86,14 +86,13 @@ public class AddSourceActivityTest {
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(addSourceActivity);
-        AddSourceActivity.StripeProvider mockStripeProvider =
-                new AddSourceActivity.StripeProvider() {
-                    @Override
-                    public Stripe getStripe(@NonNull Context context) {
-                        return mStripe;
-                    }
-                };
-        addSourceActivity.setStripeProvider(mockStripeProvider);
+        addSourceActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
+            @NonNull
+            @Override
+            public Stripe getStripe(@NonNull Context context) {
+                return mStripe;
+            }
+        });
     }
 
     private void setUpForProxySessionTest() {
@@ -110,14 +109,13 @@ public class AddSourceActivityTest {
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(addSourceActivity);
-        AddSourceActivity.StripeProvider mockStripeProvider =
-                new AddSourceActivity.StripeProvider() {
-                    @Override
-                    public Stripe getStripe(@NonNull Context context) {
-                        return mStripe;
-                    }
-                };
-        addSourceActivity.setStripeProvider(mockStripeProvider);
+        addSourceActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
+            @NonNull
+            @Override
+            public Stripe getStripe(@NonNull Context context) {
+                return mStripe;
+            }
+        });
         addSourceActivity.setCustomerSessionProxy(mCustomerSessionProxy);
         addSourceActivity.initCustomerSessionTokens();
     }

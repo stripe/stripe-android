@@ -24,14 +24,15 @@ public class PaymentActivity extends AppCompatActivity {
                 (CardInputWidget) findViewById(R.id.card_input_widget),
                 (ListView) findViewById(R.id.listview));
 
-        Button saveButton = (Button) findViewById(R.id.save);
+        final Button saveButton = findViewById(R.id.save);
         mDependencyHandler.attachAsyncTaskTokenController(saveButton);
 
-        Button saveRxButton = (Button) findViewById(R.id.saverx);
+        final Button saveRxButton = findViewById(R.id.saverx);
         mDependencyHandler.attachRxTokenController(saveRxButton);
 
-        Button saveIntentServiceButton = (Button) findViewById(R.id.saveWithService);
-        mDependencyHandler.attachIntentServiceTokenController(this, saveIntentServiceButton);
+        final Button saveIntentServiceButton = findViewById(R.id.saveWithService);
+        mDependencyHandler.attachIntentServiceTokenController(this,
+                saveIntentServiceButton);
     }
 
     @Override

@@ -71,7 +71,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         mCompositeSubscription = new CompositeSubscription();
-        mStripe = new Stripe(this);
+        mStripe = new Stripe(getApplicationContext());
         Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
 

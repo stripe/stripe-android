@@ -12,7 +12,7 @@ import com.stripe.example.dialog.ProgressDialogFragment;
  */
 public class ProgressDialogController {
 
-    private FragmentManager mFragmentManager;
+    @NonNull private final FragmentManager mFragmentManager;
     private ProgressDialogFragment mProgressFragment;
 
     public ProgressDialogController(@NonNull FragmentManager fragmentManager) {

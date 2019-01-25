@@ -1,6 +1,7 @@
 package com.stripe.example.controller;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -19,31 +20,31 @@ import java.util.Map;
  */
 public class ListViewController {
 
-    private SimpleAdapter mAdatper;
-    private List<Map<String, String>> mCardTokens = new ArrayList<Map<String, String>>();
-    private Context mContext;
+    @NonNull private final SimpleAdapter mAdapter;
+    @NonNull private final List<Map<String, String>> mCardTokens = new ArrayList<>();
+    @NonNull private final Resources mResources;
 
-    public ListViewController(ListView listView) {
-        mContext = listView.getContext();
-        mAdatper = new SimpleAdapter(
-                mContext,
+    public ListViewController(@NonNull ListView listView) {
+        final Context context = listView.getContext();
+        mResources = context.getResources();
+        mAdapter = new SimpleAdapter(
+                context,
                 mCardTokens,
                 R.layout.list_item_layout,
                 new String[]{"last4", "tokenId"},
                 new int[]{R.id.last4, R.id.tokenId});
-        listView.setAdapter(mAdatper);
+        listView.setAdapter(mAdapter);
     }
 
-    void addToList(Token token) {
+    void addToList(@NonNull Token token) {
         addToList(token.getCard().getLast4(), token.getId());
     }
 
     public void addToList(@NonNull String last4, @NonNull String tokenId) {
-        String endingIn = mContext.getString(R.string.endingIn);
-        Map<String, String> map = new HashMap<>();
-        map.put("last4", endingIn + " " + last4);
+        final Map<String, String> map = new HashMap<>();
+        map.put("last4", mResources.getString(R.string.endingIn) + " " + last4);
         map.put("tokenId", tokenId);
         mCardTokens.add(map);
-        mAdatper.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
     }
 }

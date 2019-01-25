@@ -1,13 +1,14 @@
 package com.stripe.example.controller;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.example.R;
 
@@ -16,10 +17,10 @@ import com.stripe.example.R;
  */
 public class RedirectDialogController {
 
-    AppCompatActivity mActivity;
-    AlertDialog mAlertDialog;
+    @NonNull private final Activity mActivity;
+    private AlertDialog mAlertDialog;
 
-    public RedirectDialogController(AppCompatActivity appCompatActivity) {
+    public RedirectDialogController(@NonNull Activity appCompatActivity) {
         mActivity = appCompatActivity;
     }
 
@@ -27,7 +28,7 @@ public class RedirectDialogController {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         View dialogView = LayoutInflater.from(mActivity).inflate(R.layout.polling_dialog, null);
 
-        TextView linkView = (TextView) dialogView.findViewById(R.id.tv_link_redirect);
+        TextView linkView = dialogView.findViewById(R.id.tv_link_redirect);
         linkView.setText(R.string.verify);
         linkView.setOnClickListener(new View.OnClickListener() {
             @Override
