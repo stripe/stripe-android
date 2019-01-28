@@ -18,7 +18,7 @@ public class RequestOptions {
     public static final String TYPE_QUERY = "source";
     public static final String TYPE_JSON = "json_data";
 
-    @NonNull private final String mApiVersion;
+    @Nullable private final String mApiVersion;
     @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
     @Nullable private final String mPublishableApiKey;
@@ -26,7 +26,7 @@ public class RequestOptions {
     @Nullable private final String mStripeAccount;
 
     private RequestOptions(
-            @NonNull String apiVersion,
+            @Nullable String apiVersion,
             @Nullable String guid,
             @Nullable String idempotencyKey,
             @Nullable String publishableApiKey,
@@ -43,7 +43,7 @@ public class RequestOptions {
     /**
      * @return the API version for this request
      */
-    @NonNull
+    @Nullable
     String getApiVersion() {
         return mApiVersion;
     }

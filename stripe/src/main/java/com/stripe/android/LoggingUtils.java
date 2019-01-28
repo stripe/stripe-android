@@ -89,7 +89,7 @@ class LoggingUtils {
     @NonNull
     static Map<String, Object> getTokenCreationParams(
             @NonNull Context context,
-            @NonNull List<String> productUsageTokens,
+            @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @Nullable String tokenType) {
         return getEventLoggingParams(

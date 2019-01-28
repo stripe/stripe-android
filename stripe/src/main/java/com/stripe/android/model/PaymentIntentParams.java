@@ -152,7 +152,7 @@ public class PaymentIntentParams {
      */
     @NonNull
     public Map<String, Object> toParamMap() {
-        Map<String, Object> networkReadyMap = new HashMap<>();
+        final Map<String, Object> networkReadyMap = new HashMap<>();
         if (mSourceParams != null) {
             networkReadyMap.put(API_PARAM_SOURCE_DATA, mSourceParams.toParamMap());
         } else if (mSourceId != null) {

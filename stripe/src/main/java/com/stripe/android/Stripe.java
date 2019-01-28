@@ -161,7 +161,7 @@ public class Stripe {
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
         createTokenFromParams(
-                hashMapFromPersonalId(mContext, personalId),
+                hashMapFromPersonalId(personalId),
                 publishableKey,
                 Token.TYPE_PII,
                 executor,
@@ -400,7 +400,6 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return StripeApiHandler.retrievePaymentIntent(
-                null,
                 mContext,
                 paymentIntentParams,
                 publishableKey,
@@ -542,7 +541,7 @@ public class Stripe {
                 RequestOptions.TYPE_QUERY).build();
         return StripeApiHandler.createToken(
                 mContext,
-                hashMapFromPersonalId(mContext, personalId),
+                hashMapFromPersonalId(personalId),
                 requestOptions,
                 Token.TYPE_PII,
                 mLoggingResponseListener);

@@ -113,11 +113,12 @@ public class PaymentIntent extends StripeJsonModel {
         return mNextSourceAction;
     }
 
+    @Nullable
     public Uri getAuthorizationUrl() {
         if ("requires_source_action".equals(mStatus) &&
                 mNextSourceAction.containsKey("authorize_with_url") &&
                 mNextSourceAction.get("authorize_with_url") instanceof Map) {
-            Map<String, Object> authorizeWithUrlMap =
+            final Map<String, Object> authorizeWithUrlMap =
                     (Map) mNextSourceAction.get("authorize_with_url");
             if (authorizeWithUrlMap.containsKey("url") &&
                     authorizeWithUrlMap.get("url") instanceof String) {
@@ -178,7 +179,8 @@ public class PaymentIntent extends StripeJsonModel {
         mStatus = status;
     }
 
-    public static String parseIdFromClientSecret(String clientSecret) {
+    @NonNull
+    public static String parseIdFromClientSecret(@NonNull String clientSecret) {
         return clientSecret.split("_secret")[0];
     }
 

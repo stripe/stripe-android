@@ -10,8 +10,8 @@ import java.util.Map;
  */
 class StripeResponse {
 
-    @Nullable private final String mResponseBody;
     private final int mResponseCode;
+    @Nullable private final String mResponseBody;
     @Nullable private final Map<String, List<String>> mResponseHeaders;
 
     /**
