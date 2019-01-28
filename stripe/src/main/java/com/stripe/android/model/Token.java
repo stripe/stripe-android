@@ -57,14 +57,14 @@ public class Token implements StripePaymentSource {
             @NonNull String id,
             boolean livemode,
             @NonNull Date created,
-            boolean used,
+            @Nullable Boolean used,
             @Nullable Card card) {
         mId = id;
         mType = TYPE_CARD;
         mCreated = created;
         mLivemode = livemode;
         mCard = card;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mBankAccount = null;
     }
 
@@ -76,14 +76,14 @@ public class Token implements StripePaymentSource {
             @NonNull String id,
             boolean livemode,
             @NonNull Date created,
-            boolean used,
+            @Nullable Boolean used,
             @NonNull BankAccount bankAccount) {
         mId = id;
         mType = TYPE_BANK_ACCOUNT;
         mCreated = created;
         mLivemode = livemode;
         mCard = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mBankAccount = bankAccount;
     }
 
@@ -96,14 +96,13 @@ public class Token implements StripePaymentSource {
             @NonNull String type,
             boolean livemode,
             @NonNull Date created,
-            boolean used
-    ) {
+            @Nullable Boolean used) {
         mId = id;
         mType = type;
         mCreated = created;
         mCard = null;
         mBankAccount = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mLivemode = livemode;
     }
 
@@ -118,7 +117,7 @@ public class Token implements StripePaymentSource {
     /**
      * @return the {@link #mId} of this token
      */
-    @NonNull
+    @Nullable
     @Override
     public String getId() {
         return mId;
