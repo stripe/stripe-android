@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### 8.3.0 - On deck
+### 8.3.0 2019-01-25
 * Fix bug related to ephemeral keys introduced in 8.2.0 [#780]
 * Migrate to Android X [#778]
 * Add errorCode and errorDeclineCode fields to InvalidRequestException [#771]
