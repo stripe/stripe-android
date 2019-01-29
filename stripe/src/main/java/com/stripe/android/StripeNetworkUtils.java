@@ -48,6 +48,15 @@ public class StripeNetworkUtils {
     }
 
     @NonNull
+    static Map<String, Object> mapFromCvc(@NonNull String cvc) {
+        final Map<String, Object> tokenParams = new HashMap<>();
+        tokenParams.put("cvc", cvc);
+        final Map<String, Object> cvcParams = new HashMap<>();
+        cvcParams.put(Token.TYPE_CVC_UPDATE, tokenParams);
+        return cvcParams;
+    }
+
+    @NonNull
     private static Map<String, Object> hashMapFromCard(
             @Nullable UidProvider provider,
             @NonNull Context context,

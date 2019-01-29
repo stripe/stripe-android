@@ -57,6 +57,25 @@ public class LoggingUtilsTest {
     }
 
     @Test
+    public void getCvcUpdateTokenCreationParams_withValidInput_createsCorrectMap() {
+        List<String> tokensList = new ArrayList<>();
+        tokensList.add("CardInputView");
+        // Correctness of these methods will be tested elsewhere. Assume validity for this test.
+        final String expectedTokenName =
+                LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
+
+        Map<String, Object> params = LoggingUtils.getTokenCreationParams(
+                ApplicationProvider.getApplicationContext(),
+                tokensList,
+                DUMMY_API_KEY,
+                Token.TYPE_CVC_UPDATE);
+        // Size is SIZE-1 because tokens don't have a source_type field
+        assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
+        assertEquals(expectedTokenName, params.get(LoggingUtils.FIELD_EVENT));
+        assertEquals(Token.TYPE_CVC_UPDATE, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
+    }
+
+    @Test
     public void getSourceCreationParams_withValidInput_createsCorrectMap() {
         // Size is SIZE-1 because tokens don't have a token_type field
         final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
