@@ -24,23 +24,31 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class SourceParamsTest {
 
-    private static Card FULL_FIELDS_VISA_CARD =
-            new Card(VALID_VISA_NO_SPACES,
-                    12,
-                    2050,
-                    "123",
-                    "Captain Cardholder",
-                    "1 ABC Street",
-                    "Apt. 123",
-                    "San Francisco",
-                    "CA",
-                    "94107",
-                    "US",
-                    "usd");
+    private static final Card FULL_FIELDS_VISA_CARD;
+
+    static {
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("color", "blue");
+        metadata.put("animal", "dog");
+
+        FULL_FIELDS_VISA_CARD = new Card(VALID_VISA_NO_SPACES,
+                12,
+                2050,
+                "123",
+                "Captain Cardholder",
+                "1 ABC Street",
+                "Apt. 123",
+                "San Francisco",
+                "CA",
+                "94107",
+                "US",
+                "usd",
+                metadata);
+    }
 
     @Test
     public void createAlipayReusableParams_withAllFields_hasExpectedFields() {
-        SourceParams params = SourceParams.createAlipayReusableParams(
+        final SourceParams params = SourceParams.createAlipayReusableParams(
                 "usd",
                 "Jean Valjean",
                 "jdog@lesmis.net",
@@ -60,7 +68,7 @@ public class SourceParamsTest {
 
     @Test
     public void createAlipayReusableParams_withOnlyName_hasOnlyExpectedFields() {
-        SourceParams params = SourceParams.createAlipayReusableParams(
+        final SourceParams params = SourceParams.createAlipayReusableParams(
                 "cad",
                 "Hari Seldon",
                 null,
@@ -80,7 +88,7 @@ public class SourceParamsTest {
 
     @Test
     public void createAlipaySingleUseParams_withAllFields_hasExpectedFields() {
-        SourceParams params = SourceParams.createAlipaySingleUseParams(
+        final SourceParams params = SourceParams.createAlipaySingleUseParams(
                 1000L,
                 "aud",
                 "Jane Tester",
@@ -100,7 +108,7 @@ public class SourceParamsTest {
 
     @Test
     public void createAlipaySingleUseParams_withoutOwner_hasNoOwnerFields() {
-        SourceParams params = SourceParams.createAlipaySingleUseParams(
+        final SourceParams params = SourceParams.createAlipaySingleUseParams(
                 555L,
                 "eur",
                 null,
@@ -120,7 +128,7 @@ public class SourceParamsTest {
 
     @Test
     public void createBancontactParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createBancontactParams(
+        final SourceParams params = SourceParams.createBancontactParams(
                 1000L,
                 "Stripe",
                 "return/url/3000",
@@ -144,7 +152,7 @@ public class SourceParamsTest {
 
     @Test
     public void createBancontactParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createBancontactParams(
+        final SourceParams params = SourceParams.createBancontactParams(
                 1000L,
                 "Stripe",
                 "return/url/3000",
@@ -169,7 +177,7 @@ public class SourceParamsTest {
 
     @Test
     public void createBancontactParams_hasExpectedFields_optionalStatementDescriptor() {
-        SourceParams params = SourceParams.createBancontactParams(
+        final SourceParams params = SourceParams.createBancontactParams(
                 1000L,
                 "Stripe",
                 "return/url/3000",
@@ -184,7 +192,7 @@ public class SourceParamsTest {
 
     @Test
     public void createBancontactParams_hasExpectedFields_optionalPreferredLanguage() {
-        SourceParams params = SourceParams.createBancontactParams(
+        final SourceParams params = SourceParams.createBancontactParams(
                 1000L,
                 "Stripe",
                 "return/url/3000",
@@ -199,7 +207,7 @@ public class SourceParamsTest {
 
     @Test
     public void createBancontactParams_hasExpectedFields_optionalEverything() {
-        SourceParams params = SourceParams.createBancontactParams(
+        final SourceParams params = SourceParams.createBancontactParams(
                 1000L,
                 "Stripe",
                 "return/url/3000",
@@ -211,9 +219,9 @@ public class SourceParamsTest {
 
     @Test
     public void createCardParams_hasBothExpectedMaps() {
-        SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
+        final SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
 
-        Map<String, Object> apiMap = params.getApiParameterMap();
+        final Map<String, Object> apiMap = params.getApiParameterMap();
         assertNotNull(apiMap);
         assertEquals(VALID_VISA_NO_SPACES, apiMap.get("number"));
         assertEquals(12, apiMap.get("exp_month"));
@@ -223,20 +231,26 @@ public class SourceParamsTest {
         assertNotNull(params.getOwner());
         assertEquals("Captain Cardholder", params.getOwner().get("name"));
         assertEquals(2, params.getOwner().size());
-        Map<String, Object> addressMap = getMapFromOwner(params, "address");
+
+        final Map<String, Object> addressMap = getMapFromOwner(params, "address");
         assertEquals("1 ABC Street", addressMap.get("line1"));
         assertEquals("Apt. 123", addressMap.get("line2"));
         assertEquals("San Francisco", addressMap.get("city"));
         assertEquals("CA", addressMap.get("state"));
         assertEquals("94107", addressMap.get("postal_code"));
         assertEquals("US", addressMap.get("country"));
+
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("color", "blue");
+        metadata.put("animal", "dog");
+        assertEquals(metadata, params.getMetaData());
     }
 
     @Test
     public void createCardParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
+        final SourceParams params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
 
-        Map<String, Object> expectedCardMap = new HashMap<>();
+        final Map<String, Object> expectedCardMap = new HashMap<>();
         expectedCardMap.put("number", VALID_VISA_NO_SPACES);
         expectedCardMap.put("exp_month", 12);
         expectedCardMap.put("exp_year", 2050);
@@ -250,7 +264,7 @@ public class SourceParamsTest {
         expectedAddressMap.put("postal_code", "94107");
         expectedAddressMap.put("country", "US");
 
-        Map<String, Object> totalExpectedMap = new HashMap<>();
+        final Map<String, Object> totalExpectedMap = new HashMap<>();
         totalExpectedMap.put("type", "card");
         totalExpectedMap.put("card", expectedCardMap);
         totalExpectedMap.put("owner",
@@ -259,12 +273,17 @@ public class SourceParamsTest {
                     put("name", "Captain Cardholder");
                 }});
 
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("color", "blue");
+        metadata.put("animal", "dog");
+        totalExpectedMap.put("metadata", metadata);
+
         JsonTestUtils.assertMapEquals(totalExpectedMap, params.toParamMap());
     }
 
     @Test
     public void createEPSParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createEPSParams(
+        final SourceParams params = SourceParams.createEPSParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -281,7 +300,7 @@ public class SourceParamsTest {
 
     @Test
     public void createEPSParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createEPSParams(
+        final SourceParams params = SourceParams.createEPSParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -304,7 +323,7 @@ public class SourceParamsTest {
 
     @Test
     public void createEPSParams_toParamMap_createsExpectedMap_noStatementDescriptor() {
-        SourceParams params = SourceParams.createEPSParams(
+        final SourceParams params = SourceParams.createEPSParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -323,7 +342,7 @@ public class SourceParamsTest {
 
     @Test
     public void createGiropayParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createGiropayParams(
+        final SourceParams params = SourceParams.createGiropayParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -344,7 +363,7 @@ public class SourceParamsTest {
 
     @Test
     public void createGiropayParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createGiropayParams(
+        final SourceParams params = SourceParams.createGiropayParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -367,7 +386,7 @@ public class SourceParamsTest {
 
     @Test
     public void createGiropayParams_withNullStatementDescriptor_hasExpectedFieldsButNoApiParams() {
-        SourceParams params = SourceParams.createGiropayParams(
+        final SourceParams params = SourceParams.createGiropayParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -386,7 +405,7 @@ public class SourceParamsTest {
 
     @Test
     public void createIdealParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createIdealParams(
+        final SourceParams params = SourceParams.createIdealParams(
                 900L,
                 "Default Name",
                 "stripe://anotherurl",
@@ -407,7 +426,7 @@ public class SourceParamsTest {
 
     @Test
     public void createIdealParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createIdealParams(
+        final SourceParams params = SourceParams.createIdealParams(
                 900L,
                 "Default Name",
                 "stripe://anotherurl",
@@ -433,7 +452,7 @@ public class SourceParamsTest {
 
     @Test
     public void createP24Params_withAllFields_hasExpectedFields() {
-        SourceParams params = SourceParams.createP24Params(
+        final SourceParams params = SourceParams.createP24Params(
                 1000L,
                 "eur",
                 "Jane Tester",
@@ -453,7 +472,7 @@ public class SourceParamsTest {
 
     @Test
     public void createP24Params_withNullName_hasExpectedFields() {
-        SourceParams params = SourceParams.createP24Params(
+        final SourceParams params = SourceParams.createP24Params(
                 1000L,
                 "eur",
                 null,
@@ -473,7 +492,7 @@ public class SourceParamsTest {
 
     @Test
     public void createMultibancoParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createMultibancoParams(
+        final SourceParams params = SourceParams.createMultibancoParams(
                 150L,
                 "stripe://testactivity",
                 "multibancoholder@stripe.com");
@@ -487,7 +506,7 @@ public class SourceParamsTest {
 
     @Test
     public void createMultibancoParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createMultibancoParams(
+        final SourceParams params = SourceParams.createMultibancoParams(
                 150L,
                 "stripe://testactivity",
                 "multibancoholder@stripe.com");
@@ -506,7 +525,7 @@ public class SourceParamsTest {
 
     @Test
     public void createSepaDebitParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createSepaDebitParams(
+        final SourceParams params = SourceParams.createSepaDebitParams(
                 "Jai Testa",
                 "ibaniban",
                 "sepaholder@stripe.com",
@@ -567,7 +586,7 @@ public class SourceParamsTest {
 
     @Test
     public void createSofortParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createSofortParams(
+        final SourceParams params = SourceParams.createSofortParams(
                 50000L,
                 "example://return",
                 "UK",
@@ -586,7 +605,7 @@ public class SourceParamsTest {
 
     @Test
     public void createSofortParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createSofortParams(
+        final SourceParams params = SourceParams.createSofortParams(
                 50000L,
                 "example://return",
                 "UK",
@@ -609,7 +628,7 @@ public class SourceParamsTest {
 
     @Test
     public void createThreeDSecureParams_hasExpectedFields() {
-        SourceParams params = SourceParams.createThreeDSecureParams(
+        final SourceParams params = SourceParams.createThreeDSecureParams(
                 99000L,
                 "brl",
                 "stripe://returnaddress",
@@ -631,7 +650,7 @@ public class SourceParamsTest {
 
     @Test
     public void createThreeDSecureParams_toParamMap_createsExpectedMap() {
-        SourceParams params = SourceParams.createThreeDSecureParams(
+        final SourceParams params = SourceParams.createThreeDSecureParams(
                 99000L,
                 "brl",
                 "stripe://returnaddress",
@@ -654,7 +673,7 @@ public class SourceParamsTest {
         // Using the Giropay constructor to add some free params and expected values,
         // including a source type params
         final String DOGECOIN = "dogecoin";
-        SourceParams params = SourceParams.createGiropayParams(
+        final SourceParams params = SourceParams.createGiropayParams(
                 150L,
                 "Stripe",
                 "stripe://return",
@@ -678,7 +697,7 @@ public class SourceParamsTest {
 
     @Test
     public void setCustomType_forEmptyParams_setsTypeToUnknown() {
-        SourceParams params = SourceParams.createCustomParams();
+        final SourceParams params = SourceParams.createCustomParams();
         params.setTypeRaw("dogecoin");
         assertEquals(Source.UNKNOWN, params.getType());
         assertEquals("dogecoin", params.getTypeRaw());
@@ -686,7 +705,7 @@ public class SourceParamsTest {
 
     @Test
     public void setCustomType_forStandardParams_overridesStandardType() {
-        SourceParams params = SourceParams.createThreeDSecureParams(
+        final SourceParams params = SourceParams.createThreeDSecureParams(
                 99000L,
                 "brl",
                 "stripe://returnaddress",

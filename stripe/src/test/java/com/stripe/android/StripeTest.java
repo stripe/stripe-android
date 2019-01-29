@@ -444,11 +444,11 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
-        Stripe stripe = getNonLoggingStripe(mContext);
+        final Stripe stripe = getNonLoggingStripe(mContext);
         stripe.setDefaultPublishableKey("pk_test_dCyfhfyeO2CZkcvT5xyIDdJj");
         stripe.setStripeAccount("acct_19YLYlE7cWSP2tMo");
 
-        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        final Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         card.setAddressCity("Sheboygan");
         card.setAddressCountry("US");
         card.setAddressLine1("123 Main St");
@@ -456,8 +456,8 @@ public class StripeTest {
         card.setAddressZip("53081");
         card.setAddressState("WI");
         card.setName("Winnie Hoop");
-        SourceParams params = SourceParams.createCardParams(card);
-        Map<String, String> metamap = new HashMap<String, String>() {{
+        final SourceParams params = SourceParams.createCardParams(card);
+        final Map<String, String> metamap = new HashMap<String, String>() {{
             put("addons", "cream");
             put("type", "halfandhalf");
         }};
