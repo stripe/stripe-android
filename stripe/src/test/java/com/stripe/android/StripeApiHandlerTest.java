@@ -259,7 +259,7 @@ public class StripeApiHandlerTest {
             assertNotNull(response);
             assertNotNull(response.getResponseHeaders());
             assertTrue(response.getResponseHeaders().containsKey("Stripe-Account"));
-            List<String> accounts = response.getResponseHeaders().get("Stripe-Account");
+            final List<String> accounts = response.getResponseHeaders().get("Stripe-Account");
             assertNotNull(accounts);
             assertEquals(1, accounts.size());
             assertEquals(connectAccountId, accounts.get(0));

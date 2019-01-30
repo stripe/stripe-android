@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import androidx.annotation.NonNull;
+
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONException;
@@ -10,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.Card.asCardBrand;
@@ -49,7 +52,11 @@ public class CardTest {
             "    \"funding\": \"credit\",\n" +
             "    \"fingerprint\": \"abc123\",\n" +
             "    \"last4\": \"4242\",\n" +
-            "    \"name\": \"John Cardholder\"\n" +
+            "    \"name\": \"John Cardholder\",\n" +
+            "    \"metadata\": {\n" +
+            "      \"color\": \"blue\",\n" +
+            "      \"animal\": \"dog\"\n" +
+            "    }\n" +
             "  }";
 
     private static final String BAD_JSON = "{ \"id\": ";
@@ -646,8 +653,8 @@ public class CardTest {
                 null,
                 null,
                 null,
-                null
-                );
+                null,
+                null);
         assertEquals("1234", card.getLast4());
     }
 
@@ -671,8 +678,8 @@ public class CardTest {
                 null,
                 null,
                 null,
-                null
-        );
+                null,
+                null);
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
         //noinspection deprecation
         assertEquals(Card.AMERICAN_EXPRESS, card.getType());
@@ -680,9 +687,9 @@ public class CardTest {
 
     @Test
     public void fromString_whenStringIsValidJson_returnsExpectedCard() {
-        Card expectedCard = buildEquivalentJsonCard();
+        final Card expectedCard = buildEquivalentJsonCard();
 
-        Card cardFromJson = Card.fromString(JSON_CARD);
+        final Card cardFromJson = Card.fromString(JSON_CARD);
 
         assertNotNull(cardFromJson);
         assertEquals(expectedCard.getBrand(), cardFromJson.getBrand());
@@ -705,6 +712,7 @@ public class CardTest {
         assertEquals(expectedCard.getCustomerId(), cardFromJson.getCustomerId());
         assertEquals(expectedCard.getFingerprint(), cardFromJson.getFingerprint());
         assertEquals(expectedCard.getId(), cardFromJson.getId());
+        assertEquals(expectedCard.getMetadata(), cardFromJson.getMetadata());
     }
 
     @Test
@@ -724,9 +732,9 @@ public class CardTest {
     @Test
     public void toMap_catchesAllFields_fromRawJson() {
         try {
-            JSONObject rawJsonObject = new JSONObject(JSON_CARD);
-            Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
-            Card expectedCard = buildEquivalentJsonCard();
+            final JSONObject rawJsonObject = new JSONObject(JSON_CARD);
+            final Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
+            final Card expectedCard = buildEquivalentJsonCard();
             JsonTestUtils.assertMapEquals(rawMap, expectedCard.toMap());
         } catch (JSONException unexpected) {
             fail();
@@ -738,23 +746,29 @@ public class CardTest {
         assertNull(Card.fromString(BAD_JSON));
     }
 
+    @NonNull
     private static Card buildEquivalentJsonCard() {
-        Card.Builder builder = new Card.Builder(null, 8, 2017, null);
-        builder.brand(Card.VISA);
-        builder.funding(Card.FUNDING_CREDIT);
-        builder.last4("4242");
-        builder.id("card_189fi32eZvKYlo2CHK8NPRME");
-        builder.country("US");
-        builder.currency("usd");
-        builder.addressCountry("US");
-        builder.addressCity("Des Moines");
-        builder.addressState("IA").addressZip("50305").addressZipCheck("unavailable");
-        builder.addressLine1("123 Any Street").addressLine1Check("unavailable").addressLine2("456");
-        builder.name("John Cardholder");
-        builder.cvcCheck("unavailable");
-        builder.customer("customer77");
-        builder.fingerprint("abc123");
-        return builder.build();
+        final Map<String, String> metadata = new HashMap<>(2);
+        metadata.put("color", "blue");
+        metadata.put("animal", "dog");
+
+        return new Card.Builder(null, 8, 2017, null)
+                .brand(Card.VISA)
+                .funding(Card.FUNDING_CREDIT)
+                .last4("4242")
+                .id("card_189fi32eZvKYlo2CHK8NPRME")
+                .country("US")
+                .currency("usd")
+                .addressCountry("US")
+                .addressCity("Des Moines")
+                .addressState("IA").addressZip("50305").addressZipCheck("unavailable")
+                .addressLine1("123 Any Street").addressLine1Check("unavailable").addressLine2("456")
+                .name("John Cardholder")
+                .cvcCheck("unavailable")
+                .customer("customer77")
+                .fingerprint("abc123")
+                .metadata(metadata)
+                .build();
     }
 }
 

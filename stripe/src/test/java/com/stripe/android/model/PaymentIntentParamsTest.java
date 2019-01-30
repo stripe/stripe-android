@@ -13,7 +13,7 @@ import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentParamsTest {
-    private static Card FULL_FIELDS_VISA_CARD =
+    private static final Card FULL_FIELDS_VISA_CARD =
             new Card(VALID_VISA_NO_SPACES,
                     12,
                     2050,
@@ -25,13 +25,14 @@ public class PaymentIntentParamsTest {
                     "CA",
                     "94107",
                     "US",
-                    "usd");
+                    "usd",
+                    null);
 
-    private static String TEST_CLIENT_SECRET =
+    private static final String TEST_CLIENT_SECRET =
             "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA";
 
-    private static String TEST_RETURN_URL = "stripe://return_url";
-    private static String TEST_SOURCE_ID = "src_123testsourceid";
+    private static final String TEST_RETURN_URL = "stripe://return_url";
+    private static final String TEST_SOURCE_ID = "src_123testsourceid";
 
     @Test
     public void createConfirmPaymentIntentWithSourceDataParams_withAllFields_hasExpectedFields() {

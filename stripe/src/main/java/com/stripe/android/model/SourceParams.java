@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,43 +17,43 @@ import static com.stripe.android.model.Source.SourceType;
  */
 public class SourceParams {
 
-    static final String API_PARAM_AMOUNT = "amount";
-    static final String API_PARAM_CURRENCY = "currency";
-    static final String API_PARAM_METADATA = "metadata";
-    static final String API_PARAM_OWNER = "owner";
-    static final String API_PARAM_REDIRECT = "redirect";
-    static final String API_PARAM_TYPE = "type";
-    static final String API_PARAM_TOKEN = "token";
-    static final String API_PARAM_USAGE = "usage";
+    private static final String API_PARAM_AMOUNT = "amount";
+    private static final String API_PARAM_CURRENCY = "currency";
+    private static final String API_PARAM_METADATA = "metadata";
+    private static final String API_PARAM_OWNER = "owner";
+    private static final String API_PARAM_REDIRECT = "redirect";
+    private static final String API_PARAM_TYPE = "type";
+    private static final String API_PARAM_TOKEN = "token";
+    private static final String API_PARAM_USAGE = "usage";
 
-    static final String API_PARAM_CLIENT_SECRET = "client_secret";
+    private static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
-    static final String FIELD_ADDRESS = "address";
-    static final String FIELD_BANK = "bank";
-    static final String FIELD_CARD = "card";
-    static final String FIELD_CITY = "city";
-    static final String FIELD_COUNTRY = "country";
-    static final String FIELD_CVC = "cvc";
-    static final String FIELD_EMAIL = "email";
-    static final String FIELD_EXP_MONTH = "exp_month";
-    static final String FIELD_EXP_YEAR = "exp_year";
-    static final String FIELD_IBAN = "iban";
-    static final String FIELD_LINE_1 = "line1";
-    static final String FIELD_LINE_2 = "line2";
-    static final String FIELD_NAME = "name";
-    static final String FIELD_NUMBER = "number";
-    static final String FIELD_POSTAL_CODE = "postal_code";
-    static final String FIELD_RETURN_URL = "return_url";
-    static final String FIELD_STATE = "state";
-    static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
-    static final String FIELD_PREFERRED_LANGUAGE = "preferred_language";
+    private static final String FIELD_ADDRESS = "address";
+    private static final String FIELD_BANK = "bank";
+    private static final String FIELD_CARD = "card";
+    private static final String FIELD_CITY = "city";
+    private static final String FIELD_COUNTRY = "country";
+    private static final String FIELD_CVC = "cvc";
+    private static final String FIELD_EMAIL = "email";
+    private static final String FIELD_EXP_MONTH = "exp_month";
+    private static final String FIELD_EXP_YEAR = "exp_year";
+    private static final String FIELD_IBAN = "iban";
+    private static final String FIELD_LINE_1 = "line1";
+    private static final String FIELD_LINE_2 = "line2";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_NUMBER = "number";
+    private static final String FIELD_POSTAL_CODE = "postal_code";
+    private static final String FIELD_RETURN_URL = "return_url";
+    private static final String FIELD_STATE = "state";
+    private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
+    private static final String FIELD_PREFERRED_LANGUAGE = "preferred_language";
 
-    static final String VISA_CHECKOUT = "visa_checkout";
-    static final String CALL_ID = "callid";
+    private static final String VISA_CHECKOUT = "visa_checkout";
+    private static final String CALL_ID = "callid";
 
-    static final String MASTERPASS = "masterpass";
-    static final String TRANSACTION_ID = "transaction_id";
-    static final String CART_ID = "cart_id";
+    private static final String MASTERPASS = "masterpass";
+    private static final String TRANSACTION_ID = "transaction_id";
+    private static final String CART_ID = "cart_id";
 
     @IntRange(from = 0) private Long mAmount;
     private Map<String, Object> mApiParameterMap;
@@ -82,19 +83,20 @@ public class SourceParams {
      *
      * @see <a href="https://stripe.com/docs/sources/p24">https://stripe.com/docs/sources/p24</a>
      */
+    @NonNull
     public static SourceParams createP24Params(
             @IntRange(from = 0) long amount,
             @NonNull String currency,
             @Nullable String name,
             @NonNull String email,
             @NonNull String returnUrl) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setAmount(amount)
                 .setType(Source.P24)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        Map<String, Object> ownerMap = new HashMap<>();
+        final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
@@ -119,18 +121,19 @@ public class SourceParams {
      *
      * @see <a href="https://stripe.com/docs/sources/alipay">https://stripe.com/docs/sources/alipay</a>
      */
+    @NonNull
     public static SourceParams createAlipayReusableParams(
             @NonNull String currency,
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.ALIPAY)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
                 .setUsage(Source.REUSABLE);
 
-        Map<String, Object> ownerMap = new HashMap<>();
+        final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
@@ -164,13 +167,13 @@ public class SourceParams {
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        Map<String, Object> ownerMap = new HashMap<>();
+        final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
@@ -205,7 +208,7 @@ public class SourceParams {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor,
             @Nullable String preferredLanguage) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.BANCONTACT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
@@ -213,7 +216,7 @@ public class SourceParams {
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
         if (statementDescriptor != null || preferredLanguage != null) {
-            Map<String, Object> additionalParamsMap = new HashMap<>();
+            final AbstractMap<String, Object> additionalParamsMap = new HashMap<>();
 
             additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
             additionalParamsMap.put(FIELD_PREFERRED_LANGUAGE, preferredLanguage);
@@ -260,11 +263,11 @@ public class SourceParams {
      */
     @NonNull
     public static SourceParams createCardParams(@NonNull Card card) {
-        SourceParams params = new SourceParams().setType(Source.CARD);
+        final SourceParams params = new SourceParams().setType(Source.CARD);
 
         // Not enforcing all fields to exist at this level.
         // Instead, the server will return an error for invalid data.
-        Map<String, Object> basicInfoMap = new HashMap<>();
+        final AbstractMap<String, Object> basicInfoMap = new HashMap<>();
         basicInfoMap.put(FIELD_NUMBER, card.getNumber());
         basicInfoMap.put(FIELD_EXP_MONTH, card.getExpMonth());
         basicInfoMap.put(FIELD_EXP_YEAR, card.getExpYear());
@@ -273,7 +276,7 @@ public class SourceParams {
 
         params.setApiParameterMap(basicInfoMap);
 
-        Map<String, Object> addressMap = new HashMap<>();
+        final Map<String, Object> addressMap = new HashMap<>();
         addressMap.put(FIELD_LINE_1, card.getAddressLine1());
         addressMap.put(FIELD_LINE_2, card.getAddressLine2());
         addressMap.put(FIELD_CITY, card.getAddressCity());
@@ -283,7 +286,7 @@ public class SourceParams {
         removeNullAndEmptyParams(addressMap);
 
         // If there are any keys left...
-        Map<String, Object> ownerMap = new HashMap<>();
+        final Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, card.getName());
         if (addressMap.keySet().size() > 0) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
@@ -291,6 +294,11 @@ public class SourceParams {
         removeNullAndEmptyParams(ownerMap);
         if (ownerMap.keySet().size() > 0) {
             params.setOwner(ownerMap);
+        }
+
+        final Map<String, String> metadata = card.getMetadata();
+        if (metadata != null) {
+            params.setMetaData(metadata);
         }
 
         return params;
@@ -315,7 +323,7 @@ public class SourceParams {
             @NonNull String name,
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.EPS)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
@@ -350,7 +358,7 @@ public class SourceParams {
             @NonNull String name,
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.GIROPAY)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
@@ -387,7 +395,7 @@ public class SourceParams {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor,
             @Nullable String bank) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
@@ -395,7 +403,7 @@ public class SourceParams {
         if (name != null) {
             params.setOwner(createSimpleMap(FIELD_NAME, name));
         }
-        Map<String, Object> additionalParamsMap = new HashMap<>();
+        final Map<String, Object> additionalParamsMap = new HashMap<>();
         if (statementDescriptor != null) {
             additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
@@ -425,13 +433,12 @@ public class SourceParams {
             @IntRange(from = 0) long amount,
             @NonNull String returnUrl,
             @NonNull String email) {
-        SourceParams params = new SourceParams()
+        return new SourceParams()
                 .setType(Source.MULTIBANCO)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
                 .setOwner(createSimpleMap(FIELD_EMAIL, email));
-        return params;
     }
 
     @NonNull
@@ -468,23 +475,24 @@ public class SourceParams {
             @Nullable String city,
             @Nullable String postalCode,
             @Nullable @Size(2) String country) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.SEPA_DEBIT)
                 .setCurrency(Source.EURO);
 
-        Map<String, Object> address = new HashMap<>();
+        final AbstractMap<String, Object> address = new HashMap<>();
         address.put(FIELD_LINE_1, addressLine1);
         address.put(FIELD_CITY, city);
         address.put(FIELD_POSTAL_CODE, postalCode);
         address.put(FIELD_COUNTRY, country);
 
-        Map<String, Object> ownerMap = new HashMap<>();
+        final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         ownerMap.put(FIELD_ADDRESS, address);
 
-        params.setOwner(ownerMap).setApiParameterMap(createSimpleMap(FIELD_IBAN, iban));
-        return params;
+        return params
+                .setOwner(ownerMap)
+                .setApiParameterMap(createSimpleMap(FIELD_IBAN, iban));
     }
 
     /**
@@ -506,13 +514,13 @@ public class SourceParams {
             @NonNull String returnUrl,
             @NonNull @Size(2) String country,
             @Nullable String statementDescriptor) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.SOFORT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        Map<String, Object> sofortMap = createSimpleMap(FIELD_COUNTRY, country);
+        final Map<String, Object> sofortMap = createSimpleMap(FIELD_COUNTRY, country);
         if (statementDescriptor != null) {
             sofortMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
@@ -540,7 +548,7 @@ public class SourceParams {
             @NonNull String currency,
             @NonNull String returnUrl,
             @NonNull String cardID) {
-        SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams()
                 .setType(Source.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
@@ -558,12 +566,12 @@ public class SourceParams {
      * @see <a href="https://stripe.com/docs/visa-checkout">https://stripe.com/docs/visa-checkout</a>
      * @see <a href="https://developer.visa.com/capabilities/visa_checkout/docs">https://developer.visa.com/capabilities/visa_checkout/docs</a>
      */
+    @NonNull
     public static SourceParams createVisaCheckoutParams(@NonNull String callId) {
-        SourceParams params = new SourceParams().setType(Source.CARD);
-        Map<String, Object> visaCheckoutMap =
-                createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId));
-        params.setApiParameterMap(visaCheckoutMap);
-        return params;
+        return new SourceParams()
+                .setType(Source.CARD)
+                .setApiParameterMap(
+                        createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId)));
     }
 
     /**
@@ -579,16 +587,16 @@ public class SourceParams {
      * @see <a href="https://developer.mastercard.com/product/masterpass">https://developer.mastercard.com/product/masterpass</a>
      * @see <a href="https://developer.mastercard.com/page/masterpass-merchant-mobile-checkout-sdk-for-android-v2">https://developer.mastercard.com/page/masterpass-merchant-mobile-checkout-sdk-for-android-v2</a>
      */
+    @NonNull
     public static SourceParams createMasterpassParams(
             @NonNull String transactionId,
             @NonNull String cartID) {
-        SourceParams params = new SourceParams().setType(Source.CARD);
-        Map map = createSimpleMap(TRANSACTION_ID, transactionId);
+        final Map<String, Object> map = createSimpleMap(TRANSACTION_ID, transactionId);
         map.put(CART_ID, cartID);
-        Map<String, Object> masterpassMap =
-                createSimpleMap(MASTERPASS, map);
-        params.setApiParameterMap(masterpassMap);
-        return params;
+
+        return new SourceParams()
+                .setType(Source.CARD)
+                .setApiParameterMap(createSimpleMap(MASTERPASS, map));
     }
 
     /**
@@ -602,7 +610,7 @@ public class SourceParams {
     @NonNull
     public static Map<String, Object> createRetrieveSourceParams(
             @NonNull @Size(min = 1) String clientSecret) {
-        Map<String, Object> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put(API_PARAM_CLIENT_SECRET, clientSecret);
         return params;
     }
@@ -827,7 +835,7 @@ public class SourceParams {
      */
     @NonNull
     public Map<String, Object> toParamMap() {
-        Map<String, Object> networkReadyMap = new HashMap<>();
+        final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
 
         networkReadyMap.put(API_PARAM_TYPE, mTypeRaw);
         networkReadyMap.put(mTypeRaw, mApiParameterMap);

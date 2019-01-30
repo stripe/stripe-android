@@ -126,7 +126,6 @@ public class StripeJsonModelTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void putStripeJsonModelListIfNotNull_forJsonWhenNotNull_addsExpectedList() {
         List<ExampleJsonModel> exampleJsonModels = new ArrayList<>();
         exampleJsonModels.add(new ExampleJsonModel());
@@ -147,7 +146,7 @@ public class StripeJsonModelTest {
         JsonTestUtils.assertJsonArrayEquals(expectedArray, jsonArray);
     }
 
-    class ExampleJsonModel extends StripeJsonModel {
+    private static class ExampleJsonModel extends StripeJsonModel {
 
         @NonNull
         @Override
