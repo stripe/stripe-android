@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
 
 import androidx.annotation.ColorInt;
@@ -245,24 +246,30 @@ public class CardMultilineWidget extends LinearLayout {
 
     void adjustViewForPostalCodeAttribute() {
         // Set the label/hint to the shorter value if we have three things in a row.
-        @StringRes int expiryLabel = mShouldShowPostalCode
+        @StringRes final int expiryLabel = mShouldShowPostalCode
                 ? R.string.expiry_label_short
                 : R.string.acc_label_expiry_date;
         mExpiryTextInputLayout.setHint(getResources().getString(expiryLabel));
 
-        @IdRes int focusForward = mShouldShowPostalCode
+        @IdRes final int focusForward = mShouldShowPostalCode
                 ? R.id.et_add_source_postal_ml
                 : NO_ID;
         mCvcEditText.setNextFocusForwardId(focusForward);
         mCvcEditText.setNextFocusDownId(focusForward);
 
-        int visibility = mShouldShowPostalCode ? View.VISIBLE : View.GONE;
-        mPostalInputLayout.setVisibility(visibility);
+        final int postalCodeVisibility = mShouldShowPostalCode ? View.VISIBLE : View.GONE;
+        mPostalInputLayout.setVisibility(postalCodeVisibility);
 
-        int marginPixels = mShouldShowPostalCode
+        // If the postal code field is not shown, the CVC field is the last one in the form and the
+        // action on the keyboard when the CVC field is focused should be "Done". Otherwise, show
+        // the "Next" action.
+        mCvcEditText.setImeOptions(postalCodeVisibility == View.GONE ?
+                EditorInfo.IME_ACTION_DONE : EditorInfo.IME_ACTION_NEXT);
+
+        final int marginPixels = mShouldShowPostalCode
                 ? getResources().getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
                 : 0;
-        LinearLayout.LayoutParams linearParams =
+        final LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
         linearParams.setMargins(0, 0, marginPixels, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
