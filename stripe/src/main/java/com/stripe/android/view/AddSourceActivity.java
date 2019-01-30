@@ -34,15 +34,16 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 public class AddSourceActivity extends StripeActivity {
 
     public static final String EXTRA_NEW_SOURCE = "new_source";
+
     static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
-    CardMultilineWidget mCardMultilineWidget;
-    CustomerSessionProxy mCustomerSessionProxy;
-    FrameLayout mErrorLayout;
-    StripeProvider mStripeProvider;
+    @Nullable private CardMultilineWidget mCardMultilineWidget;
+    @Nullable private CustomerSessionProxy mCustomerSessionProxy;
+    private FrameLayout mErrorLayout;
+    @Nullable private StripeProvider mStripeProvider;
 
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
@@ -63,6 +64,24 @@ public class AddSourceActivity extends StripeActivity {
                 }
             };
 
+    @NonNull private final SourceCallback mSourceCallback = new SourceCallback() {
+        @Override
+        public void onError(@NonNull Exception error) {
+            setCommunicatingProgress(false);
+            // This error is independent of the CustomerSession, so
+            // we have to surface it here.
+            showError(error.getLocalizedMessage());
+        }
+
+        @Override
+        public void onSuccess(@NonNull Source source) {
+            if (mUpdatesCustomer) {
+                attachCardToCustomer(source);
+            } else {
+                finishWithSource(source);
+            }
+        }
+    };
 
     /**
      * Create an {@link Intent} to start a {@link AddSourceActivity}.
@@ -136,28 +155,12 @@ public class AddSourceActivity extends StripeActivity {
         final SourceParams sourceParams = SourceParams.createCardParams(card);
         setCommunicatingProgress(true);
 
-        stripe.createSource(sourceParams, new SourceCallback() {
-            @Override
-            public void onError(Exception error) {
-                setCommunicatingProgress(false);
-                // This error is independent of the CustomerSession, so
-                // we have to surface it here.
-                showError(error.getLocalizedMessage());
-            }
+        stripe.createSource(sourceParams, mSourceCallback);
 
-            @Override
-            public void onSuccess(Source source) {
-                if (mUpdatesCustomer) {
-                    attachCardToCustomer(source);
-                } else {
-                    finishWithSource(source);
-                }
-            }
-        });
     }
 
-    private void attachCardToCustomer(StripePaymentSource source) {
-        CustomerSession.SourceRetrievalListener listener =
+    private void attachCardToCustomer(@NonNull final StripePaymentSource source) {
+        final CustomerSession.SourceRetrievalListener listener =
                 new CustomerSession.SourceRetrievalListener() {
                     @Override
                     public void onSourceRetrieved(@NonNull Source source) {
@@ -250,8 +253,9 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     interface CustomerSessionProxy {
-        void addProductUsageTokenIfValid(String token);
+        void addProductUsageTokenIfValid(@NonNull String token);
 
-        void addCustomerSource(String sourceId, CustomerSession.SourceRetrievalListener listener);
+        void addCustomerSource(String sourceId,
+                               @NonNull CustomerSession.SourceRetrievalListener listener);
     }
 }
