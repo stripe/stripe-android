@@ -763,7 +763,8 @@ public class Stripe {
         }
     }
 
-    private void executeTask(Executor executor, AsyncTask<Void, Void, ResponseWrapper> task) {
+    private void executeTask(@Nullable Executor executor,
+                             @NonNull AsyncTask<Void, Void, ResponseWrapper> task) {
         if (executor != null) {
             task.executeOnExecutor(executor);
         } else {
@@ -772,23 +773,23 @@ public class Stripe {
     }
 
     private static class ResponseWrapper {
-        final Source source;
-        final Token token;
-        final Exception error;
+        @Nullable final Source source;
+        @Nullable final Token token;
+        @Nullable final Exception error;
 
-        private ResponseWrapper(Token token) {
+        private ResponseWrapper(@Nullable Token token) {
             this.token = token;
             this.source = null;
             this.error = null;
         }
 
-        private ResponseWrapper(Source source) {
+        private ResponseWrapper(@Nullable Source source) {
             this.source = source;
             this.error = null;
             this.token = null;
         }
 
-        private ResponseWrapper(Exception error) {
+        private ResponseWrapper(@NonNull Exception error) {
             this.error = error;
             this.source = null;
             this.token = null;
@@ -850,7 +851,7 @@ public class Stripe {
         }
 
         @Override
-        protected void onPostExecute(ResponseWrapper responseWrapper) {
+        protected void onPostExecute(@NonNull ResponseWrapper responseWrapper) {
             final SourceCallback sourceCallback = mSourceCallbackRef.get();
             if (sourceCallback != null) {
                 if (responseWrapper.source != null) {

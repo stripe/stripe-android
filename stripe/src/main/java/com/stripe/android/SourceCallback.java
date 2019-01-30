@@ -1,5 +1,7 @@
 package com.stripe.android;
 
+import androidx.annotation.NonNull;
+
 import com.stripe.android.model.Source;
 
 /**
@@ -12,11 +14,11 @@ public interface SourceCallback {
      * Error callback method.
      * @param error the error that occurred.
      */
-    void onError(Exception error);
+    void onError(@NonNull Exception error);
 
     /**
      * Success callback method.
      * @param source the {@link Source} that was found or created.
      */
-    void onSuccess(Source source);
+    void onSuccess(@NonNull Source source);
 }
