@@ -207,10 +207,7 @@ public class CustomerSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenThrow(new APIException(
-                            "The card is invalid",
-                            "request_123",
-                            404,
+                    .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
                             null));
             when(mStripeApiProxy.deleteCustomerSourceWithKey(
                     any(Context.class),
@@ -227,10 +224,7 @@ public class CustomerSessionTest {
                     ArgumentMatchers.<String>anyList(),
                     anyString(),
                     anyString()))
-                    .thenThrow(new APIException(
-                            "The card does not exist",
-                            "request_123",
-                            404,
+                    .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
                             null));
             when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
                     any(Context.class),
@@ -250,7 +244,7 @@ public class CustomerSessionTest {
                     anyString(),
                     anyString(),
                     anyString()))
-                    .thenThrow(new APIException("auth error", "reqId", 405, null));
+                    .thenThrow(new APIException("auth error", "reqId", 405, null, null));
         } catch (StripeException exception) {
             fail("Exception when accessing mock api proxy: " + exception.getMessage());
         }

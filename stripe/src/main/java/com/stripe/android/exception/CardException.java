@@ -1,6 +1,9 @@
 package com.stripe.android.exception;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.stripe.android.StripeError;
 
 /**
  * An {@link Exception} indicating that there is a problem with a Card used for a request.
@@ -17,8 +20,8 @@ public class CardException extends StripeException {
     public CardException(@Nullable String message, @Nullable String requestId,
                          @Nullable String code, @Nullable String param,
                          @Nullable String declineCode, @Nullable String charge,
-                         @Nullable Integer statusCode, @Nullable Throwable e) {
-        super(message, requestId, statusCode, e);
+                         @Nullable Integer statusCode, @NonNull StripeError stripeError) {
+        super(stripeError, message, requestId, statusCode);
         mCode = code;
         mParam = param;
         mDeclineCode = declineCode;
