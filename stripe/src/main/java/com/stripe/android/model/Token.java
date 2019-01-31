@@ -20,12 +20,13 @@ import java.util.Date;
 public class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII, TYPE_ACCOUNT})
+    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII, TYPE_ACCOUNT, TYPE_CVC_UPDATE})
     public @interface TokenType {}
     public static final String TYPE_CARD = "card";
     public static final String TYPE_BANK_ACCOUNT = "bank_account";
     public static final String TYPE_PII = "pii";
     public static final String TYPE_ACCOUNT = "account";
+    public static final String TYPE_CVC_UPDATE = "cvc_update";
 
     // The key for these object fields is identical to their retrieved values
     // from the Type field.
@@ -173,35 +174,38 @@ public class Token implements StripePaymentSource {
         if (jsonObject == null) {
             return null;
         }
-        String tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID);
-        Long createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED);
-        Boolean liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE);
-        @TokenType String tokenType =
+        final String tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID);
+        final Long createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED);
+        final Boolean liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE);
+        @TokenType final String tokenType =
                 asTokenType(StripeJsonUtils.optString(jsonObject, FIELD_TYPE));
-        Boolean used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED);
+        final Boolean used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED);
 
         if (tokenId == null || createdTimeStamp == null || liveMode == null) {
             return null;
         }
-        Date date = new Date(createdTimeStamp * 1000);
+        final Date date = new Date(createdTimeStamp * 1000);
 
-        Token token = null;
+        final Token token;
         if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
-            JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
+            final JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
             if (bankAccountObject == null) {
                 return null;
             }
-            BankAccount bankAccount = BankAccount.fromJson(bankAccountObject);
-            token = new Token(tokenId, liveMode, date, used, bankAccount);
+            token = new Token(tokenId, liveMode, date, used,
+                    BankAccount.fromJson(bankAccountObject));
         } else if (Token.TYPE_CARD.equals(tokenType)) {
-            JSONObject cardObject = jsonObject.optJSONObject(FIELD_CARD);
+            final JSONObject cardObject = jsonObject.optJSONObject(FIELD_CARD);
             if (cardObject == null) {
                 return null;
             }
-            Card card = Card.fromJson(cardObject);
-            token = new Token(tokenId, liveMode, date, used, card);
-        } else if (Token.TYPE_PII.equals(tokenType) || Token.TYPE_ACCOUNT.equals(tokenType)) {
+            token = new Token(tokenId, liveMode, date, used, Card.fromJson(cardObject));
+        } else if (Token.TYPE_PII.equals(tokenType) ||
+                Token.TYPE_ACCOUNT.equals(tokenType) ||
+                Token.TYPE_CVC_UPDATE.equals(tokenType)) {
             token = new Token(tokenId, tokenType, liveMode, date, used);
+        } else {
+            token = null;
         }
         return token;
     }
@@ -228,6 +232,8 @@ public class Token implements StripePaymentSource {
             return Token.TYPE_PII;
         } else if (Token.TYPE_ACCOUNT.equals(possibleTokenType)) {
             return Token.TYPE_ACCOUNT;
+        } else if (Token.TYPE_CVC_UPDATE.equals(possibleTokenType)) {
+            return Token.TYPE_CVC_UPDATE;
         }
 
         return null;

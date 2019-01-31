@@ -5,8 +5,11 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
@@ -951,6 +954,24 @@ public class StripeTest {
         } catch (StripeException stripeEx) {
             fail("Unexpected exception making PII token");
         }
+    }
+
+    @Test
+    public void createTokenSynchronous_withValidCvc_passesIntegrationTest()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
+
+        final Token token = stripe.createCvcUpdateTokenSynchronous("1234");
+        assertNotNull(token);
+        assertEquals(Token.TYPE_CVC_UPDATE, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+        assertTrue(token.getId().startsWith("cvctok_"));
+        assertAllLogsAreValid(listener, 2);
     }
 
     @Test

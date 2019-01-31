@@ -43,7 +43,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void testGetApiUrl() {
-        String tokensApi = StripeApiHandler.getApiUrl();
+        String tokensApi = StripeApiHandler.getTokensUrl();
         assertEquals("https://api.stripe.com/v1/tokens", tokensApi);
     }
 

@@ -399,7 +399,7 @@ class StripeApiHandler {
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
         }
 
-        return requestToken(getApiUrl(), tokenParams, options);
+        return requestToken(getTokensUrl(), tokenParams, options);
     }
 
     @Nullable
@@ -641,7 +641,7 @@ class StripeApiHandler {
     }
 
     @VisibleForTesting
-    static String getApiUrl() {
+    static String getTokensUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
     }
 
@@ -702,7 +702,7 @@ class StripeApiHandler {
 
     @VisibleForTesting
     static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
-        return String.format(Locale.ROOT, "%s/%s", getApiUrl(), tokenId);
+        return String.format(Locale.ROOT, "%s/%s", getTokensUrl(), tokenId);
     }
 
     private static void convertErrorsToExceptionsAndThrowIfNecessary(
@@ -1109,7 +1109,7 @@ class StripeApiHandler {
                                     + "If this problem persists, you should check Stripe's "
                                     + "service status at https://twitter.com/stripestatus, "
                                     + "or let us know at support@stripe.com.",
-                            getApiUrl(), e.getMessage()), e);
+                            getTokensUrl(), e.getMessage()), e);
         } finally {
             if (conn != null) {
                 conn.disconnect();

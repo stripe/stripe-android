@@ -32,6 +32,7 @@ import java.util.concurrent.Executor;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
+import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
 
 /**
  * Class that handles {@link Token} creation from charges, {@link Card}, and accounts.
@@ -228,6 +229,42 @@ public class Stripe {
                 requestOptions,
                 Token.TYPE_BANK_ACCOUNT,
                 mLoggingResponseListener);
+    }
+
+    /**
+     * The simplest way to create a CVC update token. This runs on the default
+     * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
+     *
+     * @param cvc the CVC used to create this token
+     * @param callback a {@link TokenCallback} to receive either the token or an error
+     */
+    public void createCvcUpdateToken(
+            @NonNull @Size(min = 3, max = 4) final String cvc,
+            @NonNull final TokenCallback callback) {
+        createCvcUpdateToken(cvc, mDefaultPublishableKey, null, callback);
+    }
+
+    /**
+     * Call to create a {@link Token} for CVC with the publishable key and
+     * {@link Executor} specified.
+     *
+     * @param cvc the CVC used to create this token
+     * @param publishableKey the publishable key to use
+     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
+     *                 default non-ui executor
+     * @param callback a {@link TokenCallback} to receive the result or error message
+     */
+    public void createCvcUpdateToken(
+            @NonNull @Size(min = 3, max = 4) final String cvc,
+            @NonNull @Size(min = 1) final String publishableKey,
+            @Nullable final Executor executor,
+            @NonNull final TokenCallback callback) {
+        createTokenFromParams(
+                mapFromCvc(cvc),
+                publishableKey,
+                Token.TYPE_CVC_UPDATE,
+                executor,
+                callback);
     }
 
     /**
@@ -544,6 +581,64 @@ public class Stripe {
                 hashMapFromPersonalId(personalId),
                 requestOptions,
                 Token.TYPE_PII,
+                mLoggingResponseListener);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for CVC updating. Do not call this on the UI thread
+     * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
+     *
+     * @param cvc the CVC to use for this token
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    @Nullable
+    public Token createCvcUpdateTokenSynchronous(@NonNull String cvc)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return createCvcUpdateTokenSynchronous(cvc, mDefaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for CVC updating. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * @param cvc the CVC to use for this token
+     * @param publishableKey the publishable key to use with this request
+     * @return a {@link Token} that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    @Nullable
+    public Token createCvcUpdateTokenSynchronous(@NonNull String cvc,
+                                                 @NonNull String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        validateKey(publishableKey);
+        final RequestOptions requestOptions = RequestOptions.builder(
+                publishableKey,
+                mStripeAccount,
+                RequestOptions.TYPE_QUERY).build();
+        return StripeApiHandler.createToken(
+                mContext,
+                mapFromCvc(cvc),
+                requestOptions,
+                Token.TYPE_CVC_UPDATE,
                 mLoggingResponseListener);
     }
 
