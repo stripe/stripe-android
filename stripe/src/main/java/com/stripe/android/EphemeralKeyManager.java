@@ -35,13 +35,13 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         retrieveEphemeralKey(null, null);
     }
 
-    void retrieveEphemeralKey(@Nullable String actionString, Map<String, Object> arguments) {
+    void retrieveEphemeralKey(@Nullable String actionString,
+                              @Nullable Map<String, Object> arguments) {
         if (shouldRefreshKey(
                 mEphemeralKey,
                 mTimeBufferInSeconds,
                 mOverrideCalendar)) {
-            mEphemeralKeyProvider.createEphemeralKey(
-                    StripeApiHandler.API_VERSION,
+            mEphemeralKeyProvider.createEphemeralKey(StripeApiHandler.API_VERSION,
                     new ClientKeyUpdateListener(this, actionString, arguments));
         } else {
             mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);
@@ -115,23 +115,22 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
 
-        private @Nullable String mActionString;
-        private @Nullable Map<String, Object> mArguments;
-        private @NonNull
-        WeakReference<EphemeralKeyManager> mEphemeralKeyManagerWeakReference;
+        @Nullable private final String mActionString;
+        @Nullable private final Map<String, Object> mArguments;
+        @NonNull private final WeakReference<EphemeralKeyManager> mEphemeralKeyManagerRef;
 
         ClientKeyUpdateListener(
                 @NonNull EphemeralKeyManager keyManager,
                 @Nullable String actionString,
                 @Nullable Map<String, Object> arguments) {
-            mEphemeralKeyManagerWeakReference = new WeakReference<>(keyManager);
+            mEphemeralKeyManagerRef = new WeakReference<>(keyManager);
             mActionString = actionString;
             mArguments = arguments;
         }
 
         @Override
         public void onKeyUpdate(@NonNull String rawKey) {
-            final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
+            final EphemeralKeyManager keyManager = mEphemeralKeyManagerRef.get();
             if (keyManager != null) {
                 keyManager.updateKey(rawKey, mActionString, mArguments);
             }
@@ -139,7 +138,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
         @Override
         public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
-            final EphemeralKeyManager keyManager = mEphemeralKeyManagerWeakReference.get();
+            final EphemeralKeyManager keyManager = mEphemeralKeyManagerRef.get();
             if (keyManager != null) {
                 keyManager.updateKeyError(responseCode, message);
             }

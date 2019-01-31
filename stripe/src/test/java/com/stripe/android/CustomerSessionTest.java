@@ -585,7 +585,7 @@ public class CustomerSessionTest {
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
 
-        verify(mockListener).onError(404, "The card is invalid");
+        verify(mockListener).onError(404, "The card is invalid", null);
         assertTrue(session.getProductUsageTokens().isEmpty());
     }
 
@@ -698,7 +698,7 @@ public class CustomerSessionTest {
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
 
-        verify(mockListener).onError(404, "The card does not exist");
+        verify(mockListener).onError(404, "The card does not exist", null);
         assertTrue(session.getProductUsageTokens().isEmpty());
     }
 
@@ -809,7 +809,7 @@ public class CustomerSessionTest {
         APIException ex = (APIException)
                 captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
         assertNotNull(ex);
-        verify(mockListener).onError(405, "auth error");
+        verify(mockListener).onError(405, "auth error", null);
         assertTrue(session.getProductUsageTokens().isEmpty());
     }
 

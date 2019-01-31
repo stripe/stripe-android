@@ -256,7 +256,8 @@ public class PaymentSession {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener.onError(errorCode, errorMessage);
                             mPaymentSessionListener.onCommunicatingStateChanged(false);

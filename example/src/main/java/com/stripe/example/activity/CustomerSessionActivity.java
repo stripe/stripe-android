@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.CustomerSession;
+import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
@@ -64,7 +65,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         mSelectSourceButton.setEnabled(false);
                         mErrorDialogHandler.showError(errorMessage);
                         mProgressBar.setVisibility(View.INVISIBLE);

@@ -166,16 +166,18 @@ public class AddSourceActivityTest {
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(Source.CARD, params.getType());
 
-        callback.onSuccess(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
+        final Source source = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(source);
+        callback.onSuccess(source);
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();
 
         assertTrue(mActivityController.get().isFinishing());
         assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
-        Source source =
+        final Source newSource =
                 Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
-        assertNotNull(source);
-        assertEquals(Source.CARD, source.getType());
+        assertNotNull(newSource);
+        assertEquals(Source.CARD, newSource.getType());
     }
 
     @Test
@@ -231,16 +233,18 @@ public class AddSourceActivityTest {
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         assertEquals(Source.CARD, params.getType());
 
-        callback.onSuccess(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
+        final Source source = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        assertNotNull(source);
+        callback.onSuccess(source);
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();
 
         assertTrue(mActivityController.get().isFinishing());
         assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
-        Source source =
+        final Source newSource =
                 Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
-        assertNotNull(source);
-        assertEquals(Source.CARD, source.getType());
+        assertNotNull(newSource);
+        assertEquals(Source.CARD, newSource.getType());
     }
 
     @Test
@@ -414,7 +418,7 @@ public class AddSourceActivityTest {
         StripeException error = mock(StripeException.class);
         final String errorMessage = "Oh no! An Error!";
         when(error.getLocalizedMessage()).thenReturn(errorMessage);
-        listener.onError(400, errorMessage);
+        listener.onError(400, errorMessage, null);
 
         // We're mocking the CustomerSession, so we have to replicate its broadcast behavior.
         Bundle bundle = new Bundle();

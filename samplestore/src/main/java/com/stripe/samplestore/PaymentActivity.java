@@ -26,6 +26,7 @@ import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
+import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.ShippingInformation;
@@ -134,7 +135,8 @@ public class PaymentActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 ShippingInformation shippingInformation = intent.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA);
                 Intent shippingInfoProcessedIntent = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
-                if (shippingInformation.getAddress() == null || !shippingInformation.getAddress().getCountry().equals(Locale.US.getCountry())) {
+                if (shippingInformation.getAddress() == null ||
+                        !shippingInformation.getAddress().getCountry().equals(Locale.US.getCountry())) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 } else {
                     ArrayList<ShippingMethod> shippingMethods = getValidShippingMethods(shippingInformation);
@@ -242,8 +244,7 @@ public class PaymentActivity extends AppCompatActivity {
         TextView quantityView = view.findViewById(R.id.tv_cart_quantity);
         TextView unitPriceView = view.findViewById(R.id.tv_cart_unit_price);
         TextView totalPriceView = view.findViewById(R.id.tv_cart_total_price);
-        TextView[] itemViews = { labelView, quantityView, unitPriceView, totalPriceView };
-        return itemViews;
+        return new TextView[]{labelView, quantityView, unitPriceView, totalPriceView};
     }
 
     private void attemptPurchase() {
@@ -260,7 +261,8 @@ public class PaymentActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(int errorCode, @Nullable String errorMessage) {
+            public void onError(int errorCode, @Nullable String errorMessage,
+                                @Nullable StripeError stripeError) {
                 displayError("Error getting payment method");
             }
         });
@@ -300,7 +302,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData().getShippingInformation();
 
-        Observable<Void> stripeResponse = stripeService.createQueryCharge(createParams(price, sourceId, customerId, shippingInformation));
+        final Observable<Void> stripeResponse = stripeService.createQueryCharge(
+                createParams(price, sourceId, customerId, shippingInformation));
         final FragmentManager fragmentManager = getSupportFragmentManager();
         mCompositeSubscription.add(stripeResponse
                 .subscribeOn(Schedulers.io())
@@ -399,7 +402,8 @@ public class PaymentActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
+                        public void onError(int errorCode, @Nullable String errorMessage,
+                                            @Nullable StripeError stripeError) {
                             displayError(errorMessage);
                         }
                     });
@@ -415,19 +419,20 @@ public class PaymentActivity extends AppCompatActivity {
 
     private String formatSourceDescription(Source source) {
         if (Source.CARD.equals(source.getType())) {
-            SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(sourceCardData.getBrand()).append(getString(R.string.ending_in)).append(sourceCardData.getLast4());
-            return stringBuilder.toString();
+            final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
+            return sourceCardData.getBrand() + getString(R.string.ending_in) +
+                    sourceCardData.getLast4();
         }
         return source.getType();
     }
 
-    private ArrayList<ShippingMethod> getValidShippingMethods(ShippingInformation shippingInformation) {
+    @NonNull
+    private ArrayList<ShippingMethod> getValidShippingMethods(@NonNull ShippingInformation shippingInformation) {
         ArrayList<ShippingMethod> shippingMethods = new ArrayList<>();
         shippingMethods.add(new ShippingMethod("UPS Ground", "ups-ground", "Arrives in 3-5 days", 0, "USD"));
         shippingMethods.add(new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD"));
-        if (shippingInformation.getAddress() != null && shippingInformation.getAddress().getPostalCode().equals("94110")) {
+        if (shippingInformation.getAddress() != null &&
+                shippingInformation.getAddress().getPostalCode().equals("94110")) {
             shippingMethods.add(new ShippingMethod("1 Hour Courier", "courier", "Arrives in the next hour", 1099, "USD"));
         }
         return shippingMethods;

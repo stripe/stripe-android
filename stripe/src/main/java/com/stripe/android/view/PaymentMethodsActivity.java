@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
+import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 
@@ -107,7 +108,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onError(int errorCode, @Nullable String errorMessage) {
+                        public void onError(int errorCode, @Nullable String errorMessage,
+                                            @Nullable StripeError stripeError) {
                             String displayedError = errorMessage == null ? "" : errorMessage;
                             showError(displayedError);
                             setCommunicatingProgress(false);
@@ -213,7 +215,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         // Note: if this Activity is changed to subclass StripeActivity,
                         // this code will make the error message show twice, since StripeActivity
                         // will listen to the broadcast version of the error
@@ -304,7 +307,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         setCommunicatingProgress(false);
                     }
                 };
@@ -344,7 +348,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         String displayedError = errorMessage == null ? "" : errorMessage;
                         showError(displayedError);
                         setCommunicatingProgress(false);
