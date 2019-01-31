@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 8.4.0 (on deck)
+* Add support for creating a CVC update Token [#787]
+* Prevent AddSourceActivity's SourceCallback from being garbage collected [#791]
+* Fix IME action logic on CVC field in CardMultilineWidget [#790]
+* Add metadata field to Card [#786]
+
 ### 8.3.0 2019-01-25
 * Fix bug related to ephemeral keys introduced in 8.2.0 [#780]
 * Migrate to Android X [#778]
