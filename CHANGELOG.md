@@ -1,6 +1,7 @@
 # CHANGELOG
 
-### 8.4.0 (on deck)
+### 8.4.0 2019-02-06
+* Add StripeError field to StripeException [#793]
 * Add support for creating a CVC update Token [#787]
 * Prevent AddSourceActivity's SourceCallback from being garbage collected [#791]
 * Fix IME action logic on CVC field in CardMultilineWidget [#790]
