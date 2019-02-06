@@ -80,8 +80,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
     }
 
     private void launchWithCustomer() {
-        Intent payIntent = PaymentMethodsActivity.newIntent(this);
-        startActivityForResult(payIntent, REQUEST_CODE_SELECT_SOURCE);
+        startActivityForResult(PaymentMethodsActivity.newIntent(this), REQUEST_CODE_SELECT_SOURCE);
     }
 
     @Override
@@ -98,6 +97,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         }
     }
 
+    @NonNull
     private String buildCardString(@NonNull SourceCardData data) {
         return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
     }

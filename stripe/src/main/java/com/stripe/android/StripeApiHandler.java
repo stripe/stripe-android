@@ -147,11 +147,8 @@ class StripeApiHandler {
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
         }
     }
 
@@ -200,11 +197,8 @@ class StripeApiHandler {
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
         }
     }
 
@@ -288,11 +282,8 @@ class StripeApiHandler {
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
-            throw new APIException(
-                    unexpected.getMessage(),
-                    unexpected.getRequestId(),
-                    unexpected.getStatusCode(),
-                    unexpected);
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
         }
     }
 
@@ -339,11 +330,8 @@ class StripeApiHandler {
            return Source.fromString(response.getResponseBody());
        } catch (CardException unexpected) {
            // This particular kind of exception should not be possible from a Source API endpoint.
-           throw new APIException(
-                   unexpected.getMessage(),
-                   unexpected.getRequestId(),
-                   unexpected.getStatusCode(),
-                   unexpected);
+           throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                   unexpected.getStatusCode(), null, unexpected);
        }
     }
 
@@ -996,7 +984,7 @@ class StripeApiHandler {
             throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty " +
                     "string. " + "We interpret empty strings as null in requests. " + "You may " +
                     "set '" + keyPrefix + "' to null to delete the property.", keyPrefix, null,
-                    0, null, null, null);
+                    0, null, null, null, null);
         } else if (value == null) {
             flatParams = new LinkedList<>();
             flatParams.add(new Parameter(keyPrefix, ""));
@@ -1039,17 +1027,16 @@ class StripeApiHandler {
                 if (jsonData == null) {
                     throw new InvalidRequestException("Unable to create JSON data from parameters. "
                             + "Please contact support@stripe.com for assistance.",
-                            null, null, 0, null, null, null);
+                            null, null, 0, null, null, null, null);
                 }
                 return jsonData.toString().getBytes(CHARSET);
             } else {
                 return createQuery(params).getBytes(CHARSET);
             }
         } catch (UnsupportedEncodingException e) {
-            throw new InvalidRequestException("Unable to encode parameters to "
-                    + CHARSET
-                    + ". Please contact support@stripe.com for assistance.",
-                    null, null, 0, null, null, e);
+            throw new InvalidRequestException("Unable to encode parameters to " + CHARSET + "." +
+                    " Please contact support@stripe.com for assistance.",
+                    null, null, 0, null, null, null, e);
         }
     }
 
@@ -1117,35 +1104,27 @@ class StripeApiHandler {
         }
     }
 
-    private static void handleAPIError(@Nullable String rBody, int rCode,
+    private static void handleAPIError(@Nullable String responseBody, int responseCode,
                                        @Nullable String requestId)
-            throws InvalidRequestException, AuthenticationException,
-            CardException, APIException {
+            throws InvalidRequestException, AuthenticationException, CardException, APIException {
 
-        final ErrorParser.StripeError stripeError = ErrorParser.parseError(rBody);
-        switch (rCode) {
-            case 400: {
-                throw new InvalidRequestException(
-                        stripeError.message,
-                        stripeError.param,
-                        requestId,
-                        rCode,
-                        stripeError.code,
-                        stripeError.declineCode,
-                        null);
-            }
+        final StripeError stripeError = ErrorParser.parseError(responseBody);
+        switch (responseCode) {
+            case 400:
             case 404: {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
                         requestId,
-                        rCode,
+                        responseCode,
                         stripeError.code,
                         stripeError.declineCode,
+                        stripeError,
                         null);
             }
             case 401: {
-                throw new AuthenticationException(stripeError.message, requestId, rCode);
+                throw new AuthenticationException(stripeError.message, requestId, responseCode,
+                        stripeError);
             }
             case 402: {
                 throw new CardException(
@@ -1155,18 +1134,21 @@ class StripeApiHandler {
                         stripeError.param,
                         stripeError.declineCode,
                         stripeError.charge,
-                        rCode,
-                        null);
+                        responseCode,
+                        stripeError
+                );
             }
             case 403: {
-                throw new PermissionException(stripeError.message, requestId, rCode);
+                throw new PermissionException(stripeError.message, requestId, responseCode,
+                        stripeError);
             }
             case 429: {
                 throw new RateLimitException(stripeError.message, stripeError.param, requestId,
-                        rCode, null);
+                        responseCode, stripeError);
             }
             default: {
-                throw new APIException(stripeError.message, requestId, rCode, null);
+                throw new APIException(stripeError.message, requestId, responseCode, stripeError,
+                        null);
             }
         }
     }
@@ -1196,7 +1178,7 @@ class StripeApiHandler {
             throw new AuthenticationException("No API key provided. (HINT: set your API key using" +
                     " 'Stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe" +
                     " web interface. See https://stripe.com/api for details or email " +
-                    "support@stripe.com if you have questions.", null, 0);
+                    "support@stripe.com if you have questions.", null, 0, null);
         }
 
         final StripeResponse response = getStripeResponse(method, url, params, options);

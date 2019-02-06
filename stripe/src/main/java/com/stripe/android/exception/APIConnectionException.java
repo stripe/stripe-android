@@ -12,7 +12,7 @@ public class APIConnectionException extends StripeException {
     }
 
     public APIConnectionException(@Nullable String message, @Nullable Throwable e) {
-        super(message, null, 0, e);
+        super(null, message, null, 0, e);
     }
 
 }

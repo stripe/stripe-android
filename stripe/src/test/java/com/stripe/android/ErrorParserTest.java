@@ -43,7 +43,7 @@ public class ErrorParserTest {
 
     @Test
     public void parseError_withInvalidRequestError_createsCorrectObject() {
-        final ErrorParser.StripeError parsedStripeError =
+        final StripeError parsedStripeError =
                 ErrorParser.parseError(RAW_INVALID_REQUEST_ERROR);
         String errorMessage = "The Stripe API is only accessible over HTTPS.  " +
                 "Please see <https://stripe.com/docs> for more information.";
@@ -54,7 +54,7 @@ public class ErrorParserTest {
 
     @Test
     public void parseError_withNoErrorMessage_addsInvalidResponseMessage() {
-        final ErrorParser.StripeError badStripeError =
+        final StripeError badStripeError =
                 ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR);
         assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, badStripeError.message);
         assertNull(badStripeError.type);
@@ -62,7 +62,7 @@ public class ErrorParserTest {
 
     @Test
     public void parseError_withAllFields_parsesAllFields() {
-        final ErrorParser.StripeError error = ErrorParser.parseError(RAW_ERROR_WITH_ALL_FIELDS);
+        final StripeError error = ErrorParser.parseError(RAW_ERROR_WITH_ALL_FIELDS);
         assertEquals("code_value", error.code);
         assertEquals("param_value", error.param);
         assertEquals("charge_value", error.charge);

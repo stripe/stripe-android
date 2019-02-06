@@ -159,7 +159,7 @@ public class PaymentFlowActivityTest {
 
         Bundle bundle = new Bundle();
         bundle.putSerializable(EXTRA_EXCEPTION,
-                new APIException("Something's wrong", "ID123", 400, null));
+                new APIException("Something's wrong", "ID123", 400, null, null));
         Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
         errorIntent.putExtras(bundle);
         LocalBroadcastManager.getInstance(paymentFlowActivity)
