@@ -24,7 +24,8 @@ public class SourceCardDataTest {
 
     @Test
     public void fromExampleJsonCard_createsExpectedObject() {
-        SourceCardData cardData = SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
+        final SourceCardData cardData = SourceCardData
+                .fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
         assertNotNull(cardData);
         assertEquals(Card.VISA, cardData.getBrand());
         assertEquals(0, cardData.getAdditionalFields().size());
@@ -41,9 +42,11 @@ public class SourceCardDataTest {
 
     @Test
     public void fromExampleJsonCard_toMap_createsExpectedMapping() {
-        SourceCardData cardData = SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
-        Map<String, Object> cardDataMap = cardData.toMap();
+        final SourceCardData cardData = SourceCardData
+                .fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
+        assertNotNull(cardData);
 
+        final Map<String, Object> cardDataMap = cardData.toMap();
         assertNotNull(cardDataMap);
         assertEquals("US", cardDataMap.get("country"));
         assertEquals("4242", cardDataMap.get("last4"));

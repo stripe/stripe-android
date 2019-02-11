@@ -9,8 +9,11 @@ import com.stripe.android.StripeNetworkUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
@@ -28,6 +31,15 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     private static final String FIELD_MANDATE_REFERENCE = "mandate_reference";
     private static final String FIELD_MANDATE_URL = "mandate_url";
 
+    private static final Set<String> STANDARD_FIELDS = new HashSet<>(Arrays.asList(
+            FIELD_BANK_CODE,
+            FIELD_BRANCH_CODE,
+            FIELD_COUNTRY,
+            FIELD_FINGERPRINT,
+            FIELD_LAST4,
+            FIELD_MANDATE_REFERENCE,
+            FIELD_MANDATE_URL));
+
     private String mBankCode;
     private String mBranchCode;
     private String mCountry;
@@ -37,15 +49,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     private String mMandateUrl;
 
     private SourceSepaDebitData() {
-        super();
-        addStandardFields(
-                FIELD_BANK_CODE,
-                FIELD_BRANCH_CODE,
-                FIELD_COUNTRY,
-                FIELD_FINGERPRINT,
-                FIELD_LAST4,
-                FIELD_MANDATE_REFERENCE,
-                FIELD_MANDATE_URL);
+        super(STANDARD_FIELDS);
     }
 
     @Nullable
