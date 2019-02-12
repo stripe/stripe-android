@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,86 +30,98 @@ import static com.stripe.android.model.StripeJsonUtils.putMapIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 public class PaymentIntent extends StripeJsonModel {
-    static final String VALUE_PAYMENT_INTENT = "payment_intent";
+    private static final String VALUE_PAYMENT_INTENT = "payment_intent";
 
-    static final String FIELD_ID = "id";
-    static final String FIELD_OBJECT = "object";
-    static final String FIELD_ALLOWED_SOURCE_TYPES = "allowed_source_types";
-    static final String FIELD_AMOUNT = "amount";
-    static final String FIELD_CREATED = "created";
-    static final String FIELD_CANCELED = "canceled_at";
-    static final String FIELD_CAPTURE_METHOD = "capture_method";
-    static final String FIELD_CLIENT_SECRET = "client_secret";
-    static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
-    static final String FIELD_CURRENCY = "currency";
-    static final String FIELD_DESCRIPTION = "description";
-    static final String FIELD_LIVEMODE = "livemode";
-    static final String FIELD_NEXT_SOURCE_ACTION = "next_source_action";
-    static final String FIELD_RECEIPT_EMAIL = "receipt_email";
-    static final String FIELD_SOURCE = "source";
-    static final String FIELD_STATUS = "status";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_ALLOWED_SOURCE_TYPES = "allowed_source_types";
+    private static final String FIELD_AMOUNT = "amount";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_CANCELED = "canceled_at";
+    private static final String FIELD_CAPTURE_METHOD = "capture_method";
+    private static final String FIELD_CLIENT_SECRET = "client_secret";
+    private static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_DESCRIPTION = "description";
+    private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_NEXT_SOURCE_ACTION = "next_source_action";
+    private static final String FIELD_RECEIPT_EMAIL = "receipt_email";
+    private static final String FIELD_SOURCE = "source";
+    private static final String FIELD_STATUS = "status";
 
-    private String mId;
-    private String mObjectType;
-    private List<String> mAllowedSourceTypes;
-    private Long mAmount;
-    private Long mCanceledAt;
-    private String mCaptureMethod;
-    private String mClientSecret;
-    private String mConfirmationMethod;
-    private Long mCreated;
-    private String mCurrency;
-    private String mDescription;
-    private Boolean mLiveMode;
-    private Map<String, Object> mNextSourceAction;
-    private String mReceiptEmail;
-    private String mSource;
-    private String mStatus;
+    @Nullable private final String mId;
+    @Nullable private final String mObjectType;
+    @NonNull private final List<String> mAllowedSourceTypes;
+    @Nullable private final Long mAmount;
+    @Nullable private final Long mCanceledAt;
+    @Nullable private final String mCaptureMethod;
+    @Nullable private final String mClientSecret;
+    @Nullable private final String mConfirmationMethod;
+    @Nullable private final Long mCreated;
+    @Nullable private final String mCurrency;
+    @Nullable private final String mDescription;
+    @Nullable private final Boolean mLiveMode;
+    @Nullable private final Map<String, Object> mNextSourceAction;
+    @Nullable private final String mReceiptEmail;
+    @Nullable private final String mSource;
+    @Nullable private final String mStatus;
 
+    @Nullable
     public String getId() {
         return mId;
     }
 
+    @NonNull
     public List<String> getAllowedSourceTypes() {
         return mAllowedSourceTypes;
     }
 
+    @Nullable
     public Long getAmount() {
         return mAmount;
     }
 
+    @Nullable
     public Long getCanceledAt() {
         return mCanceledAt;
     }
 
+    @Nullable
     public String getCaptureMethod() {
         return mCaptureMethod;
     }
 
+    @Nullable
     public String getClientSecret() {
         return mClientSecret;
     }
 
+    @Nullable
     public String getConfirmationMethod() {
         return mConfirmationMethod;
     }
 
+    @Nullable
     public Long getCreated() {
         return mCreated;
     }
 
+    @Nullable
     public String getCurrency() {
         return mCurrency;
     }
 
+    @Nullable
     public String getDescription() {
         return mDescription;
     }
 
+    @Nullable
     public Boolean isLiveMode() {
         return mLiveMode;
     }
 
+    @Nullable
     public Map<String, Object> getNextSourceAction() {
         return mNextSourceAction;
     }
@@ -138,28 +151,28 @@ public class PaymentIntent extends StripeJsonModel {
         return mSource;
     }
 
-    @NonNull
+    @Nullable
     public String getStatus() {
         return mStatus;
     }
 
-    PaymentIntent(
-            String id,
-            String objectType,
-            List<String> allowedSourceTypes,
-            Long amount,
-            Long canceledAt,
-            String captureMethod,
-            String clientSecret,
-            String confirmationMethod,
-            Long created,
-            String currency,
-            String description,
-            Boolean liveMode,
-            Map<String, Object> nextSourceAction,
-            String receiptEmail,
-            String source,
-            String status
+    private PaymentIntent(
+            @Nullable String id,
+            @Nullable String objectType,
+            @NonNull List<String> allowedSourceTypes,
+            @Nullable Long amount,
+            @Nullable Long canceledAt,
+            @Nullable String captureMethod,
+            @Nullable String clientSecret,
+            @Nullable String confirmationMethod,
+            @Nullable Long created,
+            @Nullable String currency,
+            @Nullable String description,
+            @Nullable Boolean liveMode,
+            @Nullable Map<String, Object> nextSourceAction,
+            @Nullable String receiptEmail,
+            @Nullable String source,
+            @Nullable String status
     ) {
         mId = id;
         mObjectType = objectType;
@@ -201,14 +214,18 @@ public class PaymentIntent extends StripeJsonModel {
         }
         String id = optString(jsonObject, FIELD_ID);
         String objectType = optString(jsonObject, FIELD_OBJECT);
+
         JSONArray allowedSourceTypesJSONArray = jsonObject.optJSONArray(FIELD_ALLOWED_SOURCE_TYPES);
-        List<String> allowedSourceTypes = new ArrayList<>();
-        for (int i = 0; i < allowedSourceTypesJSONArray.length(); i++) {
-            try {
-                allowedSourceTypes.add(allowedSourceTypesJSONArray.getString(i));
-            } catch (JSONException ignored) {
+        final List<String> allowedSourceTypes = new ArrayList<>();
+        if (allowedSourceTypesJSONArray != null) {
+            for (int i = 0; i < allowedSourceTypesJSONArray.length(); i++) {
+                try {
+                    allowedSourceTypes.add(allowedSourceTypesJSONArray.getString(i));
+                } catch (JSONException ignored) {
+                }
             }
         }
+
         Long amount = optLong(jsonObject, FIELD_AMOUNT);
         Long canceledAt = optLong(jsonObject, FIELD_CANCELED);
         String captureMethod = optString(jsonObject, FIELD_CAPTURE_METHOD);
@@ -269,7 +286,7 @@ public class PaymentIntent extends StripeJsonModel {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
+        final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_ID, mId);
         map.put(FIELD_OBJECT, mObjectType);
         map.put(FIELD_ALLOWED_SOURCE_TYPES, mAllowedSourceTypes);

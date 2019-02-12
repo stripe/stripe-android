@@ -122,8 +122,10 @@ public class PaymentIntentTest {
     public void getAuthorizationUrl_whenProvidedBadUrl_doesNotCrash() {
         PaymentIntent paymentIntent = PaymentIntent.fromString(
                 EXAMPLE_PAYMENT_INTENT_SOURCE_WITH_BAD_AUTH_URL);
+        assertNotNull(paymentIntent);
 
         Uri authUrl = paymentIntent.getAuthorizationUrl();
+        assertNotNull(authUrl);
 
         assertEquals(BAD_URL, authUrl.getEncodedPath());
     }

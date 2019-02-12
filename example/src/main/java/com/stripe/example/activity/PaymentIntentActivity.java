@@ -240,7 +240,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                 if (paymentIntent != null) {
                                     mPaymentIntentValue.setText(paymentIntent.toString());
                                     Uri authUrl = paymentIntent.getAuthorizationUrl();
-                                    if (paymentIntent.getStatus().equals("requires_source_action") && authUrl != null) {
+                                    if ("requires_source_action".equals(paymentIntent.getStatus())
+                                            && authUrl != null) {
                                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, authUrl);
                                         startActivity(browserIntent);
                                     }
