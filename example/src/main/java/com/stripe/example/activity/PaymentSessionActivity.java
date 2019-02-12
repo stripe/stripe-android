@@ -19,6 +19,7 @@ import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
+import com.stripe.android.StripeError;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
@@ -128,7 +129,8 @@ public class PaymentSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         mCustomer = null;
                         mSelectPaymentButton.setEnabled(false);
                         mSelectShippingButton.setEnabled(false);
@@ -186,7 +188,8 @@ public class PaymentSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         mProgressBar.setVisibility(View.INVISIBLE);
                     }
                 });

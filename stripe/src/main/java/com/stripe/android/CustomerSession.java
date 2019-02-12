@@ -552,12 +552,12 @@ public class CustomerSession
         // Any error eliminates all listeners
 
         if (mCustomerRetrievalListener != null) {
-            mCustomerRetrievalListener.onError(errorCode, errorMessage);
+            mCustomerRetrievalListener.onError(errorCode, errorMessage, null);
             mCustomerRetrievalListener = null;
         }
 
         if (mSourceRetrievalListener != null) {
-            mSourceRetrievalListener.onError(errorCode, errorMessage);
+            mSourceRetrievalListener.onError(errorCode, errorMessage, null);
             mSourceRetrievalListener = null;
         }
     }
@@ -597,7 +597,7 @@ public class CustomerSession
                     case CUSTOMER_SHIPPING_INFO_SAVED: {
                         if (messageObject instanceof Customer) {
                             mCustomer = (Customer) messageObject;
-                            Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
+                            final Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
                             LocalBroadcastManager.getInstance(mContextRef.get())
                                     .sendBroadcast(intent);
                         }
@@ -605,14 +605,14 @@ public class CustomerSession
                     }
                     case CUSTOMER_ERROR: {
                         if (messageObject instanceof StripeException) {
-                            StripeException exception = (StripeException) messageObject;
+                            final StripeException exception = (StripeException) messageObject;
                             if (mCustomerRetrievalListener != null) {
                                 final int errorCode = exception.getStatusCode() == null
                                         ? 400
                                         : exception.getStatusCode();
-                                mCustomerRetrievalListener.onError(
-                                        errorCode,
-                                        exception.getLocalizedMessage());
+                                mCustomerRetrievalListener.onError(errorCode,
+                                        exception.getLocalizedMessage(),
+                                        exception.getStripeError());
                                 mCustomerRetrievalListener = null;
                             }
                             resetUsageTokens();
@@ -620,14 +620,14 @@ public class CustomerSession
                         break;
                     }
                     case SOURCE_ERROR: {
-                        StripeException exception = (StripeException) messageObject;
+                        final StripeException exception = (StripeException) messageObject;
                         if (mSourceRetrievalListener != null) {
                             final int errorCode = exception.getStatusCode() == null
                                     ? 400
                                     : exception.getStatusCode();
-                            mSourceRetrievalListener.onError(
-                                    errorCode,
-                                    exception.getLocalizedMessage());
+                            mSourceRetrievalListener.onError(errorCode,
+                                    exception.getLocalizedMessage(),
+                                    exception.getStripeError());
                             mSourceRetrievalListener = null;
                             resetUsageTokens();
                         }
@@ -806,13 +806,15 @@ public class CustomerSession
     public interface CustomerRetrievalListener {
         void onCustomerRetrieved(@NonNull Customer customer);
 
-        void onError(int errorCode, @Nullable String errorMessage);
+        void onError(int errorCode, @Nullable String errorMessage,
+                     @Nullable StripeError stripeError);
     }
 
     public interface SourceRetrievalListener {
         void onSourceRetrieved(@NonNull Source source);
 
-        void onError(int errorCode, @Nullable String errorMessage);
+        void onError(int errorCode, @Nullable String errorMessage,
+                     @Nullable StripeError stripeError);
     }
 
     interface StripeApiProxy {

@@ -19,6 +19,7 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
+import com.stripe.android.StripeError;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -168,7 +169,8 @@ public class AddSourceActivity extends StripeActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage) {
+                    public void onError(int errorCode, @Nullable String errorMessage,
+                                        @Nullable StripeError stripeError) {
                         // No need to show this error, because it will be broadcast
                         // from the CustomerSession
                         setCommunicatingProgress(false);
