@@ -25,6 +25,7 @@ import com.stripe.android.R;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.view.i18n.TranslatorManager;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
 
+    @NonNull
     public static Intent newIntent(Context context) {
         return new Intent(context, PaymentMethodsActivity.class);
     }
@@ -100,7 +102,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
             setCommunicatingProgress(true);
             initLoggingTokens();
-            CustomerSession.CustomerRetrievalListener listener =
+            final CustomerSession.CustomerRetrievalListener listener =
                     new CustomerSession.CustomerRetrievalListener() {
                         @Override
                         public void onCustomerRetrieved(@NonNull Customer customer) {
@@ -108,9 +110,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onError(int errorCode, @Nullable String errorMessage,
+                        public void onError(int httpCode, @Nullable String errorMessage,
                                             @Nullable StripeError stripeError) {
-                            String displayedError = errorMessage == null ? "" : errorMessage;
+                            final String displayedError = TranslatorManager
+                                    .getErrorMessageTranslator()
+                                    .translate(httpCode, errorMessage, stripeError);
                             showError(displayedError);
                             setCommunicatingProgress(false);
                         }
@@ -125,8 +129,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable compatIcon =
+        final MenuItem saveItem = menu.findItem(R.id.action_save);
+        final Drawable compatIcon =
                 ViewUtils.getTintedIconWithAttribute(
                         this,
                         getTheme(),
@@ -160,7 +164,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     @VisibleForTesting
     void initializeCustomerSourceData() {
-        Customer cachedCustomer = mCustomerSessionProxy == null
+        final Customer cachedCustomer = mCustomerSessionProxy == null
                 ? CustomerSession.getInstance().getCachedCustomer()
                 : mCustomerSessionProxy.getCachedCustomer();
 
@@ -215,13 +219,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         // Note: if this Activity is changed to subclass StripeActivity,
                         // this code will make the error message show twice, since StripeActivity
                         // will listen to the broadcast version of the error
                         // coming from CustomerSession
-                        String displayedError = errorMessage == null ? "" : errorMessage;
+                        final String displayedError = TranslatorManager.getErrorMessageTranslator()
+                                .translate(httpCode, errorMessage, stripeError);
                         showError(displayedError);
                         setCommunicatingProgress(false);
                     }
@@ -258,22 +263,20 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        List<CustomerSource> customerSourceList = mCustomer.getSources();
-
+        final List<CustomerSource> customerSourceList = mCustomer.getSources();
         if (!mRecyclerViewUpdated) {
             mMaskedCardAdapter = new MaskedCardAdapter(customerSourceList);
             // init the RecyclerView
-            RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
             mRecyclerView.setHasFixedSize(false);
-            mRecyclerView.setLayoutManager(linearLayoutManager);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             mRecyclerView.setAdapter(mMaskedCardAdapter);
             mRecyclerViewUpdated = true;
         } else {
             mMaskedCardAdapter.setCustomerSourceList(customerSourceList);
         }
 
-        String defaultSource = mCustomer.getDefaultSource();
-        if (!TextUtils.isEmpty(defaultSource)) {
+        final String defaultSource = mCustomer.getDefaultSource();
+        if (defaultSource != null && !TextUtils.isEmpty(defaultSource)) {
             mMaskedCardAdapter.setSelectedSource(defaultSource);
         }
         mMaskedCardAdapter.notifyDataSetChanged();
@@ -298,7 +301,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void getCustomerFromSession() {
-        CustomerSession.CustomerRetrievalListener listener =
+        final CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
@@ -307,7 +310,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         setCommunicatingProgress(false);
                     }
@@ -348,9 +351,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
-                        String displayedError = errorMessage == null ? "" : errorMessage;
+                        final String displayedError = TranslatorManager.getErrorMessageTranslator()
+                                .translate(httpCode, errorMessage, stripeError);
                         showError(displayedError);
                         setCommunicatingProgress(false);
                     }
@@ -371,7 +375,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void showError(@NonNull String error) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setMessage(error)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -380,8 +384,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                         dialogInterface.dismiss();
                     }
                 })
-                .create();
-        alertDialog.show();
+                .create()
+                .show();
     }
 
     private void updateAdapterWithCustomer(@NonNull Customer customer) {
@@ -396,7 +400,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     interface CustomerSessionProxy {
-        void addProductUsageTokenIfValid(String token);
+        void addProductUsageTokenIfValid(@NonNull String token);
 
         @Nullable
         Customer getCachedCustomer();

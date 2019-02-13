@@ -65,7 +65,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         mSelectSourceButton.setEnabled(false);
                         mErrorDialogHandler.showError(errorMessage);
