@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardFixtures;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,18 +42,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
-        Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
-                .addressCity(CARD_CITY)
-                .addressLine1(CARD_ADDRESS_L1)
-                .addressLine2(CARD_ADDRESS_L2)
-                .addressCountry(CARD_COUNTRY)
-                .addressState(CARD_STATE)
-                .addressZip(CARD_ZIP)
-                .currency(CARD_CURRENCY)
-                .name(CARD_NAME)
-                .build();
-
-        Map<String, Object> cardMap = getCardMapFromHashMappedCard(card);
+        final Map<String, Object> cardMap = getCardMapFromHashMappedCard(CardFixtures.CARD);
 
         assertEquals(CARD_NUMBER, cardMap.get("number"));
         assertEquals(CARD_CVC, cardMap.get("cvc"));
@@ -85,7 +75,8 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void hashMapFromCard_omitsEmptyFields() {
-        Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC).build();
+        final Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
+                .build();
 
         Map<String, Object> cardMap = getCardMapFromHashMappedCard(card);
 
@@ -105,9 +96,9 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void hashMapFromBankAccount_omitsEmptyFields() {
-        BankAccount bankAccount = new BankAccount(
-                BANK_ACCOUNT_NUMBER, "US", "usd", BANK_ROUTING_NUMBER);
-        Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER, "US",
+                "usd", BANK_ROUTING_NUMBER);
+        final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
         assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
@@ -119,7 +110,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void removeNullAndEmptyParams_removesNullParams() {
-        Map<String, Object> testMap = new HashMap<>();
+        final Map<String, Object> testMap = new HashMap<>();
         testMap.put("a", null);
         testMap.put("b", "not null");
         StripeNetworkUtils.removeNullAndEmptyParams(testMap);
@@ -129,7 +120,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void removeNullAndEmptyParams_removesEmptyStringParams() {
-        Map<String, Object> testMap = new HashMap<>();
+        final Map<String, Object> testMap = new HashMap<>();
         testMap.put("a", "fun param");
         testMap.put("b", "not null");
         testMap.put("c", "");
@@ -141,9 +132,9 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void removeNullAndEmptyParams_removesNestedEmptyParams() {
-        Map<String, Object> testMap = new HashMap<>();
-        Map<String, Object> firstNestedMap = new HashMap<>();
-        Map<String, Object> secondNestedMap = new HashMap<>();
+        final Map<String, Object> testMap = new HashMap<>();
+        final Map<String, Object> firstNestedMap = new HashMap<>();
+        final Map<String, Object> secondNestedMap = new HashMap<>();
         testMap.put("a", "fun param");
         testMap.put("b", "not null");
         firstNestedMap.put("1a", "something");
@@ -167,8 +158,8 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void addUidParams_addsParams() {
-        Map<String, Object> existingMap = new HashMap<>();
-        StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+        final Map<String, Object> existingMap = new HashMap<>();
+        final StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
             @Override
             public String getUid() {
                 return "abc123";
@@ -178,7 +169,6 @@ public class StripeNetworkUtilsTest {
             public String getPackageName() {
                 return "com.example.main";
             }
-
         };
         StripeNetworkUtils.addUidParams(provider, ApplicationProvider.getApplicationContext(),
                 existingMap);
@@ -189,11 +179,11 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void addUidParamsToPaymentIntent_addParamsAtRightLevel() {
-        Map<String, Object> existingMap = new HashMap<>();
-        Map<String, Object> sourceDataMap = new HashMap<>();
+        final Map<String, Object> existingMap = new HashMap<>();
+        final Map<String, Object> sourceDataMap = new HashMap<>();
         existingMap.put("source_data", sourceDataMap);
 
-        StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+        final StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
             @Override
             public String getUid() {
                 return "abc123";

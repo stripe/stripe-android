@@ -41,18 +41,18 @@ public class SourceCardData extends StripeSourceTypeModel {
     public static final String NOT_SUPPORTED = "not_supported";
     public static final String UNKNOWN = "unknown";
 
-    public static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
-    public static final String FIELD_ADDRESS_ZIP_CHECK = "address_zip_check";
-    public static final String FIELD_BRAND = "brand";
-    public static final String FIELD_COUNTRY = "country";
-    public static final String FIELD_CVC_CHECK = "cvc_check";
-    public static final String FIELD_DYNAMIC_LAST4 = "dynamic_last4";
-    public static final String FIELD_EXP_MONTH = "exp_month";
-    public static final String FIELD_EXP_YEAR = "exp_year";
-    public static final String FIELD_FUNDING = "funding";
-    public static final String FIELD_LAST4 = "last4";
-    public static final String FIELD_THREE_D_SECURE = "three_d_secure";
-    public static final String FIELD_TOKENIZATION_METHOD = "tokenization_method";
+    private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
+    private static final String FIELD_ADDRESS_ZIP_CHECK = "address_zip_check";
+    private static final String FIELD_BRAND = "brand";
+    private static final String FIELD_COUNTRY = "country";
+    private static final String FIELD_CVC_CHECK = "cvc_check";
+    private static final String FIELD_DYNAMIC_LAST4 = "dynamic_last4";
+    private static final String FIELD_EXP_MONTH = "exp_month";
+    private static final String FIELD_EXP_YEAR = "exp_year";
+    private static final String FIELD_FUNDING = "funding";
+    private static final String FIELD_LAST4 = "last4";
+    private static final String FIELD_THREE_D_SECURE = "three_d_secure";
+    private static final String FIELD_TOKENIZATION_METHOD = "tokenization_method";
 
     private static final Set<String> STANDARD_FIELDS = new HashSet<>(Arrays.asList(
             FIELD_ADDRESS_LINE1_CHECK,
