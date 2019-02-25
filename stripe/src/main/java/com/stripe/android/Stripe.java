@@ -19,6 +19,8 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
@@ -35,7 +37,10 @@ import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
 import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
 
 /**
- * Class that handles {@link Token} creation from charges, {@link Card}, and accounts.
+ * Entry-point to the Stripe SDK that handles
+ * - {@link Token} creation from charges, {@link Card}, and accounts
+ * - {@link PaymentMethod} creation
+ * - {@link PaymentIntent} retrieval and confirmation
  */
 public class Stripe {
 
@@ -470,6 +475,29 @@ public class Stripe {
                 publishableKey,
                 mStripeAccount,
                 mLoggingResponseListener);
+    }
+
+    /**
+     * Blocking method to create a {@link PaymentMethod} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param paymentMethodCreateParams params with which to create the PaymentMethod
+     * @param publishableKey a publishable API key to use
+     * @return a {@link PaymentMethod} or {@code null} if a problem occurred
+     *
+     * @throws AuthenticationException
+     * @throws InvalidRequestException
+     * @throws APIConnectionException
+     * @throws APIException
+     */
+    @Nullable
+    public PaymentMethod createPaymentMethodSynchronous(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull String publishableKey)
+            throws AuthenticationException, InvalidRequestException, APIConnectionException,
+            APIException {
+        return StripeApiHandler.createPaymentMethod(paymentMethodCreateParams, mContext,
+                publishableKey, mStripeAccount, mLoggingResponseListener);
     }
 
     /**

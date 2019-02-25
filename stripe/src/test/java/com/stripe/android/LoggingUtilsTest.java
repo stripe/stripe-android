@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class LoggingUtilsTest {
 
-    private static final String DUMMY_API_KEY = "pk_abc123";
+    private static final String API_KEY = "pk_abc123";
     private static final List<String> EXPECTED_SINGLE_TOKEN_LIST = new ArrayList<>();
     static {
         EXPECTED_SINGLE_TOKEN_LIST.add("CardInputView");
@@ -48,7 +48,7 @@ public class LoggingUtilsTest {
         Map<String, Object> params = LoggingUtils.getTokenCreationParams(
                 ApplicationProvider.getApplicationContext(),
                 tokensList,
-                DUMMY_API_KEY,
+                API_KEY,
                 Token.TYPE_PII);
         // Size is SIZE-1 because tokens don't have a source_type field
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
@@ -67,7 +67,7 @@ public class LoggingUtilsTest {
         Map<String, Object> params = LoggingUtils.getTokenCreationParams(
                 ApplicationProvider.getApplicationContext(),
                 tokensList,
-                DUMMY_API_KEY,
+                API_KEY,
                 Token.TYPE_CVC_UPDATE);
         // Size is SIZE-1 because tokens don't have a source_type field
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
@@ -85,12 +85,25 @@ public class LoggingUtilsTest {
                 LoggingUtils.getSourceCreationParams(
                         ApplicationProvider.getApplicationContext(),
                         tokenList,
-                        DUMMY_API_KEY,
+                        API_KEY,
                         Source.SEPA_DEBIT);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(Source.SEPA_DEBIT, loggingParams.get(LoggingUtils.FIELD_SOURCE_TYPE));
-        assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_SOURCE_CREATION),
+                loggingParams.get(LoggingUtils.FIELD_EVENT));
+        assertEquals(LoggingUtils.getAnalyticsUa(),
+                loggingParams.get(LoggingUtils.FIELD_ANALYTICS_UA));
+    }
+
+    @Test
+    public void getPaymentMethodCreationParams() {
+        final Map<String, Object> loggingParams =
+                LoggingUtils.getPaymentMethodCreationParams(ApplicationProvider.getApplicationContext(),
+                        null, API_KEY);
+        assertNotNull(loggingParams);
+        assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_ADD_PAYMENT_METHOD),
                 loggingParams.get(LoggingUtils.FIELD_EVENT));
         assertEquals(LoggingUtils.getAnalyticsUa(),
                 loggingParams.get(LoggingUtils.FIELD_ANALYTICS_UA));
@@ -104,10 +117,10 @@ public class LoggingUtilsTest {
         Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentConfirmationParams(
                 ApplicationProvider.getApplicationContext(),
                 tokenList,
-                DUMMY_API_KEY,
+                API_KEY,
                 null);
         assertEquals(expectedSize, loggingParams.size());
-        assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_CONFIRM_PAYMENT_INTENT),
                 loggingParams.get(LoggingUtils.FIELD_EVENT));
         assertEquals(LoggingUtils.getAnalyticsUa(),
@@ -122,9 +135,9 @@ public class LoggingUtilsTest {
         Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentRetrieveParams(
                 ApplicationProvider.getApplicationContext(),
                 tokenList,
-                DUMMY_API_KEY);
+                API_KEY);
         assertEquals(expectedSize, loggingParams.size());
-        assertEquals(DUMMY_API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_RETRIEVE_PAYMENT_INTENT),
                 loggingParams.get(LoggingUtils.FIELD_EVENT));
         assertEquals(LoggingUtils.getAnalyticsUa(),
@@ -158,10 +171,10 @@ public class LoggingUtilsTest {
                 tokensList,
                 null,
                 Token.TYPE_CARD,
-                DUMMY_API_KEY,
+                API_KEY,
                 LoggingUtils.EVENT_TOKEN_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
-        assertEquals(DUMMY_API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(EXPECTED_SINGLE_TOKEN_LIST, params.get(LoggingUtils.FIELD_PRODUCT_USAGE));
         assertEquals(Token.TYPE_CARD, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
         assertEquals(Build.VERSION.SDK_INT, params.get(LoggingUtils.FIELD_OS_VERSION));
@@ -190,10 +203,10 @@ public class LoggingUtilsTest {
                 null,
                 null,
                 Token.TYPE_BANK_ACCOUNT,
-                DUMMY_API_KEY,
+                API_KEY,
                 LoggingUtils.EVENT_SOURCE_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 2, params.size());
-        assertEquals(DUMMY_API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
+        assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(Token.TYPE_BANK_ACCOUNT, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
 
         assertEquals(Build.VERSION.SDK_INT, params.get(LoggingUtils.FIELD_OS_VERSION));

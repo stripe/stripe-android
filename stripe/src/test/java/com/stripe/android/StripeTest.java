@@ -15,6 +15,8 @@ import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
@@ -1106,6 +1108,93 @@ public class StripeTest {
         }
     }
 
+    @Test
+    public void createPaymentMethodWithCardSynchronous()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final PaymentMethod.BillingDetails expectedBillingDetails =
+                new PaymentMethod.BillingDetails.Builder()
+                        .setName("Home")
+                        .setEmail("me@example.com")
+                        .setPhone("1-800-555-1234")
+                        .setAddress(new Address.Builder()
+                                .setLine1("123 Main St")
+                                .setCity("Los Angeles")
+                                .setState("CA")
+                                .setCountry("US")
+                                .build())
+                        .build();
+        final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
+                .setBrand("visa")
+                .setChecks(new PaymentMethod.Card.Checks.Builder()
+                        .setAddressLine1Check("unchecked")
+                        .setAddressPostalCodeCheck(null)
+                        .setCvcCheck("unchecked")
+                        .build())
+                .setCountry("US")
+                .setExpiryMonth(8)
+                .setExpiryYear(2022)
+                .setFunding("credit")
+                .setLast4("4242")
+                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
+                        .setSupported(true)
+                        .build())
+                .setWallet(null)
+                .build();
+
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                        new PaymentMethodCreateParams.Card.Builder()
+                                .setNumber("4242424242424242")
+                                .setExpiryMonth(8)
+                                .setExpiryYear(2022)
+                                .setCvc("123")
+                                .build(),
+                        expectedBillingDetails);
+        final Stripe stripe = getNonLoggingStripe(mContext);
+        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(createdPaymentMethod);
+        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(expectedCard, createdPaymentMethod.card);
+    }
+
+    @Test
+    public void createPaymentMethodWithIdealSynchronous()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final PaymentMethod.BillingDetails expectedBillingDetails =
+                new PaymentMethod.BillingDetails.Builder()
+                        .setName("Home")
+                        .setEmail("me@example.com")
+                        .setPhone("1-800-555-1234")
+                        .setAddress(new Address.Builder()
+                                .setLine1("123 Main St")
+                                .setCity("Los Angeles")
+                                .setState("CA")
+                                .setCountry("US")
+                                .build())
+                        .build();
+
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                        new PaymentMethodCreateParams.Ideal.Builder()
+                                .setBank("ing")
+                                .build(),
+                        expectedBillingDetails);
+        final Stripe stripe = getNonLoggingStripe(mContext);
+        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(createdPaymentMethod);
+        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertNull(createdPaymentMethod.card);
+        assertEquals(new PaymentMethod.Ideal.Builder()
+                        .setBank("ing")
+                        .setBankIdentifierCode("INGBNL2A")
+                        .build(),
+                createdPaymentMethod.ideal);
+    }
+
     private void assertAllLogsAreValid(@NonNull TestLoggingListener listener, int expectedLogs) {
         assertEquals(expectedLogs, listener.responseList.size());
         assertEquals(0, listener.exceptionList.size());
@@ -1114,13 +1203,15 @@ public class StripeTest {
         }
     }
 
-    private static Stripe getNonLoggingStripe(Context context) {
+    @NonNull
+    private static Stripe getNonLoggingStripe(@NonNull Context context) {
         Stripe nonLoggingStripe = new Stripe(context);
         nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
         return nonLoggingStripe;
     }
 
-    private static Stripe getNonLoggingStripe(Context context, String key) {
+    @NonNull
+    private static Stripe getNonLoggingStripe(@NonNull Context context, String key) {
         Stripe nonLoggingStripe = new Stripe(context, key);
         nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
         return nonLoggingStripe;
