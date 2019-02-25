@@ -27,7 +27,7 @@ public class SourceSepaDebitDataTest {
 
     @Test
     public void fromJson_withExampleData_returnsExpectedObject() {
-        SourceSepaDebitData sepaData = SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA);
+        final SourceSepaDebitData sepaData = SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA);
         assertNotNull(sepaData);
         assertEquals("37040044", sepaData.getBankCode());
         assertEquals("R8MJxzkSUv1Kv07L", sepaData.getFingerPrint());
@@ -36,5 +36,21 @@ public class SourceSepaDebitDataTest {
         assertEquals("3000", sepaData.getLast4());
         assertEquals(MANDATE_URL, sepaData.getMandateUrl());
         assertNull(sepaData.getBranchCode());
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals(
+                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA),
+                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA)
+        );
+    }
+
+    @Test
+    public void testHashCode() {
+        assertEquals(
+                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA).hashCode(),
+                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA).hashCode()
+        );
     }
 }

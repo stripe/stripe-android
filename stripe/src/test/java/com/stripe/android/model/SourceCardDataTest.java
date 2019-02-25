@@ -22,31 +22,30 @@ public class SourceCardDataTest {
             ":\"unchecked\",\"funding\":\"credit\",\"last4\":\"4242\",\"three_d_secure\"" +
             ":\"optional\",\"tokenization_method\":\"apple_pay\",\"dynamic_last4\":\"4242\"}";
 
+
+    private static final SourceCardData CARD_DATA =
+            SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
+
     @Test
     public void fromExampleJsonCard_createsExpectedObject() {
-        final SourceCardData cardData = SourceCardData
-                .fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
-        assertNotNull(cardData);
-        assertEquals(Card.VISA, cardData.getBrand());
-        assertEquals(0, cardData.getAdditionalFields().size());
-        assertEquals(Card.FUNDING_CREDIT, cardData.getFunding());
-        assertEquals("4242", cardData.getLast4());
-        assertNotNull(cardData.getExpiryMonth());
-        assertNotNull(cardData.getExpiryYear());
-        assertEquals(12, cardData.getExpiryMonth().intValue());
-        assertEquals(2050, cardData.getExpiryYear().intValue());
-        assertEquals("US", cardData.getCountry());
-        assertEquals("optional", cardData.getThreeDSecureStatus());
-        assertEquals("apple_pay", cardData.getTokenizationMethod());
+        assertNotNull(CARD_DATA);
+        assertEquals(Card.VISA, CARD_DATA.getBrand());
+        assertEquals(0, CARD_DATA.getAdditionalFields().size());
+        assertEquals(Card.FUNDING_CREDIT, CARD_DATA.getFunding());
+        assertEquals("4242", CARD_DATA.getLast4());
+        assertNotNull(CARD_DATA.getExpiryMonth());
+        assertNotNull(CARD_DATA.getExpiryYear());
+        assertEquals(12, CARD_DATA.getExpiryMonth().intValue());
+        assertEquals(2050, CARD_DATA.getExpiryYear().intValue());
+        assertEquals("US", CARD_DATA.getCountry());
+        assertEquals("optional", CARD_DATA.getThreeDSecureStatus());
+        assertEquals("apple_pay", CARD_DATA.getTokenizationMethod());
     }
 
     @Test
     public void fromExampleJsonCard_toMap_createsExpectedMapping() {
-        final SourceCardData cardData = SourceCardData
-                .fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY);
-        assertNotNull(cardData);
-
-        final Map<String, Object> cardDataMap = cardData.toMap();
+        assertNotNull(CARD_DATA);
+        final Map<String, Object> cardDataMap = CARD_DATA.toMap();
         assertNotNull(cardDataMap);
         assertEquals("US", cardDataMap.get("country"));
         assertEquals("4242", cardDataMap.get("last4"));
@@ -57,5 +56,18 @@ public class SourceCardDataTest {
         assertEquals("optional", cardDataMap.get("three_d_secure"));
         assertEquals("apple_pay", cardDataMap.get("tokenization_method"));
         assertEquals("4242", cardDataMap.get("dynamic_last4"));
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals(CARD_DATA,
+                SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY));
+    }
+
+    @Test
+    public void testHashCode() {
+        assertNotNull(CARD_DATA);
+        assertEquals(CARD_DATA.hashCode(),
+                SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY).hashCode());
     }
 }

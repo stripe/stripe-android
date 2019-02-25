@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,6 +16,15 @@ import static org.junit.Assert.assertNull;
  */
 @RunWith(RobolectricTestRunner.class)
 public class TokenTest {
+    private static final Card CARD = new Card.Builder(null, 8, 2017, null)
+            .id("card_189fi32eZvKYlo2CHK8NPRME")
+            .brand(Card.VISA)
+            .country("US")
+            .last4("4242")
+            .funding(Card.FUNDING_CREDIT)
+            .metadata(new HashMap<String, String>())
+            .build();
+
     private static final String RAW_TOKEN = "{\n" +
             "  \"id\": \"tok_189fi32eZvKYlo2Ct0KZvU5Y\",\n" +
             "  \"object\": \"token\",\n" +
@@ -128,25 +138,15 @@ public class TokenTest {
             "}";
 
     @Test
-    public void parseToken_readsObject() {
-        Date createdDate = new Date(1462905355L * 1000L);
-        Token partialExpectedToken = new Token(
+    public void parseToken_whenCardToken_readsObjectCorrectly() {
+        final Token expectedToken = new Token(
                 "tok_189fi32eZvKYlo2Ct0KZvU5Y",
                 false,
-                createdDate,
+                new Date(1462905355L * 1000L),
                 false,
-                (Card) null);
-        Token answerToken = Token.fromString(RAW_TOKEN);
-        assertNotNull(answerToken);
-        assertEquals(partialExpectedToken.getId(), answerToken.getId());
-        assertEquals(partialExpectedToken.getLivemode(), answerToken.getLivemode());
-        assertEquals(partialExpectedToken.getCreated(), answerToken.getCreated());
-        assertEquals(partialExpectedToken.getUsed(), answerToken.getUsed());
-        assertEquals(Token.TYPE_CARD, answerToken.getType());
-
-        // Note: we test the validity of the card object in CardTest
-        assertNotNull(answerToken.getCard());
-        assertNull(answerToken.getBankAccount());
+                CARD);
+        final Token actualToken = Token.fromString(RAW_TOKEN);
+        assertEquals(expectedToken, actualToken);
     }
 
 

@@ -315,5 +315,4 @@ public class PaymentIntentParams {
     public String getReturnUrl() {
         return mReturnUrl;
     }
-
 }

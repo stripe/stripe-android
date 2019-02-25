@@ -5,11 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StringDef;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -123,44 +126,44 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_USAGE = "usage";
 
-    private String mId;
-    private Long mAmount;
-    private String mClientSecret;
-    private SourceCodeVerification mCodeVerification;
-    private Long mCreated;
-    private String mCurrency;
-    private String mTypeRaw;
-    private @SourceFlow String mFlow;
-    private Boolean mLiveMode;
-    private Map<String, String> mMetaData;
-    private SourceOwner mOwner;
-    private SourceReceiver mReceiver;
-    private SourceRedirect mRedirect;
-    private @SourceStatus String mStatus;
-    private Map<String, Object> mSourceTypeData;
-    private StripeSourceTypeModel mSourceTypeModel;
-    private @SourceType String mType;
-    private @Usage String mUsage;
+    @Nullable private String mId;
+    @Nullable private Long mAmount;
+    @Nullable private String mClientSecret;
+    @Nullable private SourceCodeVerification mCodeVerification;
+    @Nullable private Long mCreated;
+    @Nullable private String mCurrency;
+    @Nullable private String mTypeRaw;
+    @Nullable @SourceFlow private String mFlow;
+    @Nullable private Boolean mLiveMode;
+    @Nullable private Map<String, String> mMetaData;
+    @Nullable private SourceOwner mOwner;
+    @Nullable private SourceReceiver mReceiver;
+    @Nullable private SourceRedirect mRedirect;
+    @Nullable @SourceStatus private String mStatus;
+    @Nullable private Map<String, Object> mSourceTypeData;
+    @Nullable private StripeSourceTypeModel mSourceTypeModel;
+    @Nullable @SourceType private String mType;
+    @Nullable @Usage private String mUsage;
 
-    Source(
-            String id,
-            Long amount,
-            String clientSecret,
-            SourceCodeVerification codeVerification,
-            Long created,
-            String currency,
-            @SourceFlow String flow,
-            Boolean liveMode,
-            Map<String, String> metaData,
-            SourceOwner owner,
-            SourceReceiver receiver,
-            SourceRedirect redirect,
-            @SourceStatus String status,
-            Map<String, Object> sourceTypeData,
-            StripeSourceTypeModel sourceTypeModel,
-            @SourceType String type,
-            String rawType,
-            @Usage String usage
+    private Source(
+            @Nullable String id,
+            @Nullable Long amount,
+            @Nullable String clientSecret,
+            @Nullable SourceCodeVerification codeVerification,
+            @Nullable Long created,
+            @Nullable String currency,
+            @Nullable @SourceFlow String flow,
+            @Nullable Boolean liveMode,
+            @Nullable Map<String, String> metaData,
+            @Nullable SourceOwner owner,
+            @Nullable SourceReceiver receiver,
+            @Nullable SourceRedirect redirect,
+            @Nullable @SourceStatus String status,
+            @Nullable Map<String, Object> sourceTypeData,
+            @Nullable StripeSourceTypeModel sourceTypeModel,
+            @NonNull @SourceType String type,
+            @NonNull String rawType,
+            @Nullable @Usage String usage
     ) {
         mId = id;
         mAmount = amount;
@@ -345,36 +348,36 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
-        hashMap.put(FIELD_ID, mId);
-        hashMap.put(FIELD_AMOUNT, mAmount);
-        hashMap.put(FIELD_CLIENT_SECRET, mClientSecret);
+        final AbstractMap<String, Object> map = new HashMap<>();
+        map.put(FIELD_ID, mId);
+        map.put(FIELD_AMOUNT, mAmount);
+        map.put(FIELD_CLIENT_SECRET, mClientSecret);
 
-        putStripeJsonModelMapIfNotNull(hashMap, FIELD_CODE_VERIFICATION, mCodeVerification);
+        putStripeJsonModelMapIfNotNull(map, FIELD_CODE_VERIFICATION, mCodeVerification);
 
-        hashMap.put(FIELD_CREATED, mCreated);
-        hashMap.put(FIELD_CURRENCY, mCurrency);
-        hashMap.put(FIELD_FLOW, mFlow);
-        hashMap.put(FIELD_LIVEMODE, mLiveMode);
-        hashMap.put(FIELD_METADATA, mMetaData);
+        map.put(FIELD_CREATED, mCreated);
+        map.put(FIELD_CURRENCY, mCurrency);
+        map.put(FIELD_FLOW, mFlow);
+        map.put(FIELD_LIVEMODE, mLiveMode);
+        map.put(FIELD_METADATA, mMetaData);
 
-        putStripeJsonModelMapIfNotNull(hashMap, FIELD_OWNER, mOwner);
-        putStripeJsonModelMapIfNotNull(hashMap, FIELD_RECEIVER, mReceiver);
-        putStripeJsonModelMapIfNotNull(hashMap, FIELD_REDIRECT, mRedirect);
+        putStripeJsonModelMapIfNotNull(map, FIELD_OWNER, mOwner);
+        putStripeJsonModelMapIfNotNull(map, FIELD_RECEIVER, mReceiver);
+        putStripeJsonModelMapIfNotNull(map, FIELD_REDIRECT, mRedirect);
 
-        hashMap.put(mTypeRaw, mSourceTypeData);
+        map.put(mTypeRaw, mSourceTypeData);
 
-        hashMap.put(FIELD_STATUS, mStatus);
-        hashMap.put(FIELD_TYPE, mTypeRaw);
-        hashMap.put(FIELD_USAGE, mUsage);
-        removeNullAndEmptyParams(hashMap);
-        return hashMap;
+        map.put(FIELD_STATUS, mStatus);
+        map.put(FIELD_TYPE, mTypeRaw);
+        map.put(FIELD_USAGE, mUsage);
+        removeNullAndEmptyParams(map);
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         try {
             putStringIfNotNull(jsonObject, FIELD_ID, mId);
             jsonObject.put(FIELD_OBJECT, VALUE_SOURCE);
@@ -423,53 +426,45 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             return null;
         }
 
-        String id = optString(jsonObject, FIELD_ID);
-        Long amount = optLong(jsonObject, FIELD_AMOUNT);
-        String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
-        SourceCodeVerification codeVerification = optStripeJsonModel(
+        final String id = optString(jsonObject, FIELD_ID);
+        final Long amount = optLong(jsonObject, FIELD_AMOUNT);
+        final String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
+        final SourceCodeVerification codeVerification = optStripeJsonModel(
                 jsonObject,
                 FIELD_CODE_VERIFICATION,
                 SourceCodeVerification.class);
-        Long created = optLong(jsonObject, FIELD_CREATED);
-        String currency = optString(jsonObject, FIELD_CURRENCY);
-        @SourceFlow String flow = asSourceFlow(optString(jsonObject, FIELD_FLOW));
-        Boolean liveMode = jsonObject.optBoolean(FIELD_LIVEMODE);
-        Map<String, String> metadata =
+        final Long created = optLong(jsonObject, FIELD_CREATED);
+        final String currency = optString(jsonObject, FIELD_CURRENCY);
+        @SourceFlow final String flow = asSourceFlow(optString(jsonObject, FIELD_FLOW));
+        final Boolean liveMode = jsonObject.optBoolean(FIELD_LIVEMODE);
+        final Map<String, String> metadata =
                 StripeJsonUtils.jsonObjectToStringMap(jsonObject.optJSONObject(FIELD_METADATA));
-        SourceOwner owner = optStripeJsonModel(jsonObject, FIELD_OWNER, SourceOwner.class);
-        SourceReceiver receiver = optStripeJsonModel(
+        final SourceOwner owner = optStripeJsonModel(jsonObject, FIELD_OWNER, SourceOwner.class);
+        final SourceReceiver receiver = optStripeJsonModel(
                 jsonObject,
                 FIELD_RECEIVER,
                 SourceReceiver.class);
-        SourceRedirect redirect = optStripeJsonModel(
+        final SourceRedirect redirect = optStripeJsonModel(
                 jsonObject,
                 FIELD_REDIRECT,
                 SourceRedirect.class);
-        @SourceStatus String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
+        @SourceStatus final String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
 
-        String typeRaw = optString(jsonObject, FIELD_TYPE);
-        if (typeRaw == null) {
-            // We can't allow this type to be null, as we are using it for a key
-            // on the JSON object later.
-            typeRaw = UNKNOWN;
-        }
-
-        @SourceType String type = asSourceType(typeRaw);
-        if (type == null) {
-            type = UNKNOWN;
-        }
+        final String typeRawOpt = optString(jsonObject, FIELD_TYPE);
+        @SourceType final String typeRaw = typeRawOpt != null ? typeRawOpt : UNKNOWN;
+        @SourceType final String type = asSourceType(typeRaw);
 
         // Until we have models for all types, keep the original hash and the
         // model object. The customType variable can be any field, and is not altered by
         // trying to force it to be a type that we know of.
-        Map<String, Object> sourceTypeData =
+        final Map<String, Object> sourceTypeData =
                 StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(typeRaw));
-        StripeSourceTypeModel sourceTypeModel =
+        final StripeSourceTypeModel sourceTypeModel =
                 MODELED_TYPES.contains(typeRaw)
                 ? optStripeJsonModel(jsonObject, typeRaw, StripeSourceTypeModel.class)
                 : null;
 
-        @Usage String usage = asUsage(optString(jsonObject, FIELD_USAGE));
+        @Usage final String usage = asUsage(optString(jsonObject, FIELD_USAGE));
 
         return new Source(
                 id,
@@ -543,7 +538,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
         return null;
     }
 
-    @Nullable
+    @NonNull
     @SourceType
     static String asSourceType(@Nullable String sourceType) {
         if (CARD.equals(sourceType)) {
@@ -566,9 +561,9 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             return P24;
         } else if (UNKNOWN.equals(sourceType)) {
             return UNKNOWN;
+        } else {
+            return UNKNOWN;
         }
-
-        return null;
     }
 
     @Nullable
@@ -595,5 +590,38 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
             return NONE;
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof Source && typedEquals((Source) obj));
+    }
+
+    private boolean typedEquals(@NonNull Source source) {
+        return ObjectUtils.equals(mId, source.mId)
+                && ObjectUtils.equals(mAmount, source.mAmount)
+                && ObjectUtils.equals(mClientSecret, source.mClientSecret)
+                && ObjectUtils.equals(mCodeVerification, source.mCodeVerification)
+                && ObjectUtils.equals(mCreated, source.mCreated)
+                && ObjectUtils.equals(mCurrency, source.mCurrency)
+                && ObjectUtils.equals(mTypeRaw, source.mTypeRaw)
+                && ObjectUtils.equals(mFlow, source.mFlow)
+                && ObjectUtils.equals(mLiveMode, source.mLiveMode)
+                && ObjectUtils.equals(mMetaData, source.mMetaData)
+                && ObjectUtils.equals(mOwner, source.mOwner)
+                && ObjectUtils.equals(mReceiver, source.mReceiver)
+                && ObjectUtils.equals(mRedirect, source.mRedirect)
+                && ObjectUtils.equals(mStatus, source.mStatus)
+                && ObjectUtils.equals(mSourceTypeData, source.mSourceTypeData)
+                && ObjectUtils.equals(mSourceTypeModel, source.mSourceTypeModel)
+                && ObjectUtils.equals(mType, source.mType)
+                && ObjectUtils.equals(mUsage, source.mUsage);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mId, mAmount, mClientSecret, mCodeVerification, mCreated, mCurrency,
+                mTypeRaw, mFlow, mLiveMode, mMetaData, mOwner, mReceiver, mRedirect, mStatus,
+                mSourceTypeData, mSourceTypeModel, mType, mUsage);
     }
 }

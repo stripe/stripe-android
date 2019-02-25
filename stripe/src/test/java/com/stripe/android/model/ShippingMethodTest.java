@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -35,13 +38,13 @@ public class ShippingMethodTest {
         put("label", "FedEx");
     }};
 
-    private ShippingMethod mShippingMethod =  new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
+    private final static ShippingMethod SHIPPING_METHOD = createShippingMethod();
 
     @Test
     public void testJSONConversion() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SHIPPING_ADDRESS);
-            assertJsonEquals(mShippingMethod.toJson(), rawConversion);
+            assertJsonEquals(SHIPPING_METHOD.toJson(), rawConversion);
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }
@@ -49,6 +52,21 @@ public class ShippingMethodTest {
 
     @Test
     public void testMapCreation() {
-        assertMapEquals(mShippingMethod.toMap(), EXAMPLE_MAP_SHIPPING_ADDRESS);
+        assertMapEquals(SHIPPING_METHOD.toMap(), EXAMPLE_MAP_SHIPPING_ADDRESS);
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals(SHIPPING_METHOD, createShippingMethod());
+    }
+
+    @Test
+    public void testHashcode() {
+        assertEquals(SHIPPING_METHOD.hashCode(), createShippingMethod().hashCode());
+    }
+
+    @NonNull
+    private static ShippingMethod createShippingMethod() {
+        return new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
     }
 }

@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,16 +45,26 @@ public class Customer extends StripeJsonModel {
 
     private static final String VALUE_APPLE_PAY = "apple_pay";
 
-    private @Nullable String mId;
-    private @Nullable String mDefaultSource;
-    private @Nullable ShippingInformation mShippingInformation;
+    @Nullable private final String mId;
+    @Nullable private final String mDefaultSource;
+    @Nullable private final ShippingInformation mShippingInformation;
+    @NonNull private final List<CustomerSource> mSources;
+    @Nullable private final Boolean mHasMore;
+    @Nullable private final Integer mTotalCount;
+    @Nullable private final String mUrl;
 
-    private @NonNull List<CustomerSource> mSources = new ArrayList<>();
-    private @Nullable Boolean mHasMore;
-    private @Nullable Integer mTotalCount;
-    private @Nullable String mUrl;
-
-    private Customer() { }
+    private Customer(@Nullable String id, @Nullable String defaultSource,
+                     @Nullable ShippingInformation shippingInformation,
+                     @NonNull List<CustomerSource> sources, @Nullable Boolean hasMore,
+                     @Nullable Integer totalCount, @Nullable String url) {
+        mId = id;
+        mDefaultSource = defaultSource;
+        mShippingInformation = shippingInformation;
+        mSources = sources;
+        mHasMore = hasMore;
+        mTotalCount = totalCount;
+        mUrl = url;
+    }
 
     public String getId() {
         return mId;
@@ -118,17 +130,17 @@ public class Customer extends StripeJsonModel {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> mapObject = new HashMap<>();
-        mapObject.put(FIELD_ID, mId);
-        mapObject.put(FIELD_OBJECT, VALUE_CUSTOMER);
-        mapObject.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
+        final AbstractMap<String, Object> map = new HashMap<>();
+        map.put(FIELD_ID, mId);
+        map.put(FIELD_OBJECT, VALUE_CUSTOMER);
+        map.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
 
         StripeJsonModel.putStripeJsonModelMapIfNotNull(
-                mapObject,
+                map,
                 FIELD_SHIPPING,
                 mShippingInformation);
 
-        Map<String, Object> sourcesObject = new HashMap<>();
+        final AbstractMap<String, Object> sourcesObject = new HashMap<>();
         sourcesObject.put(FIELD_HAS_MORE, mHasMore);
         sourcesObject.put(FIELD_TOTAL_COUNT, mTotalCount);
         sourcesObject.put(FIELD_OBJECT, VALUE_LIST);
@@ -139,14 +151,14 @@ public class Customer extends StripeJsonModel {
                 mSources);
         StripeNetworkUtils.removeNullAndEmptyParams(sourcesObject);
 
-        mapObject.put(FIELD_SOURCES, sourcesObject);
+        map.put(FIELD_SOURCES, sourcesObject);
 
-        StripeNetworkUtils.removeNullAndEmptyParams(mapObject);
-        return mapObject;
+        StripeNetworkUtils.removeNullAndEmptyParams(map);
+        return map;
     }
 
     @Nullable
-    public static Customer fromString(String jsonString) {
+    public static Customer fromString(@Nullable String jsonString) {
         if (jsonString == null) {
             return null;
         }
@@ -159,23 +171,27 @@ public class Customer extends StripeJsonModel {
     }
 
     @Nullable
-    public static Customer fromJson(JSONObject jsonObject) {
+    public static Customer fromJson(@NonNull JSONObject jsonObject) {
         String objectType = optString(jsonObject, FIELD_OBJECT);
         if (!VALUE_CUSTOMER.equals(objectType)) {
             return null;
         }
-        Customer customer = new Customer();
-        customer.mId = optString(jsonObject, FIELD_ID);
-        customer.mDefaultSource = optString(jsonObject, FIELD_DEFAULT_SOURCE);
-        customer.mShippingInformation =
+        final String id = optString(jsonObject, FIELD_ID);
+        final String defaultSource = optString(jsonObject, FIELD_DEFAULT_SOURCE);
+        final ShippingInformation shippingInformation =
                 ShippingInformation.fromJson(jsonObject.optJSONObject(FIELD_SHIPPING));
-        JSONObject sources = jsonObject.optJSONObject(FIELD_SOURCES);
-        if (sources != null && VALUE_LIST.equals(optString(sources, FIELD_OBJECT))) {
-            customer.mHasMore = optBoolean(sources, FIELD_HAS_MORE);
-            customer.mTotalCount = optInteger(sources, FIELD_TOTAL_COUNT);
-            customer.mUrl = optString(sources, FIELD_URL);
-            List<CustomerSource> sourceDataList = new ArrayList<>();
-            JSONArray dataArray = sources.optJSONArray(FIELD_DATA);
+        final JSONObject sourcesJson = jsonObject.optJSONObject(FIELD_SOURCES);
+        
+        final Boolean hasMore;
+        final Integer totalCount;
+        final String url;
+        final List<CustomerSource> sources = new ArrayList<>();
+        if (sourcesJson != null && VALUE_LIST.equals(optString(sourcesJson, FIELD_OBJECT))) {
+            hasMore = optBoolean(sourcesJson, FIELD_HAS_MORE);
+            totalCount = optInteger(sourcesJson, FIELD_TOTAL_COUNT);
+            url = optString(sourcesJson, FIELD_URL);
+
+            final JSONArray dataArray = sourcesJson.optJSONArray(FIELD_DATA);
             for (int i = 0; i < dataArray.length(); i++) {
                 try {
                     JSONObject customerSourceObject = dataArray.getJSONObject(i);
@@ -184,11 +200,37 @@ public class Customer extends StripeJsonModel {
                             VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
                         continue;
                     }
-                    sourceDataList.add(sourceData);
+                    sources.add(sourceData);
                 } catch (JSONException ignored) { }
             }
-            customer.mSources = sourceDataList;
+        } else {
+            hasMore = null;
+            totalCount = null;
+            url = null;
         }
-        return customer;
+
+        return new Customer(id, defaultSource, shippingInformation, sources, hasMore, totalCount,
+                url);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof Customer && typedEquals((Customer) obj));
+    }
+    
+    private boolean typedEquals(@NonNull Customer customer) {
+        return ObjectUtils.equals(mId, customer.mId)
+                && ObjectUtils.equals(mDefaultSource, customer.mDefaultSource)
+                && ObjectUtils.equals(mShippingInformation, customer.mShippingInformation)
+                && ObjectUtils.equals(mSources, customer.mSources)
+                && ObjectUtils.equals(mHasMore, customer.mHasMore)
+                && ObjectUtils.equals(mTotalCount, customer.mTotalCount)
+                && ObjectUtils.equals(mUrl, customer.mUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mId, mDefaultSource, mShippingInformation, mSources, mHasMore,
+                mTotalCount, mUrl);
     }
 }

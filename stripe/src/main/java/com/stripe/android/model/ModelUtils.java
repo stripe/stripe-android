@@ -31,7 +31,6 @@ class ModelUtils {
      * @return {@code true} if the input time has passed the specified current time,
      *  {@code false} otherwise.
      */
-    @SuppressWarnings("WrongConstant")
     static boolean hasMonthPassed(int year, int month, Calendar now) {
         if (hasYearPassed(year, now)) {
             return true;
