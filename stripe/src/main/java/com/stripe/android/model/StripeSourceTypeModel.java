@@ -14,23 +14,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-abstract class StripeSourceTypeModel extends StripeJsonModel {
-
-    Map<String, Object> mAdditionalFields;
-    Set<String> mStandardFields = new HashSet<>();
+public abstract class StripeSourceTypeModel extends StripeJsonModel {
     private static final String NULL = "null";
 
-    StripeSourceTypeModel() {
+    Map<String, Object> mAdditionalFields;
+    @NonNull final Set<String> mStandardFields;
+
+    StripeSourceTypeModel(@NonNull Set<String> standardFields) {
+        mStandardFields = standardFields;
         mAdditionalFields = new HashMap<>();
     }
 
     @NonNull
     public Map<String, Object> getAdditionalFields() {
         return mAdditionalFields;
-    }
-
-    void addStandardFields(String... fields) {
-        Collections.addAll(mStandardFields, fields);
     }
 
     void setAdditionalFields(@NonNull Map<String, Object> additionalFields) {
