@@ -1,13 +1,13 @@
 package com.stripe.example.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -85,7 +85,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mRetrievePaymentIntent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                retrievePaymentIntent(mClientSecret);
+                retrievePaymentIntent();
             }
         });
         mConfirmPaymentIntent.setOnClickListener(new View.OnClickListener() {
@@ -93,14 +93,14 @@ public class PaymentIntentActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Card card = mCardInputWidget.getCard();
                 if (card != null) {
-                    confirmPaymentIntent(mClientSecret, card);
+                    confirmPaymentIntent(card);
                 }
             }
         });
     }
 
     private Map<String, Object> createPaymentIntentParams() {
-        Map<String, Object> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put("allowed_source_types[]", "card");
         params.put("amount", 1000);
         params.put("currency", "usd");
@@ -151,20 +151,17 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mCompositeSubscription.add(subscription);
     }
 
-    void retrievePaymentIntent(final String clientSecret) {
-        final Observable<PaymentIntent> paymentIntentObservable =
-                Observable.fromCallable(
-                        new Callable<PaymentIntent>() {
-                            @Override
-                            public PaymentIntent call() throws Exception {
-                                PaymentIntentParams paymentIntentParams =
-                                        PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
-                                return mStripe.retrievePaymentIntentSynchronous(
-                                        paymentIntentParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
-        Subscription subscription = paymentIntentObservable
+    private void retrievePaymentIntent() {
+        final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
+                new Callable<PaymentIntent>() {
+                    @Override
+                    public PaymentIntent call() throws Exception {
+                        return mStripe.retrievePaymentIntentSynchronous(
+                                PaymentIntentParams.createRetrievePaymentIntentParams(mClientSecret),
+                                PaymentConfiguration.getInstance().getPublishableKey());
+                    }
+                });
+        final Subscription subscription = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe(new Action0() {
                     @Override
@@ -200,24 +197,21 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mCompositeSubscription.add(subscription);
     }
 
-    void confirmPaymentIntent(final String clientSecret, Card card) {
+    private void confirmPaymentIntent(@NonNull final Card card) {
         final SourceParams sourceParams = SourceParams.createCardParams(card);
-        final Observable<PaymentIntent> paymentIntentObservable =
-                Observable.fromCallable(
-                        new Callable<PaymentIntent>() {
-                            @Override
-                            public PaymentIntent call() throws Exception {
-                                PaymentIntentParams paymentIntentParams =
-                                        PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
-                                                sourceParams,
-                                                clientSecret,
-                                                RETURN_URL);
-                                return mStripe.confirmPaymentIntentSynchronous(
-                                        paymentIntentParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
-        Subscription subscription = paymentIntentObservable
+        final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
+                new Callable<PaymentIntent>() {
+                    @Override
+                    public PaymentIntent call() throws Exception {
+                        final PaymentIntentParams paymentIntentParams = PaymentIntentParams
+                                .createConfirmPaymentIntentWithSourceDataParams(
+                                        sourceParams, mClientSecret, RETURN_URL);
+                        return mStripe.confirmPaymentIntentSynchronous(
+                                paymentIntentParams,
+                                PaymentConfiguration.getInstance().getPublishableKey());
+                    }
+                });
+        final Subscription subscription = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(new Action0() {
@@ -236,14 +230,16 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .subscribe(
                         new Action1<PaymentIntent>() {
                             @Override
-                            public void call(PaymentIntent paymentIntent) {
+                            public void call(@Nullable PaymentIntent paymentIntent) {
                                 if (paymentIntent != null) {
                                     mPaymentIntentValue.setText(paymentIntent.toString());
-                                    Uri authUrl = paymentIntent.getAuthorizationUrl();
-                                    if ("requires_source_action".equals(paymentIntent.getStatus())
-                                            && authUrl != null) {
-                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, authUrl);
-                                        startActivity(browserIntent);
+
+                                    final PaymentIntent.Status status = PaymentIntent.Status
+                                            .fromCode(paymentIntent.getStatus());
+
+                                    if (PaymentIntent.Status.RequiresAction == status) {
+                                        startActivity(new Intent(Intent.ACTION_VIEW,
+                                                paymentIntent.getRedirectUrl()));
                                     }
                                 }
                             }
@@ -257,5 +253,4 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 );
         mCompositeSubscription.add(subscription);
     }
-
 }
