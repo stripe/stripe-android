@@ -3,21 +3,29 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PaymentIntentParams {
 
+    static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";
+    static final String API_PARAM_PAYMENT_METHOD_ID = "payment_method";
+
     static final String API_PARAM_SOURCE_DATA = "source_data";
     static final String API_PARAM_SOURCE_ID = "source";
+
     static final String API_PARAM_RETURN_URL = "return_url";
     static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
-    private Map<String, Object> mExtraParams;
-    private SourceParams mSourceParams;
-    private String mSourceId;
-    private String mClientSecret;
-    private String mReturnUrl;
+    @Nullable private PaymentMethodCreateParams mPaymentMethodCreateParams;
+    @Nullable private String mPaymentMethodId;
+    @Nullable private SourceParams mSourceParams;
+    @Nullable private String mSourceId;
+
+    @Nullable private Map<String, Object> mExtraParams;
+    @Nullable private String mClientSecret;
+    @Nullable private String mReturnUrl;
 
     private PaymentIntentParams() {
     }
@@ -29,26 +37,52 @@ public class PaymentIntentParams {
      * @return an empty Params object. Call the setter methods on this class to specific values on
      * the params
      */
+    @NonNull
     public static PaymentIntentParams createCustomParams() {
         return new PaymentIntentParams();
     }
 
+
     /**
-     * Create the parameters necessary for confirming a PaymentIntent while attaching Source data
+     * Create the parameters necessary for confirming a PaymentIntent while attaching a
+     * PaymentMethod that already exits.
      *
-     * @param sourceParams params for the source that will be attached to this payment intent
+     * @param paymentMethodId the ID of the PaymentMethod that is being attached to the
+     *                        PaymentIntent being confirmed
+     * @param clientSecret client secret from the PaymentIntent being confirmed
+     * @param returnUrl the URL the customer should be redirected to after the authorization
+     *                  process
+     * @return params that can be use to confirm a PaymentIntent
+     */
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodId(
+            @Nullable String paymentMethodId,
+            @NonNull String clientSecret,
+            @Nullable String returnUrl) {
+        return new PaymentIntentParams()
+                .setPaymentMethodId(paymentMethodId)
+                .setClientSecret(clientSecret)
+                .setReturnUrl(returnUrl);
+    }
+
+    /**
+     * Create the parameters necessary for confirming a PaymentIntent while attaching
+     * {@link PaymentMethodCreateParams} data
+     *
+     * @param paymentMethodCreateParams params for the PaymentMethod that will be attached to this
+     *                                  PaymentIntent
      * @param clientSecret client secret from the PaymentIntent that is to be confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
      *                  process
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
-    public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
-            @Nullable SourceParams sourceParams,
+    public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodCreateParams(
+            @Nullable PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
             @Nullable String returnUrl) {
         return new PaymentIntentParams()
-                .setSourceParams(sourceParams)
+                .setPaymentMethodCreateParams(paymentMethodCreateParams)
                 .setClientSecret(clientSecret)
                 .setReturnUrl(returnUrl);
     }
@@ -76,6 +110,26 @@ public class PaymentIntentParams {
     }
 
     /**
+     * Create the parameters necessary for confirming a PaymentIntent while attaching Source data
+     *
+     * @param sourceParams params for the source that will be attached to this PaymentIntent
+     * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+     * @param returnUrl the URL the customer should be redirected to after the authorization
+     *                  process
+     * @return params that can be use to confirm a PaymentIntent
+     */
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
+            @Nullable SourceParams sourceParams,
+            @NonNull String clientSecret,
+            @Nullable String returnUrl) {
+        return new PaymentIntentParams()
+                .setSourceParams(sourceParams)
+                .setClientSecret(clientSecret)
+                .setReturnUrl(returnUrl);
+    }
+
+    /**
      * Create the parameters necessary for retrieving the details of PaymentIntent
      *
      * @param clientSecret client secret from the PaymentIntent that is being retrieved
@@ -88,14 +142,44 @@ public class PaymentIntentParams {
     }
 
     /**
+     * Sets the PaymentMethod data that will be included with this PaymentIntent
+     *
+     * @param paymentMethodCreateParams Params for the PaymentMethod that will be attached to this
+     *                                  PaymentIntent. Only one of PaymentMethodParam,
+     *                                  PaymentMethodId, SourceParam, SourceId should be used at a
+     *                                  time.
+     * @return {@code this}, for chaining purposes
+     */
+    @NonNull
+    public PaymentIntentParams setPaymentMethodCreateParams(
+            @Nullable PaymentMethodCreateParams paymentMethodCreateParams) {
+        this.mPaymentMethodCreateParams = paymentMethodCreateParams;
+        return this;
+    }
+
+    /**
+     * Sets a pre-existing PaymentMethtod that will be attached to this PaymentIntent
+     *
+     * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
+     *                        PaymentIntent. Only one of PaymentMethodParam, PaymentMethodId,
+     *                        SourceParam, SourceId should be used at a time.
+     * @return {@code this}, for chaining purposes
+     */
+    @NonNull
+    public PaymentIntentParams setPaymentMethodId(@Nullable String paymentMethodId) {
+        mPaymentMethodId = paymentMethodId;
+        return this;
+    }
+
+    /**
      * Sets the source data that will be included with this PaymentIntent
      *
-     * @param sourceParams params for the source that will be attached to this payment intent. Only
+     * @param sourceParams params for the source that will be attached to this PaymentIntent. Only
      *                     one of SourceParam and SourceId should be used at at time
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public PaymentIntentParams setSourceParams(@NonNull SourceParams sourceParams) {
+    public PaymentIntentParams setSourceParams(@Nullable SourceParams sourceParams) {
         mSourceParams = sourceParams;
         return this;
     }
@@ -107,7 +191,7 @@ public class PaymentIntentParams {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public PaymentIntentParams setSourceId(@NonNull String sourceId) {
+    public PaymentIntentParams setSourceId(@Nullable String sourceId) {
         mSourceId = sourceId;
         return this;
     }
@@ -128,7 +212,7 @@ public class PaymentIntentParams {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public PaymentIntentParams setReturnUrl(@NonNull String returnUrl) {
+    public PaymentIntentParams setReturnUrl(@Nullable String returnUrl) {
         mReturnUrl = returnUrl;
         return this;
     }
@@ -139,7 +223,7 @@ public class PaymentIntentParams {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public PaymentIntentParams setExtraParams(@NonNull Map<String, Object> extraParams) {
+    public PaymentIntentParams setExtraParams(@Nullable Map<String, Object> extraParams) {
         mExtraParams = extraParams;
         return this;
     }
@@ -152,12 +236,19 @@ public class PaymentIntentParams {
      */
     @NonNull
     public Map<String, Object> toParamMap() {
-        final Map<String, Object> networkReadyMap = new HashMap<>();
-        if (mSourceParams != null) {
+        final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
+
+        if (mPaymentMethodCreateParams != null) {
+            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_DATA,
+                    mPaymentMethodCreateParams.toParamMap());
+        } else if (mPaymentMethodId != null) {
+            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+        } else if (mSourceParams != null) {
             networkReadyMap.put(API_PARAM_SOURCE_DATA, mSourceParams.toParamMap());
         } else if (mSourceId != null) {
             networkReadyMap.put(API_PARAM_SOURCE_ID, mSourceId);
         }
+
         if (mReturnUrl != null) {
             networkReadyMap.put(API_PARAM_RETURN_URL, mReturnUrl);
         }
@@ -186,7 +277,7 @@ public class PaymentIntentParams {
     }
 
     /**
-     * @return params for the source that will be attached to this payment intent
+     * @return params for the source that will be attached to this PaymentIntent
      */
     @Nullable
     public SourceParams getSourceParams() {
@@ -199,6 +290,22 @@ public class PaymentIntentParams {
     @Nullable
     public String getSourceId() {
         return mSourceId;
+    }
+
+    /**
+     * @return params for the PaymentMethod that will be attached to this PaymentIntent
+     */
+    @Nullable
+    public PaymentMethodCreateParams getPaymentMethodCreateParams() {
+        return mPaymentMethodCreateParams;
+    }
+
+    /**
+     * @return the ID of the existing PaymentMethod that is being attached to this PaymentIntent.
+     */
+    @Nullable
+    public String getPaymentMethodId() {
+        return mPaymentMethodId;
     }
 
     /**
