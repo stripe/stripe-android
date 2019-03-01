@@ -58,7 +58,7 @@ public class PaymentIntentParams {
     public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodId(
             @Nullable String paymentMethodId,
             @NonNull String clientSecret,
-            @Nullable String returnUrl) {
+            @NonNull String returnUrl) {
         return new PaymentIntentParams()
                 .setPaymentMethodId(paymentMethodId)
                 .setClientSecret(clientSecret)
@@ -80,7 +80,7 @@ public class PaymentIntentParams {
     public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodCreateParams(
             @Nullable PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
-            @Nullable String returnUrl) {
+            @NonNull String returnUrl) {
         return new PaymentIntentParams()
                 .setPaymentMethodCreateParams(paymentMethodCreateParams)
                 .setClientSecret(clientSecret)
@@ -102,7 +102,7 @@ public class PaymentIntentParams {
     public static PaymentIntentParams createConfirmPaymentIntentWithSourceIdParams(
             @Nullable String sourceId,
             @NonNull String clientSecret,
-            @Nullable String returnUrl) {
+            @NonNull String returnUrl) {
         return new PaymentIntentParams()
                 .setSourceId(sourceId)
                 .setClientSecret(clientSecret)
@@ -122,7 +122,7 @@ public class PaymentIntentParams {
     public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
             @Nullable SourceParams sourceParams,
             @NonNull String clientSecret,
-            @Nullable String returnUrl) {
+            @NonNull String returnUrl) {
         return new PaymentIntentParams()
                 .setSourceParams(sourceParams)
                 .setClientSecret(clientSecret)
@@ -158,7 +158,7 @@ public class PaymentIntentParams {
     }
 
     /**
-     * Sets a pre-existing PaymentMethtod that will be attached to this PaymentIntent
+     * Sets a pre-existing PaymentMethod that will be attached to this PaymentIntent
      *
      * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
      *                        PaymentIntent. Only one of PaymentMethodParam, PaymentMethodId,
@@ -212,7 +212,7 @@ public class PaymentIntentParams {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public PaymentIntentParams setReturnUrl(@Nullable String returnUrl) {
+    public PaymentIntentParams setReturnUrl(@NonNull String returnUrl) {
         mReturnUrl = returnUrl;
         return this;
     }
