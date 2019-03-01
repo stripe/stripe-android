@@ -58,6 +58,13 @@ public class PaymentMethod extends StripeJsonModel {
         ideal = builder.mIdeal;
     }
 
+    /**
+     * @return true if the data in the model is valid
+     */
+    public boolean isValid() {
+        return type != null;
+    }
+
     @NonNull
     @Override
     public Map<String, Object> toMap() {
