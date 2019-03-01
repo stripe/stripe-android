@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,16 +41,23 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
             FIELD_MANDATE_REFERENCE,
             FIELD_MANDATE_URL));
 
-    private String mBankCode;
-    private String mBranchCode;
-    private String mCountry;
-    private String mFingerPrint;
-    private String mLast4;
-    private String mMandateReference;
-    private String mMandateUrl;
+    @Nullable private final String mBankCode;
+    @Nullable private final String mBranchCode;
+    @Nullable private final String mCountry;
+    @Nullable private final String mFingerPrint;
+    @Nullable private final String mLast4;
+    @Nullable private final String mMandateReference;
+    @Nullable private final String mMandateUrl;
 
-    private SourceSepaDebitData() {
+    private SourceSepaDebitData(@NonNull Builder builder) {
         super(STANDARD_FIELDS);
+        mBankCode = builder.mBankCode;
+        mBranchCode = builder.mBranchCode;
+        mCountry = builder.mCountry;
+        mFingerPrint = builder.mFingerPrint;
+        mLast4 = builder.mLast4;
+        mMandateReference = builder.mMandateReference;
+        mMandateUrl = builder.mMandateUrl;
     }
 
     @Nullable
@@ -58,16 +66,17 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
             return null;
         }
 
-        SourceSepaDebitData sepaData = new SourceSepaDebitData();
-        sepaData.setBankCode(optString(jsonObject, FIELD_BANK_CODE))
+        final SourceSepaDebitData sepaData = new SourceSepaDebitData.Builder()
+                .setBankCode(optString(jsonObject, FIELD_BANK_CODE))
                 .setBranchCode(optString(jsonObject, FIELD_BRANCH_CODE))
                 .setCountry(optString(jsonObject, FIELD_COUNTRY))
                 .setFingerPrint(optString(jsonObject, FIELD_FINGERPRINT))
                 .setLast4(optString(jsonObject, FIELD_LAST4))
                 .setMandateReference(optString(jsonObject, FIELD_MANDATE_REFERENCE))
-                .setMandateUrl(optString(jsonObject, FIELD_MANDATE_URL));
+                .setMandateUrl(optString(jsonObject, FIELD_MANDATE_URL))
+                .build();
 
-        Map<String, Object> nonStandardFields =
+        final Map<String, Object> nonStandardFields =
                 jsonObjectToMapWithoutKeys(jsonObject, sepaData.mStandardFields);
         if (nonStandardFields != null) {
             sepaData.setAdditionalFields(nonStandardFields);
@@ -75,30 +84,37 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
         return sepaData;
     }
 
+    @Nullable
     public String getBankCode() {
         return mBankCode;
     }
 
+    @Nullable
     public String getBranchCode() {
         return mBranchCode;
     }
 
+    @Nullable
     public String getCountry() {
         return mCountry;
     }
 
+    @Nullable
     public String getFingerPrint() {
         return mFingerPrint;
     }
 
+    @Nullable
     public String getLast4() {
         return mLast4;
     }
 
+    @Nullable
     public String getMandateReference() {
         return mMandateReference;
     }
 
+    @Nullable
     public String getMandateUrl() {
         return mMandateUrl;
     }
@@ -106,7 +122,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         putStringIfNotNull(jsonObject, FIELD_BANK_CODE, mBankCode);
         putStringIfNotNull(jsonObject, FIELD_BRANCH_CODE, mBranchCode);
         putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
@@ -122,7 +138,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> objectMap = new HashMap<>();
+        final Map<String, Object> objectMap = new HashMap<>();
         objectMap.put(FIELD_BANK_CODE, mBankCode);
         objectMap.put(FIELD_BRANCH_CODE, mBranchCode);
         objectMap.put(FIELD_COUNTRY, mCountry);
@@ -146,39 +162,83 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
         }
     }
 
-    private SourceSepaDebitData setBankCode(String bankCode) {
-        mBankCode = bankCode;
-        return this;
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj
+                || (obj instanceof SourceSepaDebitData && typedEquals((SourceSepaDebitData) obj));
     }
 
-    private SourceSepaDebitData setBranchCode(String branchCode) {
-        mBranchCode = branchCode;
-        return this;
+    private boolean typedEquals(@NonNull SourceSepaDebitData obj) {
+        return ObjectUtils.equals(mBankCode, obj.mBankCode)
+                && ObjectUtils.equals(mBranchCode, obj.mBranchCode)
+                && ObjectUtils.equals(mCountry, obj.mCountry)
+                && ObjectUtils.equals(mFingerPrint, obj.mFingerPrint)
+                && ObjectUtils.equals(mLast4, obj.mLast4)
+                && ObjectUtils.equals(mMandateReference, obj.mMandateReference)
+                && ObjectUtils.equals(mMandateUrl, obj.mMandateUrl);
     }
 
-    private SourceSepaDebitData setCountry(String country) {
-        mCountry = country;
-        return this;
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mBankCode, mBranchCode, mCountry, mFingerPrint, mLast4,
+                mMandateReference, mMandateUrl);
     }
 
-    private SourceSepaDebitData setFingerPrint(String fingerPrint) {
-        mFingerPrint = fingerPrint;
-        return this;
-    }
+    public static final class Builder {
+        private String mBankCode;
+        private String mBranchCode;
+        private String mCountry;
+        private String mFingerPrint;
+        private String mLast4;
+        private String mMandateReference;
+        private String mMandateUrl;
 
-    private SourceSepaDebitData setLast4(String last4) {
-        mLast4 = last4;
-        return this;
-    }
+        @NonNull
+        public Builder setBankCode(String bankCode) {
+            mBankCode = bankCode;
+            return this;
+        }
 
-    private SourceSepaDebitData setMandateReference(String mandateReference) {
-        mMandateReference = mandateReference;
-        return this;
-    }
+        @NonNull
+        public Builder setBranchCode(String branchCode) {
+            mBranchCode = branchCode;
+            return this;
+        }
 
-    private SourceSepaDebitData setMandateUrl(String mandateUrl) {
-        mMandateUrl = mandateUrl;
-        return this;
+        @NonNull
+        public Builder setCountry(String country) {
+            mCountry = country;
+            return this;
+        }
+
+        @NonNull
+        public Builder setFingerPrint(String fingerPrint) {
+            mFingerPrint = fingerPrint;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLast4(String last4) {
+            mLast4 = last4;
+            return this;
+        }
+
+        @NonNull
+        public Builder setMandateReference(String mandateReference) {
+            mMandateReference = mandateReference;
+            return this;
+        }
+
+        @NonNull
+        public Builder setMandateUrl(String mandateUrl) {
+            mMandateUrl = mandateUrl;
+            return this;
+        }
+        
+        @NonNull
+        public SourceSepaDebitData build() {
+            return new SourceSepaDebitData(this);
+        }
     }
 
 }

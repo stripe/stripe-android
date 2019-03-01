@@ -7,6 +7,8 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,12 +56,12 @@ public class Address extends StripeJsonModel implements Parcelable {
     @Nullable private String mState;
 
     private Address(
-            String city,
-            String country,
-            String line1,
-            String line2,
-            String postalCode,
-            String state) {
+            @Nullable String city,
+            @Nullable String country,
+            @Nullable String line1,
+            @Nullable String line2,
+            @Nullable String postalCode,
+            @Nullable String state) {
         mCity = city;
         mCountry = country;
         mLine1 = line1;
@@ -69,12 +71,17 @@ public class Address extends StripeJsonModel implements Parcelable {
     }
 
     private Address(@NonNull Builder addressBuilder) {
-        mCity = addressBuilder.mCity;
-        mCountry = addressBuilder.mCountry;
-        mLine1 = addressBuilder.mLine1;
-        mLine2 = addressBuilder.mLine2;
-        mPostalCode = addressBuilder.mPostalCode;
-        mState = addressBuilder.mState;
+        this(addressBuilder.mCity, addressBuilder.mCountry, addressBuilder.mLine1,
+                addressBuilder.mLine2, addressBuilder.mPostalCode, addressBuilder.mState);
+    }
+
+    protected Address(@NonNull Parcel in) {
+        mCity = in.readString();
+        mCountry = in.readString();
+        mLine1 = in.readString();
+        mLine2 = in.readString();
+        mPostalCode = in.readString();
+        mState = in.readString();
     }
 
     @Nullable
@@ -140,20 +147,20 @@ public class Address extends StripeJsonModel implements Parcelable {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
-        hashMap.put(FIELD_CITY, mCity);
-        hashMap.put(FIELD_COUNTRY, mCountry);
-        hashMap.put(FIELD_LINE_1, mLine1);
-        hashMap.put(FIELD_LINE_2, mLine2);
-        hashMap.put(FIELD_POSTAL_CODE, mPostalCode);
-        hashMap.put(FIELD_STATE, mState);
-        return hashMap;
+        final Map<String, Object> map = new HashMap<>();
+        map.put(FIELD_CITY, mCity);
+        map.put(FIELD_COUNTRY, mCountry);
+        map.put(FIELD_LINE_1, mLine1);
+        map.put(FIELD_LINE_2, mLine2);
+        map.put(FIELD_POSTAL_CODE, mPostalCode);
+        map.put(FIELD_STATE, mState);
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         putStringIfNotNull(jsonObject, FIELD_CITY, mCity);
         putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
         putStringIfNotNull(jsonObject, FIELD_LINE_1, mLine1);
@@ -177,58 +184,33 @@ public class Address extends StripeJsonModel implements Parcelable {
         if (jsonObject == null) {
             return null;
         }
-        String city = optString(jsonObject, FIELD_CITY);
-        String country = optString(jsonObject, FIELD_COUNTRY);
-        String line1 = optString(jsonObject, FIELD_LINE_1);
-        String line2 = optString(jsonObject, FIELD_LINE_2);
-        String postalCode = optString(jsonObject, FIELD_POSTAL_CODE);
-        String state = optString(jsonObject, FIELD_STATE);
 
+        final String city = optString(jsonObject, FIELD_CITY);
+        final String country = optString(jsonObject, FIELD_COUNTRY);
+        final String line1 = optString(jsonObject, FIELD_LINE_1);
+        final String line2 = optString(jsonObject, FIELD_LINE_2);
+        final String postalCode = optString(jsonObject, FIELD_POSTAL_CODE);
+        final String state = optString(jsonObject, FIELD_STATE);
         return new Address(city, country, line1, line2, postalCode, state);
     }
 
-    public static class Builder {
-        private String mCity;
-        private String mCountry;
-        private String mLine1;
-        private String mLine2;
-        private String mPostalCode;
-        private String mState;
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj || (obj instanceof Address && typedEquals((Address) obj));
+    }
 
-        public Builder setCity(String city) {
-            mCity = city;
-            return this;
-        }
+    private boolean typedEquals(@NonNull Address obj) {
+        return ObjectUtils.equals(mCity, obj.mCity)
+                && ObjectUtils.equals(mCountry, obj.mCountry)
+                && ObjectUtils.equals(mLine1, obj.mLine1)
+                && ObjectUtils.equals(mLine2, obj.mLine2)
+                && ObjectUtils.equals(mPostalCode, obj.mPostalCode)
+                && ObjectUtils.equals(mState, obj.mState);
+    }
 
-        public Builder setCountry(@NonNull String country) {
-            mCountry = country.toUpperCase(Locale.ROOT);
-            return this;
-        }
-
-        public Builder setLine1(String line1) {
-            mLine1 = line1;
-            return this;
-        }
-
-        public Builder setLine2(String line2) {
-            mLine2 = line2;
-            return this;
-        }
-
-        public Builder setPostalCode(String postalCode) {
-            mPostalCode = postalCode;
-            return this;
-        }
-
-        public Builder setState(String state) {
-            mState = state;
-            return this;
-        }
-
-        public Address build() {
-            return new Address(this);
-        }
-
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mCity, mCountry, mLine1, mLine2, mPostalCode, mState);
     }
 
     /************** Parcelable *********************/
@@ -261,12 +243,54 @@ public class Address extends StripeJsonModel implements Parcelable {
         return 0;
     }
 
-    protected Address(Parcel in) {
-        mCity = in.readString();
-        mCountry = in.readString();
-        mLine1 = in.readString();
-        mLine2 = in.readString();
-        mPostalCode = in.readString();
-        mState = in.readString();
+    public static class Builder {
+        private String mCity;
+        private String mCountry;
+        private String mLine1;
+        private String mLine2;
+        private String mPostalCode;
+        private String mState;
+
+        @NonNull
+        public Builder setCity(@Nullable String city) {
+            mCity = city;
+            return this;
+        }
+
+        @NonNull
+        public Builder setCountry(@NonNull String country) {
+            mCountry = country.toUpperCase(Locale.ROOT);
+            return this;
+        }
+
+        @NonNull
+        public Builder setLine1(@Nullable String line1) {
+            mLine1 = line1;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLine2(@Nullable String line2) {
+            mLine2 = line2;
+            return this;
+        }
+
+        @NonNull
+        public Builder setPostalCode(@Nullable String postalCode) {
+            mPostalCode = postalCode;
+            return this;
+        }
+
+        @NonNull
+        public Builder setState(@Nullable String state) {
+            mState = state;
+            return this;
+        }
+
+        @NonNull
+        public Address build() {
+            return new Address(this);
+        }
+
     }
 }
