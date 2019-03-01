@@ -20,6 +20,8 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -72,6 +74,7 @@ class StripeApiHandler {
     private static final String CUSTOMERS = "customers";
     private static final String TOKENS = "tokens";
     private static final String SOURCES = "sources";
+    private static final String PAYMENT_METHODS = "payment_methods";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
@@ -333,6 +336,47 @@ class StripeApiHandler {
            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
                    unexpected.getStatusCode(), null, unexpected);
        }
+    }
+
+    @Nullable
+    static PaymentMethod createPaymentMethod(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull Context context,
+            @NonNull String publishableKey,
+            @Nullable String stripeAccount,
+            @Nullable LoggingResponseListener loggingResponseListener)
+
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
+
+        StripeNetworkUtils.addUidParams(null, context, params);
+        final RequestOptions options = RequestOptions.builder(
+                publishableKey,
+                stripeAccount,
+                RequestOptions.TYPE_QUERY).build();
+
+        final String apiKey = options.getPublishableApiKey();
+        if (StripeTextUtils.isBlank(apiKey)) {
+            return null;
+        }
+
+        setTelemetryData(context, loggingResponseListener);
+        final Map<String, Object> loggingParams = LoggingUtils.getPaymentMethodCreationParams(
+                context, null, apiKey);
+        final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
+        logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+
+        try {
+            final StripeResponse response = requestData(POST, getPaymentMethodsUrl(), params,
+                    options);
+            return PaymentMethod.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
+        }
     }
 
     /**
@@ -633,10 +677,20 @@ class StripeApiHandler {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
     }
 
+    /**
+     * @return https://api.stripe.com/v1/sources
+     */
     @VisibleForTesting
     static String getSourcesUrl() {
-        //https://api.stripe.com/v1/
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_methods
+     */
+    @VisibleForTesting
+    static String getPaymentMethodsUrl() {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, PAYMENT_METHODS);
     }
 
     @NonNull
