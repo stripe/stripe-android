@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
-import static com.stripe.android.model.StripeJsonUtils.optHash;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
@@ -34,11 +33,10 @@ public class PaymentMethod extends StripeJsonModel {
     private static final String FIELD_CUSTOMER = "customer";
     private static final String FIELD_IDEAL = "ideal";
     private static final String FIELD_LIVEMODE = "livemode";
-    private static final String FIELD_METADATA = "metadata";
     private static final String FIELD_TYPE = "type";
 
     @NonNull public final String id;
-    public final Long created;
+    @Nullable public final Long created;
     public final boolean liveMode;
     @Nullable public final String type;
     @Nullable public final BillingDetails billingDetails;
@@ -46,7 +44,6 @@ public class PaymentMethod extends StripeJsonModel {
     @Nullable public final CardPresent cardPresent;
     @Nullable public final Ideal ideal;
     @Nullable public final String customerId;
-    @Nullable public final Map<String, String> metadata;
 
     private PaymentMethod(@NonNull Builder builder) {
         id = builder.mId;
@@ -54,7 +51,6 @@ public class PaymentMethod extends StripeJsonModel {
         type = builder.mType;
         created = builder.mCreated;
         billingDetails = builder.mBillingDetails;
-        metadata = builder.mMetadata;
         customerId = builder.mCustomerId;
 
         card = builder.mCard;
@@ -73,7 +69,6 @@ public class PaymentMethod extends StripeJsonModel {
         paymentMethod.put(FIELD_TYPE, type);
         paymentMethod.put(FIELD_BILLING_DETAILS,
                 billingDetails != null ? billingDetails.toMap() : null);
-        paymentMethod.put(FIELD_METADATA, metadata);
         paymentMethod.put(FIELD_CARD,
                 card != null ? card.toMap() : null);
         paymentMethod.put(FIELD_CARD_PRESENT,
@@ -95,8 +90,6 @@ public class PaymentMethod extends StripeJsonModel {
             paymentMethod.put(FIELD_TYPE, type);
             paymentMethod.put(FIELD_BILLING_DETAILS,
                     billingDetails != null ? billingDetails.toJson() : null);
-            paymentMethod.put(FIELD_METADATA,
-                    metadata != null ? new JSONObject(metadata) : null);
             paymentMethod.put(FIELD_CARD,
                     card != null ? card.toJson() : null);
             paymentMethod.put(FIELD_CARD_PRESENT,
@@ -125,7 +118,6 @@ public class PaymentMethod extends StripeJsonModel {
         }
 
         final String type = optString(paymentMethod, FIELD_TYPE);
-        final Map<String, String> metadata = optHash(paymentMethod, FIELD_METADATA);
         final Builder builder = new Builder()
                 .setId(optString(paymentMethod, FIELD_ID))
                 .setType(type)
@@ -133,8 +125,7 @@ public class PaymentMethod extends StripeJsonModel {
                 .setBillingDetails(BillingDetails.fromJson(
                         paymentMethod.optJSONObject(FIELD_BILLING_DETAILS)))
                 .setCustomerId(optString(paymentMethod, FIELD_CUSTOMER))
-                .setLiveMode(Boolean.TRUE.equals(paymentMethod.optBoolean(FIELD_LIVEMODE)))
-                .setMetadata(metadata);
+                .setLiveMode(Boolean.TRUE.equals(paymentMethod.optBoolean(FIELD_LIVEMODE)));
 
         if (FIELD_CARD.equals(type)) {
             builder.setCard(Card.fromJson(paymentMethod.optJSONObject(FIELD_CARD)));
@@ -157,7 +148,6 @@ public class PaymentMethod extends StripeJsonModel {
         private CardPresent mCardPresent;
         private Ideal mIdeal;
         private String mCustomerId;
-        private Map<String, String> mMetadata;
 
         @NonNull
         public Builder setId(@Nullable String id) {
@@ -204,12 +194,6 @@ public class PaymentMethod extends StripeJsonModel {
         @NonNull
         public Builder setCustomerId(@Nullable String customerId) {
             this.mCustomerId = customerId;
-            return this;
-        }
-
-        @NonNull
-        public Builder setMetadata(@Nullable Map<String, String> metadata) {
-            this.mMetadata = metadata;
             return this;
         }
 

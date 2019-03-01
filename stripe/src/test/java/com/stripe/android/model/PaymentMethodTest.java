@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentMethodTest {
-
     private static final String RAW_CARD_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +
             "\t\"created\": 1550757934255,\n" +
@@ -136,6 +135,7 @@ public class PaymentMethodTest {
         assertEquals(new JSONObject(RAW_CARD_JSON).toString(),
                 CARD_PAYMENT_METHOD.toJson().toString());
     }
+
 
     @Test
     public void equals_withEqualPaymentMethods_shouldReturnTrue() {
