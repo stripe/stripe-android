@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -18,15 +17,17 @@ import static com.stripe.android.testharness.JsonTestUtils.assertJsonEqualsExclu
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentTest {
 
-    private static final String EXAMPLE_PAYMENT_INTENT_SOURCE= "{\n" +
+    private static final String PAYMENT_INTENT_WITH_SOURCE_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
             "  \"allowed_source_types\": [\n" +
+            "    \"card\"\n" +
+            "  ],\n" +
+            "  \"payment_method_types\": [\n" +
             "    \"card\"\n" +
             "  ],\n" +
             "  \"amount\": 1000,\n" +
@@ -47,7 +48,7 @@ public class PaymentIntentTest {
 
     private static final String BAD_URL = "nonsense-blahblah";
 
-    private static final String EXAMPLE_PAYMENT_INTENT_SOURCE_WITH_BAD_AUTH_URL = "{\n" +
+    private static final String PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
             "  \"allowed_source_types\": [\n" +
@@ -63,8 +64,9 @@ public class PaymentIntentTest {
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
             "  \"next_source_action\": {" +
-            "       authorize_with_url: {" +
-        "           url: \""+ BAD_URL +"\" } " +
+            "       \"type\": \"authorize_with_url\"," +
+            "           authorize_with_url: {" +
+            "           url: \""+ BAD_URL +"\" } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
@@ -72,71 +74,174 @@ public class PaymentIntentTest {
             "  \"status\": \"requires_source_action\"\n" +
             "}\n";
 
-    private static List<String> ALLOWED_SOURCE_TYPES = new ArrayList<String>() {{
+    private static final String PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON = "{\n" +
+            "  \"id\": \"pi_Aabcxyz01aDfoo\",\n" +
+            "  \"object\": \"payment_intent\",\n" +
+            "  \"amount\": 750,\n" +
+            "  \"amount_capturable\": 0,\n" +
+            "  \"amount_received\": 750,\n" +
+            "  \"application\": null,\n" +
+            "  \"application_fee_amount\": null,\n" +
+            "  \"canceled_at\": null,\n" +
+            "  \"cancellation_reason\": null,\n" +
+            "  \"capture_method\": \"automatic\",\n" +
+            "  \"charges\": {\n" +
+            "    \"object\": \"list\",\n" +
+            "    \"data\": [],\n" +
+            "    \"has_more\": false,\n" +
+            "    \"total_count\": 0,\n" +
+            "    \"url\": \"/v1/charges?payment_intent=pi_Aabcxyz01aDfoo\"\n" +
+            "  },\n" +
+            "  \"client_secret\": null,\n" +
+            "  \"confirmation_method\": \"publishable\",\n" +
+            "  \"created\": 123456789,\n" +
+            "  \"currency\": \"usd\",\n" +
+            "  \"customer\": null,\n" +
+            "  \"description\": \"PaymentIntent Description\",\n" +
+            "  \"last_payment_error\": null,\n" +
+            "  \"livemode\": false,\n" +
+            "  \"metadata\": {\n" +
+            "    \"order_id\": \"123456789\"\n" +
+            "  },\n" +
+            "  \"next_action\": null,\n" +
+            "  \"on_behalf_of\": null,\n" +
+            "  \"payment_method\": null,\n" +
+            "  \"payment_method_types\": [\n" +
+            "    \"card\"\n" +
+            "  ],\n" +
+            "  \"receipt_email\": \"jenny@example.com\",\n" +
+            "  \"review\": null,\n" +
+            "  \"shipping\": {\n" +
+            "    \"address\": {\n" +
+            "      \"city\": \"Stockholm\",\n" +
+            "      \"country\": \"Sweden\",\n" +
+            "      \"line1\": \"Mega street 5\",\n" +
+            "      \"line2\": \"Mega street 5\",\n" +
+            "      \"postal_code\": \"12233JJHH\",\n" +
+            "      \"state\": \"NYC\"\n" +
+            "    },\n" +
+            "    \"carrier\": null,\n" +
+            "    \"name\": \"Mohit  Name\",\n" +
+            "    \"phone\": null,\n" +
+            "    \"tracking_number\": null\n" +
+            "  },\n" +
+            "  \"source\": \"src_1E884r2eZvKYlo2CTft0qEyY\",\n" +
+            "  \"statement_descriptor\": \"PaymentIntent Statement Descriptor\",\n" +
+            "  \"status\": \"succeeded\",\n" +
+            "  \"transfer_data\": null,\n" +
+            "  \"transfer_group\": null\n" +
+            "}";
+
+    private static final String PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON = "{\n" +
+            "\t\"id\": \"pi_Aabcxyz01aDfoo\",\n" +
+            "\t\"object\": \"payment_intent\",\n" +
+            "\t\"status\": \"requires_action\",\n" +
+            "\t\"next_action\": {\n" +
+            "\t\t\"type\": \"redirect_to_url\",\n" +
+            "\t\t\"redirect_to_url\": {\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t}\n" +
+            "\t}\n" +
+            "}";
+
+    private static final String PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON = "{\n" +
+            "\t\"id\": \"pi_Aabcxyz01aDfoo\",\n" +
+            "\t\"object\": \"payment_intent\",\n" +
+            "\t\"status\": \"requires_action\",\n" +
+            "\t\"next_action\": {\n" +
+            "\t\t\"type\": \"authorize_with_url\",\n" +
+            "\t\t\"authorize_with_url\": {\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t}\n" +
+            "\t}\n" +
+            "}";
+
+    private static final List<String> ALLOWED_SOURCE_TYPES = new ArrayList<String>() {{
         add("card");
     }};
 
-    private static final Map<String, Object> EXAMPLE_PAYMENT_INTENT_MAP = new HashMap<String, Object>() {{
-        put("id", "pi_1CkiBMLENEVhOs7YMtUehLau");
-        put("object", "payment_intent");
-        put("allowed_source_types", ALLOWED_SOURCE_TYPES);
-        put("amount", 1000L);
-        put("canceled_at", 1530839340L);
-        put("client_secret", "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA");
-        put("confirmation_method", "publishable");
-        put("created", 1530838340L);
-        put("currency", "usd");
-        put("description", "Example PaymentIntent charge");
-        put("livemode", false);
-        put("source", "src_1CkiC3LENEVhOs7YMSa4yx4G");
-        put("capture_method", "automatic");
-        put("status", "succeeded");
-    }};
+    private static final Map<String, Object> PAYMENT_INTENT_WITH_SOURCE_MAP =
+            new HashMap<String, Object>() {{
+                put(PaymentIntent.FIELD_ID, "pi_1CkiBMLENEVhOs7YMtUehLau");
+                put(PaymentIntent.FIELD_OBJECT, "payment_intent");
+                put(PaymentIntent.FIELD_ALLOWED_SOURCE_TYPES, ALLOWED_SOURCE_TYPES);
+                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, ALLOWED_SOURCE_TYPES);
+                put(PaymentIntent.FIELD_AMOUNT, 1000L);
+                put(PaymentIntent.FIELD_CANCELED, 1530839340L);
+                put(PaymentIntent.FIELD_CLIENT_SECRET,
+                        "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA");
+                put(PaymentIntent.FIELD_CONFIRMATION_METHOD, "publishable");
+                put(PaymentIntent.FIELD_CREATED, 1530838340L);
+                put(PaymentIntent.FIELD_CURRENCY, "usd");
+                put(PaymentIntent.FIELD_DESCRIPTION, "Example PaymentIntent charge");
+                put(PaymentIntent.FIELD_LIVEMODE, false);
+                put(PaymentIntent.FIELD_SOURCE, "src_1CkiC3LENEVhOs7YMSa4yx4G");
+                put(PaymentIntent.FIELD_CAPTURE_METHOD, "automatic");
+                put(PaymentIntent.FIELD_STATUS, "succeeded");
+            }};
 
-    private PaymentIntent mPaymentIntent;
-
-    @Before
-    public void setup() {
-        mPaymentIntent = PaymentIntent.fromString(EXAMPLE_PAYMENT_INTENT_SOURCE);
-        assertNotNull(mPaymentIntent);
-    }
+    private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE = PaymentIntent
+            .fromString(PAYMENT_INTENT_WITH_SOURCE_JSON);
 
     @Test
-    public void fromJsonString_backToJson_createsIdenticalElement() {
-        try {
-            JSONObject rawConversion = new JSONObject(EXAMPLE_PAYMENT_INTENT_SOURCE);
-            JSONObject actualObject = mPaymentIntent.toJson();
-            assertJsonEqualsExcludingNulls(rawConversion, actualObject);
-        } catch (JSONException jsonException) {
-            fail("Test Data failure: " + jsonException.getLocalizedMessage());
-        }
+    public void fromJsonString_backToJson_createsIdenticalElement() throws JSONException {
+        assertNotNull(PAYMENT_INTENT_WITH_SOURCE);
+        JSONObject rawConversion = new JSONObject(PAYMENT_INTENT_WITH_SOURCE_JSON);
+        JSONObject actualObject = PAYMENT_INTENT_WITH_SOURCE.toJson();
+        assertJsonEqualsExcludingNulls(rawConversion, actualObject);
     }
 
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {
-        Map<String, Object> paymentIntentMap = mPaymentIntent.toMap();
-        assertMapEquals(paymentIntentMap, EXAMPLE_PAYMENT_INTENT_MAP);
+        assertNotNull(PAYMENT_INTENT_WITH_SOURCE);
+        final Map<String, Object> paymentIntentMap = PAYMENT_INTENT_WITH_SOURCE.toMap();
+        assertMapEquals(paymentIntentMap, PAYMENT_INTENT_WITH_SOURCE_MAP);
     }
 
     @Test
     public void getAuthorizationUrl_whenProvidedBadUrl_doesNotCrash() {
-        PaymentIntent paymentIntent = PaymentIntent.fromString(
-                EXAMPLE_PAYMENT_INTENT_SOURCE_WITH_BAD_AUTH_URL);
+        final PaymentIntent paymentIntent = PaymentIntent.fromString(
+                PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON);
         assertNotNull(paymentIntent);
 
-        Uri authUrl = paymentIntent.getAuthorizationUrl();
+        final Uri authUrl = paymentIntent.getAuthorizationUrl();
         assertNotNull(authUrl);
 
         assertEquals(BAD_URL, authUrl.getEncodedPath());
     }
 
     @Test
+    public void getRedirectUrl_withRedirectToUrlPopulate_returnsRedirectUrl() {
+        final PaymentIntent paymentIntent = PaymentIntent
+                .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
+        assertNotNull(paymentIntent);
+        final Uri redirectUrl = paymentIntent.getRedirectUrl();
+        assertNotNull(redirectUrl);
+        assertEquals("https://example.com/redirect", redirectUrl.toString());
+    }
+
+    @Test
+    public void getRedirectUrl_withAuthorizeWithUrlPopulated_returnsRedirectUrl() {
+        final PaymentIntent paymentIntent = PaymentIntent
+                .fromString(PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON);
+        assertNotNull(paymentIntent);
+        final Uri redirectUrl = paymentIntent.getRedirectUrl();
+        assertNotNull(redirectUrl);
+        assertEquals("https://example.com/redirect", redirectUrl.toString());
+    }
+
+    @Test
     public void parseIdFromClientSecret_parsesCorrectly() {
-        String clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA";
-
-        String id = PaymentIntent.parseIdFromClientSecret(clientSecret);
-
+        final String clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA";
+        final String id = PaymentIntent.parseIdFromClientSecret(clientSecret);
         assertEquals("pi_1CkiBMLENEVhOs7YMtUehLau", id);
     }
 
+    @Test
+    public void parsePaymentIntentWithPaymentMethods() {
+        final PaymentIntent paymentIntent =
+                PaymentIntent.fromString(PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON);
+        assertNotNull(paymentIntent);
+        assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
+    }
 }
