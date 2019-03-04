@@ -3,6 +3,8 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,13 +18,13 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  */
 public class CustomerSource extends StripeJsonModel implements StripePaymentSource {
 
-    private StripePaymentSource mStripePaymentSource;
+    @NonNull private final StripePaymentSource mStripePaymentSource;
 
-    private CustomerSource(StripePaymentSource paymentSource) {
+    private CustomerSource(@NonNull StripePaymentSource paymentSource) {
         mStripePaymentSource = paymentSource;
     }
 
-    @Nullable
+    @NonNull
     public StripePaymentSource getStripePaymentSource() {
         return mStripePaymentSource;
     }
@@ -30,7 +32,7 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
     @Override
     @Nullable
     public String getId() {
-        return mStripePaymentSource == null ? null : mStripePaymentSource.getId();
+        return mStripePaymentSource.getId();
     }
 
     @Nullable
@@ -43,10 +45,10 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
 
     @Nullable
     public String getTokenizationMethod() {
-        Source paymentAsSource = asSource();
-        Card paymentAsCard = asCard();
-        if (paymentAsSource != null && paymentAsSource.getType().equals(Source.CARD)) {
-            SourceCardData cardData = (SourceCardData) paymentAsSource.getSourceTypeModel();
+        final Source paymentAsSource = asSource();
+        final Card paymentAsCard = asCard();
+        if (paymentAsSource != null && Source.CARD.equals(paymentAsSource.getType())) {
+            final SourceCardData cardData = (SourceCardData) paymentAsSource.getSourceTypeModel();
             if (cardData != null) {
                 return cardData.getTokenizationMethod();
             }
@@ -91,12 +93,14 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
             return null;
         }
 
-        String objectString = optString(jsonObject, "object");
-        StripePaymentSource sourceObject = null;
+        final String objectString = optString(jsonObject, "object");
+        final StripePaymentSource sourceObject;
         if (Card.VALUE_CARD.equals(objectString)) {
             sourceObject = Card.fromJson(jsonObject);
         } else if (Source.VALUE_SOURCE.equals(objectString)) {
             sourceObject = Source.fromJson(jsonObject);
+        } else {
+            sourceObject = null;
         }
 
         if (sourceObject == null) {
@@ -126,5 +130,19 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
             return ((Card) mStripePaymentSource).toJson();
         }
         return new JSONObject();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof CustomerSource && typedEquals((CustomerSource) obj));
+    }
+
+    private boolean typedEquals(@NonNull CustomerSource customerSource) {
+        return ObjectUtils.equals(mStripePaymentSource, customerSource.mStripePaymentSource);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mStripePaymentSource);
     }
 }

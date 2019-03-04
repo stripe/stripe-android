@@ -196,7 +196,7 @@ public class PaymentMethodsActivityTest {
         assertNotNull(source);
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toString());
+        resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toJson().toString());
 
         ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
@@ -228,7 +228,7 @@ public class PaymentMethodsActivityTest {
         assertNotNull(source);
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toString());
+        resultIntent.putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toJson().toString());
 
         ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
@@ -317,7 +317,8 @@ public class PaymentMethodsActivityTest {
 
         CustomerSource customerSource = customer.getSourceById(customer.getDefaultSource());
         assertNotNull(customerSource);
-        assertEquals(customerSource.toString(), intent.getStringExtra(EXTRA_SELECTED_PAYMENT));
+        assertEquals(customerSource.toJson().toString(),
+                intent.getStringExtra(EXTRA_SELECTED_PAYMENT));
     }
 
     @NonNull

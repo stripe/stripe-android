@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +17,7 @@ import java.util.Map;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model for a
- * {@url https://stripe.com/docs/api#source_object-code_verification code_verification}
+ * https://stripe.com/docs/api/sources/object#source_object-code_verification
  * object in the source api, <em>not</em> source code verification
  */
 public class SourceCodeVerification extends StripeJsonModel {
@@ -37,10 +39,10 @@ public class SourceCodeVerification extends StripeJsonModel {
     private static final String FIELD_STATUS = "status";
     private static final int INVALID_ATTEMPTS_REMAINING = -1;
 
-    private int mAttemptsRemaining;
-    private @Status String mStatus;
+    private final int mAttemptsRemaining;
+    @Nullable @Status private final String mStatus;
 
-    SourceCodeVerification(int attemptsRemaining, @Status String status) {
+    private SourceCodeVerification(int attemptsRemaining, @Nullable @Status String status) {
         mAttemptsRemaining = attemptsRemaining;
         mStatus = status;
     }
@@ -49,34 +51,27 @@ public class SourceCodeVerification extends StripeJsonModel {
         return mAttemptsRemaining;
     }
 
-    void setAttemptsRemaining(int attemptsRemaining) {
-        mAttemptsRemaining = attemptsRemaining;
-    }
-
+    @Nullable
     @Status
     public String getStatus() {
         return mStatus;
     }
 
-    void setStatus(@Status String status) {
-        mStatus = status;
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
-        hashMap.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
+        final Map<String, Object> map = new HashMap<>();
+        map.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
         if (mStatus != null) {
-            hashMap.put(FIELD_STATUS, mStatus);
+            map.put(FIELD_STATUS, mStatus);
         }
-        return hashMap;
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
@@ -118,5 +113,21 @@ public class SourceCodeVerification extends StripeJsonModel {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SourceCodeVerification
+                && typedEquals((SourceCodeVerification) obj));
+    }
+
+    private boolean typedEquals(@NonNull SourceCodeVerification sourceCodeVerification) {
+        return mAttemptsRemaining == sourceCodeVerification.mAttemptsRemaining
+                && ObjectUtils.equals(mStatus, sourceCodeVerification.mStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAttemptsRemaining, mStatus);
     }
 }

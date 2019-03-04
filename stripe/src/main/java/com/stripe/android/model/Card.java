@@ -12,6 +12,7 @@ import com.stripe.android.CardUtils;
 import com.stripe.android.R;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1068,7 +1069,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         }
     }
 
-    boolean validateExpiryDate(Calendar now) {
+    boolean validateExpiryDate(@NonNull Calendar now) {
         if (!validateExpMonth()) {
             return false;
         }
@@ -1078,7 +1079,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
     }
 
-    private Card(Builder builder) {
+    private Card(@NonNull Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
         this.expYear = builder.expYear;
@@ -1115,5 +1116,47 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
             return null;
         }
         return number.trim().replaceAll("\\s+|-", "");
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof Card && typedEquals((Card) obj));
+    }
+    
+    private boolean typedEquals(@NonNull Card card) {
+        return ObjectUtils.equals(number, card.number)
+                && ObjectUtils.equals(cvc, card.cvc)
+                && ObjectUtils.equals(expMonth, card.expMonth)
+                && ObjectUtils.equals(expYear, card.expYear)
+                && ObjectUtils.equals(name, card.name)
+                && ObjectUtils.equals(addressLine1, card.addressLine1)
+                && ObjectUtils.equals(addressLine1Check, card.addressLine1Check)
+                && ObjectUtils.equals(addressLine2, card.addressLine2)
+                && ObjectUtils.equals(addressCity, card.addressCity)
+                && ObjectUtils.equals(addressState, card.addressState)
+                && ObjectUtils.equals(addressZip, card.addressZip)
+                && ObjectUtils.equals(addressZipCheck, card.addressZipCheck)
+                && ObjectUtils.equals(addressCountry, card.addressCountry)
+                && ObjectUtils.equals(last4, card.last4)
+                && ObjectUtils.equals(brand, card.brand)
+                && ObjectUtils.equals(funding, card.funding)
+                && ObjectUtils.equals(fingerprint, card.fingerprint)
+                && ObjectUtils.equals(country, card.country)
+                && ObjectUtils.equals(currency, card.currency)
+                && ObjectUtils.equals(customerId, card.customerId)
+                && ObjectUtils.equals(cvcCheck, card.cvcCheck)
+                && ObjectUtils.equals(id, card.id)
+                && ObjectUtils.equals(loggingTokens, card.loggingTokens)
+                && ObjectUtils.equals(tokenizationMethod, card.tokenizationMethod)
+                && ObjectUtils.equals(metadata, card.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(number, cvc, expMonth, expYear, name, addressLine1,
+                addressLine1Check, addressLine2, addressCity, addressState, addressZip,
+                addressZipCheck, addressCountry, last4, brand, funding, fingerprint,
+                country, currency, customerId, cvcCheck, id, loggingTokens, tokenizationMethod,
+                metadata);
     }
 }

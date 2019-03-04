@@ -10,6 +10,7 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +51,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     @Nullable private final String mMandateUrl;
 
     private SourceSepaDebitData(@NonNull Builder builder) {
-        super(STANDARD_FIELDS);
+        super(builder);
         mBankCode = builder.mBankCode;
         mBranchCode = builder.mBranchCode;
         mCountry = builder.mCountry;
@@ -66,22 +67,21 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
             return null;
         }
 
-        final SourceSepaDebitData sepaData = new SourceSepaDebitData.Builder()
+        final Builder sepaData = new Builder()
                 .setBankCode(optString(jsonObject, FIELD_BANK_CODE))
                 .setBranchCode(optString(jsonObject, FIELD_BRANCH_CODE))
                 .setCountry(optString(jsonObject, FIELD_COUNTRY))
                 .setFingerPrint(optString(jsonObject, FIELD_FINGERPRINT))
                 .setLast4(optString(jsonObject, FIELD_LAST4))
                 .setMandateReference(optString(jsonObject, FIELD_MANDATE_REFERENCE))
-                .setMandateUrl(optString(jsonObject, FIELD_MANDATE_URL))
-                .build();
+                .setMandateUrl(optString(jsonObject, FIELD_MANDATE_URL));
 
         final Map<String, Object> nonStandardFields =
-                jsonObjectToMapWithoutKeys(jsonObject, sepaData.mStandardFields);
+                jsonObjectToMapWithoutKeys(jsonObject, STANDARD_FIELDS);
         if (nonStandardFields != null) {
             sepaData.setAdditionalFields(nonStandardFields);
         }
-        return sepaData;
+        return sepaData.build();
     }
 
     @Nullable
@@ -122,7 +122,7 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     @NonNull
     @Override
     public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = super.toJson();
         putStringIfNotNull(jsonObject, FIELD_BANK_CODE, mBankCode);
         putStringIfNotNull(jsonObject, FIELD_BRANCH_CODE, mBranchCode);
         putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
@@ -130,26 +130,22 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
         putStringIfNotNull(jsonObject, FIELD_LAST4, mLast4);
         putStringIfNotNull(jsonObject, FIELD_MANDATE_REFERENCE, mMandateReference);
         putStringIfNotNull(jsonObject, FIELD_MANDATE_URL, mMandateUrl);
-
-        putAdditionalFieldsIntoJsonObject(jsonObject, mAdditionalFields);
         return jsonObject;
     }
 
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        final Map<String, Object> objectMap = new HashMap<>();
-        objectMap.put(FIELD_BANK_CODE, mBankCode);
-        objectMap.put(FIELD_BRANCH_CODE, mBranchCode);
-        objectMap.put(FIELD_COUNTRY, mCountry);
-        objectMap.put(FIELD_FINGERPRINT, mFingerPrint);
-        objectMap.put(FIELD_LAST4, mLast4);
-        objectMap.put(FIELD_MANDATE_REFERENCE, mMandateReference);
-        objectMap.put(FIELD_MANDATE_URL, mMandateUrl);
-
-        putAdditionalFieldsIntoMap(objectMap, mAdditionalFields);
-        StripeNetworkUtils.removeNullAndEmptyParams(objectMap);
-        return objectMap;
+        final AbstractMap<String, Object> map = new HashMap<>(super.toMap());
+        map.put(FIELD_BANK_CODE, mBankCode);
+        map.put(FIELD_BRANCH_CODE, mBranchCode);
+        map.put(FIELD_COUNTRY, mCountry);
+        map.put(FIELD_FINGERPRINT, mFingerPrint);
+        map.put(FIELD_LAST4, mLast4);
+        map.put(FIELD_MANDATE_REFERENCE, mMandateReference);
+        map.put(FIELD_MANDATE_URL, mMandateUrl);
+        StripeNetworkUtils.removeNullAndEmptyParams(map);
+        return map;
     }
 
     @Nullable
@@ -169,7 +165,8 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
     }
 
     private boolean typedEquals(@NonNull SourceSepaDebitData obj) {
-        return ObjectUtils.equals(mBankCode, obj.mBankCode)
+        return super.typedEquals(obj)
+                && ObjectUtils.equals(mBankCode, obj.mBankCode)
                 && ObjectUtils.equals(mBranchCode, obj.mBranchCode)
                 && ObjectUtils.equals(mCountry, obj.mCountry)
                 && ObjectUtils.equals(mFingerPrint, obj.mFingerPrint)
@@ -180,11 +177,11 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mBankCode, mBranchCode, mCountry, mFingerPrint, mLast4,
-                mMandateReference, mMandateUrl);
+        return ObjectUtils.hash(super.hashCode(), mBankCode, mBranchCode, mCountry, mFingerPrint,
+                mLast4, mMandateReference, mMandateUrl);
     }
 
-    public static final class Builder {
+    public static final class Builder extends BaseBuilder {
         private String mBankCode;
         private String mBranchCode;
         private String mCountry;
@@ -194,43 +191,43 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
         private String mMandateUrl;
 
         @NonNull
-        public Builder setBankCode(String bankCode) {
+        Builder setBankCode(String bankCode) {
             mBankCode = bankCode;
             return this;
         }
 
         @NonNull
-        public Builder setBranchCode(String branchCode) {
+        Builder setBranchCode(String branchCode) {
             mBranchCode = branchCode;
             return this;
         }
 
         @NonNull
-        public Builder setCountry(String country) {
+        Builder setCountry(String country) {
             mCountry = country;
             return this;
         }
 
         @NonNull
-        public Builder setFingerPrint(String fingerPrint) {
+        Builder setFingerPrint(String fingerPrint) {
             mFingerPrint = fingerPrint;
             return this;
         }
 
         @NonNull
-        public Builder setLast4(String last4) {
+        Builder setLast4(String last4) {
             mLast4 = last4;
             return this;
         }
 
         @NonNull
-        public Builder setMandateReference(String mandateReference) {
+        Builder setMandateReference(String mandateReference) {
             mMandateReference = mandateReference;
             return this;
         }
 
         @NonNull
-        public Builder setMandateUrl(String mandateUrl) {
+        Builder setMandateUrl(String mandateUrl) {
             mMandateUrl = mandateUrl;
             return this;
         }
@@ -240,5 +237,4 @@ public class SourceSepaDebitData extends StripeSourceTypeModel {
             return new SourceSepaDebitData(this);
         }
     }
-
 }

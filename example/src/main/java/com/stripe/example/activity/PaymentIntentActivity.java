@@ -238,7 +238,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             @Override
                             public void call(PaymentIntent paymentIntent) {
                                 if (paymentIntent != null) {
-                                    mPaymentIntentValue.setText(paymentIntent.toString());
+                                    mPaymentIntentValue.setText(paymentIntent.toJson().toString());
                                     Uri authUrl = paymentIntent.getAuthorizationUrl();
                                     if ("requires_source_action".equals(paymentIntent.getStatus())
                                             && authUrl != null) {

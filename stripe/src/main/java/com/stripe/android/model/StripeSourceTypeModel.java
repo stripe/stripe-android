@@ -1,7 +1,10 @@
 package com.stripe.android.model;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,14 +16,12 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class StripeSourceTypeModel extends StripeJsonModel {
+    @NonNull private final Map<String, Object> mAdditionalFields;
     private static final String NULL = "null";
 
-    Map<String, Object> mAdditionalFields;
-    @NonNull final Set<String> mStandardFields;
-
-    StripeSourceTypeModel(@NonNull Set<String> standardFields) {
-        mStandardFields = standardFields;
-        mAdditionalFields = new HashMap<>();
+    StripeSourceTypeModel(@NonNull BaseBuilder builder) {
+        mAdditionalFields = builder.mAdditionalFields != null ?
+                builder.mAdditionalFields : new HashMap<String, Object>();
     }
 
     @NonNull
@@ -28,8 +29,18 @@ public abstract class StripeSourceTypeModel extends StripeJsonModel {
         return mAdditionalFields;
     }
 
-    void setAdditionalFields(@NonNull Map<String, Object> additionalFields) {
-        mAdditionalFields = additionalFields;
+    @NonNull
+    @Override
+    public Map<String, Object> toMap() {
+        return new HashMap<>(mAdditionalFields);
+    }
+
+    @NonNull
+    @Override
+    public JSONObject toJson() {
+        final JSONObject jsonObject = new JSONObject();
+        putAdditionalFieldsIntoJsonObject(jsonObject, mAdditionalFields);
+        return jsonObject;
     }
 
     /**
@@ -48,9 +59,9 @@ public abstract class StripeSourceTypeModel extends StripeJsonModel {
             return null;
         }
 
-        Set<String> keysToOmit = omitKeys == null ? new HashSet<String>() : omitKeys;
-        Map<String, Object> map = new HashMap<>();
-        Iterator<String> keyIterator = jsonObject.keys();
+        final Set<String> keysToOmit = omitKeys == null ? new HashSet<String>() : omitKeys;
+        final Map<String, Object> map = new HashMap<>();
+        final Iterator<String> keyIterator = jsonObject.keys();
         while (keyIterator.hasNext()) {
             String key = keyIterator.next();
             Object value = jsonObject.opt(key);
@@ -107,8 +118,32 @@ public abstract class StripeSourceTypeModel extends StripeJsonModel {
             return;
         }
 
-        for (String key : additionalFields.keySet()) {
-            map.put(key, additionalFields.get(key));
+        map.putAll(additionalFields);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof StripeSourceTypeModel
+                && typedEquals((StripeSourceTypeModel) obj));
+    }
+
+    @CallSuper
+    boolean typedEquals(@NonNull StripeSourceTypeModel model) {
+        return ObjectUtils.equals(mAdditionalFields, model.mAdditionalFields);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAdditionalFields);
+    }
+
+    abstract static class BaseBuilder {
+        @Nullable private Map<String, Object> mAdditionalFields;
+
+        @NonNull
+        BaseBuilder setAdditionalFields(@NonNull Map<String, Object> additionalFields) {
+            mAdditionalFields = additionalFields;
+            return this;
         }
     }
 }

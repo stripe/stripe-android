@@ -6,12 +6,14 @@ import androidx.annotation.StringDef;
 import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,21 +70,34 @@ public class SourceCardData extends StripeSourceTypeModel {
             FIELD_THREE_D_SECURE,
             FIELD_TOKENIZATION_METHOD));
 
-    private String mAddressLine1Check;
-    private String mAddressZipCheck;
-    private @Card.CardBrand String mBrand;
-    private String mCountry;
-    private String mCvcCheck;
-    private String mDynamicLast4;
-    private Integer mExpiryMonth;
-    private Integer mExpiryYear;
-    private @Card.FundingType String mFunding;
-    private String mLast4;
-    private @ThreeDSecureStatus String mThreeDSecureStatus;
-    private String mTokenizationMethod;
+    @Nullable private final String mAddressLine1Check;
+    @Nullable private final String mAddressZipCheck;
+    @Nullable @Card.CardBrand private final String mBrand;
+    @Nullable private final String mCountry;
+    @Nullable private final String mCvcCheck;
+    @Nullable private final String mDynamicLast4;
+    @Nullable private final Integer mExpiryMonth;
+    @Nullable private final Integer mExpiryYear;
+    @Nullable @Card.FundingType private final String mFunding;
+    @Nullable private final String mLast4;
+    @Nullable @ThreeDSecureStatus private final String mThreeDSecureStatus;
+    @Nullable private final String mTokenizationMethod;
 
-    private SourceCardData() {
-        super(STANDARD_FIELDS);
+    private SourceCardData(@NonNull Builder builder) {
+        super(builder);
+        
+        mAddressLine1Check = builder.mAddressLine1Check;
+        mAddressZipCheck = builder.mAddressZipCheck;
+        mBrand = builder.mBrand;
+        mCountry = builder.mCountry;
+        mCvcCheck = builder.mCvcCheck;
+        mDynamicLast4 = builder.mDynamicLast4;
+        mExpiryMonth = builder.mExpiryMonth;
+        mExpiryYear = builder.mExpiryYear;
+        mFunding = builder.mFunding;
+        mLast4 = builder.mLast4;
+        mThreeDSecureStatus = builder.mThreeDSecureStatus;
+        mTokenizationMethod = builder.mTokenizationMethod;
     }
 
     @Nullable
@@ -151,7 +166,7 @@ public class SourceCardData extends StripeSourceTypeModel {
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = super.toJson();
         putStringIfNotNull(jsonObject, FIELD_ADDRESS_LINE1_CHECK, mAddressLine1Check);
         putStringIfNotNull(jsonObject, FIELD_ADDRESS_ZIP_CHECK, mAddressZipCheck);
         putStringIfNotNull(jsonObject, FIELD_BRAND, mBrand);
@@ -163,90 +178,26 @@ public class SourceCardData extends StripeSourceTypeModel {
         putStringIfNotNull(jsonObject, FIELD_LAST4, mLast4);
         putStringIfNotNull(jsonObject, FIELD_THREE_D_SECURE, mThreeDSecureStatus);
         putStringIfNotNull(jsonObject, FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
-
-        putAdditionalFieldsIntoJsonObject(jsonObject, mAdditionalFields);
         return jsonObject;
     }
 
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> objectMap = new HashMap<>();
-        objectMap.put(FIELD_ADDRESS_LINE1_CHECK, mAddressLine1Check);
-        objectMap.put(FIELD_ADDRESS_ZIP_CHECK, mAddressZipCheck);
-        objectMap.put(FIELD_BRAND, mBrand);
-        objectMap.put(FIELD_COUNTRY, mCountry);
-        objectMap.put(FIELD_DYNAMIC_LAST4, mDynamicLast4);
-        objectMap.put(FIELD_EXP_MONTH, mExpiryMonth);
-        objectMap.put(FIELD_EXP_YEAR, mExpiryYear);
-        objectMap.put(FIELD_FUNDING, mFunding);
-        objectMap.put(FIELD_LAST4, mLast4);
-        objectMap.put(FIELD_THREE_D_SECURE, mThreeDSecureStatus);
-        objectMap.put(FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
-
-        putAdditionalFieldsIntoMap(objectMap, mAdditionalFields);
-        StripeNetworkUtils.removeNullAndEmptyParams(objectMap);
-        return objectMap;
-    }
-
-    private SourceCardData setAddressLine1Check(String addressLine1Check) {
-        mAddressLine1Check = addressLine1Check;
-        return this;
-    }
-
-    private SourceCardData setAddressZipCheck(String addressZipCheck) {
-        mAddressZipCheck = addressZipCheck;
-        return this;
-    }
-
-    private SourceCardData setBrand(String brand) {
-        mBrand = brand;
-        return this;
-    }
-
-    private SourceCardData setCountry(String country) {
-        mCountry = country;
-        return this;
-    }
-
-    private SourceCardData setCvcCheck(String cvcCheck) {
-        mCvcCheck = cvcCheck;
-        return this;
-    }
-
-    private SourceCardData setDynamicLast4(String dynamicLast4) {
-        mDynamicLast4 = dynamicLast4;
-        return this;
-    }
-
-    private SourceCardData setExpiryMonth(Integer expiryMonth) {
-        mExpiryMonth = expiryMonth;
-        return this;
-    }
-
-    private SourceCardData setExpiryYear(Integer expiryYear) {
-        mExpiryYear = expiryYear;
-        return this;
-    }
-
-    private SourceCardData setFunding(String funding) {
-        mFunding = funding;
-        return this;
-    }
-
-    private SourceCardData setLast4(String last4) {
-        mLast4 = last4;
-        return this;
-    }
-
-    private SourceCardData setThreeDSecureStatus(String threeDSecureStatus) {
-        mThreeDSecureStatus = threeDSecureStatus;
-        return this;
-    }
-
-    private SourceCardData setTokenizationMethod(String tokenizationMethod) {
-        mTokenizationMethod = tokenizationMethod;
-        return this;
+        final AbstractMap<String, Object> map = new HashMap<>(super.toMap());
+        map.put(FIELD_ADDRESS_LINE1_CHECK, mAddressLine1Check);
+        map.put(FIELD_ADDRESS_ZIP_CHECK, mAddressZipCheck);
+        map.put(FIELD_BRAND, mBrand);
+        map.put(FIELD_COUNTRY, mCountry);
+        map.put(FIELD_DYNAMIC_LAST4, mDynamicLast4);
+        map.put(FIELD_EXP_MONTH, mExpiryMonth);
+        map.put(FIELD_EXP_YEAR, mExpiryYear);
+        map.put(FIELD_FUNDING, mFunding);
+        map.put(FIELD_LAST4, mLast4);
+        map.put(FIELD_THREE_D_SECURE, mThreeDSecureStatus);
+        map.put(FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
+        StripeNetworkUtils.removeNullAndEmptyParams(map);
+        return map;
     }
 
     @Nullable
@@ -255,8 +206,8 @@ public class SourceCardData extends StripeSourceTypeModel {
             return null;
         }
 
-        SourceCardData cardData = new SourceCardData();
-        cardData.setAddressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK))
+        final Builder cardData = new Builder()
+                .setAddressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK))
                 .setAddressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK))
                 .setBrand(Card.asCardBrand(optString(jsonObject, FIELD_BRAND)))
                 .setCountry(optString(jsonObject, FIELD_COUNTRY))
@@ -270,13 +221,13 @@ public class SourceCardData extends StripeSourceTypeModel {
                         FIELD_THREE_D_SECURE)))
                 .setTokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD));
 
-        Map<String, Object> nonStandardFields =
-                jsonObjectToMapWithoutKeys(jsonObject, cardData.mStandardFields);
+        final Map<String, Object> nonStandardFields =
+                jsonObjectToMapWithoutKeys(jsonObject, STANDARD_FIELDS);
         if (nonStandardFields != null) {
             cardData.setAdditionalFields(nonStandardFields);
         }
 
-        return cardData;
+        return cardData.build();
     }
 
     @VisibleForTesting
@@ -304,6 +255,126 @@ public class SourceCardData extends StripeSourceTypeModel {
             return NOT_SUPPORTED;
         } else {
             return UNKNOWN;
+        }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SourceCardData && typedEquals((SourceCardData) obj));
+    }
+
+    boolean typedEquals(@NonNull SourceCardData sourceCardData) {
+        return super.typedEquals(sourceCardData)
+                && ObjectUtils.equals(mAddressLine1Check, sourceCardData.mAddressLine1Check)
+                && ObjectUtils.equals(mAddressZipCheck, sourceCardData.mAddressZipCheck)
+                && ObjectUtils.equals(mBrand, sourceCardData.mBrand)
+                && ObjectUtils.equals(mCountry, sourceCardData.mCountry)
+                && ObjectUtils.equals(mCvcCheck, sourceCardData.mCvcCheck)
+                && ObjectUtils.equals(mDynamicLast4, sourceCardData.mDynamicLast4)
+                && ObjectUtils.equals(mExpiryMonth, sourceCardData.mExpiryMonth)
+                && ObjectUtils.equals(mExpiryYear, sourceCardData.mExpiryYear)
+                && ObjectUtils.equals(mFunding, sourceCardData.mFunding)
+                && ObjectUtils.equals(mLast4, sourceCardData.mLast4)
+                && ObjectUtils.equals(mThreeDSecureStatus, sourceCardData.mThreeDSecureStatus)
+                && ObjectUtils.equals(mTokenizationMethod, sourceCardData.mTokenizationMethod);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAddressLine1Check, mAddressZipCheck, mBrand, mCountry, mCvcCheck,
+                mDynamicLast4, mExpiryMonth, mExpiryYear, mFunding, mLast4, mThreeDSecureStatus,
+                mTokenizationMethod);
+    }
+
+    private static final class Builder extends BaseBuilder {
+        private String mAddressLine1Check;
+        private String mAddressZipCheck;
+        @Card.CardBrand private String mBrand;
+        private String mCountry;
+        private String mCvcCheck;
+        private String mDynamicLast4;
+        private Integer mExpiryMonth;
+        private Integer mExpiryYear;
+        @Card.FundingType private String mFunding;
+        private String mLast4;
+        @ThreeDSecureStatus private String mThreeDSecureStatus;
+        private String mTokenizationMethod;
+
+        @NonNull
+        private Builder setAddressLine1Check(String addressLine1Check) {
+            mAddressLine1Check = addressLine1Check;
+            return this;
+        }
+
+        @NonNull
+        private Builder setAddressZipCheck(String addressZipCheck) {
+            mAddressZipCheck = addressZipCheck;
+            return this;
+        }
+
+        @NonNull
+        private Builder setBrand(String brand) {
+            mBrand = brand;
+            return this;
+        }
+
+        @NonNull
+        private Builder setCountry(String country) {
+            mCountry = country;
+            return this;
+        }
+
+        @NonNull
+        private Builder setCvcCheck(String cvcCheck) {
+            mCvcCheck = cvcCheck;
+            return this;
+        }
+
+        @NonNull
+        private Builder setDynamicLast4(String dynamicLast4) {
+            mDynamicLast4 = dynamicLast4;
+            return this;
+        }
+
+        @NonNull
+        private Builder setExpiryMonth(Integer expiryMonth) {
+            mExpiryMonth = expiryMonth;
+            return this;
+        }
+
+        @NonNull
+        private Builder setExpiryYear(Integer expiryYear) {
+            mExpiryYear = expiryYear;
+            return this;
+        }
+
+        @NonNull
+        private Builder setFunding(String funding) {
+            mFunding = funding;
+            return this;
+        }
+
+        @NonNull
+        private Builder setLast4(String last4) {
+            mLast4 = last4;
+            return this;
+        }
+
+        @NonNull
+        private Builder setThreeDSecureStatus(String threeDSecureStatus) {
+            mThreeDSecureStatus = threeDSecureStatus;
+            return this;
+        }
+
+        @NonNull
+        private Builder setTokenizationMethod(String tokenizationMethod) {
+            mTokenizationMethod = tokenizationMethod;
+            return this;
+        }
+        
+        @NonNull
+        public SourceCardData build() {
+            return new SourceCardData(this);
         }
     }
 }

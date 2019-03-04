@@ -199,13 +199,13 @@ public class Address extends StripeJsonModel implements Parcelable {
         return this == obj || (obj instanceof Address && typedEquals((Address) obj));
     }
 
-    private boolean typedEquals(@NonNull Address obj) {
-        return ObjectUtils.equals(mCity, obj.mCity)
-                && ObjectUtils.equals(mCountry, obj.mCountry)
-                && ObjectUtils.equals(mLine1, obj.mLine1)
-                && ObjectUtils.equals(mLine2, obj.mLine2)
-                && ObjectUtils.equals(mPostalCode, obj.mPostalCode)
-                && ObjectUtils.equals(mState, obj.mState);
+    private boolean typedEquals(@NonNull Address address) {
+        return ObjectUtils.equals(mCity, address.mCity)
+                && ObjectUtils.equals(mCountry, address.mCountry)
+                && ObjectUtils.equals(mLine1, address.mLine1)
+                && ObjectUtils.equals(mLine2, address.mLine2)
+                && ObjectUtils.equals(mPostalCode, address.mPostalCode)
+                && ObjectUtils.equals(mState, address.mState);
     }
 
     @Override
@@ -291,6 +291,5 @@ public class Address extends StripeJsonModel implements Parcelable {
         public Address build() {
             return new Address(this);
         }
-
     }
 }

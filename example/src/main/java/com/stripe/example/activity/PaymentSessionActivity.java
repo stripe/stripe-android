@@ -210,7 +210,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                             .append(" ending in ")
                             .append(scd.getLast4());
                 } else {
-                    stringBuilder.append('\n').append(source.toString()).append('\n');
+                    stringBuilder.append('\n').append(source.toJson().toString()).append('\n');
                 }
                 String isOrNot = data.isPaymentReadyToCharge() ? " IS " : " IS NOT ";
                 stringBuilder.append(isOrNot).append("ready to charge.\n\n");

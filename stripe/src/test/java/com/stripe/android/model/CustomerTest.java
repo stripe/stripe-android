@@ -1,5 +1,8 @@
 package com.stripe.android.model;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.json.JSONArray;
@@ -90,11 +93,14 @@ public class CustomerTest {
             Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
             assertNotNull(customer);
             JsonTestUtils.assertJsonEquals(rawJsonCustomer, customer.toJson());
+            assertEquals(Customer.fromString(TEST_CUSTOMER_OBJECT),
+                    Customer.fromString(TEST_CUSTOMER_OBJECT));
         } catch (JSONException testDataException) {
             fail("Test data failure: " + testDataException.getMessage());
         }
     }
 
+    @NonNull
     private String createTestCustomerObjectWithApplePaySource() {
         try {
             JSONObject rawJsonCustomer = new JSONObject(TEST_CUSTOMER_OBJECT);
@@ -137,7 +143,7 @@ public class CustomerTest {
             return rawJsonCustomer.toString();
         } catch (JSONException testDataException) {
             fail("Test data failure: " + testDataException.getMessage());
+            return null;
         }
-        return null;
     }
 }
