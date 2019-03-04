@@ -977,34 +977,113 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withValidAccount_passesIntegrationTest() {
-        try {
-            final Address exampleAddress = new Address
-                    .Builder()
-                    .setCity("SF")
-                    .setCountry("US")
-                    .setState("CA").build();
-           final Map<String, Object> exampleLegalEntity = new HashMap<String, Object>() {{
-                put("personal_address", exampleAddress.toMap());
-                put("type", "individual");
-                put("ssn_last_4", "1234");
-                put("first_name", "Kathy");
-                put("last_name", "Sun");
-            }};
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
-            Token token = stripe.createAccountTokenSynchronous(
-                    AccountParams.createAccountParams(true, exampleLegalEntity));
-            assertNotNull(token);
-            assertEquals(Token.TYPE_ACCOUNT, token.getType());
-            assertFalse(token.getLivemode());
-            assertFalse(token.getUsed());
-            assertNotNull(token.getId());
-            assertAllLogsAreValid(listener, 2);
-        } catch (StripeException stripeEx) {
-            fail(stripeEx.getMessage());
-        }
+    public void createTokenSynchronous_withValidAccountOnApi20170605_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Address exampleAddress = new Address.Builder()
+                .setCity("SF")
+                .setCountry("US")
+                .setState("CA")
+                .build();
+       final Map<String, Object> legalEntityData = new HashMap<String, Object>() {{
+            put("personal_address", exampleAddress.toMap());
+            put("type", "individual");
+            put("ssn_last_4", "1234");
+            put("first_name", "Kathy");
+            put("last_name", "Sun");
+        }};
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(true, legalEntityData),
+                ApiVersion.getDefault());
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+        assertAllLogsAreValid(listener, 2);
+    }
+
+    @Test
+    public void createTokenSynchronous_withoutLegalEntityOnApi20170605_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(true, null),
+                ApiVersion.getDefault());
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+        assertAllLogsAreValid(listener, 2);
+    }
+
+    @Test
+    public void createTokenSynchronous_withIndividualEntityOnApi20190219_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Address exampleAddress = new Address
+                .Builder()
+                .setCity("SF")
+                .setCountry("US")
+                .setState("CA").build();
+        final Map<String, Object> businessData = new HashMap<String, Object>() {{
+            put("address", exampleAddress.toMap());
+            put("ssn_last_4", "1234");
+            put("first_name", "Kathy");
+            put("last_name", "Sun");
+        }};
+
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(true,
+                        AccountParams.BusinessType.Individual, businessData),
+                ApiVersion.create("2019-02-19"));
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+        assertAllLogsAreValid(listener, 2);
+    }
+
+
+    @Test
+    public void createTokenSynchronous_withCompanyEntityOnApi20190219_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Address exampleAddress = new Address
+                .Builder()
+                .setCity("SF")
+                .setCountry("US")
+                .setState("CA").build();
+        final Map<String, Object> businessData = new HashMap<String, Object>() {{
+            put("address", exampleAddress.toMap());
+            put("tax_id", "123-23-1234");
+            put("name", "My Corp.");
+        }};
+
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final TestLoggingListener listener = new TestLoggingListener(true);
+        stripe.setLoggingResponseListener(listener);
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(true,
+                        AccountParams.BusinessType.Company, businessData),
+                ApiVersion.create("2019-02-19"));
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+        assertAllLogsAreValid(listener, 2);
     }
 
     @Test

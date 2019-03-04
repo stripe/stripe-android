@@ -684,12 +684,26 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
      */
+    @Nullable
     public Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey);
+        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey, null);
+    }
+
+    /**
+     * See {@link #createAccountTokenSynchronous(AccountParams)}
+     */
+    @Nullable
+    public Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams,
+                                               @NonNull final ApiVersion apiVersion)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey, apiVersion);
     }
 
     /**
@@ -707,9 +721,11 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers)
      */
+    @Nullable
     public Token createAccountTokenSynchronous(
             @NonNull final AccountParams accountParams,
-            @Nullable String publishableKey)
+            @Nullable String publishableKey,
+            @Nullable ApiVersion apiVersion)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -720,9 +736,9 @@ public class Stripe {
         }
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey,
-                mStripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                publishableKey, mStripeAccount, RequestOptions.TYPE_QUERY)
+                .setApiVersion(apiVersion)
+                .build();
         try {
             return StripeApiHandler.createToken(
                     mContext,

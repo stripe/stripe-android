@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,35 +19,73 @@ public class AccountParams {
     private static final String API_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted";
 
     @Nullable private Boolean mTosShownAndAccepted;
-    @Nullable private Map<String, Object> mLegalEntity;
+    @Nullable private final BusinessType mBusinessType;
+    @Nullable private Map<String, Object> mBusinessData;
+
+    private AccountParams(@Nullable BusinessType businessType) {
+        mBusinessType = businessType;
+    }
 
     /**
      * @param tosShownAndAccepted indicates that the platform showed the user the appropriate text
      *                            and links to Stripe's terms of service. Tokens will only generated
      *                            when this is true.
-     * @param legalEntity map that specifies the legal entity for which the connect account is being
-     *                    created. Can contain any of the fields specified by legal_entity in the
-     *                    API docs.
      *
-     *                  See https://stripe.com/docs/api/accounts/object#account_object-legal_entity
+     * @param legalEntity         Map that specifies the legal entity for which the connect account
+     *                            is being created. Can contain any of the fields specified by
+     *                            legal_entity in the API docs.
      *
-     *                  The object in the map is expected to be a string or a list or map of
-     *                  strings. All {@link StripeJsonModel} types have a toMap() function that
-     *                  can be used to convert the {@link StripeJsonModel} to map representation
-     *                  that can be passed in here.
+     *                            See https://stripe.com/docs/api/accounts/create
+     *
+     *                            The object in the map is expected to be a string or a list or map
+     *                            of strings. All {@link StripeJsonModel} types have a toMap()
+     *                            function that can be used to convert the {@link StripeJsonModel}
+     *                            to map representation that can be passed in here.
      */
     @NonNull
     public static AccountParams createAccountParams(
             boolean tosShownAndAccepted,
-            Map<String, Object> legalEntity) {
-        return new AccountParams()
+            @Nullable Map<String, Object> legalEntity) {
+        return new AccountParams(null)
                 .setTosShownAndAccepted(tosShownAndAccepted)
                 .setLegalEntity(legalEntity);
     }
 
     /**
-     * @param tosShownAndAccepted whether the platform showed the user the appropriate text
+     * Create an {@link AccountParams} instance for a {@link BusinessType#Individual} or
+     * {@link BusinessType#Company}
+     *
+     * Note: API version {@code 2019-02-19} [0] replaced {@code legal_entity} with
+     * {@code individual} and {@code company}.
+     *
+     * @param tosShownAndAccepted Indicates that the platform showed the user the appropriate text
      *                            and links to Stripe's terms of service. Tokens will only generated
+     *                            when this is true.
+     * @param businessType        See {@link BusinessType}
+     * @param businessParams      A map of company [1] or individual [2] params.
+     *
+     * [0] <a href="https://stripe.com/docs/upgrades#2019-02-19">
+     *     https://stripe.com/docs/upgrades#2019-02-19</a>
+     * [1] <a href="https://stripe.com/docs/api/accounts/create#create_account-company">
+     *     https://stripe.com/docs/api/accounts/create#create_account-company</a>
+     * [2] <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">
+     *     https://stripe.com/docs/api/accounts/create#create_account-individual</a>
+     *
+     * @return {@link AccountParams}
+     */
+    @NonNull
+    public static AccountParams createAccountParams(
+            boolean tosShownAndAccepted,
+            @NonNull BusinessType businessType,
+            @Nullable Map<String, Object> businessParams) {
+        return new AccountParams(businessType)
+                .setTosShownAndAccepted(tosShownAndAccepted)
+                .setLegalEntity(businessParams);
+    }
+
+    /**
+     * @param tosShownAndAccepted whether the platform showed the user the appropriate text and
+     *                            links to Stripe's terms of service. Tokens will only generated
      *                            when this is true.
      * @return {@code this}, for chaining purposes
      */
@@ -59,36 +96,36 @@ public class AccountParams {
     }
 
     /**
-     * @param legalEntity map that specifies the legal entity for which the connect account is being
-     *                    created. Can contain any of the fields specified by legal_entity in the
-     *                    API docs.
-     *
-     *                    See {@linktourl https://stripe.com/docs/api#account_object-legal_entity}
-     *
-     *                    The object in the map is expected to be a string or a list or map of
-     *                    strings. All {@link StripeJsonModel} types have a toMap() function that
-     *                    can be used to convert the {@link StripeJsonModel} to map representation
-     *                    that can be passed in here.
+     * @param legalEntity see documentation on {@link #createAccountParams}
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public AccountParams setLegalEntity(Map<String, Object> legalEntity) {
-        mLegalEntity = legalEntity;
+    public AccountParams setLegalEntity(@Nullable Map<String, Object> legalEntity) {
+        mBusinessData = legalEntity;
         return this;
     }
 
     /**
-     * Create a string-keyed map representing this object that is
-     * ready to be sent over the network.
+     * Create a string-keyed map representing this object that is ready to be sent over the network.
      *
      * @return a String-keyed map
      */
     @NonNull
     public Map<String, Object> toParamMap() {
         final Map<String, Object> networkReadyMap = new HashMap<>();
-        final AbstractMap<String, Object> tokenMap = new HashMap<>();
-        tokenMap.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
-        tokenMap.put(API_PARAM_LEGAL_ENTITY, mLegalEntity);
+        final Map<String, Object> tokenMap = new HashMap<>();
+        if (mTosShownAndAccepted != null) {
+            tokenMap.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
+        }
+
+        if (mBusinessData != null) {
+            if (mBusinessType != null) {
+                tokenMap.put(mBusinessType.code, mBusinessData);
+            } else {
+                tokenMap.put(API_PARAM_LEGAL_ENTITY, mBusinessData);
+            }
+        }
+
         networkReadyMap.put("account", tokenMap);
         removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
@@ -96,7 +133,7 @@ public class AccountParams {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mTosShownAndAccepted, mLegalEntity);
+        return ObjectUtils.hash(mTosShownAndAccepted, mBusinessType, mBusinessData);
     }
 
     @Override
@@ -106,6 +143,22 @@ public class AccountParams {
 
     private boolean typedEquals(@NonNull AccountParams accountParams) {
         return ObjectUtils.equals(mTosShownAndAccepted, accountParams.mTosShownAndAccepted)
-                && ObjectUtils.equals(mLegalEntity, accountParams.mLegalEntity);
+                && ObjectUtils.equals(mBusinessType, accountParams.mBusinessType)
+                && ObjectUtils.equals(mBusinessData, accountParams.mBusinessData);
+    }
+
+    /**
+     * See <a href="https://stripe.com/docs/api/accounts/create#create_account-business_type">
+     *     Account creation API docs</a>
+     */
+    public enum BusinessType {
+        Individual("individual"),
+        Company("company");
+
+        @NonNull public final String code;
+
+        BusinessType(@NonNull String code) {
+            this.code = code;
+        }
     }
 }
