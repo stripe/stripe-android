@@ -187,6 +187,7 @@ public class SourceTest {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
             JSONObject actualObject = mSource.toJson();
             assertJsonEquals(rawConversion, actualObject);
+            assertEquals(mSource, Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }

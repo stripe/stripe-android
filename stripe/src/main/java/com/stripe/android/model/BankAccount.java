@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StringDef;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -203,5 +205,28 @@ public class BankAccount {
                 StripeJsonUtils.optString(jsonObject, FIELD_FINGERPRINT),
                 StripeJsonUtils.optString(jsonObject, FIELD_LAST4),
                 StripeJsonUtils.optString(jsonObject, FIELD_ROUTING_NUMBER));
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAccountHolderName, mAccountHolderType, mAccountNumber,
+                mBankName, mCountryCode, mCurrency, mFingerprint, mLast4, mRoutingNumber);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj) || (obj instanceof BankAccount && typedEquals((BankAccount) obj));
+    }
+
+    private boolean typedEquals(@NonNull BankAccount bankAccount) {
+        return ObjectUtils.equals(mAccountHolderName, bankAccount.mAccountHolderName)
+                && ObjectUtils.equals(mAccountHolderType, bankAccount.mAccountHolderType)
+                && ObjectUtils.equals(mAccountNumber, bankAccount.mAccountNumber)
+                && ObjectUtils.equals(mBankName, bankAccount.mBankName)
+                && ObjectUtils.equals(mCountryCode, bankAccount.mCountryCode)
+                && ObjectUtils.equals(mCurrency, bankAccount.mCurrency)
+                && ObjectUtils.equals(mFingerprint, bankAccount.mFingerprint)
+                && ObjectUtils.equals(mLast4, bankAccount.mLast4)
+                && ObjectUtils.equals(mRoutingNumber, bankAccount.mRoutingNumber);
     }
 }

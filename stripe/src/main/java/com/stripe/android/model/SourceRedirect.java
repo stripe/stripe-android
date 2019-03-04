@@ -4,11 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,60 +36,64 @@ public class SourceRedirect extends StripeJsonModel {
     public static final String SUCCEEDED = "succeeded";
     public static final String FAILED = "failed";
 
-    static final String FIELD_RETURN_URL = "return_url";
-    static final String FIELD_STATUS = "status";
-    static final String FIELD_URL = "url";
+    private static final String FIELD_RETURN_URL = "return_url";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_URL = "url";
 
-    private String mReturnUrl;
-    private @Status String mStatus;
-    private String mUrl;
+    @Nullable private String mReturnUrl;
+    @Nullable @Status private String mStatus;
+    @Nullable private String mUrl;
 
-    SourceRedirect(String returnUrl, @Status String status, String url) {
+    private SourceRedirect(@Nullable String returnUrl, @Status @Nullable String status,
+                           @Nullable String url) {
         mReturnUrl = returnUrl;
         mStatus = status;
         mUrl = url;
     }
 
+    @Nullable
     public String getReturnUrl() {
         return mReturnUrl;
     }
 
-    public void setReturnUrl(String returnUrl) {
+    public void setReturnUrl(@Nullable String returnUrl) {
         mReturnUrl = returnUrl;
     }
 
+    @Nullable
     @Status
     public String getStatus() {
         return mStatus;
     }
 
-    public void setStatus(@Status String status) {
+    public void setStatus(@Nullable @Status String status) {
         mStatus = status;
     }
 
+    @Nullable
     public String getUrl() {
         return mUrl;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(@Nullable String url) {
         mUrl = url;
     }
 
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
-        hashMap.put(FIELD_RETURN_URL, mReturnUrl);
-        hashMap.put(FIELD_STATUS, mStatus);
-        hashMap.put(FIELD_URL, mUrl);
-        removeNullAndEmptyParams(hashMap);
-        return hashMap;
+        final AbstractMap<String, Object> map = new HashMap<>();
+        map.put(FIELD_RETURN_URL, mReturnUrl);
+        map.put(FIELD_STATUS, mStatus);
+        map.put(FIELD_URL, mUrl);
+        removeNullAndEmptyParams(map);
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         putStringIfNotNull(jsonObject, FIELD_RETURN_URL, mReturnUrl);
         putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
         putStringIfNotNull(jsonObject, FIELD_URL, mUrl);
@@ -96,8 +103,7 @@ public class SourceRedirect extends StripeJsonModel {
     @Nullable
     public static SourceRedirect fromString(@Nullable String jsonString) {
         try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            return fromJson(jsonObject);
+            return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
             return null;
         }
@@ -109,9 +115,9 @@ public class SourceRedirect extends StripeJsonModel {
             return null;
         }
 
-        String returnUrl = optString(jsonObject, FIELD_RETURN_URL);
-        @Status String status = asStatus(optString(jsonObject, FIELD_STATUS));
-        String url = optString(jsonObject, FIELD_URL);
+        final String returnUrl = optString(jsonObject, FIELD_RETURN_URL);
+        @Status final String status = asStatus(optString(jsonObject, FIELD_STATUS));
+        final String url = optString(jsonObject, FIELD_URL);
         return new SourceRedirect(returnUrl, status, url);
     }
 
@@ -127,5 +133,21 @@ public class SourceRedirect extends StripeJsonModel {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SourceRedirect && typedEquals((SourceRedirect) obj));
+    }
+
+    private boolean typedEquals(@NonNull SourceRedirect sourceRedirect) {
+        return ObjectUtils.equals(mReturnUrl, sourceRedirect.mReturnUrl)
+                && ObjectUtils.equals(mStatus, sourceRedirect.mStatus)
+                && ObjectUtils.equals(mUrl, sourceRedirect.mUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mReturnUrl, mStatus, mUrl);
     }
 }

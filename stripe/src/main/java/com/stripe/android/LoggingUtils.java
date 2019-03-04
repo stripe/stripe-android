@@ -32,6 +32,7 @@ class LoggingUtils {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             EVENT_TOKEN_CREATION,
+            EVENT_ADD_PAYMENT_METHOD,
             EVENT_SOURCE_CREATION,
             EVENT_ADD_SOURCE,
             EVENT_DEFAULT_SOURCE,
@@ -43,6 +44,7 @@ class LoggingUtils {
     }
 
     static final String EVENT_TOKEN_CREATION = "token_creation";
+    static final String EVENT_ADD_PAYMENT_METHOD = "add_payment_method";
     static final String EVENT_SOURCE_CREATION = "source_creation";
     static final String EVENT_ADD_SOURCE = "add_source";
     static final String EVENT_DEFAULT_SOURCE = "default_source";
@@ -99,6 +101,20 @@ class LoggingUtils {
                 tokenType,
                 publishableApiKey,
                 EVENT_TOKEN_CREATION);
+    }
+
+    @NonNull
+    static Map<String, Object> getPaymentMethodCreationParams(
+            @NonNull Context context,
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey) {
+        return getEventLoggingParams(
+                context.getApplicationContext(),
+                productUsageTokens,
+                null,
+                null,
+                publishableApiKey,
+                EVENT_ADD_PAYMENT_METHOD);
     }
 
     @NonNull

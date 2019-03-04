@@ -785,9 +785,6 @@ public class SourceParams {
      */
     public SourceParams setTypeRaw(@NonNull String typeRaw) {
         mType = Source.asSourceType(typeRaw);
-        if (mType == null) {
-            mType = Source.UNKNOWN;
-        }
         mTypeRaw = typeRaw;
         return this;
     }

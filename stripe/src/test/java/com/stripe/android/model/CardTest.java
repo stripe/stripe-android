@@ -688,31 +688,8 @@ public class CardTest {
     @Test
     public void fromString_whenStringIsValidJson_returnsExpectedCard() {
         final Card expectedCard = buildEquivalentJsonCard();
-
-        final Card cardFromJson = Card.fromString(JSON_CARD);
-
-        assertNotNull(cardFromJson);
-        assertEquals(expectedCard.getBrand(), cardFromJson.getBrand());
-        assertEquals(expectedCard.getFunding(), cardFromJson.getFunding());
-        assertEquals(expectedCard.getCountry(), cardFromJson.getCountry());
-        assertEquals(expectedCard.getLast4(), cardFromJson.getLast4());
-        assertEquals(expectedCard.getExpMonth(), cardFromJson.getExpMonth());
-        assertEquals(expectedCard.getExpYear(), cardFromJson.getExpYear());
-        assertEquals(expectedCard.getCurrency(), cardFromJson.getCurrency());
-        assertEquals(expectedCard.getAddressCity(), cardFromJson.getAddressCity());
-        assertEquals(expectedCard.getAddressCountry(), cardFromJson.getAddressCountry());
-        assertEquals(expectedCard.getAddressLine1(), cardFromJson.getAddressLine1());
-        assertEquals(expectedCard.getAddressLine1Check(), cardFromJson.getAddressLine1Check());
-        assertEquals(expectedCard.getAddressLine2(), cardFromJson.getAddressLine2());
-        assertEquals(expectedCard.getAddressState(), cardFromJson.getAddressState());
-        assertEquals(expectedCard.getAddressZip(), cardFromJson.getAddressZip());
-        assertEquals(expectedCard.getAddressZipCheck(), cardFromJson.getAddressZipCheck());
-        assertEquals(expectedCard.getCvcCheck(), cardFromJson.getCvcCheck());
-        assertEquals(expectedCard.getName(), cardFromJson.getName());
-        assertEquals(expectedCard.getCustomerId(), cardFromJson.getCustomerId());
-        assertEquals(expectedCard.getFingerprint(), cardFromJson.getFingerprint());
-        assertEquals(expectedCard.getId(), cardFromJson.getId());
-        assertEquals(expectedCard.getMetadata(), cardFromJson.getMetadata());
+        final Card actualCard = Card.fromString(JSON_CARD);
+        assertEquals(expectedCard, actualCard);
     }
 
     @Test

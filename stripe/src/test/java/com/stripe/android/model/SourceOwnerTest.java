@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.model.AddressTest.EXAMPLE_JSON_ADDRESS;
+import static com.stripe.android.model.AddressTest.JSON_ADDRESS;
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,11 +34,11 @@ public class SourceOwnerTest {
             "}";
 
     static final String EXAMPLE_JSON_OWNER_WITHOUT_NULLS = "{" +
-            "\"address\":"+ EXAMPLE_JSON_ADDRESS + "," +
+            "\"address\":"+ JSON_ADDRESS + "," +
             "\"email\": \"jenny.rosen@example.com\"," +
             "\"name\": \"Jenny Rosen\"," +
             "\"phone\": \"4158675309\"," +
-            "\"verified_address\":"+ EXAMPLE_JSON_ADDRESS + "," +
+            "\"verified_address\":"+ JSON_ADDRESS + "," +
             "\"verified_email\": \"jenny.rosen@example.com\"," +
             "\"verified_name\": \"Jenny Rosen\"," +
             "\"verified_phone\": \"4158675309\"" +

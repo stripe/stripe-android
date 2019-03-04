@@ -218,7 +218,7 @@ public class AddSourceActivity extends StripeActivity {
     private void finishWithSource(@NonNull Source source) {
         setCommunicatingProgress(false);
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_NEW_SOURCE, source.toString());
+        intent.putExtra(EXTRA_NEW_SOURCE, source.toJson().toString());
         setResult(RESULT_OK, intent);
         finish();
     }

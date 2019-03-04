@@ -3,9 +3,12 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,24 +32,24 @@ public class SourceOwner extends StripeJsonModel {
     private static final String FIELD_VERIFIED_NAME = VERIFIED + FIELD_NAME;
     private static final String FIELD_VERIFIED_PHONE = VERIFIED + FIELD_PHONE;
 
-    private Address mAddress;
-    private String mEmail;
-    private String mName;
-    private String mPhone;
-    private Address mVerifiedAddress;
-    private String mVerifiedEmail;
-    private String mVerifiedName;
-    private String mVerifiedPhone;
+    @Nullable private Address mAddress;
+    @Nullable private String mEmail;
+    @Nullable private String mName;
+    @Nullable private String mPhone;
+    @Nullable private Address mVerifiedAddress;
+    @Nullable private String mVerifiedEmail;
+    @Nullable private String mVerifiedName;
+    @Nullable private String mVerifiedPhone;
 
-    SourceOwner(
-            Address address,
-            String email,
-            String name,
-            String phone,
-            Address verifiedAddress,
-            String verifiedEmail,
-            String verifiedName,
-            String verifiedPhone) {
+    private SourceOwner(
+            @Nullable Address address,
+            @Nullable String email,
+            @Nullable String name,
+            @Nullable String phone,
+            @Nullable Address verifiedAddress,
+            @Nullable String verifiedEmail,
+            @Nullable String verifiedName,
+            @Nullable String verifiedPhone) {
         mAddress = address;
         mEmail = email;
         mName = name;
@@ -57,34 +60,42 @@ public class SourceOwner extends StripeJsonModel {
         mVerifiedPhone = verifiedPhone;
     }
 
+    @Nullable
     public Address getAddress() {
         return mAddress;
     }
 
+    @Nullable
     public String getEmail() {
         return mEmail;
     }
 
+    @Nullable
     public String getName() {
         return mName;
     }
 
+    @Nullable
     public String getPhone() {
         return mPhone;
     }
 
+    @Nullable
     public Address getVerifiedAddress() {
         return mVerifiedAddress;
     }
 
+    @Nullable
     public String getVerifiedEmail() {
         return mVerifiedEmail;
     }
 
+    @Nullable
     public String getVerifiedName() {
         return mVerifiedName;
     }
 
+    @Nullable
     public String getVerifiedPhone() {
         return mVerifiedPhone;
     }
@@ -124,29 +135,29 @@ public class SourceOwner extends StripeJsonModel {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
+        final AbstractMap<String, Object> map = new HashMap<>();
         if (mAddress != null) {
-            hashMap.put(FIELD_ADDRESS, mAddress.toMap());
+            map.put(FIELD_ADDRESS, mAddress.toMap());
         }
-        hashMap.put(FIELD_EMAIL, mEmail);
-        hashMap.put(FIELD_NAME, mName);
-        hashMap.put(FIELD_PHONE, mPhone);
+        map.put(FIELD_EMAIL, mEmail);
+        map.put(FIELD_NAME, mName);
+        map.put(FIELD_PHONE, mPhone);
         if (mVerifiedAddress != null) {
-            hashMap.put(FIELD_VERIFIED_ADDRESS, mVerifiedAddress.toMap());
+            map.put(FIELD_VERIFIED_ADDRESS, mVerifiedAddress.toMap());
         }
-        hashMap.put(FIELD_VERIFIED_EMAIL, mVerifiedEmail);
-        hashMap.put(FIELD_VERIFIED_NAME, mVerifiedName);
-        hashMap.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
-        removeNullAndEmptyParams(hashMap);
-        return hashMap;
+        map.put(FIELD_VERIFIED_EMAIL, mVerifiedEmail);
+        map.put(FIELD_VERIFIED_NAME, mVerifiedName);
+        map.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
+        removeNullAndEmptyParams(map);
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        JSONObject jsonAddressObject = mAddress == null ? null : mAddress.toJson();
-        JSONObject jsonVerifiedAddressObject = mVerifiedAddress == null
+        final JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonAddressObject = mAddress == null ? null : mAddress.toJson();
+        final JSONObject jsonVerifiedAddressObject = mVerifiedAddress == null
                 ? null
                 : mVerifiedAddress.toJson();
         try {
@@ -182,30 +193,29 @@ public class SourceOwner extends StripeJsonModel {
             return null;
         }
 
-        Address address = null;
-        String email;
-        String name;
-        String phone;
-        Address verifiedAddress = null;
-        String verifiedEmail;
-        String verifiedName;
-        String verifiedPhone;
-
-        JSONObject addressObject = jsonObject.optJSONObject(FIELD_ADDRESS);
-        if (addressObject != null) {
-            address = Address.fromJson(addressObject);
+        final Address address;
+        final JSONObject addressJsonOpt = jsonObject.optJSONObject(FIELD_ADDRESS);
+        if (addressJsonOpt != null) {
+            address = Address.fromJson(addressJsonOpt);
+        } else {
+            address = null;
         }
-        email = optString(jsonObject, FIELD_EMAIL);
-        name = optString(jsonObject, FIELD_NAME);
-        phone = optString(jsonObject, FIELD_PHONE);
 
-        JSONObject vAddressObject = jsonObject.optJSONObject(FIELD_VERIFIED_ADDRESS);
-        if (vAddressObject != null) {
-            verifiedAddress = Address.fromJson(vAddressObject);
+        final String email = optString(jsonObject, FIELD_EMAIL);
+        final String name = optString(jsonObject, FIELD_NAME);
+        final String phone = optString(jsonObject, FIELD_PHONE);
+
+        final Address verifiedAddress;
+        final JSONObject verifiedAddressJsonOpt = jsonObject.optJSONObject(FIELD_VERIFIED_ADDRESS);
+        if (verifiedAddressJsonOpt != null) {
+            verifiedAddress = Address.fromJson(verifiedAddressJsonOpt);
+        } else {
+            verifiedAddress = null;
         }
-        verifiedEmail = optString(jsonObject, FIELD_VERIFIED_EMAIL);
-        verifiedName = optString(jsonObject, FIELD_VERIFIED_NAME);
-        verifiedPhone = optString(jsonObject, FIELD_VERIFIED_PHONE);
+
+        final String verifiedEmail = optString(jsonObject, FIELD_VERIFIED_EMAIL);
+        final String verifiedName = optString(jsonObject, FIELD_VERIFIED_NAME);
+        final String verifiedPhone = optString(jsonObject, FIELD_VERIFIED_PHONE);
 
         return new SourceOwner(
                 address,
@@ -216,5 +226,27 @@ public class SourceOwner extends StripeJsonModel {
                 verifiedEmail,
                 verifiedName,
                 verifiedPhone);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj || (obj instanceof SourceOwner && typedEquals((SourceOwner) obj));
+    }
+
+    private boolean typedEquals(@NonNull SourceOwner sourceOwner) {
+        return ObjectUtils.equals(mAddress, sourceOwner.mAddress)
+                && ObjectUtils.equals(mEmail, sourceOwner.mEmail)
+                && ObjectUtils.equals(mName, sourceOwner.mName)
+                && ObjectUtils.equals(mPhone, sourceOwner.mPhone)
+                && ObjectUtils.equals(mVerifiedAddress, sourceOwner.mVerifiedAddress)
+                && ObjectUtils.equals(mVerifiedEmail, sourceOwner.mVerifiedEmail)
+                && ObjectUtils.equals(mVerifiedName, sourceOwner.mVerifiedName)
+                && ObjectUtils.equals(mVerifiedPhone, sourceOwner.mVerifiedPhone);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAddress, mEmail, mName, mPhone, mVerifiedAddress, mVerifiedEmail,
+                mVerifiedName, mVerifiedPhone);
     }
 }

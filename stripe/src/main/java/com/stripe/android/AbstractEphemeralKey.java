@@ -5,15 +5,16 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.model.StripeJsonModel;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +34,15 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
     static final String NULL = "null";
-    protected @NonNull String mObjectId;
-    private long mCreated;
-    private long mExpires;
-    private @NonNull String mId;
-    private boolean mLiveMode;
-    private @NonNull String mObject;
-    private @NonNull String mSecret;
-    private @NonNull String mType;
+
+    @NonNull final String mObjectId;
+    private final long mCreated;
+    private final long mExpires;
+    @NonNull private final String mId;
+    private final boolean mLiveMode;
+    @NonNull private final String mObject;
+    @NonNull private final String mSecret;
+    @NonNull private final String mType;
 
     /**
      * Parcel constructor for this {@link Parcelable} class.
@@ -50,7 +52,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
      *
      * @param in the {@link Parcel} in which this Ephemeral Key has been stored.
      */
-    protected AbstractEphemeralKey(Parcel in) {
+    AbstractEphemeralKey(@NonNull Parcel in) {
         mCreated = in.readLong();
         mObjectId = in.readString();
         mExpires = in.readLong();
@@ -61,7 +63,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         mType = in.readString();
     }
 
-    protected AbstractEphemeralKey(
+    AbstractEphemeralKey(
             long created,
             @NonNull String objectId,
             long expires,
@@ -81,9 +83,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         mType = type;
     }
 
-    protected AbstractEphemeralKey(
-            @Nullable JSONObject jsonObject
-    ) throws JSONException {
+    AbstractEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
         mCreated = jsonObject.getLong(FIELD_CREATED);
         mExpires = jsonObject.getLong(FIELD_EXPIRES);
         mId = jsonObject.getString(FIELD_ID);
@@ -129,9 +129,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
 
     @NonNull
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> toMap() {
-        Map map = new HashMap<>();
+        final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_CREATED, mCreated);
         map.put(FIELD_EXPIRES, mExpires);
         map.put(FIELD_OBJECT, mObject);
@@ -139,8 +138,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         map.put(FIELD_SECRET, mSecret);
         map.put(FIELD_LIVEMODE, mLiveMode);
 
-        List<Object> associatedObjectsList = new ArrayList<>();
-        Map<String, String> associatedObjectMap = new HashMap<>();
+        final List<Object> associatedObjectsList = new ArrayList<>();
+        final Map<String, String> associatedObjectMap = new HashMap<>();
         associatedObjectMap.put(FIELD_ID, mObjectId);
         associatedObjectMap.put(FIELD_TYPE, mType);
         associatedObjectsList.add(associatedObjectMap);
@@ -183,11 +182,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         return mExpires;
     }
 
-    @VisibleForTesting
-    void setExpires(long value) {
-        mExpires = value;
-    }
-
     @NonNull
     String getId() {
         return mId;
@@ -223,7 +217,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         return fromJson(object, ephemeralKeyClass);
     }
 
-    @Nullable
+    @NonNull
     protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
     fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
@@ -255,5 +249,28 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
                     ephemeralKeyClass.getSimpleName() +
                     " does not have an accessible (JSONObject) constructor", e);
         }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj
+                || (obj instanceof AbstractEphemeralKey && typedEquals((AbstractEphemeralKey) obj));
+    }
+
+    private boolean typedEquals(@NonNull AbstractEphemeralKey ephemeralKey) {
+        return ObjectUtils.equals(mObjectId, ephemeralKey.mObjectId)
+                && mCreated == ephemeralKey.mCreated
+                && mExpires == ephemeralKey.mExpires
+                && ObjectUtils.equals(mId, ephemeralKey.mId)
+                && mLiveMode == ephemeralKey.mLiveMode
+                && ObjectUtils.equals(mObject, ephemeralKey.mObject)
+                && ObjectUtils.equals(mSecret, ephemeralKey.mSecret)
+                && ObjectUtils.equals(mType, ephemeralKey.mType);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mObjectId, mCreated, mExpires, mId, mLiveMode, mObject, mSecret,
+                mType);
     }
 }

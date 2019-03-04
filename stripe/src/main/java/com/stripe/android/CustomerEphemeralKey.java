@@ -10,8 +10,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 class CustomerEphemeralKey extends AbstractEphemeralKey {
+    public static final Parcelable.Creator<CustomerEphemeralKey> CREATOR
+            = new Parcelable.Creator<CustomerEphemeralKey>() {
 
-    protected CustomerEphemeralKey(Parcel in) {
+        @Override
+        public CustomerEphemeralKey createFromParcel(Parcel in) {
+            return new CustomerEphemeralKey(in);
+        }
+
+        @Override
+        public CustomerEphemeralKey[] newArray(int size) {
+            return new CustomerEphemeralKey[size];
+        }
+    };
+
+    private CustomerEphemeralKey(@NonNull Parcel in) {
         super(in);
     }
 
@@ -37,32 +50,14 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
     }
 
     @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
-    public CustomerEphemeralKey(
-            @Nullable JSONObject jsonObject
-    ) throws JSONException {
+    public CustomerEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
         super(jsonObject);
-
     }
-
 
     @NonNull
     String getCustomerId() {
         return mObjectId;
     }
-
-    public static final Parcelable.Creator<CustomerEphemeralKey> CREATOR
-            = new Parcelable.Creator<CustomerEphemeralKey>() {
-
-        @Override
-        public CustomerEphemeralKey createFromParcel(Parcel in) {
-            return new CustomerEphemeralKey(in);
-        }
-
-        @Override
-        public CustomerEphemeralKey[] newArray(int size) {
-            return new CustomerEphemeralKey[size];
-        }
-    };
 
     @Nullable
     static CustomerEphemeralKey fromString(@Nullable String rawJson) throws JSONException {

@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -328,7 +329,7 @@ public class PaymentIntent extends StripeJsonModel {
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         putStringIfNotNull(jsonObject, FIELD_ID, mId);
         putStringIfNotNull(jsonObject, FIELD_OBJECT, mObjectType);
         putArrayIfNotNull(jsonObject, FIELD_ALLOWED_SOURCE_TYPES,
@@ -378,6 +379,37 @@ public class PaymentIntent extends StripeJsonModel {
         return map;
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof PaymentIntent && typedEquals((PaymentIntent) obj));
+    }
+
+    private boolean typedEquals(@NonNull PaymentIntent paymentIntent) {
+        return ObjectUtils.equals(mId, paymentIntent.mId)
+                && ObjectUtils.equals(mObjectType, paymentIntent.mObjectType)
+                && ObjectUtils.equals(mAllowedSourceTypes, paymentIntent.mAllowedSourceTypes)
+                && ObjectUtils.equals(mAmount, paymentIntent.mAmount)
+                && ObjectUtils.equals(mCanceledAt, paymentIntent.mCanceledAt)
+                && ObjectUtils.equals(mCaptureMethod, paymentIntent.mCaptureMethod)
+                && ObjectUtils.equals(mClientSecret, paymentIntent.mClientSecret)
+                && ObjectUtils.equals(mConfirmationMethod, paymentIntent.mConfirmationMethod)
+                && ObjectUtils.equals(mCreated, paymentIntent.mCreated)
+                && ObjectUtils.equals(mCurrency, paymentIntent.mCurrency)
+                && ObjectUtils.equals(mDescription, paymentIntent.mDescription)
+                && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
+                && ObjectUtils.equals(mNextSourceAction, paymentIntent.mNextSourceAction)
+                && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
+                && ObjectUtils.equals(mSource, paymentIntent.mSource)
+                && ObjectUtils.equals(mStatus, paymentIntent.mStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mId, mObjectType, mAllowedSourceTypes, mAmount, mCanceledAt,
+                mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
+                mDescription, mLiveMode, mNextSourceAction, mReceiptEmail, mSource, mStatus);
+    }
+
     public enum NextActionType {
         RedirectToUrl("redirect_to_url"),
         AuthorizeWithUrl("authorize_with_url");
@@ -410,7 +442,8 @@ public class PaymentIntent extends StripeJsonModel {
         RequiresSourceAction("requires_source_action"),
         RequiresAction("requires_action");
 
-        @NonNull public final String code;
+        @NonNull
+        public final String code;
 
         Status(@NonNull String code) {
             this.code = code;

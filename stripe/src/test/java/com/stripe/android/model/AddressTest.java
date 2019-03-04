@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 @RunWith(RobolectricTestRunner.class)
 public class AddressTest {
 
-    static final String EXAMPLE_JSON_ADDRESS = "{" +
+    static final String JSON_ADDRESS = "{" +
             "\"city\": \"San Francisco\"," +
             "\"country\": \"US\",\n" +
             "\"line1\": \"123 Market St\"," +
@@ -30,7 +30,7 @@ public class AddressTest {
             "\"state\": \"CA\"" +
             "}";
 
-    private static final Map<String, Object> EXAMPLE_MAP_ADDRESS = new HashMap<String, Object>() {{
+    private static final Map<String, Object> MAP_ADDRESS = new HashMap<String, Object>() {{
         put("city", "San Francisco");
         put("country", "US");
         put("line1", "123 Market St");
@@ -39,19 +39,14 @@ public class AddressTest {
         put("state", "CA");
     }};
 
-    private Address mAddress;
-
-    @Before
-    public void setup() {
-        mAddress = Address.fromString(EXAMPLE_JSON_ADDRESS);
-        assertNotNull(mAddress);
-    }
+    private static final Address ADDRESS = Address.fromString(JSON_ADDRESS);
 
     @Test
     public void fromJsonString_backToJson_createsIdenticalElement() {
+        assertNotNull(ADDRESS);
         try {
-            JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_ADDRESS);
-            assertJsonEquals(rawConversion, mAddress.toJson());
+            JSONObject rawConversion = new JSONObject(JSON_ADDRESS);
+            assertJsonEquals(rawConversion, ADDRESS.toJson());
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }
@@ -59,12 +54,13 @@ public class AddressTest {
 
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {
-        assertMapEquals(EXAMPLE_MAP_ADDRESS, mAddress.toMap());
+        assertNotNull(ADDRESS);
+        assertMapEquals(MAP_ADDRESS, ADDRESS.toMap());
     }
 
     @Test
     public void builderConstructor_whenCalled_createsExpectedAddress() {
-        Address address = new Address.Builder()
+        final Address address = new Address.Builder()
                 .setCity("San Francisco")
                 .setCountry("US")
                 .setLine1("123 Market St")
@@ -72,7 +68,6 @@ public class AddressTest {
                 .setPostalCode("94107")
                 .setState("CA")
                 .build();
-        assertMapEquals(address.toMap(), mAddress.toMap());
+        assertEquals(address, ADDRESS);
     }
-
 }

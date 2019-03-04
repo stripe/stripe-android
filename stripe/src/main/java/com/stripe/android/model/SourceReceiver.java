@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.StripeTextUtils;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,26 +24,27 @@ public class SourceReceiver extends StripeJsonModel {
     private static final String FIELD_AMOUNT_RETURNED = "amount_returned";
 
     // This is not to be confused with the Address object
-    private String mAddress;
+    @Nullable private String mAddress;
     private long mAmountCharged;
     private long mAmountReceived;
     private long mAmountReturned;
 
-    SourceReceiver(String address,
-                   long amountCharged,
-                   long amountReceived,
-                   long amountReturned) {
+    private SourceReceiver(@Nullable String address,
+                           long amountCharged,
+                           long amountReceived,
+                           long amountReturned) {
         mAddress = address;
         mAmountCharged = amountCharged;
         mAmountReceived = amountReceived;
         mAmountReturned = amountReturned;
     }
 
+    @Nullable
     public String getAddress() {
         return mAddress;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(@Nullable String address) {
         mAddress = address;
     }
 
@@ -73,21 +75,21 @@ public class SourceReceiver extends StripeJsonModel {
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> hashMap = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         if (!StripeTextUtils.isBlank(mAddress)) {
-            hashMap.put(FIELD_ADDRESS, mAddress);
+            map.put(FIELD_ADDRESS, mAddress);
         }
-        hashMap.put(FIELD_ADDRESS, mAddress);
-        hashMap.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
-        hashMap.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
-        hashMap.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
-        return hashMap;
+        map.put(FIELD_ADDRESS, mAddress);
+        map.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
+        map.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
+        map.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
+        return map;
     }
 
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         StripeJsonUtils.putStringIfNotNull(jsonObject, FIELD_ADDRESS, mAddress);
         try {
             jsonObject.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
@@ -102,8 +104,7 @@ public class SourceReceiver extends StripeJsonModel {
     @Nullable
     public static SourceReceiver fromString(@Nullable String jsonString) {
         try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            return fromJson(jsonObject);
+            return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
             return null;
         }
@@ -115,10 +116,27 @@ public class SourceReceiver extends StripeJsonModel {
             return null;
         }
 
-        String address = StripeJsonUtils.optString(jsonObject, FIELD_ADDRESS);
-        return new SourceReceiver(address,
+        return new SourceReceiver(
+                StripeJsonUtils.optString(jsonObject, FIELD_ADDRESS),
                 jsonObject.optLong(FIELD_AMOUNT_CHARGED),
                 jsonObject.optLong(FIELD_AMOUNT_RECEIVED),
                 jsonObject.optLong(FIELD_AMOUNT_RETURNED));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj || (obj instanceof SourceReceiver && typedEquals((SourceReceiver) obj));
+    }
+
+    private boolean typedEquals(@NonNull SourceReceiver sourceReceiver) {
+        return ObjectUtils.equals(mAddress, sourceReceiver.mAddress)
+                && mAmountCharged == sourceReceiver.mAmountCharged
+                && mAmountReceived == sourceReceiver.mAmountReceived
+                && mAmountReturned == sourceReceiver.mAmountReturned;
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAddress, mAmountCharged, mAmountReceived, mAmountReturned);
     }
 }

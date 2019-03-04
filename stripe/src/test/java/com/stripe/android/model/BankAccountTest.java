@@ -29,7 +29,7 @@ public class BankAccountTest {
 
     @Test
     public void parseSampleAccount_returnsExpectedValue() {
-        BankAccount expectedAccount = new BankAccount(
+        final BankAccount expectedAccount = new BankAccount(
                 "Jane Austen",
                 BankAccount.TYPE_INDIVIDUAL,
                 "STRIPE TEST BANK",
@@ -38,18 +38,7 @@ public class BankAccountTest {
                 "1JWtPxqbdX5Gamtc",
                 "6789",
                 "110000000");
-
-        BankAccount actualAccount = BankAccount.fromString(RAW_BANK_ACCOUNT);
-        assertNotNull(actualAccount);
-        assertEquals(expectedAccount.getAccountHolderName(),
-                actualAccount.getAccountHolderName());
-        assertEquals(expectedAccount.getAccountHolderType(),
-                actualAccount.getAccountHolderType());
-        assertEquals(expectedAccount.getBankName(), actualAccount.getBankName());
-        assertEquals(expectedAccount.getCountryCode(), actualAccount.getCountryCode());
-        assertEquals(expectedAccount.getCurrency(), actualAccount.getCurrency());
-        assertEquals(expectedAccount.getFingerprint(), actualAccount.getFingerprint());
-        assertEquals(expectedAccount.getLast4(), actualAccount.getLast4());
-        assertEquals(expectedAccount.getRoutingNumber(), actualAccount.getRoutingNumber());
+        final BankAccount actualAccount = BankAccount.fromString(RAW_BANK_ACCOUNT);
+        assertEquals(expectedAccount, actualAccount);
     }
 }
