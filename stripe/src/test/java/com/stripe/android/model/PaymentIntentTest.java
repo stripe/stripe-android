@@ -27,6 +27,9 @@ public class PaymentIntentTest {
             "  \"allowed_source_types\": [\n" +
             "    \"card\"\n" +
             "  ],\n" +
+            "  \"payment_method_types\": [\n" +
+            "    \"card\"\n" +
+            "  ],\n" +
             "  \"amount\": 1000,\n" +
             "  \"canceled_at\": 1530839340,\n" +
             "  \"capture_method\": \"automatic\",\n" +
@@ -62,8 +65,8 @@ public class PaymentIntentTest {
             "  \"livemode\": false,\n" +
             "  \"next_source_action\": {" +
             "       \"type\": \"authorize_with_url\"," +
-            "       authorize_with_url: {" +
-        "           url: \""+ BAD_URL +"\" } " +
+            "           authorize_with_url: {" +
+            "           url: \""+ BAD_URL +"\" } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
@@ -162,7 +165,7 @@ public class PaymentIntentTest {
                 put(PaymentIntent.FIELD_ID, "pi_1CkiBMLENEVhOs7YMtUehLau");
                 put(PaymentIntent.FIELD_OBJECT, "payment_intent");
                 put(PaymentIntent.FIELD_ALLOWED_SOURCE_TYPES, ALLOWED_SOURCE_TYPES);
-                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, new ArrayList<>());
+                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, ALLOWED_SOURCE_TYPES);
                 put(PaymentIntent.FIELD_AMOUNT, 1000L);
                 put(PaymentIntent.FIELD_CANCELED, 1530839340L);
                 put(PaymentIntent.FIELD_CLIENT_SECRET,
