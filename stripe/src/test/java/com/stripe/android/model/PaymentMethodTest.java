@@ -6,6 +6,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
@@ -15,6 +18,9 @@ public class PaymentMethodTest {
             "\t\"created\": 1550757934255,\n" +
             "\t\"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
             "\t\"livemode\": true,\n" +
+            "\t\"metadata\": {\n" +
+            "\t\t\"order_id\": \"123456789\"\n" +
+            "\t}," +
             "\t\"type\": \"card\",\n" +
             "\t\"billing_details\": {\n" +
             "\t\t\"address\": {\n" +
@@ -101,15 +107,23 @@ public class PaymentMethodTest {
                     .setPhone("123-456-7890")
                     .build();
 
-    private static final PaymentMethod CARD_PAYMENT_METHOD = new PaymentMethod.Builder()
-            .setId("pm_123456789")
-            .setCreated(1550757934255L)
-            .setLiveMode(true)
-            .setType("card")
-            .setCustomerId("cus_AQsHpvKfKwJDrF")
-            .setBillingDetails(BILLING_DETAILS)
-            .setCard(CARD)
-            .build();
+    private static final PaymentMethod CARD_PAYMENT_METHOD;
+
+    static {
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("order_id", "123456789");
+
+        CARD_PAYMENT_METHOD = new PaymentMethod.Builder()
+                .setId("pm_123456789")
+                .setCreated(1550757934255L)
+                .setLiveMode(true)
+                .setType("card")
+                .setCustomerId("cus_AQsHpvKfKwJDrF")
+                .setBillingDetails(BILLING_DETAILS)
+                .setCard(CARD)
+                .setMetadata(metadata)
+                .build();
+    }
 
     @Test
     public void toJson_withIdeal_shouldReturnExpectedJson() throws JSONException {
