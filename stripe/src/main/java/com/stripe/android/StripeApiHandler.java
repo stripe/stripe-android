@@ -78,8 +78,6 @@ class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    static final String API_VERSION = "2017-06-05";
-
     static void logApiCall(
             @NonNull Map<String, Object> loggingMap,
             @NonNull RequestOptions options,
@@ -127,7 +125,7 @@ class StripeApiHandler {
                 publishableKey,
                 stripeAccount,
                 RequestOptions.TYPE_QUERY)
-                .setApiVersion(API_VERSION)
+                .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
                 .build();
 
         try {
@@ -179,7 +177,7 @@ class StripeApiHandler {
                 publishableKey,
                 stripeAccount,
                 RequestOptions.TYPE_QUERY)
-                .setApiVersion(API_VERSION)
+                .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
                 .build();
 
         try {
@@ -457,8 +455,9 @@ class StripeApiHandler {
                     context, productUsageTokens, publicKey, sourceType);
 
             // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions =
-                    RequestOptions.builder(publicKey).setApiVersion(API_VERSION).build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
+                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                    .build();
             logApiCall(loggingParamsMap, loggingOptions, listener);
         }
 
@@ -466,7 +465,9 @@ class StripeApiHandler {
                 POST,
                 getAddCustomerSourceUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+                RequestOptions.builder(secret)
+                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                        .build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Source.fromString(response.getResponseBody());
@@ -492,8 +493,9 @@ class StripeApiHandler {
                     LoggingUtils.getDeleteSourceParams(context, productUsageTokens, publicKey);
 
             // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions =
-                    RequestOptions.builder(publicKey).setApiVersion(API_VERSION).build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
+                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                    .build();
             logApiCall(loggingParamsMap, loggingOptions, listener);
         }
 
@@ -501,7 +503,9 @@ class StripeApiHandler {
                 DELETE,
                 getDeleteCustomerSourceUrl(customerId, sourceId),
                 paramsMap,
-                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+                RequestOptions.builder(secret)
+                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                        .build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Source.fromString(response.getResponseBody());
@@ -528,7 +532,7 @@ class StripeApiHandler {
         // Context can be nullable because this action is performed with only a weak reference
         if (context != null) {
             final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(API_VERSION)
+                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
                     .build();
 
             final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
@@ -546,7 +550,9 @@ class StripeApiHandler {
                 POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+                RequestOptions.builder(secret)
+                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                        .build());
 
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -573,7 +579,7 @@ class StripeApiHandler {
         // Context can be nullable because this action is performed with only a weak reference
         if (context != null) {
             final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(API_VERSION)
+                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
                     .build();
 
             final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
@@ -591,7 +597,9 @@ class StripeApiHandler {
                 POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+                RequestOptions.builder(secret)
+                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                        .build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
@@ -609,7 +617,9 @@ class StripeApiHandler {
                 GET,
                 getRetrieveCustomerUrl(customerId),
                 null,
-                RequestOptions.builder(secret).setApiVersion(API_VERSION).build());
+                RequestOptions.builder(secret)
+                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
+                        .build());
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
     }

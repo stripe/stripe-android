@@ -41,7 +41,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
                 mEphemeralKey,
                 mTimeBufferInSeconds,
                 mOverrideCalendar)) {
-            mEphemeralKeyProvider.createEphemeralKey(StripeApiHandler.API_VERSION,
+            mEphemeralKeyProvider.createEphemeralKey(ApiVersion.DEFAULT_API_VERSION,
                     new ClientKeyUpdateListener(this, actionString, arguments));
         } else {
             mListener.onKeyUpdate(mEphemeralKey, actionString, arguments);

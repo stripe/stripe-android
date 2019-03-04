@@ -94,6 +94,7 @@ public class RequestOptions {
         return builder(publishableApiKey, TYPE_QUERY);
     }
 
+    @NonNull
     public static RequestOptions.RequestOptionsBuilder builder(
             @Nullable String publishableApiKey,
             @Nullable String stripeAccount,
@@ -191,6 +192,14 @@ public class RequestOptions {
                     ? null
                     : apiVersion;
             return this;
+        }
+
+        /**
+         * Convenience method for {@link #setApiVersion(String)}
+         */
+        @NonNull
+        RequestOptionsBuilder setApiVersion(@Nullable ApiVersion apiVersion) {
+            return setApiVersion(apiVersion != null ? apiVersion.getCode() : null);
         }
 
         @NonNull
