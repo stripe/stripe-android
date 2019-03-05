@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
+import static com.stripe.android.model.StripeJsonUtils.optHash;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
@@ -33,9 +34,10 @@ public class PaymentMethod extends StripeJsonModel {
     private static final String FIELD_CUSTOMER = "customer";
     private static final String FIELD_IDEAL = "ideal";
     private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_METADATA = "metadata";
     private static final String FIELD_TYPE = "type";
 
-    @NonNull public final String id;
+    @Nullable public final String id;
     @Nullable public final Long created;
     public final boolean liveMode;
     @Nullable public final String type;
@@ -44,6 +46,7 @@ public class PaymentMethod extends StripeJsonModel {
     @Nullable public final CardPresent cardPresent;
     @Nullable public final Ideal ideal;
     @Nullable public final String customerId;
+    @Nullable public final Map<String, String> metadata;
 
     private PaymentMethod(@NonNull Builder builder) {
         id = builder.mId;
@@ -56,6 +59,7 @@ public class PaymentMethod extends StripeJsonModel {
         card = builder.mCard;
         cardPresent = builder.mCardPresent;
         ideal = builder.mIdeal;
+        metadata = builder.mMetadata;
     }
 
     /**
@@ -82,6 +86,7 @@ public class PaymentMethod extends StripeJsonModel {
                 cardPresent != null ? cardPresent.toMap() : null);
         paymentMethod.put(FIELD_IDEAL,
                 ideal != null ? ideal.toMap() : null);
+        paymentMethod.put(FIELD_METADATA, metadata);
         return paymentMethod;
     }
 
@@ -94,6 +99,7 @@ public class PaymentMethod extends StripeJsonModel {
             paymentMethod.put(FIELD_CREATED, created);
             paymentMethod.put(FIELD_CUSTOMER, customerId);
             paymentMethod.put(FIELD_LIVEMODE, liveMode);
+            paymentMethod.put(FIELD_METADATA, metadata != null ? new JSONObject(metadata) : null);
             paymentMethod.put(FIELD_TYPE, type);
             paymentMethod.put(FIELD_BILLING_DETAILS,
                     billingDetails != null ? billingDetails.toJson() : null);
@@ -132,7 +138,8 @@ public class PaymentMethod extends StripeJsonModel {
                 .setBillingDetails(BillingDetails.fromJson(
                         paymentMethod.optJSONObject(FIELD_BILLING_DETAILS)))
                 .setCustomerId(optString(paymentMethod, FIELD_CUSTOMER))
-                .setLiveMode(Boolean.TRUE.equals(paymentMethod.optBoolean(FIELD_LIVEMODE)));
+                .setLiveMode(Boolean.TRUE.equals(paymentMethod.optBoolean(FIELD_LIVEMODE)))
+                .setMetadata(optHash(paymentMethod, FIELD_METADATA));
 
         if (FIELD_CARD.equals(type)) {
             builder.setCard(Card.fromJson(paymentMethod.optJSONObject(FIELD_CARD)));
@@ -174,6 +181,7 @@ public class PaymentMethod extends StripeJsonModel {
         private boolean mLiveMode;
         private String mType;
         private BillingDetails mBillingDetails;
+        private Map<String, String> mMetadata;
         private Card mCard;
         private CardPresent mCardPresent;
         private Ideal mIdeal;
@@ -194,6 +202,12 @@ public class PaymentMethod extends StripeJsonModel {
         @NonNull
         public Builder setLiveMode(boolean liveMode) {
             this.mLiveMode = liveMode;
+            return this;
+        }
+
+        @NonNull
+        public Builder setMetadata(@Nullable Map<String, String> metadata) {
+            this.mMetadata = metadata;
             return this;
         }
 
