@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test class for {@link SourceCardData}.
@@ -69,5 +70,17 @@ public class SourceCardDataTest {
         assertNotNull(CARD_DATA);
         assertEquals(CARD_DATA.hashCode(),
                 SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY).hashCode());
+    }
+
+    @Test
+    public void testAsThreeDSecureStatus() {
+        assertEquals(SourceCardData.REQUIRED, SourceCardData.asThreeDSecureStatus("required"));
+        assertEquals(SourceCardData.OPTIONAL, SourceCardData.asThreeDSecureStatus("optional"));
+        assertEquals(SourceCardData.NOT_SUPPORTED,
+                SourceCardData.asThreeDSecureStatus("not_supported"));
+        assertEquals(SourceCardData.RECOMMENDED,
+                SourceCardData.asThreeDSecureStatus("recommended"));
+        assertEquals(SourceCardData.UNKNOWN, SourceCardData.asThreeDSecureStatus("unknown"));
+        assertNull(SourceCardData.asThreeDSecureStatus(""));
     }
 }
