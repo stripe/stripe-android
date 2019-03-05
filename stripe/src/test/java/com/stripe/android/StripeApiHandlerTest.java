@@ -95,10 +95,8 @@ public class StripeApiHandlerTest {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
         String stripeAccount = "acct_123abc";
-        String apiVersion = "2011-11-11";
         RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
                 .setIdempotencyKey(idempotencyKey)
-                .setApiVersion(apiVersion)
                 .setStripeAccount(stripeAccount)
                 .build();
         Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
@@ -106,7 +104,7 @@ public class StripeApiHandlerTest {
         assertNotNull(headerMap);
         assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
         assertEquals(idempotencyKey, headerMap.get("Idempotency-Key"));
-        assertEquals(apiVersion, headerMap.get("Stripe-Version"));
+        assertEquals(ApiVersion.DEFAULT_API_VERSION, headerMap.get("Stripe-Version"));
         assertEquals(stripeAccount, headerMap.get("Stripe-Account"));
     }
 
@@ -118,7 +116,7 @@ public class StripeApiHandlerTest {
 
         assertNotNull(headerMap);
         assertFalse(headerMap.containsKey("Idempotency-Key"));
-        assertFalse(headerMap.containsKey("Stripe-Version"));
+        assertTrue(headerMap.containsKey("Stripe-Version"));
         assertFalse(headerMap.containsKey("Stripe-Account"));
         assertTrue(headerMap.containsKey("Authorization"));
     }
