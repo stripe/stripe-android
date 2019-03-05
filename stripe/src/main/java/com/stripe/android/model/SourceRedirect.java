@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
+import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -20,8 +21,8 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
- * Model for a <a href="https://stripe.com/docs/api#source_object-redirect">redirect</a> object
- * in the source api.
+ * Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-redirect">
+ *     redirect</a> object in the source api.
  */
 public class SourceRedirect extends StripeJsonModel {
 
@@ -29,12 +30,14 @@ public class SourceRedirect extends StripeJsonModel {
     @StringDef({
             PENDING,
             SUCCEEDED,
-            FAILED
+            FAILED,
+            NOT_REQUIRED
     })
     @interface Status { }
     public static final String PENDING = "pending";
     public static final String SUCCEEDED = "succeeded";
     public static final String FAILED = "failed";
+    public static final String NOT_REQUIRED = "not_required";
 
     private static final String FIELD_RETURN_URL = "return_url";
     private static final String FIELD_STATUS = "status";
@@ -123,13 +126,16 @@ public class SourceRedirect extends StripeJsonModel {
 
     @Nullable
     @Status
-    private static String asStatus(@Nullable String stringStatus) {
+    @VisibleForTesting
+    static String asStatus(@Nullable String stringStatus) {
         if (PENDING.equals(stringStatus)) {
             return PENDING;
         } else if (SUCCEEDED.equals(stringStatus)) {
             return SUCCEEDED;
         } else if (FAILED.equals(stringStatus)) {
             return FAILED;
+        } else if (NOT_REQUIRED.equals(stringStatus)) {
+            return NOT_REQUIRED;
         }
 
         return null;
