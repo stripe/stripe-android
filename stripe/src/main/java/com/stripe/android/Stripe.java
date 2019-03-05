@@ -697,8 +697,9 @@ public class Stripe {
      * See {@link #createAccountTokenSynchronous(AccountParams)}
      */
     @Nullable
-    public Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams,
-                                               @NonNull final ApiVersion apiVersion)
+    @VisibleForTesting
+    Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams,
+                                        @NonNull final ApiVersion apiVersion)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -723,6 +724,17 @@ public class Stripe {
      */
     @Nullable
     public Token createAccountTokenSynchronous(
+            @NonNull final AccountParams accountParams,
+            @Nullable String publishableKey)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return createAccountTokenSynchronous(accountParams, publishableKey, null);
+    }
+
+    @Nullable
+    private Token createAccountTokenSynchronous(
             @NonNull final AccountParams accountParams,
             @Nullable String publishableKey,
             @Nullable ApiVersion apiVersion)
