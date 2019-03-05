@@ -1188,7 +1188,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createPaymentMethodWithCardSynchronous()
+    public void createPaymentMethodSynchronous_withCard()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final PaymentMethod.BillingDetails expectedBillingDetails =
@@ -1238,8 +1238,65 @@ public class StripeTest {
         assertEquals(expectedCard, createdPaymentMethod.card);
     }
 
+
     @Test
-    public void createPaymentMethodWithIdealSynchronous()
+    public void createPaymentMethodSynchronous_withCardAndMetadata()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final PaymentMethod.BillingDetails expectedBillingDetails =
+                new PaymentMethod.BillingDetails.Builder()
+                        .setName("Home")
+                        .setEmail("me@example.com")
+                        .setPhone("1-800-555-1234")
+                        .setAddress(new Address.Builder()
+                                .setLine1("123 Main St")
+                                .setCity("Los Angeles")
+                                .setState("CA")
+                                .setCountry("US")
+                                .build())
+                        .build();
+        final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
+                .setBrand("visa")
+                .setChecks(new PaymentMethod.Card.Checks.Builder()
+                        .setAddressLine1Check("unchecked")
+                        .setAddressPostalCodeCheck(null)
+                        .setCvcCheck("unchecked")
+                        .build())
+                .setCountry("US")
+                .setExpiryMonth(8)
+                .setExpiryYear(2022)
+                .setFunding("credit")
+                .setLast4("4242")
+                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
+                        .setSupported(true)
+                        .build())
+                .setWallet(null)
+                .build();
+
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("order_id", "123456789");
+
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                        new PaymentMethodCreateParams.Card.Builder()
+                                .setNumber("4242424242424242")
+                                .setExpiryMonth(8)
+                                .setExpiryYear(2022)
+                                .setCvc("123")
+                                .build(),
+                        expectedBillingDetails,
+                        metadata);
+        final Stripe stripe = getNonLoggingStripe(mContext);
+        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(createdPaymentMethod);
+        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(expectedCard, createdPaymentMethod.card);
+        assertEquals(metadata, createdPaymentMethod.metadata);
+    }
+
+    @Test
+    public void createPaymentMethodSynchronous_withIdeal()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final PaymentMethod.BillingDetails expectedBillingDetails =
