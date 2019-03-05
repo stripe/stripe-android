@@ -13,7 +13,9 @@ import java.util.Map;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
@@ -53,5 +55,18 @@ public class SourceRedirectTest {
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {
         assertMapEquals(EXAMPLE_MAP_REDIRECT, mSourceRedirect.toMap());
+    }
+
+    @Test
+    public void asStatus() {
+        assertEquals(SourceRedirect.FAILED,
+                SourceRedirect.asStatus("failed"));
+        assertEquals(SourceRedirect.SUCCEEDED,
+                SourceRedirect.asStatus("succeeded"));
+        assertEquals(SourceRedirect.PENDING,
+                SourceRedirect.asStatus("pending"));
+        assertEquals(SourceRedirect.NOT_REQUIRED,
+                SourceRedirect.asStatus("not_required"));
+        assertNull(SourceRedirect.asStatus("something_else"));
     }
 }
