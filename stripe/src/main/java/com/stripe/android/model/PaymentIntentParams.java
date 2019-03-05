@@ -18,6 +18,8 @@ public class PaymentIntentParams {
     static final String API_PARAM_RETURN_URL = "return_url";
     static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
+    static final String API_PARAM_SAVE_PAYMENT_METHOD = "save_payment_method";
+
     @Nullable private PaymentMethodCreateParams mPaymentMethodCreateParams;
     @Nullable private String mPaymentMethodId;
     @Nullable private SourceParams mSourceParams;
@@ -26,6 +28,8 @@ public class PaymentIntentParams {
     @Nullable private Map<String, Object> mExtraParams;
     @Nullable private String mClientSecret;
     @Nullable private String mReturnUrl;
+
+    private boolean mSaveToCustomer;
 
     private PaymentIntentParams() {
     }
@@ -42,7 +46,6 @@ public class PaymentIntentParams {
         return new PaymentIntentParams();
     }
 
-
     /**
      * Create the parameters necessary for confirming a PaymentIntent while attaching a
      * PaymentMethod that already exits.
@@ -52,17 +55,33 @@ public class PaymentIntentParams {
      * @param clientSecret client secret from the PaymentIntent being confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
      *                  process
+     * @param saveToCustomer Set to {@code true} to save this PaymentIntent’s payment method to the
+     *                       associated Customer, if the payment method is not already attached.
+     *                       This parameter only applies to the payment method passed in the same
+     *                       request or the current payment method attached to the PaymentIntent and
+     *                       must be specified again if a new payment method is added.
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodId(
             @Nullable String paymentMethodId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @NonNull String returnUrl,
+            boolean saveToCustomer) {
         return new PaymentIntentParams()
                 .setPaymentMethodId(paymentMethodId)
                 .setClientSecret(clientSecret)
-                .setReturnUrl(returnUrl);
+                .setReturnUrl(returnUrl)
+                .setSaveToCustomer(saveToCustomer);
+    }
+
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodId(
+            @Nullable String paymentMethodId,
+            @NonNull String clientSecret,
+            @NonNull String returnUrl) {
+        return createConfirmPaymentIntentWithPaymentMethodId(paymentMethodId, clientSecret,
+                returnUrl, false);
     }
 
     /**
@@ -74,17 +93,33 @@ public class PaymentIntentParams {
      * @param clientSecret client secret from the PaymentIntent that is to be confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
      *                  process
+     * @param saveToCustomer Set to {@code true} to save this PaymentIntent’s payment method to the
+     *                       associated Customer, if the payment method is not already attached.
+     *                       This parameter only applies to the payment method passed in the same
+     *                       request or the current payment method attached to the PaymentIntent and
+     *                       must be specified again if a new payment method is added.
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodCreateParams(
             @Nullable PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @NonNull String returnUrl,
+            boolean saveToCustomer) {
         return new PaymentIntentParams()
                 .setPaymentMethodCreateParams(paymentMethodCreateParams)
                 .setClientSecret(clientSecret)
-                .setReturnUrl(returnUrl);
+                .setReturnUrl(returnUrl)
+                .setSaveToCustomer(saveToCustomer);
+    }
+
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithPaymentMethodCreateParams(
+            @Nullable PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull String clientSecret,
+            @NonNull String returnUrl) {
+        return createConfirmPaymentIntentWithPaymentMethodCreateParams(paymentMethodCreateParams,
+                clientSecret, returnUrl, false);
     }
 
     /**
@@ -96,17 +131,33 @@ public class PaymentIntentParams {
      * @param clientSecret client secret from the PaymentIntent being confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
      *                  process
+     * @param saveToCustomer Set to {@code true} to save this PaymentIntent’s source to the
+     *                       associated Customer, if the source is not already attached.
+     *                       This parameter only applies to the source passed in the same request
+     *                       or the current source attached to the PaymentIntent and must be
+     *                       specified again if a new source is added.
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static PaymentIntentParams createConfirmPaymentIntentWithSourceIdParams(
             @Nullable String sourceId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @NonNull String returnUrl,
+            boolean saveToCustomer) {
         return new PaymentIntentParams()
                 .setSourceId(sourceId)
                 .setClientSecret(clientSecret)
-                .setReturnUrl(returnUrl);
+                .setReturnUrl(returnUrl)
+                .setSaveToCustomer(saveToCustomer);
+    }
+
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithSourceIdParams(
+            @Nullable String sourceId,
+            @NonNull String clientSecret,
+            @NonNull String returnUrl) {
+        return createConfirmPaymentIntentWithSourceIdParams(sourceId, clientSecret, returnUrl,
+                false);
     }
 
     /**
@@ -116,17 +167,33 @@ public class PaymentIntentParams {
      * @param clientSecret client secret from the PaymentIntent that is to be confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
      *                  process
+     * @param saveToCustomer Set to {@code true} to save this PaymentIntent’s source to the
+     *                       associated Customer, if the source is not already attached.
+     *                       This parameter only applies to the source passed in the same request
+     *                       or the current source attached to the PaymentIntent and must be
+     *                       specified again if a new source is added.
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
             @Nullable SourceParams sourceParams,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @NonNull String returnUrl,
+            boolean saveToCustomer) {
         return new PaymentIntentParams()
                 .setSourceParams(sourceParams)
                 .setClientSecret(clientSecret)
-                .setReturnUrl(returnUrl);
+                .setReturnUrl(returnUrl)
+                .setSaveToCustomer(saveToCustomer);
+    }
+
+    @NonNull
+    public static PaymentIntentParams createConfirmPaymentIntentWithSourceDataParams(
+            @Nullable SourceParams sourceParams,
+            @NonNull String clientSecret,
+            @NonNull String returnUrl) {
+        return createConfirmPaymentIntentWithSourceDataParams(sourceParams, clientSecret, returnUrl,
+                false);
     }
 
     /**
@@ -138,7 +205,8 @@ public class PaymentIntentParams {
     @NonNull
     public static PaymentIntentParams createRetrievePaymentIntentParams(
             @NonNull String clientSecret) {
-        return new PaymentIntentParams().setClientSecret(clientSecret);
+        return new PaymentIntentParams()
+                .setClientSecret(clientSecret);
     }
 
     /**
@@ -228,6 +296,12 @@ public class PaymentIntentParams {
         return this;
     }
 
+    @NonNull
+    public PaymentIntentParams setSaveToCustomer(boolean saveToCustomer) {
+        mSaveToCustomer = saveToCustomer;
+        return this;
+    }
+
     /**
      * Create a string-keyed map representing this object that is
      * ready to be sent over the network.
@@ -256,6 +330,11 @@ public class PaymentIntentParams {
         if (mExtraParams != null) {
             networkReadyMap.putAll(mExtraParams);
         }
+
+        if (mSaveToCustomer) {
+            networkReadyMap.put(API_PARAM_SAVE_PAYMENT_METHOD, true);
+        }
+
         return networkReadyMap;
     }
 
@@ -314,5 +393,9 @@ public class PaymentIntentParams {
     @Nullable
     public String getReturnUrl() {
         return mReturnUrl;
+    }
+
+    public boolean shouldSaveToCustomer() {
+        return mSaveToCustomer;
     }
 }

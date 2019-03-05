@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentParamsTest {
@@ -46,6 +49,7 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(sourceParams, params.getSourceParams());
+        assertFalse(params.shouldSaveToCustomer());
     }
 
     @Test
@@ -57,6 +61,22 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
+        assertFalse(params.shouldSaveToCustomer());
+    }
+
+    @Test
+    public void createConfirmPaymentIntentWithSourceIdParams_withSaveToCustomer_hasExpectedFields() {
+        final PaymentIntentParams params = PaymentIntentParams
+                .createConfirmPaymentIntentWithSourceIdParams(
+                        TEST_SOURCE_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
+
+        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
+        assertTrue(params.shouldSaveToCustomer());
+
+        assertEquals(Boolean.TRUE,
+                params.toParamMap().get(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
 
     @Test
@@ -69,10 +89,11 @@ public class PaymentIntentParamsTest {
         Assert.assertNull(params.getExtraParams());
         Assert.assertNull(params.getSourceId());
         Assert.assertNull(params.getSourceParams());
+        assertFalse(params.shouldSaveToCustomer());
     }
 
     @Test
-    public void createRetrievePaymentIntent_withPaymentMethodCreateParams_hasExpectedFields() {
+    public void createRetrievePaymentIntentwithPaymentMethodCreateParams_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
                         .build(), null);
@@ -83,10 +104,11 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
+        assertFalse(params.shouldSaveToCustomer());
     }
 
     @Test
-    public void createRetrievePaymentIntent_withPaymentMethodId_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithPaymentMethodId_hasExpectedFields() {
         final PaymentIntentParams params = PaymentIntentParams
                 .createConfirmPaymentIntentWithPaymentMethodId(
                         TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
@@ -94,6 +116,37 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
+        assertFalse(params.shouldSaveToCustomer());
+    }
+
+    @Test
+    public void createConfirmPaymentIntentWithPaymentMethodCreateParams_withSaveToCustomer_hasExpectedFields() {
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
+                        .build(), null);
+        final PaymentIntentParams params = PaymentIntentParams
+                .createConfirmPaymentIntentWithPaymentMethodCreateParams(paymentMethodCreateParams,
+                        TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
+
+        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
+        assertTrue(params.shouldSaveToCustomer());
+    }
+
+    @Test
+    public void createConfirmPaymentIntentWithPaymentMethodId_withSaveToCustomer_hasExpectedFields() {
+        final PaymentIntentParams params = PaymentIntentParams
+                .createConfirmPaymentIntentWithPaymentMethodId(
+                        TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
+
+        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
+        assertTrue(params.shouldSaveToCustomer());
+
+        assertEquals(Boolean.TRUE,
+                params.toParamMap().get(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
 
     @Test
@@ -110,6 +163,7 @@ public class PaymentIntentParamsTest {
                 paramMap.get(PaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
         Assert.assertEquals(
                 paramMap.get(PaymentIntentParams.API_PARAM_RETURN_URL), TEST_RETURN_URL);
+        assertFalse(paramMap.containsKey(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
 
     @Test
@@ -133,5 +187,6 @@ public class PaymentIntentParamsTest {
                 paramMap.get(extraParamKey1), extraParamValue1);
         Assert.assertEquals(
                 paramMap.get(extraParamKey2), extraParamValue2);
+        assertFalse(paramMap.containsKey(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
 }
