@@ -22,41 +22,63 @@ public class PaymentMethodCreateParams {
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";
     private static final String FIELD_IDEAL = "ideal";
+    private static final String FIELD_METADATA = "metadata";
     private static final String FIELD_TYPE = "type";
 
     @NonNull private final Type type;
     @Nullable private final PaymentMethodCreateParams.Card card;
     @Nullable private final PaymentMethodCreateParams.Ideal ideal;
     @Nullable private final PaymentMethod.BillingDetails billingDetails;
+    @Nullable private final Map<String, String> metadata;
 
     @NonNull
     public static PaymentMethodCreateParams create(
             @NonNull PaymentMethodCreateParams.Card card,
             @Nullable PaymentMethod.BillingDetails billingDetails) {
-        return new PaymentMethodCreateParams(card, billingDetails);
+        return new PaymentMethodCreateParams(card, billingDetails, null);
+    }
+
+    @NonNull
+    public static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.Card card,
+            @Nullable PaymentMethod.BillingDetails billingDetails,
+            @Nullable Map<String, String> metadata) {
+        return new PaymentMethodCreateParams(card, billingDetails, metadata);
     }
 
     @NonNull
     public static PaymentMethodCreateParams create(
             @NonNull PaymentMethodCreateParams.Ideal ideal,
             @Nullable PaymentMethod.BillingDetails billingDetails) {
-        return new PaymentMethodCreateParams(ideal, billingDetails);
+        return new PaymentMethodCreateParams(ideal, billingDetails, null);
     }
 
-    private PaymentMethodCreateParams(@NonNull PaymentMethodCreateParams.Card card,
-                                      @Nullable PaymentMethod.BillingDetails billingDetails) {
+    @NonNull
+    public static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.Ideal ideal,
+            @Nullable PaymentMethod.BillingDetails billingDetails,
+            @Nullable Map<String, String> metadata) {
+        return new PaymentMethodCreateParams(ideal, billingDetails, metadata);
+    }
+
+    private PaymentMethodCreateParams(@NonNull Card card,
+                                      @Nullable PaymentMethod.BillingDetails billingDetails,
+                                      @Nullable Map<String, String> metadata) {
         this.type = Type.Card;
         this.card = card;
         this.ideal = null;
         this.billingDetails = billingDetails;
+        this.metadata = metadata;
     }
 
     private PaymentMethodCreateParams(@NonNull PaymentMethodCreateParams.Ideal ideal,
-                                      @Nullable PaymentMethod.BillingDetails billingDetails) {
+                                      @Nullable PaymentMethod.BillingDetails billingDetails,
+                                      @Nullable Map<String, String> metadata) {
         this.type = Type.Ideal;
         this.card = null;
         this.ideal = ideal;
         this.billingDetails = billingDetails;
+        this.metadata = metadata;
     }
 
     @NonNull
@@ -72,6 +94,10 @@ public class PaymentMethodCreateParams {
 
         if (billingDetails != null) {
             params.put(FIELD_BILLING_DETAILS, billingDetails.toMap());
+        }
+
+        if (metadata != null) {
+            params.put(FIELD_METADATA, metadata);
         }
 
         return params;
