@@ -35,12 +35,14 @@ public class SourceCardData extends StripeSourceTypeModel {
             REQUIRED,
             OPTIONAL,
             NOT_SUPPORTED,
+            RECOMMENDED,
             UNKNOWN
     })
     public @interface ThreeDSecureStatus { }
     public static final String REQUIRED = "required";
     public static final String OPTIONAL = "optional";
     public static final String NOT_SUPPORTED = "not_supported";
+    public static final String RECOMMENDED = "recommended";
     public static final String UNKNOWN = "unknown";
 
     private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
@@ -239,11 +241,11 @@ public class SourceCardData extends StripeSourceTypeModel {
         }
     }
 
+    @VisibleForTesting
     @Nullable
     @ThreeDSecureStatus
-    private static String asThreeDSecureStatus(@Nullable String threeDSecureStatus) {
-        String nullChecked = StripeJsonUtils.nullIfNullOrEmpty(threeDSecureStatus);
-        if (nullChecked == null) {
+    static String asThreeDSecureStatus(@Nullable String threeDSecureStatus) {
+        if (StripeJsonUtils.nullIfNullOrEmpty(threeDSecureStatus) == null) {
             return null;
         }
 
@@ -253,6 +255,8 @@ public class SourceCardData extends StripeSourceTypeModel {
             return OPTIONAL;
         } else if (NOT_SUPPORTED.equalsIgnoreCase(threeDSecureStatus)) {
             return NOT_SUPPORTED;
+        } else if (RECOMMENDED.equalsIgnoreCase(threeDSecureStatus)) {
+            return RECOMMENDED;
         } else {
             return UNKNOWN;
         }
