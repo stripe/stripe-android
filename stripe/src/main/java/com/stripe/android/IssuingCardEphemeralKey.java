@@ -9,26 +9,26 @@ import androidx.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class CustomerEphemeralKey extends AbstractEphemeralKey {
-    public static final Parcelable.Creator<CustomerEphemeralKey> CREATOR
-            = new Parcelable.Creator<CustomerEphemeralKey>() {
+class IssuingCardEphemeralKey extends AbstractEphemeralKey {
+    public static final Parcelable.Creator<IssuingCardEphemeralKey> CREATOR
+            = new Parcelable.Creator<IssuingCardEphemeralKey>() {
 
         @Override
-        public CustomerEphemeralKey createFromParcel(Parcel in) {
-            return new CustomerEphemeralKey(in);
+        public IssuingCardEphemeralKey createFromParcel(Parcel in) {
+            return new IssuingCardEphemeralKey(in);
         }
 
         @Override
-        public CustomerEphemeralKey[] newArray(int size) {
-            return new CustomerEphemeralKey[size];
+        public IssuingCardEphemeralKey[] newArray(int size) {
+            return new IssuingCardEphemeralKey[size];
         }
     };
 
-    private CustomerEphemeralKey(@NonNull Parcel in) {
+    private IssuingCardEphemeralKey(@NonNull Parcel in) {
         super(in);
     }
 
-    protected CustomerEphemeralKey(
+    protected IssuingCardEphemeralKey(
             long created,
             @NonNull String customerId,
             long expires,
@@ -50,24 +50,24 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
     }
 
     @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
-    public CustomerEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
+    public IssuingCardEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
         super(jsonObject);
     }
 
     @NonNull
-    String getCustomerId() {
+    String getIssuingCardId() {
         return mObjectId;
     }
 
     @NonNull
-    static CustomerEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
+    static IssuingCardEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
         return AbstractEphemeralKey
-                .fromString(rawJson, CustomerEphemeralKey.class);
+                .fromString(rawJson, IssuingCardEphemeralKey.class);
     }
 
     @NonNull
-    static CustomerEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
+    static IssuingCardEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
         return AbstractEphemeralKey
-                .fromJson(jsonObject, CustomerEphemeralKey.class);
+                .fromJson(jsonObject, IssuingCardEphemeralKey.class);
     }
 }
