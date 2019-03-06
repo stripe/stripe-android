@@ -121,11 +121,8 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         StripeNetworkUtils.addUidParamsToPaymentIntent(uidProvider, context, paramMap);
-        final RequestOptions options = RequestOptions.builder(
-                publishableKey,
-                stripeAccount,
+        final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY)
-                .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
                 .build();
 
         try {
@@ -173,12 +170,8 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
-        final RequestOptions options = RequestOptions.builder(
-                publishableKey,
-                stripeAccount,
-                RequestOptions.TYPE_QUERY)
-                .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                .build();
+        final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
+                RequestOptions.TYPE_QUERY).build();
 
         try {
             final String apiKey = options.getPublishableApiKey();
@@ -257,9 +250,7 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
         StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
-        final RequestOptions options = RequestOptions.builder(
-                publishableKey,
-                stripeAccount,
+        final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
         try {
@@ -316,14 +307,10 @@ class StripeApiHandler {
        final Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
        final RequestOptions options;
        if (stripeAccount == null) {
-           options = RequestOptions.builder(publishableKey)
-               .build();
+           options = RequestOptions.builder(publishableKey).build();
        } else {
-           options = RequestOptions.builder(
-               publishableKey,
-               stripeAccount,
-               RequestOptions.TYPE_QUERY)
-               .build();
+           options = RequestOptions.builder(publishableKey, stripeAccount,
+                   RequestOptions.TYPE_QUERY).build();
        }
        try {
            final StripeResponse response =
@@ -351,9 +338,7 @@ class StripeApiHandler {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
 
         StripeNetworkUtils.addUidParams(null, context, params);
-        final RequestOptions options = RequestOptions.builder(
-                publishableKey,
-                stripeAccount,
+        final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
         final String apiKey = options.getPublishableApiKey();
@@ -455,9 +440,7 @@ class StripeApiHandler {
                     context, productUsageTokens, publicKey, sourceType);
 
             // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                    .build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
             logApiCall(loggingParamsMap, loggingOptions, listener);
         }
 
@@ -465,9 +448,7 @@ class StripeApiHandler {
                 POST,
                 getAddCustomerSourceUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret)
-                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                        .build());
+                RequestOptions.builder(secret).build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Source.fromString(response.getResponseBody());
@@ -493,9 +474,7 @@ class StripeApiHandler {
                     LoggingUtils.getDeleteSourceParams(context, productUsageTokens, publicKey);
 
             // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                    .build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
             logApiCall(loggingParamsMap, loggingOptions, listener);
         }
 
@@ -503,9 +482,7 @@ class StripeApiHandler {
                 DELETE,
                 getDeleteCustomerSourceUrl(customerId, sourceId),
                 paramsMap,
-                RequestOptions.builder(secret)
-                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                        .build());
+                RequestOptions.builder(secret).build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Source.fromString(response.getResponseBody());
@@ -531,9 +508,7 @@ class StripeApiHandler {
 
         // Context can be nullable because this action is performed with only a weak reference
         if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                    .build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
             final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
                     context.getApplicationContext(),
@@ -550,9 +525,7 @@ class StripeApiHandler {
                 POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret)
-                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                        .build());
+                RequestOptions.builder(secret).build());
 
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -578,9 +551,7 @@ class StripeApiHandler {
 
         // Context can be nullable because this action is performed with only a weak reference
         if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey)
-                    .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                    .build();
+            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
             final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
                     context.getApplicationContext(),
@@ -597,9 +568,7 @@ class StripeApiHandler {
                 POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
-                RequestOptions.builder(secret)
-                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                        .build());
+                RequestOptions.builder(secret).build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
@@ -617,9 +586,7 @@ class StripeApiHandler {
                 GET,
                 getRetrieveCustomerUrl(customerId),
                 null,
-                RequestOptions.builder(secret)
-                        .setApiVersion(ApiVersion.DEFAULT_API_VERSION)
-                        .build());
+                RequestOptions.builder(secret).build());
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
     }
@@ -666,10 +633,7 @@ class StripeApiHandler {
         propertyMap.put("publisher", "Stripe");
         final JSONObject headerMappingObject = new JSONObject(propertyMap);
         headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
-
-        if (options != null && options.getApiVersion() != null) {
-            headers.put("Stripe-Version", options.getApiVersion());
-        }
+        headers.put("Stripe-Version", ApiVersion.DEFAULT_API_VERSION);
 
         if (options != null && options.getStripeAccount() != null) {
             headers.put("Stripe-Account", options.getStripeAccount());

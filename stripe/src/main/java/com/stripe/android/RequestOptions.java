@@ -18,7 +18,6 @@ public class RequestOptions {
     public static final String TYPE_QUERY = "source";
     public static final String TYPE_JSON = "json_data";
 
-    @Nullable private final String mApiVersion;
     @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
     @Nullable private final String mPublishableApiKey;
@@ -26,26 +25,16 @@ public class RequestOptions {
     @Nullable private final String mStripeAccount;
 
     private RequestOptions(
-            @Nullable String apiVersion,
             @Nullable String guid,
             @Nullable String idempotencyKey,
             @Nullable String publishableApiKey,
             @NonNull @RequestType String requestType,
             @Nullable String stripeAccount) {
-        mApiVersion = apiVersion;
         mGuid = guid;
         mIdempotencyKey = idempotencyKey;
         mPublishableApiKey = publishableApiKey;
         mRequestType = requestType;
         mStripeAccount = stripeAccount;
-    }
-
-    /**
-     * @return the API version for this request
-     */
-    @Nullable
-    String getApiVersion() {
-        return mApiVersion;
     }
 
     /**
@@ -123,7 +112,6 @@ public class RequestOptions {
      */
     public static final class RequestOptionsBuilder {
 
-        private String apiVersion;
         private String guid;
         private String idempotencyKey;
         private String publishableApiKey;
@@ -179,29 +167,6 @@ public class RequestOptions {
             return this;
         }
 
-        /**
-         * Setter for the API version for this set of {@link RequestOptions}. If not set,
-         * your account default API version is used.
-         *
-         * @param apiVersion the API version to use
-         * @return {@code this}, for chaining purposes
-         */
-        @NonNull
-        RequestOptionsBuilder setApiVersion(@Nullable String apiVersion) {
-            this.apiVersion = StripeTextUtils.isBlank(apiVersion)
-                    ? null
-                    : apiVersion;
-            return this;
-        }
-
-        /**
-         * Convenience method for {@link #setApiVersion(String)}
-         */
-        @NonNull
-        RequestOptionsBuilder setApiVersion(@Nullable ApiVersion apiVersion) {
-            return setApiVersion(apiVersion != null ? apiVersion.getCode() : null);
-        }
-
         @NonNull
         RequestOptionsBuilder setStripeAccount(@Nullable String stripeAccount) {
             this.stripeAccount = stripeAccount;
@@ -215,7 +180,6 @@ public class RequestOptions {
          */
         public RequestOptions build() {
             return new RequestOptions(
-                    this.apiVersion,
                     this.guid,
                     this.idempotencyKey,
                     this.publishableApiKey,

@@ -690,21 +690,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey, null);
-    }
-
-    /**
-     * See {@link #createAccountTokenSynchronous(AccountParams)}
-     */
-    @Nullable
-    @VisibleForTesting
-    Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams,
-                                        @NonNull final ApiVersion apiVersion)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey, apiVersion);
+        return createAccountTokenSynchronous(accountParams, mDefaultPublishableKey);
     }
 
     /**
@@ -730,18 +716,6 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createAccountTokenSynchronous(accountParams, publishableKey, null);
-    }
-
-    @Nullable
-    private Token createAccountTokenSynchronous(
-            @NonNull final AccountParams accountParams,
-            @Nullable String publishableKey,
-            @Nullable ApiVersion apiVersion)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
         String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
         if (apiKey == null) {
             return null;
@@ -749,7 +723,6 @@ public class Stripe {
         validateKey(publishableKey);
         RequestOptions requestOptions = RequestOptions.builder(
                 publishableKey, mStripeAccount, RequestOptions.TYPE_QUERY)
-                .setApiVersion(apiVersion)
                 .build();
         try {
             return StripeApiHandler.createToken(

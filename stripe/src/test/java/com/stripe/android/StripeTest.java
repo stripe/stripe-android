@@ -970,7 +970,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withValidAccountOnApi20170605_passesIntegrationTest()
+    public void createTokenSynchronous_withValidLegalEntity_passesIntegrationTest()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Address exampleAddress = new Address.Builder()
@@ -989,8 +989,7 @@ public class StripeTest {
         final TestLoggingListener listener = new TestLoggingListener(true);
         stripe.setLoggingResponseListener(listener);
         final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true, legalEntityData),
-                ApiVersion.getDefault());
+                AccountParams.createAccountParams(true, legalEntityData));
         assertNotNull(token);
         assertEquals(Token.TYPE_ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1000,15 +999,14 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withoutLegalEntityOnApi20170605_passesIntegrationTest()
+    public void createTokenSynchronous_withoutLegalEntity_passesIntegrationTest()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
         final TestLoggingListener listener = new TestLoggingListener(true);
         stripe.setLoggingResponseListener(listener);
         final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true, null),
-                ApiVersion.getDefault());
+                AccountParams.createAccountParams(true, null));
         assertNotNull(token);
         assertEquals(Token.TYPE_ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1018,7 +1016,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withIndividualEntityOnApi20190219_passesIntegrationTest()
+    public void createTokenSynchronous_withIndividualEntity_passesIntegrationTest()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Address exampleAddress = new Address
@@ -1038,8 +1036,7 @@ public class StripeTest {
         stripe.setLoggingResponseListener(listener);
         final Token token = stripe.createAccountTokenSynchronous(
                 AccountParams.createAccountParams(true,
-                        AccountParams.BusinessType.Individual, businessData),
-                ApiVersion.create("2019-02-19"));
+                        AccountParams.BusinessType.Individual, businessData));
         assertNotNull(token);
         assertEquals(Token.TYPE_ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1050,7 +1047,7 @@ public class StripeTest {
 
 
     @Test
-    public void createTokenSynchronous_withCompanyEntityOnApi20190219_passesIntegrationTest()
+    public void createTokenSynchronous_withCompanyEntity_passesIntegrationTest()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Address exampleAddress = new Address
@@ -1069,8 +1066,7 @@ public class StripeTest {
         stripe.setLoggingResponseListener(listener);
         final Token token = stripe.createAccountTokenSynchronous(
                 AccountParams.createAccountParams(true,
-                        AccountParams.BusinessType.Company, businessData),
-                ApiVersion.create("2019-02-19"));
+                        AccountParams.BusinessType.Company, businessData));
         assertNotNull(token);
         assertEquals(Token.TYPE_ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
