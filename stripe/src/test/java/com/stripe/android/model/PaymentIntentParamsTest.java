@@ -49,7 +49,7 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(sourceParams, params.getSourceParams());
-        assertFalse(params.shouldSaveToCustomer());
+        assertFalse(params.shouldSavePaymentMethod());
     }
 
     @Test
@@ -61,11 +61,11 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
-        assertFalse(params.shouldSaveToCustomer());
+        assertFalse(params.shouldSavePaymentMethod());
     }
 
     @Test
-    public void createConfirmPaymentIntentWithSourceIdParams_withSaveToCustomer_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithSourceIdParams_withSavePaymentMethod_hasExpectedFields() {
         final PaymentIntentParams params = PaymentIntentParams
                 .createConfirmPaymentIntentWithSourceIdParams(
                         TEST_SOURCE_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
@@ -73,7 +73,7 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
-        assertTrue(params.shouldSaveToCustomer());
+        assertTrue(params.shouldSavePaymentMethod());
 
         assertEquals(Boolean.TRUE,
                 params.toParamMap().get(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
@@ -89,7 +89,7 @@ public class PaymentIntentParamsTest {
         Assert.assertNull(params.getExtraParams());
         Assert.assertNull(params.getSourceId());
         Assert.assertNull(params.getSourceParams());
-        assertFalse(params.shouldSaveToCustomer());
+        assertFalse(params.shouldSavePaymentMethod());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
-        assertFalse(params.shouldSaveToCustomer());
+        assertFalse(params.shouldSavePaymentMethod());
     }
 
     @Test
@@ -116,11 +116,11 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
-        assertFalse(params.shouldSaveToCustomer());
+        assertFalse(params.shouldSavePaymentMethod());
     }
 
     @Test
-    public void createConfirmPaymentIntentWithPaymentMethodCreateParams_withSaveToCustomer_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithPaymentMethodCreateParams_withSavePaymentMethod_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
                         .build(), null);
@@ -131,11 +131,11 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
-        assertTrue(params.shouldSaveToCustomer());
+        assertTrue(params.shouldSavePaymentMethod());
     }
 
     @Test
-    public void createConfirmPaymentIntentWithPaymentMethodId_withSaveToCustomer_hasExpectedFields() {
+    public void createConfirmPaymentIntentWithPaymentMethodId_withSavePaymentMethod_hasExpectedFields() {
         final PaymentIntentParams params = PaymentIntentParams
                 .createConfirmPaymentIntentWithPaymentMethodId(
                         TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
@@ -143,7 +143,7 @@ public class PaymentIntentParamsTest {
         Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
         Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
         Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
-        assertTrue(params.shouldSaveToCustomer());
+        assertTrue(params.shouldSavePaymentMethod());
 
         assertEquals(Boolean.TRUE,
                 params.toParamMap().get(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
