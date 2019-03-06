@@ -59,15 +59,15 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
         return mObjectId;
     }
 
-    @Nullable
+    @NonNull
     static CustomerEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
-        return (CustomerEphemeralKey) AbstractEphemeralKey
+        return AbstractEphemeralKey
                 .fromString(rawJson, CustomerEphemeralKey.class);
     }
 
-    @Nullable
+    @NonNull
     static CustomerEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
-        return (CustomerEphemeralKey) AbstractEphemeralKey
+        return AbstractEphemeralKey
                 .fromJson(jsonObject, CustomerEphemeralKey.class);
     }
 }
