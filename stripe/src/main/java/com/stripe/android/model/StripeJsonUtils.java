@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * A set of JSON parsing utility functions.
  */
-class StripeJsonUtils {
+public class StripeJsonUtils {
 
     private static final String EMPTY = "";
     private static final String NULL = "null";
@@ -104,7 +104,7 @@ class StripeJsonUtils {
      * @return the value stored in the field, or {@code null} if the field isn't present
      */
     @Nullable
-    static String optString(
+    public static String optString(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName) {
         return nullIfNullOrEmpty(jsonObject.optString(fieldName));

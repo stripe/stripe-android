@@ -3,6 +3,8 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stripe.android.model.wallets.Wallet;
+import com.stripe.android.model.wallets.WalletFactory;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -451,7 +453,7 @@ public class PaymentMethod extends StripeJsonModel {
                     .setLast4(optString(cardJson, FIELD_LAST4))
                     .setThreeDSecureUsage(ThreeDSecureUsage
                             .fromJson(cardJson.optJSONObject(FIELD_THREE_D_SECURE_USAGE)))
-                    .setWallet(Wallet.fromJson(cardJson.optJSONObject(FIELD_WALLET)))
+                    .setWallet(new WalletFactory().create(cardJson.optJSONObject(FIELD_WALLET)))
                     .build();
         }
 
