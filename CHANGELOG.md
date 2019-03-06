@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### 8.5.0 2019-03-05
+* Clean up `PaymentIntent` [#805]
+* Pass `StripeError` in onError [#806]
+* Create `ErrorMessageTranslator` and default implementation [#807]
+* Make `StripeSourceTypeModel` public [#809]
+* Fix TalkBack crash in `CardInputWidget` [#817]
+* Fix account token failure on latest API version [#822]
+* Upgrade Android Gradle Plugin to 3.3.2 [#827]
+* Support save to customer param on `PaymentIntent` confirm [#828]
+* Add `"not_required"` as possible value of `Source` `redirect[status]` [#829]
+* Add `"recommended"` as possible value of `Source` `card[three_d_secure]` [#830]
+* Pin all Stripe requests to API version `2017-06-05` [#832]
+
 ### 8.4.0 2019-02-06
 * Add StripeError field to StripeException [#793]
 * Add support for creating a CVC update Token [#787]
