@@ -606,6 +606,16 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
                 null);
     }
 
+    @NonNull
+    public PaymentMethodCreateParams.Card toPaymentMethodParamsCard() {
+        return new PaymentMethodCreateParams.Card.Builder()
+                .setNumber(number)
+                .setCvc(cvc)
+                .setExpiryMonth(expMonth)
+                .setExpiryYear(expYear)
+                .build();
+    }
+
     /**
      * Checks whether {@code this} represents a valid card.
      *

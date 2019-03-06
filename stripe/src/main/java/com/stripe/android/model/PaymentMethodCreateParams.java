@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.Stripe;
+import com.stripe.android.utils.ObjectUtils;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -135,6 +136,24 @@ public class PaymentMethodCreateParams {
             this.mToken = builder.mToken;
         }
 
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(mNumber, mExpiryMonth, mExpiryYear, mCvc, mToken);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || (obj instanceof Card && typedEquals((Card) obj));
+        }
+
+        private boolean typedEquals(@NonNull Card card) {
+            return ObjectUtils.equals(mNumber, card.mNumber)
+                    && ObjectUtils.equals(mCvc, card.mCvc)
+                    && ObjectUtils.equals(mExpiryMonth, card.mExpiryMonth)
+                    && ObjectUtils.equals(mExpiryYear, card.mExpiryYear)
+                    && ObjectUtils.equals(mToken, card.mToken);
+        }
+
         @NonNull
         public Map<String, Object> toMap() {
             final Map<String, Object> map = new HashMap<>();
@@ -219,6 +238,20 @@ public class PaymentMethodCreateParams {
             final AbstractMap<String, Object> map = new HashMap<>();
             map.put(FIELD_BANK, mBank);
             return map;
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(mBank);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || (obj instanceof Ideal && typedEquals((Ideal) obj));
+        }
+
+        private boolean typedEquals(@NonNull Ideal ideal) {
+            return ObjectUtils.equals(mBank, ideal.mBank);
         }
 
         public static final class Builder {
