@@ -101,6 +101,8 @@ public class CustomerSession
 
     private static CustomerSession mInstance;
 
+    @NonNull private final StripeApiHandler mApiHandler;
+
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
@@ -180,6 +182,7 @@ public class CustomerSession
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 CustomerEphemeralKey.class);
+        mApiHandler = new StripeApiHandler();
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -657,7 +660,7 @@ public class CustomerSession
     }
 
     @Nullable
-    private static Source addCustomerSourceWithKey(
+    private Source addCustomerSourceWithKey(
             @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
@@ -674,7 +677,7 @@ public class CustomerSession
                     sourceType,
                     key.getSecret());
         } else {
-            return StripeApiHandler.addCustomerSource(
+            return mApiHandler.addCustomerSource(
                     contextRef.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -687,7 +690,7 @@ public class CustomerSession
     }
 
     @Nullable
-    private static Source deleteCustomerSourceWithKey(
+    private Source deleteCustomerSourceWithKey(
             @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
@@ -702,7 +705,7 @@ public class CustomerSession
                     sourceId,
                     key.getSecret());
         } else {
-            return StripeApiHandler.deleteCustomerSource(
+            return mApiHandler.deleteCustomerSource(
                     contextRef.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -714,7 +717,7 @@ public class CustomerSession
     }
 
     @Nullable
-    private static Customer setCustomerShippingInfoWithKey(
+    private Customer setCustomerShippingInfoWithKey(
             @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
@@ -729,7 +732,7 @@ public class CustomerSession
                     shippingInformation,
                     key.getSecret());
         } else {
-            return StripeApiHandler.setCustomerShippingInfo(
+            return mApiHandler.setCustomerShippingInfo(
                     contextRef.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -741,7 +744,7 @@ public class CustomerSession
     }
 
     @Nullable
-    private static Customer setCustomerSourceDefaultWithKey(
+    private Customer setCustomerSourceDefaultWithKey(
             @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
             @NonNull List<String> productUsageTokens,
@@ -758,7 +761,7 @@ public class CustomerSession
                     sourceType,
                     key.getSecret());
         } else {
-            return StripeApiHandler.setDefaultCustomerSource(
+            return mApiHandler.setDefaultCustomerSource(
                     contextRef.get(),
                     key.getCustomerId(),
                     PaymentConfiguration.getInstance().getPublishableKey(),
@@ -781,13 +784,13 @@ public class CustomerSession
      * @return a {@link Customer} if one can be found with this key, or {@code null} if one cannot.
      */
     @Nullable
-    private static Customer retrieveCustomerWithKey(
+    private Customer retrieveCustomerWithKey(
             @NonNull CustomerEphemeralKey key,
             @Nullable StripeApiProxy proxy) throws StripeException {
         if (proxy != null) {
             return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
         } else {
-            return StripeApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
+            return mApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
         }
     }
 
