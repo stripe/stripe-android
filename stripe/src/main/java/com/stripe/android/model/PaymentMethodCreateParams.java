@@ -119,26 +119,45 @@ public class PaymentMethodCreateParams {
         private static final String FIELD_EXP_MONTH = "exp_month";
         private static final String FIELD_EXP_YEAR = "exp_year";
         private static final String FIELD_CVC = "cvc";
+        private static final String FIELD_TOKEN = "token";
 
         @Nullable private final String mNumber;
         @Nullable private final Integer mExpiryMonth;
         @Nullable private final Integer mExpiryYear;
         @Nullable private final String mCvc;
+        @Nullable private final String mToken;
 
         private Card(@NonNull Card.Builder builder) {
             this.mNumber = builder.mNumber;
             this.mExpiryMonth = builder.mExpiryMonth;
             this.mExpiryYear = builder.mExpiryYear;
             this.mCvc = builder.mCvc;
+            this.mToken = builder.mToken;
         }
 
         @NonNull
         public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> map = new HashMap<>();
-            map.put(FIELD_NUMBER, mNumber);
-            map.put(FIELD_EXP_MONTH, mExpiryMonth);
-            map.put(FIELD_EXP_YEAR, mExpiryYear);
-            map.put(FIELD_CVC, mCvc);
+            final Map<String, Object> map = new HashMap<>();
+            if (mNumber != null) {
+                map.put(FIELD_NUMBER, mNumber);
+            }
+
+            if (mExpiryMonth != null) {
+                map.put(FIELD_EXP_MONTH, mExpiryMonth);
+            }
+
+            if (mExpiryYear != null) {
+                map.put(FIELD_EXP_YEAR, mExpiryYear);
+            }
+
+            if (mCvc != null) {
+                map.put(FIELD_CVC, mCvc);
+            }
+
+            if (mToken != null) {
+                map.put(FIELD_TOKEN, mToken);
+            }
+
             return map;
         }
 
@@ -147,6 +166,7 @@ public class PaymentMethodCreateParams {
             @Nullable private Integer mExpiryMonth;
             @Nullable private Integer mExpiryYear;
             @Nullable private String mCvc;
+            @Nullable private String mToken;
 
             @NonNull
             public Builder setNumber(@Nullable String number) {
@@ -169,6 +189,12 @@ public class PaymentMethodCreateParams {
             @NonNull
             public Builder setCvc(@Nullable String cvc) {
                 this.mCvc = cvc;
+                return this;
+            }
+
+            @NonNull
+            public Builder setToken(@Nullable String token) {
+                this.mToken = token;
                 return this;
             }
 

@@ -69,26 +69,19 @@ public class StripeTest {
     private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
     private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
 
-    private BankAccount mBankAccount;
-    private Card mCard;
-    private int mYear;
+    private static final int YEAR = Calendar.getInstance().get(Calendar.YEAR) + 1;
+    private static final Card CARD = new Card(TEST_CARD_NUMBER, 12, YEAR, "123");
+    private static final BankAccount BANK_ACCOUNT = new BankAccount(
+            TEST_BANK_ACCOUNT_NUMBER,
+            "US",
+            "usd",
+            TEST_BANK_ROUTING_NUMBER);
 
     private Context mContext;
 
     @Before
     public void setup() {
         mContext = ApplicationProvider.getApplicationContext();
-        String cvc = "123";
-        int month = 12;
-        Calendar rightNow = Calendar.getInstance();
-        // Try to make the test card always expire next year
-        mYear = rightNow.get(Calendar.YEAR) + 1;
-        mCard = new Card(TEST_CARD_NUMBER, month, mYear, cvc);
-        mBankAccount = new BankAccount(
-                TEST_BANK_ACCOUNT_NUMBER,
-                "US",
-                "usd",
-                TEST_BANK_ROUTING_NUMBER);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -227,17 +220,17 @@ public class StripeTest {
             TestLoggingListener listener = new TestLoggingListener(true);
             stripe.setLoggingResponseListener(listener);
 
-            Token token = stripe.createTokenSynchronous(mCard);
+            Token token = stripe.createTokenSynchronous(CARD);
 
             assertNotNull(token);
             Card returnedCard = token.getCard();
             assertNotNull(returnedCard);
             assertNull(token.getBankAccount());
             assertEquals(Token.TYPE_CARD, token.getType());
-            assertEquals(mCard.getLast4(), returnedCard.getLast4());
+            assertEquals(CARD.getLast4(), returnedCard.getLast4());
             assertEquals(Card.VISA, returnedCard.getBrand());
-            assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
-            assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
+            assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
+            assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
             assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
 
             assertAllLogsAreValid(listener, 2);
@@ -257,17 +250,17 @@ public class StripeTest {
             TestLoggingListener listener = new TestLoggingListener(true);
             stripe.setLoggingResponseListener(listener);
 
-            Token token = stripe.createTokenSynchronous(mCard);
+            Token token = stripe.createTokenSynchronous(CARD);
 
             assertNotNull(token);
             Card returnedCard = token.getCard();
             assertNotNull(returnedCard);
             assertNull(token.getBankAccount());
             assertEquals(Token.TYPE_CARD, token.getType());
-            assertEquals(mCard.getLast4(), returnedCard.getLast4());
+            assertEquals(CARD.getLast4(), returnedCard.getLast4());
             assertEquals(Card.VISA, returnedCard.getBrand());
-            assertEquals(mCard.getExpYear(), returnedCard.getExpYear());
-            assertEquals(mCard.getExpMonth(), returnedCard.getExpMonth());
+            assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
+            assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
             assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
 
             assertAllLogsAreValid(listener, 2);
@@ -286,7 +279,7 @@ public class StripeTest {
             TestLoggingListener listener = new TestLoggingListener(true);
             stripe.setLoggingResponseListener(listener);
 
-            Token token = stripe.createTokenSynchronous(mCard);
+            Token token = stripe.createTokenSynchronous(CARD);
 
             assertNotNull(token);
             SourceParams sourceParams = SourceParams.createCustomParams();
@@ -310,7 +303,7 @@ public class StripeTest {
             Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             TestLoggingListener listener = new TestLoggingListener(true);
             stripe.setLoggingResponseListener(listener);
-            Token token = stripe.createTokenSynchronous(mCard);
+            Token token = stripe.createTokenSynchronous(CARD);
             assertNotNull(token);
 
             SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
@@ -332,7 +325,7 @@ public class StripeTest {
         try {
             Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
 
-            Token token = stripe.createBankAccountTokenSynchronous(mBankAccount);
+            Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
             assertNotNull(token);
             assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
             assertNull(token.getCard());
@@ -341,9 +334,9 @@ public class StripeTest {
             String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
                     .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
             assertEquals(expectedLast4, returnedBankAccount.getLast4());
-            assertEquals(mBankAccount.getCountryCode(), returnedBankAccount.getCountryCode());
-            assertEquals(mBankAccount.getCurrency(), returnedBankAccount.getCurrency());
-            assertEquals(mBankAccount.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
+            assertEquals(BANK_ACCOUNT.getCountryCode(), returnedBankAccount.getCountryCode());
+            assertEquals(BANK_ACCOUNT.getCurrency(), returnedBankAccount.getCurrency());
+            assertEquals(BANK_ACCOUNT.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
         } catch (AuthenticationException authEx) {
             fail("Unexpected error: " + authEx.getLocalizedMessage());
         } catch (StripeException stripeEx) {
@@ -1126,7 +1119,7 @@ public class StripeTest {
         try {
             // This key won't work for a real connection to the api.
             Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
-            stripe.createTokenSynchronous(mCard);
+            stripe.createTokenSynchronous(CARD);
             fail("Expecting an error, but did not get one.");
         } catch (AuthenticationException authEx) {
             String message = authEx.getMessage();
@@ -1143,7 +1136,7 @@ public class StripeTest {
         TestLoggingListener listener = new TestLoggingListener(true);
         stripe.setLoggingResponseListener(listener);
         try {
-            stripe.createTokenSynchronous(mCard);
+            stripe.createTokenSynchronous(CARD);
             fail("We shouldn't be able to make a token without a key.");
         } catch (Exception exception) {
             // Note: we're not testing the type of exception in this test.
@@ -1156,7 +1149,7 @@ public class StripeTest {
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
         try {
             // This card is missing quite a few numbers.
-            Card card = new Card("42424242", 12, mYear, "123");
+            Card card = new Card("42424242", 12, YEAR, "123");
             Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
             Token token = stripe.createTokenSynchronous(card);
             fail("Expecting an exception, but created a token instead: " + token.toString());
@@ -1238,6 +1231,38 @@ public class StripeTest {
         assertEquals(expectedCard, createdPaymentMethod.card);
     }
 
+    @Test
+    public void createPaymentMethod_withCardToken()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException {
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final Token token = stripe.createTokenSynchronous(CARD);
+
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                        new PaymentMethodCreateParams.Card.Builder()
+                                .setToken(token.getId())
+                                .build(), null);
+        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(createdPaymentMethod);
+
+        final PaymentMethod.Card expectedPaymentMethodCard = new PaymentMethod.Card.Builder()
+                .setBrand("visa")
+                .setCountry("US")
+                .setExpiryMonth(12)
+                .setExpiryYear(2020)
+                .setFunding("credit")
+                .setLast4("4242")
+                .setChecks(new PaymentMethod.Card.Checks.Builder()
+                        .setCvcCheck("unchecked")
+                        .build())
+                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
+                        .setSupported(true)
+                        .build())
+                .build();
+        assertEquals(expectedPaymentMethodCard, createdPaymentMethod.card);
+    }
 
     @Test
     public void createPaymentMethodSynchronous_withCardAndMetadata()
