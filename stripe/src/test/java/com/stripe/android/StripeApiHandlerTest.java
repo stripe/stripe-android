@@ -15,6 +15,7 @@ import com.stripe.android.model.SourceParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,42 +42,49 @@ public class StripeApiHandlerTest {
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
             "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
 
+    private StripeApiHandler mApiHandler;
+
+    @Before
+    public void before() {
+        mApiHandler = new StripeApiHandler();
+    }
+
     @Test
     public void testGetApiUrl() {
-        String tokensApi = StripeApiHandler.getTokensUrl();
+        String tokensApi = mApiHandler.getTokensUrl();
         assertEquals("https://api.stripe.com/v1/tokens", tokensApi);
     }
 
     @Test
     public void testGetSourcesUrl() {
-        String sourcesUrl = StripeApiHandler.getSourcesUrl();
+        String sourcesUrl = mApiHandler.getSourcesUrl();
         assertEquals("https://api.stripe.com/v1/sources", sourcesUrl);
     }
 
     @Test
     public void testGetRetrieveSourceUrl() {
-        String sourceUrlWithId = StripeApiHandler.getRetrieveSourceApiUrl("abc123");
+        String sourceUrlWithId = mApiHandler.getRetrieveSourceApiUrl("abc123");
         assertEquals("https://api.stripe.com/v1/sources/abc123", sourceUrlWithId);
     }
 
     @Test
     public void testGetRequestTokenApiUrl() {
         String tokenId = "tok_sample";
-        String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
+        String requestApi = mApiHandler.getRetrieveTokenApiUrl(tokenId);
         assertEquals("https://api.stripe.com/v1/tokens/" + tokenId, requestApi);
     }
 
     @Test
     public void testGetRetrieveCustomerUrl() {
         String customerId = "cus_123abc";
-        String customerRequestUrl = StripeApiHandler.getRetrieveCustomerUrl(customerId);
+        String customerRequestUrl = mApiHandler.getRetrieveCustomerUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId, customerRequestUrl);
     }
 
     @Test
     public void testGetAddCustomerSourceUrl() {
         String customerId = "cus_123abc";
-        String addSourceUrl = StripeApiHandler.getAddCustomerSourceUrl(customerId);
+        String addSourceUrl = mApiHandler.getAddCustomerSourceUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources",
                 addSourceUrl);
     }
@@ -85,7 +93,7 @@ public class StripeApiHandlerTest {
     public void testGetDeleteCustomerSourceUrl() {
         String customerId = "cus_123abc";
         String sourceId = "src_456xyz";
-        String deleteSourceUrl = StripeApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
+        String deleteSourceUrl = mApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources/" + sourceId,
                 deleteSourceUrl);
     }
@@ -99,7 +107,7 @@ public class StripeApiHandlerTest {
                 .setIdempotencyKey(idempotencyKey)
                 .setStripeAccount(stripeAccount)
                 .build();
-        Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
+        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
 
         assertNotNull(headerMap);
         assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
@@ -112,7 +120,7 @@ public class StripeApiHandlerTest {
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         final RequestOptions requestOptions = RequestOptions.builder("some_key")
                 .build();
-        Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
+        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
 
         assertNotNull(headerMap);
         assertFalse(headerMap.containsKey("Idempotency-Key"));
@@ -124,7 +132,7 @@ public class StripeApiHandlerTest {
     @Test
     public void getHeaders_containsPropertyMapValues() {
         RequestOptions requestOptions = RequestOptions.builder("some_key").build();
-        Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
+        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
 
         assertNotNull(headerMap);
         String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
@@ -143,7 +151,7 @@ public class StripeApiHandlerTest {
     @Test
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
         RequestOptions requestOptions = RequestOptions.builder("some_key").build();
-        Map<String, String> headerMap = StripeApiHandler.getHeaders(requestOptions);
+        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
         assertNotNull(headerMap);
 
         final String expectedUserAgent =
@@ -161,7 +169,7 @@ public class StripeApiHandlerTest {
         String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
         try {
-            String query = StripeApiHandler.createQuery(cardMap);
+            String query = mApiHandler.createQuery(cardMap);
             assertEquals(expectedValue, query);
         } catch (UnsupportedEncodingException unsupportedCodingException) {
             fail("Encoding error with card object");
@@ -191,7 +199,7 @@ public class StripeApiHandlerTest {
             };
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSource(
+            Source source = mApiHandler.createSource(
                     provider,
                     ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
@@ -237,7 +245,7 @@ public class StripeApiHandlerTest {
 
             final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSource(
+            Source source = mApiHandler.createSource(
                     provider,
                     ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
@@ -281,7 +289,7 @@ public class StripeApiHandlerTest {
                     clientSecret,
                     null
             );
-            PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
+            PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                     null,
                     ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
@@ -309,7 +317,7 @@ public class StripeApiHandlerTest {
                     clientSecret,
                     null
             );
-            PaymentIntent paymentIntent = StripeApiHandler.confirmPaymentIntent(
+            PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                     null,
                     ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
@@ -334,7 +342,7 @@ public class StripeApiHandlerTest {
             PaymentIntentParams paymentIntentParams = PaymentIntentParams.createRetrievePaymentIntentParams(
                     clientSecret
             );
-            PaymentIntent paymentIntent = StripeApiHandler.retrievePaymentIntent(
+            PaymentIntent paymentIntent = mApiHandler.retrievePaymentIntent(
                     ApplicationProvider.getApplicationContext(),
                     paymentIntentParams,
                     publicKey,
@@ -355,7 +363,7 @@ public class StripeApiHandlerTest {
             TestLoggingListener testLoggingListener = new TestLoggingListener(false);
 
             Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = StripeApiHandler.createSource(
+            Source source = mApiHandler.createSource(
                     null,
                     ApplicationProvider.getApplicationContext(),
                     SourceParams.createCardParams(card),
