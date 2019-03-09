@@ -1,12 +1,11 @@
 package com.stripe.android.view;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;

@@ -1,8 +1,8 @@
 package com.stripe.android.view;
 
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 
-import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;

@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
-import com.google.android.material.textfield.TextInputLayout;
+import android.support.design.widget.TextInputLayout;
+
 import com.stripe.android.R;
 
 import org.junit.Test;

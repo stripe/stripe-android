@@ -2,9 +2,8 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;

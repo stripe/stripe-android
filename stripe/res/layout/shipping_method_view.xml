@@ -46,7 +46,7 @@
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
         />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/iv_selected_icon"
         android:layout_width="@dimen/shipping_check_icon_width"
         android:layout_height="wrap_content"

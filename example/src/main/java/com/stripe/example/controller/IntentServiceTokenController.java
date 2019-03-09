@@ -5,13 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Button;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.view.CardInputWidget;
@@ -32,7 +30,7 @@ public class IntentServiceTokenController {
     @Nullable private TokenBroadcastReceiver mTokenBroadcastReceiver;
 
     public IntentServiceTokenController (
-            @NonNull AppCompatActivity appCompatActivity,
+            @NonNull Activity appCompatActivity,
             @NonNull Button button,
             @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
