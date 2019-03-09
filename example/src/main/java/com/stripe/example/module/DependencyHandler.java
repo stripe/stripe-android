@@ -1,12 +1,12 @@
 package com.stripe.example.module;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.view.CardInputWidget;
@@ -56,7 +56,7 @@ public class DependencyHandler {
      * @return a reference to the {@link AsyncTaskTokenController}
      */
     @NonNull
-    public AsyncTaskTokenController attachAsyncTaskTokenController(Button button) {
+    public AsyncTaskTokenController attachAsyncTaskTokenController(@NonNull Button button) {
         if (mAsyncTaskController == null) {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
@@ -80,11 +80,11 @@ public class DependencyHandler {
      */
     @NonNull
     public IntentServiceTokenController attachIntentServiceTokenController(
-            AppCompatActivity appCompatActivity,
-            Button button) {
+            @NonNull Activity activity,
+            @NonNull Button button) {
         if (mIntentServiceTokenController == null) {
             mIntentServiceTokenController = new IntentServiceTokenController(
-                    appCompatActivity,
+                    activity,
                     button,
                     mCardInputWidget,
                     mErrorDialogHandler,

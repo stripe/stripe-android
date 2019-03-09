@@ -1,11 +1,11 @@
 package com.stripe.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
@@ -55,7 +55,7 @@ public class PaymentSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
-    private AppCompatActivity mActivity;
+    private Activity mActivity;
     @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
 
     @NonNull

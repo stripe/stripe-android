@@ -2,10 +2,9 @@ package com.stripe.example.controller;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-import androidx.annotation.NonNull;
 
 import com.stripe.android.model.Token;
 import com.stripe.example.R;

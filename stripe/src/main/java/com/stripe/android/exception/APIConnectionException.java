@@ -1,6 +1,6 @@
 package com.stripe.android.exception;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * An {@link Exception} that represents a failure to connect to Stripe's API.

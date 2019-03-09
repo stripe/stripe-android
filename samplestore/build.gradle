@@ -10,7 +10,7 @@ android {
         targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     lintOptions {
@@ -29,9 +29,9 @@ android {
 dependencies {
     implementation project(':stripe')
 
-    implementation "androidx.appcompat:appcompat:${rootProject.ext.androidxAppCompatVersion}"
-    implementation "androidx.recyclerview:recyclerview:${rootProject.ext.androidxRecyclerViewVersion}"
-    implementation "com.google.android.material:material:${rootProject.ext.androidxMaterialVersion}"
+    implementation "com.android.support:appcompat-v7:28.0.0"
+    implementation "com.android.support:recyclerview-v7:28.0.0"
+    implementation "com.android.support:design:28.0.0"
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex:rxandroid:1.2.1'
@@ -41,7 +41,7 @@ dependencies {
     implementation 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:1.15.0'
+    implementation 'com.squareup.okio:okio:1.17.2'
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/

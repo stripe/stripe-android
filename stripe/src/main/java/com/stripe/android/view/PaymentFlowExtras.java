@@ -8,5 +8,4 @@ public class PaymentFlowExtras {
     public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
     public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
     public static final String EXTRA_VALID_SHIPPING_METHODS = "valid_shipping_methods";
-
 }
