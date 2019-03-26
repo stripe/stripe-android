@@ -8,6 +8,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
@@ -41,6 +42,7 @@ public class PaymentSession {
      */
     public PaymentSession(@NonNull Activity hostActivity) {
         mHostActivity = hostActivity;
+        PaymentConfiguration.getInstance().setRequiredBillingAddressFields(Address.RequiredBillingAddressFields.ZIP);
         mPaymentSessionData = new PaymentSessionData();
     }
 

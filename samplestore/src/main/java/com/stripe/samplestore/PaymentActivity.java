@@ -102,6 +102,7 @@ public class PaymentActivity extends AppCompatActivity {
         updateConfirmPaymentButton();
         mEnterShippingInfo = findViewById(R.id.shipping_info);
         mEnterPaymentInfo = findViewById(R.id.payment_source);
+
         RxView.clicks(mEnterShippingInfo)
                 .subscribe(new Action1<Void>() {
                     @Override

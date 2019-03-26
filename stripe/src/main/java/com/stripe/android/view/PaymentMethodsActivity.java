@@ -72,7 +72,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         Intent addSourceIntent = AddSourceActivity.newIntent(
                                 PaymentMethodsActivity.this,
-                                false,
+                                true,
                                 true);
                         if (mStartedFromPaymentSession) {
                             addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
