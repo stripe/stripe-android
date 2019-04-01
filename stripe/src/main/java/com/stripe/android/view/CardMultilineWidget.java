@@ -60,30 +60,33 @@ public class CardMultilineWidget extends LinearLayout {
     private boolean mIsEnabled;
     private boolean mShouldShowPostalCode;
     private boolean mHasAdjustedDrawable;
+    @Nullable private String mCustomCvcLabel;
 
     private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
 
-    public CardMultilineWidget(Context context) {
-        super(context);
-        initView(null);
+    public CardMultilineWidget(@NonNull Context context) {
+        this(context, null);
     }
 
-    public CardMultilineWidget(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView(attrs);
+    public CardMultilineWidget(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public CardMultilineWidget(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        initView(attrs);
+    public CardMultilineWidget(@NonNull Context context, @Nullable AttributeSet attrs,
+                               int defStyleAttr) {
+        this(context, attrs, defStyleAttr, false);
     }
 
     @VisibleForTesting
-    CardMultilineWidget(Context context, boolean shouldShowPostalCode) {
-        super(context);
-        mShouldShowPostalCode = shouldShowPostalCode;
-        initView(null);
+    CardMultilineWidget(@NonNull Context context, boolean shouldShowPostalCode) {
+        this(context, null, 0, shouldShowPostalCode);
+    }
+
+    private CardMultilineWidget(@NonNull Context context, @Nullable AttributeSet attrs,
+                                int defStyleAttr, boolean shouldShowPostalCode) {
+        super(context, attrs, defStyleAttr);
+        initView(attrs, shouldShowPostalCode);
     }
 
     /**
@@ -168,6 +171,14 @@ public class CardMultilineWidget extends LinearLayout {
         if (hasWindowFocus) {
             updateBrand(mCardBrand);
         }
+    }
+
+    /**
+     * Set an optional CVC field label to override defaults. Set to `null` to use defaults.
+     */
+    public void setCvcLabel(@Nullable String cvcLabel) {
+        mCustomCvcLabel = cvcLabel;
+        updateCvc();
     }
 
     public void setShouldShowPostalCode(boolean shouldShowPostalCode) {
@@ -338,7 +349,9 @@ public class CardMultilineWidget extends LinearLayout {
         return pixels.intValue();
     }
 
-    private void initView(AttributeSet attrs) {
+    private void initView(@Nullable AttributeSet attrs, boolean shouldShowPostalCode) {
+        mShouldShowPostalCode = shouldShowPostalCode;
+
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.card_multiline_widget, this);
 
@@ -500,8 +513,7 @@ public class CardMultilineWidget extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     flipToCvcIconIfNotFinished();
-                    @StringRes int helperText = getCvcHelperText();
-                    mCvcEditText.setHintDelayed(helperText, COMMON_HINT_DELAY);
+                    mCvcEditText.setHintDelayed(getCvcHelperText(), COMMON_HINT_DELAY);
                     if (mCardInputListener != null) {
                         mCardInputListener.onFocusChange(FOCUS_CVC);
                     }
@@ -551,23 +563,25 @@ public class CardMultilineWidget extends LinearLayout {
 
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
-        updateCvc(mCardBrand);
+        updateCvc();
         updateDrawable(BRAND_RESOURCE_MAP.get(brand), Card.UNKNOWN.equals(brand));
     }
 
-    private void updateCvc(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
-            mCvcEditText.setFilters(
-                    new InputFilter[]{
-                            new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)
-                    });
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_amex_hint));
-        } else {
-            mCvcEditText.setFilters(
-                    new InputFilter[]{
-                            new InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON)});
-            mCvcTextInputLayout.setHint(getResources().getString(R.string.cvc_number_hint));
+    private void updateCvc() {
+        final int maxLength = Card.AMERICAN_EXPRESS.equals(mCardBrand) ?
+                Card.CVC_LENGTH_AMERICAN_EXPRESS : Card.CVC_LENGTH_COMMON;
+        mCvcEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
+        mCvcTextInputLayout.setHint(getCvcLabel());
+    }
+
+    @NonNull
+    private String getCvcLabel() {
+        if (mCustomCvcLabel != null) {
+            return mCustomCvcLabel;
         }
+
+        return getResources().getString(Card.AMERICAN_EXPRESS.equals(mCardBrand) ?
+                R.string.cvc_amex_hint : R.string.cvc_number_hint);
     }
 
     private void updateDrawable(@DrawableRes int iconResourceId, boolean needsTint) {

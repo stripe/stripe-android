@@ -81,7 +81,7 @@ public class AddSourceActivityTest {
         mActivityController = Robolectric.buildActivity(AddSourceActivity.class)
                 .create().start().resume().visible();
         final AddSourceActivity addSourceActivity = mActivityController.get();
-        mCardMultilineWidget =addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
+        mCardMultilineWidget = addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = addSourceActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
