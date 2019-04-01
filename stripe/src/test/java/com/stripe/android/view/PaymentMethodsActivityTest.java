@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.view.MenuItem;
 import android.view.View;
@@ -95,9 +96,8 @@ public class PaymentMethodsActivityTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        Intent intent = PaymentMethodsActivity.newIntent(ApplicationProvider.getApplicationContext())
-                .putExtra(EXTRA_PROXY_DELAY, true);
-        mPaymentMethodsActivity = createActivity(intent);
+        mPaymentMethodsActivity = createActivity(createIntent()
+                .putExtra(EXTRA_PROXY_DELAY, true));
         mPaymentMethodsActivity.setCustomerSessionProxy(mCustomerSessionProxy);
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
 
@@ -163,11 +163,9 @@ public class PaymentMethodsActivityTest {
 
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
-        Intent intent = PaymentMethodsActivity
-                .newIntent(ApplicationProvider.getApplicationContext())
+        mPaymentMethodsActivity = createActivity(createIntent()
                 .putExtra(EXTRA_PROXY_DELAY, true)
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mPaymentMethodsActivity = createActivity(intent);
+                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true));
         mPaymentMethodsActivity.setCustomerSessionProxy(mCustomerSessionProxy);
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
 
@@ -329,5 +327,11 @@ public class PaymentMethodsActivityTest {
                 .resume()
                 .visible()
                 .get();
+    }
+
+    @NonNull
+    private Intent createIntent() {
+        return new PaymentMethodsActivityStarter(Robolectric.buildActivity(Activity.class).get())
+                .newIntent();
     }
 }

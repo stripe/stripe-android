@@ -1,5 +1,6 @@
 package com.stripe.samplestore;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -48,12 +49,12 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
-import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_DEFAULT_SHIPPING_METHOD;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_SHIPPING_INFO_DATA;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_METHODS;
+import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
+import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -76,10 +77,10 @@ public class PaymentActivity extends AppCompatActivity {
     private StoreCart mStoreCart;
     private long mShippingCosts = 0L;
 
-    public static Intent createIntent(@NonNull Context context, @NonNull StoreCart cart) {
-        Intent intent = new Intent(context, PaymentActivity.class);
-        intent.putExtra(EXTRA_CART, cart);
-        return intent;
+    @NonNull
+    public static Intent createIntent(@NonNull Activity activity, @NonNull StoreCart cart) {
+        return new Intent(activity, PaymentActivity.class)
+                .putExtra(EXTRA_CART, cart);
     }
 
     @Override
@@ -133,22 +134,30 @@ public class PaymentActivity extends AppCompatActivity {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                ShippingInformation shippingInformation = intent.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA);
-                Intent shippingInfoProcessedIntent = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
-                if (shippingInformation.getAddress() == null ||
-                        !shippingInformation.getAddress().getCountry().equals(Locale.US.getCountry())) {
+                final ShippingInformation shippingInformation = intent
+                        .getParcelableExtra(EXTRA_SHIPPING_INFO_DATA);
+                final Intent shippingInfoProcessedIntent =
+                        new Intent(EVENT_SHIPPING_INFO_PROCESSED);
+                if (!isShippingInfoValid(shippingInformation)) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 } else {
                     ArrayList<ShippingMethod> shippingMethods = getValidShippingMethods(shippingInformation);
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
                     shippingInfoProcessedIntent.putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
-                    shippingInfoProcessedIntent.putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.get(0));
+                    shippingInfoProcessedIntent
+                            .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.get(0));
                 }
-                LocalBroadcastManager.getInstance(PaymentActivity.this).sendBroadcast(shippingInfoProcessedIntent);
+                LocalBroadcastManager.getInstance(PaymentActivity.this)
+                        .sendBroadcast(shippingInfoProcessedIntent);
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
+    }
+
+    private boolean isShippingInfoValid(@NonNull ShippingInformation shippingInfo) {
+        return shippingInfo.getAddress() != null &&
+                Locale.US.getCountry().equals(shippingInfo.getAddress().getCountry());
     }
 
     /*

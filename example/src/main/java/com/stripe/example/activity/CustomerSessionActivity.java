@@ -17,6 +17,7 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.PaymentMethodsActivityStarter;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
@@ -82,7 +83,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
     }
 
     private void launchWithCustomer() {
-        startActivityForResult(PaymentMethodsActivity.newIntent(this), REQUEST_CODE_SELECT_SOURCE);
+        new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
     }
 
     @Override

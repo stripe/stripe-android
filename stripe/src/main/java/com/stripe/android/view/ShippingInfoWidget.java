@@ -108,15 +108,16 @@ public class ShippingInfoWidget extends LinearLayout {
             return null;
         }
 
-        Address address = new Address.Builder().setCity(mCityEditText.getText().toString())
-                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode()).setLine1
-                        (mAddressEditText.getText().toString()).setLine2
-                        (mAddressEditText2.getText().toString()).setPostalCode
-                        (mPostalCodeEditText.getText().toString()).setState(mStateEditText
-                        .getText().toString()).build();
-        ShippingInformation shippingInformation = new ShippingInformation(address, mNameEditText
-                .getText().toString(), mPhoneNumberEditText.getText().toString());
-        return shippingInformation;
+        final Address address = new Address.Builder()
+                .setCity(mCityEditText.getText().toString())
+                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode())
+                .setLine1(mAddressEditText.getText().toString())
+                .setLine2(mAddressEditText2.getText().toString())
+                .setPostalCode(mPostalCodeEditText.getText().toString())
+                .setState(mStateEditText.getText().toString())
+                .build();
+        return new ShippingInformation(address, mNameEditText.getText().toString(),
+                mPhoneNumberEditText.getText().toString());
     }
 
     /**

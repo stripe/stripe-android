@@ -130,7 +130,7 @@ abstract class StripeActivity extends AppCompatActivity {
             mAlertMessageListener.onAlertMessageDisplayed(error);
         }
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setMessage(error)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -139,8 +139,8 @@ abstract class StripeActivity extends AppCompatActivity {
                         dialogInterface.dismiss();
                     }
                 })
-                .create();
-        alertDialog.show();
+                .create()
+                .show();
     }
 
     interface AlertMessageListener {
