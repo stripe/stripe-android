@@ -3,6 +3,8 @@ package com.stripe.android;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
@@ -41,6 +43,8 @@ public class StripeApiHandlerTest {
 
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
             "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+
+    private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "stripe-account";
 
     private StripeApiHandler mApiHandler;
 
@@ -223,58 +227,56 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void createSource_withConnectAccount_keepsHeaderInAccount() {
-        try {
-            // This is the one and only test where we actually log something, because
-            // we are testing whether or not we log.
-            TestLoggingListener testLoggingListener = new TestLoggingListener(true);
-            TestStripeResponseListener testStripeResponseListener =
-                    new TestStripeResponseListener();
+    public void createSource_withConnectAccount_keepsHeaderInAccount()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        // This is the one and only test where we actually log something, because
+        // we are testing whether or not we log.
+        TestLoggingListener testLoggingListener = new TestLoggingListener(true);
+        TestStripeResponseListener testStripeResponseListener =
+                new TestStripeResponseListener();
 
-            StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
-                @Override
-                public String getUid() {
-                    return "abc123";
-                }
+        StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
+            @Override
+            public String getUid() {
+                return "abc123";
+            }
 
-                @Override
-                public String getPackageName() {
-                    return "com.example.main";
-                }
-            };
+            @Override
+            public String getPackageName() {
+                return "com.example.main";
+            }
+        };
 
-            final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-            Card card = new Card("4242424242424242", 1, 2050, "123");
-            Source source = mApiHandler.createSource(
-                    provider,
-                    ApplicationProvider.getApplicationContext(),
-                    SourceParams.createCardParams(card),
-                    "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                    connectAccountId,
-                    testLoggingListener,
-                    testStripeResponseListener);
+        final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
+        Card card = new Card("4242424242424242", 1, 2050, "123");
+        Source source = mApiHandler.createSource(
+                provider,
+                ApplicationProvider.getApplicationContext(),
+                SourceParams.createCardParams(card),
+                "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
+                connectAccountId,
+                testLoggingListener,
+                testStripeResponseListener);
 
-            // Check that we get a source back; we don't care about its fields for this test.
-            assertNotNull(source);
+        // Check that we get a source back; we don't care about its fields for this test.
+        assertNotNull(source);
 
-            assertNull(testLoggingListener.mStripeException);
-            assertNotNull(testLoggingListener.mStripeResponse);
-            assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+        assertNull(testLoggingListener.mStripeException);
+        assertNotNull(testLoggingListener.mStripeResponse);
+        assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
 
-            StripeResponse response = testStripeResponseListener.mStripeResponse;
-            assertNotNull(response);
-            assertNotNull(response.getResponseHeaders());
-            assertTrue(response.getResponseHeaders().containsKey("Stripe-Account"));
-            final List<String> accounts = response.getResponseHeaders().get("Stripe-Account");
-            assertNotNull(accounts);
-            assertEquals(1, accounts.size());
-            assertEquals(connectAccountId, accounts.get(0));
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        final StripeResponse response = testStripeResponseListener.mStripeResponse;
+        assertNotNull(response);
+
+        final Map<String, List<String>> responseHeaders = response.getResponseHeaders();
+        assertNotNull(responseHeaders);
+        assertTrue(responseHeaders.containsKey(STRIPE_ACCOUNT_RESPONSE_HEADER));
+
+        final List<String> accounts = responseHeaders.get(STRIPE_ACCOUNT_RESPONSE_HEADER);
+        assertNotNull(accounts);
+        assertEquals(1, accounts.size());
+        assertEquals(connectAccountId, accounts.get(0));
     }
 
     @Ignore
