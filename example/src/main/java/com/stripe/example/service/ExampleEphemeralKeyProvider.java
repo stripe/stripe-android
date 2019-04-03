@@ -1,7 +1,7 @@
 package com.stripe.example.service;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Size;
+import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 import com.stripe.android.EphemeralKeyProvider;
 import com.stripe.android.EphemeralKeyUpdateListener;
@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
-import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -24,13 +23,12 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
 
-    private @NonNull CompositeSubscription mCompositeSubscription;
-    private @NonNull StripeService mStripeService;
-    private @NonNull ProgressListener mProgressListener;
+    @NonNull private final CompositeSubscription mCompositeSubscription;
+    @NonNull private final StripeService mStripeService;
+    @NonNull private final ProgressListener mProgressListener;
 
     public ExampleEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
-        Retrofit retrofit = RetrofitFactory.getInstance();
-        mStripeService = retrofit.create(StripeService.class);
+        mStripeService = RetrofitFactory.getInstance().create(StripeService.class);
         mCompositeSubscription = new CompositeSubscription();
         mProgressListener = progressListener;
     }
@@ -52,8 +50,7 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
                                     String rawKey = response.string();
                                     keyUpdateListener.onKeyUpdate(rawKey);
                                     mProgressListener.onStringResponse(rawKey);
-                                } catch (IOException iox) {
-
+                                } catch (IOException ignored) {
                                 }
                             }
                         }, new Action1<Throwable>() {

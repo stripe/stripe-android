@@ -1,11 +1,10 @@
 package com.stripe.android.view;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-
-import androidx.annotation.NonNull;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;

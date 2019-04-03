@@ -1,7 +1,7 @@
 package com.stripe.android.view.i18n;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeError;
 import com.stripe.android.StripeErrorFixtures;

@@ -1,8 +1,8 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 
 import com.stripe.android.StripeTextUtils;
 
