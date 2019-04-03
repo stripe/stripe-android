@@ -1,6 +1,6 @@
 package com.stripe.android.view;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -52,9 +52,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
 
+    /**
+     * @deprecated use {@link PaymentMethodsActivityStarter#newIntent()}
+     */
+    @Deprecated
     @NonNull
-    public static Intent newIntent(Context context) {
-        return new Intent(context, PaymentMethodsActivity.class);
+    public static Intent newIntent(@NonNull Activity activity) {
+        return new PaymentMethodsActivityStarter(activity).newIntent();
     }
 
     @Override

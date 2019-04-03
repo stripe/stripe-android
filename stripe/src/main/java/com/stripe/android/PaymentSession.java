@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.PaymentMethodsActivityStarter;
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -26,10 +27,11 @@ public class PaymentSession {
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
-    @NonNull private Activity mHostActivity;
-    @NonNull private PaymentSessionData mPaymentSessionData;
+    @NonNull private final Activity mHostActivity;
+    @NonNull private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
-    @NonNull private PaymentSessionConfig mPaymentSessionConfig;
+    private PaymentSessionConfig mPaymentSessionConfig;
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -41,6 +43,7 @@ public class PaymentSession {
      */
     public PaymentSession(@NonNull Activity hostActivity) {
         mHostActivity = hostActivity;
+        mPaymentMethodsActivityStarter = new PaymentMethodsActivityStarter(hostActivity);
         mPaymentSessionData = new PaymentSessionData();
     }
 
@@ -80,18 +83,23 @@ public class PaymentSession {
             return false;
         } else if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
-                case PAYMENT_METHOD_REQUEST:
+                case PAYMENT_METHOD_REQUEST: {
                     fetchCustomer();
                     return true;
-                case PAYMENT_SHIPPING_DETAILS_REQUEST:
+                }
+                case PAYMENT_SHIPPING_DETAILS_REQUEST: {
                     PaymentSessionData paymentSessionData = data.getParcelableExtra(
                             PAYMENT_SESSION_DATA_KEY);
                     updateIsPaymentReadyToCharge(mPaymentSessionConfig, paymentSessionData);
                     mPaymentSessionData = paymentSessionData;
-                    mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
+                    if (mPaymentSessionListener != null) {
+                        mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
+                    }
                     return true;
-                default:
+                }
+                default: {
                     break;
+                }
             }
         }
         return false;
@@ -106,8 +114,8 @@ public class PaymentSession {
      * @param paymentSessionData holds the data that has been collected.
      * @return whether the data in the provided {@link PaymentSessionData} is ready to charge.
      */
-    public boolean updateIsPaymentReadyToCharge(PaymentSessionConfig paymentSessionConfig,
-                                                PaymentSessionData paymentSessionData) {
+    public boolean updateIsPaymentReadyToCharge(@NonNull PaymentSessionConfig paymentSessionConfig,
+                                                @NonNull PaymentSessionData paymentSessionData) {
         if (StripeTextUtils.isBlank(paymentSessionData.getSelectedPaymentMethodId()) ||
                 (paymentSessionConfig.isShippingInfoRequired() &&
                         paymentSessionData.getShippingInformation() == null) ||
@@ -185,8 +193,8 @@ public class PaymentSession {
      * or to add a new one.
      */
     public void presentPaymentMethodSelection() {
-        Intent paymentMethodsIntent = PaymentMethodsActivity.newIntent(mHostActivity);
-        paymentMethodsIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
+                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
         mHostActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
     }
 
