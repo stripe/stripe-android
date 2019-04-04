@@ -1,9 +1,10 @@
 # CHANGELOG
 
 ### 8.6.0 2019-04-05
-* Downgrade from AndroidX to Support Library [#849]
-* Add setter for custom CVC field label on CardMultilineWidget [#843]
-* Refactor StripeApiHandler to use instance methods [#839]
+* Downgrade from AndroidX to Android Support Library [#849]
+* Add setter for custom CVC field label on `CardMultilineWidget` [#843]
+* Fix a11y traversal order in `CardInputWidget` [#850]
+* Refactor `StripeApiHandler` to use instance methods [#839]
 
 ### 8.5.0 2019-03-05
 * Clean up `PaymentIntent` [#805]
