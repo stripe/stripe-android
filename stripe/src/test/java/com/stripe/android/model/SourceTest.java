@@ -21,6 +21,7 @@ import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -173,6 +174,38 @@ public class SourceTest {
             "}" +
             "}";
 
+    private static final String DELETED_CARD_JSON = "{\n" +
+            "  \"id\": \"card_1ELdAlCRMbs6FrXfNbmZEOb7\",\n" +
+            "  \"object\": \"card\",\n" +
+            "  \"deleted\": true\n" +
+            "}";
+
+    private static final String CREATED_CARD_JSON = "{\n" +
+            "  \"id\": \"card_1ELxrOCRMbs6FrXfdxOGjnaD\",\n" +
+            "  \"object\": \"card\",\n" +
+            "  \"address_city\": null,\n" +
+            "  \"address_country\": null,\n" +
+            "  \"address_line1\": null,\n" +
+            "  \"address_line1_check\": null,\n" +
+            "  \"address_line2\": null,\n" +
+            "  \"address_state\": null,\n" +
+            "  \"address_zip\": null,\n" +
+            "  \"address_zip_check\": null,\n" +
+            "  \"brand\": \"Visa\",\n" +
+            "  \"country\": \"US\",\n" +
+            "  \"customer\": \"cus_Epd7N0VR3cdjsr\",\n" +
+            "  \"cvc_check\": null,\n" +
+            "  \"dynamic_last4\": null,\n" +
+            "  \"exp_month\": 4,\n" +
+            "  \"exp_year\": 2020,\n" +
+            "  \"funding\": \"credit\",\n" +
+            "  \"last4\": \"4242\",\n" +
+            "  \"metadata\": {\n" +
+            "  },\n" +
+            "  \"name\": null,\n" +
+            "  \"tokenization_method\": null\n" +
+            "}\n";
+
     private Source mSource;
 
     @Before
@@ -208,5 +241,24 @@ public class SourceTest {
         assertEquals(DOGE_COIN, customSource.getTypeRaw());
         assertNull(customSource.getSourceTypeModel());
         assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
+    }
+
+    @Test
+    public void fromJsonString_withDeletedCardJson_shouldReturnSourceWithCardId() {
+        final Source source = Source.fromString(DELETED_CARD_JSON);
+        assertNotNull(source);
+        assertEquals("card_1ELdAlCRMbs6FrXfNbmZEOb7", source.getId());
+    }
+
+    @Test
+    public void fromJsonString_withCreatedCardJson_shouldReturnSourceWithCardId() {
+        final Source source = Source.fromString(CREATED_CARD_JSON);
+        assertNotNull(source);
+        assertEquals("card_1ELxrOCRMbs6FrXfdxOGjnaD", source.getId());
+        assertEquals(Source.CARD, source.getType());
+        assertTrue(source.getSourceTypeModel() instanceof SourceCardData);
+
+        final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
+        assertEquals(Card.VISA, sourceCardData.getBrand());
     }
 }
