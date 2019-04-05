@@ -20,6 +20,8 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -28,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -81,8 +84,10 @@ public class CustomerSession
     @Nullable private Customer mCustomer;
     private long mCustomerCacheTime;
     @Nullable private Context mContext;
-    @Nullable private CustomerRetrievalListener mCustomerRetrievalListener;
-    @Nullable private SourceRetrievalListener mSourceRetrievalListener;
+    @NonNull private final Map<String, WeakReference<CustomerRetrievalListener>>
+            mCustomerRetrievalListenerRefs = new HashMap<>();
+    @NonNull private final Map<String, WeakReference<SourceRetrievalListener>>
+            mSourceRetrievalListenerRefs = new HashMap<>();
 
     @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
     @NonNull private final Handler mUiThreadHandler;
@@ -140,6 +145,10 @@ public class CustomerSession
 
     @VisibleForTesting
     static void clearInstance() {
+        if (mInstance != null) {
+            mInstance.mCustomerRetrievalListenerRefs.clear();
+            mInstance.mSourceRetrievalListenerRefs.clear();
+        }
         cancelCallbacks();
         mInstance = null;
     }
@@ -197,8 +206,10 @@ public class CustomerSession
             listener.onCustomerRetrieved(getCachedCustomer());
         } else {
             mCustomer = null;
-            mCustomerRetrievalListener = listener;
-            mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+
+            final String operationId = UUID.randomUUID().toString();
+            mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+            mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
         }
     }
 
@@ -210,8 +221,10 @@ public class CustomerSession
      */
     public void updateCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
         mCustomer = null;
-        mCustomerRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+
+        final String operationId = UUID.randomUUID().toString();
+        mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
     }
 
     /**
@@ -246,8 +259,12 @@ public class CustomerSession
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
-        mSourceRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mSourceRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_ADD_SOURCE, arguments);
     }
 
     /**
@@ -264,8 +281,12 @@ public class CustomerSession
         mContext = context.getApplicationContext();
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
-        mSourceRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_DELETE_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mSourceRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
     }
 
     /**
@@ -280,7 +301,8 @@ public class CustomerSession
         mContext = context.getApplicationContext();
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SHIPPING_INFO, shippingInformation);
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments);
+        mEphemeralKeyManager.retrieveEphemeralKey(null, ACTION_SET_CUSTOMER_SHIPPING_INFO,
+                arguments);
     }
 
     /**
@@ -300,8 +322,13 @@ public class CustomerSession
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
-        mCustomerRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_SET_DEFAULT_SOURCE,
+                arguments);
     }
 
     void resetUsageTokens() {
@@ -327,19 +354,23 @@ public class CustomerSession
     private void addCustomerSource(
             @NonNull final Context context,
             @NonNull final CustomerEphemeralKey key,
+            @Nullable final String operationId,
             @NonNull final String sourceId,
             @NonNull final String sourceType) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Source source =
-                            addCustomerSourceWithKey(context, key, sourceId, sourceType);
-                    mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source));
+                    final SourceMessage sourceMessage = new SourceMessage(
+                            operationId,
+                            addCustomerSourceWithKey(context, key, sourceId, sourceType)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, sourceMessage));
                 } catch (StripeException stripeEx) {
                     mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx));
+                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                     sendErrorIntent(stripeEx);
                 }
             }
@@ -357,18 +388,23 @@ public class CustomerSession
     private void deleteCustomerSource(
             @NonNull final Context context,
             @NonNull final CustomerEphemeralKey key,
-            @NonNull final String sourceId) {
+            @NonNull final String sourceId,
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Source source = deleteCustomerSourceWithKey(context, key, sourceId);
-                    mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source));
+                    final SourceMessage sourceMessage = new SourceMessage(
+                            operationId,
+                            deleteCustomerSourceWithKey(context, key, sourceId)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, sourceMessage));
 
                 } catch (StripeException stripeEx) {
-                    mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx));
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                     sendErrorIntent(stripeEx);
                 }
             }
@@ -380,22 +416,22 @@ public class CustomerSession
             @NonNull final Context context,
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
-            @NonNull final String sourceType) {
+            @NonNull final String sourceType,
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Customer customer = setCustomerSourceDefaultWithKey(
-                            context,
-                            key,
-                            sourceId,
-                            sourceType
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            setCustomerSourceDefaultWithKey(context, key, sourceId, sourceType)
                     );
                     mUiThreadHandler.sendMessage(
-                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer));
+                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customerMessage));
                 } catch (StripeException stripeEx) {
                     mUiThreadHandler.sendMessage(
-                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx));
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                     sendErrorIntent(stripeEx);
                 }
             }
@@ -407,18 +443,22 @@ public class CustomerSession
     private void setCustomerShippingInformation(
             @NonNull final Context context,
             @NonNull final CustomerEphemeralKey key,
-            @NonNull final ShippingInformation shippingInformation) {
+            @NonNull final ShippingInformation shippingInformation,
+            @Nullable final String operationId) {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Customer customer =
-                            setCustomerShippingInfoWithKey(context, key, shippingInformation);
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            setCustomerShippingInfoWithKey(context, key, shippingInformation)
+                    );
                     mUiThreadHandler.sendMessage(mUiThreadHandler
-                            .obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customer));
+                            .obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customerMessage));
                 } catch (StripeException stripeEx) {
-                    mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx));
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                     sendErrorIntent(stripeEx);
                 }
             }
@@ -426,17 +466,22 @@ public class CustomerSession
         executeRunnable(runnable);
     }
 
-    private void updateCustomer(@NonNull final CustomerEphemeralKey key) {
+    private void updateCustomer(@NonNull final CustomerEphemeralKey key,
+                                @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Customer customer = retrieveCustomerWithKey(key);
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            retrieveCustomerWithKey(key)
+                    );
                     mUiThreadHandler.sendMessage(
-                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer));
+                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customerMessage));
                 } catch (StripeException stripeEx) {
                     mUiThreadHandler.sendMessage(
-                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx));
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                 }
             }
         };
@@ -457,10 +502,11 @@ public class CustomerSession
     @Override
     public void onKeyUpdate(
             @NonNull CustomerEphemeralKey ephemeralKey,
+            @Nullable String operationId,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
         if (actionString == null) {
-            updateCustomer(ephemeralKey);
+            updateCustomer(ephemeralKey, operationId);
             return;
         }
 
@@ -470,40 +516,51 @@ public class CustomerSession
 
         if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
                 arguments.containsKey(KEY_SOURCE_TYPE)) {
-            addCustomerSource(mContext, ephemeralKey,
+            addCustomerSource(mContext,
+                    ephemeralKey,
+                    operationId,
                     (String) arguments.get(KEY_SOURCE),
                     (String) arguments.get(KEY_SOURCE_TYPE));
             resetUsageTokens();
         } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
                 arguments.containsKey(KEY_SOURCE)) {
-            deleteCustomerSource(mContext, ephemeralKey, (String) arguments.get(KEY_SOURCE));
+            deleteCustomerSource(mContext,
+                    ephemeralKey,
+                    (String) arguments.get(KEY_SOURCE),
+                    operationId);
             resetUsageTokens();
         } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
                 && arguments.containsKey(KEY_SOURCE) && arguments.containsKey(KEY_SOURCE_TYPE)) {
-            setCustomerSourceDefault(mContext, ephemeralKey,
+            setCustomerSourceDefault(mContext,
+                    ephemeralKey,
                     (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE));
+                    (String) arguments.get(KEY_SOURCE_TYPE),
+                    operationId);
             resetUsageTokens();
         } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
                 arguments.containsKey(KEY_SHIPPING_INFO)) {
-            setCustomerShippingInformation(mContext, ephemeralKey,
-                    (ShippingInformation) arguments.get(KEY_SHIPPING_INFO));
+            setCustomerShippingInformation(mContext,
+                    ephemeralKey,
+                    (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                    operationId);
             resetUsageTokens();
         }
     }
 
     @Override
-    public void onKeyError(int httpCode, @Nullable String errorMessage) {
+    public void onKeyError(@Nullable String operationId, int httpCode,
+                           @Nullable String errorMessage) {
         // Any error eliminates all listeners
-
-        if (mCustomerRetrievalListener != null) {
-            mCustomerRetrievalListener.onError(httpCode, errorMessage, null);
-            mCustomerRetrievalListener = null;
+        final CustomerRetrievalListener customerRetrievalListener =
+                getCustomerRetrievalListener(operationId);
+        if (customerRetrievalListener != null) {
+            customerRetrievalListener.onError(httpCode, errorMessage, null);
         }
 
-        if (mSourceRetrievalListener != null) {
-            mSourceRetrievalListener.onError(httpCode, errorMessage, null);
-            mSourceRetrievalListener = null;
+        final SourceRetrievalListener sourceRetrievalListener =
+                getSourceRetrievalListener(operationId);
+        if (sourceRetrievalListener != null) {
+            sourceRetrievalListener.onError(httpCode, errorMessage, null);
         }
     }
 
@@ -513,68 +570,63 @@ public class CustomerSession
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                final Object messageObject = msg.obj;
 
                 switch (msg.what) {
                     case CUSTOMER_RETRIEVED: {
-                        if (messageObject instanceof Customer) {
-                            mCustomer = (Customer) messageObject;
+                        if (msg.obj instanceof CustomerMessage) {
+                            final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
+                            final String operationId = customerMessage.operationId;
+                            mCustomer = customerMessage.customer;
                             mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
-                            if (mCustomerRetrievalListener != null) {
-                                mCustomerRetrievalListener.onCustomerRetrieved(mCustomer);
-                                // Eliminate reference to retrieval listener after use.
-                                mCustomerRetrievalListener = null;
+
+                            final CustomerRetrievalListener listener =
+                                    getCustomerRetrievalListener(operationId);
+                            if (listener != null && mCustomer != null) {
+                                listener.onCustomerRetrieved(mCustomer);
                             }
                         }
                         break;
                     }
                     case SOURCE_RETRIEVED: {
-                        if (messageObject instanceof Source && mSourceRetrievalListener != null) {
-                            mSourceRetrievalListener.onSourceRetrieved((Source) messageObject);
+                        if (msg.obj instanceof SourceMessage) {
+                            final SourceMessage sourceMessage = (SourceMessage) msg.obj;
+                            final String operationId = sourceMessage.operationId;
+
+                            final SourceRetrievalListener listener =
+                                    getSourceRetrievalListener(operationId);
+                            if (listener != null && sourceMessage.source != null) {
+                                listener.onSourceRetrieved(sourceMessage.source);
+                            }
                         }
 
-                        // A source listener only listens once.
-                        mSourceRetrievalListener = null;
                         // Clear our context reference so we don't use a stale one.
                         mContext = null;
                         break;
                     }
                     case CUSTOMER_SHIPPING_INFO_SAVED: {
-                        if (mContext != null && messageObject instanceof Customer) {
-                            mCustomer = (Customer) messageObject;
+                        if (mContext != null && msg.obj instanceof CustomerMessage) {
+                            final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
+                            mCustomer = customerMessage.customer;
                             LocalBroadcastManager.getInstance(mContext)
                                     .sendBroadcast(new Intent(EVENT_SHIPPING_INFO_SAVED));
                         }
                         break;
                     }
                     case CUSTOMER_ERROR: {
-                        if (messageObject instanceof StripeException) {
-                            final StripeException exception = (StripeException) messageObject;
-                            if (mCustomerRetrievalListener != null) {
-                                final int errorCode = exception.getStatusCode() == null
-                                        ? 400
-                                        : exception.getStatusCode();
-                                mCustomerRetrievalListener.onError(errorCode,
-                                        exception.getLocalizedMessage(),
-                                        exception.getStripeError());
-                                mCustomerRetrievalListener = null;
-                            }
-                            resetUsageTokens();
+                        if (msg.obj instanceof ExceptionMessage) {
+                            final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                            handleRetrievalError(exceptionMessage.operationId,
+                                    exceptionMessage.exception, CUSTOMER_ERROR);
                         }
                         break;
                     }
                     case SOURCE_ERROR: {
-                        final StripeException exception = (StripeException) messageObject;
-                        if (mSourceRetrievalListener != null) {
-                            final int errorCode = exception.getStatusCode() == null
-                                    ? 400
-                                    : exception.getStatusCode();
-                            mSourceRetrievalListener.onError(errorCode,
-                                    exception.getLocalizedMessage(),
-                                    exception.getStripeError());
-                            mSourceRetrievalListener = null;
-                            resetUsageTokens();
+                        if (msg.obj instanceof ExceptionMessage) {
+                            final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                            handleRetrievalError(exceptionMessage.operationId,
+                                    exceptionMessage.exception, SOURCE_ERROR);
                         }
+
                         break;
                     }
                     default: {
@@ -583,6 +635,31 @@ public class CustomerSession
                 }
             }
         };
+    }
+
+    private void handleRetrievalError(@Nullable String operationId,
+                                      @NonNull StripeException exception,
+                                      int errorType) {
+        final WeakReference<? extends RetrievalListener> listenerRef;
+        if (errorType == SOURCE_ERROR) {
+            listenerRef = mSourceRetrievalListenerRefs.remove(operationId);
+        } else if (errorType == CUSTOMER_ERROR) {
+            listenerRef = mCustomerRetrievalListenerRefs.remove(operationId);
+        } else {
+            listenerRef = null;
+        }
+
+        final RetrievalListener listener = listenerRef != null ? listenerRef.get() : null;
+        if (listener != null) {
+            final int errorCode = exception.getStatusCode() == null
+                    ? 400
+                    : exception.getStatusCode();
+            listener.onError(errorCode,
+                    exception.getLocalizedMessage(),
+                    exception.getStripeError());
+        }
+
+        resetUsageTokens();
     }
 
     @NonNull
@@ -709,7 +786,7 @@ public class CustomerSession
     /**
      * Calls the Stripe API (or a test proxy) to fetch a customer. If the provided key is expired,
      * this method <b>does not</b> update the key.
-     * Use {@link #updateCustomer(CustomerEphemeralKey)} to validate the key
+     * Use {@link #updateCustomer(CustomerEphemeralKey, String)} to validate the key
      * before refreshing the customer.
      *
      * @param key the {@link CustomerEphemeralKey} used for this access
@@ -736,16 +813,29 @@ public class CustomerSession
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
-    public interface CustomerRetrievalListener {
-        void onCustomerRetrieved(@NonNull Customer customer);
-
-        void onError(int httpCode, @Nullable String errorMessage,
-                     @Nullable StripeError stripeError);
+    @Nullable
+    private CustomerRetrievalListener getCustomerRetrievalListener(@Nullable String operationId) {
+        final Reference<CustomerRetrievalListener> listenerRef =
+                mCustomerRetrievalListenerRefs.remove(operationId);
+        return listenerRef != null ? listenerRef.get() : null;
     }
 
-    public interface SourceRetrievalListener {
-        void onSourceRetrieved(@NonNull Source source);
+    @Nullable
+    private SourceRetrievalListener getSourceRetrievalListener(@Nullable String operationId) {
+        final Reference<SourceRetrievalListener> listenerRef =
+                mSourceRetrievalListenerRefs.remove(operationId);
+        return listenerRef != null ? listenerRef.get() : null;
+    }
 
+    public interface CustomerRetrievalListener extends RetrievalListener {
+        void onCustomerRetrieved(@NonNull Customer customer);
+    }
+
+    public interface SourceRetrievalListener extends RetrievalListener {
+        void onSourceRetrieved(@NonNull Source source);
+    }
+
+    interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
     }
@@ -793,5 +883,35 @@ public class CustomerSession
                 @NonNull ShippingInformation shippingInformation,
                 @NonNull String secret)
                 throws InvalidRequestException, APIConnectionException, APIException;
+    }
+
+    private static class CustomerMessage {
+        @Nullable private final String operationId;
+        @Nullable private final Customer customer;
+
+        private CustomerMessage(@Nullable String operationId, @Nullable Customer customer) {
+            this.operationId = operationId;
+            this.customer = customer;
+        }
+    }
+
+    private static class SourceMessage {
+        @Nullable private final String operationId;
+        @Nullable private final Source source;
+
+        private SourceMessage(@Nullable String operationId, @Nullable Source source) {
+            this.operationId = operationId;
+            this.source = source;
+        }
+    }
+
+    private static class ExceptionMessage {
+        @Nullable private final String operationId;
+        @NonNull private final StripeException exception;
+
+        private ExceptionMessage(@Nullable String operationId, @NonNull StripeException exception) {
+            this.operationId = operationId;
+            this.exception = exception;
+        }
     }
 }
