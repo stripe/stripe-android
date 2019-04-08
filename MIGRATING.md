@@ -1,13 +1,39 @@
 ## Migration Guides
 
+### Migration from versions < 9.0.0
+- `AccountParams.createAccountParams()` requires a `AccountParams#BusinessType` parameter
+    ```java
+    // before
+    AccountParams.createAccountParams(
+      true,
+      createBusinessData()
+    );
+    
+    // after, AccountParams.BusinessType is required
+    
+    // for Individual entities
+    AccountParams.createAccountParams(
+      true,
+      BusinessType.Individual,
+      createBusinessData()
+    );
+    
+    // for Company entities
+    AccountParams.createAccountParams(
+      true,
+      BusinessType.Company,
+      createBusinessData()
+    );
+    ```
+
 ### Migrating from versions < 7.0.0
 - Remove Bitcoin source support because Stripe no longer processes Bitcoin payments: https://stripe.com/blog/ending-bitcoin-support
     - Sources can no longer have a "BITCOIN" source type. These sources will now be interpreted as "UNKNOWN".
     - You can no longer `createBitcoinParams`. Please use a different payment method.
 
 ### Migrating from versions < 5.0.0
-- StripeApiHandler methods can no longer be called directly.
-- PaymentConfiguration now stores your public key and is depended upon for CustomerSession.
+- `StripeApiHandler` methods can no longer be called directly.
+- `PaymentConfiguration` now stores your public key and is depended upon for `CustomerSession`.
 - Many *Utils* classes have been migrated to package-private access.
 
 ### Migrating from versions < 4.0.0
