@@ -12,9 +12,6 @@ import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.APIException;
-import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
@@ -27,11 +24,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -93,10 +88,6 @@ public class CustomerSession
     @NonNull private final Handler mUiThreadHandler;
     @NonNull private final Set<String> mProductUsageTokens;
     @Nullable private final Calendar mProxyNowCalendar;
-    @Nullable private final StripeApiProxy mStripeApiProxy;
-
-    // A queue of Runnables for doing customer updates
-    @NonNull private final BlockingQueue<Runnable> mNetworkQueue = new LinkedBlockingQueue<>();
     @NonNull private final ThreadPoolExecutor mThreadPoolExecutor;
     @NonNull private final StripeApiHandler mApiHandler;
 
@@ -107,7 +98,7 @@ public class CustomerSession
      * {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
     public static void initCustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
-        initCustomerSession(keyProvider, null, null);
+        setInstance(new CustomerSession(keyProvider));
     }
 
     /**
@@ -125,6 +116,11 @@ public class CustomerSession
         return mInstance;
     }
 
+    @VisibleForTesting
+    static void setInstance(@Nullable CustomerSession customerSession) {
+        mInstance = customerSession;
+    }
+
     /**
      * End the singleton instance of a {@link CustomerSession}.
      * Calls to {@link CustomerSession#getInstance()} will throw an {@link IllegalStateException}
@@ -136,21 +132,13 @@ public class CustomerSession
     }
 
     @VisibleForTesting
-    static void initCustomerSession(
-            @NonNull EphemeralKeyProvider keyProvider,
-            @Nullable StripeApiProxy stripeApiProxy,
-            @Nullable Calendar proxyNowCalendar) {
-        mInstance = new CustomerSession(keyProvider, stripeApiProxy, proxyNowCalendar);
-    }
-
-    @VisibleForTesting
     static void clearInstance() {
         if (mInstance != null) {
             mInstance.mCustomerRetrievalListenerRefs.clear();
             mInstance.mSourceRetrievalListenerRefs.clear();
         }
         cancelCallbacks();
-        mInstance = null;
+        setInstance(null);
     }
 
     /**
@@ -168,22 +156,27 @@ public class CustomerSession
         mInstance.mThreadPoolExecutor.shutdownNow();
     }
 
-    private CustomerSession(
+    private CustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
+        this(keyProvider, null, createThreadPoolExecutor(), new StripeApiHandler());
+    }
+
+    @VisibleForTesting
+    CustomerSession(
             @NonNull EphemeralKeyProvider keyProvider,
-            @Nullable StripeApiProxy stripeApiProxy,
-            @Nullable Calendar proxyNowCalendar) {
-        mThreadPoolExecutor = createThreadPoolExecutor();
-        mUiThreadHandler = createMainThreadHandler();
-        mStripeApiProxy = stripeApiProxy;
+            @Nullable Calendar proxyNowCalendar,
+            @NonNull ThreadPoolExecutor threadPoolExecutor,
+            @NonNull StripeApiHandler apiHandler) {
+        mThreadPoolExecutor = threadPoolExecutor;
         mProxyNowCalendar = proxyNowCalendar;
         mProductUsageTokens = new HashSet<>();
+        mApiHandler = apiHandler;
+        mUiThreadHandler = createMainThreadHandler();
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 CustomerEphemeralKey.class);
-        mApiHandler = new StripeApiHandler();
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -202,8 +195,9 @@ public class CustomerSession
      *                 customer, either from the cache or from the server
      */
     public void retrieveCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
-        if (canUseCachedCustomer()) {
-            listener.onCustomerRetrieved(getCachedCustomer());
+        final Customer cachedCustomer = getCachedCustomer();
+        if (cachedCustomer != null) {
+            listener.onCustomerRetrieved(cachedCustomer);
         } else {
             mCustomer = null;
 
@@ -490,12 +484,6 @@ public class CustomerSession
     }
 
     private void executeRunnable(@NonNull Runnable runnable) {
-        // In automation, run on the main thread.
-        if (mStripeApiProxy != null) {
-            runnable.run();
-            return;
-        }
-
         mThreadPoolExecutor.execute(runnable);
     }
 
@@ -664,13 +652,13 @@ public class CustomerSession
     }
 
     @NonNull
-    private ThreadPoolExecutor createThreadPoolExecutor() {
+    private static ThreadPoolExecutor createThreadPoolExecutor() {
         return new ThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 THREAD_POOL_SIZE,
                 KEEP_ALIVE_TIME,
                 KEEP_ALIVE_TIME_UNIT,
-                mNetworkQueue);
+                new LinkedBlockingQueue<Runnable>());
     }
 
     @NonNull
@@ -684,26 +672,15 @@ public class CustomerSession
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) throws StripeException {
-        if (mStripeApiProxy != null) {
-            return mStripeApiProxy.addCustomerSourceWithKey(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    sourceType,
-                    key.getSecret());
-        } else {
-            return mApiHandler.addCustomerSource(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    sourceType,
-                    key.getSecret(),
-                    null);
-        }
+        return mApiHandler.addCustomerSource(
+                context,
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                sourceType,
+                key.getSecret(),
+                null);
     }
 
     @Nullable
@@ -711,24 +688,14 @@ public class CustomerSession
             @NonNull Context context,
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId) throws StripeException {
-        if (mStripeApiProxy != null) {
-            return mStripeApiProxy.deleteCustomerSourceWithKey(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    key.getSecret());
-        } else {
-            return mApiHandler.deleteCustomerSource(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    key.getSecret(),
-                    null);
-        }
+        return mApiHandler.deleteCustomerSource(
+                context,
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                key.getSecret(),
+                null);
     }
 
     @Nullable
@@ -736,24 +703,14 @@ public class CustomerSession
             @NonNull Context context,
             @NonNull CustomerEphemeralKey key,
             @NonNull ShippingInformation shippingInformation) throws StripeException {
-        if (mStripeApiProxy != null) {
-            return mStripeApiProxy.setCustomerShippingInfoWithKey(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    shippingInformation,
-                    key.getSecret());
-        } else {
-            return mApiHandler.setCustomerShippingInfo(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    shippingInformation,
-                    key.getSecret(),
-                    null);
-        }
+        return mApiHandler.setCustomerShippingInfo(
+                context,
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                shippingInformation,
+                key.getSecret(),
+                null);
     }
 
     @Nullable
@@ -762,26 +719,15 @@ public class CustomerSession
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) throws StripeException {
-        if (mStripeApiProxy != null) {
-            return mStripeApiProxy.setDefaultCustomerSourceWithKey(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    sourceType,
-                    key.getSecret());
-        } else {
-            return mApiHandler.setDefaultCustomerSource(
-                    context,
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    new ArrayList<>(mProductUsageTokens),
-                    sourceId,
-                    sourceType,
-                    key.getSecret(),
-                    null);
-        }
+        return mApiHandler.setDefaultCustomerSource(
+                context,
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                sourceType,
+                key.getSecret(),
+                null);
     }
 
     /**
@@ -796,11 +742,7 @@ public class CustomerSession
     @Nullable
     private Customer retrieveCustomerWithKey(@NonNull CustomerEphemeralKey key)
             throws StripeException {
-        if (mStripeApiProxy != null) {
-            return mStripeApiProxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
-        } else {
-            return mApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
-        }
+        return mApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
     }
 
     private void sendErrorIntent(@NonNull StripeException exception) {
@@ -839,51 +781,6 @@ public class CustomerSession
     interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
-    }
-
-    interface StripeApiProxy {
-        @Nullable Customer retrieveCustomerWithKey(@NonNull String customerId,
-                                                   @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
-
-        @Nullable Source addCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String sourceType,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
-
-        @Nullable Source deleteCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
-
-        @Nullable Customer setDefaultCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String sourceType,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
-
-
-        @Nullable Customer setCustomerShippingInfoWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull ShippingInformation shippingInformation,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
     }
 
     private static class CustomerMessage {
