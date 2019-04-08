@@ -9,7 +9,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
@@ -147,16 +149,19 @@ public class CustomerSessionTest {
 
     @Mock private BroadcastReceiver mBroadcastReceiver;
     @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
-    @Mock private CustomerSession.StripeApiProxy mErrorProxy;
 
     @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
+    @Captor private ArgumentCaptor<Source> mSourceArgumentCaptor;
+    @Captor private ArgumentCaptor<Customer> mCustomerArgumentCaptor;
+    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
     private Customer mFirstCustomer;
     private Customer mSecondCustomer;
-
     private Source mAddedSource;
+
+    private final Context mContext = ApplicationProvider.getApplicationContext();
 
     @NonNull
     private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
@@ -168,13 +173,11 @@ public class CustomerSessionTest {
     }
 
     @Before
-    public void setup() {
+    public void setup() throws APIException, APIConnectionException, InvalidRequestException {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
 
-        final LocalBroadcastManager instance =
-                LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
-        instance.registerReceiver(
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(
                 mBroadcastReceiver,
                 new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
 
@@ -187,72 +190,40 @@ public class CustomerSessionTest {
 
         mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(mAddedSource);
-        try {
-            when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
-                    .thenReturn(mFirstCustomer, mSecondCustomer);
-            when(mStripeApiProxy.addCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenReturn(mAddedSource);
-            when(mErrorProxy.addCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
-                            null));
-            when(mStripeApiProxy.deleteCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString()))
-                    .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
-            when(mErrorProxy.deleteCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString()))
-                    .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
-                            null));
-            when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenReturn(mSecondCustomer);
 
-            when(mErrorProxy.setDefaultCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenThrow(new APIException("auth error", "reqId", 405, null, null));
-        } catch (StripeException exception) {
-            fail("Exception when accessing mock api proxy: " + exception.getMessage());
-        }
+        when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
+                .thenReturn(mFirstCustomer, mSecondCustomer);
+        when(mStripeApiProxy.addCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()))
+                .thenReturn(mAddedSource);
+        when(mStripeApiProxy.deleteCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()))
+                .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
+        when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()))
+                .thenReturn(mSecondCustomer);
     }
 
     @After
     public void teardown() {
-        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
+        LocalBroadcastManager.getInstance(mContext)
                 .unregisterReceiver(mBroadcastReceiver);
         CustomerSession.endCustomerSession();
     }
@@ -300,17 +271,12 @@ public class CustomerSessionTest {
 
     @Test
     public void create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
-        CustomerSession session = CustomerSession.getInstance();
-
-        assertEquals(firstKey.getId(), Objects.requireNonNull(session.getEphemeralKey()).getId());
+        CustomerSession.initCustomerSession(mEphemeralKeyProvider, mStripeApiProxy, null);
+        final CustomerSession session = CustomerSession.getInstance();
 
         try {
             verify(mStripeApiProxy).retrieveCustomerWithKey(
@@ -338,11 +304,10 @@ public class CustomerSessionTest {
                 .requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO));
         ShippingInformation shippingInformation = Objects.requireNonNull(customerWithShippingInfo
                 .getShippingInformation());
-        session.setCustomerShippingInformation(ApplicationProvider.getApplicationContext(),
-                shippingInformation);
+        session.setCustomerShippingInformation(mContext, shippingInformation);
         try {
             verify(mStripeApiProxy).setCustomerShippingInfoWithKey(
-                    eq(ApplicationProvider.getApplicationContext()),
+                    eq(mContext),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -374,10 +339,7 @@ public class CustomerSessionTest {
                 mEphemeralKeyProvider,
                 mStripeApiProxy,
                 proxyCalendar);
-        CustomerSession session = CustomerSession.getInstance();
-
-        assertNotNull(session.getEphemeralKey());
-        assertEquals(firstKey.getId(), session.getEphemeralKey().getId());
+        final CustomerSession session = CustomerSession.getInstance();
         assertEquals(firstKey.getCustomerId(), mFirstCustomer.getId());
 
         long firstCustomerCacheTime = session.getCustomerCacheTime();
@@ -397,9 +359,8 @@ public class CustomerSessionTest {
                 mock(CustomerSession.CustomerRetrievalListener.class);
         session.retrieveCurrentCustomer(mockListener);
 
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        verify(mockListener).onCustomerRetrieved(mCustomerArgumentCaptor.capture());
+        final Customer capturedCustomer = mCustomerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
         assertNotNull(session.getCustomer());
@@ -461,9 +422,8 @@ public class CustomerSessionTest {
                 mock(CustomerSession.CustomerRetrievalListener.class);
         session.retrieveCurrentCustomer(mockListener);
 
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        verify(mockListener).onCustomerRetrieved(mCustomerArgumentCaptor.capture());
+        Customer capturedCustomer = mCustomerArgumentCaptor.getValue();
 
         assertNotNull(capturedCustomer);
         assertEquals(mFirstCustomer.getId(), capturedCustomer.getId());
@@ -505,7 +465,7 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
+        session.addCustomerSource(mContext,
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -513,7 +473,7 @@ public class CustomerSessionTest {
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         try {
             verify(mStripeApiProxy).addCustomerSourceWithKey(
-                    eq(ApplicationProvider.getApplicationContext()),
+                    eq(mContext),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -528,15 +488,15 @@ public class CustomerSessionTest {
             fail(unexpected.getMessage());
         }
 
-        ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
-        Source capturedSource = sourceArgumentCaptor.getValue();
+        verify(mockListener).onSourceRetrieved(mSourceArgumentCaptor.capture());
+        final Source capturedSource = mSourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
     }
 
     @Test
-    public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
+            throws APIException, APIConnectionException, InvalidRequestException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -567,18 +527,15 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.setStripeApiProxy(mErrorProxy);
-        session.addCustomerSource(ApplicationProvider.getApplicationContext(),
+        setupErrorProxy();
+        session.addCustomerSource(mContext,
                 "abc123",
                 Source.CARD,
                 mockListener);
 
-        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mBroadcastReceiver).onReceive(
-                any(Context.class),
-                intentArgumentCaptor.capture());
+        verify(mBroadcastReceiver).onReceive(any(Context.class), mIntentArgumentCaptor.capture());
 
-        Intent captured = intentArgumentCaptor.getValue();
+        Intent captured = mIntentArgumentCaptor.getValue();
         assertNotNull(captured);
         assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
         APIException ex = (APIException)
@@ -621,14 +578,14 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
+        session.deleteCustomerSource(mContext,
                 "abc123",
                 mockListener);
 
         assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
         try {
             verify(mStripeApiProxy).deleteCustomerSourceWithKey(
-                    eq(ApplicationProvider.getApplicationContext()),
+                    eq(mContext),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -642,15 +599,15 @@ public class CustomerSessionTest {
             fail(unexpected.getMessage());
         }
 
-        ArgumentCaptor<Source> sourceArgumentCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(mockListener).onSourceRetrieved(sourceArgumentCaptor.capture());
-        Source capturedSource = sourceArgumentCaptor.getValue();
+        verify(mockListener).onSourceRetrieved(mSourceArgumentCaptor.capture());
+        final Source capturedSource = mSourceArgumentCaptor.getValue();
         assertNotNull(capturedSource);
         assertEquals(mAddedSource.getId(), capturedSource.getId());
     }
 
     @Test
-    public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
+            throws APIException, APIConnectionException, InvalidRequestException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -681,17 +638,12 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        session.setStripeApiProxy(mErrorProxy);
-        session.deleteCustomerSource(ApplicationProvider.getApplicationContext(),
-                "abc123",
-                mockListener);
+        setupErrorProxy();
+        session.deleteCustomerSource(mContext, "abc123", mockListener);
 
-        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mBroadcastReceiver).onReceive(
-                any(Context.class),
-                intentArgumentCaptor.capture());
-
-        Intent captured = intentArgumentCaptor.getValue();
+        verify(mBroadcastReceiver).onReceive(any(Context.class),
+                mIntentArgumentCaptor.capture());
+        final Intent captured = mIntentArgumentCaptor.getValue();
         assertNotNull(captured);
         assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
         APIException ex = (APIException)
@@ -733,7 +685,7 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
+        session.setCustomerDefaultSource(mContext,
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -741,7 +693,7 @@ public class CustomerSessionTest {
         assertTrue(session.getProductUsageTokens().isEmpty());
         try {
             verify(mStripeApiProxy).setDefaultCustomerSourceWithKey(
-                    eq(ApplicationProvider.getApplicationContext()),
+                    eq(mContext),
                     eq(mFirstCustomer.getId()),
                     eq("pk_test_abc123"),
                     mListArgumentCaptor.capture(),
@@ -755,15 +707,15 @@ public class CustomerSessionTest {
             fail(unexpected.getMessage());
         }
 
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture());
-        Customer capturedCustomer = customerArgumentCaptor.getValue();
+        verify(mockListener).onCustomerRetrieved(mCustomerArgumentCaptor.capture());
+        Customer capturedCustomer = mCustomerArgumentCaptor.getValue();
         assertNotNull(capturedCustomer);
         assertEquals(mSecondCustomer.getId(), capturedCustomer.getId());
     }
 
     @Test
-    public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
+    public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs()
+            throws APIException, APIConnectionException, InvalidRequestException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -792,15 +744,11 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        session.setStripeApiProxy(mErrorProxy);
-        session.setCustomerDefaultSource(ApplicationProvider.getApplicationContext(),
-                "abc123",
-                Source.CARD,
-                mockListener);
+        setupErrorProxy();
+        session.setCustomerDefaultSource(mContext, "abc123", Source.CARD, mockListener);
 
         ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mBroadcastReceiver).onReceive(
-                any(Context.class),
+        verify(mBroadcastReceiver).onReceive(any(Context.class),
                 intentArgumentCaptor.capture());
 
         Intent captured = intentArgumentCaptor.getValue();
@@ -848,5 +796,39 @@ public class CustomerSessionTest {
         List<String> actualTokens = new ArrayList<>(
                 CustomerSession.getInstance().getProductUsageTokens());
         assertTrue(actualTokens.contains("ShippingMethodScreen"));
+    }
+
+    private void setupErrorProxy()
+            throws APIException, APIConnectionException, InvalidRequestException {
+        when(mStripeApiProxy.addCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()))
+                .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
+                        null));
+
+        when(mStripeApiProxy.deleteCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()))
+                .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
+                        null));
+
+        when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
+                eq(mContext),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()))
+                .thenThrow(new APIException("auth error", "reqId", 405, null, null));
     }
 }
