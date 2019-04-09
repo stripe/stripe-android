@@ -354,9 +354,9 @@ public class CustomerSession
     private void addCustomerSource(
             @NonNull final Context context,
             @NonNull final CustomerEphemeralKey key,
-            @Nullable final String operationId,
             @NonNull final String sourceId,
-            @NonNull final String sourceType) {
+            @NonNull final String sourceType,
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
@@ -518,9 +518,10 @@ public class CustomerSession
                 arguments.containsKey(KEY_SOURCE_TYPE)) {
             addCustomerSource(mContext,
                     ephemeralKey,
-                    operationId,
                     (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE));
+                    (String) arguments.get(KEY_SOURCE_TYPE),
+                    operationId
+            );
             resetUsageTokens();
         } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
                 arguments.containsKey(KEY_SOURCE)) {
