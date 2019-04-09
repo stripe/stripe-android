@@ -715,7 +715,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @param number the new {@link #number}
      */
     @Deprecated
-    public void setNumber(String number) {
+    public void setNumber(@Nullable String number) {
         this.number = number;
         this.brand = null;
         this.last4 = null;
@@ -724,6 +724,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the {@link #cvc} for this card
      */
+    @Nullable
     public String getCVC() {
         return cvc;
     }
@@ -732,7 +733,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @param cvc the new {@link #cvc} code for this card
      */
     @Deprecated
-    public void setCVC(String cvc) {
+    public void setCVC(@Nullable String cvc) {
         this.cvc = cvc;
     }
 
@@ -756,6 +757,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the {@link #expYear} for this card
      */
+    @Nullable
     public Integer getExpYear() {
         return expYear;
     }

@@ -117,7 +117,7 @@ public class Token implements StripePaymentSource {
     /**
      * @return the {@link #mId} of this token
      */
-    @Nullable
+    @NonNull
     @Override
     public String getId() {
         return mId;
