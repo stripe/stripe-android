@@ -35,18 +35,18 @@ dependencies {
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'io.reactivex:rxjava:1.3.0'
+    implementation 'io.reactivex:rxjava:1.3.8'
 
     /* Needed for Rx Bindings on views */
-    implementation 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+    implementation 'com.jakewharton.rxbinding:rxbinding:1.0.1'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:1.17.2'
+    implementation 'com.squareup.okio:okio:2.2.2'
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     /* Used to debug your Retrofit connections */
