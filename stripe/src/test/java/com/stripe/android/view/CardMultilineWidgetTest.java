@@ -302,10 +302,10 @@ public class CardMultilineWidgetTest {
     @Test
     public void setCvcLabel_shouldShowCustomLabelIfPresent() {
         mCardMultilineWidget.setCvcLabel("my cool cvc");
-        assertEquals("my cool cvc", mFullGroup.cvcEditText.getHint());
+        assertEquals("my cool cvc", mFullGroup.cvcInputLayout.getHint());
 
         mCardMultilineWidget.setCvcLabel(null);
-        assertEquals("CVC", mFullGroup.cvcEditText.getHint());
+        assertEquals("CVC", mFullGroup.cvcInputLayout.getHint());
     }
 
     @Test
