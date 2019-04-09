@@ -23,8 +23,8 @@ dependencies {
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     testImplementation "junit:junit:4.12"
-    testImplementation "org.mockito:mockito-core:2.23.0"
-    testImplementation "org.robolectric:robolectric:4.1"
+    testImplementation "org.mockito:mockito-core:2.26.0"
+    testImplementation "org.robolectric:robolectric:4.2.1"
     testImplementation 'androidx.test:core:1.1.0'
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
