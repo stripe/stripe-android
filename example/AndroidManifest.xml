@@ -8,7 +8,8 @@
 
     <application
         android:icon="@drawable/ic_launcher"
-        android:label="@string/appName">
+        android:label="@string/appName"
+        android:name=".ExampleApplication">
 
         <!-- Enables the Google Payment API -->
         <meta-data
