@@ -1236,9 +1236,8 @@ public class StripeTest {
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Card.Builder()
-                                .setToken(token.getId())
-                                .build(), null);
+                        PaymentMethodCreateParams.Card.create(token.getId()),
+                        null);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
         assertNotNull(createdPaymentMethod);
