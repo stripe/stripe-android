@@ -57,21 +57,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
 
         mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mSelectSourceButton.setEnabled(true);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        mSelectSourceButton.setEnabled(false);
-                        mErrorDialogHandler.show(errorMessage);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
+                new CustomerRetrievalListenerImpl(this));
 
         mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,5 +88,40 @@ public class CustomerSessionActivity extends AppCompatActivity {
     @NonNull
     private String buildCardString(@NonNull SourceCardData data) {
         return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
+    }
+
+    private void onCustomerRetrieved() {
+        mSelectSourceButton.setEnabled(true);
+        mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void onRetrieveError(@Nullable String errorMessage) {
+        mSelectSourceButton.setEnabled(false);
+        mErrorDialogHandler.show(errorMessage);
+        mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private static final class CustomerRetrievalListenerImpl
+            extends CustomerSession.ActivityCustomerRetrievalListener<CustomerSessionActivity> {
+        private CustomerRetrievalListenerImpl(@NonNull CustomerSessionActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final CustomerSessionActivity activity = getActivity();
+            if (activity != null) {
+                activity.onCustomerRetrieved();
+            }
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final CustomerSessionActivity activity = getActivity();
+            if (activity != null) {
+                activity.onRetrieveError(errorMessage);
+            }
+        }
     }
 }
