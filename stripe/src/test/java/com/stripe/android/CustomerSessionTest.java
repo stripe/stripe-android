@@ -24,7 +24,6 @@ import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentFlowActivity;
 
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -239,13 +238,6 @@ public class CustomerSessionTest {
                 return null;
             }
         }).when(mThreadPoolExecutor).execute(any(Runnable.class));
-    }
-
-    @After
-    public void teardown() {
-        LocalBroadcastManager.getInstance(mContext)
-                .unregisterReceiver(mBroadcastReceiver);
-        CustomerSession.endCustomerSession();
     }
 
     @Test(expected = IllegalStateException.class)

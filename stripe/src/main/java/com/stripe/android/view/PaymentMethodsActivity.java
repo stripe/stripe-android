@@ -44,12 +44,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
     private Customer mCustomer;
-    private CustomerSessionProxy mCustomerSessionProxy;
     private MaskedCardAdapter mMaskedCardAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
+
+    private CustomerSession mCustomerSession;
 
     /**
      * @deprecated use {@link PaymentMethodsActivityStarter#newIntent()}
@@ -67,24 +68,26 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
-        View addCardView = findViewById(R.id.payment_methods_add_payment_container);
+        final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
 
-        addCardView.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent addSourceIntent = AddSourceActivity.newIntent(
-                                PaymentMethodsActivity.this,
-                                false,
-                                true);
-                        if (mStartedFromPaymentSession) {
-                            addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-                        }
-                        startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
-                    }
-                });
+        mCustomerSession = CustomerSession.getInstance();
+        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
 
-        Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
+        addCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(@NonNull View view) {
+                final Intent addSourceIntent = AddSourceActivity.newIntent(
+                        PaymentMethodsActivity.this,
+                        false,
+                        true);
+                if (mStartedFromPaymentSession) {
+                    addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+                }
+                startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
+            }
+        });
+
+        final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -96,7 +99,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
-        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
     }
 
     @Override
@@ -122,23 +124,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                             setCommunicatingProgress(false);
                         }
                     };
-            if (mCustomerSessionProxy == null) {
-                CustomerSession.getInstance().updateCurrentCustomer(listener);
-            } else {
-                mCustomerSessionProxy.updateCurrentCustomer(listener);
-            }
+            mCustomerSession.updateCurrentCustomer(listener);
         }
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         final MenuItem saveItem = menu.findItem(R.id.action_save);
-        final Drawable compatIcon =
-                ViewUtils.getTintedIconWithAttribute(
-                        this,
-                        getTheme(),
-                        R.attr.titleTextColor,
-                        R.drawable.ic_checkmark);
+        final Drawable compatIcon = ViewUtils.getTintedIconWithAttribute(
+                this,
+                getTheme(),
+                R.attr.titleTextColor,
+                R.drawable.ic_checkmark);
         saveItem.setIcon(compatIcon);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -157,7 +154,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             setSelectionAndFinish();
             return true;
         } else {
-            boolean handled = super.onOptionsItemSelected(item);
+            final boolean handled = super.onOptionsItemSelected(item);
             if (!handled) {
                 onBackPressed();
             }
@@ -167,9 +164,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     @VisibleForTesting
     void initializeCustomerSourceData() {
-        final Customer cachedCustomer = mCustomerSessionProxy == null
-                ? CustomerSession.getInstance().getCachedCustomer()
-                : mCustomerSessionProxy.getCachedCustomer();
+        final Customer cachedCustomer = mCustomerSession.getCachedCustomer();
 
         if (cachedCustomer != null) {
             mCustomer = cachedCustomer;
@@ -179,23 +174,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    @VisibleForTesting
-    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
-        mCustomerSessionProxy = proxy;
-    }
-
     private void initLoggingTokens() {
-        if (mCustomerSessionProxy == null) {
-            if (mStartedFromPaymentSession) {
-                CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
-            }
-            CustomerSession.getInstance().addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
-        } else {
-            if (mStartedFromPaymentSession) {
-                mCustomerSessionProxy.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
-            }
-            mCustomerSessionProxy.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
+        if (mStartedFromPaymentSession) {
+            mCustomerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         }
+        mCustomerSession.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
     }
 
     /**
@@ -214,7 +197,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        CustomerSession.CustomerRetrievalListener listener =
+        final CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
@@ -236,7 +219,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 };
 
         // We only activate this if there is a single source in the list
-        CustomerSource customerSource = customer.getSources().get(0);
+        final CustomerSource customerSource = customer.getSources().get(0);
         if (customerSource == null || customerSource.getId() == null) {
             // If the source ID is null for the only source we have, then there is nothing
             // we can do but update the display. This should not happen. It is only possible
@@ -246,18 +229,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(
-                    this,
-                    customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
-        } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(
-                    customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
-        }
+        mCustomerSession.setCustomerDefaultSource(
+                this,
+                customerSource.getId(),
+                customerSource.getSourceType(),
+                listener);
     }
 
     private void createListFromCustomerSources() {
@@ -320,11 +296,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 };
 
         setCommunicatingProgress(true);
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().retrieveCurrentCustomer(listener);
-        } else {
-            mCustomerSessionProxy.retrieveCurrentCustomer(listener);
-        }
+        mCustomerSession.retrieveCurrentCustomer(listener);
     }
 
     private void setCommunicatingProgress(boolean communicating) {
@@ -343,8 +315,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
-        CustomerSession.CustomerRetrievalListener listener =
+        final CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
+        final CustomerSession.CustomerRetrievalListener listener =
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
@@ -365,15 +337,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (selectedSource == null || selectedSource.getId() == null) {
             return;
         }
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(
-                    this, selectedSource.getId(), selectedSource.getSourceType(), listener);
-        } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(
-                    selectedSource.getId(),
-                    selectedSource.getSourceType(),
-                    listener);
-        }
+        mCustomerSession.setCustomerDefaultSource(
+                this, selectedSource.getId(), selectedSource.getSourceType(), listener);
         setCommunicatingProgress(true);
     }
 
@@ -400,20 +365,5 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
         mMaskedCardAdapter.updateCustomer(customer);
         setCommunicatingProgress(false);
-    }
-
-    interface CustomerSessionProxy {
-        void addProductUsageTokenIfValid(@NonNull String token);
-
-        @Nullable
-        Customer getCachedCustomer();
-
-        void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
-
-        void setCustomerDefaultSource(@NonNull String sourceId,
-                                      @NonNull String sourceType,
-                                      @Nullable CustomerSession.CustomerRetrievalListener listener);
-
-        void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
     }
 }
