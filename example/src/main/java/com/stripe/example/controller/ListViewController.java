@@ -39,7 +39,7 @@ public class ListViewController {
         addToList(token.getCard().getLast4(), token.getId());
     }
 
-    public void addToList(@NonNull String last4, @NonNull String tokenId) {
+    void addToList(@NonNull String last4, @NonNull String tokenId) {
         final Map<String, String> map = new HashMap<>();
         map.put("last4", mResources.getString(R.string.endingIn) + " " + last4);
         map.put("tokenId", tokenId);

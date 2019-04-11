@@ -44,8 +44,10 @@ public class RedirectActivity extends AppCompatActivity {
     private static final String QUERY_CLIENT_SECRET = "client_secret";
     private static final String QUERY_SOURCE_ID = "source";
 
+    @NonNull private final CompositeSubscription mCompositeSubscription =
+            new CompositeSubscription();
+
     private CardInputWidget mCardInputWidget;
-    private CompositeSubscription mCompositeSubscription;
     private RedirectAdapter mRedirectAdapter;
     private ErrorDialogHandler mErrorDialogHandler;
     private RedirectDialogController mRedirectDialogController;
@@ -58,10 +60,10 @@ public class RedirectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polling);
 
-        mCompositeSubscription = new CompositeSubscription();
         mCardInputWidget = findViewById(R.id.card_widget_three_d);
         mErrorDialogHandler = new ErrorDialogHandler(this.getSupportFragmentManager());
-        mProgressDialogController = new ProgressDialogController(this.getSupportFragmentManager());
+        mProgressDialogController = new ProgressDialogController(this.getSupportFragmentManager(),
+                getResources());
         mRedirectDialogController = new RedirectDialogController(this);
         mStripe = new Stripe(getApplicationContext());
 
@@ -113,8 +115,8 @@ public class RedirectActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mCompositeSubscription.unsubscribe();
+        super.onDestroy();
     }
 
     void beginSequence() {
@@ -149,8 +151,7 @@ public class RedirectActivity extends AppCompatActivity {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.setMessageResource(R.string.createSource);
-                        mProgressDialogController.startProgress();
+                        mProgressDialogController.show(R.string.createSource);
                     }
                 })
                 .subscribe(
@@ -176,7 +177,7 @@ public class RedirectActivity extends AppCompatActivity {
                                     // The card Source can be used to create a 3DS Source
                                     createThreeDSecureSource(source.getId());
                                 } else {
-                                    mProgressDialogController.finishProgress();
+                                    mProgressDialogController.dismiss();
                                 }
 
                             }
@@ -184,7 +185,7 @@ public class RedirectActivity extends AppCompatActivity {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getMessage());
+                                mErrorDialogHandler.show(throwable.getMessage());
                             }
                         }
                 ));
@@ -221,7 +222,7 @@ public class RedirectActivity extends AppCompatActivity {
                 .doOnUnsubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.finishProgress();
+                        mProgressDialogController.dismiss();
                     }
                 })
                 .subscribe(
@@ -238,7 +239,7 @@ public class RedirectActivity extends AppCompatActivity {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getMessage());
+                                mErrorDialogHandler.show(throwable.getMessage());
                             }
                         }
                 ));

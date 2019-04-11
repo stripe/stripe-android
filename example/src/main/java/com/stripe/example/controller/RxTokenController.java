@@ -11,6 +11,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
+import com.stripe.example.R;
 
 import java.util.concurrent.Callable;
 
@@ -71,7 +72,7 @@ public class RxTokenController {
     private void saveCard() {
         final Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
-            mErrorDialogHandler.showError("Invalid Card Data");
+            mErrorDialogHandler.show("Invalid Card Data");
             return;
         }
         final Stripe stripe = new Stripe(mContext);
@@ -95,14 +96,14 @@ public class RxTokenController {
                         new Action0() {
                             @Override
                             public void call() {
-                                mProgressDialogController.startProgress();
+                                mProgressDialogController.show(R.string.progressMessage);
                             }
                         })
                 .doOnUnsubscribe(
                         new Action0() {
                             @Override
                             public void call() {
-                                mProgressDialogController.finishProgress();
+                                mProgressDialogController.dismiss();
                             }
                         })
                 .subscribe(
@@ -115,7 +116,7 @@ public class RxTokenController {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
+                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
                             }
                         }));
     }

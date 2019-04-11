@@ -1,7 +1,6 @@
 package com.stripe.example.controller;
 
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 
 import com.stripe.example.R;
@@ -18,9 +17,8 @@ public class ErrorDialogHandler {
         mFragmentManager = fragmentManager;
     }
 
-    public void showError(@NonNull String errorMessage) {
-        DialogFragment fragment = ErrorDialogFragment.newInstance(
-                R.string.validationErrors, errorMessage);
-        fragment.show(mFragmentManager, "error");
+    public void show(@NonNull String errorMessage) {
+        ErrorDialogFragment.newInstance(R.string.validationErrors, errorMessage)
+                .show(mFragmentManager, "error");
     }
 }

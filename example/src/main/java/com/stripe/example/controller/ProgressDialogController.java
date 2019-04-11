@@ -1,6 +1,8 @@
 package com.stripe.example.controller;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentManager;
 
@@ -12,27 +14,28 @@ import com.stripe.example.dialog.ProgressDialogFragment;
  */
 public class ProgressDialogController {
 
+    @NonNull private final Resources mRes;
     @NonNull private final FragmentManager mFragmentManager;
-    private ProgressDialogFragment mProgressFragment;
+    @Nullable private ProgressDialogFragment mProgressFragment;
 
-    public ProgressDialogController(@NonNull FragmentManager fragmentManager) {
+    public ProgressDialogController(@NonNull FragmentManager fragmentManager,
+                                    @NonNull Resources res) {
         mFragmentManager = fragmentManager;
-        mProgressFragment = ProgressDialogFragment.newInstance(R.string.progressMessage);
+        mRes = res;
     }
 
-    public void setMessageResource(@StringRes int resId) {
-        if (mProgressFragment.isVisible()) {
+    public void show(@StringRes int resId) {
+        if (mProgressFragment != null && mProgressFragment.isVisible()) {
             mProgressFragment.dismiss();
             mProgressFragment = null;
         }
-        mProgressFragment = ProgressDialogFragment.newInstance(resId);
-    }
-
-    public void startProgress() {
+        mProgressFragment = ProgressDialogFragment.newInstance(mRes.getString(resId));
         mProgressFragment.show(mFragmentManager, "progress");
     }
 
-    public void finishProgress() {
-        mProgressFragment.dismiss();
+    public void dismiss() {
+        if (mProgressFragment != null) {
+            mProgressFragment.dismiss();
+        }
     }
 }

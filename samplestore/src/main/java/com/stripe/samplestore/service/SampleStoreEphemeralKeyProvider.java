@@ -19,13 +19,12 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
-    private @NonNull
-    CompositeSubscription mCompositeSubscription;
-    private @NonNull StripeService mStripeService;
-    private @NonNull ProgressListener mProgressListener;
+    @NonNull private final CompositeSubscription mCompositeSubscription;
+    @NonNull private final StripeService mStripeService;
+    @NonNull private final ProgressListener mProgressListener;
 
     public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
-        Retrofit retrofit = RetrofitFactory.getInstance();
+        final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
         mCompositeSubscription = new CompositeSubscription();
         mProgressListener = progressListener;
@@ -34,7 +33,7 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
     @Override
     public void createEphemeralKey(@NonNull @Size(min = 4) String apiVersion,
                                    @NonNull final EphemeralKeyUpdateListener keyUpdateListener) {
-        Map<String, String> apiParamMap = new HashMap<>();
+        final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
         mCompositeSubscription.add(
@@ -48,8 +47,7 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
                                     String rawKey = response.string();
                                     keyUpdateListener.onKeyUpdate(rawKey);
                                     mProgressListener.onStringResponse(rawKey);
-                                } catch (IOException iox) {
-
+                                } catch (IOException ignored) {
                                 }
                             }
                         }, new Action1<Throwable>() {
@@ -61,6 +59,6 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
     }
 
     public interface ProgressListener {
-        void onStringResponse(String string);
+        void onStringResponse(@NonNull String string);
     }
 }

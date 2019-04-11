@@ -45,9 +45,11 @@ public class PaymentIntentActivity extends AppCompatActivity {
     private static final String TAG = PaymentIntentActivity.class.getName();
 
     private static final String RETURN_URL = "stripe://payment_intent_return";
+
+    @NonNull private final CompositeSubscription mCompositeSubscription =
+            new CompositeSubscription();
     private ProgressDialogController mProgressDialogController;
     private ErrorDialogHandler mErrorDialogHandler;
-    private CompositeSubscription mCompositeSubscription;
     private Stripe mStripe;
     private StripeService mStripeService;
     private String mClientSecret;
@@ -60,16 +62,15 @@ public class PaymentIntentActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_intent_demo);
-        Button createPaymentIntent = findViewById(R.id.btn_create_payment_intent);
+        final Button createPaymentIntent = findViewById(R.id.btn_create_payment_intent);
         mRetrievePaymentIntent = findViewById(R.id.btn_retrieve_payment_intent);
         mConfirmPaymentIntent = findViewById(R.id.btn_confirm_payment_intent);
         mPaymentIntentValue = findViewById(R.id.payment_intent_value);
         mCardInputWidget = findViewById(R.id.card_input_widget);
-        mProgressDialogController =
-                new ProgressDialogController(getSupportFragmentManager());
 
+        mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
+                getResources());
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
-        mCompositeSubscription = new CompositeSubscription();
         mStripe = new Stripe(getApplicationContext());
         Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
@@ -98,6 +99,13 @@ public class PaymentIntentActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        mCompositeSubscription.unsubscribe();
+        super.onDestroy();
+    }
+
+    @NonNull
     private Map<String, Object> createPaymentIntentParams() {
         final Map<String, Object> params = new HashMap<>();
         params.put("allowed_source_types[]", "card");
@@ -113,14 +121,13 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.setMessageResource(R.string.creating_payment_intent);
-                        mProgressDialogController.startProgress();
+                        mProgressDialogController.show(R.string.creating_payment_intent);
                     }
                 })
                 .doOnUnsubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.finishProgress();
+                        mProgressDialogController.dismiss();
                     }
                 })
                 .subscribe(
@@ -143,7 +150,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
+                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
                             }
                         }
                 );
@@ -165,14 +172,13 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.setMessageResource(R.string.retrieving_payment_intent);
-                        mProgressDialogController.startProgress();
+                        mProgressDialogController.show(R.string.retrieving_payment_intent);
                     }
                 })
                 .doOnUnsubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.finishProgress();
+                        mProgressDialogController.dismiss();
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(
@@ -216,14 +222,13 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.setMessageResource(R.string.confirming_payment_intent);
-                        mProgressDialogController.startProgress();
+                        mProgressDialogController.show(R.string.confirming_payment_intent);
                     }
                 })
                 .doOnUnsubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mProgressDialogController.finishProgress();
+                        mProgressDialogController.dismiss();
                     }
                 })
                 .subscribe(

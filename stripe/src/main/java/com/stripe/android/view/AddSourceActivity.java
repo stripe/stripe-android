@@ -13,10 +13,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.stripe.android.ActivitySourceCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
-import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Card;
@@ -63,25 +63,6 @@ public class AddSourceActivity extends StripeActivity {
                     return false;
                 }
             };
-
-    @NonNull private final SourceCallback mSourceCallback = new SourceCallback() {
-        @Override
-        public void onError(@NonNull Exception error) {
-            setCommunicatingProgress(false);
-            // This error is independent of the CustomerSession, so
-            // we have to surface it here.
-            showError(error.getLocalizedMessage());
-        }
-
-        @Override
-        public void onSuccess(@NonNull Source source) {
-            if (mUpdatesCustomer) {
-                attachCardToCustomer(source);
-            } else {
-                finishWithSource(source);
-            }
-        }
-    };
 
     /**
      * Create an {@link Intent} to start a {@link AddSourceActivity}.
@@ -155,7 +136,7 @@ public class AddSourceActivity extends StripeActivity {
         final SourceParams sourceParams = SourceParams.createCardParams(card);
         setCommunicatingProgress(true);
 
-        stripe.createSource(sourceParams, mSourceCallback);
+        stripe.createSource(sourceParams, new SourceCallbackImpl(this, mUpdatesCustomer));
 
     }
 
@@ -258,5 +239,42 @@ public class AddSourceActivity extends StripeActivity {
 
         void addCustomerSource(String sourceId,
                                @NonNull CustomerSession.SourceRetrievalListener listener);
+    }
+
+    private static final class SourceCallbackImpl
+            extends ActivitySourceCallback<AddSourceActivity> {
+        private final boolean mUpdatesCustomer;
+
+        private SourceCallbackImpl(@NonNull AddSourceActivity activity,
+                                   boolean updatesCustomer) {
+            super(activity);
+            mUpdatesCustomer = updatesCustomer;
+        }
+
+        @Override
+        public void onError(@NonNull Exception error) {
+            final AddSourceActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.setCommunicatingProgress(false);
+            // This error is independent of the CustomerSession, so we have to surface it here.
+            activity.showError(error.getLocalizedMessage());
+        }
+
+        @Override
+        public void onSuccess(@NonNull Source source) {
+            final AddSourceActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            if (mUpdatesCustomer) {
+                activity.attachCardToCustomer(source);
+            } else {
+                activity.finishWithSource(source);
+            }
+        }
     }
 }
