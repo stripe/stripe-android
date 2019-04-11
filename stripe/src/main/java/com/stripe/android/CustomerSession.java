@@ -17,8 +17,6 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -79,10 +77,10 @@ public class CustomerSession
     @Nullable private Customer mCustomer;
     private long mCustomerCacheTime;
     @Nullable private Context mContext;
-    @NonNull private final Map<String, WeakReference<CustomerRetrievalListener>>
-            mCustomerRetrievalListenerRefs = new HashMap<>();
-    @NonNull private final Map<String, WeakReference<SourceRetrievalListener>>
-            mSourceRetrievalListenerRefs = new HashMap<>();
+    @NonNull private final Map<String, CustomerRetrievalListener> mCustomerRetrievalListeners =
+            new HashMap<>();
+    @NonNull private final Map<String, SourceRetrievalListener> mSourceRetrievalListeners =
+            new HashMap<>();
 
     @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
     @NonNull private final Handler mUiThreadHandler;
@@ -134,8 +132,8 @@ public class CustomerSession
     @VisibleForTesting
     static void clearInstance() {
         if (mInstance != null) {
-            mInstance.mCustomerRetrievalListenerRefs.clear();
-            mInstance.mSourceRetrievalListenerRefs.clear();
+            mInstance.mCustomerRetrievalListeners.clear();
+            mInstance.mSourceRetrievalListeners.clear();
         }
         cancelCallbacks();
         setInstance(null);
@@ -202,7 +200,7 @@ public class CustomerSession
             mCustomer = null;
 
             final String operationId = UUID.randomUUID().toString();
-            mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+            mCustomerRetrievalListeners.put(operationId, listener);
             mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
         }
     }
@@ -217,7 +215,7 @@ public class CustomerSession
         mCustomer = null;
 
         final String operationId = UUID.randomUUID().toString();
-        mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+        mCustomerRetrievalListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
     }
 
@@ -256,7 +254,7 @@ public class CustomerSession
 
         final String operationId = UUID.randomUUID().toString();
         if (listener != null) {
-            mSourceRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+            mSourceRetrievalListeners.put(operationId, listener);
         }
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_ADD_SOURCE, arguments);
     }
@@ -278,7 +276,7 @@ public class CustomerSession
 
         final String operationId = UUID.randomUUID().toString();
         if (listener != null) {
-            mSourceRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+            mSourceRetrievalListeners.put(operationId, listener);
         }
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
     }
@@ -319,7 +317,7 @@ public class CustomerSession
 
         final String operationId = UUID.randomUUID().toString();
         if (listener != null) {
-            mCustomerRetrievalListenerRefs.put(operationId, new WeakReference<>(listener));
+            mCustomerRetrievalListeners.put(operationId, listener);
         }
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_SET_DEFAULT_SOURCE,
                 arguments);
@@ -629,16 +627,15 @@ public class CustomerSession
     private void handleRetrievalError(@Nullable String operationId,
                                       @NonNull StripeException exception,
                                       int errorType) {
-        final WeakReference<? extends RetrievalListener> listenerRef;
+        final RetrievalListener listener;
         if (errorType == SOURCE_ERROR) {
-            listenerRef = mSourceRetrievalListenerRefs.remove(operationId);
+            listener = mSourceRetrievalListeners.remove(operationId);
         } else if (errorType == CUSTOMER_ERROR) {
-            listenerRef = mCustomerRetrievalListenerRefs.remove(operationId);
+            listener = mCustomerRetrievalListeners.remove(operationId);
         } else {
-            listenerRef = null;
+            listener = null;
         }
 
-        final RetrievalListener listener = listenerRef != null ? listenerRef.get() : null;
         if (listener != null) {
             final int errorCode = exception.getStatusCode() == null
                     ? 400
@@ -758,16 +755,12 @@ public class CustomerSession
 
     @Nullable
     private CustomerRetrievalListener getCustomerRetrievalListener(@Nullable String operationId) {
-        final Reference<CustomerRetrievalListener> listenerRef =
-                mCustomerRetrievalListenerRefs.remove(operationId);
-        return listenerRef != null ? listenerRef.get() : null;
+        return mCustomerRetrievalListeners.remove(operationId);
     }
 
     @Nullable
     private SourceRetrievalListener getSourceRetrievalListener(@Nullable String operationId) {
-        final Reference<SourceRetrievalListener> listenerRef =
-                mSourceRetrievalListenerRefs.remove(operationId);
-        return listenerRef != null ? listenerRef.get() : null;
+        return mSourceRetrievalListeners.remove(operationId);
     }
 
     public interface CustomerRetrievalListener extends RetrievalListener {
