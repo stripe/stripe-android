@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### 8.7.0 2019-04-12
+* Fix garbage-collection issues with `Stripe` callbacks [#863]
+* Fix race-conditions with `CustomerSession` listeners [#856]
+* Correctly parse JSON when creating or deleting customer card source [#857]
+* Fix crash on some devices (e.g. Meizu) related to `TextInputEditText` [#858]
+* Improve `PaymentMethodCreateParams.Card` creation [#862]
+* Update `PaymentIntent#Status` enum [#870]
+* Fix some memory leak issues in example app [#865]
+
 ### 8.6.0 2019-04-05
 * Downgrade from AndroidX to Android Support Library [#849]
 * Add setter for custom CVC field label on `CardMultilineWidget` [#843]
