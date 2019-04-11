@@ -947,7 +947,7 @@ public class Stripe {
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
-        @NonNull private final WeakReference<SourceCallback> mSourceCallbackRef;
+        @NonNull private final SourceCallback mSourceCallback;
 
         CreateSourceTask(@NonNull Context context,
                          @NonNull StripeApiHandler apiHandler,
@@ -960,7 +960,7 @@ public class Stripe {
             mSourceParams = sourceParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
-            mSourceCallbackRef = new WeakReference<>(sourceCallback);
+            mSourceCallback = sourceCallback;
         }
 
         @Override
@@ -981,13 +981,10 @@ public class Stripe {
 
         @Override
         protected void onPostExecute(@NonNull ResponseWrapper responseWrapper) {
-            final SourceCallback sourceCallback = mSourceCallbackRef.get();
-            if (sourceCallback != null) {
-                if (responseWrapper.source != null) {
-                    sourceCallback.onSuccess(responseWrapper.source);
-                } else if (responseWrapper.error != null) {
-                    sourceCallback.onError(responseWrapper.error);
-                }
+            if (responseWrapper.source != null) {
+                mSourceCallback.onSuccess(responseWrapper.source);
+            } else if (responseWrapper.error != null) {
+                mSourceCallback.onError(responseWrapper.error);
             }
         }
     }
@@ -999,7 +996,7 @@ public class Stripe {
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
         @NonNull @Token.TokenType private final String mTokenType;
-        @NonNull private final WeakReference<TokenCallback> mCallbackRef;
+        @NonNull private final TokenCallback mCallback;
         @Nullable private final StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
 
         CreateTokenTask(@NonNull Context context,
@@ -1008,7 +1005,7 @@ public class Stripe {
                 @NonNull final String publishableKey,
                 @Nullable final String stripeAccount,
                 @NonNull @Token.TokenType final String tokenType,
-                @Nullable final TokenCallback callback,
+                @NonNull final TokenCallback callback,
                 @Nullable final StripeApiHandler.LoggingResponseListener loggingResponseListener) {
             mContextRef = new WeakReference<>(context);
             mApiHandler = apiHandler;
@@ -1017,7 +1014,7 @@ public class Stripe {
             mStripeAccount = stripeAccount;
             mTokenType = tokenType;
             mLoggingResponseListener = loggingResponseListener;
-            mCallbackRef = new WeakReference<>(callback);
+            mCallback = callback;
         }
 
         @Override
@@ -1043,16 +1040,13 @@ public class Stripe {
         }
 
         private void tokenTaskPostExecution(@NonNull ResponseWrapper result) {
-            final TokenCallback callback = mCallbackRef.get();
-            if (callback != null) {
-                if (result.token != null) {
-                    callback.onSuccess(result.token);
-                } else if (result.error != null) {
-                    callback.onError(result.error);
-                } else {
-                    callback.onError(new RuntimeException("Somehow got neither a token response or"
-                            + " an error response"));
-                }
+            if (result.token != null) {
+                mCallback.onSuccess(result.token);
+            } else if (result.error != null) {
+                mCallback.onError(result.error);
+            } else {
+                mCallback.onError(new RuntimeException(
+                        "Somehow got neither a token response or an error response"));
             }
         }
     }
