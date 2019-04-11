@@ -294,7 +294,9 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private Map<String, Object> createParams(long price, String sourceId, String customerId, ShippingInformation shippingInformation){
+    @NonNull
+    private Map<String, Object> createParams(long price, String sourceId, String customerId,
+                                             ShippingInformation shippingInformation) {
         Map<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
         params.put("source", sourceId);
@@ -372,57 +374,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void setupPaymentSession() {
         mPaymentSession = new PaymentSession(this);
-        mPaymentSession.init(new PaymentSession.PaymentSessionListener() {
-            @Override
-            public void onCommunicatingStateChanged(boolean isCommunicating) {
-                if (isCommunicating) {
-                    mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
-                } else {
-                    mProgressDialogFragment.dismiss();
-                }
-            }
-
-            @Override
-            public void onError(int errorCode, @Nullable String errorMessage) {
-                displayError(errorMessage);
-            }
-
-            @Override
-            public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
-                if (data.getShippingMethod() != null) {
-                    mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
-                    mShippingCosts = data.getShippingMethod().getAmount();
-                    addCartItems();
-                    updateConfirmPaymentButton();
-                }
-
-                if (data.getSelectedPaymentMethodId() != null) {
-                    CustomerSession.getInstance().retrieveCurrentCustomer(new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            String sourceId = customer.getDefaultSource();
-                            if (sourceId == null) {
-                                displayError("No payment method selected");
-                                return;
-                            }
-                            CustomerSource source = customer.getSourceById(sourceId);
-                            mEnterPaymentInfo.setText(formatSourceDescription(source.asSource()));
-                        }
-
-                        @Override
-                        public void onError(int httpCode, @Nullable String errorMessage,
-                                            @Nullable StripeError stripeError) {
-                            displayError(errorMessage);
-                        }
-                    });
-                }
-
-                if (data.isPaymentReadyToCharge()) {
-                    mConfirmPaymentButton.setEnabled(true);
-                }
-
-            }
-        }, new PaymentSessionConfig.Builder().build());
+        mPaymentSession.init(new PaymentSessionListenerImpl(this),
+                new PaymentSessionConfig.Builder().build());
     }
 
     private String formatSourceDescription(Source source) {
@@ -446,4 +399,83 @@ public class PaymentActivity extends AppCompatActivity {
         return shippingMethods;
     }
 
+    private void onCommunicatingStateChanged(boolean isCommunicating) {
+        if (isCommunicating) {
+            mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
+        } else {
+            mProgressDialogFragment.dismiss();
+        }
+    }
+
+    private void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
+        if (data.getShippingMethod() != null) {
+            mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
+            mShippingCosts = data.getShippingMethod().getAmount();
+            addCartItems();
+            updateConfirmPaymentButton();
+        }
+
+        if (data.getSelectedPaymentMethodId() != null) {
+            CustomerSession.getInstance().retrieveCurrentCustomer(
+                    new CustomerSession.CustomerRetrievalListener() {
+                        @Override
+                        public void onCustomerRetrieved(@NonNull Customer customer) {
+                            final String sourceId = customer.getDefaultSource();
+                            if (sourceId == null) {
+                                displayError("No payment method selected");
+                                return;
+                            }
+                            final CustomerSource source = customer.getSourceById(sourceId);
+                            mEnterPaymentInfo.setText(formatSourceDescription(source.asSource()));
+                        }
+
+                        @Override
+                        public void onError(int httpCode, @Nullable String errorMessage,
+                                            @Nullable StripeError stripeError) {
+                            displayError(errorMessage);
+                        }
+                    });
+        }
+
+        if (data.isPaymentReadyToCharge()) {
+            mConfirmPaymentButton.setEnabled(true);
+        }
+    }
+
+    private static final class PaymentSessionListenerImpl
+            extends PaymentSession.ActivityPaymentSessionListener<PaymentActivity> {
+        private PaymentSessionListenerImpl(@NonNull PaymentActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCommunicatingStateChanged(boolean isCommunicating) {
+            final PaymentActivity activity = getListenerActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.onCommunicatingStateChanged(isCommunicating);
+        }
+
+        @Override
+        public void onError(int errorCode, @Nullable String errorMessage) {
+            final PaymentActivity activity = getListenerActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.displayError(errorMessage);
+        }
+
+        @Override
+        public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
+            final PaymentActivity activity = getListenerActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.onPaymentSessionDataChanged(data);
+        }
+    }
 }

@@ -19,9 +19,9 @@ import com.stripe.android.view.CardInputWidget;
  */
 public class AsyncTaskTokenController {
 
-    @NonNull private final Context mContext;
+    @NonNull private final Stripe mStripe;
     @NonNull private final ErrorDialogHandler mErrorDialogHandler;
-    @NonNull private ListViewController mOutputListController;
+    @NonNull private final ListViewController mOutputListController;
     @NonNull private final ProgressDialogController mProgressDialogController;
 
     @Nullable private CardInputWidget mCardInputWidget;
@@ -34,7 +34,7 @@ public class AsyncTaskTokenController {
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController) {
         mCardInputWidget = cardInputWidget;
-        mContext = context;
+        mStripe = new Stripe(context);
         mErrorDialogHandler = errorDialogHandler;
         mProgressDialogController = progressDialogController;
         mOutputListController = outputListController;
@@ -52,21 +52,21 @@ public class AsyncTaskTokenController {
     }
 
     private void saveCard() {
-        Card cardToSave = mCardInputWidget.getCard();
+        final Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.showError("Invalid Card Data");
             return;
         }
         mProgressDialogController.startProgress();
-        new Stripe(mContext).createToken(
+        mStripe.createToken(
                 cardToSave,
                 PaymentConfiguration.getInstance().getPublishableKey(),
                 new TokenCallback() {
-                    public void onSuccess(Token token) {
+                    public void onSuccess(@NonNull Token token) {
                         mOutputListController.addToList(token);
                         mProgressDialogController.finishProgress();
                     }
-                    public void onError(Exception error) {
+                    public void onError(@NonNull Exception error) {
                         mErrorDialogHandler.showError(error.getLocalizedMessage());
                         mProgressDialogController.finishProgress();
                     }

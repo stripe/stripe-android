@@ -12,6 +12,8 @@ import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Represents a single start-to-finish payment operation.
  */
@@ -28,6 +30,7 @@ public class PaymentSession {
 
     @NonNull private final Activity mHostActivity;
     @NonNull private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    @NonNull private final CustomerSession mCustomerSession;
     private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
     private PaymentSessionConfig mPaymentSessionConfig;
@@ -42,6 +45,7 @@ public class PaymentSession {
      */
     public PaymentSession(@NonNull Activity hostActivity) {
         mHostActivity = hostActivity;
+        mCustomerSession = CustomerSession.getInstance();
         mPaymentMethodsActivityStarter = new PaymentMethodsActivityStarter(hostActivity);
         mPaymentSessionData = new PaymentSessionData();
     }
@@ -57,7 +61,7 @@ public class PaymentSession {
                     @Override
                     public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
                         mPaymentSessionData.setPaymentResult(paymentResult);
-                        CustomerSession.getInstance().resetUsageTokens();
+                        mCustomerSession.resetUsageTokens();
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener
                                     .onPaymentSessionDataChanged(mPaymentSessionData);
@@ -87,9 +91,9 @@ public class PaymentSession {
                     return true;
                 }
                 case PAYMENT_SHIPPING_DETAILS_REQUEST: {
-                    PaymentSessionData paymentSessionData = data.getParcelableExtra(
+                    final PaymentSessionData paymentSessionData = data.getParcelableExtra(
                             PAYMENT_SESSION_DATA_KEY);
-                    updateIsPaymentReadyToCharge(mPaymentSessionConfig, paymentSessionData);
+                    paymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
                     mPaymentSessionData = paymentSessionData;
                     if (mPaymentSessionListener != null) {
                         mPaymentSessionListener.onPaymentSessionDataChanged(paymentSessionData);
@@ -102,29 +106,6 @@ public class PaymentSession {
             }
         }
         return false;
-    }
-
-    /**
-     * Function that looks at the {@link PaymentSessionConfig} and determines whether the data in
-     * the provided {@link PaymentSessionData} is ready to charge.
-     * Return with whether the data is ready to charge.
-     *
-     * @param paymentSessionConfig specifies what data is required.
-     * @param paymentSessionData holds the data that has been collected.
-     * @return whether the data in the provided {@link PaymentSessionData} is ready to charge.
-     */
-    public boolean updateIsPaymentReadyToCharge(@NonNull PaymentSessionConfig paymentSessionConfig,
-                                                @NonNull PaymentSessionData paymentSessionData) {
-        if (StripeTextUtils.isBlank(paymentSessionData.getSelectedPaymentMethodId()) ||
-                (paymentSessionConfig.isShippingInfoRequired() &&
-                        paymentSessionData.getShippingInformation() == null) ||
-                (paymentSessionConfig.isShippingMethodRequired() &&
-                        paymentSessionData.getShippingMethod() == null)) {
-            paymentSessionData.setPaymentReadyToCharge(false);
-            return false;
-        }
-        paymentSessionData.setPaymentReadyToCharge(true);
-        return true;
     }
 
     /**
@@ -165,9 +146,9 @@ public class PaymentSession {
         // will throw a runtime exception if none is ready.
         try {
             if (savedInstanceState == null) {
-                CustomerSession.getInstance().resetUsageTokens();
+                mCustomerSession.resetUsageTokens();
             }
-            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+            mCustomerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         } catch (IllegalStateException illegalState) {
             mPaymentSessionListener = null;
             return false;
@@ -248,13 +229,13 @@ public class PaymentSession {
         if (mPaymentSessionListener != null) {
             mPaymentSessionListener.onCommunicatingStateChanged(true);
         }
-        CustomerSession.getInstance().retrieveCurrentCustomer(
+        mCustomerSession.retrieveCurrentCustomer(
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
                         String paymentId = customer.getDefaultSource();
                         mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
-                        updateIsPaymentReadyToCharge(mPaymentSessionConfig, mPaymentSessionData);
+                        mPaymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener
                                     .onPaymentSessionDataChanged(mPaymentSessionData);
@@ -303,4 +284,23 @@ public class PaymentSession {
         void onPaymentSessionDataChanged(@NonNull PaymentSessionData data);
     }
 
+    /**
+     * Abstract implementation of {@link PaymentSessionListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivityPaymentSessionListener<A extends Activity>
+            implements PaymentSessionListener {
+
+        @NonNull
+        private final WeakReference<A> mActivityRef;
+
+        public ActivityPaymentSessionListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getListenerActivity() {
+            return mActivityRef.get();
+        }
+    }
 }

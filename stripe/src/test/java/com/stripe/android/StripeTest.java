@@ -55,10 +55,10 @@ public class StripeTest {
     private static final Card DEFAULT_CARD = new Card(null, null, null, null);
     private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
         @Override
-        public void onError(Exception error) {
+        public void onError(@NonNull Exception error) {
         }
         @Override
-        public void onSuccess(Token token) {
+        public void onSuccess(@NonNull Token token) {
         }
     };
 
@@ -140,12 +140,12 @@ public class StripeTest {
         Stripe stripe = new Stripe(mContext);
         stripe.createToken(DEFAULT_CARD, new TokenCallback() {
             @Override
-            public void onError(Exception error) {
+            public void onError(@NonNull Exception error) {
                 fail("Should not call method");
             }
 
             @Override
-            public void onSuccess(Token token) {
+            public void onSuccess(@NonNull Token token) {
                 fail("Should not call method");
             }
         });
