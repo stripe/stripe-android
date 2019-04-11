@@ -165,10 +165,10 @@ public class PaymentActivity extends AppCompatActivity {
      */
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mCompositeSubscription.unsubscribe();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         mPaymentSession.onDestroy();
+        super.onDestroy();
     }
 
     @Override
