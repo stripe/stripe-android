@@ -141,6 +141,24 @@ public class PaymentSessionData implements Parcelable {
         mShippingTotal = shippingTotal;
     }
 
+    /**
+     * Function that looks at the {@link PaymentSessionConfig} and determines whether the data is
+     * ready to charge.
+     *
+     * @param config specifies what data is required
+     * @return whether the data is ready to charge
+     */
+    public boolean updateIsPaymentReadyToCharge(@NonNull PaymentSessionConfig config) {
+        if (StripeTextUtils.isBlank(getSelectedPaymentMethodId()) ||
+                (config.isShippingInfoRequired() && getShippingInformation() == null) ||
+                (config.isShippingMethodRequired() && getShippingMethod() == null)) {
+            setPaymentReadyToCharge(false);
+            return false;
+        }
+        setPaymentReadyToCharge(true);
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -204,7 +222,7 @@ public class PaymentSessionData implements Parcelable {
         }
     };
 
-    private PaymentSessionData(Parcel in) {
+    private PaymentSessionData(@NonNull Parcel in) {
         mCartTotal = in.readLong();
         mIsPaymentReadyToCharge = in.readInt() == 1;
         mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
