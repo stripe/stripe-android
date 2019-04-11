@@ -2,6 +2,7 @@ package com.stripe.samplestore;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -116,9 +117,11 @@ public class StoreActivity
                 new SampleStoreEphemeralKeyProvider(
                         new SampleStoreEphemeralKeyProvider.ProgressListener() {
                             @Override
-                            public void onStringResponse(String string) {
+                            public void onStringResponse(@NonNull String string) {
                                 if (string.startsWith("Error: ")) {
-                                    new AlertDialog.Builder(StoreActivity.this).setMessage(string).show();
+                                    new AlertDialog.Builder(StoreActivity.this)
+                                            .setMessage(string)
+                                            .show();
                                 }
                             }
                         }));

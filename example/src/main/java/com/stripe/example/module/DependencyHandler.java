@@ -26,7 +26,7 @@ public class DependencyHandler {
     @Nullable private AsyncTaskTokenController mAsyncTaskController;
     @NonNull private final CardInputWidget mCardInputWidget;
     @NonNull private final Context mContext;
-    @NonNull private final ProgressDialogController mProgresDialogController;
+    @NonNull private final ProgressDialogController mProgressDialogController;
     @NonNull private final ErrorDialogHandler mErrorDialogHandler;
     @Nullable private IntentServiceTokenController mIntentServiceTokenController;
     @NonNull private final ListViewController mListViewController;
@@ -40,8 +40,10 @@ public class DependencyHandler {
         mCardInputWidget = cardInputWidget;
         mContext = activity.getApplicationContext();
 
-        mProgresDialogController =
-                new ProgressDialogController(activity.getSupportFragmentManager());
+        mProgressDialogController = new ProgressDialogController(
+                activity.getSupportFragmentManager(),
+                activity.getResources()
+        );
 
         mListViewController = new ListViewController(outputListView);
 
@@ -64,7 +66,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mAsyncTaskController;
     }
@@ -89,7 +91,7 @@ public class DependencyHandler {
                     mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mIntentServiceTokenController;
     }
@@ -112,7 +114,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mRxTokenController;
     }

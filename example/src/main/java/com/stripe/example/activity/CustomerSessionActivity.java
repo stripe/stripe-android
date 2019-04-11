@@ -50,7 +50,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
                         @Override
                         public void onStringResponse(String string) {
                             if (string.startsWith("Error: ")) {
-                                mErrorDialogHandler.showError(string);
+                                mErrorDialogHandler.show(string);
                             }
                         }
                     }));
@@ -68,7 +68,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
                     public void onError(int httpCode, @Nullable String errorMessage,
                                         @Nullable StripeError stripeError) {
                         mSelectSourceButton.setEnabled(false);
-                        mErrorDialogHandler.showError(errorMessage);
+                        mErrorDialogHandler.show(errorMessage);
                         mProgressBar.setVisibility(View.INVISIBLE);
                     }
                 });

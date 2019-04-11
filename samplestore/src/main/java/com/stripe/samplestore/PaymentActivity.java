@@ -61,8 +61,10 @@ public class PaymentActivity extends AppCompatActivity {
     private static final String TOTAL_LABEL = "Total:";
     private static final String SHIPPING = "Shipping";
 
+    @NonNull private final CompositeSubscription mCompositeSubscription =
+            new CompositeSubscription();
+
     private BroadcastReceiver mBroadcastReceiver;
-    private CompositeSubscription mCompositeSubscription;
     private ProgressDialogFragment mProgressDialogFragment;
 
     private LinearLayout mCartItemLayout;
@@ -93,10 +95,9 @@ public class PaymentActivity extends AppCompatActivity {
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
         addCartItems();
-        mCompositeSubscription = new CompositeSubscription();
 
-        mProgressDialogFragment =
-                ProgressDialogFragment.newInstance(R.string.completing_purchase);
+        mProgressDialogFragment = ProgressDialogFragment
+                .newInstance(getString(R.string.completing_purchase));
 
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
@@ -165,10 +166,7 @@ public class PaymentActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
-            mCompositeSubscription = null;
-        }
+        mCompositeSubscription.unsubscribe();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         mPaymentSession.onDestroy();
     }

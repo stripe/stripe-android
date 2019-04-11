@@ -1,6 +1,7 @@
 package com.stripe.example.activity;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
@@ -37,7 +38,9 @@ public class PaymentMultilineActivity extends AppCompatActivity {
     ErrorDialogHandler mErrorDialogHandler;
 
     CardMultilineWidget mCardMultilineWidget;
-    CompositeSubscription mCompositeSubscription;
+
+    @NonNull private final CompositeSubscription mCompositeSubscription =
+            new CompositeSubscription();
 
     private SimpleAdapter mSimpleAdapter;
     private List<Map<String, String>> mCardSources= new ArrayList<>();
@@ -47,11 +50,10 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_multiline);
 
-        mCompositeSubscription = new CompositeSubscription();
         mCardMultilineWidget = findViewById(R.id.card_multiline_widget);
 
-        mProgressDialogController =
-                new ProgressDialogController(getSupportFragmentManager());
+        mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
+                getResources());
 
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
 
@@ -100,14 +102,14 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                         new Action0() {
                             @Override
                             public void call() {
-                                mProgressDialogController.startProgress();
+                                mProgressDialogController.show(R.string.progressMessage);
                             }
                         })
                 .doOnUnsubscribe(
                         new Action0() {
                             @Override
                             public void call() {
-                                mProgressDialogController.finishProgress();
+                                mProgressDialogController.dismiss();
                             }
                         })
                 .subscribe(
@@ -120,7 +122,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                         new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                mErrorDialogHandler.showError(throwable.getLocalizedMessage());
+                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
                             }
                         }));
     }
@@ -139,4 +141,9 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         mSimpleAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    protected void onDestroy() {
+        mCompositeSubscription.unsubscribe();
+        super.onDestroy();
+    }
 }

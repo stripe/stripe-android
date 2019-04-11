@@ -123,7 +123,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                             @Override
                             public void onStringResponse(String string) {
                                 if (string.startsWith("Error: ")) {
-                                    mErrorDialogHandler.showError(string);
+                                    mErrorDialogHandler.show(string);
                                 }
                             }
                         }));
@@ -142,7 +142,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                         mCustomer = null;
                         mSelectPaymentButton.setEnabled(false);
                         mSelectShippingButton.setEnabled(false);
-                        mErrorDialogHandler.showError(errorMessage);
+                        mErrorDialogHandler.show(errorMessage);
                         mProgressBar.setVisibility(View.INVISIBLE);
                     }
                 });
@@ -287,7 +287,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.mErrorDialogHandler.showError(errorMessage);
+            activity.mErrorDialogHandler.show(errorMessage);
         }
 
         @Override
