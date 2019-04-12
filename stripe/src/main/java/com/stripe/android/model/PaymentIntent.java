@@ -448,8 +448,15 @@ public class PaymentIntent extends StripeJsonModel {
         RequiresPaymentMethod("requires_payment_method"),
         Succeeded("succeeded"),
 
+        /**
+         * @deprecated use {@link #RequiresPaymentMethod}
+         */
         @Deprecated
         RequiresSource("requires_source"),
+
+        /**
+         * @deprecated use {@link #RequiresAction}
+         */
         @Deprecated
         RequiresSourceAction("requires_source_action");
 
