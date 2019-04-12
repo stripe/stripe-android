@@ -435,11 +435,23 @@ public class PaymentIntent extends StripeJsonModel {
         }
     }
 
+    /**
+     * See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status
+     */
     public enum Status {
-        RequiresSource("requires_source"),
+        Canceled("canceled"),
+        Processing("processing"),
+        RequiresAction("requires_action"),
+        RequiresAuthorization("requires_authorization"),
+        RequiresCapture("requires_capture"),
+        RequiresConfirmation("requires_confirmation"),
         RequiresPaymentMethod("requires_payment_method"),
-        RequiresSourceAction("requires_source_action"),
-        RequiresAction("requires_action");
+        Succeeded("succeeded"),
+
+        @Deprecated
+        RequiresSource("requires_source"),
+        @Deprecated
+        RequiresSourceAction("requires_source_action");
 
         @NonNull
         public final String code;
