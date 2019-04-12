@@ -10,7 +10,6 @@ import android.support.annotation.VisibleForTesting;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.stripe.android.ActivitySourceCallback;
@@ -42,7 +41,6 @@ public class AddSourceActivity extends StripeActivity {
 
     @Nullable private CardMultilineWidget mCardMultilineWidget;
     @Nullable private CustomerSessionProxy mCustomerSessionProxy;
-    private FrameLayout mErrorLayout;
     @Nullable private StripeProvider mStripeProvider;
 
     private boolean mStartedFromPaymentSession;
@@ -90,8 +88,7 @@ public class AddSourceActivity extends StripeActivity {
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         initEnterListeners();
-        mErrorLayout = findViewById(R.id.add_source_error_container);
-        boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
+        final boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mStartedFromPaymentSession =
                 getIntent().getBooleanExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
@@ -123,7 +120,7 @@ public class AddSourceActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-        final Card card = mCardMultilineWidget.getCard();
+        final Card card = mCardMultilineWidget != null ? mCardMultilineWidget.getCard() : null;
         if (card == null) {
             // In this case, the error will be displayed on the card widget itself.
             return;
@@ -142,20 +139,7 @@ public class AddSourceActivity extends StripeActivity {
 
     private void attachCardToCustomer(@NonNull final StripePaymentSource source) {
         final CustomerSession.SourceRetrievalListener listener =
-                new CustomerSession.SourceRetrievalListener() {
-                    @Override
-                    public void onSourceRetrieved(@NonNull Source source) {
-                        finishWithSource(source);
-                    }
-
-                    @Override
-                    public void onError(int errorCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        // No need to show this error, because it will be broadcast
-                        // from the CustomerSession
-                        setCommunicatingProgress(false);
-                    }
-                };
+                new SourceRetrievalListenerImpl(this);
 
         if (mCustomerSessionProxy == null) {
             @Source.SourceType final String sourceType;
@@ -275,6 +259,36 @@ public class AddSourceActivity extends StripeActivity {
             } else {
                 activity.finishWithSource(source);
             }
+        }
+    }
+
+    private static final class SourceRetrievalListenerImpl
+            extends CustomerSession.ActivitySourceRetrievalListener<AddSourceActivity> {
+        private SourceRetrievalListenerImpl(@NonNull AddSourceActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onSourceRetrieved(@NonNull Source source) {
+            final AddSourceActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.finishWithSource(source);
+        }
+
+        @Override
+        public void onError(int errorCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final AddSourceActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            // No need to show this error, because it will be broadcast
+            // from the CustomerSession
+            activity.setCommunicatingProgress(false);
         }
     }
 }

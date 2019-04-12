@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -774,6 +776,24 @@ public class CustomerSession
     interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
+    }
+
+    /**
+     * Abstract implementation of {@link SourceRetrievalListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivitySourceRetrievalListener<A extends Activity>
+            implements SourceRetrievalListener {
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivitySourceRetrievalListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
     }
 
     private static class CustomerMessage {
