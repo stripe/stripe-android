@@ -295,7 +295,7 @@ public class PaymentActivity extends AppCompatActivity {
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
-        final Observable<Void> stripeResponse = stripeService.createQueryCharge(
+        final Observable<Void> stripeResponse = stripeService.capturePayment(
                 createParams(price, sourceId, customerId, shippingInformation));
         final FragmentManager fragmentManager = getSupportFragmentManager();
         mCompositeSubscription.add(stripeResponse
