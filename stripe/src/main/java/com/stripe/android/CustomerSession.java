@@ -765,6 +765,21 @@ public class CustomerSession
         return mSourceRetrievalListeners.remove(operationId);
     }
 
+    public abstract static class ActivityCustomerRetrievalListener<A extends Activity>
+            implements CustomerRetrievalListener {
+
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityCustomerRetrievalListener(@NonNull A activity) {
+            mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
+    }
+
     public interface CustomerRetrievalListener extends RetrievalListener {
         void onCustomerRetrieved(@NonNull Customer customer);
     }

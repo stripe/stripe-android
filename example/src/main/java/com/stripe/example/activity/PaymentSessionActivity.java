@@ -74,24 +74,26 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
+
+        final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-                ShippingInformation shippingInformation = intent
+                final ShippingInformation shippingInformation = intent
                         .getParcelableExtra(EXTRA_SHIPPING_INFO_DATA);
-                Intent shippingInfoProcessedIntent = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
+                final Intent shippingInfoProcessedIntent =
+                        new Intent(EVENT_SHIPPING_INFO_PROCESSED);
                 if (!isValidShippingInfo(shippingInformation)) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 } else {
-                    ArrayList<ShippingMethod> shippingMethods = createSampleShippingMethods();
+                    final ArrayList<ShippingMethod> shippingMethods = createSampleShippingMethods();
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
                     shippingInfoProcessedIntent.putParcelableArrayListExtra(
                             EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
                     shippingInfoProcessedIntent.putExtra(EXTRA_DEFAULT_SHIPPING_METHOD,
                             shippingMethods.get(1));
                 }
-                LocalBroadcastManager.getInstance(PaymentSessionActivity.this)
-                        .sendBroadcast(shippingInfoProcessedIntent);
+                localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent);
             }
 
             private boolean isValidShippingInfo(@NonNull ShippingInformation shippingInfo) {
@@ -99,7 +101,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                         Locale.US.getCountry().equals(shippingInfo.getAddress().getCountry());
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+        localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
         mSelectPaymentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,32 +130,18 @@ public class PaymentSessionActivity extends AppCompatActivity {
                             }
                         }));
         CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                        setupPaymentSession();
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        mCustomer = null;
-                        mSelectPaymentButton.setEnabled(false);
-                        mSelectShippingButton.setEnabled(false);
-                        mErrorDialogHandler.show(errorMessage);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
+                new InitialCustomerRetrievalListener(this));
     }
 
     private void setupPaymentSession() {
         mPaymentSession = new PaymentSession(this);
-        boolean paymentSessionInitialized = mPaymentSession.init(new PaymentSessionListenerImpl(this), new PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD, ShippingInfoWidget.CITY_FIELD)
-                .build());
+        final boolean paymentSessionInitialized = mPaymentSession.init(
+                new PaymentSessionListenerImpl(this),
+                new PaymentSessionConfig.Builder()
+                        .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                        .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD,
+                                ShippingInfoWidget.CITY_FIELD)
+                        .build());
         if (paymentSessionInitialized) {
             mSelectPaymentButton.setEnabled(true);
             mSelectShippingButton.setEnabled(true);
@@ -161,37 +149,16 @@ public class PaymentSessionActivity extends AppCompatActivity {
         }
     }
 
-    private void checkForCustomerUpdates() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                        if (mPaymentSessionData != null) {
-                            mResultTitleTextView.setVisibility(View.VISIBLE);
-                            mResultTextView.setText(formatStringResults(mPaymentSessionData));
-                        }
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-    }
-
     @NonNull
     private String formatStringResults(@NonNull PaymentSessionData data) {
-        Currency currency = Currency.getInstance("USD");
-        StringBuilder stringBuilder = new StringBuilder();
+        final Currency currency = Currency.getInstance("USD");
+        final StringBuilder stringBuilder = new StringBuilder();
 
         if (data.getSelectedPaymentMethodId() != null && mCustomer != null) {
-            CustomerSource source = mCustomer.getSourceById(data.getSelectedPaymentMethodId());
+            final CustomerSource source = mCustomer
+                    .getSourceById(data.getSelectedPaymentMethodId());
             if (source != null) {
-                Source cardSource = source.asSource();
+                final Source cardSource = source.asSource();
                 stringBuilder.append("Payment Info:\n");
                 if (cardSource != null) {
                     SourceCardData scd = (SourceCardData) cardSource.getSourceTypeModel();
@@ -260,7 +227,9 @@ public class PaymentSessionActivity extends AppCompatActivity {
 
     private void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
         mPaymentSessionData = data;
-        checkForCustomerUpdates();
+        mProgressBar.setVisibility(View.VISIBLE);
+        CustomerSession.getInstance().retrieveCurrentCustomer(
+                new PaymentSessionChangeCustomerRetrievalListener(this));
     }
 
     private static final class PaymentSessionListenerImpl
@@ -298,6 +267,75 @@ public class PaymentSessionActivity extends AppCompatActivity {
             }
 
             activity.onPaymentSessionDataChanged(data);
+        }
+    }
+
+    private static final class InitialCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity> {
+        private InitialCustomerRetrievalListener(@NonNull PaymentSessionActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentSessionActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.mCustomer = customer;
+            activity.mProgressBar.setVisibility(View.INVISIBLE);
+            activity.setupPaymentSession();
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentSessionActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.mCustomer = null;
+            activity.mSelectPaymentButton.setEnabled(false);
+            activity.mSelectShippingButton.setEnabled(false);
+            activity.mErrorDialogHandler.show(errorMessage);
+            activity.mProgressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private static final class PaymentSessionChangeCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity> {
+        private PaymentSessionChangeCustomerRetrievalListener(
+                @NonNull PaymentSessionActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentSessionActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.mCustomer = customer;
+            activity.mProgressBar.setVisibility(View.INVISIBLE);
+            if (activity.mPaymentSessionData != null) {
+                activity.mResultTitleTextView.setVisibility(View.VISIBLE);
+                activity.mResultTextView.setText(
+                        activity.formatStringResults(activity.mPaymentSessionData));
+            }
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentSessionActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.mProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 }
