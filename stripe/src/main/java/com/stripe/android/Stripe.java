@@ -25,13 +25,10 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
-import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
 import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
 
@@ -43,6 +40,7 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
  */
 public class Stripe {
 
+    @NonNull
     private final SourceCreator mSourceCreator = new SourceCreator() {
         @Override
         public void create(
@@ -51,7 +49,7 @@ public class Stripe {
                 @Nullable final String stripeAccount,
                 @Nullable Executor executor,
                 @NonNull final SourceCallback sourceCallback) {
-            executeTask(executor, new CreateSourceTask(mContext, mApiHandler, sourceParams,
+            executeTask(executor, new CreateSourceTask(mApiHandler, sourceParams,
                     publishableKey, stripeAccount, sourceCallback));
         }
     };
@@ -66,16 +64,17 @@ public class Stripe {
                 @NonNull @Token.TokenType final String tokenType,
                 @Nullable final Executor executor,
                 @NonNull final TokenCallback callback) {
-            executeTask(executor, new CreateTokenTask(mContext, mApiHandler, tokenParams,
+            executeTask(executor, new CreateTokenTask(mApiHandler, tokenParams,
                     publishableKey, stripeAccount, tokenType, callback, mLoggingResponseListener));
         }
     };
 
-    @NonNull private final Context mContext;
     @Nullable private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
     private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final LoggingUtils mLoggingUtils;
+    @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
 
     /**
      * A constructor with only context, to set the key later.
@@ -83,8 +82,9 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        mContext = context.getApplicationContext();
-        mApiHandler = new StripeApiHandler();
+        mApiHandler = new StripeApiHandler(context);
+        mLoggingUtils = new LoggingUtils(context);
+        mStripeNetworkUtils = new StripeNetworkUtils(context);
     }
 
     /**
@@ -94,8 +94,9 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, String publishableKey) {
-        mContext = context.getApplicationContext();
-        mApiHandler = new StripeApiHandler();
+        mApiHandler = new StripeApiHandler(context);
+        mLoggingUtils = new LoggingUtils(context);
+        mStripeNetworkUtils = new StripeNetworkUtils(context);
         setDefaultPublishableKey(publishableKey);
     }
 
@@ -133,7 +134,7 @@ public class Stripe {
         }
 
         createTokenFromParams(
-                hashMapFromBankAccount(mContext, bankAccount),
+                mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 publishableKey,
                 Token.TYPE_BANK_ACCOUNT,
                 executor,
@@ -231,8 +232,7 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
-                hashMapFromBankAccount(mContext, bankAccount),
+                mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 requestOptions,
                 Token.TYPE_BANK_ACCOUNT,
                 mLoggingResponseListener);
@@ -365,7 +365,7 @@ public class Stripe {
         }
 
         createTokenFromParams(
-                hashMapFromCard(mContext, card),
+                mStripeNetworkUtils.hashMapFromCard(card),
                 publishableKey,
                 Token.TYPE_CARD,
                 executor,
@@ -420,8 +420,7 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return mApiHandler.createSource(
-                null, mContext, params, apiKey, mStripeAccount, mLoggingResponseListener);
+        return mApiHandler.createSource(params, apiKey, mStripeAccount, mLoggingResponseListener);
     }
 
     /**
@@ -444,7 +443,6 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.retrievePaymentIntent(
-                mContext,
                 paymentIntentParams,
                 publishableKey,
                 mStripeAccount,
@@ -471,8 +469,6 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.confirmPaymentIntent(
-                null,
-                mContext,
                 paymentIntentParams,
                 publishableKey,
                 mStripeAccount,
@@ -498,7 +494,7 @@ public class Stripe {
             @NonNull String publishableKey)
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
-        return mApiHandler.createPaymentMethod(paymentMethodCreateParams, mContext,
+        return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
                 publishableKey, mStripeAccount, mLoggingResponseListener);
     }
 
@@ -552,8 +548,7 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
-                hashMapFromCard(mContext, card),
+                mStripeNetworkUtils.hashMapFromCard(card),
                 requestOptions,
                 Token.TYPE_CARD,
                 mLoggingResponseListener);
@@ -607,7 +602,6 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
                 hashMapFromPersonalId(personalId),
                 requestOptions,
                 Token.TYPE_PII,
@@ -665,7 +659,6 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
                 mapFromCvc(cvc),
                 requestOptions,
                 Token.TYPE_CVC_UPDATE,
@@ -728,7 +721,6 @@ public class Stripe {
                 .build();
         try {
             return mApiHandler.createToken(
-                    mContext,
                     accountParams.toParamMap(),
                     requestOptions,
                     Token.TYPE_ACCOUNT,
@@ -752,15 +744,13 @@ public class Stripe {
         final Map<String, Object> loggingMap;
         if (paymentSource instanceof Token) {
             Token token = (Token) paymentSource;
-            loggingMap = LoggingUtils.getTokenCreationParams(
-                    mContext,
+            loggingMap = mLoggingUtils.getTokenCreationParams(
                     productUsageTokens,
                     mDefaultPublishableKey,
                     token.getType());
         } else {
             Source source = (Source) paymentSource;
-            loggingMap = LoggingUtils.getSourceCreationParams(
-                    mContext,
+            loggingMap = mLoggingUtils.getSourceCreationParams(
                     productUsageTokens,
                     mDefaultPublishableKey,
                     source.getType());
@@ -942,20 +932,17 @@ public class Stripe {
     }
 
     private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper> {
-        @NonNull private final WeakReference<Context> mContextRef;
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
         @NonNull private final SourceCallback mSourceCallback;
 
-        CreateSourceTask(@NonNull Context context,
-                         @NonNull StripeApiHandler apiHandler,
+        CreateSourceTask(@NonNull StripeApiHandler apiHandler,
                          @NonNull SourceParams sourceParams,
                          @NonNull String publishableKey,
                          @Nullable String stripeAccount,
                          @NonNull SourceCallback sourceCallback) {
-            mContextRef = new WeakReference<>(context);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
             mPublishableKey = publishableKey;
@@ -967,8 +954,6 @@ public class Stripe {
         protected ResponseWrapper doInBackground(Void... params) {
             try {
                 final Source source = mApiHandler.createSource(
-                        null,
-                        mContextRef.get(),
                         mSourceParams,
                         mPublishableKey,
                         mStripeAccount,
@@ -990,7 +975,6 @@ public class Stripe {
     }
 
     private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper> {
-        @NonNull private final WeakReference<Context> mContextRef;
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final String mPublishableKey;
@@ -999,7 +983,7 @@ public class Stripe {
         @NonNull private final TokenCallback mCallback;
         @Nullable private final StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
 
-        CreateTokenTask(@NonNull Context context,
+        CreateTokenTask(
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull final Map<String, Object> tokenParams,
                 @NonNull final String publishableKey,
@@ -1007,7 +991,6 @@ public class Stripe {
                 @NonNull @Token.TokenType final String tokenType,
                 @NonNull final TokenCallback callback,
                 @Nullable final StripeApiHandler.LoggingResponseListener loggingResponseListener) {
-            mContextRef = new WeakReference<>(context);
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
             mPublishableKey = publishableKey;
@@ -1023,7 +1006,6 @@ public class Stripe {
                 final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
                         mStripeAccount, RequestOptions.TYPE_QUERY).build();
                 final Token token = mApiHandler.createToken(
-                        mContextRef.get(),
                         mTokenParams,
                         requestOptions,
                         mTokenType,

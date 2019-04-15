@@ -119,7 +119,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
     }
 
     private void setupCustomerSession() {
-        CustomerSession.initCustomerSession(
+        CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
                         new ExampleEphemeralKeyProvider.ProgressListener() {
                             @Override

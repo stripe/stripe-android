@@ -153,7 +153,6 @@ public class AddSourceActivity extends StripeActivity {
             }
 
             CustomerSession.getInstance().addCustomerSource(
-                    this,
                     source.getId(),
                     sourceType,
                     listener);

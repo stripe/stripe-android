@@ -77,14 +77,22 @@ class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
+    @NonNull private final Context mContext;
     @NonNull private final ApiVersion mApiVersion;
+    @NonNull private final LoggingUtils mLoggingUtils;
+    @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
+    @NonNull private final StripeNetworkUtils mNetworkUtils;
 
-    StripeApiHandler() {
-        this(ApiVersion.getDefault());
+    StripeApiHandler(@NonNull Context context) {
+        this(context, ApiVersion.getDefault());
     }
 
-    private StripeApiHandler(@NonNull ApiVersion apiVersion) {
+    private StripeApiHandler(@NonNull Context context, @NonNull ApiVersion apiVersion) {
+        mContext = context.getApplicationContext();
         mApiVersion = apiVersion;
+        mLoggingUtils = new LoggingUtils(context);
+        mTelemetryClientUtil = new TelemetryClientUtil(context);
+        mNetworkUtils = new StripeNetworkUtils(context);
     }
 
     void logApiCall(
@@ -107,8 +115,6 @@ class StripeApiHandler {
     /**
      * Confirm a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
      *
-     * @param uidProvider a provider for UUID items in test
-     * @param context a {@link Context} object for acquiring resources
      * @param paymentIntentParams contains the confirmation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
@@ -118,8 +124,6 @@ class StripeApiHandler {
      */
     @Nullable
     PaymentIntent confirmPaymentIntent(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
             @Nullable String stripeAccount,
@@ -129,7 +133,7 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
-        StripeNetworkUtils.addUidParamsToPaymentIntent(uidProvider, context, paramMap);
+        mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY)
                 .build();
@@ -140,11 +144,11 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
+            setTelemetryData(loggingResponseListener);
             final SourceParams sourceParams = paymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
-            final Map<String, Object> loggingParams = LoggingUtils
-                    .getPaymentIntentConfirmationParams(context, null, apiKey, sourceType);
+            final Map<String, Object> loggingParams = mLoggingUtils
+                    .getPaymentIntentConfirmationParams(null, apiKey, sourceType);
             RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
             logApiCall(loggingParams, loggingOptions, loggingResponseListener);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
@@ -161,15 +165,13 @@ class StripeApiHandler {
 
     /**
      * Retrieve a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
-     *  @param context a {@link Context} object for acquiring resources
-     * @param paymentIntentParams contains the retrieval params
+     *  @param paymentIntentParams contains the retrieval params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
      * @param loggingResponseListener a listener for logging responses
      */
     @Nullable
     PaymentIntent retrievePaymentIntent(
-            @NonNull Context context,
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
             @Nullable String stripeAccount,
@@ -188,9 +190,9 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
-            final Map<String, Object> loggingParams =
-                    LoggingUtils.getPaymentIntentRetrieveParams(context, null, apiKey);
+            setTelemetryData(loggingResponseListener);
+            final Map<String, Object> loggingParams = mLoggingUtils
+                    .getPaymentIntentRetrieveParams(null, apiKey);
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
             logApiCall(loggingParams, loggingOptions, loggingResponseListener);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
@@ -208,8 +210,6 @@ class StripeApiHandler {
     /**
      * Create a {@link Source} using the input {@link SourceParams}.
      *
-     * @param uidProvider a provider for UUID items in test
-     * @param context a {@link Context} object for acquiring resources
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
@@ -223,8 +223,6 @@ class StripeApiHandler {
      */
     @Nullable
     Source createSource(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
             @Nullable String stripeAccount,
@@ -234,8 +232,6 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         return createSource(
-                uidProvider,
-                context,
                 sourceParams,
                 publishableKey,
                 stripeAccount,
@@ -246,8 +242,6 @@ class StripeApiHandler {
     @VisibleForTesting
     @Nullable
     Source createSource(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
             @Nullable String stripeAccount,
@@ -258,7 +252,7 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
-        StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
+        mNetworkUtils.addUidParams(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
@@ -268,9 +262,8 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
-            final Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
-                    context,
+            setTelemetryData(loggingResponseListener);
+            final Map<String, Object> loggingParams = mLoggingUtils.getSourceCreationParams(
                     null,
                     apiKey,
                     sourceParams.getType());
@@ -335,7 +328,6 @@ class StripeApiHandler {
     @Nullable
     PaymentMethod createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull Context context,
             @NonNull String publishableKey,
             @Nullable String stripeAccount,
             @Nullable LoggingResponseListener loggingResponseListener)
@@ -346,7 +338,7 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
 
-        StripeNetworkUtils.addUidParams(null, context, params);
+        mNetworkUtils.addUidParams(params);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
@@ -355,9 +347,9 @@ class StripeApiHandler {
             return null;
         }
 
-        setTelemetryData(context, loggingResponseListener);
-        final Map<String, Object> loggingParams = LoggingUtils.getPaymentMethodCreationParams(
-                context, null, apiKey);
+        setTelemetryData(loggingResponseListener);
+        final Map<String, Object> loggingParams = mLoggingUtils.getPaymentMethodCreationParams(
+                null, apiKey);
         final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
         logApiCall(loggingParams, loggingOptions, loggingResponseListener);
 
@@ -374,7 +366,6 @@ class StripeApiHandler {
     /**
      * Create a {@link Token} using the input token parameters.
      *
-     * @param context the {@link Context} in which this method is working
      * @param tokenParams a mapped set of parameters representing the object for which this token
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
@@ -392,7 +383,6 @@ class StripeApiHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     Token createToken(
-            @NonNull Context context,
             @NonNull Map<String, Object> tokenParams,
             @NonNull RequestOptions options,
             @NonNull @Token.TokenType String tokenType,
@@ -413,10 +403,10 @@ class StripeApiHandler {
                     (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
-            setTelemetryData(context, listener);
+            setTelemetryData(listener);
 
             final Map<String, Object> loggingParams =
-                    LoggingUtils.getTokenCreationParams(context, loggingTokens, apiKey, tokenType);
+                    mLoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
             logApiCall(loggingParams, options, listener);
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
@@ -428,7 +418,6 @@ class StripeApiHandler {
 
     @Nullable
     Source addCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
@@ -444,14 +433,12 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("source", sourceId);
 
-        if (context != null) {
-            final Map<String, Object> loggingParamsMap = LoggingUtils.getAddSourceParams(
-                    context, productUsageTokens, publicKey, sourceType);
+        final Map<String, Object> loggingParamsMap = mLoggingUtils.getAddSourceParams(
+                productUsageTokens, publicKey, sourceType);
 
-            // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-            logApiCall(loggingParamsMap, loggingOptions, listener);
-        }
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions, listener);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -465,7 +452,6 @@ class StripeApiHandler {
 
     @Nullable
     Source deleteCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
@@ -478,14 +464,12 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         final Map<String, Object> paramsMap = new HashMap<>();
-        if (context != null) {
-            final Map<String, Object> loggingParamsMap =
-                    LoggingUtils.getDeleteSourceParams(context, productUsageTokens, publicKey);
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDeleteSourceParams(productUsageTokens, publicKey);
 
-            // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-            logApiCall(loggingParamsMap, loggingOptions, listener);
-        }
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions, listener);
 
         final StripeResponse response = getStripeResponse(
                 DELETE,
@@ -499,7 +483,6 @@ class StripeApiHandler {
 
     @Nullable
     Customer setDefaultCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
@@ -516,19 +499,15 @@ class StripeApiHandler {
         paramsMap.put("default_source", sourceId);
 
         // Context can be nullable because this action is performed with only a weak reference
-        if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
-            final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context.getApplicationContext(),
-                    productUsageTokens,
-                    sourceType,
-                    null,
-                    publicKey,
-                    LoggingUtils.EVENT_DEFAULT_SOURCE);
+        final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(
+                productUsageTokens,
+                sourceType,
+                null,
+                publicKey, LoggingUtils.EVENT_DEFAULT_SOURCE);
 
-            logApiCall(loggingParameters, loggingOptions, listener);
-        }
+        logApiCall(loggingParameters, loggingOptions, listener);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -543,7 +522,6 @@ class StripeApiHandler {
 
     @Nullable
     Customer setCustomerShippingInfo(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
@@ -559,19 +537,15 @@ class StripeApiHandler {
         paramsMap.put("shipping", shippingInformation.toMap());
 
         // Context can be nullable because this action is performed with only a weak reference
-        if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
-            final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context.getApplicationContext(),
-                    productUsageTokens,
-                    null,
-                    null,
-                    publicKey,
-                    LoggingUtils.EVENT_SET_SHIPPING_INFO);
+        final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publicKey, LoggingUtils.EVENT_SET_SHIPPING_INFO);
 
-            logApiCall(loggingParameters, loggingOptions, listener);
-        }
+        logApiCall(loggingParameters, loggingOptions, listener);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -674,11 +648,6 @@ class StripeApiHandler {
     @VisibleForTesting
     String getPaymentMethodsUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, PAYMENT_METHODS);
-    }
-
-    @NonNull
-    private String createPaymentIntentUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/payment_intents", LIVE_API_BASE);
     }
 
     @NonNull
@@ -1260,9 +1229,8 @@ class StripeApiHandler {
         return Token.fromString(response.getResponseBody());
     }
 
-    private void setTelemetryData(@NonNull Context context,
-                                         @Nullable LoggingResponseListener listener) {
-        final Map<String, Object> telemetry = TelemetryClientUtil.createTelemetryMap(context);
+    private void setTelemetryData(@Nullable LoggingResponseListener listener) {
+        final Map<String, Object> telemetry = mTelemetryClientUtil.createTelemetryMap();
         StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
         if (listener != null && !listener.shouldLogTest()) {
             return;
@@ -1270,7 +1238,7 @@ class StripeApiHandler {
 
         final RequestOptions options =
                 RequestOptions.builder(null, RequestOptions.TYPE_JSON)
-                        .setGuid(TelemetryClientUtil.getHashedId(context))
+                        .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
         fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
     }

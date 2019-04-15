@@ -1,11 +1,12 @@
 package com.stripe.android;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -92,7 +93,6 @@ public class PaymentSessionTest {
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(firstCustomer, secondCustomer);
         when(mApiHandler.addCustomerSource(
-                any(Context.class),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -102,7 +102,6 @@ public class PaymentSessionTest {
                 ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
                 .thenReturn(addedSource);
         when(mApiHandler.setDefaultCustomerSource(
-                any(Context.class),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -304,7 +303,7 @@ public class PaymentSessionTest {
 
     @NonNull
     private CustomerSession createCustomerSession() {
-        return new CustomerSession(mEphemeralKeyProvider, null, mThreadPoolExecutor,
-                mApiHandler);
+        return new CustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler);
     }
 }

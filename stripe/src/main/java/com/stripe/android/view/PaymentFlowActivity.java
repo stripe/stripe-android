@@ -144,7 +144,6 @@ public class PaymentFlowActivity extends StripeActivity {
 
     private void onShippingInfoValidated() {
         CustomerSession.getInstance().setCustomerShippingInformation(
-                this,
                 mShippingInformationSubmitted);
     }
 
