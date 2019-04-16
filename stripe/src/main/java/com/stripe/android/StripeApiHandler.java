@@ -57,15 +57,12 @@ import javax.net.ssl.SSLSocketFactory;
 class StripeApiHandler {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            GET,
-            POST,
-            DELETE
-    })
-    @interface RestMethod { }
-    static final String GET = "GET";
-    static final String POST = "POST";
-    static final String DELETE = "DELETE";
+    @StringDef({RestMethod.GET, RestMethod.POST, RestMethod.DELETE})
+    @interface RestMethod {
+        String GET = "GET";
+        String POST = "POST";
+        String DELETE = "DELETE";
+    }
 
     private static final String LIVE_API_BASE = "https://api.stripe.com";
     private static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
@@ -115,7 +112,7 @@ class StripeApiHandler {
             return false;
         }
 
-        return fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options);
+        return fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, RestMethod.GET, options);
     }
 
     /**
@@ -158,7 +155,7 @@ class StripeApiHandler {
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
             final StripeResponse response = requestData(
-                    POST, confirmPaymentIntentUrl(paymentIntentId), paramMap, options);
+                    RestMethod.POST, confirmPaymentIntentUrl(paymentIntentId), paramMap, options);
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -199,7 +196,7 @@ class StripeApiHandler {
             logApiCall(loggingParams, loggingOptions);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
-            final StripeResponse response = requestData(GET,
+            final StripeResponse response = requestData(RestMethod.GET,
                     retrievePaymentIntentUrl(paymentIntentId), paramMap, options);
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
@@ -249,7 +246,8 @@ class StripeApiHandler {
                     sourceParams.getType());
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
             logApiCall(loggingParams, loggingOptions);
-            final StripeResponse response = requestData(POST, getSourcesUrl(), paramMap, options);
+            final StripeResponse response = requestData(RestMethod.POST, getSourcesUrl(), paramMap,
+                    options);
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -261,8 +259,8 @@ class StripeApiHandler {
     /**
      * Retrieve an existing {@link Source} object from the server.
      *
-     * @param sourceId the {@link Source#mId} field for the Source to query
-     * @param clientSecret the {@link Source#mClientSecret} field for the Source to query
+     * @param sourceId the {@link Source#getId()} field for the Source to query
+     * @param clientSecret the {@link Source#getClientSecret()} field for the Source to query
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
      * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
@@ -292,8 +290,8 @@ class StripeApiHandler {
                    RequestOptions.TYPE_QUERY).build();
        }
        try {
-           final StripeResponse response =
-                   requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
+           final StripeResponse response = requestData(RestMethod.GET,
+                   getRetrieveSourceApiUrl(sourceId), paramMap, options);
            return Source.fromString(response.getResponseBody());
        } catch (CardException unexpected) {
            // This particular kind of exception should not be possible from a Source API endpoint.
@@ -330,8 +328,8 @@ class StripeApiHandler {
         logApiCall(loggingParams, loggingOptions);
 
         try {
-            final StripeResponse response = requestData(POST, getPaymentMethodsUrl(), params,
-                    options);
+            final StripeResponse response = requestData(RestMethod.POST, getPaymentMethodsUrl(),
+                    params, options);
             return PaymentMethod.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
@@ -413,7 +411,7 @@ class StripeApiHandler {
         logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RestMethod.POST,
                 getAddCustomerSourceUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -434,7 +432,6 @@ class StripeApiHandler {
             APIException,
             AuthenticationException,
             CardException {
-        final Map<String, Object> paramsMap = new HashMap<>();
         final Map<String, Object> loggingParamsMap =
                 mLoggingUtils.getDeleteSourceParams(productUsageTokens, publicKey);
 
@@ -443,9 +440,9 @@ class StripeApiHandler {
         logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                DELETE,
+                RestMethod.DELETE,
                 getDeleteCustomerSourceUrl(customerId, sourceId),
-                paramsMap,
+                null,
                 RequestOptions.builder(secret).build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -479,7 +476,7 @@ class StripeApiHandler {
         logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RestMethod.POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -515,7 +512,7 @@ class StripeApiHandler {
         logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RestMethod.POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -533,7 +530,7 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         final StripeResponse response = getStripeResponse(
-                GET,
+                RestMethod.GET,
                 getRetrieveCustomerUrl(customerId),
                 null,
                 RequestOptions.builder(secret).build());
@@ -541,28 +538,12 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
-    @NonNull
-    String createQuery(@Nullable Map<String, Object> params)
-            throws UnsupportedEncodingException, InvalidRequestException {
-        final StringBuilder queryStringBuffer = new StringBuilder();
-        final List<Parameter> flatParams = flattenParams(params);
-
-        for (Parameter flatParam : flatParams) {
-            if (queryStringBuffer.length() > 0) {
-                queryStringBuffer.append("&");
-            }
-            queryStringBuffer.append(urlEncodePair(flatParam.key, flatParam.value));
-        }
-
-        return queryStringBuffer.toString();
-    }
-
     @VisibleForTesting
     void start3ds2Auth(@NonNull Stripe3DS2AuthParams authParams,
                        @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
-        final StripeResponse response = getStripeResponse(POST,
+        final StripeResponse response = getStripeResponse(RestMethod.POST,
                 getApiUrl("3ds2/authenticate"),
                 authParams.toParamMap(),
                 RequestOptions.builder(publishableKey).build()
@@ -589,8 +570,7 @@ class StripeApiHandler {
      * @return https://api.stripe.com/v1/payment_methods
      */
     @NonNull
-    @VisibleForTesting
-    String getPaymentMethodsUrl() {
+    private String getPaymentMethodsUrl() {
         return getApiUrl(PAYMENT_METHODS);
     }
 
@@ -745,48 +725,6 @@ class StripeApiHandler {
         return jsonArray;
     }
 
-    @NonNull
-    private HttpURLConnection createDeleteConnection(
-            @NonNull String url,
-            @NonNull RequestOptions options) throws IOException {
-        final HttpURLConnection conn = mConnectionFactory.create(url, options);
-        conn.setRequestMethod(DELETE);
-        return conn;
-    }
-
-    @NonNull
-    private HttpURLConnection createGetConnection(
-            @NonNull String url,
-            @NonNull String query,
-            @NonNull RequestOptions options) throws IOException {
-        final HttpURLConnection conn = mConnectionFactory.create(formatURL(url, query), options);
-        conn.setRequestMethod(GET);
-        return conn;
-    }
-
-    @NonNull
-    private HttpURLConnection createPostConnection(
-            @NonNull String url,
-            @Nullable Map<String, Object> params,
-            @NonNull RequestOptions options) throws IOException, InvalidRequestException {
-        final HttpURLConnection conn = mConnectionFactory.create(url, options);
-
-        conn.setDoOutput(true);
-        conn.setRequestMethod(POST);
-        conn.setRequestProperty("Content-Type", getContentType(options));
-
-        OutputStream output = null;
-        try {
-            output = conn.getOutputStream();
-            output.write(getOutputBytes(params, options));
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        return conn;
-    }
-
     /**
      * @return true if a request was made and it was successful
      */
@@ -832,128 +770,6 @@ class StripeApiHandler {
         return isSuccessful;
     }
 
-    @NonNull
-    private List<Parameter> flattenParams(@Nullable Map<String, Object> params)
-            throws InvalidRequestException {
-        return flattenParamsMap(params, null);
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsList(@NonNull List<?> params,
-                                              @NonNull String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams = new LinkedList<>();
-
-        // Because application/x-www-form-urlencoded cannot represent an empty
-        // list, convention is to take the list parameter and just set it to an
-        // empty string. (e.g. A regular list might look like `a[]=1&b[]=2`.
-        // Emptying it would look like `a=`.)
-        if (params.isEmpty()) {
-            flatParams.add(new Parameter(keyPrefix, ""));
-        } else {
-            final String newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix);
-            for (Object param : params) {
-                flatParams.addAll(flattenParamsValue(param, newPrefix));
-            }
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsMap(@Nullable Map<String, Object> params,
-                                             @Nullable String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams = new LinkedList<>();
-        if (params == null) {
-            return flatParams;
-        }
-
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            final String key = entry.getKey();
-            final Object value = entry.getValue();
-            final String newPrefix;
-            if (keyPrefix != null) {
-                newPrefix = String.format(Locale.ROOT, "%s[%s]", keyPrefix, key);
-            } else {
-                newPrefix = key;
-            }
-
-            flatParams.addAll(flattenParamsValue(value, newPrefix));
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsValue(@NonNull Object value,
-                                               @Nullable String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams;
-        if (value instanceof Map<?, ?>) {
-            flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
-        } else if (value instanceof List<?>) {
-            flatParams = flattenParamsList((List<?>) value, keyPrefix);
-        } else if ("".equals(value)) {
-            throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty " +
-                    "string. " + "We interpret empty strings as null in requests. " + "You may " +
-                    "set '" + keyPrefix + "' to null to delete the property.", keyPrefix, null,
-                    0, null, null, null, null);
-        } else if (value == null) {
-            flatParams = new LinkedList<>();
-            flatParams.add(new Parameter(keyPrefix, ""));
-        } else {
-            flatParams = new LinkedList<>();
-            flatParams.add(new Parameter(keyPrefix, value.toString()));
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private String formatURL(@NonNull String url, @Nullable String query) {
-        if (query == null || query.isEmpty()) {
-            return url;
-        } else {
-            // In some cases, URL can already contain a question mark (eg, upcoming invoice lines)
-            String separator = url.contains("?") ? "&" : "?";
-            return String.format(Locale.ROOT, "%s%s%s", url, separator, query);
-        }
-    }
-
-    @NonNull
-    private String getContentType(@NonNull RequestOptions options) {
-        if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-            return String.format(Locale.ROOT, "application/json; charset=%s", CHARSET);
-        } else {
-            return String.format(Locale.ROOT, "application/x-www-form-urlencoded;charset=%s",
-                    CHARSET);
-        }
-    }
-
-    @NonNull
-    private byte[] getOutputBytes(
-            @Nullable Map<String, Object> params,
-            @NonNull RequestOptions options) throws InvalidRequestException {
-        try {
-            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                JSONObject jsonData = mapToJsonObject(params);
-                if (jsonData == null) {
-                    throw new InvalidRequestException("Unable to create JSON data from parameters. "
-                            + "Please contact support@stripe.com for assistance.",
-                            null, null, 0, null, null, null, null);
-                }
-                return jsonData.toString().getBytes(CHARSET);
-            } else {
-                return createQuery(params).getBytes(CHARSET);
-            }
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidRequestException("Unable to encode parameters to " + CHARSET + "." +
-                    " Please contact support@stripe.com for assistance.",
-                    null, null, 0, null, null, null, e);
-        }
-    }
-
     @Nullable
     private String getResponseBody(@NonNull InputStream responseStream)
             throws IOException {
@@ -967,7 +783,7 @@ class StripeApiHandler {
 
     @NonNull
     private StripeResponse getStripeResponse(
-            @RestMethod String method,
+            @RestMethod @NonNull String method,
             @NonNull String url,
             @Nullable Map<String, Object> params,
             @NonNull RequestOptions options)
@@ -976,22 +792,26 @@ class StripeApiHandler {
         HttpURLConnection conn = null;
         try {
             switch (method) {
-                case GET:
-                    conn = createGetConnection(url, createQuery(params), options);
+                case RestMethod.GET: {
+                    conn = mConnectionFactory.create(RestMethod.GET, url, params, options);
                     break;
-                case POST:
-                    conn = createPostConnection(url, params, options);
+                }
+                case RestMethod.POST: {
+                    conn = mConnectionFactory.create(RestMethod.POST, url, params, options);
                     break;
-                case DELETE:
-                    conn = createDeleteConnection(url, options);
+                }
+                case RestMethod.DELETE: {
+                    conn = mConnectionFactory.create(RestMethod.DELETE, url, null, options);
                     break;
-                default:
+                }
+                default: {
                     throw new APIConnectionException(
                             String.format(Locale.ENGLISH,
                                     "Unrecognized HTTP method %s. "
                                             + "This indicates a bug in the Stripe bindings. "
                                             + "Please contact support@stripe.com for assistance.",
                                     method));
+                }
             }
             // trigger the request
             final int rCode = conn.getResponseCode();
@@ -1097,21 +917,9 @@ class StripeApiHandler {
         }
 
         final StripeResponse response = getStripeResponse(method, url, params, options);
-
-        final int rCode = response.getResponseCode();
-        final String rBody = response.getResponseBody();
-
-        final Map<String, List<String>> headers = response.getResponseHeaders();
-        final List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
-        final String requestId;
-        if (requestIdList != null && requestIdList.size() > 0) {
-            requestId = requestIdList.get(0);
-        } else {
-            requestId = null;
-        }
-
-        if (rCode < 200 || rCode >= 300) {
-            handleAPIError(rBody, rCode, requestId);
+        if (response.hasErrorCode()) {
+            handleAPIError(response.getResponseBody(), response.getResponseCode(),
+                    response.getRequestId());
         }
 
         if (allowedToSetTTL) {
@@ -1124,6 +932,7 @@ class StripeApiHandler {
                         originalDNSCacheTTL);
             }
         }
+
         return response;
     }
 
@@ -1134,7 +943,7 @@ class StripeApiHandler {
             @NonNull RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-        final StripeResponse response = requestData(StripeApiHandler.POST, url, params, options);
+        final StripeResponse response = requestData(RestMethod.POST, url, params, options);
         return Token.fromString(response.getResponseBody());
     }
 
@@ -1149,24 +958,7 @@ class StripeApiHandler {
                 RequestOptions.builder(null, RequestOptions.TYPE_JSON)
                         .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
-        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options);
-    }
-
-    @NonNull
-    private String urlEncodePair(@NonNull String k, @NonNull String v)
-            throws UnsupportedEncodingException {
-        return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v));
-    }
-
-    @Nullable
-    private String urlEncode(@Nullable String str) throws UnsupportedEncodingException {
-        // Preserve original behavior that passing null for an object id will lead
-        // to us actually making a request to /v1/foo/null
-        if (str == null) {
-            return null;
-        } else {
-            return URLEncoder.encode(str, CHARSET);
-        }
+        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, RestMethod.POST, options);
     }
 
     private static final class Parameter {
@@ -1194,9 +986,12 @@ class StripeApiHandler {
         }
 
         @NonNull
-        private HttpURLConnection create(@NonNull String url, @NonNull RequestOptions options)
-                throws IOException {
-            final URL stripeURL = new URL(url);
+        private HttpURLConnection create(@RestMethod @NonNull String method,
+                                         @NonNull String url,
+                                         @Nullable Map<String, Object> params,
+                                         @NonNull RequestOptions options)
+                throws IOException, InvalidRequestException {
+            final URL stripeURL = new URL(getUrl(method, url, params));
             final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
             conn.setConnectTimeout(30 * 1000);
             conn.setReadTimeout(80 * 1000);
@@ -1216,7 +1011,48 @@ class StripeApiHandler {
                 ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
             }
 
+            conn.setRequestMethod(method);
+
+            if (RestMethod.POST.equals(method)) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", getContentType(options));
+
+                OutputStream output = null;
+                try {
+                    output = conn.getOutputStream();
+                    output.write(getOutputBytes(params, options));
+                } finally {
+                    if (output != null) {
+                        output.close();
+                    }
+                }
+            }
+
             return conn;
+        }
+
+        @NonNull
+        private String getUrl(@RestMethod @NonNull String method,
+                              @NonNull String url,
+                              @Nullable Map<String, Object> params)
+                throws UnsupportedEncodingException, InvalidRequestException {
+            if (RestMethod.GET.equals(method)) {
+                return formatUrl(url, createQuery(params));
+            }
+
+            return url;
+        }
+
+        @NonNull
+        private String formatUrl(@NonNull String url, @Nullable String query) {
+            if (query == null || query.isEmpty()) {
+                return url;
+            } else {
+                // In some cases, URL can already contain a question mark
+                // (eg, upcoming invoice lines)
+                final String separator = url.contains("?") ? "&" : "?";
+                return String.format(Locale.ROOT, "%s%s%s", url, separator, query);
+            }
         }
 
         private boolean urlNeedsHeaderData(@NonNull String url) {
@@ -1232,6 +1068,227 @@ class StripeApiHandler {
                 @NonNull RequestOptions options) {
             if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
                 connection.setRequestProperty("Cookie", "m=" + options.getGuid());
+            }
+        }
+
+        @NonNull
+        private String getContentType(@NonNull RequestOptions options) {
+            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
+                return String.format(Locale.ROOT, "application/json; charset=%s", CHARSET);
+            } else {
+                return String.format(Locale.ROOT, "application/x-www-form-urlencoded;charset=%s",
+                        CHARSET);
+            }
+        }
+
+        @NonNull
+        private byte[] getOutputBytes(
+                @Nullable Map<String, Object> params,
+                @NonNull RequestOptions options) throws InvalidRequestException {
+            try {
+                if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
+                    JSONObject jsonData = mapToJsonObject(params);
+                    if (jsonData == null) {
+                        throw new InvalidRequestException("Unable to create JSON data from " +
+                                "parameters. Please contact support@stripe.com for assistance.",
+                                null, null, 0, null, null, null, null);
+                    }
+                    return jsonData.toString().getBytes(CHARSET);
+                } else {
+                    return createQuery(params).getBytes(CHARSET);
+                }
+            } catch (UnsupportedEncodingException e) {
+                throw new InvalidRequestException("Unable to encode parameters to " + CHARSET
+                        + ". Please contact support@stripe.com for assistance.",
+                        null, null, 0, null, null, null, e);
+            }
+        }
+
+        /**
+         * Converts a string-keyed {@link Map} into a {@link JSONObject}. This will cause a
+         * {@link ClassCastException} if any sub-map has keys that are not {@link String Strings}.
+         *
+         * @param mapObject the {@link Map} that you'd like in JSON form
+         * @return a {@link JSONObject} representing the input map, or {@code null} if the input
+         * object is {@code null}
+         */
+        @Nullable
+        @SuppressWarnings("unchecked")
+        private JSONObject mapToJsonObject(@Nullable Map<String, ?> mapObject) {
+            if (mapObject == null) {
+                return null;
+            }
+            JSONObject jsonObject = new JSONObject();
+            for (String key : mapObject.keySet()) {
+                Object value = mapObject.get(key);
+                if (value == null) {
+                    continue;
+                }
+
+                try {
+                    if (value instanceof Map<?, ?>) {
+                        try {
+                            Map<String, Object> mapValue = (Map<String, Object>) value;
+                            jsonObject.put(key, mapToJsonObject(mapValue));
+                        } catch (ClassCastException classCastException) {
+                            // don't include the item in the JSONObject if the keys are not Strings
+                        }
+                    } else if (value instanceof List<?>) {
+                        jsonObject.put(key, listToJsonArray((List<Object>) value));
+                    } else if (value instanceof Number || value instanceof Boolean) {
+                        jsonObject.put(key, value);
+                    } else {
+                        jsonObject.put(key, value.toString());
+                    }
+                } catch (JSONException jsonException) {
+                    // Simply skip this value
+                }
+            }
+            return jsonObject;
+        }
+
+        /**
+         * Converts a {@link List} into a {@link JSONArray}. A {@link ClassCastException} will be
+         * thrown if any object in the list (or any sub-list or sub-map) is a {@link Map} whose keys
+         * are not {@link String Strings}.
+         *
+         * @param values a {@link List} of values to be put in a {@link JSONArray}
+         * @return a {@link JSONArray}, or {@code null} if the input was {@code null}
+         */
+        @Nullable
+        @SuppressWarnings("unchecked")
+        private JSONArray listToJsonArray(@Nullable List<?> values) {
+            if (values == null) {
+                return null;
+            }
+
+            final JSONArray jsonArray = new JSONArray();
+            for (Object object : values) {
+                if (object instanceof Map<?, ?>) {
+                    // We are ignoring type erasure here and crashing on bad input.
+                    // Now that this method is not public, we have more control on what is
+                    // passed to it.
+                    final Map<String, Object> mapObject = (Map<String, Object>) object;
+                    jsonArray.put(mapToJsonObject(mapObject));
+                } else if (object instanceof List<?>) {
+                    jsonArray.put(listToJsonArray((List) object));
+                } else if (object instanceof Number || object instanceof Boolean) {
+                    jsonArray.put(object);
+                } else {
+                    jsonArray.put(object.toString());
+                }
+            }
+            return jsonArray;
+        }
+
+        @NonNull
+        String createQuery(@Nullable Map<String, Object> params)
+                throws UnsupportedEncodingException, InvalidRequestException {
+            final StringBuilder queryStringBuffer = new StringBuilder();
+            final List<Parameter> flatParams = flattenParams(params);
+
+            for (Parameter flatParam : flatParams) {
+                if (queryStringBuffer.length() > 0) {
+                    queryStringBuffer.append("&");
+                }
+                queryStringBuffer.append(urlEncodePair(flatParam.key, flatParam.value));
+            }
+
+            return queryStringBuffer.toString();
+        }
+
+        @NonNull
+        private List<Parameter> flattenParams(@Nullable Map<String, Object> params)
+                throws InvalidRequestException {
+            return flattenParamsMap(params, null);
+        }
+
+        @NonNull
+        private List<Parameter> flattenParamsList(@NonNull List<?> params,
+                                                  @NonNull String keyPrefix)
+                throws InvalidRequestException {
+            final List<Parameter> flatParams = new LinkedList<>();
+
+            // Because application/x-www-form-urlencoded cannot represent an empty
+            // list, convention is to take the list parameter and just set it to an
+            // empty string. (e.g. A regular list might look like `a[]=1&b[]=2`.
+            // Emptying it would look like `a=`.)
+            if (params.isEmpty()) {
+                flatParams.add(new Parameter(keyPrefix, ""));
+            } else {
+                final String newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix);
+                for (Object param : params) {
+                    flatParams.addAll(flattenParamsValue(param, newPrefix));
+                }
+            }
+
+            return flatParams;
+        }
+
+        @NonNull
+        private List<Parameter> flattenParamsMap(@Nullable Map<String, Object> params,
+                                                 @Nullable String keyPrefix)
+                throws InvalidRequestException {
+            final List<Parameter> flatParams = new LinkedList<>();
+            if (params == null) {
+                return flatParams;
+            }
+
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                final String key = entry.getKey();
+                final Object value = entry.getValue();
+                final String newPrefix;
+                if (keyPrefix != null) {
+                    newPrefix = String.format(Locale.ROOT, "%s[%s]", keyPrefix, key);
+                } else {
+                    newPrefix = key;
+                }
+
+                flatParams.addAll(flattenParamsValue(value, newPrefix));
+            }
+
+            return flatParams;
+        }
+
+        @NonNull
+        private List<Parameter> flattenParamsValue(@NonNull Object value,
+                                                   @Nullable String keyPrefix)
+                throws InvalidRequestException {
+            final List<Parameter> flatParams;
+            if (value instanceof Map<?, ?>) {
+                flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
+            } else if (value instanceof List<?>) {
+                flatParams = flattenParamsList((List<?>) value, keyPrefix);
+            } else if ("".equals(value)) {
+                throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty "
+                        + "string. " + "We interpret empty strings as null in requests. "
+                        + "You may set '" + keyPrefix + "' to null to delete the property.",
+                        keyPrefix, null, 0, null, null, null, null);
+            } else if (value == null) {
+                flatParams = new LinkedList<>();
+                flatParams.add(new Parameter(keyPrefix, ""));
+            } else {
+                flatParams = new LinkedList<>();
+                flatParams.add(new Parameter(keyPrefix, value.toString()));
+            }
+
+            return flatParams;
+        }
+
+        @NonNull
+        private String urlEncodePair(@NonNull String k, @NonNull String v)
+                throws UnsupportedEncodingException {
+            return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v));
+        }
+
+        @Nullable
+        private String urlEncode(@Nullable String str) throws UnsupportedEncodingException {
+            // Preserve original behavior that passing null for an object id will lead
+            // to us actually making a request to /v1/foo/null
+            if (str == null) {
+                return null;
+            } else {
+                return URLEncoder.encode(str, CHARSET);
             }
         }
 
