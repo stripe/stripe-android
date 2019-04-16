@@ -26,11 +26,18 @@
         android:visibility="gone"
         />
 
+    <include
+        android:id="@+id/google_pay_option"
+        android:layout_width="match_parent"
+        android:layout_height="48sp"
+        android:layout_below="@id/payment_methods_toolbar"
+        layout="@layout/pay_with_google_row" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/payment_methods_toolbar"
+        android:layout_below="@id/google_pay_option"
         android:layout_marginTop="@dimen/masked_card_list_top_margin"
         />
 

@@ -1,0 +1,33 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/google_icon_view"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/google_icon_width"
+        android:paddingLeft="@dimen/masked_card_row_end_padding"
+        android:paddingStart="@dimen/masked_card_row_end_padding"
+        android:paddingRight="@dimen/masked_card_row_end_padding"
+        android:paddingEnd="@dimen/masked_card_row_end_padding"
+        android:src="@drawable/pay_with_google_icon"
+        android:layout_gravity="center_vertical|start"
+        />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/google_info_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginLeft="@dimen/masked_card_row_start_padding"
+        android:layout_marginStart="@dimen/masked_card_row_start_padding"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:layout_gravity="center_vertical|start"
+        />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/google_check_icon"
+        android:layout_width="@dimen/masked_card_icon_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        />
+
+</merge>

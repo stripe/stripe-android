@@ -111,7 +111,6 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     static final String USD = "usd";
 
     private static final String FIELD_ID = "id";
-    private static final String FIELD_OBJECT = "object";
     private static final String FIELD_AMOUNT = "amount";
     private static final String FIELD_CLIENT_SECRET = "client_secret";
     private static final String FIELD_CODE_VERIFICATION = "code_verification";

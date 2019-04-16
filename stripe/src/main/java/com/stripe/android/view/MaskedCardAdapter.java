@@ -22,7 +22,7 @@ import java.util.List;
  */
 class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
 
-    private static final int NO_SELECTION = -1;
+    static final int NO_SELECTION = -1;
     private @NonNull List<CustomerSource> mCustomerSourceList;
     private int mSelectedIndex = NO_SELECTION;
 

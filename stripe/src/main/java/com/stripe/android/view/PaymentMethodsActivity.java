@@ -24,6 +24,7 @@ import com.stripe.android.R;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.GooglePayMethod;
 import com.stripe.android.view.i18n.TranslatorManager;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private boolean mCommunicating;
     private Customer mCustomer;
     private MaskedCardAdapter mMaskedCardAdapter;
+    private GooglePayView mGooglePayView;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
@@ -68,6 +70,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
+        mGooglePayView = findViewById(R.id.google_pay_item);
+
         final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
 
         mCustomerSession = CustomerSession.getInstance();
@@ -86,6 +90,17 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
             }
         });
+
+        mGooglePayView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mGooglePayView.isSelected()) {
+                    mGooglePayView.toggleSelected();
+                    mMaskedCardAdapter.updateSelectedIndex(MaskedCardAdapter.NO_SELECTION);
+                }
+            }
+        });
+
 
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
@@ -248,6 +263,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             // init the RecyclerView
             mRecyclerView.setHasFixedSize(false);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            mMaskedCardAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    // sync google pay and card selection
+                    if((mMaskedCardAdapter.getSelectedSource() != null) == mGooglePayView.isSelected())
+                        mGooglePayView.toggleSelected();
+                }
+            });
             mRecyclerView.setAdapter(mMaskedCardAdapter);
             mRecyclerViewUpdated = true;
         } else {
@@ -276,6 +299,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             setResult(RESULT_CANCELED);
         }
 
+        finish();
+    }
+
+    private void finishWithGooglePaySelection() {
+        final GooglePayMethod googlePayMethod = new GooglePayMethod();
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_SELECTED_PAYMENT, googlePayMethod.toJson().toString());
+        setResult(RESULT_OK, intent);
         finish();
     }
 
@@ -310,6 +341,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void setSelectionAndFinish() {
+
+        if(mGooglePayView != null && mGooglePayView.isSelected()) {
+            finishWithGooglePaySelection();
+            return;
+        }
+
         if (mMaskedCardAdapter == null || mMaskedCardAdapter.getSelectedSource() == null) {
             cancelAndFinish();
             return;

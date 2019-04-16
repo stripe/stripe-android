@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) Google
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="17dp"
+    android:height="16dp"
+    android:viewportWidth="17.0"
+    android:viewportHeight="16.0">
+    <path
+        android:pathData="M15.2,8.17C15.2,7.639 15.152,7.127 15.064,6.636L8,6.636L8,9.538L12.036,9.538C11.863,10.475 11.334,11.269 10.54,11.801L10.54,13.683L12.964,13.683C14.382,12.377 15.2,10.455 15.2,8.17L15.2,8.17Z"
+        android:strokeColor="#00000000"
+        android:fillColor="#4285F4"
+        android:strokeWidth="1"/>
+    <path
+        android:pathData="M8,15.5C10.025,15.5 11.723,14.828 12.964,13.683L10.54,11.801C9.868,12.251 9.009,12.517 8,12.517C6.047,12.517 4.393,11.198 3.803,9.425L1.298,9.425L1.298,11.368C2.532,13.819 5.068,15.5 8,15.5Z"
+        android:strokeColor="#00000000"
+        android:fillColor="#34A853"
+        android:strokeWidth="1"/>
+    <path
+        android:pathData="M3.803,9.425C3.653,8.975 3.568,8.494 3.568,8C3.568,7.506 3.653,7.025 3.803,6.575L3.803,4.632L1.298,4.632C0.79,5.644 0.5,6.79 0.5,8C0.5,9.21 0.79,10.356 1.298,11.368L3.803,9.425Z"
+        android:strokeColor="#00000000"
+        android:fillColor="#FBBC05"
+        android:strokeWidth="1"/>
+    <path
+        android:pathData="M8,3.483C9.101,3.483 10.09,3.861 10.867,4.605L13.018,2.453C11.719,1.243 10.022,0.5 8,0.5C5.068,0.5 2.532,2.181 1.298,4.632L3.803,6.575C4.393,4.802 6.047,3.483 8,3.483Z"
+        android:strokeColor="#00000000"
+        android:fillColor="#EA4335"
+        android:strokeWidth="1"/>
+</vector>

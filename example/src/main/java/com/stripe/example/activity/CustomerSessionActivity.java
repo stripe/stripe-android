@@ -13,13 +13,18 @@ import android.widget.TextView;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.GooglePayMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
+import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * An example activity that handles working with a {@link CustomerSession}, allowing you to
@@ -85,16 +90,37 @@ public class CustomerSessionActivity extends AppCompatActivity {
         new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
     }
 
+    @Nullable
+    private String readPaymentObjectType(String selectedPayment) {
+        // This should be available through a higher level static
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(selectedPayment);
+        } catch (JSONException ignored) {
+            jsonObject = null;
+        }
+        if(jsonObject == null)
+            return null;
+
+        return jsonObject.optString(StripePaymentSource.FIELD_OBJECT);
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            Source source = Source.fromString(selectedSource);
-            // Note: it isn't possible for a null or non-card source to be returned.
-            if (source != null && Source.CARD.equals(source.getType())) {
-                SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
-                mSelectedSourceTextView.setText(buildCardString(cardData));
+            String selectedPayment = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            String objectType = readPaymentObjectType(selectedPayment);
+            if(objectType.equals(GooglePayMethod.VALUE_GOOGLE_PAY)) {
+                mSelectedSourceTextView.setText("Google Pay");
+            } else {
+                // plain source
+                Source source = Source.fromString(selectedPayment);
+                if (source != null && Source.CARD.equals(source.getType())) {
+                    SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
+                    mSelectedSourceTextView.setText(buildCardString(cardData));
+                }
             }
         }
     }
