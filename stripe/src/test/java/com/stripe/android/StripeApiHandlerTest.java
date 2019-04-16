@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.stripe.android.StripeApiHandler.POST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -46,11 +48,14 @@ public class StripeApiHandlerTest {
 
     private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "stripe-account";
 
-    private StripeApiHandler mApiHandler;
+    private static final Card CARD =
+            new Card("4242424242424242", 1, 2050, "123");
+
+    @NonNull private final StripeApiHandler mApiHandler =
+            new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
     @Before
     public void before() {
-        mApiHandler = new StripeApiHandler(ApplicationProvider.getApplicationContext());
     }
 
     @Test
@@ -166,14 +171,12 @@ public class StripeApiHandlerTest {
     @Test
     public void createQuery_withCardData_createsProperQueryString()
             throws UnsupportedEncodingException, InvalidRequestException {
-        Card card = new Card.Builder("4242424242424242", 8, 2019, "123")
-                .build();
-        Map<String, Object> cardMap =
+        final Map<String, Object> cardMap =
                 new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                        .hashMapFromCard(card);
-        String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
-                "cvc%5D=123&card%5Bexp_month%5D=8&card%5Bexp_year%5D=2019";
-        String query = mApiHandler.createQuery(cardMap);
+                        .hashMapFromCard(CARD);
+        final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
+                "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
+        final String query = mApiHandler.createQuery(cardMap);
         assertEquals(expectedValue, query);
     }
 
@@ -185,9 +188,8 @@ public class StripeApiHandlerTest {
         // we are testing whether or not we log.
         TestLoggingListener testLoggingListener = new TestLoggingListener(true);
 
-        Card card = new Card("4242424242424242", 1, 2050, "123");
-        Source source = mApiHandler.createSource(
-                SourceParams.createCardParams(card),
+        final Source source = mApiHandler.createSource(
+                SourceParams.createCardParams(CARD),
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                 null,
                 testLoggingListener);
@@ -207,17 +209,13 @@ public class StripeApiHandlerTest {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
         TestLoggingListener testLoggingListener = new TestLoggingListener(true);
-        TestStripeResponseListener testStripeResponseListener =
-                new TestStripeResponseListener();
 
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-        Card card = new Card("4242424242424242", 1, 2050, "123");
         Source source = mApiHandler.createSource(
-                SourceParams.createCardParams(card),
+                SourceParams.createCardParams(CARD),
                 "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                 connectAccountId,
-                testLoggingListener,
-                testStripeResponseListener);
+                testLoggingListener);
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source);
@@ -225,8 +223,20 @@ public class StripeApiHandlerTest {
         assertNull(testLoggingListener.mStripeException);
         assertNotNull(testLoggingListener.mStripeResponse);
         assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+    }
 
-        final StripeResponse response = testStripeResponseListener.mStripeResponse;
+    @Test
+    public void requestData_withConnectAccount_shouldReturnCorrectResponseHeaders()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
+        final StripeResponse response = mApiHandler.requestData(
+                POST, mApiHandler.getSourcesUrl(),
+                SourceParams.createCardParams(CARD).toParamMap(),
+                RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
+                        connectAccountId, RequestOptions.TYPE_QUERY)
+                        .build()
+        );
         assertNotNull(response);
 
         final Map<String, List<String>> responseHeaders = response.getResponseHeaders();
@@ -246,10 +256,9 @@ public class StripeApiHandlerTest {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publicKey = "put a public key that matches the private key here";
 
-        final Card card = new Card("4242424242424242", 1, 2050, "123");
         final PaymentIntentParams paymentIntentParams =
                 PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
-                        SourceParams.createCardParams(card),
+                        SourceParams.createCardParams(CARD),
                         clientSecret,
                         null
                 );
@@ -303,11 +312,10 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        TestLoggingListener testLoggingListener = new TestLoggingListener(false);
+        final TestLoggingListener testLoggingListener = new TestLoggingListener(false);
 
-        Card card = new Card("4242424242424242", 1, 2050, "123");
-        Source source = mApiHandler.createSource(
-                SourceParams.createCardParams(card),
+        final Source source = mApiHandler.createSource(
+                SourceParams.createCardParams(CARD),
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                 null,
                 testLoggingListener);
@@ -317,16 +325,6 @@ public class StripeApiHandlerTest {
 
         assertNull(testLoggingListener.mStripeException);
         assertNull(testLoggingListener.mStripeResponse);
-    }
-
-    private static class TestStripeResponseListener
-            implements StripeApiHandler.StripeResponseListener {
-        StripeResponse mStripeResponse;
-
-        @Override
-        public void onStripeResponse(@NonNull StripeResponse response) {
-            mStripeResponse = response;
-        }
     }
 
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
