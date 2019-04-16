@@ -185,4 +185,5 @@ public class GooglePayView extends LinearLayout {
         mUnselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(mUnselectedTextColorInt,
                 getResources().getInteger(R.integer.light_text_alpha_hex));
     }
+
 }

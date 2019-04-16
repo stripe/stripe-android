@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.stripe.android.CustomerSession;
@@ -38,6 +39,7 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  */
 public class PaymentMethodsActivity extends AppCompatActivity {
 
+    public static final String EXTRA_SHOW_GOOGLE_PAY = "show_google_pay";
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
@@ -51,6 +53,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
+    private boolean mShowGooglePay;
 
     private CustomerSession mCustomerSession;
 
@@ -76,6 +79,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
+        mShowGooglePay =
+                getIntent().getBooleanExtra(EXTRA_SHOW_GOOGLE_PAY, false);
 
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,6 +106,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             }
         });
 
+        LinearLayout googlePayRow = findViewById(R.id.google_pay_support_layout);
+        googlePayRow.setVisibility(mShowGooglePay ? LinearLayout.VISIBLE:LinearLayout.GONE);
 
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);

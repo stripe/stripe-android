@@ -87,7 +87,11 @@ public class CustomerSessionActivity extends AppCompatActivity {
     }
 
     private void launchWithCustomer() {
-        new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
+        final Intent paymentMethodsIntent = new PaymentMethodsActivityStarter(this).newIntent()
+                .putExtra(PaymentMethodsActivity.EXTRA_SHOW_GOOGLE_PAY, true);
+        this.startActivityForResult(paymentMethodsIntent, REQUEST_CODE_SELECT_SOURCE);
+
+        // new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
     }
 
     @Nullable
