@@ -241,7 +241,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                     final PaymentIntent.Status status = PaymentIntent.Status
                                             .fromCode(paymentIntent.getStatus());
 
-                                    if (PaymentIntent.Status.RequiresAction == status) {
+                                    if (PaymentIntent.Status.RequiresAction == status ||
+                                            PaymentIntent.Status.RequiresSourceAction == status) {
                                         startActivity(new Intent(Intent.ACTION_VIEW,
                                                 paymentIntent.getRedirectUrl()));
                                     }
