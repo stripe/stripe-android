@@ -77,7 +77,6 @@ class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
     private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    @NonNull private final Context mContext;
     @NonNull private final ApiVersion mApiVersion;
     @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
@@ -88,7 +87,6 @@ class StripeApiHandler {
     }
 
     private StripeApiHandler(@NonNull Context context, @NonNull ApiVersion apiVersion) {
-        mContext = context.getApplicationContext();
         mApiVersion = apiVersion;
         mLoggingUtils = new LoggingUtils(context);
         mTelemetryClientUtil = new TelemetryClientUtil(context);
@@ -498,7 +496,6 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("default_source", sourceId);
 
-        // Context can be nullable because this action is performed with only a weak reference
         final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
         final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(
@@ -536,7 +533,6 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("shipping", shippingInformation.toMap());
 
-        // Context can be nullable because this action is performed with only a weak reference
         final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
         final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(

@@ -816,7 +816,6 @@ public class CustomerSession
                                 sourceMessage.operationId);
                     }
 
-                    // Clear our context reference so we don't use a stale one.
                     break;
                 }
                 case CUSTOMER_SHIPPING_INFO_SAVED: {
