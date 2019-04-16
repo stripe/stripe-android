@@ -108,11 +108,12 @@ public class StripeApiHandlerTest {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
         String stripeAccount = "acct_123abc";
-        RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
+        final RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
                 .setIdempotencyKey(idempotencyKey)
                 .setStripeAccount(stripeAccount)
                 .build();
-        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
+        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+                .getHeaders(requestOptions);
 
         assertNotNull(headerMap);
         assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
@@ -123,11 +124,10 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
-        final RequestOptions requestOptions = RequestOptions.builder("some_key")
-                .build();
-        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
+        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+                .getHeaders(RequestOptions.builder("some_key")
+                        .build());
 
-        assertNotNull(headerMap);
         assertFalse(headerMap.containsKey("Idempotency-Key"));
         assertTrue(headerMap.containsKey("Stripe-Version"));
         assertFalse(headerMap.containsKey("Stripe-Account"));
@@ -136,13 +136,12 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_containsPropertyMapValues() throws JSONException {
-        RequestOptions requestOptions = RequestOptions.builder("some_key").build();
-        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
+        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+                .getHeaders(RequestOptions.builder("some_key")
+                        .build());
 
-        assertNotNull(headerMap);
-        String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
-
-        JSONObject mapObject = new JSONObject(userAgentRawString);
+        final String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
+        final JSONObject mapObject = new JSONObject(userAgentRawString);
         assertEquals(BuildConfig.VERSION_NAME, mapObject.getString("bindings.version"));
         assertEquals("Java", mapObject.getString("lang"));
         assertEquals("Stripe", mapObject.getString("publisher"));
@@ -152,9 +151,9 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
-        RequestOptions requestOptions = RequestOptions.builder("some_key").build();
-        Map<String, String> headerMap = mApiHandler.getHeaders(requestOptions);
-        assertNotNull(headerMap);
+        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+                .getHeaders(RequestOptions.builder("some_key")
+                        .build());
 
         final String expectedUserAgent =
                 String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
@@ -254,7 +253,7 @@ public class StripeApiHandlerTest {
                         clientSecret,
                         null
                 );
-        PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
+        final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
                 publicKey,
                 null,
@@ -277,13 +276,12 @@ public class StripeApiHandlerTest {
                         clientSecret,
                         null
                 );
-        PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
+        final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
                 publicKey,
                 null,
                 null);
         assertNotNull(paymentIntent);
-
     }
 
     @Ignore

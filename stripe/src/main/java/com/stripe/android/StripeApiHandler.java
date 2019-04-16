@@ -39,6 +39,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.Security;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,22 +77,22 @@ class StripeApiHandler {
     private static final String SOURCES = "sources";
     private static final String PAYMENT_METHODS = "payment_methods";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
-    private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    @NonNull private final ApiVersion mApiVersion;
     @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
+    @NonNull private final ConnectionFactory mConnectionFactory;
 
     StripeApiHandler(@NonNull Context context) {
-        this(context, ApiVersion.getDefault());
+        this(context, new ConnectionFactory());
     }
 
-    private StripeApiHandler(@NonNull Context context, @NonNull ApiVersion apiVersion) {
-        mApiVersion = apiVersion;
+    private StripeApiHandler(@NonNull Context context,
+                             @NonNull ConnectionFactory connectionFactory) {
         mLoggingUtils = new LoggingUtils(context);
         mTelemetryClientUtil = new TelemetryClientUtil(context);
         mNetworkUtils = new StripeNetworkUtils(context);
+        mConnectionFactory = connectionFactory;
     }
 
     void logApiCall(
@@ -587,44 +589,6 @@ class StripeApiHandler {
     }
 
     @NonNull
-    Map<String, String> getHeaders(@Nullable RequestOptions options) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Accept-Charset", CHARSET);
-        headers.put("Accept", "application/json");
-        headers.put("User-Agent",
-                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                        BuildConfig.VERSION_NAME));
-
-        if (options != null) {
-            headers.put("Authorization", String.format(Locale.ENGLISH,
-                    "Bearer %s", options.getPublishableApiKey()));
-        }
-
-        // debug headers
-        final Map<String, String> propertyMap = new HashMap<>();
-
-        final String systemPropertyName = "java.version";
-        propertyMap.put(systemPropertyName, System.getProperty(systemPropertyName));
-        propertyMap.put("os.name", "android");
-        propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
-        propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
-        propertyMap.put("lang", "Java");
-        propertyMap.put("publisher", "Stripe");
-        final JSONObject headerMappingObject = new JSONObject(propertyMap);
-        headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
-        headers.put("Stripe-Version", mApiVersion.getCode());
-
-        if (options != null && options.getStripeAccount() != null) {
-            headers.put("Stripe-Account", options.getStripeAccount());
-        }
-
-        if (options != null && options.getIdempotencyKey() != null) {
-            headers.put("Idempotency-Key", options.getIdempotencyKey());
-        }
-
-        return headers;
-    }
-
     @VisibleForTesting
     String getTokensUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
@@ -633,6 +597,7 @@ class StripeApiHandler {
     /**
      * @return https://api.stripe.com/v1/sources
      */
+    @NonNull
     @VisibleForTesting
     String getSourcesUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
@@ -641,6 +606,7 @@ class StripeApiHandler {
     /**
      * @return https://api.stripe.com/v1/payment_methods
      */
+    @NonNull
     @VisibleForTesting
     String getPaymentMethodsUrl() {
         return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, PAYMENT_METHODS);
@@ -792,41 +758,31 @@ class StripeApiHandler {
         return jsonArray;
     }
 
-    private void attachPseudoCookie(
-            @NonNull HttpURLConnection connection,
-            @NonNull RequestOptions options) {
-        if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
-            connection.setRequestProperty("Cookie", "m=" + options.getGuid());
-        }
-    }
-
     @NonNull
-    private java.net.HttpURLConnection createDeleteConnection(
+    private HttpURLConnection createDeleteConnection(
             @NonNull String url,
             @NonNull RequestOptions options) throws IOException {
-        final java.net.HttpURLConnection conn = createStripeConnection(url, options);
+        final HttpURLConnection conn = mConnectionFactory.create(url, options);
         conn.setRequestMethod(DELETE);
-
         return conn;
     }
 
     @NonNull
-    private java.net.HttpURLConnection createGetConnection(
+    private HttpURLConnection createGetConnection(
             @NonNull String url,
             @NonNull String query,
             @NonNull RequestOptions options) throws IOException {
-        final HttpURLConnection conn = createStripeConnection(formatURL(url, query), options);
+        final HttpURLConnection conn = mConnectionFactory.create(formatURL(url, query), options);
         conn.setRequestMethod(GET);
-
         return conn;
     }
 
     @NonNull
-    private java.net.HttpURLConnection createPostConnection(
+    private HttpURLConnection createPostConnection(
             @NonNull String url,
             @Nullable Map<String, Object> params,
             @NonNull RequestOptions options) throws IOException, InvalidRequestException {
-        final java.net.HttpURLConnection conn = createStripeConnection(url, options);
+        final HttpURLConnection conn = mConnectionFactory.create(url, options);
 
         conn.setDoOutput(true);
         conn.setRequestMethod(POST);
@@ -844,34 +800,6 @@ class StripeApiHandler {
         return conn;
     }
 
-    @NonNull
-    private java.net.HttpURLConnection createStripeConnection(
-            @NonNull String url,
-            @NonNull RequestOptions options)
-            throws IOException {
-        final URL stripeURL = new URL(url);
-        final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
-        conn.setConnectTimeout(30 * 1000);
-        conn.setReadTimeout(80 * 1000);
-        conn.setUseCaches(false);
-
-        if (urlNeedsHeaderData(url)) {
-            for (Map.Entry<String, String> header : getHeaders(options).entrySet()) {
-                conn.setRequestProperty(header.getKey(), header.getValue());
-            }
-        }
-
-        if (urlNeedsPseudoCookie(url)) {
-            attachPseudoCookie(conn, options);
-        }
-
-        if (conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
-        }
-
-        return conn;
-    }
-
     private void fireAndForgetApiCall(
             @NonNull Map<String, Object> paramMap,
             @NonNull String url,
@@ -882,10 +810,10 @@ class StripeApiHandler {
         boolean allowedToSetTTL = true;
 
         try {
-            originalDNSCacheTTL = java.security.Security
+            originalDNSCacheTTL = Security
                     .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
             // disable DNS cache
-            java.security.Security
+            Security
                     .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
         } catch (SecurityException se) {
             allowedToSetTTL = false;
@@ -911,9 +839,9 @@ class StripeApiHandler {
                 if (originalDNSCacheTTL == null) {
                     // value unspecified by implementation
                     // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                    java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
                 } else {
-                    java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
+                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
                             originalDNSCacheTTL);
                 }
             }
@@ -928,7 +856,7 @@ class StripeApiHandler {
 
     @NonNull
     private List<Parameter> flattenParamsList(@NonNull List<?> params,
-                                                     @NonNull String keyPrefix)
+                                              @NonNull String keyPrefix)
             throws InvalidRequestException {
         final List<Parameter> flatParams = new LinkedList<>();
 
@@ -950,7 +878,7 @@ class StripeApiHandler {
 
     @NonNull
     private List<Parameter> flattenParamsMap(@Nullable Map<String, Object> params,
-                                                    @Nullable String keyPrefix)
+                                             @Nullable String keyPrefix)
             throws InvalidRequestException {
         final List<Parameter> flatParams = new LinkedList<>();
         if (params == null) {
@@ -975,7 +903,7 @@ class StripeApiHandler {
 
     @NonNull
     private List<Parameter> flattenParamsValue(@NonNull Object value,
-                                                      @Nullable String keyPrefix)
+                                               @Nullable String keyPrefix)
             throws InvalidRequestException {
         final List<Parameter> flatParams;
         if (value instanceof Map<?, ?>) {
@@ -1061,7 +989,7 @@ class StripeApiHandler {
             @NonNull RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
         // HTTPSURLConnection verifies SSL cert by default
-        java.net.HttpURLConnection conn = null;
+        HttpURLConnection conn = null;
         try {
             switch (method) {
                 case GET:
@@ -1107,7 +1035,7 @@ class StripeApiHandler {
     }
 
     private void handleAPIError(@Nullable String responseBody, int responseCode,
-                                       @Nullable String requestId)
+                                @Nullable String requestId)
             throws InvalidRequestException, AuthenticationException, CardException, APIException {
 
         final StripeError stripeError = ErrorParser.parseError(responseBody);
@@ -1168,9 +1096,9 @@ class StripeApiHandler {
         boolean allowedToSetTTL = true;
 
         try {
-            originalDNSCacheTTL = java.security.Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
             // disable DNS cache
-            java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
         } catch (SecurityException se) {
             allowedToSetTTL = false;
         }
@@ -1205,9 +1133,9 @@ class StripeApiHandler {
             if (originalDNSCacheTTL == null) {
                 // value unspecified by implementation
                 // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
             } else {
-                java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
+                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
                         originalDNSCacheTTL);
             }
         }
@@ -1216,8 +1144,8 @@ class StripeApiHandler {
 
     @Nullable
     private Token requestToken(
-            String url,
-            Map<String, Object> params,
+            @NonNull String url,
+            @NonNull Map<String, Object> params,
             @NonNull RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
@@ -1237,14 +1165,6 @@ class StripeApiHandler {
                         .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
         fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
-    }
-
-    private boolean urlNeedsHeaderData(@NonNull String url) {
-        return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
-    }
-
-    private boolean urlNeedsPseudoCookie(@NonNull String url) {
-        return url.startsWith(LOGGING_ENDPOINT);
     }
 
     @NonNull
@@ -1276,13 +1196,107 @@ class StripeApiHandler {
         void onStripeResponse(@NonNull StripeResponse response);
     }
 
-    private final class Parameter {
+    private static final class Parameter {
         @NonNull private final String key;
         @NonNull private final String value;
 
         Parameter(@NonNull String key, @NonNull String value) {
             this.key = key;
             this.value = value;
+        }
+    }
+
+    static final class ConnectionFactory {
+        private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
+
+        @NonNull private final ApiVersion mApiVersion;
+
+        @VisibleForTesting
+        ConnectionFactory() {
+            this(ApiVersion.getDefault());
+        }
+
+        private ConnectionFactory(@NonNull ApiVersion apiVersion) {
+            mApiVersion = apiVersion;
+        }
+
+        @NonNull
+        private HttpURLConnection create(@NonNull String url, @NonNull RequestOptions options)
+                throws IOException {
+            final URL stripeURL = new URL(url);
+            final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
+            conn.setConnectTimeout(30 * 1000);
+            conn.setReadTimeout(80 * 1000);
+            conn.setUseCaches(false);
+
+            if (urlNeedsHeaderData(url)) {
+                for (Map.Entry<String, String> header : getHeaders(options).entrySet()) {
+                    conn.setRequestProperty(header.getKey(), header.getValue());
+                }
+            }
+
+            if (urlNeedsPseudoCookie(url)) {
+                attachPseudoCookie(conn, options);
+            }
+
+            if (conn instanceof HttpsURLConnection) {
+                ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
+            }
+
+            return conn;
+        }
+
+        private boolean urlNeedsHeaderData(@NonNull String url) {
+            return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
+        }
+
+        private boolean urlNeedsPseudoCookie(@NonNull String url) {
+            return url.startsWith(LOGGING_ENDPOINT);
+        }
+
+        private void attachPseudoCookie(
+                @NonNull HttpURLConnection connection,
+                @NonNull RequestOptions options) {
+            if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
+                connection.setRequestProperty("Cookie", "m=" + options.getGuid());
+            }
+        }
+
+        @NonNull
+        @VisibleForTesting
+        Map<String, String> getHeaders(@NonNull RequestOptions options) {
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Accept-Charset", CHARSET);
+            headers.put("Accept", "application/json");
+            headers.put("User-Agent",
+                    String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
+                            BuildConfig.VERSION_NAME));
+
+            headers.put("Authorization", String.format(Locale.ENGLISH,
+                    "Bearer %s", options.getPublishableApiKey()));
+
+            // debug headers
+            final AbstractMap<String, String> propertyMap = new HashMap<>();
+            propertyMap.put("java.version", System.getProperty("java.version"));
+            propertyMap.put("os.name", "android");
+            propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
+            propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
+            propertyMap.put("lang", "Java");
+            propertyMap.put("publisher", "Stripe");
+
+            final JSONObject headerMappingObject = new JSONObject(propertyMap);
+            headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
+            headers.put("Stripe-Version", mApiVersion.getCode());
+
+            if (options.getStripeAccount() != null) {
+                headers.put("Stripe-Account", options.getStripeAccount());
+            }
+
+            if (options.getIdempotencyKey() != null) {
+                headers.put("Idempotency-Key", options.getIdempotencyKey());
+            }
+
+            return headers;
         }
     }
 }
