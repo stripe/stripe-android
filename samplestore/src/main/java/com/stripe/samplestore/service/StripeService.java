@@ -14,9 +14,8 @@ import rx.Observable;
  */
 public interface StripeService {
 
-    @POST("charge")
-    Observable<Void> createQueryCharge(
-            @Body Map<String, Object> params);
+    @POST("capture_payment")
+    Observable<Void> capturePayment(@Body Map<String, Object> params);
 
     @FormUrlEncoded
     @POST("ephemeral_keys")
