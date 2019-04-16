@@ -44,7 +44,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs);
         mSelectSourceButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
-        CustomerSession.initCustomerSession(
+        CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
                     new ExampleEphemeralKeyProvider.ProgressListener() {
                         @Override

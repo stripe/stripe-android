@@ -26,6 +26,18 @@
     );
     ```
 
+- `CustomerSession.initCustomerSession()` now has a `Context` parameter.
+   Related, `CustomerSession` public instance methods no longer have a `Context` parameter.
+   ```java
+   // before
+   CustomerSession.initCustomerSession(ephemeralKeyProvider);
+   CustomerSession.getInstance().setCustomerShippingInformation(this, listener);
+
+   // after
+   CustomerSession.initCustomerSession(this, ephemeralKeyProvider);
+   CustomerSession.getInstance().setCustomerShippingInformation(listener);
+   ```
+
 ### Migrating from versions < 7.0.0
 - Remove Bitcoin source support because Stripe no longer processes Bitcoin payments: https://stripe.com/blog/ending-bitcoin-support
     - Sources can no longer have a "BITCOIN" source type. These sources will now be interpreted as "UNKNOWN".

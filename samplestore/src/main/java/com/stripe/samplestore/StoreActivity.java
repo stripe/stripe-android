@@ -113,7 +113,7 @@ public class StoreActivity
 
     private void setupCustomerSession() {
         // CustomerSession only needs to be initialized once per app.
-        CustomerSession.initCustomerSession(
+        CustomerSession.initCustomerSession(this,
                 new SampleStoreEphemeralKeyProvider(
                         new SampleStoreEphemeralKeyProvider.ProgressListener() {
                             @Override

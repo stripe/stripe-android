@@ -191,7 +191,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        mCustomerSession.setCustomerDefaultSource(this, customerSource.getId(),
+        mCustomerSession.setCustomerDefaultSource(customerSource.getId(),
                 customerSource.getSourceType(),
                 new PostUpdateCustomerRetrievalListener(this));
     }
@@ -265,7 +265,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (selectedSource == null || selectedSource.getId() == null) {
             return;
         }
-        mCustomerSession.setCustomerDefaultSource(this, selectedSource.getId(),
+        mCustomerSession.setCustomerDefaultSource(selectedSource.getId(),
                 selectedSource.getSourceType(), new FinishCustomerRetrievalListener(this));
         setCommunicatingProgress(true);
     }
