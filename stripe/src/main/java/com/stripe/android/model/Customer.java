@@ -44,6 +44,7 @@ public class Customer extends StripeJsonModel {
     private static final String VALUE_CUSTOMER = "customer";
 
     private static final String VALUE_APPLE_PAY = "apple_pay";
+    private static final String VALUE_GOOGLE_PAY = "google_pay";
 
     @Nullable private final String mId;
     @Nullable private final String mDefaultSource;
@@ -197,7 +198,9 @@ public class Customer extends StripeJsonModel {
                     JSONObject customerSourceObject = dataArray.getJSONObject(i);
                     CustomerSource sourceData = CustomerSource.fromJson(customerSourceObject);
                     if (sourceData == null ||
-                            VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
+                            VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod()) ||
+                            VALUE_GOOGLE_PAY.equals(sourceData.getTokenizationMethod())
+                    ) {
                         continue;
                     }
                     sources.add(sourceData);
