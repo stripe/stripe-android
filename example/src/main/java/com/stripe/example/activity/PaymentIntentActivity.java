@@ -15,7 +15,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
-import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
@@ -108,7 +108,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
     @NonNull
     private Map<String, Object> createPaymentIntentParams() {
         final Map<String, Object> params = new HashMap<>();
-        params.put("allowed_source_types[]", "card");
+        params.put("payment_method_types[]", "card");
         params.put("amount", 1000);
         params.put("currency", "usd");
         return params;
@@ -203,14 +203,15 @@ public class PaymentIntentActivity extends AppCompatActivity {
     }
 
     private void confirmPaymentIntent(@NonNull final Card card) {
-        final SourceParams sourceParams = SourceParams.createCardParams(card);
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
         final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
                 new Callable<PaymentIntent>() {
                     @Override
                     public PaymentIntent call() throws Exception {
                         final PaymentIntentParams paymentIntentParams = PaymentIntentParams
-                                .createConfirmPaymentIntentWithSourceDataParams(
-                                        sourceParams, mClientSecret, RETURN_URL);
+                                .createConfirmPaymentIntentWithPaymentMethodCreateParams(
+                                        paymentMethodCreateParams, mClientSecret, RETURN_URL);
                         return mStripe.confirmPaymentIntentSynchronous(
                                 paymentIntentParams,
                                 PaymentConfiguration.getInstance().getPublishableKey());
@@ -241,7 +242,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                     final PaymentIntent.Status status = PaymentIntent.Status
                                             .fromCode(paymentIntent.getStatus());
 
-                                    if (PaymentIntent.Status.RequiresAction == status) {
+                                    if (PaymentIntent.Status.RequiresAction == status ||
+                                            PaymentIntent.Status.RequiresSourceAction == status) {
                                         startActivity(new Intent(Intent.ACTION_VIEW,
                                                 paymentIntent.getRedirectUrl()));
                                     }

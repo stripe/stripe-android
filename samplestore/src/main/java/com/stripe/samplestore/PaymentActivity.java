@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -89,8 +88,8 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        Bundle extras = getIntent().getExtras();
-        mStoreCart = extras.getParcelable(EXTRA_CART);
+        final Bundle extras = getIntent().getExtras();
+        mStoreCart = extras != null ? extras.<StoreCart>getParcelable(EXTRA_CART) : null;
 
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
@@ -121,7 +120,9 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribe(new Action1<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        attemptPurchase();
+                        CustomerSession.getInstance().retrieveCurrentCustomer(
+                                new AttemptPurchaseCustomerRetrievalListener(
+                                        PaymentActivity.this));
                     }
                 });
 
@@ -141,9 +142,11 @@ public class PaymentActivity extends AppCompatActivity {
                 if (!isShippingInfoValid(shippingInformation)) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
                 } else {
-                    ArrayList<ShippingMethod> shippingMethods = getValidShippingMethods(shippingInformation);
+                    final ArrayList<ShippingMethod> shippingMethods =
+                            getValidShippingMethods(shippingInformation);
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
-                    shippingInfoProcessedIntent.putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
+                    shippingInfoProcessedIntent.putParcelableArrayListExtra(
+                            EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
                     shippingInfoProcessedIntent
                             .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.get(0));
                 }
@@ -245,7 +248,8 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Size(value = 4)
-    private TextView[] getItemViews(View view) {
+    @NonNull
+    private TextView[] getItemViews(@NonNull View view) {
         TextView labelView = view.findViewById(R.id.tv_cart_emoji);
         TextView quantityView = view.findViewById(R.id.tv_cart_quantity);
         TextView unitPriceView = view.findViewById(R.id.tv_cart_unit_price);
@@ -253,36 +257,15 @@ public class PaymentActivity extends AppCompatActivity {
         return new TextView[]{labelView, quantityView, unitPriceView, totalPriceView};
     }
 
-    private void attemptPurchase() {
-        CustomerSession.getInstance().retrieveCurrentCustomer(new CustomerSession.CustomerRetrievalListener() {
-            @Override
-            public void onCustomerRetrieved(@NonNull Customer customer) {
-                String sourceId = customer.getDefaultSource();
-                if (sourceId == null) {
-                    displayError("No payment method selected");
-                    return;
-                }
-                CustomerSource source = customer.getSourceById(sourceId);
-                proceedWithPurchaseIf3DSCheckIsNotNecessary(source.asSource(), customer.getId());
-            }
-
-            @Override
-            public void onError(int httpCode, @Nullable String errorMessage,
-                                @Nullable StripeError stripeError) {
-                displayError("Error getting payment method");
-            }
-        });
-
-    }
-
-    private void proceedWithPurchaseIf3DSCheckIsNotNecessary(Source source, String customerId) {
+    private void proceedWithPurchaseIf3DSCheckIsNotNecessary(@Nullable Source source,
+                                                             @Nullable String customerId) {
         if (source == null || !Source.CARD.equals(source.getType())) {
             displayError("Something went wrong - this should be rare");
             return;
         }
 
-        SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
-        if (SourceCardData.REQUIRED.equals(cardData.getThreeDSecureStatus())) {
+        final SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
+        if (cardData != null && SourceCardData.REQUIRED.equals(cardData.getThreeDSecureStatus())) {
             // In this case, you would need to ask the user to verify the purchase.
             // You can see an example of how to do this in the 3DS example application.
             // In stripe-android/example.
@@ -293,9 +276,10 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createParams(long price, String sourceId, String customerId,
-                                             ShippingInformation shippingInformation) {
-        Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> createParams(long price, @Nullable String sourceId,
+                                             @Nullable String customerId,
+                                             @NonNull ShippingInformation shippingInformation) {
+        final Map<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
         params.put("source", sourceId);
         params.put("customer_id", customerId);
@@ -303,14 +287,15 @@ public class PaymentActivity extends AppCompatActivity {
         return params;
     }
 
-    private void completePurchase(String sourceId, String customerId) {
-        Retrofit retrofit = RetrofitFactory.getInstance();
-        StripeService stripeService = retrofit.create(StripeService.class);
+    private void completePurchase(@Nullable String sourceId, @Nullable String customerId) {
+        final StripeService stripeService = RetrofitFactory.getInstance()
+                .create(StripeService.class);
         long price = mStoreCart.getTotalPrice() + mShippingCosts;
 
-        ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData().getShippingInformation();
+        final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
+                .getShippingInformation();
 
-        final Observable<Void> stripeResponse = stripeService.createQueryCharge(
+        final Observable<Void> stripeResponse = stripeService.capturePayment(
                 createParams(price, sourceId, customerId, shippingInformation));
         final FragmentManager fragmentManager = getSupportFragmentManager();
         mCompositeSubscription.add(stripeResponse
@@ -376,6 +361,7 @@ public class PaymentActivity extends AppCompatActivity {
                 new PaymentSessionConfig.Builder().build());
     }
 
+    @Nullable
     private String formatSourceDescription(Source source) {
         if (Source.CARD.equals(source.getType())) {
             final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
@@ -386,13 +372,17 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private ArrayList<ShippingMethod> getValidShippingMethods(@NonNull ShippingInformation shippingInformation) {
-        ArrayList<ShippingMethod> shippingMethods = new ArrayList<>();
-        shippingMethods.add(new ShippingMethod("UPS Ground", "ups-ground", "Arrives in 3-5 days", 0, "USD"));
-        shippingMethods.add(new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD"));
+    private ArrayList<ShippingMethod> getValidShippingMethods(
+            @NonNull ShippingInformation shippingInformation) {
+        final ArrayList<ShippingMethod> shippingMethods = new ArrayList<>();
+        shippingMethods.add(new ShippingMethod("UPS Ground", "ups-ground",
+                "Arrives in 3-5 days", 0, "USD"));
+        shippingMethods.add(new ShippingMethod("FedEx", "fedex",
+                "Arrives tomorrow", 599, "USD"));
         if (shippingInformation.getAddress() != null &&
-                shippingInformation.getAddress().getPostalCode().equals("94110")) {
-            shippingMethods.add(new ShippingMethod("1 Hour Courier", "courier", "Arrives in the next hour", 1099, "USD"));
+                "94110".equals(shippingInformation.getAddress().getPostalCode())) {
+            shippingMethods.add(new ShippingMethod("1 Hour Courier", "courier",
+                    "Arrives in the next hour", 1099, "USD"));
         }
         return shippingMethods;
     }
@@ -415,24 +405,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         if (data.getSelectedPaymentMethodId() != null) {
             CustomerSession.getInstance().retrieveCurrentCustomer(
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            final String sourceId = customer.getDefaultSource();
-                            if (sourceId == null) {
-                                displayError("No payment method selected");
-                                return;
-                            }
-                            final CustomerSource source = customer.getSourceById(sourceId);
-                            mEnterPaymentInfo.setText(formatSourceDescription(source.asSource()));
-                        }
-
-                        @Override
-                        public void onError(int httpCode, @Nullable String errorMessage,
-                                            @Nullable StripeError stripeError) {
-                            displayError(errorMessage);
-                        }
-                    });
+                    new PaymentSessionChangedCustomerRetrievalListener(this));
         }
 
         if (data.isPaymentReadyToCharge()) {
@@ -474,6 +447,77 @@ public class PaymentActivity extends AppCompatActivity {
             }
 
             activity.onPaymentSessionDataChanged(data);
+        }
+    }
+
+    private static final class PaymentSessionChangedCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
+        private PaymentSessionChangedCustomerRetrievalListener(@NonNull PaymentActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            final String sourceId = customer.getDefaultSource();
+            if (sourceId == null) {
+                activity.displayError("No payment method selected");
+                return;
+            }
+
+            final CustomerSource source = customer.getSourceById(sourceId);
+            activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source.asSource()));
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.displayError(errorMessage);
+        }
+    }
+
+    private static final class AttemptPurchaseCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
+        private AttemptPurchaseCustomerRetrievalListener(@NonNull PaymentActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            final String sourceId = customer.getDefaultSource();
+            if (sourceId == null) {
+                activity.displayError("No payment method selected");
+                return;
+            }
+
+            final CustomerSource source = customer.getSourceById(sourceId);
+            activity.proceedWithPurchaseIf3DSCheckIsNotNecessary(source.asSource(),
+                    customer.getId());
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.displayError("Error getting payment method");
         }
     }
 }

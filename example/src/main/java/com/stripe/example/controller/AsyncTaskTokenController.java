@@ -60,6 +60,7 @@ public class AsyncTaskTokenController {
             mErrorDialogHandler.show("Invalid Card Data");
             return;
         }
+
         mProgressDialogController.show(R.string.progressMessage);
         mStripe.createToken(
                 cardToSave,

@@ -166,10 +166,7 @@ public class CustomerSessionTest {
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
-
     private Source mAddedSource;
-
-    private final Context mContext = ApplicationProvider.getApplicationContext();
 
     @NonNull
     private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
@@ -187,9 +184,9 @@ public class CustomerSessionTest {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
 
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(
-                mBroadcastReceiver,
-                new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
+        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
+                .registerReceiver(mBroadcastReceiver,
+                        new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
 
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(SECOND_CUSTOMER);
@@ -202,7 +199,6 @@ public class CustomerSessionTest {
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
         when(mApiHandler.addCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -212,7 +208,6 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
                 .thenReturn(mAddedSource);
         when(mApiHandler.deleteCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -221,7 +216,6 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
                 .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
         when(mApiHandler.setDefaultCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -303,12 +297,11 @@ public class CustomerSessionTest {
                 .requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO));
         ShippingInformation shippingInformation = Objects.requireNonNull(customerWithShippingInfo
                 .getShippingInformation());
-        customerSession.setCustomerShippingInformation(mContext, shippingInformation);
+        customerSession.setCustomerShippingInformation(shippingInformation);
 
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).setCustomerShippingInfo(
-                eq(mContext),
                 eq(FIRST_CUSTOMER.getId()),
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
@@ -449,7 +442,7 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        customerSession.addCustomerSource(mContext,
+        customerSession.addCustomerSource(
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -458,7 +451,6 @@ public class CustomerSessionTest {
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).addCustomerSource(
-                eq(mContext),
                 eq(FIRST_CUSTOMER.getId()),
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
@@ -508,7 +500,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         setupErrorProxy();
-        customerSession.addCustomerSource(mContext,
+        customerSession.addCustomerSource(
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -557,7 +549,7 @@ public class CustomerSessionTest {
         CustomerSession.SourceRetrievalListener mockListener =
                 mock(CustomerSession.SourceRetrievalListener.class);
 
-        customerSession.deleteCustomerSource(mContext,
+        customerSession.deleteCustomerSource(
                 "abc123",
                 mockListener);
 
@@ -565,7 +557,6 @@ public class CustomerSessionTest {
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).deleteCustomerSource(
-                eq(mContext),
                 eq(FIRST_CUSTOMER.getId()),
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
@@ -614,7 +605,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.SourceRetrievalListener.class);
 
         setupErrorProxy();
-        customerSession.deleteCustomerSource(mContext, "abc123", mockListener);
+        customerSession.deleteCustomerSource("abc123", mockListener);
 
         verify(mBroadcastReceiver).onReceive(any(Context.class),
                 mIntentArgumentCaptor.capture());
@@ -659,7 +650,7 @@ public class CustomerSessionTest {
         CustomerSession.CustomerRetrievalListener mockListener =
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
-        customerSession.setCustomerDefaultSource(mContext,
+        customerSession.setCustomerDefaultSource(
                 "abc123",
                 Source.CARD,
                 mockListener);
@@ -668,7 +659,6 @@ public class CustomerSessionTest {
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).setDefaultCustomerSource(
-                eq(mContext),
                 eq(FIRST_CUSTOMER.getId()),
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
@@ -717,7 +707,7 @@ public class CustomerSessionTest {
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
         setupErrorProxy();
-        customerSession.setCustomerDefaultSource(mContext, "abc123", Source.CARD,
+        customerSession.setCustomerDefaultSource("abc123", Source.CARD,
                 mockListener);
 
         final ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -769,7 +759,6 @@ public class CustomerSessionTest {
             throws APIException, APIConnectionException, InvalidRequestException,
             AuthenticationException, CardException {
         when(mApiHandler.addCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -781,7 +770,6 @@ public class CustomerSessionTest {
                         null));
 
         when(mApiHandler.deleteCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -792,7 +780,6 @@ public class CustomerSessionTest {
                         null));
 
         when(mApiHandler.setDefaultCustomerSource(
-                eq(mContext),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -805,7 +792,7 @@ public class CustomerSessionTest {
 
     @NonNull
     private CustomerSession createCustomerSession(@Nullable Calendar calendar) {
-        return new CustomerSession(mEphemeralKeyProvider, calendar, mThreadPoolExecutor,
-                mApiHandler);
+        return new CustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler);
     }
 }

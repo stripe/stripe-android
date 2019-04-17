@@ -68,7 +68,8 @@ public class PaymentFlowActivityTest {
                 LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
         localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED));
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider);
+        CustomerSession.initCustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider);
     }
 
     @After
