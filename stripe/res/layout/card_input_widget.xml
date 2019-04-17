@@ -83,7 +83,7 @@
             android:hint="@string/expiry_date_hint"
             tools:ignore="UnusedAttribute"
             tools:importantForAccessibility="yes"
-            android:accessibilityTraversalBefore="+@id/et_cvc_number"
+            android:accessibilityTraversalBefore="@+id/et_cvc_number"
             android:accessibilityTraversalAfter="@+id/et_card_number"
             android:nextFocusRight="@+id/et_cvc_number"
             android:nextFocusForward="@+id/et_cvc_number"
