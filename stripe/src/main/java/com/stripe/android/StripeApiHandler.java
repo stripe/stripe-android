@@ -82,13 +82,17 @@ class StripeApiHandler {
     @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
     @NonNull private final ConnectionFactory mConnectionFactory;
+    private final boolean mShouldLogRequest;
 
     StripeApiHandler(@NonNull Context context) {
-        this(context, new ConnectionFactory());
+        this(context, new ConnectionFactory(), true);
     }
 
-    private StripeApiHandler(@NonNull Context context,
-                             @NonNull ConnectionFactory connectionFactory) {
+    @VisibleForTesting
+    StripeApiHandler(@NonNull Context context,
+                     @NonNull ConnectionFactory connectionFactory,
+                     boolean shouldLogRequest) {
+        mShouldLogRequest = shouldLogRequest;
         mLoggingUtils = new LoggingUtils(context);
         mTelemetryClientUtil = new TelemetryClientUtil(context);
         mNetworkUtils = new StripeNetworkUtils(context);
@@ -99,7 +103,7 @@ class StripeApiHandler {
             @NonNull Map<String, Object> loggingMap,
             @NonNull RequestOptions options,
             @Nullable LoggingResponseListener listener) {
-        if (options == null || (listener != null && !listener.shouldLogTest())) {
+        if (!mShouldLogRequest || options == null) {
             return;
         }
 
@@ -1134,7 +1138,7 @@ class StripeApiHandler {
     private void setTelemetryData(@Nullable LoggingResponseListener listener) {
         final Map<String, Object> telemetry = mTelemetryClientUtil.createTelemetryMap();
         StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
-        if (listener != null && !listener.shouldLogTest()) {
+        if (!mShouldLogRequest) {
             return;
         }
 
@@ -1163,11 +1167,9 @@ class StripeApiHandler {
     }
 
     interface LoggingResponseListener {
-        boolean shouldLogTest();
+        void onLoggingResponse(@NonNull StripeResponse response);
 
-        void onLoggingResponse(StripeResponse response);
-
-        void onStripeException(StripeException exception);
+        void onStripeException(@NonNull StripeException exception);
     }
 
     private static final class Parameter {

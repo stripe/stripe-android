@@ -186,7 +186,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        TestLoggingListener testLoggingListener = new TestLoggingListener(true);
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
 
         final Source source = mApiHandler.createSource(
                 SourceParams.createCardParams(CARD),
@@ -208,7 +208,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        TestLoggingListener testLoggingListener = new TestLoggingListener(true);
+        TestLoggingListener testLoggingListener = new TestLoggingListener();
 
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
         Source source = mApiHandler.createSource(
@@ -312,9 +312,13 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final TestLoggingListener testLoggingListener = new TestLoggingListener(false);
+        final TestLoggingListener testLoggingListener = new TestLoggingListener();
 
-        final Source source = mApiHandler.createSource(
+        final StripeApiHandler apiHandler = new StripeApiHandler(
+                ApplicationProvider.getApplicationContext(),
+                new StripeApiHandler.ConnectionFactory(),
+                false);
+        final Source source = apiHandler.createSource(
                 SourceParams.createCardParams(CARD),
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
                 null,
@@ -328,26 +332,16 @@ public class StripeApiHandlerTest {
     }
 
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
-        private boolean mShouldLogTest;
         private StripeResponse mStripeResponse;
         private StripeException mStripeException;
 
-        TestLoggingListener(boolean shouldLogTest) {
-            mShouldLogTest = shouldLogTest;
-        }
-
         @Override
-        public boolean shouldLogTest() {
-            return mShouldLogTest;
-        }
-
-        @Override
-        public void onLoggingResponse(StripeResponse response) {
+        public void onLoggingResponse(@NonNull StripeResponse response) {
             mStripeResponse = response;
         }
 
         @Override
-        public void onStripeException(StripeException exception) {
+        public void onStripeException(@NonNull StripeException exception) {
             mStripeException = exception;
         }
     }

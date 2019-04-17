@@ -82,9 +82,8 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        mApiHandler = new StripeApiHandler(context);
-        mLoggingUtils = new LoggingUtils(context);
-        mStripeNetworkUtils = new StripeNetworkUtils(context);
+        this(new StripeApiHandler(context), new LoggingUtils(context),
+                new StripeNetworkUtils(context));
     }
 
     /**
@@ -93,11 +92,18 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      * @param publishableKey the client's publishable key
      */
-    public Stripe(@NonNull Context context, String publishableKey) {
-        mApiHandler = new StripeApiHandler(context);
-        mLoggingUtils = new LoggingUtils(context);
-        mStripeNetworkUtils = new StripeNetworkUtils(context);
+    public Stripe(@NonNull Context context, @NonNull String publishableKey) {
+        this(new StripeApiHandler(context), new LoggingUtils(context),
+                new StripeNetworkUtils(context));
         setDefaultPublishableKey(publishableKey);
+    }
+
+    @VisibleForTesting
+    Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
+           @NonNull StripeNetworkUtils stripeNetworkUtils) {
+        mApiHandler = apiHandler;
+        mLoggingUtils = loggingUtils;
+        mStripeNetworkUtils = stripeNetworkUtils;
     }
 
     /**
@@ -840,7 +846,7 @@ public class Stripe {
     }
 
     @VisibleForTesting
-    void setLoggingResponseListener(StripeApiHandler.LoggingResponseListener listener) {
+    void setLoggingResponseListener(@NonNull StripeApiHandler.LoggingResponseListener listener) {
         mLoggingResponseListener = listener;
     }
 
