@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -1352,16 +1353,30 @@ public class StripeTest {
 
     @NonNull
     private static Stripe getNonLoggingStripe(@NonNull Context context) {
-        Stripe nonLoggingStripe = new Stripe(context);
-        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
-        return nonLoggingStripe;
+        return createNonLoggingStripe(context, null);
     }
 
     @NonNull
-    private static Stripe getNonLoggingStripe(@NonNull Context context, String key) {
-        Stripe nonLoggingStripe = new Stripe(context, key);
-        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
-        return nonLoggingStripe;
+    private static Stripe getNonLoggingStripe(@NonNull Context context,
+                                              @NonNull String publishableKey) {
+        return createNonLoggingStripe(context, publishableKey);
+    }
+
+    @NonNull
+    private static Stripe createNonLoggingStripe(@NonNull Context context,
+                                                 @Nullable String publishableKey) {
+        final Stripe stripe = new Stripe(
+                new StripeApiHandler(
+                        context,
+                        new StripeApiHandler.ConnectionFactory(),
+                        false),
+                new LoggingUtils(context),
+                new StripeNetworkUtils(context));
+        if (publishableKey != null) {
+            stripe.setDefaultPublishableKey(publishableKey);
+        }
+        stripe.setLoggingResponseListener(new TestLoggingListener(false));
+        return stripe;
     }
 
     @NonNull
@@ -1371,20 +1386,15 @@ public class StripeTest {
 
     private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
         private final boolean mShouldLogTest;
-        private final List<StripeResponse> responseList = new ArrayList<>();
-        private final List<StripeException> exceptionList = new ArrayList<>();
+        @NonNull private final List<StripeResponse> responseList = new ArrayList<>();
+        @NonNull private final List<StripeException> exceptionList = new ArrayList<>();
 
-        TestLoggingListener(boolean shouldLogTest) {
+        private TestLoggingListener(boolean shouldLogTest) {
             mShouldLogTest = shouldLogTest;
         }
 
         @Override
-        public boolean shouldLogTest() {
-            return mShouldLogTest;
-        }
-
-        @Override
-        public void onLoggingResponse(StripeResponse response) {
+        public void onLoggingResponse(@NonNull StripeResponse response) {
             if (!mShouldLogTest) {
                 fail("Test should not be logged.");
             }
@@ -1392,7 +1402,7 @@ public class StripeTest {
         }
 
         @Override
-        public void onStripeException(StripeException exception) {
+        public void onStripeException(@NonNull StripeException exception) {
             if (!mShouldLogTest) {
                 fail("Test should not be logged.");
             }
