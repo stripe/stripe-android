@@ -409,6 +409,7 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
+    @Nullable
     public Source createSourceSynchronous(
             @NonNull SourceParams params,
             @Nullable String publishableKey)

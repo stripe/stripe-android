@@ -39,12 +39,14 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btn_make_card_sources).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, PaymentMultilineActivity.class));
-            }
-        });
+        findViewById(R.id.btn_make_card_payment_methods)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(LauncherActivity.this,
+                                PaymentMultilineActivity.class));
+                    }
+                });
 
         findViewById(R.id.btn_make_sources).setOnClickListener(new View.OnClickListener() {
             @Override
