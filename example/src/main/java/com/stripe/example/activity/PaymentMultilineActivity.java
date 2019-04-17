@@ -11,14 +11,14 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
-import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.view.CardMultilineWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,16 +34,16 @@ import rx.subscriptions.CompositeSubscription;
 
 public class PaymentMultilineActivity extends AppCompatActivity {
 
-    ProgressDialogController mProgressDialogController;
-    ErrorDialogHandler mErrorDialogHandler;
+    private ProgressDialogController mProgressDialogController;
+    private ErrorDialogHandler mErrorDialogHandler;
 
-    CardMultilineWidget mCardMultilineWidget;
+    private CardMultilineWidget mCardMultilineWidget;
 
     @NonNull private final CompositeSubscription mCompositeSubscription =
             new CompositeSubscription();
 
     private SimpleAdapter mSimpleAdapter;
-    private List<Map<String, String>> mCardSources= new ArrayList<>();
+    @NonNull private final List<Map<String, String>> mCardSources= new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
 
-        ListView listView = findViewById(R.id.card_list_pma);
+        final ListView listView = findViewById(R.id.card_list_pma);
         mSimpleAdapter = new SimpleAdapter(
                 this,
                 mCardSources,
@@ -82,15 +82,16 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         }
 
         final Stripe stripe = new Stripe(getApplicationContext());
-        final SourceParams cardSourceParams = SourceParams.createCardParams(card);
+        final PaymentMethodCreateParams cardSourceParams =
+                PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
-        final Observable<Source> tokenObservable =
+        final Observable<PaymentMethod> tokenObservable =
                 Observable.fromCallable(
-                        new Callable<Source>() {
+                        new Callable<PaymentMethod>() {
                             @Override
-                            public Source call() throws Exception {
-                                return stripe.createSourceSynchronous(cardSourceParams,
+                            public PaymentMethod call() throws Exception {
+                                return stripe.createPaymentMethodSynchronous(cardSourceParams,
                                         PaymentConfiguration.getInstance().getPublishableKey());
                             }
                         });
@@ -113,10 +114,10 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                             }
                         })
                 .subscribe(
-                        new Action1<Source>() {
+                        new Action1<PaymentMethod>() {
                             @Override
-                            public void call(Source source) {
-                                addToList(source);
+                            public void call(PaymentMethod paymentMethod) {
+                                addToList(paymentMethod);
                             }
                         },
                         new Action1<Throwable>() {
@@ -127,16 +128,16 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                         }));
     }
 
-    private void addToList(@Nullable Source source) {
-        if (source == null || !Source.CARD.equals(source.getType())) {
+    private void addToList(@Nullable PaymentMethod paymentMethod) {
+        if (paymentMethod == null || paymentMethod.card == null) {
             return;
         }
-        SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
 
-        String endingIn = getString(R.string.endingIn);
-        Map<String, String> map = new HashMap<>();
-        map.put("last4", endingIn + " " + sourceCardData.getLast4());
-        map.put("tokenId", source.getId());
+        final PaymentMethod.Card paymentMethodCard = paymentMethod.card;
+        final String endingIn = getString(R.string.endingIn);
+        final AbstractMap<String, String> map = new HashMap<>();
+        map.put("last4", endingIn + " " + paymentMethodCard.last4);
+        map.put("tokenId", paymentMethod.id);
         mCardSources.add(map);
         mSimpleAdapter.notifyDataSetChanged();
     }

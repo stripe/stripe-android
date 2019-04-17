@@ -16,6 +16,7 @@ import com.stripe.android.model.Card;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.SourceRedirect;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 import com.stripe.example.adapter.RedirectAdapter;
@@ -61,32 +62,30 @@ public class RedirectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_polling);
 
         mCardInputWidget = findViewById(R.id.card_widget_three_d);
-        mErrorDialogHandler = new ErrorDialogHandler(this.getSupportFragmentManager());
-        mProgressDialogController = new ProgressDialogController(this.getSupportFragmentManager(),
+        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mRedirectDialogController = new RedirectDialogController(this);
         mStripe = new Stripe(getApplicationContext());
 
-        Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
-        threeDSecureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        beginSequence();
-                    }
-                });
+        final Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
+        threeDSecureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                beginSequence();
+            }
+        });
 
-        Button threeDSyncButton = findViewById(R.id.btn_three_d_secure_sync);
-        threeDSyncButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        beginSequence();
-                    }
-                });
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        final Button threeDSyncButton = findViewById(R.id.btn_three_d_secure_sync);
+        threeDSyncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                beginSequence();
+            }
+        });
 
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        final RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         mRedirectAdapter = new RedirectAdapter();
@@ -95,7 +94,7 @@ public class RedirectActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         if (intent.getData() != null && intent.getData().getQuery() != null) {
             // The client secret and source ID found here is identical to
@@ -120,7 +119,7 @@ public class RedirectActivity extends AppCompatActivity {
     }
 
     void beginSequence() {
-        Card displayCard = mCardInputWidget.getCard();
+        final Card displayCard = mCardInputWidget.getCard();
         if (displayCard == null) {
             return;
         }
@@ -163,16 +162,18 @@ public class RedirectActivity extends AppCompatActivity {
                                 SourceCardData sourceCardData =
                                         (SourceCardData) source.getSourceTypeModel();
 
+                                final String threeDSecureStatus = sourceCardData != null ?
+                                        sourceCardData.getThreeDSecureStatus() : null;
+
                                 // Making a note of the Card Source in our list.
                                 mRedirectAdapter.addItem(
                                         source.getStatus(),
-                                        sourceCardData.getThreeDSecureStatus(),
+                                        threeDSecureStatus,
                                         source.getId(),
                                         source.getType());
                                 // If we need to get 3DS verification for this card, we
                                 // first create a 3DS Source.
-                                if (SourceCardData.REQUIRED.equals(
-                                        sourceCardData.getThreeDSecureStatus())) {
+                                if (SourceCardData.REQUIRED.equals(threeDSecureStatus)) {
 
                                     // The card Source can be used to create a 3DS Source
                                     createThreeDSecureSource(source.getId());
@@ -208,6 +209,7 @@ public class RedirectActivity extends AppCompatActivity {
 
         Observable<Source> threeDSecureObservable = Observable.fromCallable(
                 new Callable<Source>() {
+                    @Nullable
                     @Override
                     public Source call() throws Exception {
                         return mStripe.createSourceSynchronous(
@@ -230,7 +232,11 @@ public class RedirectActivity extends AppCompatActivity {
                         // to the result of creating a 3DS Source
                         new Action1<Source>() {
                             @Override
-                            public void call(Source source) {
+                            public void call(@Nullable Source source) {
+                                if (source == null) {
+                                    return;
+                                }
+
                                 // Once a 3DS Source is created, that is used
                                 // to initiate the third-party verification
                                 showDialog(source);
@@ -250,10 +256,15 @@ public class RedirectActivity extends AppCompatActivity {
      *
      * @param source the {@link Source} to verify
      */
-    void showDialog(final Source source) {
+    private void showDialog(@NonNull final Source source) {
         // Caching the source object here because this app makes a lot of them.
         mRedirectSource = source;
-        mRedirectDialogController.showDialog(source.getRedirect().getUrl());
+
+        final SourceRedirect sourceRedirect = source.getRedirect();
+        final String redirectUrl = sourceRedirect != null ? sourceRedirect.getUrl() : null;
+        if (redirectUrl != null) {
+            mRedirectDialogController.showDialog(redirectUrl);
+        }
     }
 
     private void updateSourceList(@Nullable Source source) {
@@ -283,6 +294,7 @@ public class RedirectActivity extends AppCompatActivity {
      *               back to the application
      * @return a return url to be sent to the vendor
      */
+    @NonNull
     private static String getUrl(boolean isSync) {
         if (isSync) {
             return RETURN_SCHEMA + RETURN_HOST_SYNC;

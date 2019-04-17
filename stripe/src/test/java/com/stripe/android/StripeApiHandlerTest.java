@@ -46,7 +46,7 @@ public class StripeApiHandlerTest {
     private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
             "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
 
-    private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "stripe-account";
+    private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account";
 
     private static final Card CARD =
             new Card("4242424242424242", 1, 2050, "123");
