@@ -1,6 +1,7 @@
 package com.stripe.example.activity;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
@@ -91,7 +93,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mConfirmPaymentIntent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Card card = mCardInputWidget.getCard();
+                final Card card = mCardInputWidget.getCard();
                 if (card != null) {
                     confirmPaymentIntent(card);
                 }
@@ -103,6 +105,21 @@ public class PaymentIntentActivity extends AppCompatActivity {
     protected void onDestroy() {
         mCompositeSubscription.unsubscribe();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent.getData() != null && intent.getData().getQuery() != null) {
+            Toast.makeText(PaymentIntentActivity.this,
+                    "Retrieving PaymentIntent after authorizing",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            mClientSecret = intent.getData().getQueryParameter(
+                    "payment_intent_client_secret");
+            retrievePaymentIntent();
+        }
     }
 
     @NonNull
@@ -138,6 +155,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             public void call(ResponseBody responseBody) {
                                 try {
                                     JSONObject jsonObject = new JSONObject(responseBody.string());
+                                    mPaymentIntentValue.setText(jsonObject.toString());
                                     mClientSecret = jsonObject.optString("secret");
                                     mConfirmPaymentIntent.setEnabled(mClientSecret != null);
                                     mRetrievePaymentIntent.setEnabled(mClientSecret != null);
@@ -163,7 +181,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                     @Override
                     public PaymentIntent call() throws Exception {
                         return mStripe.retrievePaymentIntentSynchronous(
-                                PaymentIntentParams.createRetrievePaymentIntentParams(mClientSecret),
+                                PaymentIntentParams
+                                        .createRetrievePaymentIntentParams(mClientSecret),
                                 PaymentConfiguration.getInstance().getPublishableKey());
                     }
                 });
@@ -184,12 +203,10 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(
                         new Action1<PaymentIntent>() {
                             @Override
-                            public void call(PaymentIntent paymentIntent) {
-                                if (paymentIntent != null) {
-                                    mPaymentIntentValue.setText(paymentIntent.toJson().toString());
-                                } else {
-                                    mPaymentIntentValue.setText(R.string.error_while_retrieving_payment_intent);
-                                }
+                            public void call(@Nullable PaymentIntent paymentIntent) {
+                                mPaymentIntentValue.setText(paymentIntent != null ?
+                                        paymentIntent.toJson().toString() :
+                                        getString(R.string.error_while_retrieving_payment_intent));
                             }
                         },
                         new Action1<Throwable>() {
@@ -237,13 +254,17 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             @Override
                             public void call(@Nullable PaymentIntent paymentIntent) {
                                 if (paymentIntent != null) {
-                                    mPaymentIntentValue.setText(paymentIntent.toString());
+                                    mPaymentIntentValue.setText(paymentIntent.toJson().toString());
 
                                     final PaymentIntent.Status status = PaymentIntent.Status
                                             .fromCode(paymentIntent.getStatus());
 
                                     if (PaymentIntent.Status.RequiresAction == status ||
                                             PaymentIntent.Status.RequiresSourceAction == status) {
+                                        Toast.makeText(PaymentIntentActivity.this,
+                                                "Redirecting to redirect URL",
+                                                Toast.LENGTH_SHORT)
+                                                .show();
                                         startActivity(new Intent(Intent.ACTION_VIEW,
                                                 paymentIntent.getRedirectUrl()));
                                     }

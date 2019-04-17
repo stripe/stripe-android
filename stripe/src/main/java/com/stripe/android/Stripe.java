@@ -462,6 +462,7 @@ public class Stripe {
      * @throws APIConnectionException
      * @throws APIException
      */
+    @Nullable
     public PaymentIntent confirmPaymentIntentSynchronous(
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey) throws AuthenticationException,
