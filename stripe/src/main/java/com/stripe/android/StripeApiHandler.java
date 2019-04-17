@@ -231,26 +231,6 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createSource(
-                sourceParams,
-                publishableKey,
-                stripeAccount,
-                loggingResponseListener,
-                null);
-    }
-
-    @VisibleForTesting
-    @Nullable
-    Source createSource(
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener,
-            @Nullable StripeResponseListener stripeResponseListener)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
         mNetworkUtils.addUidParams(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
@@ -270,9 +250,6 @@ class StripeApiHandler {
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
             logApiCall(loggingParams, loggingOptions, loggingResponseListener);
             final StripeResponse response = requestData(POST, getSourcesUrl(), paramMap, options);
-            if (stripeResponseListener != null) {
-                stripeResponseListener.onStripeResponse(response);
-            }
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -1084,7 +1061,8 @@ class StripeApiHandler {
     }
 
     @NonNull
-    private StripeResponse requestData(
+    @VisibleForTesting
+    StripeResponse requestData(
             @RestMethod String method,
             @NonNull String url,
             @NonNull Map<String, Object> params,
@@ -1190,10 +1168,6 @@ class StripeApiHandler {
         void onLoggingResponse(StripeResponse response);
 
         void onStripeException(StripeException exception);
-    }
-
-    interface StripeResponseListener {
-        void onStripeResponse(@NonNull StripeResponse response);
     }
 
     private static final class Parameter {
