@@ -634,8 +634,8 @@ public class CustomerSession
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -647,8 +647,8 @@ public class CustomerSession
                 PaymentConfiguration.getInstance().getPublishableKey(),
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -660,8 +660,8 @@ public class CustomerSession
                 PaymentConfiguration.getInstance().getPublishableKey(),
                 new ArrayList<>(mProductUsageTokens),
                 shippingInformation,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -675,8 +675,8 @@ public class CustomerSession
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     /**

@@ -98,8 +98,8 @@ public class PaymentSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()
+        ))
                 .thenReturn(addedSource);
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
@@ -107,8 +107,7 @@ public class PaymentSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()))
                 .thenReturn(secondCustomer);
 
         doAnswer(new Answer() {

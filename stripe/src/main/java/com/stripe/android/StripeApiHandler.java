@@ -99,21 +99,23 @@ class StripeApiHandler {
         mConnectionFactory = connectionFactory;
     }
 
-    void logApiCall(
+    /**
+     * @return true if a request was made and it was successful
+     */
+    boolean logApiCall(
             @NonNull Map<String, Object> loggingMap,
-            @NonNull RequestOptions options,
-            @Nullable LoggingResponseListener listener) {
+            @NonNull RequestOptions options) {
         if (!mShouldLogRequest || options == null) {
-            return;
+            return false;
         }
 
         final String apiKey = options.getPublishableApiKey();
         if (apiKey == null || apiKey.trim().isEmpty()) {
             // if there is no apiKey associated with the request, we don't need to react here.
-            return;
+            return false;
         }
 
-        fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options, listener);
+        return fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options);
     }
 
     /**
@@ -122,7 +124,6 @@ class StripeApiHandler {
      * @param paymentIntentParams contains the confirmation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      * @return a {@link PaymentIntent} reflecting the updated state after applying the parameter
      * provided
      */
@@ -130,8 +131,7 @@ class StripeApiHandler {
     PaymentIntent confirmPaymentIntent(
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -148,13 +148,13 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(loggingResponseListener);
+            logTelemetryData();
             final SourceParams sourceParams = paymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
             final Map<String, Object> loggingParams = mLoggingUtils
                     .getPaymentIntentConfirmationParams(null, apiKey, sourceType);
             RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            logApiCall(loggingParams, loggingOptions);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
             final StripeResponse response = requestData(
@@ -172,14 +172,12 @@ class StripeApiHandler {
      *  @param paymentIntentParams contains the retrieval params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      */
     @Nullable
     PaymentIntent retrievePaymentIntent(
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -194,11 +192,11 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(loggingResponseListener);
+            logTelemetryData();
             final Map<String, Object> loggingParams = mLoggingUtils
                     .getPaymentIntentRetrieveParams(null, apiKey);
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            logApiCall(loggingParams, loggingOptions);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
             final StripeResponse response = requestData(GET,
@@ -217,7 +215,6 @@ class StripeApiHandler {
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      * @return a {@link Source} if one could be created from the input params,
      * or {@code null} if not
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
@@ -229,8 +226,7 @@ class StripeApiHandler {
     Source createSource(
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -246,13 +242,13 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(loggingResponseListener);
+            logTelemetryData();
             final Map<String, Object> loggingParams = mLoggingUtils.getSourceCreationParams(
                     null,
                     apiKey,
                     sourceParams.getType());
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            logApiCall(loggingParams, loggingOptions);
             final StripeResponse response = requestData(POST, getSourcesUrl(), paramMap, options);
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
@@ -310,8 +306,7 @@ class StripeApiHandler {
     PaymentMethod createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
 
             throws AuthenticationException,
             InvalidRequestException,
@@ -328,11 +323,11 @@ class StripeApiHandler {
             return null;
         }
 
-        setTelemetryData(loggingResponseListener);
+        logTelemetryData();
         final Map<String, Object> loggingParams = mLoggingUtils.getPaymentMethodCreationParams(
                 null, apiKey);
         final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-        logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+        logApiCall(loggingParams, loggingOptions);
 
         try {
             final StripeResponse response = requestData(POST, getPaymentMethodsUrl(), params,
@@ -351,9 +346,7 @@ class StripeApiHandler {
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
      *                key, api version, etc
-     * @param tokenType the {@link com.stripe.android.model.Token.TokenType} being created
-     * @param listener a {@link LoggingResponseListener} useful for testing logging calls
-     *
+     * @param tokenType the {@link Token.TokenType} being created
      * @return a {@link Token} that can be used to perform other operations with this card
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
      * @throws InvalidRequestException if one or more of the parameters is incorrect
@@ -366,8 +359,7 @@ class StripeApiHandler {
     Token createToken(
             @NonNull Map<String, Object> tokenParams,
             @NonNull RequestOptions options,
-            @NonNull @Token.TokenType String tokenType,
-            @Nullable LoggingResponseListener listener)
+            @NonNull @Token.TokenType String tokenType)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -384,11 +376,11 @@ class StripeApiHandler {
                     (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
-            setTelemetryData(listener);
+            logTelemetryData();
 
             final Map<String, Object> loggingParams =
                     mLoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
-            logApiCall(loggingParams, options, listener);
+            logApiCall(loggingParams, options);
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -404,8 +396,7 @@ class StripeApiHandler {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -419,7 +410,7 @@ class StripeApiHandler {
 
         // We use the public key to log, so we need different RequestOptions.
         final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-        logApiCall(loggingParamsMap, loggingOptions, listener);
+        logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -437,8 +428,7 @@ class StripeApiHandler {
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -450,7 +440,7 @@ class StripeApiHandler {
 
         // We use the public key to log, so we need different RequestOptions.
         final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-        logApiCall(loggingParamsMap, loggingOptions, listener);
+        logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
                 DELETE,
@@ -469,8 +459,7 @@ class StripeApiHandler {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -487,7 +476,7 @@ class StripeApiHandler {
                 null,
                 publicKey, LoggingUtils.EVENT_DEFAULT_SOURCE);
 
-        logApiCall(loggingParameters, loggingOptions, listener);
+        logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -506,8 +495,7 @@ class StripeApiHandler {
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -524,7 +512,7 @@ class StripeApiHandler {
                 null,
                 publicKey, LoggingUtils.EVENT_SET_SHIPPING_INFO);
 
-        logApiCall(loggingParameters, loggingOptions, listener);
+        logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
                 POST,
@@ -781,39 +769,34 @@ class StripeApiHandler {
         return conn;
     }
 
-    private void fireAndForgetApiCall(
+    /**
+     * @return true if a request was made and it was successful
+     */
+    private boolean fireAndForgetApiCall(
             @NonNull Map<String, Object> paramMap,
             @NonNull String url,
             @NonNull @RestMethod String method,
-            @NonNull RequestOptions options,
-            @Nullable LoggingResponseListener listener) {
+            @NonNull RequestOptions options) {
         String originalDNSCacheTTL = null;
         boolean allowedToSetTTL = true;
 
         try {
-            originalDNSCacheTTL = Security
-                    .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
             // disable DNS cache
-            Security
-                    .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
         } catch (SecurityException se) {
             allowedToSetTTL = false;
         }
 
+        boolean isSuccessful = false;
         try {
-            StripeResponse response = getStripeResponse(
+            final StripeResponse response = getStripeResponse(
                     method,
                     url,
                     paramMap,
                     options);
-
-            if (listener != null) {
-                listener.onLoggingResponse(response);
-            }
-        } catch (StripeException stripeException) {
-            if (listener != null) {
-                listener.onStripeException(stripeException);
-            }
+            isSuccessful = response.getResponseCode() == 200;
+        } catch (StripeException ignore) {
             // We're just logging. No need to crash here or attempt to re-log things.
         } finally {
             if (allowedToSetTTL) {
@@ -827,6 +810,8 @@ class StripeApiHandler {
                 }
             }
         }
+
+        return isSuccessful;
     }
 
     @NonNull
@@ -969,7 +954,7 @@ class StripeApiHandler {
             @Nullable Map<String, Object> params,
             @NonNull RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
-        // HTTPSURLConnection verifies SSL cert by default
+        // HttpURLConnection verifies SSL cert by default
         HttpURLConnection conn = null;
         try {
             switch (method) {
@@ -1135,7 +1120,7 @@ class StripeApiHandler {
         return Token.fromString(response.getResponseBody());
     }
 
-    private void setTelemetryData(@Nullable LoggingResponseListener listener) {
+    private void logTelemetryData() {
         final Map<String, Object> telemetry = mTelemetryClientUtil.createTelemetryMap();
         StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
         if (!mShouldLogRequest) {
@@ -1146,7 +1131,7 @@ class StripeApiHandler {
                 RequestOptions.builder(null, RequestOptions.TYPE_JSON)
                         .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
-        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
+        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options);
     }
 
     @NonNull
@@ -1166,12 +1151,6 @@ class StripeApiHandler {
         }
     }
 
-    interface LoggingResponseListener {
-        void onLoggingResponse(@NonNull StripeResponse response);
-
-        void onStripeException(@NonNull StripeException exception);
-    }
-
     private static final class Parameter {
         @NonNull private final String key;
         @NonNull private final String value;
@@ -1182,7 +1161,7 @@ class StripeApiHandler {
         }
     }
 
-    static final class ConnectionFactory {
+    static class ConnectionFactory {
         private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
         @NonNull private final ApiVersion mApiVersion;

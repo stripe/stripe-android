@@ -9,7 +9,6 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
-import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
@@ -18,14 +17,16 @@ import com.stripe.android.model.SourceParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,8 +35,9 @@ import static com.stripe.android.StripeApiHandler.POST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Test class for {@link StripeApiHandler}.
@@ -54,8 +56,11 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
+    @Mock private StripeApiHandler.ConnectionFactory mConnectionFactory;
+
     @Before
     public void before() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -184,45 +189,41 @@ public class StripeApiHandlerTest {
     public void createSource_shouldLogSourceCreation_andReturnSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        // This is the one and only test where we actually log something, because
-        // we are testing whether or not we log.
-        TestLoggingListener testLoggingListener = new TestLoggingListener();
-
         final Source source = mApiHandler.createSource(
                 SourceParams.createCardParams(CARD),
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                null,
-                testLoggingListener);
+                null
+        );
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source);
-
-        assertNull(testLoggingListener.mStripeException);
-        assertNotNull(testLoggingListener.mStripeResponse);
-        Assert.assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
     }
 
     @Test
     public void createSource_withConnectAccount_keepsHeaderInAccount()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        // This is the one and only test where we actually log something, because
-        // we are testing whether or not we log.
-        TestLoggingListener testLoggingListener = new TestLoggingListener();
-
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-        Source source = mApiHandler.createSource(
+        final Source source = mApiHandler.createSource(
                 SourceParams.createCardParams(CARD),
                 "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                connectAccountId,
-                testLoggingListener);
+                connectAccountId
+        );
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source);
+    }
 
-        assertNull(testLoggingListener.mStripeException);
-        assertNotNull(testLoggingListener.mStripeResponse);
-        assertEquals(200, testLoggingListener.mStripeResponse.getResponseCode());
+    @Test
+    public void logApiCall_shouldReturnSuccessful() {
+        // This is the one and only test where we actually log something, because
+        // we are testing whether or not we log.
+        final boolean isSuccessful = mApiHandler.logApiCall(
+                new HashMap<String, Object>(),
+                RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX")
+                        .build()
+        );
+        assertTrue(isSuccessful);
     }
 
     @Test
@@ -241,9 +242,21 @@ public class StripeApiHandlerTest {
 
         final Map<String, List<String>> responseHeaders = response.getResponseHeaders();
         assertNotNull(responseHeaders);
-        assertTrue(responseHeaders.containsKey(STRIPE_ACCOUNT_RESPONSE_HEADER));
 
-        final List<String> accounts = responseHeaders.get(STRIPE_ACCOUNT_RESPONSE_HEADER);
+        final List<String> accounts;
+
+        // the Stripe API response will either have a 'Stripe-Account' or 'stripe-account' header,
+        // so we need to check both
+        if (responseHeaders.containsKey(STRIPE_ACCOUNT_RESPONSE_HEADER)) {
+            accounts = responseHeaders.get(STRIPE_ACCOUNT_RESPONSE_HEADER);
+        } else if (responseHeaders.containsKey(
+                STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT))) {
+            accounts = responseHeaders.get(STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT));
+        } else {
+            fail("Stripe API response should contain 'Stripe-Account' header");
+            accounts = null;
+        }
+
         assertNotNull(accounts);
         assertEquals(1, accounts.size());
         assertEquals(connectAccountId, accounts.get(0));
@@ -265,8 +278,8 @@ public class StripeApiHandlerTest {
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
                 publicKey,
-                null,
-                null);
+                null
+        );
 
         assertNotNull(paymentIntent);
     }
@@ -288,8 +301,8 @@ public class StripeApiHandlerTest {
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
                 publicKey,
-                null,
-                null);
+                null
+        );
         assertNotNull(paymentIntent);
     }
 
@@ -303,8 +316,8 @@ public class StripeApiHandlerTest {
         final PaymentIntent paymentIntent = mApiHandler.retrievePaymentIntent(
                 PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
                 publicKey,
-                null,
-                null);
+                null
+        );
         assertNotNull(paymentIntent);
     }
 
@@ -312,37 +325,31 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final TestLoggingListener testLoggingListener = new TestLoggingListener();
-
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 new StripeApiHandler.ConnectionFactory(),
-                false);
+                false
+        );
         final Source source = apiHandler.createSource(
                 SourceParams.createCardParams(CARD),
                 FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                null,
-                testLoggingListener);
+                null
+        );
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source);
-
-        assertNull(testLoggingListener.mStripeException);
-        assertNull(testLoggingListener.mStripeResponse);
     }
 
-    private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
-        private StripeResponse mStripeResponse;
-        private StripeException mStripeException;
-
-        @Override
-        public void onLoggingResponse(@NonNull StripeResponse response) {
-            mStripeResponse = response;
-        }
-
-        @Override
-        public void onStripeException(@NonNull StripeException exception) {
-            mStripeException = exception;
-        }
+    @Test
+    public void logApiCall_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
+        final StripeApiHandler apiHandler = new StripeApiHandler(
+                ApplicationProvider.getApplicationContext(),
+                mConnectionFactory,
+                false
+        );
+        apiHandler.logApiCall(new HashMap<String, Object>(),
+                RequestOptions.builder("some_key")
+                        .build());
+        verifyNoMoreInteractions(mConnectionFactory);
     }
 }
