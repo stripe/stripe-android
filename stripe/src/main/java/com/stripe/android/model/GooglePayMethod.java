@@ -13,7 +13,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 public class GooglePayMethod extends StripeJsonModel implements StripePaymentSource {
 
-    static public final String VALUE_GOOGLE_PAY = "google_pay";
+    public static final String VALUE_GOOGLE_PAY = "google_pay";
 
     private static final String FIELD_OBJECT = "object";
 

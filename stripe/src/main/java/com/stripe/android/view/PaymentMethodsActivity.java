@@ -107,7 +107,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         });
 
         LinearLayout googlePayRow = findViewById(R.id.google_pay_support_layout);
-        googlePayRow.setVisibility(mShowGooglePay ? LinearLayout.VISIBLE:LinearLayout.GONE);
+        googlePayRow.setVisibility(mShowGooglePay ? LinearLayout.VISIBLE : LinearLayout.GONE);
 
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
@@ -234,7 +234,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 @Override
                 public void onChanged() {
                     // sync google pay and card selection
-                    if((mMaskedCardAdapter.getSelectedSource() != null) == mGooglePayView.isSelected())
+                    if ((mMaskedCardAdapter.getSelectedSource() != null) ==
+                            mGooglePayView.isSelected())
                         mGooglePayView.toggleSelected();
                 }
             });
@@ -295,7 +296,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     private void setSelectionAndFinish() {
 
-        if(mGooglePayView != null && mGooglePayView.isSelected()) {
+        if (mGooglePayView != null && mGooglePayView.isSelected()) {
             finishWithGooglePaySelection();
             return;
         }
