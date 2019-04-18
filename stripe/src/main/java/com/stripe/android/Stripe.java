@@ -65,11 +65,10 @@ public class Stripe {
                 @Nullable final Executor executor,
                 @NonNull final TokenCallback callback) {
             executeTask(executor, new CreateTokenTask(mApiHandler, tokenParams,
-                    publishableKey, stripeAccount, tokenType, callback, mLoggingResponseListener));
+                    publishableKey, stripeAccount, tokenType, callback));
         }
     };
 
-    @Nullable private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
     private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
@@ -240,8 +239,8 @@ public class Stripe {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 requestOptions,
-                Token.TYPE_BANK_ACCOUNT,
-                mLoggingResponseListener);
+                Token.TYPE_BANK_ACCOUNT
+        );
     }
 
     /**
@@ -427,7 +426,7 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return mApiHandler.createSource(params, apiKey, mStripeAccount, mLoggingResponseListener);
+        return mApiHandler.createSource(params, apiKey, mStripeAccount);
     }
 
     /**
@@ -452,8 +451,8 @@ public class Stripe {
         return mApiHandler.retrievePaymentIntent(
                 paymentIntentParams,
                 publishableKey,
-                mStripeAccount,
-                mLoggingResponseListener);
+                mStripeAccount
+        );
     }
 
     /**
@@ -479,8 +478,8 @@ public class Stripe {
         return mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
                 publishableKey,
-                mStripeAccount,
-                mLoggingResponseListener);
+                mStripeAccount
+        );
     }
 
     /**
@@ -503,7 +502,7 @@ public class Stripe {
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
         return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
-                publishableKey, mStripeAccount, mLoggingResponseListener);
+                publishableKey, mStripeAccount);
     }
 
     /**
@@ -558,8 +557,8 @@ public class Stripe {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromCard(card),
                 requestOptions,
-                Token.TYPE_CARD,
-                mLoggingResponseListener);
+                Token.TYPE_CARD
+        );
     }
 
     /**
@@ -612,8 +611,8 @@ public class Stripe {
         return mApiHandler.createToken(
                 hashMapFromPersonalId(personalId),
                 requestOptions,
-                Token.TYPE_PII,
-                mLoggingResponseListener);
+                Token.TYPE_PII
+        );
     }
 
     /**
@@ -669,8 +668,8 @@ public class Stripe {
         return mApiHandler.createToken(
                 mapFromCvc(cvc),
                 requestOptions,
-                Token.TYPE_CVC_UPDATE,
-                mLoggingResponseListener);
+                Token.TYPE_CVC_UPDATE
+        );
     }
 
     /**
@@ -731,8 +730,8 @@ public class Stripe {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
                     requestOptions,
-                    Token.TYPE_ACCOUNT,
-                    mLoggingResponseListener);
+                    Token.TYPE_ACCOUNT
+            );
         } catch (CardException exception) {
             // Should never occur. CardException is only for card related requests.
         }
@@ -763,7 +762,7 @@ public class Stripe {
                     mDefaultPublishableKey,
                     source.getType());
         }
-        mApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
+        mApiHandler.logApiCall(loggingMap, options);
     }
 
     /**
@@ -843,11 +842,6 @@ public class Stripe {
      */
     public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
         mStripeAccount = stripeAccount;
-    }
-
-    @VisibleForTesting
-    void setLoggingResponseListener(@NonNull StripeApiHandler.LoggingResponseListener listener) {
-        mLoggingResponseListener = listener;
     }
 
     private void createTokenFromParams(
@@ -964,8 +958,8 @@ public class Stripe {
                 final Source source = mApiHandler.createSource(
                         mSourceParams,
                         mPublishableKey,
-                        mStripeAccount,
-                        null);
+                        mStripeAccount
+                );
                 return new ResponseWrapper(source);
             } catch (StripeException stripeException) {
                 return new ResponseWrapper(stripeException);
@@ -989,7 +983,6 @@ public class Stripe {
         @Nullable private final String mStripeAccount;
         @NonNull @Token.TokenType private final String mTokenType;
         @NonNull private final TokenCallback mCallback;
-        @Nullable private final StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
 
         CreateTokenTask(
                 @NonNull StripeApiHandler apiHandler,
@@ -997,14 +990,12 @@ public class Stripe {
                 @NonNull final String publishableKey,
                 @Nullable final String stripeAccount,
                 @NonNull @Token.TokenType final String tokenType,
-                @NonNull final TokenCallback callback,
-                @Nullable final StripeApiHandler.LoggingResponseListener loggingResponseListener) {
+                @NonNull final TokenCallback callback) {
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
             mTokenType = tokenType;
-            mLoggingResponseListener = loggingResponseListener;
             mCallback = callback;
         }
 
@@ -1016,8 +1007,8 @@ public class Stripe {
                 final Token token = mApiHandler.createToken(
                         mTokenParams,
                         requestOptions,
-                        mTokenType,
-                        mLoggingResponseListener);
+                        mTokenType
+                );
                 return new ResponseWrapper(token);
             } catch (StripeException e) {
                 return new ResponseWrapper(e);

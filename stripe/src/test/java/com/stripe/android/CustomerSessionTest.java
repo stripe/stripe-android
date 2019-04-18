@@ -204,16 +204,15 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()
+        ))
                 .thenReturn(mAddedSource);
         when(mApiHandler.deleteCustomerSource(
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()))
                 .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
@@ -221,8 +220,7 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()))
                 .thenReturn(SECOND_CUSTOMER);
 
         doAnswer(new Answer() {
@@ -306,8 +304,7 @@ public class CustomerSessionTest {
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
                 eq(shippingInformation),
-                eq(firstKey.getSecret()),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull());
+                eq(firstKey.getSecret()));
         assertTrue(mListArgumentCaptor.getValue().contains("PaymentMethodsActivity"));
     }
 
@@ -456,8 +453,8 @@ public class CustomerSessionTest {
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.CARD),
-                eq(firstKey.getSecret()),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull());
+                eq(firstKey.getSecret())
+        );
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
         assertTrue(productUsage.contains("AddSourceActivity"));
@@ -561,8 +558,7 @@ public class CustomerSessionTest {
                 eq("pk_test_abc123"),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
-                eq(firstKey.getSecret()),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull());
+                eq(firstKey.getSecret()));
         final List productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
         assertTrue(productUsage.contains("AddSourceActivity"));
@@ -664,8 +660,7 @@ public class CustomerSessionTest {
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.CARD),
-                eq(firstKey.getSecret()),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull());
+                eq(firstKey.getSecret()));
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(1, productUsage.size());
@@ -764,8 +759,8 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()
+        ))
                 .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
                         null));
 
@@ -774,8 +769,7 @@ public class CustomerSessionTest {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()))
                 .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
                         null));
 
@@ -785,8 +779,7 @@ public class CustomerSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString(),
-                ArgumentMatchers.<StripeApiHandler.LoggingResponseListener>isNull()))
+                anyString()))
                 .thenThrow(new APIException("auth error", "reqId", 405, null, null));
     }
 
