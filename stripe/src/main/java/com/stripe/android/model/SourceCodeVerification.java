@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
+
 /**
  * Model for a
  * https://stripe.com/docs/api/sources/object#source_object-code_verification

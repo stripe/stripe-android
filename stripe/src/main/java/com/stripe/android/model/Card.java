@@ -33,6 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringHashIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
+
 /**
  * A model object representing a Card in the Android SDK.
  */
