@@ -542,6 +542,67 @@ class StripeApiHandler {
     }
 
     @NonNull
+    static Map<String, Object> createVerificationParam(
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode){
+        Map<String, Object> verificationMap = new HashMap<>();
+        verificationMap.put("id", verificationId);
+        verificationMap.put("one_time_code", userOneTimeCode);
+        return verificationMap;
+    }
+
+    @NonNull
+    String retrieveIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException, JSONException {
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
+
+        StripeResponse response = getStripeResponse(
+                GET,
+                getRetrieveIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        JSONObject jsonResponse = new JSONObject(response.getResponseBody());
+        return jsonResponse.getString("pin");
+    }
+
+    void updateIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String newPin,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
+        paramsMap.put("pin", newPin);
+
+        StripeResponse response = getStripeResponse(
+                POST,
+                getUpdateIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+    }
+
+    @NonNull
     String createQuery(@Nullable Map<String, Object> params)
             throws UnsupportedEncodingException, InvalidRequestException {
         final StringBuilder queryStringBuffer = new StringBuilder();
@@ -628,6 +689,16 @@ class StripeApiHandler {
     @VisibleForTesting
     String getRetrieveTokenApiUrl(@NonNull String tokenId) {
         return String.format(Locale.ROOT, "%s/%s", getTokensUrl(), tokenId);
+    }
+
+    @VisibleForTesting
+    static String getRetrieveIssuingCardPinUrl(@NonNull String cardId) {
+        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
+    }
+
+    @VisibleForTesting
+    static String getUpdateIssuingCardPinUrl(@NonNull String cardId) {
+        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
     }
 
     private void convertErrorsToExceptionsAndThrowIfNecessary(
