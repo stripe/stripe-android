@@ -557,10 +557,23 @@ class StripeApiHandler {
         return queryStringBuffer.toString();
     }
 
+    @VisibleForTesting
+    void start3ds2Auth(@NonNull Stripe3DS2AuthParams authParams,
+                       @NonNull String publishableKey)
+            throws InvalidRequestException, APIConnectionException, APIException, CardException,
+            AuthenticationException {
+        final StripeResponse response = getStripeResponse(POST,
+                getApiUrl("3ds2/authenticate"),
+                authParams.toParamMap(),
+                RequestOptions.builder(publishableKey).build()
+        );
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+    }
+
     @NonNull
     @VisibleForTesting
     String getTokensUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
+        return getApiUrl(TOKENS);
     }
 
     /**
@@ -569,7 +582,7 @@ class StripeApiHandler {
     @NonNull
     @VisibleForTesting
     String getSourcesUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+        return getApiUrl(SOURCES);
     }
 
     /**
@@ -578,7 +591,12 @@ class StripeApiHandler {
     @NonNull
     @VisibleForTesting
     String getPaymentMethodsUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, PAYMENT_METHODS);
+        return getApiUrl(PAYMENT_METHODS);
+    }
+
+    @NonNull
+    private static String getApiUrl(@NonNull String path) {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, path);
     }
 
     @NonNull
@@ -600,7 +618,7 @@ class StripeApiHandler {
 
     @VisibleForTesting
     private String getCustomersUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, CUSTOMERS);
+        return getApiUrl(CUSTOMERS);
     }
 
     @VisibleForTesting
