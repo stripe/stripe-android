@@ -166,8 +166,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     /**
      * Update our currently displayed customer data. If the customer only has one
-     * {@link CustomerSource} and does not have a {@link Customer#mDefaultSource defaultSource},
-     * then set that one source to be the default source before updating displayed source data.
+     * {@link CustomerSource} and does not have a
+     * @link Customer#getDefaultSource()} defaultSource}, then set that one source to be the
+     * default source before updating displayed source data.
      *
      * @param customer the new {@link Customer} object whose sources should be displayed
      */
