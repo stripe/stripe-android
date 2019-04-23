@@ -16,7 +16,9 @@ import java.util.Map;
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEqualsExcludingNulls;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentTest {
@@ -36,7 +38,7 @@ public class PaymentIntentTest {
             "  \"currency\": \"usd\",\n" +
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
-            "  \"next_source_action\": null,\n" +
+            "  \"next_action\": null,\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
             "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
@@ -57,7 +59,7 @@ public class PaymentIntentTest {
             "  \"currency\": \"usd\",\n" +
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
-            "  \"next_source_action\": {" +
+            "  \"next_action\": {" +
             "       \"type\": \"authorize_with_url\"," +
             "           authorize_with_url: {" +
             "           url: \""+ BAD_URL +"\" } " +
@@ -65,7 +67,7 @@ public class PaymentIntentTest {
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
             "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
-            "  \"status\": \"requires_source_action\"\n" +
+            "  \"status\": \"requires_action\"\n" +
             "}\n";
 
     private static final String PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON = "{\n" +
@@ -197,9 +199,8 @@ public class PaymentIntentTest {
                 PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON);
         assertNotNull(paymentIntent);
 
-        final Uri authUrl = paymentIntent.getAuthorizationUrl();
+        final Uri authUrl = paymentIntent.getRedirectUrl();
         assertNotNull(authUrl);
-
         assertEquals(BAD_URL, authUrl.getEncodedPath());
     }
 
@@ -208,6 +209,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent = PaymentIntent
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
         assertNotNull(paymentIntent);
+        assertTrue(paymentIntent.requiresAction());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -235,6 +237,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent =
                 PaymentIntent.fromString(PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON);
         assertNotNull(paymentIntent);
+        assertFalse(paymentIntent.requiresAction());
         assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
     }
 }

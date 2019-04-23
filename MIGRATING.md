@@ -38,8 +38,15 @@
    CustomerSession.getInstance().setCustomerShippingInformation(listener);
    ```
 
+- `PaymentIntent` has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
+    - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
+    - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
+    - `PaymentIntent#getNextSourceAction()` is now `PaymentIntent#getNextAction()`
+    - `PaymentIntent#getAuthorizationUrl()` is now `PaymentIntent#getRedirectUrl()`
+    - `PaymentIntent#requiresAction()` has been added as a convenience
+
 ### Migrating from versions < 7.0.0
-- Remove Bitcoin source support because Stripe no longer processes Bitcoin payments: https://stripe.com/blog/ending-bitcoin-support
+- Remove Bitcoin source support because Stripe [no longer processes Bitcoin payments](https://stripe.com/blog/ending-bitcoin-support)
     - Sources can no longer have a "BITCOIN" source type. These sources will now be interpreted as "UNKNOWN".
     - You can no longer `createBitcoinParams`. Please use a different payment method.
 
