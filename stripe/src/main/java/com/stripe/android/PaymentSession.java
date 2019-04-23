@@ -42,7 +42,14 @@ public class PaymentSession {
      */
     public PaymentSession(@NonNull Activity hostActivity) {
         mHostActivity = hostActivity;
-        PaymentConfiguration.getInstance().setRequiredBillingAddressFields(Address.RequiredBillingAddressFields.ZIP);
+        mPaymentSessionData = new PaymentSessionData();
+    }
+    
+    public PaymentSession(@NonNull Activity hostActivity, boolean withzip) {
+        mHostActivity = hostActivity;
+        if (withzip) {
+            PaymentConfiguration.getInstance().setRequiredBillingAddressFields(Address.RequiredBillingAddressFields.ZIP);
+        }
         mPaymentSessionData = new PaymentSessionData();
     }
 
