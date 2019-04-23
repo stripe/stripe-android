@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.stripe.android.StripeApiHandler.POST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -57,7 +56,7 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
-    @Mock private StripeApiHandler.ConnectionFactory mConnectionFactory;
+    @Mock private StripeApiHandler.RequestExecutor mRequestExecutor;
 
     @Before
     public void before() {
@@ -182,7 +181,7 @@ public class StripeApiHandlerTest {
                         .hashMapFromCard(CARD);
         final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
-        final String query = mApiHandler.createQuery(cardMap);
+        final String query = new StripeApiHandler.ConnectionFactory().createQuery(cardMap);
         assertEquals(expectedValue, query);
     }
 
@@ -256,7 +255,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
         final StripeResponse response = mApiHandler.requestData(
-                POST, mApiHandler.getSourcesUrl(),
+                StripeApiHandler.RestMethod.POST, mApiHandler.getSourcesUrl(),
                 SourceParams.createCardParams(CARD).toParamMap(),
                 RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                         connectAccountId, RequestOptions.TYPE_QUERY)
@@ -351,7 +350,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                new StripeApiHandler.ConnectionFactory(),
+                new StripeApiHandler.RequestExecutor(),
                 false
         );
         final Source source = apiHandler.createSource(
@@ -368,12 +367,12 @@ public class StripeApiHandlerTest {
     public void logApiCall_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mConnectionFactory,
+                mRequestExecutor,
                 false
         );
         apiHandler.logApiCall(new HashMap<String, Object>(),
                 RequestOptions.builder("some_key")
                         .build());
-        verifyNoMoreInteractions(mConnectionFactory);
+        verifyNoMoreInteractions(mRequestExecutor);
     }
 }
