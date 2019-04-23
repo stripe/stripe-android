@@ -78,22 +78,22 @@ class StripeApiHandler {
     @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
-    @NonNull private final ConnectionFactory mConnectionFactory;
+    @NonNull private final RequestExecutor mRequestExecutor;
     private final boolean mShouldLogRequest;
 
     StripeApiHandler(@NonNull Context context) {
-        this(context, new ConnectionFactory(), true);
+        this(context, new RequestExecutor(), true);
     }
 
     @VisibleForTesting
     StripeApiHandler(@NonNull Context context,
-                     @NonNull ConnectionFactory connectionFactory,
+                     @NonNull RequestExecutor requestExecutor,
                      boolean shouldLogRequest) {
+        mRequestExecutor = requestExecutor;
         mShouldLogRequest = shouldLogRequest;
         mLoggingUtils = new LoggingUtils(context);
         mTelemetryClientUtil = new TelemetryClientUtil(context);
         mNetworkUtils = new StripeNetworkUtils(context);
-        mConnectionFactory = connectionFactory;
     }
 
     /**
@@ -553,7 +553,7 @@ class StripeApiHandler {
 
     @NonNull
     @VisibleForTesting
-    String getTokensUrl() {
+    static String getTokensUrl() {
         return getApiUrl(TOKENS);
     }
 
@@ -770,17 +770,6 @@ class StripeApiHandler {
         return isSuccessful;
     }
 
-    @Nullable
-    private String getResponseBody(@NonNull InputStream responseStream)
-            throws IOException {
-        //\A is the beginning of
-        // the stream boundary
-        final Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
-        final String rBody = scanner.hasNext() ? scanner.next() : null;
-        responseStream.close();
-        return rBody;
-    }
-
     @NonNull
     private StripeResponse getStripeResponse(
             @RestMethod @NonNull String method,
@@ -788,54 +777,7 @@ class StripeApiHandler {
             @Nullable Map<String, Object> params,
             @NonNull RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
-        // HttpURLConnection verifies SSL cert by default
-        HttpURLConnection conn = null;
-        try {
-            switch (method) {
-                case RestMethod.GET: {
-                    conn = mConnectionFactory.create(RestMethod.GET, url, params, options);
-                    break;
-                }
-                case RestMethod.POST: {
-                    conn = mConnectionFactory.create(RestMethod.POST, url, params, options);
-                    break;
-                }
-                case RestMethod.DELETE: {
-                    conn = mConnectionFactory.create(RestMethod.DELETE, url, null, options);
-                    break;
-                }
-                default: {
-                    throw new APIConnectionException(
-                            String.format(Locale.ENGLISH,
-                                    "Unrecognized HTTP method %s. "
-                                            + "This indicates a bug in the Stripe bindings. "
-                                            + "Please contact support@stripe.com for assistance.",
-                                    method));
-                }
-            }
-            // trigger the request
-            final int rCode = conn.getResponseCode();
-            final String rBody;
-            if (rCode >= 200 && rCode < 300) {
-                rBody = getResponseBody(conn.getInputStream());
-            } else {
-                rBody = getResponseBody(conn.getErrorStream());
-            }
-            return new StripeResponse(rCode, rBody, conn.getHeaderFields());
-        } catch (IOException e) {
-            throw new APIConnectionException(
-                    String.format(Locale.ENGLISH,
-                            "IOException during API request to Stripe (%s): %s "
-                                    + "Please check your internet connection and try again. "
-                                    + "If this problem persists, you should check Stripe's "
-                                    + "service status at https://twitter.com/stripestatus, "
-                                    + "or let us know at support@stripe.com.",
-                            getTokensUrl(), e.getMessage()), e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
+        return mRequestExecutor.execute(method, url, params, options);
     }
 
     private void handleAPIError(@Nullable String responseBody, int responseCode,
@@ -968,6 +910,81 @@ class StripeApiHandler {
         Parameter(@NonNull String key, @NonNull String value) {
             this.key = key;
             this.value = value;
+        }
+    }
+
+    static class RequestExecutor {
+        private final ConnectionFactory mConnectionFactory;
+
+        RequestExecutor() {
+            mConnectionFactory = new ConnectionFactory();
+        }
+
+        @NonNull
+        StripeResponse execute(
+                @RestMethod @NonNull String method,
+                @NonNull String url,
+                @Nullable Map<String, Object> params,
+                @NonNull RequestOptions options)
+                throws APIConnectionException, InvalidRequestException {
+            // HttpURLConnection verifies SSL cert by default
+            HttpURLConnection conn = null;
+            try {
+                switch (method) {
+                    case RestMethod.GET: {
+                        conn = mConnectionFactory.create(RestMethod.GET, url, params, options);
+                        break;
+                    }
+                    case RestMethod.POST: {
+                        conn = mConnectionFactory.create(RestMethod.POST, url, params, options);
+                        break;
+                    }
+                    case RestMethod.DELETE: {
+                        conn = mConnectionFactory.create(RestMethod.DELETE, url, null, options);
+                        break;
+                    }
+                    default: {
+                        throw new APIConnectionException(String.format(Locale.ENGLISH,
+                                "Unrecognized HTTP method %s. "
+                                        + "This indicates a bug in the Stripe bindings. "
+                                        + "Please contact support@stripe.com for assistance.",
+                                method));
+                    }
+                }
+                // trigger the request
+                final int rCode = conn.getResponseCode();
+                final String rBody;
+                if (rCode >= 200 && rCode < 300) {
+                    rBody = getResponseBody(conn.getInputStream());
+                } else {
+                    rBody = getResponseBody(conn.getErrorStream());
+                }
+                return new StripeResponse(rCode, rBody, conn.getHeaderFields());
+            } catch (IOException e) {
+                throw new APIConnectionException(
+                        String.format(Locale.ENGLISH,
+                                "IOException during API request to Stripe (%s): %s "
+                                        + "Please check your internet connection and try again. "
+                                        + "If this problem persists, you should check Stripe's "
+                                        + "service status at https://twitter.com/stripestatus, "
+                                        + "or let us know at support@stripe.com.",
+                                getTokensUrl(), e.getMessage()), e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+        }
+
+        @Nullable
+        private String getResponseBody(@NonNull InputStream responseStream)
+                throws IOException {
+            //\A is the beginning of
+            // the stream boundary
+            final Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
+            final String rBody = scanner.hasNext() ? scanner.next() : null;
+            responseStream.close();
+            return rBody;
         }
     }
 

@@ -1280,7 +1280,7 @@ public class StripeTest {
         final Stripe stripe = new Stripe(
                 new StripeApiHandler(
                         context,
-                        new StripeApiHandler.ConnectionFactory(),
+                        new StripeApiHandler.RequestExecutor(),
                         false),
                 new LoggingUtils(context),
                 new StripeNetworkUtils(context));

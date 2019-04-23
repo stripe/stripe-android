@@ -56,7 +56,7 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
-    @Mock private StripeApiHandler.ConnectionFactory mConnectionFactory;
+    @Mock private StripeApiHandler.RequestExecutor mRequestExecutor;
 
     @Before
     public void before() {
@@ -350,7 +350,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                new StripeApiHandler.ConnectionFactory(),
+                new StripeApiHandler.RequestExecutor(),
                 false
         );
         final Source source = apiHandler.createSource(
@@ -367,12 +367,12 @@ public class StripeApiHandlerTest {
     public void logApiCall_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mConnectionFactory,
+                mRequestExecutor,
                 false
         );
         apiHandler.logApiCall(new HashMap<String, Object>(),
                 RequestOptions.builder("some_key")
                         .build());
-        verifyNoMoreInteractions(mConnectionFactory);
+        verifyNoMoreInteractions(mRequestExecutor);
     }
 }
