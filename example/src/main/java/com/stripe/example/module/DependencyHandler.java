@@ -1,12 +1,12 @@
 package com.stripe.example.module;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.view.CardInputWidget;
@@ -26,7 +26,7 @@ public class DependencyHandler {
     @Nullable private AsyncTaskTokenController mAsyncTaskController;
     @NonNull private final CardInputWidget mCardInputWidget;
     @NonNull private final Context mContext;
-    @NonNull private final ProgressDialogController mProgresDialogController;
+    @NonNull private final ProgressDialogController mProgressDialogController;
     @NonNull private final ErrorDialogHandler mErrorDialogHandler;
     @Nullable private IntentServiceTokenController mIntentServiceTokenController;
     @NonNull private final ListViewController mListViewController;
@@ -40,8 +40,10 @@ public class DependencyHandler {
         mCardInputWidget = cardInputWidget;
         mContext = activity.getApplicationContext();
 
-        mProgresDialogController =
-                new ProgressDialogController(activity.getSupportFragmentManager());
+        mProgressDialogController = new ProgressDialogController(
+                activity.getSupportFragmentManager(),
+                activity.getResources()
+        );
 
         mListViewController = new ListViewController(outputListView);
 
@@ -56,7 +58,7 @@ public class DependencyHandler {
      * @return a reference to the {@link AsyncTaskTokenController}
      */
     @NonNull
-    public AsyncTaskTokenController attachAsyncTaskTokenController(Button button) {
+    public AsyncTaskTokenController attachAsyncTaskTokenController(@NonNull Button button) {
         if (mAsyncTaskController == null) {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
@@ -64,7 +66,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mAsyncTaskController;
     }
@@ -80,16 +82,16 @@ public class DependencyHandler {
      */
     @NonNull
     public IntentServiceTokenController attachIntentServiceTokenController(
-            AppCompatActivity appCompatActivity,
-            Button button) {
+            @NonNull Activity activity,
+            @NonNull Button button) {
         if (mIntentServiceTokenController == null) {
             mIntentServiceTokenController = new IntentServiceTokenController(
-                    appCompatActivity,
+                    activity,
                     button,
                     mCardInputWidget,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mIntentServiceTokenController;
     }
@@ -112,7 +114,7 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgresDialogController);
+                    mProgressDialogController);
         }
         return mRxTokenController;
     }

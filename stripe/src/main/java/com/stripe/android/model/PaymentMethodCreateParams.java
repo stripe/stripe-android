@@ -1,7 +1,7 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.Stripe;
 import com.stripe.android.utils.ObjectUtils;
@@ -128,12 +128,25 @@ public class PaymentMethodCreateParams {
         @Nullable private final String mCvc;
         @Nullable private final String mToken;
 
+        @NonNull
+        public static Card create(@NonNull String token) {
+            return new Card(token);
+        }
+
+        private Card(@NonNull String token) {
+            this.mToken = token;
+            this.mNumber = null;
+            this.mExpiryMonth = null;
+            this.mExpiryYear = null;
+            this.mCvc = null;
+        }
+
         private Card(@NonNull Card.Builder builder) {
             this.mNumber = builder.mNumber;
             this.mExpiryMonth = builder.mExpiryMonth;
             this.mExpiryYear = builder.mExpiryYear;
             this.mCvc = builder.mCvc;
-            this.mToken = builder.mToken;
+            this.mToken = null;
         }
 
         @Override
@@ -180,12 +193,15 @@ public class PaymentMethodCreateParams {
             return map;
         }
 
+        /**
+         * Used to create a {@link Card} object with the user's card details. To create a
+         * {@link Card} with a Stripe token (e.g. for Google Pay), use {@link Card#create(String)}.
+         */
         public static final class Builder {
             @Nullable private String mNumber;
             @Nullable private Integer mExpiryMonth;
             @Nullable private Integer mExpiryYear;
             @Nullable private String mCvc;
-            @Nullable private String mToken;
 
             @NonNull
             public Builder setNumber(@Nullable String number) {
@@ -208,12 +224,6 @@ public class PaymentMethodCreateParams {
             @NonNull
             public Builder setCvc(@Nullable String cvc) {
                 this.mCvc = cvc;
-                return this;
-            }
-
-            @NonNull
-            public Builder setToken(@Nullable String token) {
-                this.mToken = token;
                 return this;
             }
 

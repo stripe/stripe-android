@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.appcompat.widget.Toolbar
+    <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_as"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"

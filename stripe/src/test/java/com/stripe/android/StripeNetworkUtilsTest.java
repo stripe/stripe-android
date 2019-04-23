@@ -1,14 +1,18 @@
 package com.stripe.android;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
+
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
@@ -18,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link StripeNetworkUtils}
@@ -39,6 +44,13 @@ public class StripeNetworkUtilsTest {
     private static final String BANK_ACCOUNT_NUMBER = "000123456789";
     private static final String BANK_ROUTING_NUMBER = "110000000";
     private static final String BANK_ACCOUNT_HOLDER_NAME = "Lily Thomas";
+
+    @Mock private UidProvider mUidProvider;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
@@ -159,19 +171,9 @@ public class StripeNetworkUtilsTest {
     @Test
     public void addUidParams_addsParams() {
         final Map<String, Object> existingMap = new HashMap<>();
-        final StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
-            @Override
-            public String getUid() {
-                return "abc123";
-            }
-
-            @Override
-            public String getPackageName() {
-                return "com.example.main";
-            }
-        };
-        StripeNetworkUtils.addUidParams(provider, ApplicationProvider.getApplicationContext(),
-                existingMap);
+        when(mUidProvider.get()).thenReturn("abc123");
+        new StripeNetworkUtils("com.example.main", mUidProvider)
+                .addUidParams(existingMap);
         assertEquals(2, existingMap.size());
         assertTrue(existingMap.containsKey("muid"));
         assertTrue(existingMap.containsKey("guid"));
@@ -183,20 +185,9 @@ public class StripeNetworkUtilsTest {
         final Map<String, Object> sourceDataMap = new HashMap<>();
         existingMap.put("source_data", sourceDataMap);
 
-        final StripeNetworkUtils.UidProvider provider = new StripeNetworkUtils.UidProvider() {
-            @Override
-            public String getUid() {
-                return "abc123";
-            }
-
-            @Override
-            public String getPackageName() {
-                return "com.example.main";
-            }
-
-        };
-        StripeNetworkUtils.addUidParamsToPaymentIntent(provider,
-                ApplicationProvider.getApplicationContext(), existingMap);
+        when(mUidProvider.get()).thenReturn("abc123");
+        new StripeNetworkUtils("abc123", mUidProvider)
+                .addUidParamsToPaymentIntent(existingMap);
         assertEquals(1, existingMap.size());
         assertTrue(sourceDataMap.containsKey("muid"));
         assertTrue(sourceDataMap.containsKey("guid"));
@@ -204,16 +195,18 @@ public class StripeNetworkUtilsTest {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
-        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromCard(
-                ApplicationProvider.getApplicationContext(), card);
+        final Map<String, Object> tokenMap =
+                new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
+                .hashMapFromCard(card);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("card");
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
-        Map<String, Object> tokenMap = StripeNetworkUtils.hashMapFromBankAccount(
-                ApplicationProvider.getApplicationContext(), bankAccount);
+        final Map<String, Object> tokenMap =
+                new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
+                .hashMapFromBankAccount(bankAccount);
         assertNotNull(tokenMap);
         return (Map<String, Object>) tokenMap.get("bank_account");
     }

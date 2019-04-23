@@ -3,15 +3,17 @@ package com.stripe.example.dialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-
-import androidx.fragment.app.DialogFragment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 
 public class ProgressDialogFragment extends DialogFragment {
-    public static ProgressDialogFragment newInstance(int msgId) {
+    @NonNull
+    public static ProgressDialogFragment newInstance(@NonNull String message) {
         ProgressDialogFragment fragment = new ProgressDialogFragment();
 
         Bundle args = new Bundle();
-        args.putInt("msgId", msgId);
+        args.putString("message", message);
 
         fragment.setArguments(args);
 
@@ -22,11 +24,16 @@ public class ProgressDialogFragment extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
 
+    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        int msgId = getArguments().getInt("msgId");
-        ProgressDialog dialog = new ProgressDialog(getActivity());
-        dialog.setMessage(getActivity().getResources().getString(msgId));
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        final ProgressDialog dialog = new ProgressDialog(getActivity());
+        dialog.setMessage(getMessage());
         return dialog;
+    }
+
+    @Nullable
+    private String getMessage() {
+        return getArguments() != null ? getArguments().getString("message") : null;
     }
 }

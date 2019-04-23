@@ -1,12 +1,11 @@
 package com.stripe.android.view;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
@@ -301,6 +300,15 @@ public class CardMultilineWidgetTest {
     }
 
     @Test
+    public void setCvcLabel_shouldShowCustomLabelIfPresent() {
+        mCardMultilineWidget.setCvcLabel("my cool cvc");
+        assertEquals("my cool cvc", mFullGroup.cvcInputLayout.getHint());
+
+        mCardMultilineWidget.setCvcLabel(null);
+        assertEquals("CVC", mFullGroup.cvcInputLayout.getHint());
+    }
+
+    @Test
     public void initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
         assertEquals(View.VISIBLE, mFullGroup.postalCodeInputLayout.getVisibility());
         mCardMultilineWidget.setShouldShowPostalCode(false);
@@ -555,16 +563,15 @@ public class CardMultilineWidgetTest {
     }
 
     static class WidgetControlGroup {
-
-        CardNumberEditText cardNumberEditText;
-        TextInputLayout cardInputLayout;
-        ExpiryDateEditText expiryDateEditText;
-        TextInputLayout expiryInputLayout;
-        StripeEditText cvcEditText;
-        TextInputLayout cvcInputLayout;
-        StripeEditText postalCodeEditText;
-        TextInputLayout postalCodeInputLayout;
-        LinearLayout secondRowLayout;
+        @NonNull final CardNumberEditText cardNumberEditText;
+        @NonNull final TextInputLayout cardInputLayout;
+        @NonNull final ExpiryDateEditText expiryDateEditText;
+        @NonNull final TextInputLayout expiryInputLayout;
+        @NonNull final StripeEditText cvcEditText;
+        @NonNull final TextInputLayout cvcInputLayout;
+        @NonNull final StripeEditText postalCodeEditText;
+        @NonNull final TextInputLayout postalCodeInputLayout;
+        @NonNull final LinearLayout secondRowLayout;
 
         WidgetControlGroup(@NonNull CardMultilineWidget parentWidget) {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);

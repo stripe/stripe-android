@@ -1,9 +1,9 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-import androidx.annotation.StringDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
+import android.support.annotation.StringDef;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -32,6 +32,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 public class Source extends StripeJsonModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
+    private static final String VALUE_CARD = "card";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -145,6 +146,12 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     @Nullable @SourceType private String mType;
     @Nullable @Usage private String mUsage;
 
+    private Source(@Nullable String id, @Nullable SourceCardData sourceTypeModel) {
+        mId = id;
+        mType = CARD;
+        mSourceTypeModel = sourceTypeModel;
+    }
+
     private Source(
             @Nullable String id,
             @Nullable Long amount,
@@ -185,6 +192,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
         mUsage = usage;
     }
 
+    @Nullable
     @Override
     public String getId() {
         return mId;
@@ -422,10 +430,30 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
 
     @Nullable
     public static Source fromJson(@Nullable JSONObject jsonObject) {
-        if (jsonObject == null || !VALUE_SOURCE.equals(jsonObject.optString(FIELD_OBJECT))) {
+        if (jsonObject == null) {
             return null;
         }
 
+        final String objectType = jsonObject.optString(FIELD_OBJECT);
+        if (VALUE_CARD.equals(objectType)) {
+            return fromCardJson(jsonObject);
+        } else if (VALUE_SOURCE.equals(objectType)) {
+            return fromSourceJson(jsonObject);
+        } else {
+            return null;
+        }
+    }
+
+    @NonNull
+    private static Source fromCardJson(@NonNull JSONObject jsonObject) {
+        return new Source(
+                optString(jsonObject, FIELD_ID),
+                SourceCardData.fromJson(jsonObject)
+        );
+    }
+
+    @NonNull
+    private static Source fromSourceJson(@NonNull JSONObject jsonObject) {
         final String id = optString(jsonObject, FIELD_ID);
         final Long amount = optLong(jsonObject, FIELD_AMOUNT);
         final String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
@@ -459,8 +487,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
         // trying to force it to be a type that we know of.
         final Map<String, Object> sourceTypeData =
                 StripeJsonUtils.jsonObjectToMap(jsonObject.optJSONObject(typeRaw));
-        final StripeSourceTypeModel sourceTypeModel =
-                MODELED_TYPES.contains(typeRaw)
+        final StripeSourceTypeModel sourceTypeModel = MODELED_TYPES.contains(typeRaw)
                 ? optStripeJsonModel(jsonObject, typeRaw, StripeSourceTypeModel.class)
                 : null;
 

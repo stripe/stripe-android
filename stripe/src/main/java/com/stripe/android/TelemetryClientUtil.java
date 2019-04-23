@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.provider.Settings;
-
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -18,7 +16,16 @@ import java.util.concurrent.TimeUnit;
 
 class TelemetryClientUtil {
 
-    static Map<String, Object> createTelemetryMap(@NonNull final Context context) {
+    @NonNull private final Context mContext;
+    @NonNull private final UidProvider mUidProvider;
+
+    TelemetryClientUtil(@NonNull Context context) {
+        mContext = context.getApplicationContext();
+        mUidProvider = new UidProvider(context);
+    }
+
+    @NonNull
+    Map<String, Object> createTelemetryMap() {
         Map<String, Object> telemetryMap = new HashMap<>();
         Map<String, Object> firstMap = new HashMap<>();
         Map<String, Object> secondMap = new HashMap<>();
@@ -28,12 +35,12 @@ class TelemetryClientUtil {
 
         firstMap.put("c", createSingleValuePair(Locale.getDefault().toString()));
         firstMap.put("d", createSingleValuePair(getAndroidVersionString()));
-        firstMap.put("f", createSingleValuePair(getScreen(context)));
+        firstMap.put("f", createSingleValuePair(getScreen()));
         firstMap.put("g", createSingleValuePair(getTimeZoneString()));
         telemetryMap.put("a", firstMap);
 
-        secondMap.put("d", getHashedMuid(context));
-        String packageName = getPackageName(context);
+        secondMap.put("d", getHashedMuid());
+        String packageName = getPackageName();
         secondMap.put("k", packageName);
         secondMap.put("o", Build.VERSION.RELEASE);
         secondMap.put("p", Build.VERSION.SDK_INT);
@@ -42,11 +49,12 @@ class TelemetryClientUtil {
         secondMap.put("s", Build.MODEL);
         secondMap.put("t", Build.TAGS);
 
-        if (context.getPackageName() != null) {
+        if (mContext.getPackageName() != null) {
             try {
-                PackageInfo pInfo = context.getPackageManager().getPackageInfo(packageName, 0);
+                final PackageInfo pInfo = mContext.getPackageManager()
+                        .getPackageInfo(packageName, 0);
                 secondMap.put("l", pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException nameNotFound) { }
+            } catch (PackageManager.NameNotFoundException ignored) { }
         }
 
         telemetryMap.put("b", secondMap);
@@ -80,58 +88,50 @@ class TelemetryClientUtil {
     }
 
     @NonNull
-    private static String getScreen(@NonNull final Context context) {
-        if (context.getResources() == null) {
+    private String getScreen() {
+        if (mContext.getResources() == null) {
             return "";
         }
 
-        int width = context.getResources().getDisplayMetrics().widthPixels;
-        int height = context.getResources().getDisplayMetrics().heightPixels;
-        int density = context.getResources().getDisplayMetrics().densityDpi;
+        int width = mContext.getResources().getDisplayMetrics().widthPixels;
+        int height = mContext.getResources().getDisplayMetrics().heightPixels;
+        int density = mContext.getResources().getDisplayMetrics().densityDpi;
 
         return String.format(Locale.ENGLISH, "%dw_%dh_%ddpi", width, height, density);
     }
 
     @NonNull
     private static String getAndroidVersionString() {
-        StringBuilder builder = new StringBuilder();
         final String delimiter = " ";
-        builder.append("Android").append(delimiter)
-                .append(Build.VERSION.RELEASE).append(delimiter)
-                .append(Build.VERSION.CODENAME).append(delimiter)
-                .append(Build.VERSION.SDK_INT);
-        return builder.toString();
+        return "Android" + delimiter +
+                Build.VERSION.RELEASE + delimiter +
+                Build.VERSION.CODENAME + delimiter +
+                Build.VERSION.SDK_INT;
     }
 
-    @SuppressWarnings("HardwareIds")
     @NonNull
-    static String getHashedId(@NonNull final Context context) {
-        String id = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
+    String getHashedId() {
+        final String id = mUidProvider.get();
         if (StripeTextUtils.isBlank(id)) {
             return "";
         }
 
-        String hashId = StripeTextUtils.shaHashInput(id);
+        final String hashId = StripeTextUtils.shaHashInput(id);
         return hashId == null ? "" : hashId;
     }
 
     @NonNull
-    private static String getHashedMuid(@NonNull final Context context) {
-        String guid = getHashedId(context);
-        String packageName = getPackageName(context);
-        String raw = packageName + guid;
-        String hashed = StripeTextUtils.shaHashInput(raw);
+    private String getHashedMuid() {
+        final String hashed = StripeTextUtils.shaHashInput(getPackageName() + getHashedId());
         return hashed == null ? "" : hashed;
     }
 
     @NonNull
-    private static String getPackageName(@NonNull final Context context) {
-        if (context.getApplicationContext() == null
-                || context.getApplicationContext().getPackageName() == null) {
+    private String getPackageName() {
+        if (mContext.getPackageName() == null) {
             return "";
         }
-        return context.getApplicationContext().getPackageName();
+        return mContext.getPackageName();
     }
 }
 

@@ -1,14 +1,13 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
+import android.support.design.widget.TextInputLayout;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-
-import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
@@ -108,15 +107,16 @@ public class ShippingInfoWidget extends LinearLayout {
             return null;
         }
 
-        Address address = new Address.Builder().setCity(mCityEditText.getText().toString())
-                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode()).setLine1
-                        (mAddressEditText.getText().toString()).setLine2
-                        (mAddressEditText2.getText().toString()).setPostalCode
-                        (mPostalCodeEditText.getText().toString()).setState(mStateEditText
-                        .getText().toString()).build();
-        ShippingInformation shippingInformation = new ShippingInformation(address, mNameEditText
-                .getText().toString(), mPhoneNumberEditText.getText().toString());
-        return shippingInformation;
+        final Address address = new Address.Builder()
+                .setCity(mCityEditText.getText().toString())
+                .setCountry(mCountryAutoCompleteTextView.getSelectedCountryCode())
+                .setLine1(mAddressEditText.getText().toString())
+                .setLine2(mAddressEditText2.getText().toString())
+                .setPostalCode(mPostalCodeEditText.getText().toString())
+                .setState(mStateEditText.getText().toString())
+                .build();
+        return new ShippingInformation(address, mNameEditText.getText().toString(),
+                mPhoneNumberEditText.getText().toString());
     }
 
     /**

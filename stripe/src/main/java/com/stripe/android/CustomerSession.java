@@ -1,21 +1,18 @@
 package com.stripe.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
+import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.LocalBroadcastManager;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RestrictTo;
-import androidx.annotation.VisibleForTesting;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.APIException;
-import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.ShippingInformation;
@@ -27,10 +24,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -62,27 +58,6 @@ public class CustomerSession
                     "ShippingInfoScreen",
                     "ShippingMethodScreen"));
 
-    private @Nullable Customer mCustomer;
-    private long mCustomerCacheTime;
-    private @Nullable WeakReference<Context> mContextRef;
-    private @Nullable CustomerRetrievalListener mCustomerRetrievalListener;
-    private @Nullable SourceRetrievalListener mSourceRetrievalListener;
-
-    private @Nullable
-    CustomerEphemeralKey mEphemeralKey;
-    private @NonNull EphemeralKeyManager mEphemeralKeyManager;
-
-    private @NonNull Handler mUiThreadHandler;
-
-    private @NonNull Set<String> mProductUsageTokens;
-    private @Nullable Calendar mProxyNowCalendar;
-    private @Nullable StripeApiProxy mStripeApiProxy;
-
-    // A queue of Runnables for doing customer updates
-    private final BlockingQueue<Runnable> mNetworkQueue = new LinkedBlockingQueue<>();
-
-    private final @NonNull ThreadPoolExecutor mThreadPoolExecutor;
-
     private static final int CUSTOMER_RETRIEVED = 7;
     private static final int CUSTOMER_ERROR = 11;
     private static final int SOURCE_RETRIEVED = 13;
@@ -101,16 +76,31 @@ public class CustomerSession
 
     private static CustomerSession mInstance;
 
+    @Nullable private Customer mCustomer;
+    private long mCustomerCacheTime;
+    @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
+    @NonNull private final Map<String, CustomerRetrievalListener> mCustomerRetrievalListeners =
+            new HashMap<>();
+    @NonNull private final Map<String, SourceRetrievalListener> mSourceRetrievalListeners =
+            new HashMap<>();
+
+    @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
+    @NonNull private final Handler mUiThreadHandler;
+    @NonNull private final Set<String> mProductUsageTokens;
+    @Nullable private final Calendar mProxyNowCalendar;
+    @NonNull private final ThreadPoolExecutor mThreadPoolExecutor;
     @NonNull private final StripeApiHandler mApiHandler;
 
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
+     * @param context application context
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
      * {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
-    public static void initCustomerSession(@NonNull EphemeralKeyProvider keyProvider) {
-        initCustomerSession(keyProvider, null, null);
+    public static void initCustomerSession(@NonNull Context context,
+                                           @NonNull EphemeralKeyProvider keyProvider) {
+        setInstance(new CustomerSession(context, keyProvider));
     }
 
     /**
@@ -128,28 +118,29 @@ public class CustomerSession
         return mInstance;
     }
 
+    @VisibleForTesting
+    static void setInstance(@Nullable CustomerSession customerSession) {
+        mInstance = customerSession;
+    }
+
     /**
      * End the singleton instance of a {@link CustomerSession}.
      * Calls to {@link CustomerSession#getInstance()} will throw an {@link IllegalStateException}
      * after this call, until the user calls
-     * {@link CustomerSession#initCustomerSession(EphemeralKeyProvider)} again.
+     * {@link CustomerSession#initCustomerSession(Context, EphemeralKeyProvider)} again.
      */
     public static void endCustomerSession() {
         clearInstance();
     }
 
     @VisibleForTesting
-    static void initCustomerSession(
-            @NonNull EphemeralKeyProvider keyProvider,
-            @Nullable StripeApiProxy stripeApiProxy,
-            @Nullable Calendar proxyNowCalendar) {
-        mInstance = new CustomerSession(keyProvider, stripeApiProxy, proxyNowCalendar);
-    }
-
-    @VisibleForTesting
     static void clearInstance() {
+        if (mInstance != null) {
+            mInstance.mCustomerRetrievalListeners.clear();
+            mInstance.mSourceRetrievalListeners.clear();
+        }
         cancelCallbacks();
-        mInstance = null;
+        setInstance(null);
     }
 
     /**
@@ -157,8 +148,9 @@ public class CustomerSession
      * It will not clear the singleton instance of a {@link CustomerSession} so it can be
      * safely used when a view is being removed/destroyed to avoid null pointer exceptions
      * due to async operation delay.
-     * No need to call {@link CustomerSession#initCustomerSession(EphemeralKeyProvider)} again
-     * after this operation.
+     *
+     * No need to call {@link CustomerSession#initCustomerSession(Context, EphemeralKeyProvider)}
+     * again after this operation.
      */
     public static void cancelCallbacks() {
         if (mInstance == null) {
@@ -167,27 +159,76 @@ public class CustomerSession
         mInstance.mThreadPoolExecutor.shutdownNow();
     }
 
-    private CustomerSession(
+    private CustomerSession(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider) {
+        this(context, keyProvider, null, createThreadPoolExecutor(),
+                new StripeApiHandler(context));
+    }
+
+    @VisibleForTesting
+    CustomerSession(
+            @NonNull Context context,
             @NonNull EphemeralKeyProvider keyProvider,
-            @Nullable StripeApiProxy stripeApiProxy,
-            @Nullable Calendar proxyNowCalendar) {
-        mThreadPoolExecutor = createThreadPoolExecutor();
-        mUiThreadHandler = createMainThreadHandler();
-        mStripeApiProxy = stripeApiProxy;
+            @Nullable Calendar proxyNowCalendar,
+            @NonNull ThreadPoolExecutor threadPoolExecutor,
+            @NonNull StripeApiHandler apiHandler) {
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
+        mThreadPoolExecutor = threadPoolExecutor;
         mProxyNowCalendar = proxyNowCalendar;
         mProductUsageTokens = new HashSet<>();
+        mApiHandler = apiHandler;
+        mUiThreadHandler = new CustomerSessionHandler(new CustomerSessionHandler.Listener() {
+            @Override
+            public void onCustomerRetrieved(@Nullable Customer customer,
+                                            @Nullable String operationId) {
+                mCustomer = customer;
+                mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
+
+                final CustomerRetrievalListener listener =
+                        getCustomerRetrievalListener(operationId);
+                if (listener != null && customer != null) {
+                    listener.onCustomerRetrieved(customer);
+                }
+            }
+
+            @Override
+            public void onSourceRetrieved(@Nullable Source source, @Nullable String operationId) {
+                final SourceRetrievalListener listener =
+                        getSourceRetrievalListener(operationId);
+                if (listener != null && source != null) {
+                    listener.onSourceRetrieved(source);
+                }
+            }
+
+            @Override
+            public void onCustomerShippingInfoSaved(@Nullable Customer customer) {
+                mCustomer = customer;
+                mLocalBroadcastManager
+                        .sendBroadcast(new Intent(EVENT_SHIPPING_INFO_SAVED));
+            }
+
+            @Override
+            public void onCustomerError(@NonNull StripeException exception,
+                                        @Nullable String operationId) {
+                handleRetrievalError(operationId, exception, CUSTOMER_ERROR);
+            }
+
+            @Override
+            public void onSourceError(@NonNull StripeException exception,
+                                      @Nullable String operationId) {
+                handleRetrievalError(operationId, exception, SOURCE_ERROR);
+            }
+        });
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 CustomerEphemeralKey.class);
-        mApiHandler = new StripeApiHandler();
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
-    public void addProductUsageTokenIfValid(String token) {
-        if (token != null && VALID_TOKENS.contains(token)) {
+    public void addProductUsageTokenIfValid(@Nullable String token) {
+        if (VALID_TOKENS.contains(token)) {
             mProductUsageTokens.add(token);
         }
     }
@@ -201,12 +242,15 @@ public class CustomerSession
      *                 customer, either from the cache or from the server
      */
     public void retrieveCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
-        if (canUseCachedCustomer()) {
-            listener.onCustomerRetrieved(getCachedCustomer());
+        final Customer cachedCustomer = getCachedCustomer();
+        if (cachedCustomer != null) {
+            listener.onCustomerRetrieved(cachedCustomer);
         } else {
             mCustomer = null;
-            mCustomerRetrievalListener = listener;
-            mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+
+            final String operationId = UUID.randomUUID().toString();
+            mCustomerRetrievalListeners.put(operationId, listener);
+            mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
         }
     }
 
@@ -218,8 +262,10 @@ public class CustomerSession
      */
     public void updateCurrentCustomer(@NonNull CustomerRetrievalListener listener) {
         mCustomer = null;
-        mCustomerRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(null, null);
+
+        final String operationId = UUID.randomUUID().toString();
+        mCustomerRetrievalListeners.put(operationId, listener);
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, null, null);
     }
 
     /**
@@ -240,76 +286,78 @@ public class CustomerSession
     /**
      * Add the input source to the current customer object.
      *
-     * @param context the {@link Context} to use for resources
      * @param sourceId the ID of the source to be added
      * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
      *                 complete
      */
     public void addCustomerSource(
-            @NonNull Context context,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
             @Nullable SourceRetrievalListener listener) {
-        mContextRef = new WeakReference<>(context.getApplicationContext());
-        Map<String, Object> arguments = new HashMap<>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
-        mSourceRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_ADD_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mSourceRetrievalListeners.put(operationId, listener);
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_ADD_SOURCE, arguments);
     }
 
     /**
      * Delete the source from the current customer object.
-     * @param context the {@link Context} to use for resources
      * @param sourceId the ID of the source to be deleted
      * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
      *                 complete. The api call will return the removed source.
      */
     public void deleteCustomerSource(
-            @NonNull Context context,
             @NonNull String sourceId,
             @Nullable SourceRetrievalListener listener) {
-        mContextRef = new WeakReference<>(context.getApplicationContext());
         Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
-        mSourceRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_DELETE_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mSourceRetrievalListeners.put(operationId, listener);
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
     }
 
     /**
      * Set the shipping information on the current customer object.
      *
-     * @param context a {@link Context} to use for resources
      * @param shippingInformation the data to be set
      */
     public void setCustomerShippingInformation(
-            @NonNull Context context,
             @NonNull ShippingInformation shippingInformation) {
-        mContextRef = new WeakReference<>(context.getApplicationContext());
-        Map<String, Object> arguments = new HashMap<>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SHIPPING_INFO, shippingInformation);
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments);
+        mEphemeralKeyManager.retrieveEphemeralKey(null, ACTION_SET_CUSTOMER_SHIPPING_INFO,
+                arguments);
     }
 
     /**
      * Set the default source of the current customer object.
      *
-     * @param context a {@link Context} to use for resources
      * @param sourceId the ID of the source to be set
      * @param listener a {@link CustomerRetrievalListener} to be notified about an update to the
      *                 customer
      */
     public void setCustomerDefaultSource(
-            @NonNull Context context,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
             @Nullable CustomerRetrievalListener listener) {
-        mContextRef = new WeakReference<>(context.getApplicationContext());
-        Map<String, Object> arguments = new HashMap<>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
-        mCustomerRetrievalListener = listener;
-        mEphemeralKeyManager.retrieveEphemeralKey(ACTION_SET_DEFAULT_SOURCE, arguments);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mCustomerRetrievalListeners.put(operationId, listener);
+        }
+        mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_SET_DEFAULT_SOURCE,
+                arguments);
     }
 
     void resetUsageTokens() {
@@ -327,45 +375,31 @@ public class CustomerSession
         return mCustomerCacheTime;
     }
 
-    @Nullable
-    @VisibleForTesting
-    CustomerEphemeralKey getEphemeralKey() {
-        return mEphemeralKey;
-    }
-
     @VisibleForTesting
     Set<String> getProductUsageTokens() {
         return mProductUsageTokens;
     }
 
-    @VisibleForTesting
-    void setStripeApiProxy(@Nullable StripeApiProxy proxy) {
-        mStripeApiProxy = proxy;
-    }
-
     private void addCustomerSource(
-            @NonNull final WeakReference<Context> contextRef,
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
-            @NonNull final List<String> productUsageTokens) {
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Source source = addCustomerSourceWithKey(
-                            contextRef,
-                            key,
-                            new ArrayList<>(productUsageTokens),
-                            sourceId,
-                            sourceType,
-                            mStripeApiProxy);
-                    mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source));
+                    final SourceMessage sourceMessage = new SourceMessage(
+                            operationId,
+                            addCustomerSourceWithKey(key, sourceId, sourceType)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, sourceMessage));
                 } catch (StripeException stripeEx) {
                     mUiThreadHandler
-                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx));
-                    sendErrorIntent(contextRef, stripeEx);
+                            .sendMessage(mUiThreadHandler.obtainMessage(SOURCE_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
                 }
             }
         };
@@ -380,27 +414,25 @@ public class CustomerSession
     }
 
     private void deleteCustomerSource(
-            @NonNull final WeakReference<Context> contextRef,
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
-            @NonNull final List<String> productUsageTokens) {
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    Source source = deleteCustomerSourceWithKey(
-                            contextRef,
-                            key,
-                            new ArrayList<>(productUsageTokens),
-                            sourceId,
-                            mStripeApiProxy);
-                    Message message = mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, source);
-                    mUiThreadHandler.sendMessage(message);
+                    final SourceMessage sourceMessage = new SourceMessage(
+                            operationId,
+                            deleteCustomerSourceWithKey(key, sourceId)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_RETRIEVED, sourceMessage));
 
                 } catch (StripeException stripeEx) {
-                    Message message = mUiThreadHandler.obtainMessage(SOURCE_ERROR, stripeEx);
-                    mUiThreadHandler.sendMessage(message);
-                    sendErrorIntent(contextRef, stripeEx);
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(SOURCE_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
                 }
             }
         };
@@ -408,28 +440,25 @@ public class CustomerSession
     }
 
     private void setCustomerSourceDefault(
-            @NonNull final WeakReference<Context> contextRef,
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
             @NonNull final String sourceType,
-            @NonNull final List<String> productUsageTokens) {
+            @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    Customer customer = setCustomerSourceDefaultWithKey(
-                            contextRef,
-                            key,
-                            new ArrayList<>(productUsageTokens),
-                            sourceId,
-                            sourceType,
-                            mStripeApiProxy);
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
-                    mUiThreadHandler.sendMessage(message);
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            setCustomerSourceDefaultWithKey(key, sourceId, sourceType)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customerMessage));
                 } catch (StripeException stripeEx) {
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
-                    mUiThreadHandler.sendMessage(message);
-                    sendErrorIntent(contextRef, stripeEx);
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
                 }
             }
         };
@@ -438,46 +467,46 @@ public class CustomerSession
     }
 
     private void setCustomerShippingInformation(
-            @NonNull final WeakReference<Context> contextRef,
             @NonNull final CustomerEphemeralKey key,
             @NonNull final ShippingInformation shippingInformation,
-            @NonNull final List<String> productUsageTokens) {
+            @Nullable final String operationId) {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    Customer customer = setCustomerShippingInfoWithKey(
-                            contextRef,
-                            key,
-                            new ArrayList<>(productUsageTokens),
-                            shippingInformation,
-                            mStripeApiProxy);
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED,
-                            customer);
-                    mUiThreadHandler.sendMessage(message);
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            setCustomerShippingInfoWithKey(key, shippingInformation)
+                    );
+                    mUiThreadHandler.sendMessage(mUiThreadHandler
+                            .obtainMessage(CUSTOMER_SHIPPING_INFO_SAVED, customerMessage));
                 } catch (StripeException stripeEx) {
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
-                    mUiThreadHandler.sendMessage(message);
-                    sendErrorIntent(contextRef, stripeEx);
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
                 }
             }
         };
         executeRunnable(runnable);
     }
 
-    private void updateCustomer(@NonNull final CustomerEphemeralKey key) {
+    private void updateCustomer(@NonNull final CustomerEphemeralKey key,
+                                @Nullable final String operationId) {
         final Runnable fetchCustomerRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    Customer customer = retrieveCustomerWithKey(
-                            key,
-                            mStripeApiProxy);
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customer);
-                    mUiThreadHandler.sendMessage(message);
+                    final CustomerMessage customerMessage = new CustomerMessage(
+                            operationId,
+                            retrieveCustomerWithKey(key)
+                    );
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_RETRIEVED, customerMessage));
                 } catch (StripeException stripeEx) {
-                    Message message = mUiThreadHandler.obtainMessage(CUSTOMER_ERROR, stripeEx);
-                    mUiThreadHandler.sendMessage(message);
+                    mUiThreadHandler.sendMessage(
+                            mUiThreadHandler.obtainMessage(CUSTOMER_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
                 }
             }
         };
@@ -486,172 +515,107 @@ public class CustomerSession
     }
 
     private void executeRunnable(@NonNull Runnable runnable) {
-        // In automation, run on the main thread.
-        if (mStripeApiProxy != null) {
-            runnable.run();
-            return;
-        }
-
         mThreadPoolExecutor.execute(runnable);
     }
 
     @Override
     public void onKeyUpdate(
             @NonNull CustomerEphemeralKey ephemeralKey,
+            @Nullable String operationId,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
-        mEphemeralKey = ephemeralKey;
         if (actionString == null) {
-            updateCustomer(mEphemeralKey);
-        } else if (ACTION_ADD_SOURCE.equals(actionString)
-                && mContextRef != null
-                && arguments != null
-                && arguments.containsKey(KEY_SOURCE)
-                && arguments.containsKey(KEY_SOURCE_TYPE)) {
+            updateCustomer(ephemeralKey, operationId);
+            return;
+        }
+
+        if (arguments == null) {
+            return;
+        }
+
+        if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
+                arguments.containsKey(KEY_SOURCE_TYPE)) {
             addCustomerSource(
-                    mContextRef,
-                    mEphemeralKey,
+                    ephemeralKey,
                     (String) arguments.get(KEY_SOURCE),
                     (String) arguments.get(KEY_SOURCE_TYPE),
-                    new ArrayList<>(mProductUsageTokens));
+                    operationId
+            );
             resetUsageTokens();
-        } else if (ACTION_DELETE_SOURCE.equals(actionString)
-                && mContextRef != null
-                && arguments != null
-                && arguments.containsKey(KEY_SOURCE)) {
+        } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
+                arguments.containsKey(KEY_SOURCE)) {
             deleteCustomerSource(
-                    mContextRef,
-                    mEphemeralKey,
+                    ephemeralKey,
                     (String) arguments.get(KEY_SOURCE),
-                    new ArrayList<>(mProductUsageTokens));
+                    operationId);
             resetUsageTokens();
         } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
-                && mContextRef != null
-                && arguments != null
-                && arguments.containsKey(KEY_SOURCE)
-                && arguments.containsKey(KEY_SOURCE_TYPE)) {
+                && arguments.containsKey(KEY_SOURCE) && arguments.containsKey(KEY_SOURCE_TYPE)) {
             setCustomerSourceDefault(
-                    mContextRef,
-                    mEphemeralKey,
+                    ephemeralKey,
                     (String) arguments.get(KEY_SOURCE),
                     (String) arguments.get(KEY_SOURCE_TYPE),
-                    new ArrayList<>(mProductUsageTokens));
+                    operationId);
             resetUsageTokens();
-        } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString)
-                && mContextRef != null
-                && arguments != null
-                && arguments.containsKey(KEY_SHIPPING_INFO)) {
+        } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
+                arguments.containsKey(KEY_SHIPPING_INFO)) {
             setCustomerShippingInformation(
-                    mContextRef,
-                    mEphemeralKey,
+                    ephemeralKey,
                     (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
-                    new ArrayList<>(mProductUsageTokens));
+                    operationId);
             resetUsageTokens();
         }
     }
 
     @Override
-    public void onKeyError(int httpCode, @Nullable String errorMessage) {
+    public void onKeyError(@Nullable String operationId, int httpCode,
+                           @Nullable String errorMessage) {
         // Any error eliminates all listeners
-
-        if (mCustomerRetrievalListener != null) {
-            mCustomerRetrievalListener.onError(httpCode, errorMessage, null);
-            mCustomerRetrievalListener = null;
+        final CustomerRetrievalListener customerRetrievalListener =
+                getCustomerRetrievalListener(operationId);
+        if (customerRetrievalListener != null) {
+            customerRetrievalListener.onError(httpCode, errorMessage, null);
         }
 
-        if (mSourceRetrievalListener != null) {
-            mSourceRetrievalListener.onError(httpCode, errorMessage, null);
-            mSourceRetrievalListener = null;
+        final SourceRetrievalListener sourceRetrievalListener =
+                getSourceRetrievalListener(operationId);
+        if (sourceRetrievalListener != null) {
+            sourceRetrievalListener.onError(httpCode, errorMessage, null);
         }
     }
 
-    @NonNull
-    private Handler createMainThreadHandler() {
-        return new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                final Object messageObject = msg.obj;
+    private void handleRetrievalError(@Nullable String operationId,
+                                      @NonNull StripeException exception,
+                                      int errorType) {
+        final RetrievalListener listener;
+        if (errorType == SOURCE_ERROR) {
+            listener = mSourceRetrievalListeners.remove(operationId);
+        } else if (errorType == CUSTOMER_ERROR) {
+            listener = mCustomerRetrievalListeners.remove(operationId);
+        } else {
+            listener = null;
+        }
 
-                switch (msg.what) {
-                    case CUSTOMER_RETRIEVED: {
-                        if (messageObject instanceof Customer) {
-                            mCustomer = (Customer) messageObject;
-                            mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
-                            if (mCustomerRetrievalListener != null) {
-                                mCustomerRetrievalListener.onCustomerRetrieved(mCustomer);
-                                // Eliminate reference to retrieval listener after use.
-                                mCustomerRetrievalListener = null;
-                            }
-                        }
-                        break;
-                    }
-                    case SOURCE_RETRIEVED: {
-                        if (messageObject instanceof Source && mSourceRetrievalListener != null) {
-                            mSourceRetrievalListener.onSourceRetrieved((Source) messageObject);
-                        }
+        if (listener != null) {
+            final int errorCode = exception.getStatusCode() == null
+                    ? 400
+                    : exception.getStatusCode();
+            listener.onError(errorCode,
+                    exception.getLocalizedMessage(),
+                    exception.getStripeError());
+        }
 
-                        // A source listener only listens once.
-                        mSourceRetrievalListener = null;
-                        // Clear our context reference so we don't use a stale one.
-                        mContextRef = null;
-                        break;
-                    }
-                    case CUSTOMER_SHIPPING_INFO_SAVED: {
-                        if (messageObject instanceof Customer) {
-                            mCustomer = (Customer) messageObject;
-                            final Intent intent = new Intent(EVENT_SHIPPING_INFO_SAVED);
-                            LocalBroadcastManager.getInstance(mContextRef.get())
-                                    .sendBroadcast(intent);
-                        }
-                        break;
-                    }
-                    case CUSTOMER_ERROR: {
-                        if (messageObject instanceof StripeException) {
-                            final StripeException exception = (StripeException) messageObject;
-                            if (mCustomerRetrievalListener != null) {
-                                final int errorCode = exception.getStatusCode() == null
-                                        ? 400
-                                        : exception.getStatusCode();
-                                mCustomerRetrievalListener.onError(errorCode,
-                                        exception.getLocalizedMessage(),
-                                        exception.getStripeError());
-                                mCustomerRetrievalListener = null;
-                            }
-                            resetUsageTokens();
-                        }
-                        break;
-                    }
-                    case SOURCE_ERROR: {
-                        final StripeException exception = (StripeException) messageObject;
-                        if (mSourceRetrievalListener != null) {
-                            final int errorCode = exception.getStatusCode() == null
-                                    ? 400
-                                    : exception.getStatusCode();
-                            mSourceRetrievalListener.onError(errorCode,
-                                    exception.getLocalizedMessage(),
-                                    exception.getStripeError());
-                            mSourceRetrievalListener = null;
-                            resetUsageTokens();
-                        }
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-        };
+        resetUsageTokens();
     }
 
     @NonNull
-    private ThreadPoolExecutor createThreadPoolExecutor() {
+    private static ThreadPoolExecutor createThreadPoolExecutor() {
         return new ThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 THREAD_POOL_SIZE,
                 KEEP_ALIVE_TIME,
                 KEEP_ALIVE_TIME_UNIT,
-                mNetworkQueue);
+                new LinkedBlockingQueue<Runnable>());
     }
 
     @NonNull
@@ -661,207 +625,239 @@ public class CustomerSession
 
     @Nullable
     private Source addCustomerSourceWithKey(
-            @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
-            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull @Source.SourceType String sourceType,
-            @Nullable StripeApiProxy proxy) throws StripeException {
-        if (proxy != null) {
-            return proxy.addCustomerSourceWithKey(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    sourceType,
-                    key.getSecret());
-        } else {
-            return mApiHandler.addCustomerSource(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    sourceType,
-                    key.getSecret(),
-                    null);
-        }
+            @NonNull @Source.SourceType String sourceType) throws StripeException {
+        return mApiHandler.addCustomerSource(
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                sourceType,
+                key.getSecret()
+        );
     }
 
     @Nullable
     private Source deleteCustomerSourceWithKey(
-            @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
-            @NonNull List<String> productUsageTokens,
-            @NonNull String sourceId,
-            @Nullable StripeApiProxy proxy) throws StripeException {
-        if (proxy != null) {
-            return proxy.deleteCustomerSourceWithKey(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    key.getSecret());
-        } else {
-            return mApiHandler.deleteCustomerSource(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    key.getSecret(),
-                    null);
-        }
+            @NonNull String sourceId) throws StripeException {
+        return mApiHandler.deleteCustomerSource(
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                key.getSecret()
+        );
     }
 
     @Nullable
     private Customer setCustomerShippingInfoWithKey(
-            @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
-            @NonNull List<String> productUsageTokens,
-            @NonNull ShippingInformation shippingInformation,
-            @Nullable StripeApiProxy proxy) throws StripeException {
-        if (proxy != null) {
-            return proxy.setCustomerShippingInfoWithKey(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    shippingInformation,
-                    key.getSecret());
-        } else {
-            return mApiHandler.setCustomerShippingInfo(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    shippingInformation,
-                    key.getSecret(),
-                    null);
-        }
+            @NonNull ShippingInformation shippingInformation) throws StripeException {
+        return mApiHandler.setCustomerShippingInfo(
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                shippingInformation,
+                key.getSecret()
+        );
     }
 
     @Nullable
     private Customer setCustomerSourceDefaultWithKey(
-            @NonNull WeakReference<Context> contextRef,
             @NonNull CustomerEphemeralKey key,
-            @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull @Source.SourceType String sourceType,
-            @Nullable StripeApiProxy proxy) throws StripeException {
-        if (proxy != null) {
-            return proxy.setDefaultCustomerSourceWithKey(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    sourceType,
-                    key.getSecret());
-        } else {
-            return mApiHandler.setDefaultCustomerSource(
-                    contextRef.get(),
-                    key.getCustomerId(),
-                    PaymentConfiguration.getInstance().getPublishableKey(),
-                    productUsageTokens,
-                    sourceId,
-                    sourceType,
-                    key.getSecret(),
-                    null);
-        }
+            @NonNull @Source.SourceType String sourceType) throws StripeException {
+        return mApiHandler.setDefaultCustomerSource(
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                sourceId,
+                sourceType,
+                key.getSecret()
+        );
     }
 
     /**
      * Calls the Stripe API (or a test proxy) to fetch a customer. If the provided key is expired,
      * this method <b>does not</b> update the key.
-     * Use {@link #updateCustomer(CustomerEphemeralKey)} to validate the key
+     * Use {@link #updateCustomer(CustomerEphemeralKey, String)} to validate the key
      * before refreshing the customer.
      *
      * @param key the {@link CustomerEphemeralKey} used for this access
-     * @param proxy a {@link StripeApiProxy} to intercept calls to the real servers
      * @return a {@link Customer} if one can be found with this key, or {@code null} if one cannot.
      */
     @Nullable
-    private Customer retrieveCustomerWithKey(
-            @NonNull CustomerEphemeralKey key,
-            @Nullable StripeApiProxy proxy) throws StripeException {
-        if (proxy != null) {
-            return proxy.retrieveCustomerWithKey(key.getCustomerId(), key.getSecret());
-        } else {
-            return mApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
-        }
+    private Customer retrieveCustomerWithKey(@NonNull CustomerEphemeralKey key)
+            throws StripeException {
+        return mApiHandler.retrieveCustomer(key.getCustomerId(), key.getSecret());
     }
 
-    private static void sendErrorIntent(@NonNull WeakReference<Context> contextRef,
-                                        @NonNull StripeException exception) {
-        if (contextRef.get() == null) {
-            return;
-        }
+    private void sendErrorIntent(@NonNull StripeException exception) {
         final Bundle bundle = new Bundle();
         bundle.putSerializable(EXTRA_EXCEPTION, exception);
         final Intent intent = new Intent(ACTION_API_EXCEPTION)
                 .putExtras(bundle);
-        LocalBroadcastManager.getInstance(contextRef.get()).sendBroadcast(intent);
+        mLocalBroadcastManager.sendBroadcast(intent);
     }
 
-    public interface CustomerRetrievalListener {
+    @Nullable
+    private CustomerRetrievalListener getCustomerRetrievalListener(@Nullable String operationId) {
+        return mCustomerRetrievalListeners.remove(operationId);
+    }
+
+    @Nullable
+    private SourceRetrievalListener getSourceRetrievalListener(@Nullable String operationId) {
+        return mSourceRetrievalListeners.remove(operationId);
+    }
+
+    public abstract static class ActivityCustomerRetrievalListener<A extends Activity>
+            implements CustomerRetrievalListener {
+
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityCustomerRetrievalListener(@NonNull A activity) {
+            mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
+    }
+
+    public interface CustomerRetrievalListener extends RetrievalListener {
         void onCustomerRetrieved(@NonNull Customer customer);
-
-        void onError(int httpCode, @Nullable String errorMessage,
-                     @Nullable StripeError stripeError);
     }
 
-    public interface SourceRetrievalListener {
+    public interface SourceRetrievalListener extends RetrievalListener {
         void onSourceRetrieved(@NonNull Source source);
+    }
 
+    interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
     }
 
-    interface StripeApiProxy {
-        @Nullable Customer retrieveCustomerWithKey(@NonNull String customerId,
-                                                   @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
+    /**
+     * Abstract implementation of {@link SourceRetrievalListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivitySourceRetrievalListener<A extends Activity>
+            implements SourceRetrievalListener {
+        @NonNull private final WeakReference<A> mActivityRef;
 
-        @Nullable Source addCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String sourceType,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
+        public ActivitySourceRetrievalListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
 
-        @Nullable Source deleteCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
+    }
 
-        @Nullable Customer setDefaultCustomerSourceWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull String sourceId,
-                @NonNull String sourceType,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
+    private static class CustomerMessage {
+        @Nullable private final String operationId;
+        @Nullable private final Customer customer;
 
+        private CustomerMessage(@Nullable String operationId, @Nullable Customer customer) {
+            this.operationId = operationId;
+            this.customer = customer;
+        }
+    }
 
-        @Nullable Customer setCustomerShippingInfoWithKey(
-                @Nullable Context context,
-                @NonNull String customerId,
-                @NonNull String publicKey,
-                @NonNull List<String> productUsageTokens,
-                @NonNull ShippingInformation shippingInformation,
-                @NonNull String secret)
-                throws InvalidRequestException, APIConnectionException, APIException;
+    private static class SourceMessage {
+        @Nullable private final String operationId;
+        @Nullable private final Source source;
+
+        private SourceMessage(@Nullable String operationId, @Nullable Source source) {
+            this.operationId = operationId;
+            this.source = source;
+        }
+    }
+
+    private static class ExceptionMessage {
+        @Nullable private final String operationId;
+        @NonNull private final StripeException exception;
+
+        private ExceptionMessage(@Nullable String operationId, @NonNull StripeException exception) {
+            this.operationId = operationId;
+            this.exception = exception;
+        }
+    }
+
+    private static final class CustomerSessionHandler extends Handler {
+        @NonNull private final Listener mListener;
+
+        CustomerSessionHandler(@NonNull Listener listener) {
+            super(Looper.getMainLooper());
+            mListener = listener;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case CUSTOMER_RETRIEVED: {
+                    if (msg.obj instanceof CustomerMessage) {
+                        final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
+                        mListener.onCustomerRetrieved(customerMessage.customer,
+                                customerMessage.operationId);
+                    }
+                    break;
+                }
+                case SOURCE_RETRIEVED: {
+                    if (msg.obj instanceof SourceMessage) {
+                        final SourceMessage sourceMessage = (SourceMessage) msg.obj;
+                        mListener.onSourceRetrieved(sourceMessage.source,
+                                sourceMessage.operationId);
+                    }
+
+                    break;
+                }
+                case CUSTOMER_SHIPPING_INFO_SAVED: {
+                    if (msg.obj instanceof CustomerMessage) {
+                        final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
+                        mListener.onCustomerShippingInfoSaved(customerMessage.customer);
+                    }
+                    break;
+                }
+                case CUSTOMER_ERROR: {
+                    if (msg.obj instanceof ExceptionMessage) {
+                        final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                        mListener.onCustomerError(exceptionMessage.exception,
+                                exceptionMessage.operationId);
+                    }
+                    break;
+                }
+                case SOURCE_ERROR: {
+                    if (msg.obj instanceof ExceptionMessage) {
+                        final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                        mListener.onSourceError(exceptionMessage.exception,
+                                exceptionMessage.operationId);
+                    }
+
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        interface Listener {
+            void onCustomerRetrieved(@Nullable Customer customer, @Nullable String operationId);
+
+            void onSourceRetrieved(@Nullable Source source, @Nullable String operationId);
+
+            void onCustomerShippingInfoSaved(@Nullable Customer customer);
+
+            void onCustomerError(@NonNull StripeException exception, @Nullable String operationId);
+
+            void onSourceError(@NonNull StripeException exception, @Nullable String operationId);
+        }
     }
 }

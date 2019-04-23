@@ -1,7 +1,7 @@
 package com.stripe.android;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -15,7 +15,7 @@ import com.stripe.android.utils.ObjectUtils;
  * API changes.
  */
 class ApiVersion {
-    static final String DEFAULT_API_VERSION = "2017-06-05";
+    static final String DEFAULT_API_VERSION = "2019-03-14";
 
     @NonNull private static final ApiVersion DEFAULT_INSTANCE = new ApiVersion(DEFAULT_API_VERSION);
 

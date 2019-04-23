@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.CustomerSession;
@@ -40,10 +40,10 @@ import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
-import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_SHIPPING_INFO_DATA;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_METHODS;
+import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -67,8 +67,9 @@ public class PaymentFlowActivityTest {
         LocalBroadcastManager localBroadcastManager =
                 LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
         localBroadcastManager.registerReceiver(mBroadcastReceiver,
-                new IntentFilter(PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED));
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider);
+                new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED));
+        CustomerSession.initCustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider);
     }
 
     @After

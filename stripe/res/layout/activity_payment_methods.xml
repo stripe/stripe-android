@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.appcompat.widget.Toolbar
+    <android.support.v7.widget.Toolbar
         android:id="@+id/payment_methods_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -26,7 +26,7 @@
         android:visibility="gone"
         />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
         android:background="@drawable/simple_button_background"
         android:orientation="horizontal">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <android.support.v7.widget.AppCompatImageView
             android:layout_width="wrap_content"
             android:layout_height="@dimen/masked_card_icon_width"
             android:src="@drawable/ic_add_black_32dp"
@@ -60,7 +60,7 @@
             android:layout_gravity="center_vertical|start"
             />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <android.support.v7.widget.AppCompatTextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

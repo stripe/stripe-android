@@ -1,24 +1,23 @@
 package com.stripe.android.view;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
@@ -45,16 +44,21 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
     private Customer mCustomer;
-    private CustomerSessionProxy mCustomerSessionProxy;
     private MaskedCardAdapter mMaskedCardAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
 
+    private CustomerSession mCustomerSession;
+
+    /**
+     * @deprecated use {@link PaymentMethodsActivityStarter#newIntent()}
+     */
+    @Deprecated
     @NonNull
-    public static Intent newIntent(Context context) {
-        return new Intent(context, PaymentMethodsActivity.class);
+    public static Intent newIntent(@NonNull Activity activity) {
+        return new PaymentMethodsActivityStarter(activity).newIntent();
     }
 
     @Override
@@ -64,24 +68,26 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
-        View addCardView = findViewById(R.id.payment_methods_add_payment_container);
+        final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
 
-        addCardView.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent addSourceIntent = AddSourceActivity.newIntent(
-                                PaymentMethodsActivity.this,
-                                PaymentConfiguration.getRequiredBillingAddressFields(),
-                                true);
-                        if (mStartedFromPaymentSession) {
-                            addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-                        }
-                        startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
-                    }
-                });
+        mCustomerSession = CustomerSession.getInstance();
+        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
 
-        Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
+        addCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(@NonNull View view) {
+                final Intent addSourceIntent = AddSourceActivity.newIntent(
+                        PaymentMethodsActivity.this,
+                        PaymentConfiguration.getRequiredBillingAddressFields(),
+                        true);
+                if (mStartedFromPaymentSession) {
+                    addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+                }
+                startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
+            }
+        });
+
+        final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -93,7 +99,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
-        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
     }
 
     @Override
@@ -102,40 +107,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
             setCommunicatingProgress(true);
             initLoggingTokens();
-            final CustomerSession.CustomerRetrievalListener listener =
-                    new CustomerSession.CustomerRetrievalListener() {
-                        @Override
-                        public void onCustomerRetrieved(@NonNull Customer customer) {
-                            updateCustomerAndSetDefaultSourceIfNecessary(customer);
-                        }
-
-                        @Override
-                        public void onError(int httpCode, @Nullable String errorMessage,
-                                            @Nullable StripeError stripeError) {
-                            final String displayedError = TranslatorManager
-                                    .getErrorMessageTranslator()
-                                    .translate(httpCode, errorMessage, stripeError);
-                            showError(displayedError);
-                            setCommunicatingProgress(false);
-                        }
-                    };
-            if (mCustomerSessionProxy == null) {
-                CustomerSession.getInstance().updateCurrentCustomer(listener);
-            } else {
-                mCustomerSessionProxy.updateCurrentCustomer(listener);
-            }
+            mCustomerSession.updateCurrentCustomer(new AddCardCustomerRetrievalListener(this));
         }
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         final MenuItem saveItem = menu.findItem(R.id.action_save);
-        final Drawable compatIcon =
-                ViewUtils.getTintedIconWithAttribute(
-                        this,
-                        getTheme(),
-                        R.attr.titleTextColor,
-                        R.drawable.ic_checkmark);
+        final Drawable compatIcon = ViewUtils.getTintedIconWithAttribute(
+                this,
+                getTheme(),
+                R.attr.titleTextColor,
+                R.drawable.ic_checkmark);
         saveItem.setIcon(compatIcon);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -154,7 +137,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             setSelectionAndFinish();
             return true;
         } else {
-            boolean handled = super.onOptionsItemSelected(item);
+            final boolean handled = super.onOptionsItemSelected(item);
             if (!handled) {
                 onBackPressed();
             }
@@ -164,9 +147,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     @VisibleForTesting
     void initializeCustomerSourceData() {
-        final Customer cachedCustomer = mCustomerSessionProxy == null
-                ? CustomerSession.getInstance().getCachedCustomer()
-                : mCustomerSessionProxy.getCachedCustomer();
+        final Customer cachedCustomer = mCustomerSession.getCachedCustomer();
 
         if (cachedCustomer != null) {
             mCustomer = cachedCustomer;
@@ -176,23 +157,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    @VisibleForTesting
-    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
-        mCustomerSessionProxy = proxy;
-    }
-
     private void initLoggingTokens() {
-        if (mCustomerSessionProxy == null) {
-            if (mStartedFromPaymentSession) {
-                CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
-            }
-            CustomerSession.getInstance().addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
-        } else {
-            if (mStartedFromPaymentSession) {
-                mCustomerSessionProxy.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
-            }
-            mCustomerSessionProxy.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
+        if (mStartedFromPaymentSession) {
+            mCustomerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         }
+        mCustomerSession.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
     }
 
     /**
@@ -211,29 +180,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        updateAdapterWithCustomer(customer);
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        // Note: if this Activity is changed to subclass StripeActivity,
-                        // this code will make the error message show twice, since StripeActivity
-                        // will listen to the broadcast version of the error
-                        // coming from CustomerSession
-                        final String displayedError = TranslatorManager.getErrorMessageTranslator()
-                                .translate(httpCode, errorMessage, stripeError);
-                        showError(displayedError);
-                        setCommunicatingProgress(false);
-                    }
-                };
-
         // We only activate this if there is a single source in the list
-        CustomerSource customerSource = customer.getSources().get(0);
+        final CustomerSource customerSource = customer.getSources().get(0);
         if (customerSource == null || customerSource.getId() == null) {
             // If the source ID is null for the only source we have, then there is nothing
             // we can do but update the display. This should not happen. It is only possible
@@ -243,18 +191,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(
-                    this,
-                    customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
-        } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(
-                    customerSource.getId(),
-                    customerSource.getSourceType(),
-                    listener);
-        }
+        mCustomerSession.setCustomerDefaultSource(customerSource.getId(),
+                customerSource.getSourceType(),
+                new PostUpdateCustomerRetrievalListener(this));
     }
 
     private void createListFromCustomerSources() {
@@ -301,27 +240,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void getCustomerFromSession() {
-        final CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        createListFromCustomerSources();
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        setCommunicatingProgress(false);
-                    }
-                };
-
         setCommunicatingProgress(true);
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().retrieveCurrentCustomer(listener);
-        } else {
-            mCustomerSessionProxy.retrieveCurrentCustomer(listener);
-        }
+        mCustomerSession.retrieveCurrentCustomer(
+                new GetCustomerFromSessionCustomerRetrievalListener(this));
     }
 
     private void setCommunicatingProgress(boolean communicating) {
@@ -340,37 +261,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
-        CustomerSession.CustomerRetrievalListener listener =
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mCustomer = customer;
-                        finishWithSelection(customer.getDefaultSource());
-                        setCommunicatingProgress(false);
-                    }
-
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        final String displayedError = TranslatorManager.getErrorMessageTranslator()
-                                .translate(httpCode, errorMessage, stripeError);
-                        showError(displayedError);
-                        setCommunicatingProgress(false);
-                    }
-                };
+        final CustomerSource selectedSource = mMaskedCardAdapter.getSelectedSource();
         if (selectedSource == null || selectedSource.getId() == null) {
             return;
         }
-        if (mCustomerSessionProxy == null) {
-            CustomerSession.getInstance().setCustomerDefaultSource(
-                    this, selectedSource.getId(), selectedSource.getSourceType(), listener);
-        } else {
-            mCustomerSessionProxy.setCustomerDefaultSource(
-                    selectedSource.getId(),
-                    selectedSource.getSourceType(),
-                    listener);
-        }
+        mCustomerSession.setCustomerDefaultSource(selectedSource.getId(),
+                selectedSource.getSourceType(), new FinishCustomerRetrievalListener(this));
         setCommunicatingProgress(true);
     }
 
@@ -399,18 +295,134 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         setCommunicatingProgress(false);
     }
 
-    interface CustomerSessionProxy {
-        void addProductUsageTokenIfValid(@NonNull String token);
+    private static final class FinishCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentMethodsActivity> {
+        private FinishCustomerRetrievalListener(@NonNull PaymentMethodsActivity activity) {
+            super(activity);
+        }
 
-        @Nullable
-        Customer getCachedCustomer();
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
 
-        void retrieveCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
+            activity.mCustomer = customer;
+            activity.finishWithSelection(customer.getDefaultSource());
+            activity.setCommunicatingProgress(false);
+        }
 
-        void setCustomerDefaultSource(@NonNull String sourceId,
-                                      @NonNull String sourceType,
-                                      @Nullable CustomerSession.CustomerRetrievalListener listener);
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
 
-        void updateCurrentCustomer(@NonNull CustomerSession.CustomerRetrievalListener listener);
+            final String displayedError = TranslatorManager.getErrorMessageTranslator()
+                    .translate(httpCode, errorMessage, stripeError);
+            activity.showError(displayedError);
+            activity.setCommunicatingProgress(false);
+        }
+    }
+
+
+    private static final class AddCardCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentMethodsActivity> {
+        private AddCardCustomerRetrievalListener(@NonNull PaymentMethodsActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.updateCustomerAndSetDefaultSourceIfNecessary(customer);
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            final String displayedError = TranslatorManager
+                    .getErrorMessageTranslator()
+                    .translate(httpCode, errorMessage, stripeError);
+            activity.showError(displayedError);
+            activity.setCommunicatingProgress(false);
+        }
+    }
+
+    private static final class PostUpdateCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentMethodsActivity> {
+        private PostUpdateCustomerRetrievalListener(@NonNull PaymentMethodsActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.updateAdapterWithCustomer(customer);
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            // Note: if this Activity is changed to subclass StripeActivity,
+            // this code will make the error message show twice, since StripeActivity
+            // will listen to the broadcast version of the error
+            // coming from CustomerSession
+            final String displayedError = TranslatorManager.getErrorMessageTranslator()
+                    .translate(httpCode, errorMessage, stripeError);
+            activity.showError(displayedError);
+            activity.setCommunicatingProgress(false);
+        }
+    }
+
+    private static final class GetCustomerFromSessionCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentMethodsActivity> {
+        private GetCustomerFromSessionCustomerRetrievalListener(
+                @NonNull PaymentMethodsActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.mCustomer = customer;
+            activity.createListFromCustomerSources();
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentMethodsActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.setCommunicatingProgress(false);
+        }
     }
 }

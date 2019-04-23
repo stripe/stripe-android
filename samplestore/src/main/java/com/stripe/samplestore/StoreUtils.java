@@ -1,6 +1,6 @@
 package com.stripe.samplestore;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.text.DecimalFormat;
 import java.util.Currency;

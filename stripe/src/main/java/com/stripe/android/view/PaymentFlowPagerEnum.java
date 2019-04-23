@@ -1,5 +1,8 @@
 package com.stripe.android.view;
 
+import android.support.annotation.LayoutRes;
+import android.support.annotation.StringRes;
+
 import com.stripe.android.R;
 
 enum PaymentFlowPagerEnum {
@@ -8,20 +11,21 @@ enum PaymentFlowPagerEnum {
     SHIPPING_METHOD(R.string.title_select_shipping_method,
             R.layout.activity_select_shipping_method);
 
-    private int mTitleResId;
-    private int mLayoutResId;
+    @StringRes private final int mTitleResId;
+    @LayoutRes private final int mLayoutResId;
 
-    PaymentFlowPagerEnum(int titleResId, int layoutResId) {
+    PaymentFlowPagerEnum(@StringRes int titleResId, @LayoutRes int layoutResId) {
         mTitleResId = titleResId;
         mLayoutResId = layoutResId;
     }
 
+    @StringRes
     int getTitleResId() {
         return mTitleResId;
     }
 
+    @LayoutRes
     int getLayoutResId() {
         return mLayoutResId;
     }
-
 }

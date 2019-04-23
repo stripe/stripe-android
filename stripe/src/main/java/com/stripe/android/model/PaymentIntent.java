@@ -1,9 +1,8 @@
 package com.stripe.android.model;
 
 import android.net.Uri;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
@@ -35,7 +34,6 @@ public class PaymentIntent extends StripeJsonModel {
 
     static final String FIELD_ID = "id";
     static final String FIELD_OBJECT = "object";
-    static final String FIELD_ALLOWED_SOURCE_TYPES = "allowed_source_types";
     static final String FIELD_AMOUNT = "amount";
     static final String FIELD_CREATED = "created";
     static final String FIELD_CANCELED = "canceled_at";
@@ -55,7 +53,6 @@ public class PaymentIntent extends StripeJsonModel {
 
     @Nullable private final String mId;
     @Nullable private final String mObjectType;
-    @NonNull private final List<String> mAllowedSourceTypes;
     @NonNull private final List<String> mPaymentMethodTypes;
     @Nullable private final Long mAmount;
     @Nullable private final Long mCanceledAt;
@@ -76,15 +73,6 @@ public class PaymentIntent extends StripeJsonModel {
     @Nullable
     public String getId() {
         return mId;
-    }
-
-    /**
-     * @deprecated use {@link #getPaymentMethodTypes()}
-     */
-    @Deprecated
-    @NonNull
-    public List<String> getAllowedSourceTypes() {
-        return mAllowedSourceTypes;
     }
 
     @NonNull
@@ -211,7 +199,6 @@ public class PaymentIntent extends StripeJsonModel {
     private PaymentIntent(
             @Nullable String id,
             @Nullable String objectType,
-            @NonNull List<String> allowedSourceTypes,
             @NonNull List<String> paymentMethodTypes,
             @Nullable Long amount,
             @Nullable Long canceledAt,
@@ -230,7 +217,6 @@ public class PaymentIntent extends StripeJsonModel {
     ) {
         mId = id;
         mObjectType = objectType;
-        mAllowedSourceTypes = allowedSourceTypes;
         mPaymentMethodTypes = paymentMethodTypes;
         mAmount = amount;
         mCanceledAt = canceledAt;
@@ -271,8 +257,6 @@ public class PaymentIntent extends StripeJsonModel {
 
         final String id = optString(jsonObject, FIELD_ID);
         final String objectType = optString(jsonObject, FIELD_OBJECT);
-        final List<String> allowedSourceTypes = jsonArrayToList(
-                jsonObject.optJSONArray(FIELD_ALLOWED_SOURCE_TYPES));
         final List<String> paymentMethodTypes = jsonArrayToList(
                 jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES));
         final Long amount = optLong(jsonObject, FIELD_AMOUNT);
@@ -293,7 +277,6 @@ public class PaymentIntent extends StripeJsonModel {
         return new PaymentIntent(
                 id,
                 objectType,
-                allowedSourceTypes,
                 paymentMethodTypes,
                 amount,
                 canceledAt,
@@ -332,8 +315,6 @@ public class PaymentIntent extends StripeJsonModel {
         final JSONObject jsonObject = new JSONObject();
         putStringIfNotNull(jsonObject, FIELD_ID, mId);
         putStringIfNotNull(jsonObject, FIELD_OBJECT, mObjectType);
-        putArrayIfNotNull(jsonObject, FIELD_ALLOWED_SOURCE_TYPES,
-                listToJsonArray(mAllowedSourceTypes));
         putArrayIfNotNull(jsonObject, FIELD_PAYMENT_METHOD_TYPES,
                 listToJsonArray(mPaymentMethodTypes));
         putLongIfNotNull(jsonObject, FIELD_AMOUNT, mAmount);
@@ -359,7 +340,6 @@ public class PaymentIntent extends StripeJsonModel {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_ID, mId);
         map.put(FIELD_OBJECT, mObjectType);
-        map.put(FIELD_ALLOWED_SOURCE_TYPES, mAllowedSourceTypes);
         map.put(FIELD_PAYMENT_METHOD_TYPES, mPaymentMethodTypes);
         map.put(FIELD_AMOUNT, mAmount);
         map.put(FIELD_CANCELED, mCanceledAt);
@@ -387,7 +367,6 @@ public class PaymentIntent extends StripeJsonModel {
     private boolean typedEquals(@NonNull PaymentIntent paymentIntent) {
         return ObjectUtils.equals(mId, paymentIntent.mId)
                 && ObjectUtils.equals(mObjectType, paymentIntent.mObjectType)
-                && ObjectUtils.equals(mAllowedSourceTypes, paymentIntent.mAllowedSourceTypes)
                 && ObjectUtils.equals(mAmount, paymentIntent.mAmount)
                 && ObjectUtils.equals(mCanceledAt, paymentIntent.mCanceledAt)
                 && ObjectUtils.equals(mCaptureMethod, paymentIntent.mCaptureMethod)
@@ -405,7 +384,7 @@ public class PaymentIntent extends StripeJsonModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mAllowedSourceTypes, mAmount, mCanceledAt,
+        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt,
                 mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
                 mDescription, mLiveMode, mNextSourceAction, mReceiptEmail, mSource, mStatus);
     }
@@ -436,11 +415,30 @@ public class PaymentIntent extends StripeJsonModel {
         }
     }
 
+    /**
+     * See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status
+     */
     public enum Status {
-        RequiresSource("requires_source"),
+        Canceled("canceled"),
+        Processing("processing"),
+        RequiresAction("requires_action"),
+        RequiresAuthorization("requires_authorization"),
+        RequiresCapture("requires_capture"),
+        RequiresConfirmation("requires_confirmation"),
         RequiresPaymentMethod("requires_payment_method"),
-        RequiresSourceAction("requires_source_action"),
-        RequiresAction("requires_action");
+        Succeeded("succeeded"),
+
+        /**
+         * @deprecated use {@link #RequiresPaymentMethod}
+         */
+        @Deprecated
+        RequiresSource("requires_source"),
+
+        /**
+         * @deprecated use {@link #RequiresAction}
+         */
+        @Deprecated
+        RequiresSourceAction("requires_source_action");
 
         @NonNull
         public final String code;

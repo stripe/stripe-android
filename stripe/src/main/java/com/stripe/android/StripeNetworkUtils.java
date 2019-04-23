@@ -1,17 +1,15 @@
 package com.stripe.android;
 
 import android.content.Context;
-import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,45 +23,31 @@ public class StripeNetworkUtils {
     private static final String MUID = "muid";
     private static final String GUID = "guid";
 
+    @NonNull private final String mPackageName;
+    @NonNull private final UidProvider mUidProvider;
+
+    StripeNetworkUtils(@NonNull Context context) {
+        this(context.getPackageName(), new UidProvider(context));
+    }
+
+    @VisibleForTesting
+    StripeNetworkUtils(@NonNull String packageName, @NonNull UidProvider uidProvider) {
+        mPackageName = packageName;
+        mUidProvider = uidProvider;
+    }
+
     /**
      * A utility function to map the fields of a {@link Card} object into a {@link Map} we
      * can use in network communications.
      *
-     * @param context the {@link Context} used to resolve resources
      * @param card the {@link Card} to be read
      * @return a {@link Map} containing the appropriate values read from the card
      */
     @NonNull
-    static Map<String, Object> hashMapFromCard(@NonNull Context context, Card card) {
-        return hashMapFromCard(null, context, card);
-    }
-
-    @NonNull
-    static Map<String, Object> hashMapFromPersonalId(@NonNull String personalId) {
+    Map<String, Object> hashMapFromCard(@NonNull Card card) {
         final Map<String, Object> tokenParams = new HashMap<>();
-        tokenParams.put("personal_id_number", personalId);
-        final Map<String, Object> piiParams = new HashMap<>();
-        piiParams.put(Token.TYPE_PII, tokenParams);
-        return piiParams;
-    }
 
-    @NonNull
-    static Map<String, Object> mapFromCvc(@NonNull String cvc) {
-        final Map<String, Object> tokenParams = new HashMap<>();
-        tokenParams.put("cvc", cvc);
-        final Map<String, Object> cvcParams = new HashMap<>();
-        cvcParams.put(Token.TYPE_CVC_UPDATE, tokenParams);
-        return cvcParams;
-    }
-
-    @NonNull
-    private static Map<String, Object> hashMapFromCard(
-            @Nullable UidProvider provider,
-            @NonNull Context context,
-            Card card) {
-        Map<String, Object> tokenParams = new HashMap<>();
-
-        Map<String, Object> cardParams = new HashMap<>();
+        final AbstractMap<String, Object> cardParams = new HashMap<>();
         cardParams.put("number", StripeTextUtils.nullIfBlank(card.getNumber()));
         cardParams.put("cvc", StripeTextUtils.nullIfBlank(card.getCVC()));
         cardParams.put("exp_month", card.getExpMonth());
@@ -86,21 +70,55 @@ public class StripeNetworkUtils {
 
         tokenParams.put(Token.TYPE_CARD, cardParams);
 
-        addUidParams(provider, context, tokenParams);
+        addUidParams(tokenParams);
         return tokenParams;
+    }
+
+    @NonNull
+    static Map<String, Object> hashMapFromPersonalId(@NonNull String personalId) {
+        final Map<String, Object> tokenParams = new HashMap<>();
+        tokenParams.put("personal_id_number", personalId);
+        final Map<String, Object> piiParams = new HashMap<>();
+        piiParams.put(Token.TYPE_PII, tokenParams);
+        return piiParams;
+    }
+
+    @NonNull
+    static Map<String, Object> mapFromCvc(@NonNull String cvc) {
+        final Map<String, Object> tokenParams = new HashMap<>();
+        tokenParams.put("cvc", cvc);
+        final Map<String, Object> cvcParams = new HashMap<>();
+        cvcParams.put(Token.TYPE_CVC_UPDATE, tokenParams);
+        return cvcParams;
     }
 
     /**
      * Util function for creating parameters for a bank account.
      *
-     * @param context {@link Context} used to determine resources
      * @param bankAccount {@link BankAccount} object used to create the paramters
      * @return a map that can be used as parameters to create a bank account object
      */
     @NonNull
-    static Map<String, Object> hashMapFromBankAccount(@NonNull Context context,
-                                                      @NonNull BankAccount bankAccount) {
-        return hashMapFromBankAccount(null, context, bankAccount);
+    Map<String, Object> hashMapFromBankAccount(@NonNull BankAccount bankAccount) {
+        Map<String, Object> tokenParams = new HashMap<>();
+        AbstractMap<String, Object> accountParams = new HashMap<>();
+
+        accountParams.put("country", bankAccount.getCountryCode());
+        accountParams.put("currency", bankAccount.getCurrency());
+        accountParams.put("account_number", bankAccount.getAccountNumber());
+        accountParams.put("routing_number",
+                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
+        accountParams.put("account_holder_name",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
+        accountParams.put("account_holder_type",
+                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
+
+        // Remove all null values; they cause validation errors
+        removeNullAndEmptyParams(accountParams);
+
+        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        addUidParams(tokenParams);
+        return tokenParams;
     }
 
     /**
@@ -130,34 +148,20 @@ public class StripeNetworkUtils {
         }
     }
 
-    static void addUidParamsToPaymentIntent(@Nullable UidProvider provider,
-                                            @NonNull Context context,
-                                            @NonNull Map<String, Object> params) {
+    void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
         if (params.containsKey("source_data") && params.get("source_data") instanceof Map) {
-            addUidParams(provider, context, (Map) params.get("source_data"));
+            addUidParams((Map) params.get("source_data"));
         }
     }
 
-    @SuppressWarnings("HardwareIds")
-    static void addUidParams(
-            @Nullable UidProvider provider,
-            @NonNull Context context,
-            @NonNull Map<String, Object> params) {
-        String guid =
-                provider == null
-                        ? Settings.Secure.getString(context.getContentResolver(),
-                        Settings.Secure.ANDROID_ID)
-                        : provider.getUid();
-
+    void addUidParams(@NonNull Map<String, Object> params) {
+        final String guid = mUidProvider.get();
         if (StripeTextUtils.isBlank(guid)) {
             return;
         }
 
         String hashGuid = StripeTextUtils.shaHashInput(guid);
-        String muid =
-                provider == null
-                        ? context.getApplicationContext().getPackageName() + guid
-                        : provider.getPackageName() + guid;
+        String muid = mPackageName + guid;
         String hashMuid = StripeTextUtils.shaHashInput(muid);
 
         if (!StripeTextUtils.isBlank(hashGuid)) {
@@ -167,38 +171,5 @@ public class StripeNetworkUtils {
         if (!StripeTextUtils.isBlank(hashMuid)) {
             params.put(MUID, hashMuid);
         }
-    }
-
-    @NonNull
-    private static Map<String, Object> hashMapFromBankAccount(
-            @Nullable UidProvider provider,
-            @NonNull Context context,
-            @NonNull BankAccount bankAccount) {
-        Map<String, Object> tokenParams = new HashMap<>();
-        Map<String, Object> accountParams = new HashMap<>();
-
-        accountParams.put("country", bankAccount.getCountryCode());
-        accountParams.put("currency", bankAccount.getCurrency());
-        accountParams.put("account_number", bankAccount.getAccountNumber());
-        accountParams.put("routing_number",
-                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
-        accountParams.put("account_holder_name",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
-        accountParams.put("account_holder_type",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
-
-        // Remove all null values; they cause validation errors
-        removeNullAndEmptyParams(accountParams);
-
-        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
-        addUidParams(provider, context, tokenParams);
-        return tokenParams;
-    }
-
-    @VisibleForTesting
-    interface UidProvider {
-        String getUid();
-
-        String getPackageName();
     }
 }

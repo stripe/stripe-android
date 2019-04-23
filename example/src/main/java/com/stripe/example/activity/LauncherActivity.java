@@ -2,9 +2,8 @@ package com.stripe.example.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
@@ -40,12 +39,14 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btn_make_card_sources).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, PaymentMultilineActivity.class));
-            }
-        });
+        findViewById(R.id.btn_make_card_payment_methods)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(LauncherActivity.this,
+                                PaymentMultilineActivity.class));
+                    }
+                });
 
         findViewById(R.id.btn_make_sources).setOnClickListener(new View.OnClickListener() {
             @Override

@@ -3,13 +3,13 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.CustomerSession;
@@ -81,7 +81,7 @@ public class AddSourceActivityTest {
         mActivityController = Robolectric.buildActivity(AddSourceActivity.class)
                 .create().start().resume().visible();
         final AddSourceActivity addSourceActivity = mActivityController.get();
-        mCardMultilineWidget =addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
+        mCardMultilineWidget = addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = addSourceActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 

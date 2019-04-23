@@ -24,9 +24,6 @@ public class PaymentIntentTest {
     private static final String PAYMENT_INTENT_WITH_SOURCE_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
-            "  \"allowed_source_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
             "  \"payment_method_types\": [\n" +
             "    \"card\"\n" +
             "  ],\n" +
@@ -51,9 +48,6 @@ public class PaymentIntentTest {
     private static final String PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
-            "  \"allowed_source_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
             "  \"amount\": 1000,\n" +
             "  \"canceled_at\": 1530839340,\n" +
             "  \"capture_method\": \"automatic\",\n" +
@@ -156,7 +150,7 @@ public class PaymentIntentTest {
             "\t}\n" +
             "}";
 
-    private static final List<String> ALLOWED_SOURCE_TYPES = new ArrayList<String>() {{
+    private static final List<String> PAYMENT_METHOD_TYPES = new ArrayList<String>() {{
         add("card");
     }};
 
@@ -164,8 +158,7 @@ public class PaymentIntentTest {
             new HashMap<String, Object>() {{
                 put(PaymentIntent.FIELD_ID, "pi_1CkiBMLENEVhOs7YMtUehLau");
                 put(PaymentIntent.FIELD_OBJECT, "payment_intent");
-                put(PaymentIntent.FIELD_ALLOWED_SOURCE_TYPES, ALLOWED_SOURCE_TYPES);
-                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, ALLOWED_SOURCE_TYPES);
+                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, PAYMENT_METHOD_TYPES);
                 put(PaymentIntent.FIELD_AMOUNT, 1000L);
                 put(PaymentIntent.FIELD_CANCELED, 1530839340L);
                 put(PaymentIntent.FIELD_CLIENT_SECRET,

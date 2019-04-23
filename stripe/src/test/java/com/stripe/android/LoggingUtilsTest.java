@@ -1,9 +1,9 @@
 package com.stripe.android;
 
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -37,6 +37,9 @@ public class LoggingUtilsTest {
         EXPECTED_SINGLE_TOKEN_LIST.add("CardInputView");
     }
 
+    @NonNull private final LoggingUtils mLoggingUtils =
+            new LoggingUtils(ApplicationProvider.getApplicationContext());
+
     @Test
     public void getTokenCreationParams_withValidInput_createsCorrectMap() {
         List<String> tokensList = new ArrayList<>();
@@ -45,8 +48,7 @@ public class LoggingUtilsTest {
         final String expectedTokenName =
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
 
-        Map<String, Object> params = LoggingUtils.getTokenCreationParams(
-                ApplicationProvider.getApplicationContext(),
+        final Map<String, Object> params = mLoggingUtils.getTokenCreationParams(
                 tokensList,
                 API_KEY,
                 Token.TYPE_PII);
@@ -64,8 +66,7 @@ public class LoggingUtilsTest {
         final String expectedTokenName =
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_TOKEN_CREATION);
 
-        Map<String, Object> params = LoggingUtils.getTokenCreationParams(
-                ApplicationProvider.getApplicationContext(),
+        final Map<String, Object> params = mLoggingUtils.getTokenCreationParams(
                 tokensList,
                 API_KEY,
                 Token.TYPE_CVC_UPDATE);
@@ -81,12 +82,10 @@ public class LoggingUtilsTest {
         final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
         List<String> tokenList = new ArrayList<>();
         tokenList.add("CardInputView");
-        Map<String, Object> loggingParams =
-                LoggingUtils.getSourceCreationParams(
-                        ApplicationProvider.getApplicationContext(),
-                        tokenList,
-                        API_KEY,
-                        Source.SEPA_DEBIT);
+        final Map<String, Object> loggingParams = mLoggingUtils.getSourceCreationParams(
+                tokenList,
+                API_KEY,
+                Source.SEPA_DEBIT);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(Source.SEPA_DEBIT, loggingParams.get(LoggingUtils.FIELD_SOURCE_TYPE));
         assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
@@ -98,9 +97,8 @@ public class LoggingUtilsTest {
 
     @Test
     public void getPaymentMethodCreationParams() {
-        final Map<String, Object> loggingParams =
-                LoggingUtils.getPaymentMethodCreationParams(ApplicationProvider.getApplicationContext(),
-                        null, API_KEY);
+        final Map<String, Object> loggingParams = mLoggingUtils
+                .getPaymentMethodCreationParams(null, API_KEY);
         assertNotNull(loggingParams);
         assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EVENT_ADD_PAYMENT_METHOD),
@@ -114,8 +112,7 @@ public class LoggingUtilsTest {
         final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
         List<String> tokenList = new ArrayList<>();
         tokenList.add("CardInputView");
-        Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentConfirmationParams(
-                ApplicationProvider.getApplicationContext(),
+        Map<String, Object> loggingParams = mLoggingUtils.getPaymentIntentConfirmationParams(
                 tokenList,
                 API_KEY,
                 null);
@@ -132,8 +129,7 @@ public class LoggingUtilsTest {
         final int expectedSize = LoggingUtils.VALID_PARAM_FIELDS.size() - 1;
         List<String> tokenList = new ArrayList<>();
         tokenList.add("CardInputView");
-        Map<String, Object> loggingParams = LoggingUtils.getPaymentIntentRetrieveParams(
-                ApplicationProvider.getApplicationContext(),
+        Map<String, Object> loggingParams = mLoggingUtils.getPaymentIntentRetrieveParams(
                 tokenList,
                 API_KEY);
         assertEquals(expectedSize, loggingParams.size());
@@ -156,23 +152,19 @@ public class LoggingUtilsTest {
 
         final int versionCode = 20;
         final String packageName = BuildConfig.APPLICATION_ID;
-        final Context context = mock(Context.class);
         final PackageManager packageManager = mock(PackageManager.class);
-        when(context.getPackageManager()).thenReturn(packageManager);
         final PackageInfo packageInfo = new PackageInfo();
         packageInfo.versionCode = versionCode;
         packageInfo.packageName = BuildConfig.APPLICATION_ID;
-        when(context.getPackageName()).thenReturn(packageName);
         when(packageManager.getPackageInfo(packageName, 0))
                 .thenReturn(packageInfo);
 
-        Map<String, Object> params = LoggingUtils.getEventLoggingParams(
-                context,
-                tokensList,
-                null,
-                Token.TYPE_CARD,
-                API_KEY,
-                LoggingUtils.EVENT_TOKEN_CREATION);
+        final Map<String, Object> params = new LoggingUtils(packageManager, packageName)
+                .getEventLoggingParams(
+                        tokensList,
+                        null,
+                        Token.TYPE_CARD,
+                        API_KEY, LoggingUtils.EVENT_TOKEN_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
         assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(EXPECTED_SINGLE_TOKEN_LIST, params.get(LoggingUtils.FIELD_PRODUCT_USAGE));
@@ -198,13 +190,11 @@ public class LoggingUtilsTest {
                 LoggingUtils.getEventParamName(LoggingUtils.EVENT_SOURCE_CREATION);
         final String expectedUaName = LoggingUtils.getAnalyticsUa();
 
-        Map<String, Object> params = LoggingUtils.getEventLoggingParams(
-                ApplicationProvider.getApplicationContext(),
+        final Map<String, Object> params = mLoggingUtils.getEventLoggingParams(
                 null,
                 null,
                 Token.TYPE_BANK_ACCOUNT,
-                API_KEY,
-                LoggingUtils.EVENT_SOURCE_CREATION);
+                API_KEY, LoggingUtils.EVENT_SOURCE_CREATION);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 2, params.size());
         assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(Token.TYPE_BANK_ACCOUNT, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
@@ -224,7 +214,7 @@ public class LoggingUtilsTest {
     @Test
     public void addNameAndVersion_whenApplicationContextIsNull_addsNoContextValues() {
         Map<String, Object> paramsMap = new HashMap<>();
-        LoggingUtils.addNameAndVersion(paramsMap, null, null);
+        new LoggingUtils(null, null).addNameAndVersion(paramsMap);
         assertEquals(LoggingUtils.NO_CONTEXT, paramsMap.get(LoggingUtils.FIELD_APP_NAME));
         assertEquals(LoggingUtils.NO_CONTEXT, paramsMap.get(LoggingUtils.FIELD_APP_VERSION));
     }
@@ -242,7 +232,7 @@ public class LoggingUtilsTest {
         }
 
         Map<String, Object> paramsMap = new HashMap<>();
-        LoggingUtils.addNameAndVersion(paramsMap, manager, dummyName);
+        new LoggingUtils(manager, dummyName).addNameAndVersion(paramsMap);
         assertEquals(LoggingUtils.UNKNOWN, paramsMap.get(LoggingUtils.FIELD_APP_NAME));
         assertEquals(LoggingUtils.UNKNOWN, paramsMap.get(LoggingUtils.FIELD_APP_VERSION));
     }

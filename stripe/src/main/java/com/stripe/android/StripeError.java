@@ -1,6 +1,6 @@
 package com.stripe.android;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A model for error objects sent from the Stripe API.

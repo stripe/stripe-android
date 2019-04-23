@@ -5,16 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import com.stripe.android.model.Card;
 import com.stripe.android.view.CardInputWidget;
+import com.stripe.example.R;
 import com.stripe.example.service.TokenIntentService;
 
 /**
@@ -32,14 +31,14 @@ public class IntentServiceTokenController {
     @Nullable private TokenBroadcastReceiver mTokenBroadcastReceiver;
 
     public IntentServiceTokenController (
-            @NonNull AppCompatActivity appCompatActivity,
+            @NonNull Activity activity,
             @NonNull Button button,
             @NonNull CardInputWidget cardInputWidget,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
             @NonNull ProgressDialogController progressDialogController) {
 
-        mActivity = appCompatActivity;
+        mActivity = activity;
         mCardInputWidget = cardInputWidget;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListViewController = outputListController;
@@ -77,7 +76,7 @@ public class IntentServiceTokenController {
     private void saveCard() {
         final Card cardToSave = mCardInputWidget.getCard();
         if (cardToSave == null) {
-            mErrorDialogHandler.showError("Invalid Card Data");
+            mErrorDialogHandler.show("Invalid Card Data");
             return;
         }
         final Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
@@ -86,7 +85,7 @@ public class IntentServiceTokenController {
                 cardToSave.getExpMonth(),
                 cardToSave.getExpYear(),
                 cardToSave.getCVC());
-        mProgressDialogController.startProgress();
+        mProgressDialogController.show(R.string.progressMessage);
         mActivity.startService(tokenServiceIntent);
     }
 
@@ -97,14 +96,14 @@ public class IntentServiceTokenController {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mProgressDialogController.finishProgress();
+            mProgressDialogController.dismiss();
 
             if (intent == null) {
                 return;
             }
 
             if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
-                mErrorDialogHandler.showError(
+                mErrorDialogHandler.show(
                         intent.getStringExtra(TokenIntentService.STRIPE_ERROR_MESSAGE));
                 return;
             }

@@ -1,23 +1,23 @@
 package com.stripe.android.view;
 
-import androidx.annotation.Nullable;
-
-import com.google.android.material.textfield.TextInputLayout;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 
 class ErrorListener implements StripeEditText.ErrorMessageListener {
 
-    TextInputLayout textInputLayout;
+    @NonNull private final TextInputLayout mTextInputLayout;
 
-    ErrorListener(TextInputLayout textInputLayout) {
-        this.textInputLayout = textInputLayout;
+    ErrorListener(@NonNull TextInputLayout textInputLayout) {
+        mTextInputLayout = textInputLayout;
     }
 
     @Override
     public void displayErrorMessage(@Nullable String message) {
         if (message == null) {
-            textInputLayout.setErrorEnabled(false);
+            mTextInputLayout.setErrorEnabled(false);
         } else {
-            textInputLayout.setError(message);
+            mTextInputLayout.setError(message);
         }
     }
 }

@@ -1,8 +1,9 @@
 package com.stripe.android;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.exception.APIConnectionException;
@@ -30,10 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -55,10 +54,10 @@ public class StripeTest {
     private static final Card DEFAULT_CARD = new Card(null, null, null, null);
     private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
         @Override
-        public void onError(Exception error) {
+        public void onError(@NonNull Exception error) {
         }
         @Override
-        public void onSuccess(Token token) {
+        public void onSuccess(@NonNull Token token) {
         }
     };
 
@@ -140,12 +139,12 @@ public class StripeTest {
         Stripe stripe = new Stripe(mContext);
         stripe.createToken(DEFAULT_CARD, new TokenCallback() {
             @Override
-            public void onError(Exception error) {
+            public void onError(@NonNull Exception error) {
                 fail("Should not call method");
             }
 
             @Override
-            public void onSuccess(Token token) {
+            public void onSuccess(@NonNull Token token) {
                 fail("Should not call method");
             }
         });
@@ -214,139 +213,101 @@ public class StripeTest {
     }
 
     @Test
-    public void createCardTokenSynchronous_withValidData_returnsToken() {
-        try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
+    public void createCardTokenSynchronous_withValidData_returnsToken()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        final Token token = stripe.createTokenSynchronous(CARD);
 
-            Token token = stripe.createTokenSynchronous(CARD);
-
-            assertNotNull(token);
-            Card returnedCard = token.getCard();
-            assertNotNull(returnedCard);
-            assertNull(token.getBankAccount());
-            assertEquals(Token.TYPE_CARD, token.getType());
-            assertEquals(CARD.getLast4(), returnedCard.getLast4());
-            assertEquals(Card.VISA, returnedCard.getBrand());
-            assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
-            assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
-            assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
-
-            assertAllLogsAreValid(listener, 2);
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        assertNotNull(token);
+        Card returnedCard = token.getCard();
+        assertNotNull(returnedCard);
+        assertNull(token.getBankAccount());
+        assertEquals(Token.TYPE_CARD, token.getType());
+        assertEquals(CARD.getLast4(), returnedCard.getLast4());
+        assertEquals(Card.VISA, returnedCard.getBrand());
+        assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
+        assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
+        assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
     }
 
     @Test
-    public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken() {
-        try {
-            Stripe stripe = new Stripe(mContext, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
-            stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
+    public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = new Stripe(mContext, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
+        stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
 
-            Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createTokenSynchronous(CARD);
 
-            assertNotNull(token);
-            Card returnedCard = token.getCard();
-            assertNotNull(returnedCard);
-            assertNull(token.getBankAccount());
-            assertEquals(Token.TYPE_CARD, token.getType());
-            assertEquals(CARD.getLast4(), returnedCard.getLast4());
-            assertEquals(Card.VISA, returnedCard.getBrand());
-            assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
-            assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
-            assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
-
-            assertAllLogsAreValid(listener, 2);
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        assertNotNull(token);
+        Card returnedCard = token.getCard();
+        assertNotNull(returnedCard);
+        assertNull(token.getBankAccount());
+        assertEquals(Token.TYPE_CARD, token.getType());
+        assertEquals(CARD.getLast4(), returnedCard.getLast4());
+        assertEquals(Card.VISA, returnedCard.getBrand());
+        assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
+        assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
+        assertEquals(Card.FUNDING_CREDIT, returnedCard.getFunding());
     }
 
     @Test
-    public void createToken_createSource_returnsSource() {
-        try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
+    public void createToken_createSource_returnsSource()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = createPublishableKeyStripe();
+        final Token token = stripe.createTokenSynchronous(CARD);
+        assertNotNull(token);
 
-            Token token = stripe.createTokenSynchronous(CARD);
+        final SourceParams sourceParams = SourceParams.createCustomParams();
+        sourceParams.setType(Source.CARD);
+        sourceParams.setToken(token.getId());
 
-            assertNotNull(token);
-            SourceParams sourceParams = SourceParams.createCustomParams();
-            sourceParams.setType(Source.CARD);
-            sourceParams.setToken(token.getId());
-            Source source = stripe.createSourceSynchronous(sourceParams,
-                    FUNCTIONAL_PUBLISHABLE_KEY);
-            assertNotNull(source);
-            assertAllLogsAreValid(listener, 4);
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        final Source source = stripe.createSourceSynchronous(sourceParams,
+                FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(source);
     }
 
     @Test
-    public void createToken_createSourceWithTokenToSourceParams_returnsSource() {
-        try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
-            Token token = stripe.createTokenSynchronous(CARD);
-            assertNotNull(token);
+    public void createToken_createSourceWithTokenToSourceParams_returnsSource()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException, CardException {
+        final Stripe stripe = createPublishableKeyStripe();
+        final Token token = stripe.createTokenSynchronous(CARD);
+        assertNotNull(token);
 
-            SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
+        final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
 
-            Source source = stripe.createSourceSynchronous(sourceParams,
-                    FUNCTIONAL_PUBLISHABLE_KEY);
-            assertNotNull(source);
-            assertAllLogsAreValid(listener, 4);
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        final Source source = stripe.createSourceSynchronous(sourceParams,
+                FUNCTIONAL_PUBLISHABLE_KEY);
+        assertNotNull(source);
     }
 
     @Test
-    public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken() {
-        try {
-            Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+    public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        Stripe stripe = getNonLoggingStripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
 
-            Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
-            assertNotNull(token);
-            assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
-            assertNull(token.getCard());
+        Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
+        assertNotNull(token);
+        assertEquals(Token.TYPE_BANK_ACCOUNT, token.getType());
+        assertNull(token.getCard());
 
-            BankAccount returnedBankAccount = token.getBankAccount();
-            String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
-                    .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
-            assertEquals(expectedLast4, returnedBankAccount.getLast4());
-            assertEquals(BANK_ACCOUNT.getCountryCode(), returnedBankAccount.getCountryCode());
-            assertEquals(BANK_ACCOUNT.getCurrency(), returnedBankAccount.getCurrency());
-            assertEquals(BANK_ACCOUNT.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error when connecting to Stripe API: "
-                    + stripeEx.getLocalizedMessage());
-        }
+        BankAccount returnedBankAccount = token.getBankAccount();
+        assertNotNull(returnedBankAccount);
+        String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
+                .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
+        assertEquals(expectedLast4, returnedBankAccount.getLast4());
+        assertEquals(BANK_ACCOUNT.getCountryCode(), returnedBankAccount.getCountryCode());
+        assertEquals(BANK_ACCOUNT.getCurrency(), returnedBankAccount.getCurrency());
+        assertEquals(BANK_ACCOUNT.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
     }
 
     @Test
-    public void createSourceSynchronous_withAlipayReusableParams_passesIntegrationTest() {
+    public void createSourceSynchronous_withAlipayReusableParams_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException, APIConnectionException {
         Stripe stripe = getNonLoggingStripe(mContext);
         SourceParams alipayParams = SourceParams.createAlipayReusableParams(
                 "usd",
@@ -354,24 +315,20 @@ public class StripeTest {
                 "abc@def.com",
                 "stripe://start");
 
-        try {
-            Source alipaySource =
-                    stripe.createSourceSynchronous(alipayParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
-            assertNotNull(alipaySource);
-            assertNotNull(alipaySource.getId());
-            assertNotNull(alipaySource.getClientSecret());
-            assertEquals(Source.ALIPAY, alipaySource.getType());
-            assertEquals("redirect", alipaySource.getFlow());
-            assertNotNull(alipaySource.getOwner());
-            assertEquals("Example Payer", alipaySource.getOwner().getName());
-            assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
-            assertEquals("usd", alipaySource.getCurrency());
-            assertEquals(Source.REUSABLE, alipaySource.getUsage());
-            assertNotNull(alipaySource.getRedirect());
-            assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+        Source alipaySource =
+                stripe.createSourceSynchronous(alipayParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+        assertNotNull(alipaySource);
+        assertNotNull(alipaySource.getId());
+        assertNotNull(alipaySource.getClientSecret());
+        assertEquals(Source.ALIPAY, alipaySource.getType());
+        assertEquals("redirect", alipaySource.getFlow());
+        assertNotNull(alipaySource.getOwner());
+        assertEquals("Example Payer", alipaySource.getOwner().getName());
+        assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
+        assertEquals("usd", alipaySource.getCurrency());
+        assertEquals(Source.REUSABLE, alipaySource.getUsage());
+        assertNotNull(alipaySource.getRedirect());
+        assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
 
     @Test
@@ -421,11 +378,12 @@ public class StripeTest {
         }};
         bancontactParams.setMetaData(metamap);
         try {
-            Source bancontactSource =
+            final Source bancontactSource =
                     stripe.createSourceSynchronous(bancontactParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(bancontactSource);
             assertNotNull(bancontactSource.getId());
             assertNotNull(bancontactSource.getClientSecret());
+            assertNotNull(bancontactSource.getAmount());
             assertEquals(Source.BANCONTACT, bancontactSource.getType());
             assertEquals(1000L, bancontactSource.getAmount().longValue());
             assertNotNull(bancontactSource.getSourceTypeData());
@@ -511,6 +469,7 @@ public class StripeTest {
             Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
             assertNotNull(threeDSource);
+            assertNotNull(threeDSource.getAmount());
             assertEquals(50000L, threeDSource.getAmount().longValue());
             assertEquals("brl", threeDSource.getCurrency());
             assertNotNull(threeDSource.getClientSecret());
@@ -525,10 +484,10 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withGiropayParams_passesIntegrationTest() {
+    public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
         Stripe stripe = new Stripe(mContext, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
-        TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
         SourceParams params = SourceParams.createGiropayParams(
                 2000L,
                 "Mr. X",
@@ -539,26 +498,23 @@ public class StripeTest {
             put("type", "wrap");
         }};
         params.setMetaData(metamap);
-        try {
-            Source giropaySource =
-                    stripe.createSourceSynchronous(params);
-            assertNotNull(giropaySource);
-            assertNotNull(giropaySource.getClientSecret());
-            assertNotNull(giropaySource.getId());
-            assertEquals("eur", giropaySource.getCurrency());
-            assertEquals(2000L, giropaySource.getAmount().longValue());
-            assertEquals(Source.GIROPAY, giropaySource.getType());
-            assertNotNull(giropaySource.getSourceTypeData());
-            assertNull(giropaySource.getSourceTypeModel());
-            assertNotNull(giropaySource.getOwner());
-            assertNotNull(giropaySource.getRedirect());
-            assertEquals("Mr. X", giropaySource.getOwner().getName());
-            assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
-            assertAllLogsAreValid(listener, 2);
-            JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+
+        Source giropaySource =
+                stripe.createSourceSynchronous(params);
+        assertNotNull(giropaySource);
+        assertNotNull(giropaySource.getClientSecret());
+        assertNotNull(giropaySource.getId());
+        assertNotNull(giropaySource.getAmount());
+        assertEquals("eur", giropaySource.getCurrency());
+        assertEquals(2000L, giropaySource.getAmount().longValue());
+        assertEquals(Source.GIROPAY, giropaySource.getType());
+        assertNotNull(giropaySource.getSourceTypeData());
+        assertNull(giropaySource.getSourceTypeModel());
+        assertNotNull(giropaySource.getOwner());
+        assertNotNull(giropaySource.getRedirect());
+        assertEquals("Mr. X", giropaySource.getOwner().getName());
+        assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
+        JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
     }
 
     @Test
@@ -762,6 +718,7 @@ public class StripeTest {
             assertNotNull(idealSource);
             assertNotNull(idealSource.getClientSecret());
             assertNotNull(idealSource.getId());
+            assertNotNull(idealSource.getAmount());
             assertEquals(5500L, idealSource.getAmount().longValue());
             assertEquals(Source.IDEAL, idealSource.getType());
             assertEquals("eur", idealSource.getCurrency());
@@ -799,6 +756,7 @@ public class StripeTest {
             assertNotNull(idealSource);
             assertNotNull(idealSource.getClientSecret());
             assertNotNull(idealSource.getId());
+            assertNotNull(idealSource.getAmount());
             assertEquals(5500L, idealSource.getAmount().longValue());
             assertEquals(Source.IDEAL, idealSource.getType());
             assertEquals("eur", idealSource.getCurrency());
@@ -838,6 +796,7 @@ public class StripeTest {
             assertNotNull(idealSource);
             assertNotNull(idealSource.getClientSecret());
             assertNotNull(idealSource.getId());
+            assertNotNull(idealSource.getAmount());
             assertEquals(5500L, idealSource.getAmount().longValue());
             assertEquals(Source.IDEAL, idealSource.getType());
             assertEquals("eur", idealSource.getCurrency());
@@ -874,6 +833,7 @@ public class StripeTest {
             assertNotNull(sofortSource);
             assertNotNull(sofortSource.getClientSecret());
             assertNotNull(sofortSource.getId());
+            assertNotNull(sofortSource.getAmount());
             assertEquals(Source.SOFORT, sofortSource.getType());
             assertEquals("eur", sofortSource.getCurrency());
             assertNotNull(sofortSource.getSourceTypeData());
@@ -933,31 +893,23 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest() {
-        try {
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
-
-            Token token = stripe.createPiiTokenSynchronous("0123456789");
-            assertNotNull(token);
-            assertEquals(Token.TYPE_PII, token.getType());
-            assertFalse(token.getLivemode());
-            assertFalse(token.getUsed());
-            assertNotNull(token.getId());
-            assertAllLogsAreValid(listener, 2);
-        } catch (StripeException stripeEx) {
-            fail("Unexpected exception making PII token");
-        }
+    public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = createPublishableKeyStripe();
+        final Token token = stripe.createPiiTokenSynchronous("0123456789");
+        assertNotNull(token);
+        assertEquals(Token.TYPE_PII, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
     }
 
     @Test
     public void createTokenSynchronous_withValidCvc_passesIntegrationTest()
             throws CardException, APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-        final TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
+        final Stripe stripe = createPublishableKeyStripe();
 
         final Token token = stripe.createCvcUpdateTokenSynchronous("1234");
         assertNotNull(token);
@@ -966,57 +918,10 @@ public class StripeTest {
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
         assertTrue(token.getId().startsWith("cvctok_"));
-        assertAllLogsAreValid(listener, 2);
     }
 
     @Test
-    public void createTokenSynchronous_withValidLegalEntity_passesIntegrationTest()
-            throws APIException, AuthenticationException, InvalidRequestException,
-            APIConnectionException {
-        final Address exampleAddress = new Address.Builder()
-                .setCity("SF")
-                .setCountry("US")
-                .setState("CA")
-                .build();
-       final Map<String, Object> legalEntityData = new HashMap<String, Object>() {{
-            put("personal_address", exampleAddress.toMap());
-            put("type", "individual");
-            put("ssn_last_4", "1234");
-            put("first_name", "Kathy");
-            put("last_name", "Sun");
-        }};
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-        final TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
-        final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true, legalEntityData));
-        assertNotNull(token);
-        assertEquals(Token.TYPE_ACCOUNT, token.getType());
-        assertFalse(token.getLivemode());
-        assertFalse(token.getUsed());
-        assertNotNull(token.getId());
-        assertAllLogsAreValid(listener, 2);
-    }
-
-    @Test
-    public void createTokenSynchronous_withoutLegalEntity_passesIntegrationTest()
-            throws APIException, AuthenticationException, InvalidRequestException,
-            APIConnectionException {
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-        final TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
-        final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true, null));
-        assertNotNull(token);
-        assertEquals(Token.TYPE_ACCOUNT, token.getType());
-        assertFalse(token.getLivemode());
-        assertFalse(token.getUsed());
-        assertNotNull(token.getId());
-        assertAllLogsAreValid(listener, 2);
-    }
-
-    @Test
-    public void createTokenSynchronous_withIndividualEntity_passesIntegrationTest()
+    public void createAccountTokenSynchronous_withIndividualEntity_passesIntegrationTest()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Address exampleAddress = new Address
@@ -1031,9 +936,7 @@ public class StripeTest {
             put("last_name", "Sun");
         }};
 
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-        final TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
+        final Stripe stripe = createPublishableKeyStripe();
         final Token token = stripe.createAccountTokenSynchronous(
                 AccountParams.createAccountParams(true,
                         AccountParams.BusinessType.Individual, businessData));
@@ -1042,12 +945,10 @@ public class StripeTest {
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
-        assertAllLogsAreValid(listener, 2);
     }
 
-
     @Test
-    public void createTokenSynchronous_withCompanyEntity_passesIntegrationTest()
+    public void createAccountTokenSynchronous_withCompanyEntity_isSuccessful()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final Address exampleAddress = new Address
@@ -1061,9 +962,7 @@ public class StripeTest {
             put("name", "My Corp.");
         }};
 
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-        final TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
+        final Stripe stripe = createPublishableKeyStripe();
         final Token token = stripe.createAccountTokenSynchronous(
                 AccountParams.createAccountParams(true,
                         AccountParams.BusinessType.Company, businessData));
@@ -1072,42 +971,62 @@ public class StripeTest {
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
-        assertAllLogsAreValid(listener, 2);
     }
 
     @Test
-    public void createTokenSynchronous_withoutTosShown_failsIntegrationTest() {
-        try {
-            final Map<String, Object> exampleMapAddress = new HashMap<String, Object>() {{
-                put("city", "San Francisco");
-                put("country", "US");
-                put("line1", "123 Market St");
-                put("line2", "#345");
-                put("postal_code", "94107");
-                put("state", "CA");
-            }};
+    public void createAccountTokenSynchronous_withoutTosShown_isSuccessful()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Address address = new Address.Builder()
+                .setCity("SF")
+                .setCountry("US")
+                .setState("CA").build();
+        final Map<String, Object> businessData = new HashMap<String, Object>() {{
+            put("address", address.toMap());
+            put("ssn_last_4", "1234");
+            put("first_name", "Kathy");
+            put("last_name", "Sun");
+        }};
 
-            final Map<String, Object> exampleLegalEntity = new HashMap<String, Object>() {{
-                put("personal_address", exampleMapAddress);
-                put("type", "individual");
-                put("ssn_last_4", "1234");
-                put("first_name", "Kathy");
-                put("last_name", "Sun");
-            }};
-            Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
-            TestLoggingListener listener = new TestLoggingListener(true);
-            stripe.setLoggingResponseListener(listener);
-            Token token = stripe.createAccountTokenSynchronous(
-                    AccountParams.createAccountParams(false, exampleLegalEntity));
-            assertNotNull(token);
-            assertEquals(Token.TYPE_ACCOUNT, token.getType());
-            assertFalse(token.getLivemode());
-            assertFalse(token.getUsed());
-            assertNotNull(token.getId());
-            assertAllLogsAreValid(listener, 2);
-        } catch (StripeException stripeEx) {
-            fail(stripeEx.getMessage());
-        }
+        Stripe stripe = createPublishableKeyStripe();
+        Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(false,
+                        AccountParams.BusinessType.Individual, businessData));
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+    }
+
+    @Test
+    public void createAccountTokenSynchronous_withoutBusinessData_isValid()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = createPublishableKeyStripe();
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(false,
+                        AccountParams.BusinessType.Individual, null));
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
+    }
+
+    @Test
+    public void createAccountTokenSynchronous_withoutBusinessType_isValid()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = createPublishableKeyStripe();
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.createAccountParams(false,
+                        null, null));
+        assertNotNull(token);
+        assertEquals(Token.TYPE_ACCOUNT, token.getType());
+        assertFalse(token.getLivemode());
+        assertFalse(token.getUsed());
+        assertNotNull(token.getId());
     }
 
     @Test
@@ -1125,20 +1044,13 @@ public class StripeTest {
         }
     }
 
-    @Test
-    public void createTokenSynchronous_withoutKey_shouldNotLogAnything() {
-        Stripe stripe = new Stripe(mContext);
+    @Test(expected = IllegalArgumentException.class)
+    public void createTokenSynchronous_withoutKey_shouldThrowException()
+            throws CardException, APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        final Stripe stripe = new Stripe(mContext);
         // This test should not log anything, so we set it to be theoretically capable of logging
-        TestLoggingListener listener = new TestLoggingListener(true);
-        stripe.setLoggingResponseListener(listener);
-        try {
-            stripe.createTokenSynchronous(CARD);
-            fail("We shouldn't be able to make a token without a key.");
-        } catch (Exception exception) {
-            // Note: we're not testing the type of exception in this test.
-            assertEquals(0, listener.responseList.size());
-            assertEquals(0, listener.exceptionList.size());
-        }
+        stripe.createTokenSynchronous(CARD);
     }
 
     @Test
@@ -1231,14 +1143,13 @@ public class StripeTest {
     public void createPaymentMethod_withCardToken()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException {
-        final Stripe stripe = new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
+        final Stripe stripe = createPublishableKeyStripe();
         final Token token = stripe.createTokenSynchronous(CARD);
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Card.Builder()
-                                .setToken(token.getId())
-                                .build(), null);
+                        PaymentMethodCreateParams.Card.create(token.getId()),
+                        null);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams, FUNCTIONAL_PUBLISHABLE_KEY);
         assertNotNull(createdPaymentMethod);
@@ -1352,56 +1263,35 @@ public class StripeTest {
                 createdPaymentMethod.ideal);
     }
 
-    private void assertAllLogsAreValid(@NonNull TestLoggingListener listener, int expectedLogs) {
-        assertEquals(expectedLogs, listener.responseList.size());
-        assertEquals(0, listener.exceptionList.size());
-        for(int i = 0; i < expectedLogs; i++) {
-            assertEquals(200, listener.responseList.get(i).getResponseCode());
-        }
-    }
-
     @NonNull
     private static Stripe getNonLoggingStripe(@NonNull Context context) {
-        Stripe nonLoggingStripe = new Stripe(context);
-        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
-        return nonLoggingStripe;
+        return createNonLoggingStripe(context, null);
     }
 
     @NonNull
-    private static Stripe getNonLoggingStripe(@NonNull Context context, String key) {
-        Stripe nonLoggingStripe = new Stripe(context, key);
-        nonLoggingStripe.setLoggingResponseListener(new TestLoggingListener(false));
-        return nonLoggingStripe;
+    private static Stripe getNonLoggingStripe(@NonNull Context context,
+                                              @NonNull String publishableKey) {
+        return createNonLoggingStripe(context, publishableKey);
     }
 
-    private static class TestLoggingListener implements StripeApiHandler.LoggingResponseListener {
-        private final boolean mShouldLogTest;
-        private final List<StripeResponse> responseList = new ArrayList<>();
-        private final List<StripeException> exceptionList = new ArrayList<>();
-
-        TestLoggingListener(boolean shouldLogTest) {
-            mShouldLogTest = shouldLogTest;
+    @NonNull
+    private static Stripe createNonLoggingStripe(@NonNull Context context,
+                                                 @Nullable String publishableKey) {
+        final Stripe stripe = new Stripe(
+                new StripeApiHandler(
+                        context,
+                        new StripeApiHandler.ConnectionFactory(),
+                        false),
+                new LoggingUtils(context),
+                new StripeNetworkUtils(context));
+        if (publishableKey != null) {
+            stripe.setDefaultPublishableKey(publishableKey);
         }
+        return stripe;
+    }
 
-        @Override
-        public boolean shouldLogTest() {
-            return mShouldLogTest;
-        }
-
-        @Override
-        public void onLoggingResponse(StripeResponse response) {
-            if (!mShouldLogTest) {
-                fail("Test should not be logged.");
-            }
-            responseList.add(response);
-        }
-
-        @Override
-        public void onStripeException(StripeException exception) {
-            if (!mShouldLogTest) {
-                fail("Test should not be logged.");
-            }
-            exceptionList.add(exception);
-        }
+    @NonNull
+    private Stripe createPublishableKeyStripe() {
+        return new Stripe(mContext, FUNCTIONAL_PUBLISHABLE_KEY);
     }
 }

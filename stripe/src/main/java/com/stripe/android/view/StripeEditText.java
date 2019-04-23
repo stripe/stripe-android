@@ -3,6 +3,14 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Handler;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.TextInputEditText;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -12,26 +20,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.core.content.ContextCompat;
-
-import com.google.android.material.textfield.TextInputEditText;
 import com.stripe.android.R;
 
 import static com.stripe.android.view.ViewUtils.isColorDark;
 
 /**
- * Extension of {@link AppCompatEditText} that listens for users pressing the delete key when
+ * Extension of {@link TextInputEditText} that listens for users pressing the delete key when
  * there is no text present. Google has actually made this
  * <a href="https://code.google.com/p/android/issues/detail?id=42904">somewhat difficult</a>,
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-public class StripeEditText extends TextInputEditText {
+public class StripeEditText extends AppCompatEditText {
 
     @Nullable private AfterTextChangedListener mAfterTextChangedListener;
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
@@ -40,22 +40,23 @@ public class StripeEditText extends TextInputEditText {
     @ColorRes private int mDefaultErrorColorResId;
     @ColorInt private int mErrorColor;
 
-    private Handler mHandler;
+    @NonNull private final Handler mHandler;
     private String mErrorMessage;
     private ErrorMessageListener mErrorMessageListener;
 
-    public StripeEditText(Context context) {
-        super(context);
-        initView();
+    public StripeEditText(@NonNull Context context) {
+        this(context, null);
     }
 
-    public StripeEditText(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView();
+    public StripeEditText(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, android.support.v7.appcompat.R.attr.editTextStyle);
     }
 
-    public StripeEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public StripeEditText(@NonNull Context context, @Nullable AttributeSet attrs,
+                          int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        mHandler = new Handler();
         initView();
     }
 
@@ -177,7 +178,6 @@ public class StripeEditText extends TextInputEditText {
     }
 
     private void initView() {
-        mHandler = new Handler();
         listenForTextChanges();
         listenForDeleteEmpty();
         determineDefaultErrorColor();
@@ -247,7 +247,7 @@ public class StripeEditText extends TextInputEditText {
 
     private class SoftDeleteInputConnection extends InputConnectionWrapper {
 
-        SoftDeleteInputConnection(InputConnection target, boolean mutable) {
+        private SoftDeleteInputConnection(@NonNull InputConnection target, boolean mutable) {
             super(target, mutable);
         }
 

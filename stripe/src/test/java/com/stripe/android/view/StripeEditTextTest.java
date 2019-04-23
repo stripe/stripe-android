@@ -1,7 +1,7 @@
 package com.stripe.android.view;
 
-import androidx.annotation.ColorInt;
-import androidx.core.content.ContextCompat;
+import android.support.annotation.ColorInt;
+import android.support.v4.content.ContextCompat;
 
 import com.stripe.android.R;
 import com.stripe.android.testharness.ViewTestUtils;
@@ -16,6 +16,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -119,5 +120,10 @@ public class StripeEditTextTest {
         mEditText.setShouldShowError(true);
         int currentColorInt = mEditText.getTextColors().getDefaultColor();
         assertEquals(blueError, currentColorInt);
+    }
+
+    @Test
+    public void getCachedColorStateList_afterInit_returnsNotNull() {
+        assertNotNull(mEditText.getCachedColorStateList());
     }
 }
