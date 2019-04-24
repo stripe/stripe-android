@@ -74,4 +74,10 @@
     <string name="authentication_dialog_title">Authentication required</string>
     <string name="authentication_dialog_message">Authenticate %1$s ending in %2$s?</string>
     <string name="pay_with_google">Pay with Google</string>
+
+    <!-- Payment Auth example -->
+    <string name="launch_payment_auth_example">Launch Payment Auth Example</string>
+    <string name="buy">Buy!</string>
+    <string name="payment_intent_status">PaymentIntent status: %s</string>
+    <string name="payment_auth_intro">Tapping the button below will create a PaymentIntent then attempt to confirm it.</string>
 </resources>

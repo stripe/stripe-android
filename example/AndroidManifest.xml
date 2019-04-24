@@ -105,6 +105,10 @@
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activity.PaymentAuthActivity"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
