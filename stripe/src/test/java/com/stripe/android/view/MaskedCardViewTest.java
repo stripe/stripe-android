@@ -4,6 +4,8 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CustomerSource;
@@ -14,9 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.Calendar;
 
@@ -40,9 +40,7 @@ public class MaskedCardViewTest {
 
     @Before
     public void setup() {
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start().resume();
-        mMaskedCardView = activityController.get().getMaskedCardView();
+        mMaskedCardView = new MaskedCardView(ApplicationProvider.getApplicationContext());
         mSelectedImageView = mMaskedCardView.findViewById(R.id.masked_check_icon);
 
         Calendar expirationCalendar = Calendar.getInstance();

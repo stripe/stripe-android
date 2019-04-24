@@ -9,9 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.Locale;
 
@@ -25,19 +23,23 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link CountryAutoCompleteTextView}
  */
 @RunWith(RobolectricTestRunner.class)
-public class CountryAutoCompleteTextViewTest {
+public class CountryAutoCompleteTextViewTest extends BaseViewTest<ShippingInfoTestActivity> {
 
     private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
     private AutoCompleteTextView mAutoCompleteTextView;
+
+    public CountryAutoCompleteTextViewTest() {
+        super(ShippingInfoTestActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
-        ActivityController<ShippingInfoTestActivity> activityController =
-                Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();
-        mCountryAutoCompleteTextView = activityController.get().findViewById(R.id.country_autocomplete_aaw);
-        mAutoCompleteTextView = mCountryAutoCompleteTextView.findViewById(R.id.autocomplete_country_cat);
+        mCountryAutoCompleteTextView = createStartedActivity()
+                .findViewById(R.id.country_autocomplete_aaw);
+        mAutoCompleteTextView = mCountryAutoCompleteTextView
+                .findViewById(R.id.autocomplete_country_cat);
     }
 
     @Test
@@ -51,9 +53,11 @@ public class CountryAutoCompleteTextViewTest {
         String previousValidCountryCode = mCountryAutoCompleteTextView.getSelectedCountryCode();
         mCountryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE");
         assertNull(mAutoCompleteTextView.getError());
-        assertEquals(mAutoCompleteTextView.getText().toString(), new Locale("", previousValidCountryCode).getDisplayCountry());
+        assertEquals(mAutoCompleteTextView.getText().toString(),
+                new Locale("", previousValidCountryCode).getDisplayCountry());
         mCountryAutoCompleteTextView.setCountrySelected(Locale.UK.getCountry());
-        assertNotEquals(mAutoCompleteTextView.getText().toString(), new Locale("", previousValidCountryCode).getDisplayCountry());
+        assertNotEquals(mAutoCompleteTextView.getText().toString(),
+                new Locale("", previousValidCountryCode).getDisplayCountry());
         assertEquals(mAutoCompleteTextView.getText().toString(), Locale.UK.getDisplayCountry());
     }
 

@@ -19,8 +19,6 @@ licenses:
     - 'google-gdk-license-.+'
     - '.+'
 
-group: deprecated-2017Q3
-
 before_install:
   - yes | sdkmanager "platforms;android-28"
 

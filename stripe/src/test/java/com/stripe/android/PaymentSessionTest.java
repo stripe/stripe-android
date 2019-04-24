@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -16,9 +15,11 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
+import com.stripe.android.view.BaseViewTest;
 import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowActivity;
@@ -59,16 +59,19 @@ import static org.mockito.Mockito.when;
  * Test class for {@link PaymentSession}
  */
 @RunWith(RobolectricTestRunner.class)
-public class PaymentSessionTest {
+public class PaymentSessionTest extends BaseViewTest<CardInputTestActivity> {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
-    private Activity mActivity;
 
     @Mock private StripeApiHandler mApiHandler;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
+
+    public PaymentSessionTest() {
+        super(CardInputTestActivity.class);
+    }
 
     @Before
     public void setup()
@@ -79,7 +82,6 @@ public class PaymentSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-        mActivity = Robolectric.buildActivity(AppCompatActivity.class).create().start().get();
 
         final Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(firstCustomer);
@@ -119,12 +121,18 @@ public class PaymentSessionTest {
         }).when(mThreadPoolExecutor).execute(any(Runnable.class));
     }
 
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+    }
+
     @Test
     public void init_addsPaymentSessionToken_andFetchesCustomer() {
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
 
-        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        final PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         assertTrue(customerSession.getProductUsageTokens()
@@ -138,7 +146,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        final PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
         verify(mPaymentSessionListener).onCommunicatingStateChanged(eq(true));
         verify(mPaymentSessionListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
@@ -150,7 +158,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        final PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
         paymentSession.setCartTotal(500L);
 
@@ -166,7 +174,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         // We have already tested the functionality up to here.
@@ -184,13 +192,14 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        final Activity activity = createActivity();
+        PaymentSession paymentSession = new PaymentSession(activity);
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         paymentSession.presentPaymentMethodSelection();
 
         ShadowActivity.IntentForResult intentForResult =
-                Shadows.shadowOf(mActivity).getNextStartedActivityForResult();
+                Shadows.shadowOf(activity).getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertNotNull(intentForResult.intent.getComponent());
         assertEquals(PaymentMethodsActivity.class.getName(),
@@ -206,7 +215,7 @@ public class PaymentSessionTest {
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         // The init removes PaymentMethodsActivity, but then adds PaymentSession
@@ -224,7 +233,7 @@ public class PaymentSessionTest {
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(mPaymentSessionListener,
                 new PaymentSessionConfig.Builder().build(), new Bundle());
@@ -243,7 +252,7 @@ public class PaymentSessionTest {
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(mPaymentSessionListener,
                 new PaymentSessionConfig.Builder().build(), new Bundle());
@@ -274,7 +283,7 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        PaymentSession paymentSession = new PaymentSession(createStartedActivity());
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         paymentSession.setCartTotal(300L);

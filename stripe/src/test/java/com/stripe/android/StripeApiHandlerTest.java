@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
-import static com.stripe.android.StripeApiHandler.POST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -56,7 +56,7 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
-    @Mock private StripeApiHandler.ConnectionFactory mConnectionFactory;
+    @Mock private StripeApiHandler.RequestExecutor mRequestExecutor;
 
     @Before
     public void before() {
@@ -181,7 +181,7 @@ public class StripeApiHandlerTest {
                         .hashMapFromCard(CARD);
         final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
-        final String query = mApiHandler.createQuery(cardMap);
+        final String query = new StripeApiHandler.ConnectionFactory().createQuery(cardMap);
         assertEquals(expectedValue, query);
     }
 
@@ -215,6 +215,29 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
+            throws APIConnectionException, APIException, CardException,
+            AuthenticationException {
+        final Stripe3DS2AuthParams authParams = new Stripe3DS2AuthParams(
+                "src_invalid",
+                "1.0.0",
+                UUID.randomUUID().toString(),
+                "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqMTqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxspn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWFDzzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8NgEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBoqJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnnyhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-FPY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLNDAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew",
+                "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"b23da28b-d611-46a8-93af-44ad57ce9c9d\",\"x\":\"hSwyaaAp3ppSGkpt7d9G8wnp3aIXelsZVo05EPpqetg\",\"y\":\"OUVOv9xPh5RYWapla0oz3vCJWRRXlDmppy5BGNeSl-A\"}",
+                "2.1.0",
+                10
+        );
+
+        try {
+            mApiHandler.start3ds2Auth(authParams, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
+            fail("Expected InvalidRequestException");
+        } catch (InvalidRequestException e) {
+            assertEquals("source", e.getParam());
+            assertEquals("resource_missing", e.getErrorCode());
+        }
+    }
+
+    @Test
     public void logApiCall_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
@@ -232,7 +255,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
         final StripeResponse response = mApiHandler.requestData(
-                POST, mApiHandler.getSourcesUrl(),
+                StripeApiHandler.RestMethod.POST, mApiHandler.getSourcesUrl(),
                 SourceParams.createCardParams(CARD).toParamMap(),
                 RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                         connectAccountId, RequestOptions.TYPE_QUERY)
@@ -327,7 +350,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                new StripeApiHandler.ConnectionFactory(),
+                new StripeApiHandler.RequestExecutor(),
                 false
         );
         final Source source = apiHandler.createSource(
@@ -344,12 +367,12 @@ public class StripeApiHandlerTest {
     public void logApiCall_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mConnectionFactory,
+                mRequestExecutor,
                 false
         );
         apiHandler.logApiCall(new HashMap<String, Object>(),
                 RequestOptions.builder("some_key")
                         .build());
-        verifyNoMoreInteractions(mConnectionFactory);
+        verifyNoMoreInteractions(mRequestExecutor);
     }
 }
