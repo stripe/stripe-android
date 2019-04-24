@@ -63,7 +63,9 @@ public class IssuingCardPinService
      *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
      */
     @NonNull
-    public static IssuingCardPinService create(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider) {
+    public static IssuingCardPinService create(
+            @NonNull Context context,
+            @NonNull EphemeralKeyProvider keyProvider) {
         return new IssuingCardPinService(keyProvider, new StripeApiHandler(context));
     }
 
