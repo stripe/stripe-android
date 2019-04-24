@@ -32,6 +32,7 @@ public class IssuingCardPinService
     private static final String ARGUMENT_VERIFICATION_ID = "verificationId";
     private static final String ARGUMENT_ONE_TIME_CODE = "userOneTimeCode";
     private static final String ARGUMENT_NEW_PIN = "newPin";
+
     @NonNull
     private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
     @NonNull
@@ -132,7 +133,7 @@ public class IssuingCardPinService
                             @Nullable Map<String, Object> arguments) {
 
         if (PIN_RETRIEVE.equals(action)) {
-            IssuingCardPinRetrievalListener listener = mRetrievalListeners.get(operationId);
+            IssuingCardPinRetrievalListener listener = mRetrievalListeners.remove(operationId);
             if(listener == null){
                 Log.e(TAG, IssuingCardPinService.class.getName() +
                         " was called without a listener");
@@ -150,7 +151,7 @@ public class IssuingCardPinService
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
             try {
-                
+
                 String pin = mApiHandler.retrieveIssuingCardPin(
                         cardId,
                         verificationId,
@@ -195,7 +196,7 @@ public class IssuingCardPinService
         }
         if (PIN_UPDATE.equals(action)) {
 
-            IssuingCardPinUpdateListener listener = mUpdateListeners.get(operationId);
+            IssuingCardPinUpdateListener listener = mUpdateListeners.remove(operationId);
             if(listener == null){
                 Log.e(TAG, IssuingCardPinService.class.getName() +
                         " was called without a listener");
@@ -264,8 +265,8 @@ public class IssuingCardPinService
                            int errorCode,
                            @Nullable String errorMessage) {
 
-        IssuingCardPinUpdateListener updateListener = mUpdateListeners.get(operationId);
-        IssuingCardPinRetrievalListener retrievalListener = mRetrievalListeners.get(operationId);
+        IssuingCardPinUpdateListener updateListener = mUpdateListeners.remove(operationId);
+        IssuingCardPinRetrievalListener retrievalListener = mRetrievalListeners.remove(operationId);
         if (retrievalListener != null) {
             retrievalListener.onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
