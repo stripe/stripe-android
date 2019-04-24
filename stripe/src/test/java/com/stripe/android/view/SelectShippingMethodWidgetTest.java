@@ -1,13 +1,13 @@
 package com.stripe.android.view;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.stripe.android.model.ShippingMethod;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,23 +21,22 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 public class SelectShippingMethodWidgetTest {
 
-    private SelectShippingMethodWidget mSelectShippingMethodWidget;
     private ShippingMethodAdapter mShippingMethodAdapter;
     private List<ShippingMethod> mShippingMethods;
 
     @Before
     public void setup() {
         Locale.setDefault(Locale.US);
-        ActivityController<SelectShippingMethodTestActivity> activityController =
-                Robolectric.buildActivity(SelectShippingMethodTestActivity.class).create().start();
-        mSelectShippingMethodWidget = activityController.get().getSelectShippingMethodWidget();
         mShippingMethods = new ArrayList<>();
         ShippingMethod ups = new ShippingMethod("UPS Ground", "ups-ground", "Arrives in 3-5 days", 0, "USD");
         ShippingMethod fedEx = new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
         mShippingMethods.add(ups);
         mShippingMethods.add(fedEx);
-        mSelectShippingMethodWidget.setShippingMethods(mShippingMethods, ups);
-        mShippingMethodAdapter = mSelectShippingMethodWidget.mShippingMethodAdapter;
+
+        final SelectShippingMethodWidget selectShippingMethodWidget =
+                new SelectShippingMethodWidget(ApplicationProvider.getApplicationContext());
+        selectShippingMethodWidget.setShippingMethods(mShippingMethods, ups);
+        mShippingMethodAdapter = selectShippingMethodWidget.mShippingMethodAdapter;
     }
 
     @Test

@@ -11,14 +11,13 @@ import com.stripe.android.model.Card;
 import com.stripe.android.testharness.TestFocusChangeListener;
 import com.stripe.android.testharness.ViewTestUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import java.util.Calendar;
@@ -50,7 +49,7 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = Build.VERSION_CODES.O_MR1)
-public class CardInputWidgetTest {
+public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
     // Every Card made by the CardInputView should have the card widget token.
     private static final String[] EXPECTED_LOGGING_ARRAY = {LOGGING_TOKEN};
@@ -60,15 +59,19 @@ public class CardInputWidgetTest {
     private StripeEditText mCvcEditText;
     private TestFocusChangeListener mOnGlobalFocusChangeListener;
 
-    @Mock
-    CardInputListener mCardInputListener;
+    private CardInputTestActivity mActivity;
+
+    @Mock private CardInputListener mCardInputListener;
+
+    public CardInputWidgetTest() {
+        super(CardInputTestActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class)
-                        .create().start();
+
+        mActivity = createStartedActivity();
 
         CardInputWidget.DimensionOverrideSettings dimensionOverrides =
                 new CardInputWidget.DimensionOverrideSettings() {
@@ -85,13 +88,13 @@ public class CardInputWidgetTest {
                     }
                 };
 
-        mCardInputWidget = activityController.get().getCardInputWidget();
+        mCardInputWidget = mActivity.getCardInputWidget();
         mCardInputWidget.setDimensionOverrideSettings(dimensionOverrides);
         mOnGlobalFocusChangeListener = new TestFocusChangeListener();
         mCardInputWidget.getViewTreeObserver()
                 .addOnGlobalFocusChangeListener(mOnGlobalFocusChangeListener);
 
-        mCardNumberEditText = activityController.get().getCardNumberEditText();
+        mCardNumberEditText = mActivity.getCardNumberEditText();
         mCardNumberEditText.setText("");
 
         mExpiryEditText = mCardInputWidget.findViewById(R.id.et_expiry_date);
@@ -104,7 +107,15 @@ public class CardInputWidgetTest {
         params.width = 48;
         params.rightMargin = 12;
         iconView.setLayoutParams(params);
-        activityController.visible().resume();
+
+        resumeStartedActivity(mActivity);
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+//        mActivity.finish();
     }
 
     @Test
