@@ -22,6 +22,10 @@
         <activity
             android:name=".view.PaymentAuthWebViewActivity"
             android:theme="@style/StripeDefaultTheme" />
+
+        <activity
+            android:name=".view.PaymentAuthBypassActivity"
+            android:theme="@style/StripeDefaultTheme" />
     </application>
 
 </manifest>

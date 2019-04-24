@@ -76,6 +76,8 @@ class PaymentAuthWebView extends WebView {
     }
 
     static class PaymentAuthWebViewClient extends WebViewClient {
+        static final String PARAM_CLIENT_SECRET = "payment_intent_client_secret";
+
         @NonNull private final Activity mActivity;
         @NonNull private final Uri mReturnUrl;
 
@@ -88,9 +90,11 @@ class PaymentAuthWebView extends WebView {
         public boolean shouldOverrideUrlLoading(@NonNull WebView view,
                                                 @NonNull String urlString) {
             if (isReturnUrl(urlString)) {
+                final String clientSecret = Uri.parse(urlString)
+                        .getQueryParameter(PARAM_CLIENT_SECRET);
                 mActivity.setResult(Activity.RESULT_OK,
                         new Intent()
-                                .setData(Uri.parse(urlString)));
+                                .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET, clientSecret));
                 mActivity.finish();
                 return true;
             }

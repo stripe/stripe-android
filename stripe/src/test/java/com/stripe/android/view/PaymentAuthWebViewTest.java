@@ -32,7 +32,7 @@ public class PaymentAuthWebViewTest {
     @Test
     public void shouldOverrideUrlLoading_shouldSetResult() {
         final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
-                        "payment_intent_client_secret=pi_123_secret_456&source_type=card";
+                "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
                         "stripe://payment_intent_return");
@@ -41,6 +41,7 @@ public class PaymentAuthWebViewTest {
         verify(mActivity).finish();
 
         final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals(deepLink, intent.getDataString());
+        assertEquals("pi_123_secret_456",
+                intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
     }
 }

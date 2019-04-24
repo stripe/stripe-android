@@ -1,6 +1,8 @@
 package com.stripe.android;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -60,6 +62,7 @@ public class Stripe {
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
+    @NonNull private final PaymentAuthenticationController mPaymentAuthenticationController;
 
     /**
      * A constructor with only context, to set the key later.
@@ -86,9 +89,56 @@ public class Stripe {
     @VisibleForTesting
     Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
            @NonNull StripeNetworkUtils stripeNetworkUtils) {
+        this(apiHandler, loggingUtils, stripeNetworkUtils, new PaymentAuthenticationController());
+    }
+
+    @VisibleForTesting
+    Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
+           @NonNull StripeNetworkUtils stripeNetworkUtils,
+           @NonNull PaymentAuthenticationController paymentAuthenticationController) {
         mApiHandler = apiHandler;
         mLoggingUtils = loggingUtils;
         mStripeNetworkUtils = stripeNetworkUtils;
+        mPaymentAuthenticationController = paymentAuthenticationController;
+    }
+
+    /**
+     *
+     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param confirmPaymentIntentParams {@link PaymentIntentParams} used to confirm the
+     *                                   {@link PaymentIntent}
+     */
+    private void startPaymentAuth(@NonNull Activity activity,
+                                  @NonNull PaymentIntentParams confirmPaymentIntentParams,
+                                  @Nullable String publishableKey) {
+        final String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        mPaymentAuthenticationController.confirmAndAuth(this, activity,
+                confirmPaymentIntentParams, apiKey);
+    }
+
+    void startPaymentAuth(@NonNull Activity activity,
+                          @NonNull PaymentIntentParams paymentIntentParams) {
+        startPaymentAuth(activity, paymentIntentParams, mDefaultPublishableKey);
+    }
+
+    boolean onPaymentAuthResult(
+            int requestCode, int resultCode, @Nullable Intent data,
+            @NonNull String publishableKey,
+            @NonNull ApiResultCallback<PaymentIntent> callback) {
+        if (data != null && mPaymentAuthenticationController
+                .shouldHandleResult(requestCode, resultCode, data)) {
+            mPaymentAuthenticationController.handleResult(this, data,
+                    publishableKey, callback);
+            return true;
+        }
+
+        return false;
+    }
+
+    boolean onPaymentAuthResult(
+            int requestCode, int resultCode, @Nullable Intent data,
+            @NonNull ApiResultCallback<PaymentIntent> callback) {
+        return onPaymentAuthResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
     /**
