@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.Before;
@@ -7,9 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.Calendar;
 
@@ -29,16 +29,14 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 @RunWith(RobolectricTestRunner.class)
 public class ExpiryDateEditTextTest {
 
-    @Mock ExpiryDateEditText.ExpiryDateEditListener mExpiryDateEditListener;
+    @Mock private ExpiryDateEditText.ExpiryDateEditListener mExpiryDateEditListener;
     private ExpiryDateEditText mExpiryDateEditText;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
-        mExpiryDateEditText = activityController.get().getExpiryDateEditText();
+        mExpiryDateEditText = new ExpiryDateEditText(ApplicationProvider.getApplicationContext());
         mExpiryDateEditText.setText("");
         mExpiryDateEditText.setExpiryDateEditListener(mExpiryDateEditListener);
     }

@@ -21,6 +21,7 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,9 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Calendar;
@@ -59,16 +58,20 @@ import static org.robolectric.Shadows.shadowOf;
  * Test class for {@link AddSourceActivity}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class AddSourceActivityTest {
+public class AddSourceActivityTest extends BaseViewTest<AddSourceActivity> {
 
-    private ActivityController<AddSourceActivity> mActivityController;
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
     private ProgressBar mProgressBar;
+    private AddSourceActivity mActivity;
     private ShadowActivity mShadowActivity;
 
-    @Mock Stripe mStripe;
-    @Mock AddSourceActivity.CustomerSessionProxy mCustomerSessionProxy;
+    @Mock private Stripe mStripe;
+    @Mock private AddSourceActivity.CustomerSessionProxy mCustomerSessionProxy;
+
+    public AddSourceActivityTest() {
+        super(AddSourceActivity.class);
+    }
 
     @Before
     public void setup() {
@@ -77,16 +80,20 @@ public class AddSourceActivityTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+    }
+
     private void setUpForLocalTest() {
-        mActivityController = Robolectric.buildActivity(AddSourceActivity.class)
-                .create().start().resume().visible();
-        final AddSourceActivity addSourceActivity = mActivityController.get();
-        mCardMultilineWidget = addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
-        mProgressBar = addSourceActivity.findViewById(R.id.progress_bar_as);
+        mActivity = createActivity();
+        mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
+        mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
-        mShadowActivity = shadowOf(addSourceActivity);
-        addSourceActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
+        mShadowActivity = shadowOf(mActivity);
+        mActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
             @NonNull
             @Override
             public Stripe getStripe(@NonNull Context context) {
@@ -96,28 +103,25 @@ public class AddSourceActivityTest {
     }
 
     private void setUpForProxySessionTest() {
-        Intent intent = AddSourceActivity
+        final Intent intent = AddSourceActivity
                 .newIntent(ApplicationProvider.getApplicationContext(), true, true)
                 .putExtra(EXTRA_PROXY_DELAY, true)
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mActivityController = Robolectric.buildActivity(AddSourceActivity.class, intent)
-                .create().start().resume().visible();
-        final AddSourceActivity addSourceActivity = mActivityController.get();
-        mCardMultilineWidget = addSourceActivity.findViewById(R.id.add_source_card_entry_widget);
-        mProgressBar = mActivityController.get()
-                .findViewById(R.id.progress_bar_as);
+        mActivity = createActivity(intent);
+        mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
+        mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
-        mShadowActivity = shadowOf(addSourceActivity);
-        addSourceActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
+        mShadowActivity = shadowOf(mActivity);
+        mActivity.setStripeProvider(new AddSourceActivity.StripeProvider() {
             @NonNull
             @Override
             public Stripe getStripe(@NonNull Context context) {
                 return mStripe;
             }
         });
-        addSourceActivity.setCustomerSessionProxy(mCustomerSessionProxy);
-        addSourceActivity.initCustomerSessionTokens();
+        mActivity.setCustomerSessionProxy(mCustomerSessionProxy);
+        mActivity.initCustomerSessionTokens();
     }
 
     @Test
@@ -172,7 +176,7 @@ public class AddSourceActivityTest {
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();
 
-        assertTrue(mActivityController.get().isFinishing());
+        assertTrue(mActivity.isFinishing());
         assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
         final Source newSource =
                 Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
@@ -221,7 +225,7 @@ public class AddSourceActivityTest {
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mActivityController.get().onOptionsItemSelected(menuItem);
+        mActivity.onOptionsItemSelected(menuItem);
         verify(mStripe).createSource(
                 paramsArgumentCaptor.capture(),
                 callbackArgumentCaptor.capture());
@@ -239,7 +243,7 @@ public class AddSourceActivityTest {
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();
 
-        assertTrue(mActivityController.get().isFinishing());
+        assertTrue(mActivity.isFinishing());
         assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
         final Source newSource =
                 Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
@@ -269,7 +273,7 @@ public class AddSourceActivityTest {
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivityController.get().onOptionsItemSelected(menuItem);
+        mActivity.onOptionsItemSelected(menuItem);
         verify(mStripe).createSource(
                 paramsArgumentCaptor.capture(),
                 callbackArgumentCaptor.capture());
@@ -304,7 +308,7 @@ public class AddSourceActivityTest {
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         Intent intent = mShadowActivity.getResultIntent();
 
-        assertTrue(mActivityController.get().isFinishing());
+        assertTrue(mActivity.isFinishing());
         assertTrue(intent.hasExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
         Source source =
                 Source.fromString(intent.getStringExtra(AddSourceActivity.EXTRA_NEW_SOURCE));
@@ -322,7 +326,7 @@ public class AddSourceActivityTest {
 
         StripeActivity.AlertMessageListener alertMessageListener =
                 Mockito.mock(StripeActivity.AlertMessageListener.class);
-        mActivityController.get().setAlertMessageListener(alertMessageListener);
+        mActivity.setAlertMessageListener(alertMessageListener);
 
         // Note: these values do not match what is being mock-sent back in the result.
         mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
@@ -336,7 +340,7 @@ public class AddSourceActivityTest {
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mActivityController.get().onOptionsItemSelected(menuItem);
+        mActivity.onOptionsItemSelected(menuItem);
         verify(mStripe).createSource(
                 paramsArgumentCaptor.capture(),
                 callbackArgumentCaptor.capture());
@@ -355,7 +359,7 @@ public class AddSourceActivityTest {
 
         Intent intent = mShadowActivity.getResultIntent();
         assertNull(intent);
-        assertFalse(mActivityController.get().isFinishing());
+        assertFalse(mActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
         verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
     }
@@ -369,7 +373,7 @@ public class AddSourceActivityTest {
                 ArgumentCaptor.forClass(SourceCallback.class);
         StripeActivity.AlertMessageListener alertMessageListener =
                 Mockito.mock(StripeActivity.AlertMessageListener.class);
-        mActivityController.get().setAlertMessageListener(alertMessageListener);
+        mActivity.setAlertMessageListener(alertMessageListener);
 
         // Note: these values do not match what is being mock-sent back in the result.
         mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
@@ -385,7 +389,7 @@ public class AddSourceActivityTest {
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivityController.get().onOptionsItemSelected(menuItem);
+        mActivity.onOptionsItemSelected(menuItem);
         verify(mStripe).createSource(
                 paramsArgumentCaptor.capture(),
                 callbackArgumentCaptor.capture());
@@ -425,11 +429,11 @@ public class AddSourceActivityTest {
         bundle.putSerializable(EXTRA_EXCEPTION, error);
         Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
         errorIntent.putExtras(bundle);
-        LocalBroadcastManager.getInstance(mActivityController.get()).sendBroadcast(errorIntent);
+        LocalBroadcastManager.getInstance(mActivity).sendBroadcast(errorIntent);
 
         Intent intent = mShadowActivity.getResultIntent();
         assertNull(intent);
-        assertFalse(mActivityController.get().isFinishing());
+        assertFalse(mActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
         verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
     }
