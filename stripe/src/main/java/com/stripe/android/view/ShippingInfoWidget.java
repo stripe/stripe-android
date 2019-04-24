@@ -232,8 +232,8 @@ public class ShippingInfoWidget extends LinearLayout {
         mNameEditText.setErrorMessageListener(new ErrorListener(mNameTextInputLayout));
         mPostalCodeEditText.setErrorMessageListener(new ErrorListener(mPostalCodeTextInputLayout));
         mStateEditText.setErrorMessageListener(new ErrorListener(mStateTextInputLayout));
-        mPhoneNumberEditText.setErrorMessageListener(new ErrorListener
-                (mPhoneNumberTextInputLayout));
+        mPhoneNumberEditText.setErrorMessageListener(
+                new ErrorListener(mPhoneNumberTextInputLayout));
         mAddressEditText.setErrorMessage(getResources().getString(R.string.address_required));
         mCityEditText.setErrorMessage(getResources().getString(R.string.address_city_required));
         mNameEditText.setErrorMessage(getResources().getString(R.string.address_name_required));

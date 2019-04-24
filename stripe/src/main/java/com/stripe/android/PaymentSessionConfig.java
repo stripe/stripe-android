@@ -144,15 +144,13 @@ public class PaymentSessionConfig implements Parcelable {
         parcel.writeInt(mShippingMethodRequired ? 1 : 0);
     }
 
-    public
     @NonNull
-    List<String> getHiddenShippingInfoFields() {
+    public List<String> getHiddenShippingInfoFields() {
         return mHiddenShippingInfoFields;
     }
 
-    public
     @NonNull
-    List<String> getOptionalShippingInfoFields() {
+    public List<String> getOptionalShippingInfoFields() {
         return mOptionalShippingInfoFields;
     }
 

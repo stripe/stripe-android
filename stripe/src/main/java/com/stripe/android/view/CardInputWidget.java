@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.model.Card.CardBrand;
+
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
@@ -482,12 +483,12 @@ public class CardInputWidget extends LinearLayout {
         ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
             @Override
             public void onInitializeAccessibilityNodeInfo(
-                @NonNull View host,
-                @NonNull AccessibilityNodeInfoCompat info) {
+                    @NonNull View host,
+                    @NonNull AccessibilityNodeInfoCompat info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
                 final String accLabel = getResources().getString(
-                    R.string.acc_label_cvc_node,
-                    mCvcNumberEditText.getText()
+                        R.string.acc_label_cvc_node,
+                        mCvcNumberEditText.getText()
                 );
                 info.setText(accLabel);
             }
@@ -582,7 +583,8 @@ public class CardInputWidget extends LinearLayout {
                                 mCvcNumberEditText.hasFocus(),
                                 text);
                     }
-        });
+                }
+        );
 
         mCardNumberEditText.setCardNumberCompleteListener(
                 new CardNumberEditText.CardNumberCompleteListener() {
@@ -614,7 +616,8 @@ public class CardInputWidget extends LinearLayout {
                             mCardInputListener.onExpirationComplete();
                         }
                     }
-        });
+                }
+        );
 
         mCardNumberEditText.requestFocus();
     }
