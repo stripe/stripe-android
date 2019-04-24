@@ -134,7 +134,7 @@ public class IssuingCardPinService
 
         if (PIN_RETRIEVE.equals(action)) {
             IssuingCardPinRetrievalListener listener = mRetrievalListeners.remove(operationId);
-            if(listener == null){
+            if (listener == null) {
                 Log.e(TAG, IssuingCardPinService.class.getName() +
                         " was called without a listener");
                 return;
@@ -197,7 +197,7 @@ public class IssuingCardPinService
         if (PIN_UPDATE.equals(action)) {
 
             IssuingCardPinUpdateListener listener = mUpdateListeners.remove(operationId);
-            if(listener == null){
+            if (listener == null) {
                 Log.e(TAG, IssuingCardPinService.class.getName() +
                         " was called without a listener");
                 return;
