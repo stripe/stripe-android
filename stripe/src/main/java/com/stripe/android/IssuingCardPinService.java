@@ -13,7 +13,6 @@ import com.stripe.android.exception.InvalidRequestException;
 
 import org.json.JSONException;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -33,10 +32,13 @@ public class IssuingCardPinService
     private static final String ARGUMENT_NEW_PIN = "newPin";
     @NonNull
     private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
-    @NonNull private final StripeApiHandler mApiHandler;
-    @NonNull private final Map<String, IssuingCardPinRetrievalListener> mRetrievalListeners =
+    @NonNull
+    private final StripeApiHandler mApiHandler;
+    @NonNull
+    private final Map<String, IssuingCardPinRetrievalListener> mRetrievalListeners =
             new HashMap<>();
-    @NonNull private final Map<String, IssuingCardPinUpdateListener> mUpdateListeners =
+    @NonNull
+    private final Map<String, IssuingCardPinUpdateListener> mUpdateListeners =
             new HashMap<>();
 
 
@@ -251,7 +253,7 @@ public class IssuingCardPinService
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
                     errorMessage,
                     null);
-        } else  if (updateListener != null) {
+        } else if (updateListener != null) {
             updateListener.onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,
                     errorMessage,
