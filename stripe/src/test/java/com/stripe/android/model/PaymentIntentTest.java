@@ -59,8 +59,10 @@ public class PaymentIntentTest {
             "  \"livemode\": false,\n" +
             "  \"next_source_action\": {" +
             "       \"type\": \"authorize_with_url\"," +
-            "           authorize_with_url: {" +
-            "           url: \""+ BAD_URL +"\" } " +
+            "           \"authorize_with_url\": {" +
+            "             \"url\": \""+ BAD_URL +"\"," +
+            "             \"return_url\": \"yourapp://post-authentication-return-url\"" +
+            "           } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
@@ -133,7 +135,8 @@ public class PaymentIntentTest {
             "\t\"next_action\": {\n" +
             "\t\t\"type\": \"redirect_to_url\",\n" +
             "\t\t\"redirect_to_url\": {\n" +
-            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\",\n" +
+            "\t\t\t\"return_url\": \"yourapp://post-authentication-return-url\"\n" +
             "\t\t}\n" +
             "\t}\n" +
             "}";
@@ -145,7 +148,8 @@ public class PaymentIntentTest {
             "\t\"next_action\": {\n" +
             "\t\t\"type\": \"authorize_with_url\",\n" +
             "\t\t\"authorize_with_url\": {\n" +
-            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\",\n" +
+            "\t\t\t\"return_url\": \"yourapp://post-authentication-return-url\"\n" +
             "\t\t}\n" +
             "\t}\n" +
             "}";
