@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.model.Card.CardBrand;
+
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
