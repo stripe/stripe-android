@@ -28,7 +28,8 @@ dependencies {
     testImplementation 'androidx.test:core:1.1.0'
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestUtil 'androidx.test:orchestrator:1.1.1'
 }
 
 android {
@@ -39,7 +40,8 @@ android {
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
     sourceSets {
         main {
