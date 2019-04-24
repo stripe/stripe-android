@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class IssuingCardPinService
         implements EphemeralKeyManager.KeyManagerListener<IssuingCardEphemeralKey> {
 
+    private static final String TAG = IssuingCardPinService.class.getName();
     private static final long KEY_REFRESH_BUFFER_IN_SECONDS = 30L;
     private static final String PIN_RETRIEVE = "PIN_RETRIEVE";
     private static final String PIN_UPDATE = "PIN_UPDATE";
@@ -41,6 +43,18 @@ public class IssuingCardPinService
     private final Map<String, IssuingCardPinUpdateListener> mUpdateListeners =
             new HashMap<>();
 
+    /**
+     * Create a IssuingCardPinService with the provided {@link EphemeralKeyProvider}.
+     *
+     * @param keyProvider an {@link EphemeralKeyProvider} used to get
+     *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
+     */
+    @NonNull
+    public static IssuingCardPinService create(
+            @NonNull Context context,
+            @NonNull EphemeralKeyProvider keyProvider) {
+        return new IssuingCardPinService(keyProvider, new StripeApiHandler(context));
+    }
 
     @VisibleForTesting
     IssuingCardPinService(
@@ -54,19 +68,6 @@ public class IssuingCardPinService
                 null,
                 IssuingCardEphemeralKey.class);
         mApiHandler = apiHandler;
-    }
-
-    /**
-     * Create a IssuingCardPinService with the provided {@link EphemeralKeyProvider}.
-     *
-     * @param keyProvider an {@link EphemeralKeyProvider} used to get
-     *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
-     */
-    @NonNull
-    public static IssuingCardPinService create(
-            @NonNull Context context,
-            @NonNull EphemeralKeyProvider keyProvider) {
-        return new IssuingCardPinService(keyProvider, new StripeApiHandler(context));
     }
 
     /**
@@ -131,114 +132,129 @@ public class IssuingCardPinService
                             @Nullable Map<String, Object> arguments) {
 
         if (PIN_RETRIEVE.equals(action)) {
+            IssuingCardPinRetrievalListener listener = mRetrievalListeners.get(operationId);
+            if(listener == null){
+                Log.e(TAG, IssuingCardPinService.class.getName() +
+                        " was called without a listener");
+                return;
+            }
+            if (arguments == null) {
+                listener.onError(
+                        CardPinActionError.UNKNOWN_ERROR,
+                        "An error occurred retrieving the PIN",
+                        null);
+                return;
+            }
             String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
             String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
-            IssuingCardPinRetrievalListener listener = mRetrievalListeners.get(operationId);
 
             try {
+                
                 String pin = mApiHandler.retrieveIssuingCardPin(
                         cardId,
                         verificationId,
                         userOneTimeCode,
                         ephemeralKey.getSecret());
+                listener.onIssuingCardPinRetrieved(pin);
 
-                if (listener != null) {
-                    listener.onIssuingCardPinRetrieved(pin);
-                }
             } catch (InvalidRequestException e) {
-                if (listener != null) {
-                    if ("expired".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_EXPIRED,
-                                "The one-time code has expired",
-                                null);
-                    }
-                    if ("incorrect_code".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_INCORRECT,
-                                "The one-time code was incorrect",
-                                null);
-                    }
-                    if ("too_many_attempts".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
-                                "The verification challenge was attempted too many times",
-                                null);
-                    } else {
-                        listener.onError(
-                                CardPinActionError.UNKNOWN_ERROR,
-                                "An error occurred retrieving the PIN",
-                                e);
-                    }
+                if ("expired".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_EXPIRED,
+                            "The one-time code has expired",
+                            null);
+                }
+                if ("incorrect_code".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_INCORRECT,
+                            "The one-time code was incorrect",
+                            null);
+                }
+                if ("too_many_attempts".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+                            "The verification challenge was attempted too many times",
+                            null);
+                } else {
+                    listener.onError(
+                            CardPinActionError.UNKNOWN_ERROR,
+                            "An error occurred retrieving the PIN",
+                            e);
                 }
             } catch (APIConnectionException |
                     APIException |
                     AuthenticationException |
                     JSONException |
                     CardException e) {
-                if (listener != null) {
-                    listener.onError(
-                            CardPinActionError.UNKNOWN_ERROR,
-                            "An error occurred retrieving the PIN",
-                            e);
-                }
+                listener.onError(
+                        CardPinActionError.UNKNOWN_ERROR,
+                        "An error occurred retrieving the PIN",
+                        e);
             }
         }
         if (PIN_UPDATE.equals(action)) {
+
+            IssuingCardPinUpdateListener listener = mUpdateListeners.get(operationId);
+            if(listener == null){
+                Log.e(TAG, IssuingCardPinService.class.getName() +
+                        " was called without a listener");
+                return;
+            }
+            if (arguments == null) {
+                listener.onError(
+                        CardPinActionError.UNKNOWN_ERROR,
+                        "An error occurred retrieving the PIN",
+                        null);
+                return;
+            }
             String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
             String newPin = (String) arguments.get(ARGUMENT_NEW_PIN);
             String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
-            IssuingCardPinUpdateListener listener = mUpdateListeners.get(operationId);
 
             try {
+
                 mApiHandler.updateIssuingCardPin(
                         cardId,
                         newPin,
                         verificationId,
                         userOneTimeCode,
                         ephemeralKey.getSecret());
+                listener.onIssuingCardPinUpdated();
 
-                if (listener != null) {
-                    listener.onIssuingCardPinUpdated();
-                }
             } catch (InvalidRequestException e) {
-                if (listener != null) {
-                    if ("expired".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_EXPIRED,
-                                "The one-time code has expired",
-                                null);
-                    }
-                    if ("incorrect_code".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_INCORRECT,
-                                "The one-time code was incorrect",
-                                null);
-                    }
-                    if ("too_many_attempts".equals(e.getErrorCode())) {
-                        listener.onError(
-                                CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
-                                "The verification challenge was attempted too many times",
-                                null);
-                    } else {
-                        listener.onError(
-                                CardPinActionError.UNKNOWN_ERROR,
-                                "An error occurred retrieving the PIN",
-                                e);
-                    }
+                if ("expired".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_EXPIRED,
+                            "The one-time code has expired",
+                            null);
                 }
-            } catch (APIConnectionException |
-                    APIException |
-                    AuthenticationException |
-                    CardException e) {
-                if (listener != null) {
+                if ("incorrect_code".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_INCORRECT,
+                            "The one-time code was incorrect",
+                            null);
+                }
+                if ("too_many_attempts".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+                            "The verification challenge was attempted too many times",
+                            null);
+                } else {
                     listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
                             "An error occurred retrieving the PIN",
                             e);
                 }
+            } catch (APIConnectionException |
+                    APIException |
+                    AuthenticationException |
+                    CardException e) {
+                listener.onError(
+                        CardPinActionError.UNKNOWN_ERROR,
+                        "An error occurred retrieving the PIN",
+                        e);
             }
         }
     }
