@@ -87,5 +87,4 @@ public class CountryAutoCompleteTextViewTest extends BaseViewTest<ShippingInfoTe
     public void teardown() {
         Locale.setDefault(Locale.US);
     }
-
 }

@@ -115,7 +115,7 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
     @Override
     public void tearDown() {
         super.tearDown();
-//        mActivity.finish();
+        mActivity.finish();
     }
 
     @Test
