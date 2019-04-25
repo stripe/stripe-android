@@ -142,7 +142,9 @@ public class IssuingCardPinService
             if (arguments == null) {
                 listener.onError(
                         CardPinActionError.UNKNOWN_ERROR,
-                        "An error occurred retrieving the PIN",
+                        "Arguments were lost during the ephemeral key call, " +
+                                "this is not supposed to happen," +
+                                " please contact support@stripe.com for assistance.",
                         null);
                 return;
             }
@@ -180,7 +182,8 @@ public class IssuingCardPinService
                 } else {
                     listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
-                            "An error occurred retrieving the PIN",
+                            "The call to retrieve the PIN failed, possibly an error " +
+                                    "with the verification. Please check the exception.",
                             e);
                 }
             } catch (APIConnectionException |
@@ -190,7 +193,8 @@ public class IssuingCardPinService
                     CardException e) {
                 listener.onError(
                         CardPinActionError.UNKNOWN_ERROR,
-                        "An error occurred retrieving the PIN",
+                        "An error occurred retrieving the PIN, " +
+                                "please check the exception",
                         e);
             }
         }
@@ -205,7 +209,9 @@ public class IssuingCardPinService
             if (arguments == null) {
                 listener.onError(
                         CardPinActionError.UNKNOWN_ERROR,
-                        "An error occurred retrieving the PIN",
+                        "Arguments were lost during the ephemeral key call, " +
+                                "this is not supposed to happen," +
+                                " please contact support@stripe.com for assistance.",
                         null);
                 return;
             }
@@ -245,7 +251,8 @@ public class IssuingCardPinService
                 } else {
                     listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
-                            "An error occurred retrieving the PIN",
+                            "The call to update the PIN failed, possibly an error " +
+                                    "with the verification. Please check the exception.",
                             e);
                 }
             } catch (APIConnectionException |
@@ -254,7 +261,8 @@ public class IssuingCardPinService
                     CardException e) {
                 listener.onError(
                         CardPinActionError.UNKNOWN_ERROR,
-                        "An error occurred retrieving the PIN",
+                        "An error occurred retrieving the PIN " +
+                                "please check the exception",
                         e);
             }
         }
