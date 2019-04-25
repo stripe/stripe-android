@@ -29,7 +29,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -58,20 +57,13 @@ public class EphemeralKeyManagerTest {
     @Mock private EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> mKeyManagerListener;
     @Captor private ArgumentCaptor<Map<String, Object>> mArgumentCaptor;
 
+    private CustomerEphemeralKey mCustomerEphemeralKey;
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
-
-    @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
-        try {
-            return CustomerEphemeralKey.fromString(key);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
     
     @Before
-    public void setup() {
+    public void setup() throws JSONException {
         MockitoAnnotations.initMocks(this);
+        mCustomerEphemeralKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         mTestEphemeralKeyProvider = new TestEphemeralKeyProvider();
     }
 
@@ -125,25 +117,24 @@ public class EphemeralKeyManagerTest {
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsInFutureButWithinBuffer_returnsTrue() {
         Calendar fixedCalendar = Calendar.getInstance();
-        CustomerEphemeralKey key = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(key);
+        assertNotNull(mCustomerEphemeralKey);
 
-        long parsedExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(key.getExpires());
+        long parsedExpiryTimeInMillis = TimeUnit.SECONDS
+                .toMillis(mCustomerEphemeralKey.getExpires());
         long bufferTimeInMillis = TimeUnit.SECONDS.toMillis(TEST_SECONDS_BUFFER);
 
         long notFarEnoughInTheFuture = parsedExpiryTimeInMillis + bufferTimeInMillis / 2;
         fixedCalendar.setTimeInMillis(notFarEnoughInTheFuture);
         assertEquals(notFarEnoughInTheFuture, fixedCalendar.getTimeInMillis());
 
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(key,
+        assertTrue(EphemeralKeyManager.shouldRefreshKey(mCustomerEphemeralKey,
                 TEST_SECONDS_BUFFER,
                 fixedCalendar));
     }
 
     @Test
     public void createKeyManager_updatesEphemeralKey_notifiesListener() {
-        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(testKey);
+        assertNotNull(mCustomerEphemeralKey);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
@@ -159,7 +150,7 @@ public class EphemeralKeyManagerTest {
                 ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
         assertNotNull(keyManager.getEphemeralKey());
-        assertEquals(testKey.getId(), keyManager.getEphemeralKey().getId());
+        assertEquals(mCustomerEphemeralKey.getId(), keyManager.getEphemeralKey().getId());
     }
 
     @Test
@@ -173,9 +164,6 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 fixedCalendar,
                 CustomerEphemeralKey.class);
-
-        // We already tested this setup, so let's reset the mock to avoid confusion.
-        reset(mKeyManagerListener);
 
         final String operationId = UUID.randomUUID().toString();
         final String actionString = "action";
@@ -204,11 +192,10 @@ public class EphemeralKeyManagerTest {
 
     @Test
     public void updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
-        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(testKey);
+        assertNotNull(mCustomerEphemeralKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
-        long expiryTimeInMillis = TimeUnit.SECONDS.toMillis(testKey.getExpires());
+        long expiryTimeInMillis = TimeUnit.SECONDS.toMillis(mCustomerEphemeralKey.getExpires());
         // The time is one millisecond past the expiration date for this test.
         proxyCalendar.setTimeInMillis(expiryTimeInMillis + 1L);
         // Testing this just to invoke getTime
