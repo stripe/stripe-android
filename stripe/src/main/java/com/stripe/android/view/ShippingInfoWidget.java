@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.design.widget.TextInputLayout;
@@ -44,34 +45,52 @@ public class ShippingInfoWidget extends LinearLayout {
     private List<String> mOptionalShippingInfoFields = new ArrayList<>();
     private List<String> mHiddenShippingInfoFields = new ArrayList<>();
 
-    private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
-    private TextInputLayout mAddressLine1TextInputLayout;
-    private TextInputLayout mAddressLine2TextInputLayout;
-    private TextInputLayout mCityTextInputLayout;
-    private TextInputLayout mNameTextInputLayout;
-    private TextInputLayout mPostalCodeTextInputLayout;
-    private TextInputLayout mStateTextInputLayout;
-    private TextInputLayout mPhoneNumberTextInputLayout;
-    private StripeEditText mAddressEditText;
-    private StripeEditText mAddressEditText2;
-    private StripeEditText mCityEditText;
-    private StripeEditText mNameEditText;
-    private StripeEditText mPostalCodeEditText;
-    private StripeEditText mStateEditText;
-    private StripeEditText mPhoneNumberEditText;
+    @NonNull private final CountryAutoCompleteTextView mCountryAutoCompleteTextView;
+    @NonNull private final TextInputLayout mAddressLine1TextInputLayout;
+    @NonNull private final TextInputLayout mAddressLine2TextInputLayout;
+    @NonNull private final TextInputLayout mCityTextInputLayout;
+    @NonNull private final TextInputLayout mNameTextInputLayout;
+    @NonNull private final TextInputLayout mPostalCodeTextInputLayout;
+    @NonNull private final TextInputLayout mStateTextInputLayout;
+    @NonNull private final TextInputLayout mPhoneNumberTextInputLayout;
+    @NonNull private final StripeEditText mAddressEditText;
+    @NonNull private final StripeEditText mAddressEditText2;
+    @NonNull private final StripeEditText mCityEditText;
+    @NonNull private final StripeEditText mNameEditText;
+    @NonNull private final StripeEditText mPostalCodeEditText;
+    @NonNull private final StripeEditText mStateEditText;
+    @NonNull private final StripeEditText mPhoneNumberEditText;
 
-    public ShippingInfoWidget(Context context) {
-        super(context);
-        initView();
+    public ShippingInfoWidget(@NonNull Context context) {
+        this(context, null);
     }
 
-    public ShippingInfoWidget(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView();
+    public ShippingInfoWidget(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public ShippingInfoWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ShippingInfoWidget(@NonNull Context context, @Nullable AttributeSet attrs,
+                              int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        setOrientation(VERTICAL);
+        inflate(getContext(), R.layout.add_address_widget, this);
+        mCountryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw);
+        mAddressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw);
+        mAddressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw);
+        mCityTextInputLayout = findViewById(R.id.tl_city_aaw);
+        mNameTextInputLayout = findViewById(R.id.tl_name_aaw);
+        mPostalCodeTextInputLayout = findViewById(R.id.tl_postal_code_aaw);
+        mStateTextInputLayout = findViewById(R.id.tl_state_aaw);
+        mAddressEditText = findViewById(R.id.et_address_line_one_aaw);
+        mAddressEditText2 = findViewById(R.id.et_address_line_two_aaw);
+        mCityEditText = findViewById(R.id.et_city_aaw);
+        mNameEditText = findViewById(R.id.et_name_aaw);
+        mPostalCodeEditText = findViewById(R.id.et_postal_code_aaw);
+        mStateEditText = findViewById(R.id.et_state_aaw);
+        mPhoneNumberEditText = findViewById(R.id.et_phone_number_aaw);
+        mPhoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw);
+
         initView();
     }
 
@@ -102,6 +121,7 @@ public class ShippingInfoWidget extends LinearLayout {
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
 
+    @Nullable
     public ShippingInformation getShippingInformation() {
         if (!validateAllFields()) {
             return null;
@@ -126,7 +146,8 @@ public class ShippingInfoWidget extends LinearLayout {
         if (shippingInformation == null) {
             return;
         }
-        Address address = shippingInformation.getAddress();
+
+        final Address address = shippingInformation.getAddress();
         if (address != null) {
             mCityEditText.setText(address.getCity());
             if (address.getCountry() != null && !address.getCountry().isEmpty()) {
@@ -147,11 +168,12 @@ public class ShippingInfoWidget extends LinearLayout {
      * @return {@code true} if all shown fields are valid, {@code false} otherwise
      */
     public boolean validateAllFields() {
-        boolean postalCodeValid = true;
-        String countrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
-        if (mPostalCodeEditText.getText().toString().isEmpty() && (mOptionalShippingInfoFields
-                .contains(POSTAL_CODE_FIELD) || mHiddenShippingInfoFields.contains
-                (POSTAL_CODE_FIELD))) {
+        final boolean postalCodeValid;
+
+        final String countrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
+        if (mPostalCodeEditText.getText().toString().isEmpty() &&
+                (mOptionalShippingInfoFields.contains(POSTAL_CODE_FIELD) ||
+                        mHiddenShippingInfoFields.contains(POSTAL_CODE_FIELD))) {
             postalCodeValid = true;
         } else if (countrySelected.equals(Locale.US.getCountry())) {
             postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText()
@@ -164,30 +186,33 @@ public class ShippingInfoWidget extends LinearLayout {
                     .toString().trim());
         } else if (CountryUtils.doesCountryUsePostalCode(countrySelected)) {
             postalCodeValid = !mPostalCodeEditText.getText().toString().isEmpty();
+        } else {
+            postalCodeValid = true;
         }
         mPostalCodeEditText.setShouldShowError(!postalCodeValid);
 
-        boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() &&
+        final boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() &&
                 !mOptionalShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD) &&
                 !mHiddenShippingInfoFields.contains(ADDRESS_LINE_ONE_FIELD);
         mAddressEditText.setShouldShowError(requiredAddressLine1Empty);
 
-        boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() &&
+        final boolean requiredCityEmpty = mCityEditText.getText().toString().isEmpty() &&
                 !mOptionalShippingInfoFields.contains(CITY_FIELD) && !mHiddenShippingInfoFields
                 .contains(CITY_FIELD);
         mCityEditText.setShouldShowError(requiredCityEmpty);
 
-        boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty();
+        final boolean requiredNameEmpty = mNameEditText.getText().toString().isEmpty();
         mNameEditText.setShouldShowError(requiredNameEmpty);
 
-        boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() &&
+        final boolean requiredStateEmpty = mStateEditText.getText().toString().isEmpty() &&
                 !mOptionalShippingInfoFields.contains(STATE_FIELD) && !mHiddenShippingInfoFields
                 .contains(STATE_FIELD);
         mStateEditText.setShouldShowError(requiredStateEmpty);
 
-        boolean requiredPhoneNumberEmpty = mPhoneNumberEditText.getText().toString().isEmpty() &&
-                !mOptionalShippingInfoFields.contains(PHONE_FIELD) && !mHiddenShippingInfoFields
-                .contains(PHONE_FIELD);
+        final boolean requiredPhoneNumberEmpty =
+                mPhoneNumberEditText.getText().toString().isEmpty() &&
+                        !mOptionalShippingInfoFields.contains(PHONE_FIELD) &&
+                        !mHiddenShippingInfoFields.contains(PHONE_FIELD);
         mPhoneNumberEditText.setShouldShowError(requiredPhoneNumberEmpty);
 
         return postalCodeValid && !requiredAddressLine1Empty && !requiredCityEmpty &&
@@ -195,23 +220,6 @@ public class ShippingInfoWidget extends LinearLayout {
     }
 
     private void initView() {
-        setOrientation(VERTICAL);
-        inflate(getContext(), R.layout.add_address_widget, this);
-        mCountryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw);
-        mAddressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw);
-        mAddressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw);
-        mCityTextInputLayout = findViewById(R.id.tl_city_aaw);
-        mNameTextInputLayout = findViewById(R.id.tl_name_aaw);
-        mPostalCodeTextInputLayout = findViewById(R.id.tl_postal_code_aaw);
-        mStateTextInputLayout = findViewById(R.id.tl_state_aaw);
-        mAddressEditText = findViewById(R.id.et_address_line_one_aaw);
-        mAddressEditText2 = findViewById(R.id.et_address_line_two_aaw);
-        mCityEditText = findViewById(R.id.et_city_aaw);
-        mNameEditText = findViewById(R.id.et_name_aaw);
-        mPostalCodeEditText = findViewById(R.id.et_postal_code_aaw);
-        mStateEditText = findViewById(R.id.et_state_aaw);
-        mPhoneNumberEditText = findViewById(R.id.et_phone_number_aaw);
-        mPhoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw);
         mCountryAutoCompleteTextView.setCountryChangeListener(new CountryAutoCompleteTextView
                 .CountryChangeListener() {
             @Override
@@ -224,7 +232,6 @@ public class ShippingInfoWidget extends LinearLayout {
         renderLabels();
         renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
     }
-
 
     private void setupErrorHandling() {
         mAddressEditText.setErrorMessageListener(new ErrorListener(mAddressLine1TextInputLayout));
@@ -415,5 +422,4 @@ public class ShippingInfoWidget extends LinearLayout {
         mStateEditText.setErrorMessage(getResources().getString(R.string
                 .address_region_generic_required));
     }
-
 }
