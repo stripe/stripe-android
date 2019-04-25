@@ -273,31 +273,31 @@ class StripeApiHandler {
      */
     @Nullable
     Source retrieveSource(
-           @NonNull String sourceId,
-           @NonNull String clientSecret,
-           @NonNull String publishableKey,
-           @Nullable String stripeAccount)
-           throws AuthenticationException,
-           InvalidRequestException,
-           APIConnectionException,
-           APIException {
-       final Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
-       final RequestOptions options;
-       if (stripeAccount == null) {
-           options = RequestOptions.builder(publishableKey).build();
-       } else {
-           options = RequestOptions.builder(publishableKey, stripeAccount,
-                   RequestOptions.TYPE_QUERY).build();
-       }
-       try {
-           final StripeResponse response = requestData(RestMethod.GET,
-                   getRetrieveSourceApiUrl(sourceId), paramMap, options);
-           return Source.fromString(response.getResponseBody());
-       } catch (CardException unexpected) {
-           // This particular kind of exception should not be possible from a Source API endpoint.
-           throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
-                   unexpected.getStatusCode(), null, unexpected);
-       }
+            @NonNull String sourceId,
+            @NonNull String clientSecret,
+            @NonNull String publishableKey,
+            @Nullable String stripeAccount)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        final Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+        final RequestOptions options;
+        if (stripeAccount == null) {
+            options = RequestOptions.builder(publishableKey).build();
+        } else {
+            options = RequestOptions.builder(publishableKey, stripeAccount,
+                    RequestOptions.TYPE_QUERY).build();
+        }
+        try {
+            final StripeResponse response = requestData(RestMethod.GET,
+                    getRetrieveSourceApiUrl(sourceId), paramMap, options);
+            return Source.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
+        }
     }
 
     @Nullable
