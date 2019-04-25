@@ -44,7 +44,6 @@ public class PaymentIntent extends StripeJsonModel {
     static final String FIELD_DESCRIPTION = "description";
     static final String FIELD_LIVEMODE = "livemode";
     static final String FIELD_NEXT_ACTION = "next_action";
-    static final String FIELD_NEXT_SOURCE_ACTION = "next_source_action";
     static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
     static final String FIELD_RECEIPT_EMAIL = "receipt_email";
     static final String FIELD_SOURCE = "source";
@@ -63,7 +62,6 @@ public class PaymentIntent extends StripeJsonModel {
     @Nullable private final String mCurrency;
     @Nullable private final String mDescription;
     @Nullable private final Boolean mLiveMode;
-    @Nullable private final Map<String, Object> mNextSourceAction;
     @Nullable private final Map<String, Object> mNextAction;
 
     @Nullable private final String mReceiptEmail;
@@ -125,13 +123,8 @@ public class PaymentIntent extends StripeJsonModel {
         return mLiveMode;
     }
 
-    /**
-     * @deprecated use {@link #getNextAction()}
-     */
-    @Deprecated
-    @Nullable
-    public Map<String, Object> getNextSourceAction() {
-        return mNextSourceAction;
+    public boolean requiresAction() {
+        return Status.fromCode(mStatus) == Status.RequiresAction;
     }
 
     @Nullable
@@ -146,8 +139,6 @@ public class PaymentIntent extends StripeJsonModel {
         final Status status = Status.fromCode(mStatus);
         if (Status.RequiresAction == status) {
             nextAction = mNextAction;
-        } else if (Status.RequiresSourceAction == status) {
-            nextAction = mNextSourceAction;
         } else {
             nextAction = null;
         }
@@ -170,15 +161,6 @@ public class PaymentIntent extends StripeJsonModel {
         }
 
         return null;
-    }
-
-    /**
-     * @deprecated use {@link #getRedirectUrl()}
-     */
-    @Deprecated
-    @Nullable
-    public Uri getAuthorizationUrl() {
-        return getRedirectUrl();
     }
 
     @Nullable
@@ -209,7 +191,6 @@ public class PaymentIntent extends StripeJsonModel {
             @Nullable String currency,
             @Nullable String description,
             @Nullable Boolean liveMode,
-            @Nullable Map<String, Object> nextSourceAction,
             @Nullable Map<String, Object> nextAction,
             @Nullable String receiptEmail,
             @Nullable String source,
@@ -227,7 +208,6 @@ public class PaymentIntent extends StripeJsonModel {
         mCurrency = currency;
         mDescription = description;
         mLiveMode = liveMode;
-        mNextSourceAction = nextSourceAction;
         mNextAction = nextAction;
         mReceiptEmail = receiptEmail;
         mSource = source;
@@ -270,7 +250,6 @@ public class PaymentIntent extends StripeJsonModel {
         final Boolean livemode = optBoolean(jsonObject, FIELD_LIVEMODE);
         final String receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL);
         final String status = optString(jsonObject, FIELD_STATUS);
-        final Map<String, Object> nextSourceAction = optMap(jsonObject, FIELD_NEXT_SOURCE_ACTION);
         final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
         final String source = optString(jsonObject, FIELD_SOURCE);
 
@@ -287,7 +266,6 @@ public class PaymentIntent extends StripeJsonModel {
                 currency,
                 description,
                 livemode,
-                nextSourceAction,
                 nextAction,
                 receiptEmail,
                 source,
@@ -326,7 +304,6 @@ public class PaymentIntent extends StripeJsonModel {
         putStringIfNotNull(jsonObject, FIELD_CURRENCY, mCurrency);
         putStringIfNotNull(jsonObject, FIELD_DESCRIPTION, mDescription);
         putBooleanIfNotNull(jsonObject, FIELD_LIVEMODE, mLiveMode);
-        putMapIfNotNull(jsonObject, FIELD_NEXT_SOURCE_ACTION, mNextSourceAction);
         putMapIfNotNull(jsonObject, FIELD_NEXT_ACTION, mNextAction);
         putStringIfNotNull(jsonObject, FIELD_RECEIPT_EMAIL, mReceiptEmail);
         putStringIfNotNull(jsonObject, FIELD_SOURCE, mSource);
@@ -350,7 +327,6 @@ public class PaymentIntent extends StripeJsonModel {
         map.put(FIELD_CURRENCY, mCurrency);
         map.put(FIELD_DESCRIPTION, mDescription);
         map.put(FIELD_LIVEMODE, mLiveMode);
-        map.put(FIELD_NEXT_SOURCE_ACTION, mNextSourceAction);
         map.put(FIELD_NEXT_ACTION, mNextAction);
         map.put(FIELD_RECEIPT_EMAIL, mReceiptEmail);
         map.put(FIELD_STATUS, mStatus);
@@ -376,7 +352,6 @@ public class PaymentIntent extends StripeJsonModel {
                 && ObjectUtils.equals(mCurrency, paymentIntent.mCurrency)
                 && ObjectUtils.equals(mDescription, paymentIntent.mDescription)
                 && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
-                && ObjectUtils.equals(mNextSourceAction, paymentIntent.mNextSourceAction)
                 && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
                 && ObjectUtils.equals(mSource, paymentIntent.mSource)
                 && ObjectUtils.equals(mStatus, paymentIntent.mStatus);
@@ -386,7 +361,7 @@ public class PaymentIntent extends StripeJsonModel {
     public int hashCode() {
         return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt,
                 mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
-                mDescription, mLiveMode, mNextSourceAction, mReceiptEmail, mSource, mStatus);
+                mDescription, mLiveMode, mReceiptEmail, mSource, mStatus);
     }
 
     public enum NextActionType {
@@ -426,19 +401,7 @@ public class PaymentIntent extends StripeJsonModel {
         RequiresCapture("requires_capture"),
         RequiresConfirmation("requires_confirmation"),
         RequiresPaymentMethod("requires_payment_method"),
-        Succeeded("succeeded"),
-
-        /**
-         * @deprecated use {@link #RequiresPaymentMethod}
-         */
-        @Deprecated
-        RequiresSource("requires_source"),
-
-        /**
-         * @deprecated use {@link #RequiresAction}
-         */
-        @Deprecated
-        RequiresSourceAction("requires_source_action");
+        Succeeded("succeeded");
 
         @NonNull
         public final String code;
