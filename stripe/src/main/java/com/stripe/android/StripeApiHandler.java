@@ -565,7 +565,7 @@ class StripeApiHandler {
 
         StripeResponse response = getStripeResponse(
                 RestMethod.GET,
-                getApiUrl(String.format(Locale.ROOT, "%v1/issuing/cards/%s/pin", cardId)),
+                getApiUrl(String.format(Locale.ROOT, "issuing/cards/%s/pin", cardId)),
                 paramsMap,
                 RequestOptions.builder(ephemeralKeySecret).build());
         // Method throws if errors are found, so no return value occurs.
@@ -592,7 +592,7 @@ class StripeApiHandler {
 
         StripeResponse response = getStripeResponse(
                 RestMethod.POST,
-                getApiUrl(String.format(Locale.ROOT, "%v1/issuing/cards/%s/pin", cardId)),
+                getApiUrl(String.format(Locale.ROOT, "issuing/cards/%s/pin", cardId)),
                 paramsMap,
                 RequestOptions.builder(ephemeralKeySecret).build());
         // Method throws if errors are found, so no return value occurs.
