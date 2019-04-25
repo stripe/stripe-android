@@ -9,6 +9,7 @@ import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -39,7 +40,6 @@ public class IssuingCardPinServiceTest {
             "            }]\n" +
             "}";
 
-
     @Mock
     private StripeApiHandler.RequestExecutor mRequestExecutor;
     @Mock
@@ -51,7 +51,6 @@ public class IssuingCardPinServiceTest {
 
     @Before
     public void before() {
-
         MockitoAnnotations.initMocks(this);
 
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
@@ -63,8 +62,7 @@ public class IssuingCardPinServiceTest {
                 false
         );
 
-        service = new IssuingCardPinService(
-                ephemeralKeyProvider, apiHandler);
+        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler);
     }
 
     @Test
@@ -79,7 +77,7 @@ public class IssuingCardPinServiceTest {
         when(mRequestExecutor.execute(
                 eq(StripeApiHandler.RestMethod.GET),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                anyMapOf(String.class, Object.class),
+                ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
         )).thenReturn(response);
 
@@ -107,7 +105,7 @@ public class IssuingCardPinServiceTest {
         when(mRequestExecutor.execute(
                 eq(StripeApiHandler.RestMethod.POST),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                anyMapOf(String.class, Object.class),
+                ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
         )).thenReturn(response);
 
@@ -137,7 +135,7 @@ public class IssuingCardPinServiceTest {
         when(mRequestExecutor.execute(
                 eq(StripeApiHandler.RestMethod.GET),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                anyMapOf(String.class, Object.class),
+                ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
         )).thenReturn(response);
 

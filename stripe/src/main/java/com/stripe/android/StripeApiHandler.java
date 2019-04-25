@@ -541,7 +541,7 @@ class StripeApiHandler {
     @NonNull
     static Map<String, Object> createVerificationParam(
             @NonNull String verificationId,
-            @NonNull String userOneTimeCode){
+            @NonNull String userOneTimeCode) {
         Map<String, Object> verificationMap = new HashMap<>();
         verificationMap.put("id", verificationId);
         verificationMap.put("one_time_code", userOneTimeCode);

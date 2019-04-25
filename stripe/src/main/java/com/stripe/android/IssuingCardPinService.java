@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/*
+/**
  * Methods for retrieval / update of a Stripe Issuing card
  */
 public class IssuingCardPinService
