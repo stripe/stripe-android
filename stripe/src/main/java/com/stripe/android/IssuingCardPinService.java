@@ -84,7 +84,7 @@ public class IssuingCardPinService
             @NonNull String cardId,
             @NonNull String verificationId,
             @NonNull String userOneTimeCode,
-            @Nullable IssuingCardPinRetrievalListener listener
+            @NonNull IssuingCardPinRetrievalListener listener
     ) {
 
         Map<String, Object> arguments = new HashMap<>();
@@ -112,7 +112,7 @@ public class IssuingCardPinService
             @NonNull String newPin,
             @NonNull String verificationId,
             @NonNull String userOneTimeCode,
-            @Nullable IssuingCardPinUpdateListener listener
+            @NonNull IssuingCardPinUpdateListener listener
     ) {
 
         Map<String, Object> arguments = new HashMap<>();

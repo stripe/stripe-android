@@ -42,6 +42,10 @@ public class IssuingCardPinServiceTest {
 
     @Mock
     private StripeApiHandler.RequestExecutor mRequestExecutor;
+    @Mock
+    IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
+    @Mock
+    IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
 
     private IssuingCardPinService service;
 
@@ -79,16 +83,16 @@ public class IssuingCardPinServiceTest {
                 any(RequestOptions.class)
         )).thenReturn(response);
 
-        IssuingCardPinService.IssuingCardPinRetrievalListener mockListener =
+        mockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
         service.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",
-                mockListener);
+                mockRetrievalListener);
 
-        verify(mockListener).onIssuingCardPinRetrieved("1234");
+        verify(mockRetrievalListener).onIssuingCardPinRetrieved("1234");
     }
 
     @Test
@@ -107,7 +111,7 @@ public class IssuingCardPinServiceTest {
                 any(RequestOptions.class)
         )).thenReturn(response);
 
-        IssuingCardPinService.IssuingCardPinUpdateListener mockListener =
+        mockUpdateListener =
                 mock(IssuingCardPinService.IssuingCardPinUpdateListener.class);
 
         service.updatePin(
@@ -115,9 +119,9 @@ public class IssuingCardPinServiceTest {
                 "1234",
                 "iv_abcd",
                 "123-456",
-                mockListener);
+                mockUpdateListener);
 
-        verify(mockListener).onIssuingCardPinUpdated();
+        verify(mockUpdateListener).onIssuingCardPinUpdated();
     }
 
     @Test
@@ -137,16 +141,16 @@ public class IssuingCardPinServiceTest {
                 any(RequestOptions.class)
         )).thenReturn(response);
 
-        IssuingCardPinService.IssuingCardPinRetrievalListener mockListener =
+        mockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
         service.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",
-                mockListener);
+                mockRetrievalListener);
 
-        verify(mockListener).onError(
+        verify(mockRetrievalListener).onError(
                 IssuingCardPinService.CardPinActionError.ONE_TIME_CODE_INCORRECT,
                 "The one-time code was incorrect",
                 null);

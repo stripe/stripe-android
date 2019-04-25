@@ -565,7 +565,7 @@ class StripeApiHandler {
 
         StripeResponse response = getStripeResponse(
                 RestMethod.GET,
-                getRetrieveIssuingCardPinUrl(cardId),
+                getApiUrl(String.format(Locale.ROOT, "%v1/issuing/cards/%s/pin", cardId)),
                 paramsMap,
                 RequestOptions.builder(ephemeralKeySecret).build());
         // Method throws if errors are found, so no return value occurs.
@@ -592,7 +592,7 @@ class StripeApiHandler {
 
         StripeResponse response = getStripeResponse(
                 RestMethod.POST,
-                getUpdateIssuingCardPinUrl(cardId),
+                getApiUrl(String.format(Locale.ROOT, "%v1/issuing/cards/%s/pin", cardId)),
                 paramsMap,
                 RequestOptions.builder(ephemeralKeySecret).build());
         // Method throws if errors are found, so no return value occurs.
@@ -687,16 +687,6 @@ class StripeApiHandler {
     @VisibleForTesting
     String getRetrieveTokenApiUrl(@NonNull String tokenId) {
         return String.format(Locale.ROOT, "%s/%s", getTokensUrl(), tokenId);
-    }
-
-    @VisibleForTesting
-    static String getRetrieveIssuingCardPinUrl(@NonNull String cardId) {
-        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
-    }
-
-    @VisibleForTesting
-    static String getUpdateIssuingCardPinUrl(@NonNull String cardId) {
-        return String.format(Locale.ROOT, "%s/v1/issuing/cards/%s/pin", LIVE_API_BASE, cardId);
     }
 
     private void convertErrorsToExceptionsAndThrowIfNecessary(
