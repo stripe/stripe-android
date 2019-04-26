@@ -16,6 +16,7 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
@@ -152,6 +153,16 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                     "  }\n" +
                     "}";
 
+    private static final String PAYMENT_METHOD_OBJECT = "{\n" +
+            "  \"id\": \"pm_abc123\",\n" +
+            "  \"object\": \"payment_method\",\n" +
+            "  \"created\": 1556220472,\n" +
+            "  \"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
+            "  \"livemode\": false,\n" +
+            "  \"metadata\": {},\n" +
+            "  \"type\": \"card\"\n" +
+            "}";
+
     private static final Customer FIRST_CUSTOMER =
             Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
     private static final Customer SECOND_CUSTOMER =
@@ -163,11 +174,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
     @Captor private ArgumentCaptor<Source> mSourceArgumentCaptor;
+    @Captor private ArgumentCaptor<PaymentMethod> mPaymentMethodArgumentCaptor;
     @Captor private ArgumentCaptor<Customer> mCustomerArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
     private Source mAddedSource;
+    private PaymentMethod mPaymentMethod;
 
     public CustomerSessionTest() {
         super(PaymentFlowActivity.class);
@@ -207,6 +220,9 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(mAddedSource);
 
+        mPaymentMethod = PaymentMethod.fromString(PAYMENT_METHOD_OBJECT);
+        assertNotNull(mPaymentMethod);
+
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
         when(mApiHandler.addCustomerSource(
@@ -233,6 +249,23 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString()))
                 .thenReturn(SECOND_CUSTOMER);
+
+        when(mApiHandler.attachPaymentMethod(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenReturn(mPaymentMethod);
+
+        when(mApiHandler.detachPaymentMethod(
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenReturn(mPaymentMethod);
 
         doAnswer(new Answer() {
             @Override
@@ -793,6 +826,24 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString()))
                 .thenThrow(new APIException("auth error", "reqId", 405, null, null));
+
+        when(mApiHandler.attachPaymentMethod(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenThrow(new APIException("The payment method is invalid", "request_123", 404,
+                        null, null));
+
+        when(mApiHandler.detachPaymentMethod(
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()))
+                .thenThrow(new APIException("The payment method does not exist", "request_123",
+                        404, null, null));
     }
 
     @NonNull
