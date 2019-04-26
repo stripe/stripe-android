@@ -63,96 +63,102 @@ public class PayWithGoogleActivity extends AppCompatActivity {
     }
 
     private void payWithGoogle() {
-        PaymentDataRequest request = createPaymentDataRequest();
-        if (request != null) {
-            AutoResolveHelper.resolveTask(
-                    mPaymentsClient.loadPaymentData(request),
-                    PayWithGoogleActivity.this,
-                    LOAD_PAYMENT_DATA_REQUEST_CODE);
-        }
+        AutoResolveHelper.resolveTask(
+                mPaymentsClient.loadPaymentData(createPaymentDataRequest()),
+                PayWithGoogleActivity.this,
+                LOAD_PAYMENT_DATA_REQUEST_CODE);
     }
 
     private void isReadyToPay() {
         mProgressBar.setVisibility(View.VISIBLE);
-        IsReadyToPayRequest request = IsReadyToPayRequest.newBuilder()
+        final IsReadyToPayRequest request = IsReadyToPayRequest.newBuilder()
                 .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
                 .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
                 .build();
-        Task<Boolean> task = mPaymentsClient.isReadyToPay(request);
-        task.addOnCompleteListener(
-                new OnCompleteListener<Boolean>() {
-                    public void onComplete(@NonNull Task<Boolean> task) {
-                        try {
-                            boolean result =
-                                    task.getResult(ApiException.class);
-                            mProgressBar.setVisibility(View.INVISIBLE);
-                            if(result) {
-                                Toast.makeText(PayWithGoogleActivity.this, "Ready", Toast.LENGTH_SHORT).show();
-                                mPayWithGoogleButton.setEnabled(true);
-                            } else {
-                                Toast.makeText(PayWithGoogleActivity.this, "No PWG", Toast.LENGTH_SHORT).show();
-                                //hide Google as payment option
-                            }
-                        } catch (ApiException exception) {
-                            Toast.makeText(PayWithGoogleActivity.this,
-                                    "Exception: " + exception.getLocalizedMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        }
+        final Task<Boolean> task = mPaymentsClient.isReadyToPay(request);
+        task.addOnCompleteListener(new OnCompleteListener<Boolean>() {
+            public void onComplete(@NonNull Task<Boolean> task) {
+                try {
+                    final boolean result = task.getResult(ApiException.class);
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    if (result) {
+                        Toast.makeText(PayWithGoogleActivity.this, "Ready",
+                                Toast.LENGTH_SHORT).show();
+                        mPayWithGoogleButton.setEnabled(true);
+                    } else {
+                        Toast.makeText(PayWithGoogleActivity.this, "No PWG",
+                                Toast.LENGTH_SHORT).show();
+                        //hide Google as payment option
                     }
-                });
+                } catch (ApiException exception) {
+                    Toast.makeText(PayWithGoogleActivity.this,
+                            "Exception: " + exception.getLocalizedMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case LOAD_PAYMENT_DATA_REQUEST_CODE:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        PaymentData paymentData = PaymentData.getFromIntent(data);
-                        // You can get some data on the user's card, such as the brand and last 4 digits
-                        CardInfo info = paymentData.getCardInfo();
-                        // You can also pull the user address from the PaymentData object.
-                        UserAddress address = paymentData.getShippingAddress();
-                        // This is the raw string version of your Stripe token.
-                        String rawToken = paymentData.getPaymentMethodToken().getToken();
-
-                        // Now that you have a Stripe token object, charge that by using the id
-                        Token stripeToken = Token.fromString(rawToken);
-                        if (stripeToken != null) {
-                            // This chargeToken function is a call to your own server, which should then connect
-                            // to Stripe's API to finish the charge.
-                            // chargeToken(stripeToken.getId());
-                            Toast.makeText(PayWithGoogleActivity.this,
-                                    "Got token " + stripeToken.toString(), Toast.LENGTH_LONG).show();
-                        }
+        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
+            switch (resultCode) {
+                case Activity.RESULT_OK: {
+                    final PaymentData paymentData = PaymentData.getFromIntent(data);
+                    if (paymentData == null) {
                         break;
-                    case Activity.RESULT_CANCELED:
+                    }
+                    // You can get some data on the user's card, such as the brand and
+                    // last 4 digits
+                    CardInfo info = paymentData.getCardInfo();
+                    // You can also pull the user address from the PaymentData object.
+                    UserAddress address = paymentData.getShippingAddress();
+                    // This is the raw string version of your Stripe token.
+                    String rawToken = paymentData.getPaymentMethodToken().getToken();
+
+                    // Now that you have a Stripe token object, charge that by using the id
+                    Token stripeToken = Token.fromString(rawToken);
+                    if (stripeToken != null) {
+                        // This chargeToken function is a call to your own server, which
+                        // should then connect to Stripe's API to finish the charge.
+                        // chargeToken(stripeToken.getId());
                         Toast.makeText(PayWithGoogleActivity.this,
-                                "Canceled", Toast.LENGTH_LONG).show();
-
-                        break;
-                    case AutoResolveHelper.RESULT_ERROR:
-                        Status status = AutoResolveHelper.getStatusFromIntent(data);
-                        Toast.makeText(PayWithGoogleActivity.this,
-                                "Got error " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
-
-                        // Log the status for debugging
-                        // Generally there is no need to show an error to
-                        // the user as the Google Payment API will do that
-                        break;
-                    default:
-                        // Do nothing.
+                                "Got token " + stripeToken.toString(), Toast.LENGTH_LONG)
+                                .show();
+                    }
+                    break;
                 }
-                break; // Breaks the case LOAD_PAYMENT_DATA_REQUEST_CODE
-            default:
-                // Do nothing.
+                case Activity.RESULT_CANCELED: {
+                    Toast.makeText(PayWithGoogleActivity.this,
+                            "Canceled", Toast.LENGTH_LONG).show();
+
+                    break;
+                }
+                case AutoResolveHelper.RESULT_ERROR: {
+                    final Status status = AutoResolveHelper.getStatusFromIntent(data);
+                    final String statusMessage = status != null ? status.getStatusMessage() : "";
+                    Toast.makeText(PayWithGoogleActivity.this,
+                            "Got error " + statusMessage,
+                            Toast.LENGTH_SHORT).show();
+
+                    // Log the status for debugging
+                    // Generally there is no need to show an error to
+                    // the user as the Google Payment API will do that
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
         }
     }
 
+    @NonNull
     private PaymentMethodTokenizationParameters createTokenizationParameters() {
         return PaymentMethodTokenizationParameters.newBuilder()
-                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
+                .setPaymentMethodTokenizationType(
+                        WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
                 .addParameter("gateway", "stripe")
                 .addParameter("stripe:publishableKey",
                         PaymentConfiguration.getInstance().getPublishableKey())
@@ -160,27 +166,26 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 .build();
     }
 
+    @NonNull
     private PaymentDataRequest createPaymentDataRequest() {
-        PaymentDataRequest.Builder request =
-                PaymentDataRequest.newBuilder()
-                        .setTransactionInfo(
-                                TransactionInfo.newBuilder()
-                                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
-                                        .setTotalPrice("10.00")
-                                        .setCurrencyCode("USD")
-                                        .build())
-                        .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
-                        .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
-                        .setCardRequirements(
-                                CardRequirements.newBuilder()
-                                        .addAllowedCardNetworks(Arrays.asList(
-                                                WalletConstants.CARD_NETWORK_AMEX,
-                                                WalletConstants.CARD_NETWORK_DISCOVER,
-                                                WalletConstants.CARD_NETWORK_VISA,
-                                                WalletConstants.CARD_NETWORK_MASTERCARD))
-                                        .build());
-
-        request.setPaymentMethodTokenizationParameters(createTokenizationParameters());
-        return request.build();
+        return PaymentDataRequest.newBuilder()
+                .setTransactionInfo(
+                        TransactionInfo.newBuilder()
+                                .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
+                                .setTotalPrice("10.00")
+                                .setCurrencyCode("USD")
+                                .build())
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
+                .setCardRequirements(
+                        CardRequirements.newBuilder()
+                                .addAllowedCardNetworks(Arrays.asList(
+                                        WalletConstants.CARD_NETWORK_AMEX,
+                                        WalletConstants.CARD_NETWORK_DISCOVER,
+                                        WalletConstants.CARD_NETWORK_VISA,
+                                        WalletConstants.CARD_NETWORK_MASTERCARD))
+                                .build())
+                .setPaymentMethodTokenizationParameters(createTokenizationParameters())
+                .build();
     }
 }

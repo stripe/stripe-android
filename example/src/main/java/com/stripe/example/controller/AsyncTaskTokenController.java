@@ -85,6 +85,7 @@ public class AsyncTaskTokenController {
             mOutputListController.addToList(token);
             mProgressDialogController.dismiss();
         }
+
         public void onError(@NonNull Exception error) {
             mErrorDialogHandler.show(error.getLocalizedMessage());
             mProgressDialogController.dismiss();

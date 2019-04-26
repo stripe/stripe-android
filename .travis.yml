@@ -23,5 +23,5 @@ before_install:
   - yes | sdkmanager "platforms;android-28"
 
 script:
-  - ./gradlew :stripe:checkstyle lint
+  - ./gradlew :stripe:checkstyle :example:checkstyle lint
   - ./gradlew clean test

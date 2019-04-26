@@ -2,6 +2,7 @@ package com.stripe.example.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -28,14 +29,14 @@ public class LauncherActivity extends AppCompatActivity {
         findViewById(R.id.btn_payment_intent).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LauncherActivity.this, PaymentIntentActivity.class));
+                startActivity(PaymentIntentActivity.class);
             }
         });
 
         findViewById(R.id.btn_make_card_tokens).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LauncherActivity.this, PaymentActivity.class));
+                startActivity(PaymentActivity.class);
             }
         });
 
@@ -43,39 +44,45 @@ public class LauncherActivity extends AppCompatActivity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        startActivity(new Intent(LauncherActivity.this,
-                                PaymentMultilineActivity.class));
+                        startActivity(PaymentMultilineActivity.class);
                     }
                 });
 
         findViewById(R.id.btn_make_sources).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LauncherActivity.this, RedirectActivity.class));
+                startActivity(RedirectActivity.class);
             }
         });
 
-        findViewById(R.id.btn_customer_session_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, CustomerSessionActivity.class));
-            }
-        });
+        findViewById(R.id.btn_customer_session_launch)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(CustomerSessionActivity.class);
+                    }
+                });
 
-        findViewById(R.id.btn_payment_session_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, PaymentSessionActivity.class));
-            }
-        });
+        findViewById(R.id.btn_payment_session_launch)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(PaymentSessionActivity.class);
+                    }
+                });
 
-        findViewById(R.id.btn_payment_with_google_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LauncherActivity.this, PayWithGoogleActivity.class));
-            }
-        });
+        findViewById(R.id.btn_payment_with_google_launch)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(PayWithGoogleActivity.class);
+                    }
+                });
 
+    }
+
+    private void startActivity(@NonNull Class<?> activityClass) {
+        startActivity(new Intent(this, activityClass));
     }
 
 }

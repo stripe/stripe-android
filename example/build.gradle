@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+apply plugin: 'checkstyle'
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
 
 dependencies {
     implementation project(':stripe')
@@ -25,7 +28,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     /* Used to debug your Retrofit connections */
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
