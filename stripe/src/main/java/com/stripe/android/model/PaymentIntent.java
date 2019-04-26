@@ -134,6 +134,16 @@ public class PaymentIntent extends StripeJsonModel {
 
     @Nullable
     public Uri getRedirectUrl() {
+        final RedirectData redirectData = getRedirectData();
+        if (redirectData == null) {
+            return null;
+        }
+
+        return redirectData.url;
+    }
+
+    @Nullable
+    public RedirectData getRedirectData() {
         final Map<String, Object> nextAction;
 
         final Status status = Status.fromCode(mStatus);
@@ -153,10 +163,7 @@ public class PaymentIntent extends StripeJsonModel {
                 NextActionType.AuthorizeWithUrl == nextActionType) {
             final Object redirectToUrl = nextAction.get(nextActionType.code);
             if (redirectToUrl instanceof Map) {
-                final Object url = ((Map) redirectToUrl).get("url");
-                if (url instanceof String) {
-                    return Uri.parse((String) url);
-                }
+                return RedirectData.create((Map) redirectToUrl);
             }
         }
 
@@ -423,6 +430,46 @@ public class PaymentIntent extends StripeJsonModel {
             }
 
             return null;
+        }
+    }
+
+    static class RedirectData {
+        static final String FIELD_URL = "url";
+        static final String FIELD_RETURN_URL = "return_url";
+
+        /**
+         * See <a href="https://stripe.com/docs/api
+         * /payment_intents/object#payment_intent_object-next_action-redirect_to_url-url">
+         * PaymentIntent.next_action.redirect_to_url.url
+         * </a>
+         */
+        @NonNull public final Uri url;
+
+        /**
+         * See <a href="https://stripe.com/docs/api
+         * /payment_intents/object#payment_intent_object-next_action-redirect_to_url-return_url">
+         * PaymentIntent.next_action.redirect_to_url.return_url
+         * </a>
+         */
+        @Nullable public final Uri returnUrl;
+
+        @Nullable
+        static RedirectData create(@NonNull Map<?, ?> redirectToUrlHash) {
+            final Object urlObj = redirectToUrlHash.get(FIELD_URL);
+            final Object returnUrlObj = redirectToUrlHash.get(FIELD_RETURN_URL);
+            final String url = (urlObj instanceof String) ? urlObj.toString() : null;
+            final String returnUrl = (returnUrlObj instanceof String) ?
+                    returnUrlObj.toString() : null;
+            if (url == null) {
+                return null;
+            }
+
+            return new RedirectData(url, returnUrl);
+        }
+
+        private RedirectData(@NonNull String url, @Nullable String returnUrl) {
+            this.url = Uri.parse(url);
+            this.returnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
         }
     }
 }
