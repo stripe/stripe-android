@@ -9,11 +9,11 @@ import android.support.annotation.NonNull;
  */
 public class StoreLineItem implements Parcelable {
 
-    @NonNull private String mDescription;
-    private int mQuantity;
-    private long mUnitPrice;
+    @NonNull private final String mDescription;
+    private final int mQuantity;
+    private final long mUnitPrice;
 
-    public StoreLineItem(@NonNull String description, int quantity, long unitPrice) {
+    StoreLineItem(@NonNull String description, int quantity, long unitPrice) {
         mDescription = description;
         mQuantity = quantity;
         mUnitPrice = unitPrice;
@@ -42,27 +42,28 @@ public class StoreLineItem implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(this.mDescription);
         dest.writeInt(this.mQuantity);
         dest.writeLong(this.mUnitPrice);
     }
 
-    protected StoreLineItem(Parcel in) {
+    protected StoreLineItem(@NonNull Parcel in) {
         this.mDescription = in.readString();
         this.mQuantity = in.readInt();
         this.mUnitPrice = in.readLong();
     }
 
-    public static final Parcelable.Creator<StoreLineItem> CREATOR = new Parcelable.Creator<StoreLineItem>() {
-        @Override
-        public StoreLineItem createFromParcel(Parcel source) {
-            return new StoreLineItem(source);
-        }
+    public static final Parcelable.Creator<StoreLineItem> CREATOR =
+            new Parcelable.Creator<StoreLineItem>() {
+                @Override
+                public StoreLineItem createFromParcel(Parcel source) {
+                    return new StoreLineItem(source);
+                }
 
-        @Override
-        public StoreLineItem[] newArray(int size) {
-            return new StoreLineItem[size];
-        }
-    };
+                @Override
+                public StoreLineItem[] newArray(int size) {
+                    return new StoreLineItem[size];
+                }
+            };
 }
