@@ -207,6 +207,16 @@ public class CustomerSession {
             }
 
             @Override
+            public void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
+                                                 @Nullable String operationId) {
+                final PaymentMethodRetrievalListener listener =
+                        getPaymentMethodRetrievalListener(operationId);
+                if (listener != null && paymentMethod != null) {
+                    listener.onPaymentMethodRetrieved(paymentMethod);
+                }
+            }
+
+            @Override
             public void onCustomerShippingInfoSaved(@Nullable Customer customer) {
                 mCustomer = customer;
                 mLocalBroadcastManager
@@ -223,6 +233,12 @@ public class CustomerSession {
             public void onSourceError(@NonNull StripeException exception,
                                       @Nullable String operationId) {
                 handleRetrievalError(operationId, exception, SOURCE_ERROR);
+            }
+
+            @Override
+            public void onPaymentMethodError(@NonNull StripeException exception,
+                                             @Nullable String operationId) {
+                handleRetrievalError(operationId, exception, PAYMENT_METHOD_ERROR);
             }
         });
         mEphemeralKeyManager = new EphemeralKeyManager<>(
@@ -702,6 +718,12 @@ public class CustomerSession {
                 if (sourceRetrievalListener != null) {
                     sourceRetrievalListener.onError(httpCode, errorMessage, null);
                 }
+
+                final PaymentMethodRetrievalListener  paymentMethodRetrievalListener =
+                        getPaymentMethodRetrievalListener(operationId);
+                if (paymentMethodRetrievalListener != null) {
+                    paymentMethodRetrievalListener.onError(httpCode, errorMessage, null);
+                }
             }
         };
     }
@@ -714,6 +736,8 @@ public class CustomerSession {
             listener = mSourceRetrievalListeners.remove(operationId);
         } else if (errorType == CUSTOMER_ERROR) {
             listener = mCustomerRetrievalListeners.remove(operationId);
+        } else if (errorType == PAYMENT_METHOD_ERROR) {
+            listener = mPaymentMethodRetrievalListeners.remove(operationId);
         } else {
             listener = null;
         }
@@ -1004,6 +1028,15 @@ public class CustomerSession {
 
                     break;
                 }
+                case PAYMENT_METHOD_RETRIEVED: {
+                    if (msg.obj instanceof PaymentMethodMessage) {
+                        final PaymentMethodMessage paymentMethodMessage = (PaymentMethodMessage) msg.obj;
+                        mListener.onPaymentMethodRetrieved(paymentMethodMessage.paymentMethod,
+                                paymentMethodMessage.operationId);
+                    }
+
+                    break;
+                }
                 case CUSTOMER_SHIPPING_INFO_SAVED: {
                     if (msg.obj instanceof CustomerMessage) {
                         final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
@@ -1028,6 +1061,15 @@ public class CustomerSession {
 
                     break;
                 }
+                case PAYMENT_METHOD_ERROR: {
+                    if (msg.obj instanceof ExceptionMessage) {
+                        final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                        mListener.onPaymentMethodError(exceptionMessage.exception,
+                                exceptionMessage.operationId);
+                    }
+
+                    break;
+                }
                 default: {
                     break;
                 }
@@ -1039,11 +1081,17 @@ public class CustomerSession {
 
             void onSourceRetrieved(@Nullable Source source, @Nullable String operationId);
 
+            void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
+                                          @Nullable String operationId);
+
             void onCustomerShippingInfoSaved(@Nullable Customer customer);
 
             void onCustomerError(@NonNull StripeException exception, @Nullable String operationId);
 
             void onSourceError(@NonNull StripeException exception, @Nullable String operationId);
+
+            void onPaymentMethodError(@NonNull StripeException exception,
+                                      @Nullable String operationId);
         }
     }
 }
