@@ -73,6 +73,8 @@ class StripeApiHandler {
     private static final String TOKENS = "tokens";
     private static final String SOURCES = "sources";
     private static final String PAYMENT_METHODS = "payment_methods";
+    private static final String PAYMENT_METHODS_ATTACH = "attach";
+    private static final String PAYMENT_METHODS_DETACH = "detach";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
 
     @NonNull private final LoggingUtils mLoggingUtils;
@@ -450,6 +452,66 @@ class StripeApiHandler {
     }
 
     @Nullable
+    PaymentMethod attachPaymentMethod(
+            @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String paymentMethodId,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("customer", customerId);
+
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RestMethod.POST,
+                getAttachPaymentMethodUrl(paymentMethodId),
+                paramsMap,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return PaymentMethod.fromString(response.getResponseBody());
+    }
+
+    @Nullable
+    PaymentMethod detachPaymentMethod(
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String paymentMethodId,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RestMethod.POST,
+                getDetachPaymentMethodUrl(paymentMethodId),
+                null,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return PaymentMethod.fromString(response.getResponseBody());
+    }
+
+    @Nullable
     Customer setDefaultCustomerSource(
             @NonNull String customerId,
             @NonNull String publicKey,
@@ -672,6 +734,23 @@ class StripeApiHandler {
     String getDeleteCustomerSourceUrl(@NonNull String customerId, @NonNull String sourceId) {
         return String.format(Locale.ENGLISH,
                 "%s/%s", getAddCustomerSourceUrl(customerId), sourceId);
+    }
+
+    @VisibleForTesting
+    String getPaymentMethodsUrl(@NonNull String paymentMethodId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getPaymentMethodsUrl(), paymentMethodId);
+    }
+
+    @VisibleForTesting
+    String getAttachPaymentMethodUrl(@NonNull String paymentMethodId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getPaymentMethodsUrl(paymentMethodId),
+                PAYMENT_METHODS_ATTACH);
+    }
+
+    @VisibleForTesting
+    String getDetachPaymentMethodUrl(@NonNull String paymentMethodId) {
+        return String.format(Locale.ENGLISH, "%s/%s", getPaymentMethodsUrl(paymentMethodId),
+                PAYMENT_METHODS_DETACH);
     }
 
     @VisibleForTesting

@@ -114,6 +114,24 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void getAttachPaymentMethodUrl() {
+        final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
+        final String attachUrl = mApiHandler.getAttachPaymentMethodUrl(paymentMethodId);
+        final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
+                paymentMethodId, "/attach");
+        assertEquals(expectedUrl, attachUrl);
+    }
+
+    @Test
+    public void getDetachPaymentMethodUrl() {
+        final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
+        final String detachUrl = mApiHandler.getDetachPaymentMethodUrl(paymentMethodId);
+        final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
+                paymentMethodId, "/detach");
+        assertEquals(expectedUrl, detachUrl);
+    }
+
+    @Test
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         String fakePublicKey = "fake_public_key";
         String idempotencyKey = "idempotency_rules";
