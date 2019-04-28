@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -29,10 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -62,13 +58,14 @@ import static org.mockito.Mockito.when;
 public class PaymentSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
-    private Activity mActivity;
 
+    @Mock private Activity mActivity;
     @Mock private StripeApiHandler mApiHandler;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
+    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     @Before
     public void setup()
@@ -79,7 +76,6 @@ public class PaymentSessionTest {
         PaymentConfiguration.init("pk_test_abc123");
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-        mActivity = Robolectric.buildActivity(AppCompatActivity.class).create().start().get();
 
         final Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(firstCustomer);
@@ -184,18 +180,19 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession paymentSession = new PaymentSession(mActivity);
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
         paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         paymentSession.presentPaymentMethodSelection();
 
-        ShadowActivity.IntentForResult intentForResult =
-                Shadows.shadowOf(mActivity).getNextStartedActivityForResult();
-        assertNotNull(intentForResult);
-        assertNotNull(intentForResult.intent.getComponent());
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
+                eq(PaymentSession.PAYMENT_METHOD_REQUEST));
+
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertNotNull(intent.getComponent());
         assertEquals(PaymentMethodsActivity.class.getName(),
-                intentForResult.intent.getComponent().getClassName());
-        assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+                intent.getComponent().getClassName());
+        assertTrue(intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
 
     @Test

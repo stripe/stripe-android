@@ -213,13 +213,11 @@ public class PaymentSession {
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
      */
     public void presentShippingFlow() {
-        Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class);
-        intent.putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig);
-        intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
-        intent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mHostActivity.startActivityForResult(
-                intent,
-                PAYMENT_SHIPPING_DETAILS_REQUEST);
+        final Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class)
+                .putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig)
+                .putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData)
+                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        mHostActivity.startActivityForResult(intent, PAYMENT_SHIPPING_DETAILS_REQUEST);
     }
 
     /**

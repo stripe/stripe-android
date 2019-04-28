@@ -1,5 +1,6 @@
 package com.stripe.samplestore;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.text.DecimalFormat;
@@ -10,10 +11,12 @@ import java.util.Currency;
  */
 public class StoreUtils {
 
+    @NonNull
     static String getEmojiByUnicode(int unicode){
         return new String(Character.toChars(unicode));
     }
 
+    @NonNull
     static String getPriceString(long price, @Nullable Currency currency) {
         Currency displayCurrency = currency == null
                 ? Currency.getInstance("USD")

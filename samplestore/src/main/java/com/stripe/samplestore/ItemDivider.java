@@ -3,23 +3,27 @@ package com.stripe.samplestore;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 class ItemDivider extends RecyclerView.ItemDecoration {
 
-    private Drawable divider;
+    @NonNull private final Drawable divider;
 
     /**
      * Custom divider will be used in the list.
      */
-    ItemDivider(Context context, int resId) {
+    ItemDivider(@NonNull Context context, @DrawableRes int resId) {
         divider = ContextCompat.getDrawable(context, resId);
     }
 
     @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent,
+                       @NonNull RecyclerView.State state) {
         int left = parent.getPaddingLeft();
         int right = parent.getWidth() - parent.getPaddingRight();
 

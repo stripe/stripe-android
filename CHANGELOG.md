@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 9.0.0 (on deck)
+Note: this release has breaking changes. See [MIGRATING.md](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md)
+* Update pinned API version to `2019-03-14` (#873)
+* Inject `Context` in `CustomerSession` and `StripeApiHandler` (#875)
+* Update `PaymentIntent` model for API `2019-02-11` (#907)
+* Upgrade Android Gradle Plugin to 3.4.0 (#894)
+* Create `CustomerSession.ActivityCustomerRetrievalListener` to handle `Activity` weak refs (#872)
+
 ## 8.7.0 2019-04-12
 * Fix garbage-collection issues with `Stripe` callbacks [#863]
 * Fix race-conditions with `CustomerSession` listeners [#856]

@@ -25,7 +25,7 @@
         android:background="?attr/selectableItemBackground"
         android:src="@drawable/ic_remove_black_24dp"
         android:tint="@color/semitransparentGray"
-        />
+        android:contentDescription="@string/decrease_quantity" />
 
     <TextView
         android:id="@+id/tv_quantity"
@@ -34,8 +34,8 @@
         android:layout_marginLeft="@dimen/emoji_left_margin"
         android:layout_marginStart="@dimen/emoji_left_margin"
         android:layout_gravity="center_vertical"
-        android:textSize="36dp"
-        android:text="0"
+        android:textSize="36sp"
+        android:text="@string/default_quantity"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 
@@ -50,7 +50,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_add_black_24dp"
         android:tint="@color/semitransparentGray"
-        />
+        android:contentDescription="@string/increase_quantity" />
 
     <TextView
         android:id="@+id/tv_price"

@@ -256,11 +256,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                 if (paymentIntent != null) {
                                     mPaymentIntentValue.setText(paymentIntent.toJson().toString());
 
-                                    final PaymentIntent.Status status = PaymentIntent.Status
-                                            .fromCode(paymentIntent.getStatus());
-
-                                    if (PaymentIntent.Status.RequiresAction == status ||
-                                            PaymentIntent.Status.RequiresSourceAction == status) {
+                                    if (paymentIntent.requiresAction()) {
                                         Toast.makeText(PaymentIntentActivity.this,
                                                 "Redirecting to redirect URL",
                                                 Toast.LENGTH_SHORT)

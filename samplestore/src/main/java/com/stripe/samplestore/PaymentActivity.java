@@ -3,7 +3,6 @@ package com.stripe.samplestore;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -20,7 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentSession;
@@ -40,12 +39,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED;
@@ -60,8 +58,7 @@ public class PaymentActivity extends AppCompatActivity {
     private static final String TOTAL_LABEL = "Total:";
     private static final String SHIPPING = "Shipping";
 
-    @NonNull private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private BroadcastReceiver mBroadcastReceiver;
     private ProgressDialogFragment mProgressDialogFragment;
@@ -89,7 +86,7 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         final Bundle extras = getIntent().getExtras();
-        mStoreCart = extras != null ? extras.<StoreCart>getParcelable(EXTRA_CART) : null;
+        mStoreCart = extras != null ? extras.getParcelable(EXTRA_CART) : null;
 
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
@@ -102,31 +99,15 @@ public class PaymentActivity extends AppCompatActivity {
         updateConfirmPaymentButton();
         mEnterShippingInfo = findViewById(R.id.shipping_info);
         mEnterPaymentInfo = findViewById(R.id.payment_source);
-
-        RxView.clicks(mEnterShippingInfo)
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        mPaymentSession.presentShippingFlow();
-                    }
-                });
-        RxView.clicks(mEnterPaymentInfo)
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        mPaymentSession.presentPaymentMethodSelection();
-                    }
-                });
-        RxView.clicks(mConfirmPaymentButton)
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        CustomerSession.getInstance().retrieveCurrentCustomer(
-                                new AttemptPurchaseCustomerRetrievalListener(
-                                        PaymentActivity.this));
-                    }
-                });
-
+      
+        mCompositeDisposable.add(RxView.clicks(mEnterShippingInfo)
+                .subscribe(aVoid -> mPaymentSession.presentShippingFlow()));
+        mCompositeDisposable.add(RxView.clicks(mEnterPaymentInfo)
+                .subscribe(aVoid -> mPaymentSession.presentPaymentMethodSelection()));
+        mCompositeDisposable.add(RxView.clicks(mConfirmPaymentButton)
+                .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
+                        new AttemptPurchaseCustomerRetrievalListener(
+                                PaymentActivity.this))));
         setupPaymentSession();
 
         if (!mPaymentSession.getPaymentSessionData().isPaymentReadyToCharge()) {
@@ -169,7 +150,7 @@ public class PaymentActivity extends AppCompatActivity {
      */
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         mPaymentSession.onDestroy();
         super.onDestroy();
@@ -296,61 +277,39 @@ public class PaymentActivity extends AppCompatActivity {
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
-        final Observable<Void> stripeResponse = stripeService.capturePayment(
+        final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
                 createParams(price, sourceId, customerId, shippingInformation));
         final FragmentManager fragmentManager = getSupportFragmentManager();
-        mCompositeSubscription.add(stripeResponse
+        mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                if (mProgressDialogFragment != null &&
-                                        !mProgressDialogFragment.isAdded())
-                                    mProgressDialogFragment.show(fragmentManager, "progress");
-                            }
-                        })
-                .doOnUnsubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                if (mProgressDialogFragment != null
-                                        && mProgressDialogFragment.isVisible()) {
-                                    mProgressDialogFragment.dismiss();
-                                }
-                            }
-                        })
+                .doOnSubscribe(disposable -> {
+                    if (mProgressDialogFragment != null && !mProgressDialogFragment.isAdded()) {
+                        mProgressDialogFragment.show(fragmentManager, "progress");
+                    }
+                })
+                .doOnDispose(() -> {
+                    if (mProgressDialogFragment != null &&
+                            mProgressDialogFragment.isVisible()) {
+                        mProgressDialogFragment.dismiss();
+                    }
+                })
                 .subscribe(
-                        new Action1<Void>() {
-                            @Override
-                            public void call(Void aVoid) {
-                                finishCharge();
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                displayError(throwable.getLocalizedMessage());
-                            }
-                        }));
+                        response -> finishCharge(),
+                        throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
-    private void displayError(String errorMessage) {
+    private void displayError(@NonNull String errorMessage) {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Error");
         alertDialog.setMessage(errorMessage);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 
     private void finishCharge() {
-        Intent data = StoreActivity.createPurchaseCompleteIntent(
+        final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
         finish();

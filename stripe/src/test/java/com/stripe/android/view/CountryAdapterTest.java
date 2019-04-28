@@ -2,13 +2,13 @@ package com.stripe.android.view;
 
 import android.widget.Filter;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,8 @@ public class CountryAdapterTest {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
 
-        ActivityController<ShippingInfoTestActivity> activityController =
-                Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();
         List<String> countries = new ArrayList<>(CountryUtils.getCountryNameToCodeMap().keySet());
-        mCountryAdapter = new CountryAdapter(activityController.get(), countries);
+        mCountryAdapter = new CountryAdapter(ApplicationProvider.getApplicationContext(), countries);
     }
 
     @Test

@@ -15,15 +15,16 @@ import java.util.concurrent.TimeUnit;
 class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
     @NonNull private final Class<TEphemeralKey> mEphemeralKeyClass;
-    private @Nullable TEphemeralKey mEphemeralKey;
-    private @NonNull EphemeralKeyProvider mEphemeralKeyProvider;
-    private @Nullable Calendar mOverrideCalendar;
-    private @NonNull KeyManagerListener mListener;
+    @NonNull private final EphemeralKeyProvider mEphemeralKeyProvider;
+    @Nullable private final Calendar mOverrideCalendar;
+    @NonNull private final KeyManagerListener<TEphemeralKey> mListener;
     private final long mTimeBufferInSeconds;
+
+    @Nullable private TEphemeralKey mEphemeralKey;
 
     EphemeralKeyManager(
             @NonNull EphemeralKeyProvider ephemeralKeyProvider,
-            @NonNull KeyManagerListener keyManagerListener,
+            @NonNull KeyManagerListener<TEphemeralKey> keyManagerListener,
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
             @NonNull Class<TEphemeralKey> ephemeralKeyClass) {

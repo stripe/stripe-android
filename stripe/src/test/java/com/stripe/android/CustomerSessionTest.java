@@ -20,10 +20,12 @@ import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
+import com.stripe.android.view.BaseViewTest;
 import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentFlowActivity;
 
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ import static org.mockito.Mockito.when;
  * Test class for {@link CustomerSession}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class CustomerSessionTest {
+public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
             "  \"id\": \"ephkey_123\",\n" +
@@ -167,6 +168,16 @@ public class CustomerSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
     private Source mAddedSource;
+
+    public CustomerSessionTest() {
+        super(PaymentFlowActivity.class);
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+    }
 
     @NonNull
     private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
@@ -727,9 +738,10 @@ public class CustomerSessionTest {
                 .putExtra(PAYMENT_SESSION_CONFIG, new PaymentSessionConfig.Builder()
                         .build())
                 .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        Robolectric.buildActivity(PaymentFlowActivity.class, intent)
-                .create().start().resume().visible();
-        List<String> actualTokens = new ArrayList<>(customerSession.getProductUsageTokens());
+
+        createActivity(intent);
+
+        final List<String> actualTokens = new ArrayList<>(customerSession.getProductUsageTokens());
         assertTrue(actualTokens.contains("ShippingInfoScreen"));
     }
 
@@ -744,8 +756,8 @@ public class CustomerSessionTest {
                         .build())
                 .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
 
-        Robolectric.buildActivity(PaymentFlowActivity.class, intent)
-                .create().start().resume().visible();
+        createActivity(intent);
+
         assertTrue(new ArrayList<>(customerSession.getProductUsageTokens())
                 .contains("ShippingMethodScreen"));
     }

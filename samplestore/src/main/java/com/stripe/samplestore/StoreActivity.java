@@ -3,12 +3,12 @@ package com.stripe.samplestore;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -35,40 +35,39 @@ public class StoreActivity
 
     private FloatingActionButton mGoToCartButton;
     private StoreAdapter mStoreAdapter;
+    private SampleStoreEphemeralKeyProvider mEphemeralKeyProvider;
 
+    @NonNull
     public static Intent createPurchaseCompleteIntent(long amount) {
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra(EXTRA_PRICE_PAID, amount);
-        return returnIntent;
+        return new Intent()
+                .putExtra(EXTRA_PRICE_PAID, amount);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
         mGoToCartButton = findViewById(R.id.fab_checkout);
         mStoreAdapter = new StoreAdapter(this);
-        ItemDivider dividerDecoration = new ItemDivider(this, R.drawable.item_divider);
-        RecyclerView recyclerView = findViewById(R.id.rv_store_items);
 
         mGoToCartButton.hide();
-        Toolbar myToolBar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolBar);
+        setSupportActionBar(findViewById(R.id.my_toolbar));
 
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.addItemDecoration(dividerDecoration);
+        final RecyclerView recyclerView = findViewById(R.id.rv_store_items);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new ItemDivider(this, R.drawable.item_divider));
         recyclerView.setAdapter(mStoreAdapter);
 
-        mGoToCartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mStoreAdapter.launchPurchaseActivityWithCart();
-            }
-        });
+        mGoToCartButton.setOnClickListener(v -> mStoreAdapter.launchPurchaseActivityWithCart());
         setupCustomerSession();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mEphemeralKeyProvider.destroy();
+        super.onDestroy();
     }
 
     @Override
@@ -96,34 +95,32 @@ public class StoreActivity
     }
 
     private void displayPurchase(long price) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = LayoutInflater.from(this)
+        final View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.purchase_complete_notification, null);
 
-        TextView emojiView = dialogView.findViewById(R.id.dlg_emoji_display);
+        final TextView emojiView = dialogView.findViewById(R.id.dlg_emoji_display);
         // Show a smiley face!
         emojiView.setText(StoreUtils.getEmojiByUnicode(0x1F642));
-        TextView priceView = dialogView.findViewById(R.id.dlg_price_display);
+
+        final TextView priceView = dialogView.findViewById(R.id.dlg_price_display);
         priceView.setText(StoreUtils.getPriceString(price, null));
 
-        builder.setView(dialogView);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+                .show();
     }
 
     private void setupCustomerSession() {
         // CustomerSession only needs to be initialized once per app.
-        CustomerSession.initCustomerSession(this,
-                new SampleStoreEphemeralKeyProvider(
-                        new SampleStoreEphemeralKeyProvider.ProgressListener() {
-                            @Override
-                            public void onStringResponse(@NonNull String string) {
-                                if (string.startsWith("Error: ")) {
-                                    new AlertDialog.Builder(StoreActivity.this)
-                                            .setMessage(string)
-                                            .show();
-                                }
-                            }
-                        }));
+        mEphemeralKeyProvider = new SampleStoreEphemeralKeyProvider(
+                string -> {
+                    if (string.startsWith("Error: ")) {
+                        new AlertDialog.Builder(StoreActivity.this)
+                                .setMessage(string)
+                                .show();
+                    }
+                });
+        CustomerSession.initCustomerSession(this, mEphemeralKeyProvider);
     }
 }

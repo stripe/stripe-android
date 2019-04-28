@@ -34,8 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
-public class CustomerSession
-        implements EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
+public class CustomerSession {
 
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";
@@ -220,7 +219,7 @@ public class CustomerSession
         });
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
-                this,
+                createKeyListener(),
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 CustomerEphemeralKey.class);
@@ -518,70 +517,76 @@ public class CustomerSession
         mThreadPoolExecutor.execute(runnable);
     }
 
-    @Override
-    public void onKeyUpdate(
-            @NonNull CustomerEphemeralKey ephemeralKey,
-            @Nullable String operationId,
-            @Nullable String actionString,
-            @Nullable Map<String, Object> arguments) {
-        if (actionString == null) {
-            updateCustomer(ephemeralKey, operationId);
-            return;
-        }
+    @NonNull
+    private EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> createKeyListener() {
+        return new EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>() {
+            @Override
+            public void onKeyUpdate(
+                    @NonNull CustomerEphemeralKey ephemeralKey,
+                    @Nullable String operationId,
+                    @Nullable String actionString,
+                    @Nullable Map<String, Object> arguments) {
+                if (actionString == null) {
+                    updateCustomer(ephemeralKey, operationId);
+                    return;
+                }
 
-        if (arguments == null) {
-            return;
-        }
+                if (arguments == null) {
+                    return;
+                }
 
-        if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
-                arguments.containsKey(KEY_SOURCE_TYPE)) {
-            addCustomerSource(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE),
-                    operationId
-            );
-            resetUsageTokens();
-        } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
-                arguments.containsKey(KEY_SOURCE)) {
-            deleteCustomerSource(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    operationId);
-            resetUsageTokens();
-        } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
-                && arguments.containsKey(KEY_SOURCE) && arguments.containsKey(KEY_SOURCE_TYPE)) {
-            setCustomerSourceDefault(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE),
-                    operationId);
-            resetUsageTokens();
-        } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
-                arguments.containsKey(KEY_SHIPPING_INFO)) {
-            setCustomerShippingInformation(
-                    ephemeralKey,
-                    (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
-                    operationId);
-            resetUsageTokens();
-        }
-    }
+                if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
+                        arguments.containsKey(KEY_SOURCE_TYPE)) {
+                    addCustomerSource(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            operationId
+                    );
+                    resetUsageTokens();
+                } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
+                        arguments.containsKey(KEY_SOURCE)) {
+                    deleteCustomerSource(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            operationId);
+                    resetUsageTokens();
+                } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString) &&
+                        arguments.containsKey(KEY_SOURCE) &&
+                        arguments.containsKey(KEY_SOURCE_TYPE)) {
+                    setCustomerSourceDefault(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            operationId);
+                    resetUsageTokens();
+                } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
+                        arguments.containsKey(KEY_SHIPPING_INFO)) {
+                    setCustomerShippingInformation(
+                            ephemeralKey,
+                            (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                            operationId);
+                    resetUsageTokens();
+                }
+            }
 
-    @Override
-    public void onKeyError(@Nullable String operationId, int httpCode,
-                           @Nullable String errorMessage) {
-        // Any error eliminates all listeners
-        final CustomerRetrievalListener customerRetrievalListener =
-                getCustomerRetrievalListener(operationId);
-        if (customerRetrievalListener != null) {
-            customerRetrievalListener.onError(httpCode, errorMessage, null);
-        }
+            @Override
+            public void onKeyError(@Nullable String operationId, int httpCode,
+                                   @Nullable String errorMessage) {
+                // Any error eliminates all listeners
+                final CustomerRetrievalListener customerRetrievalListener =
+                        getCustomerRetrievalListener(operationId);
+                if (customerRetrievalListener != null) {
+                    customerRetrievalListener.onError(httpCode, errorMessage, null);
+                }
 
-        final SourceRetrievalListener sourceRetrievalListener =
-                getSourceRetrievalListener(operationId);
-        if (sourceRetrievalListener != null) {
-            sourceRetrievalListener.onError(httpCode, errorMessage, null);
-        }
+                final SourceRetrievalListener sourceRetrievalListener =
+                        getSourceRetrievalListener(operationId);
+                if (sourceRetrievalListener != null) {
+                    sourceRetrievalListener.onError(httpCode, errorMessage, null);
+                }
+            }
+        };
     }
 
     private void handleRetrievalError(@Nullable String operationId,
