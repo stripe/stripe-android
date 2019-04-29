@@ -56,7 +56,7 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());
 
-    @Mock private StripeApiHandler.RequestExecutor mRequestExecutor;
+    @Mock private RequestExecutor mRequestExecutor;
 
     @Before
     public void before() {
@@ -65,40 +65,40 @@ public class StripeApiHandlerTest {
 
     @Test
     public void testGetApiUrl() {
-        String tokensApi = mApiHandler.getTokensUrl();
+        String tokensApi = StripeApiHandler.getTokensUrl();
         assertEquals("https://api.stripe.com/v1/tokens", tokensApi);
     }
 
     @Test
     public void testGetSourcesUrl() {
-        String sourcesUrl = mApiHandler.getSourcesUrl();
+        String sourcesUrl = StripeApiHandler.getSourcesUrl();
         assertEquals("https://api.stripe.com/v1/sources", sourcesUrl);
     }
 
     @Test
     public void testGetRetrieveSourceUrl() {
-        String sourceUrlWithId = mApiHandler.getRetrieveSourceApiUrl("abc123");
+        String sourceUrlWithId = StripeApiHandler.getRetrieveSourceApiUrl("abc123");
         assertEquals("https://api.stripe.com/v1/sources/abc123", sourceUrlWithId);
     }
 
     @Test
     public void testGetRequestTokenApiUrl() {
         String tokenId = "tok_sample";
-        String requestApi = mApiHandler.getRetrieveTokenApiUrl(tokenId);
+        String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
         assertEquals("https://api.stripe.com/v1/tokens/" + tokenId, requestApi);
     }
 
     @Test
     public void testGetRetrieveCustomerUrl() {
         String customerId = "cus_123abc";
-        String customerRequestUrl = mApiHandler.getRetrieveCustomerUrl(customerId);
+        String customerRequestUrl = StripeApiHandler.getRetrieveCustomerUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId, customerRequestUrl);
     }
 
     @Test
     public void testGetAddCustomerSourceUrl() {
         String customerId = "cus_123abc";
-        String addSourceUrl = mApiHandler.getAddCustomerSourceUrl(customerId);
+        String addSourceUrl = StripeApiHandler.getAddCustomerSourceUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources",
                 addSourceUrl);
     }
@@ -107,28 +107,52 @@ public class StripeApiHandlerTest {
     public void testGetDeleteCustomerSourceUrl() {
         String customerId = "cus_123abc";
         String sourceId = "src_456xyz";
-        String deleteSourceUrl = mApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
+        String deleteSourceUrl = StripeApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources/"
                         + sourceId,
                 deleteSourceUrl);
     }
 
     @Test
-    public void getAttachPaymentMethodUrl() {
+    public void testGetAttachPaymentMethodUrl() {
         final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
-        final String attachUrl = mApiHandler.getAttachPaymentMethodUrl(paymentMethodId);
+        final String attachUrl = StripeApiHandler.getAttachPaymentMethodUrl(paymentMethodId);
         final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
                 paymentMethodId, "/attach");
         assertEquals(expectedUrl, attachUrl);
     }
 
     @Test
-    public void getDetachPaymentMethodUrl() {
+    public void testGetDetachPaymentMethodUrl() {
         final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
         final String detachUrl = mApiHandler.getDetachPaymentMethodUrl(paymentMethodId);
         final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
                 paymentMethodId, "/detach");
         assertEquals(expectedUrl, detachUrl);
+    }
+
+    @Test
+    public void testGetPaymentMethodsUrl() {
+        assertEquals("https://api.stripe.com/v1/payment_methods",
+                StripeApiHandler.getPaymentMethodsUrl());
+    }
+
+    @Test
+    public void testGetIssuingCardPinUrl() {
+        assertEquals("https://api.stripe.com/v1/issuing/cards/card123/pin",
+                StripeApiHandler.getIssuingCardPinUrl("card123"));
+    }
+
+    @Test
+    public void testRetrievePaymentIntentUrl() {
+        assertEquals("https://api.stripe.com/v1/payment_intents/pi123",
+                StripeApiHandler.getRetrievePaymentIntentUrl("pi123"));
+    }
+
+    @Test
+    public void testConfirmPaymentIntentUrl() {
+        assertEquals("https://api.stripe.com/v1/payment_intents/pi123/confirm",
+                StripeApiHandler.getConfirmPaymentIntentUrl("pi123"));
     }
 
     @Test
@@ -140,7 +164,7 @@ public class StripeApiHandlerTest {
                 .setIdempotencyKey(idempotencyKey)
                 .setStripeAccount(stripeAccount)
                 .build();
-        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
                 .getHeaders(requestOptions);
 
         assertNotNull(headerMap);
@@ -152,7 +176,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
-        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
                 .getHeaders(RequestOptions.builder("some_key")
                         .build());
 
@@ -164,7 +188,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_containsPropertyMapValues() throws JSONException {
-        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
                 .getHeaders(RequestOptions.builder("some_key")
                         .build());
 
@@ -179,7 +203,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
-        final Map<String, String> headerMap = new StripeApiHandler.ConnectionFactory()
+        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
                 .getHeaders(RequestOptions.builder("some_key")
                         .build());
 
@@ -199,7 +223,7 @@ public class StripeApiHandlerTest {
                         .hashMapFromCard(CARD);
         final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
-        final String query = new StripeApiHandler.ConnectionFactory().createQuery(cardMap);
+        final String query = new RequestExecutor.ConnectionFactory().createQuery(cardMap);
         assertEquals(expectedValue, query);
     }
 
@@ -273,7 +297,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
         final StripeResponse response = mApiHandler.requestData(
-                StripeApiHandler.RestMethod.POST, mApiHandler.getSourcesUrl(),
+                RequestExecutor.RestMethod.POST, StripeApiHandler.getSourcesUrl(),
                 SourceParams.createCardParams(CARD).toParamMap(),
                 RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
                         connectAccountId, RequestOptions.TYPE_QUERY)
@@ -303,7 +327,7 @@ public class StripeApiHandlerTest {
         assertEquals(connectAccountId, accounts.get(0));
     }
 
-    @Ignore
+    @Ignore("requires a private key")
     public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -314,7 +338,7 @@ public class StripeApiHandlerTest {
                 PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
                         SourceParams.createCardParams(CARD),
                         clientSecret,
-                        null
+                        "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
@@ -325,7 +349,7 @@ public class StripeApiHandlerTest {
         assertNotNull(paymentIntent);
     }
 
-    @Ignore
+    @Ignore("requires a private key")
     public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -337,7 +361,7 @@ public class StripeApiHandlerTest {
                 PaymentIntentParams.createConfirmPaymentIntentWithSourceIdParams(
                         sourceId,
                         clientSecret,
-                        null
+                        "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
@@ -347,7 +371,7 @@ public class StripeApiHandlerTest {
         assertNotNull(paymentIntent);
     }
 
-    @Ignore
+    @Ignore("requires a private key")
     public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -368,7 +392,7 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                new StripeApiHandler.RequestExecutor(),
+                new RequestExecutor(),
                 false
         );
         final Source source = apiHandler.createSource(
