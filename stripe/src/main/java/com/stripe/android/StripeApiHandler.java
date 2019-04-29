@@ -704,19 +704,13 @@ class StripeApiHandler {
 
     @NonNull
     private String retrievePaymentIntentUrl(@NonNull String paymentIntentId) {
-        return String.format(
-                Locale.ENGLISH,
-                "%s/v1/payment_intents/%s",
-                LIVE_API_BASE, paymentIntentId);
+        return getApiUrl(String.format(Locale.ENGLISH, "payment_intents/%s", paymentIntentId));
     }
 
     @NonNull
     private String confirmPaymentIntentUrl(@NonNull String paymentIntentId) {
-        return String.format(
-                Locale.ENGLISH,
-                "%s/v1/payment_intents/%s/confirm",
-                LIVE_API_BASE,
-                paymentIntentId);
+        return getApiUrl(String.format(Locale.ENGLISH, "%s/confirm",
+                retrievePaymentIntentUrl(paymentIntentId)));
     }
 
     @VisibleForTesting
@@ -736,8 +730,7 @@ class StripeApiHandler {
                 "%s/%s", getAddCustomerSourceUrl(customerId), sourceId);
     }
 
-    @VisibleForTesting
-    String getPaymentMethodsUrl(@NonNull String paymentMethodId) {
+    private String getPaymentMethodsUrl(@NonNull String paymentMethodId) {
         return String.format(Locale.ENGLISH, "%s/%s", getPaymentMethodsUrl(), paymentMethodId);
     }
 
