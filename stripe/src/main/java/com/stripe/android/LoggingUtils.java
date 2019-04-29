@@ -33,6 +33,8 @@ class LoggingUtils {
     @StringDef({
             EVENT_TOKEN_CREATION,
             EVENT_ADD_PAYMENT_METHOD,
+            EVENT_ATTACH_PAYMENT_METHOD,
+            EVENT_DETACH_PAYMENT_METHOD,
             EVENT_SOURCE_CREATION,
             EVENT_ADD_SOURCE,
             EVENT_DEFAULT_SOURCE,
@@ -45,6 +47,8 @@ class LoggingUtils {
 
     static final String EVENT_TOKEN_CREATION = "token_creation";
     static final String EVENT_ADD_PAYMENT_METHOD = "add_payment_method";
+    static final String EVENT_ATTACH_PAYMENT_METHOD = "attach_payment_method";
+    static final String EVENT_DETACH_PAYMENT_METHOD = "detach_payment_method";
     static final String EVENT_SOURCE_CREATION = "source_creation";
     static final String EVENT_ADD_SOURCE = "add_source";
     static final String EVENT_DEFAULT_SOURCE = "default_source";
@@ -157,6 +161,28 @@ class LoggingUtils {
                 null,
                 null,
                 publishableKey, EVENT_DELETE_SOURCE);
+    }
+
+    @NonNull
+    Map<String, Object> getAttachPaymentMethodParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableKey, EVENT_ATTACH_PAYMENT_METHOD);
+    }
+
+    @NonNull
+    Map<String, Object> getDetachPaymentMethodParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableKey, EVENT_DETACH_PAYMENT_METHOD);
     }
 
     @NonNull
