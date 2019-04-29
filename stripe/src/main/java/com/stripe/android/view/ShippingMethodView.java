@@ -44,30 +44,27 @@ class ShippingMethodView extends RelativeLayout {
     ShippingMethodView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        inflate(getContext(), R.layout.shipping_method_view, this);
+        inflate(context, R.layout.shipping_method_view, this);
         mLabel = findViewById(R.id.tv_label_smv);
         mDetail = findViewById(R.id.tv_detail_smv);
         mAmount = findViewById(R.id.tv_amount_smv);
         mCheckmark = findViewById(R.id.iv_selected_icon);
 
-        final int rawSelectedColorInt =
-                getThemeAccentColor(getContext()).data;
-        final int rawUselectedTextColorPrimaryInt =
-                getThemeTextColorPrimary(getContext()).data;
-        final int rawUnselectedTextColorSecondaryInt =
-                getThemeTextColorSecondary(getContext()).data;
+        final int rawSelectedColorInt = getThemeAccentColor(context).data;
+        final int rawUselectedTextColorPrimaryInt = getThemeTextColorPrimary(context).data;
+        final int rawUnselectedTextColorSecondaryInt = getThemeTextColorSecondary(context).data;
         mSelectedColorInt =
                 ViewUtils.isColorTransparent(rawSelectedColorInt) ?
-                        ContextCompat.getColor(getContext(), R.color.accent_color_default) :
+                        ContextCompat.getColor(context, R.color.accent_color_default) :
                         rawSelectedColorInt;
         mUnselectedTextColorPrimaryInt =
                 ViewUtils.isColorTransparent(rawUselectedTextColorPrimaryInt) ?
-                        ContextCompat.getColor(getContext(),
+                        ContextCompat.getColor(context,
                                 R.color.color_text_unselected_primary_default) :
                         rawUselectedTextColorPrimaryInt;
         mUnselectedTextColorSecondaryInt =
                 ViewUtils.isColorTransparent(rawUnselectedTextColorSecondaryInt) ?
-                        ContextCompat.getColor(getContext(),
+                        ContextCompat.getColor(context,
                                 R.color.color_text_unselected_secondary_default) :
                         rawUnselectedTextColorSecondaryInt;
 

@@ -74,7 +74,7 @@ public class ShippingInfoWidget extends LinearLayout {
         super(context, attrs, defStyleAttr);
 
         setOrientation(VERTICAL);
-        inflate(getContext(), R.layout.add_address_widget, this);
+        inflate(context, R.layout.add_address_widget, this);
         mCountryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw);
         mAddressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw);
         mAddressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw);

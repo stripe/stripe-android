@@ -32,13 +32,13 @@ public class SelectShippingMethodWidget extends FrameLayout {
                                       int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        inflate(getContext(), R.layout.select_shipping_method_widget, this);
+        inflate(context, R.layout.select_shipping_method_widget, this);
         mShippingMethodAdapter = new ShippingMethodAdapter();
 
         final RecyclerView shippingMethodRecyclerView = findViewById(R.id.rv_shipping_methods_ssmw);
         shippingMethodRecyclerView.setHasFixedSize(true);
         shippingMethodRecyclerView.setAdapter(mShippingMethodAdapter);
-        shippingMethodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        shippingMethodRecyclerView.setLayoutManager(new LinearLayoutManager(context));
     }
 
     /**
