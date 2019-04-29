@@ -1030,7 +1030,8 @@ public class CustomerSession {
                 }
                 case PAYMENT_METHOD_RETRIEVED: {
                     if (msg.obj instanceof PaymentMethodMessage) {
-                        final PaymentMethodMessage paymentMethodMessage = (PaymentMethodMessage) msg.obj;
+                        final PaymentMethodMessage paymentMethodMessage =
+                                (PaymentMethodMessage) msg.obj;
                         mListener.onPaymentMethodRetrieved(paymentMethodMessage.paymentMethod,
                                 paymentMethodMessage.operationId);
                     }
