@@ -1,6 +1,8 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -16,28 +18,34 @@ import java.util.List;
  */
 public class SelectShippingMethodWidget extends FrameLayout {
 
-    RecyclerView mShippingMethodRecyclerView;
-    ShippingMethodAdapter mShippingMethodAdapter;
+    @NonNull final ShippingMethodAdapter mShippingMethodAdapter;
 
-    public SelectShippingMethodWidget(Context context) {
-        super(context);
-        initView();
+    public SelectShippingMethodWidget(@NonNull Context context) {
+        this(context, null);
     }
 
-    public SelectShippingMethodWidget(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView();
+    public SelectShippingMethodWidget(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public SelectShippingMethodWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SelectShippingMethodWidget(@NonNull Context context, @Nullable AttributeSet attrs,
+                                      int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initView();
+
+        inflate(context, R.layout.select_shipping_method_widget, this);
+        mShippingMethodAdapter = new ShippingMethodAdapter();
+
+        final RecyclerView shippingMethodRecyclerView = findViewById(R.id.rv_shipping_methods_ssmw);
+        shippingMethodRecyclerView.setHasFixedSize(true);
+        shippingMethodRecyclerView.setAdapter(mShippingMethodAdapter);
+        shippingMethodRecyclerView.setLayoutManager(new LinearLayoutManager(context));
     }
 
     /**
      * @return The {@link ShippingMethod} selected by the customer or {@code null} if no option is
      *  selected.
      */
+    @Nullable
     public ShippingMethod getSelectedShippingMethod() {
         return mShippingMethodAdapter.getSelectedShippingMethod();
     }
@@ -45,19 +53,8 @@ public class SelectShippingMethodWidget extends FrameLayout {
     /**
      * Specify the shipping methods to show.
      */
-    public void setShippingMethods(List<ShippingMethod> shippingMethods,
-                                   ShippingMethod defaultShippingMethod) {
+    public void setShippingMethods(@Nullable List<ShippingMethod> shippingMethods,
+                                   @Nullable ShippingMethod defaultShippingMethod) {
         mShippingMethodAdapter.setShippingMethods(shippingMethods, defaultShippingMethod);
     }
-
-    private void initView() {
-        inflate(getContext(), R.layout.select_shipping_method_widget, this);
-        mShippingMethodRecyclerView = findViewById(R.id.rv_shipping_methods_ssmw);
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        mShippingMethodAdapter = new ShippingMethodAdapter();
-        mShippingMethodRecyclerView.setHasFixedSize(true);
-        mShippingMethodRecyclerView.setAdapter(mShippingMethodAdapter);
-        mShippingMethodRecyclerView.setLayoutManager(linearLayoutManager);
-    }
-
 }
