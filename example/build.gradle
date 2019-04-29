@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+apply plugin: 'checkstyle'
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
 
 dependencies {
     implementation project(':stripe')

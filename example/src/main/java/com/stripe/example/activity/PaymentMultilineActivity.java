@@ -43,7 +43,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
             new CompositeSubscription();
 
     private SimpleAdapter mSimpleAdapter;
-    @NonNull private final List<Map<String, String>> mCardSources= new ArrayList<>();
+    @NonNull private final List<Map<String, String>> mCardSources = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
