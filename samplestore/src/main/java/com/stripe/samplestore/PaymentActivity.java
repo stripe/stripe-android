@@ -34,6 +34,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.samplestore.service.StripeService;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -258,14 +259,15 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createParams(long price, @Nullable String sourceId,
+    private Map<String, Object> createParams(long price,
+                                             @Nullable String sourceId,
                                              @Nullable String customerId,
-                                             @NonNull ShippingInformation shippingInformation) {
-        final Map<String, Object> params = new HashMap<>();
+                                             @Nullable ShippingInformation shippingInformation) {
+        final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
         params.put("source", sourceId);
         params.put("customer_id", customerId);
-        params.put("shipping", shippingInformation.toMap());
+        params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
         return params;
     }
 
@@ -322,11 +324,13 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Nullable
-    private String formatSourceDescription(Source source) {
+    private String formatSourceDescription(@NonNull Source source) {
         if (Source.CARD.equals(source.getType())) {
             final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            return sourceCardData.getBrand() + getString(R.string.ending_in) +
-                    sourceCardData.getLast4();
+            if (sourceCardData != null) {
+                return sourceCardData.getBrand() + getString(R.string.ending_in) +
+                        sourceCardData.getLast4();
+            }
         }
         return source.getType();
     }
@@ -429,8 +433,11 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            final CustomerSource source = customer.getSourceById(sourceId);
-            activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source.asSource()));
+            final CustomerSource customerSource = customer.getSourceById(sourceId);
+            final Source source = customerSource != null ? customerSource.asSource() : null;
+            if (source != null) {
+                activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source));
+            }
         }
 
         @Override
@@ -464,9 +471,9 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            final CustomerSource source = customer.getSourceById(sourceId);
-            activity.proceedWithPurchaseIf3DSCheckIsNotNecessary(source.asSource(),
-                    customer.getId());
+            final CustomerSource customerSource = customer.getSourceById(sourceId);
+            final Source source = customerSource != null ? customerSource.asSource() : null;
+            activity.proceedWithPurchaseIf3DSCheckIsNotNecessary(source, customer.getId());
         }
 
         @Override
