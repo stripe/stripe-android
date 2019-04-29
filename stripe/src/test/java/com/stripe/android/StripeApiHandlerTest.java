@@ -327,7 +327,7 @@ public class StripeApiHandlerTest {
         assertEquals(connectAccountId, accounts.get(0));
     }
 
-    @Ignore("requires a private key")
+    @Ignore("requires a secret key")
     public void disabled_confirmPaymentIntent_withSourceData_canSuccessfulConfirm()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -349,7 +349,7 @@ public class StripeApiHandlerTest {
         assertNotNull(paymentIntent);
     }
 
-    @Ignore("requires a private key")
+    @Ignore("requires a secret key")
     public void disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -371,7 +371,7 @@ public class StripeApiHandlerTest {
         assertNotNull(paymentIntent);
     }
 
-    @Ignore("requires a private key")
+    @Ignore("requires a secret key")
     public void disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
