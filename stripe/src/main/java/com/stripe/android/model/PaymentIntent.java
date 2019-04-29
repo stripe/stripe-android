@@ -433,7 +433,7 @@ public class PaymentIntent extends StripeJsonModel {
         }
     }
 
-    static class RedirectData {
+    public static class RedirectData {
         static final String FIELD_URL = "url";
         static final String FIELD_RETURN_URL = "return_url";
 
