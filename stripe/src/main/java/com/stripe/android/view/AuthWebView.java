@@ -21,16 +21,19 @@ import android.webkit.WebViewClient;
  * [0] https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url
  */
 class AuthWebView extends WebView {
-    AuthWebView(@NonNull Context context) {
+    @SuppressWarnings("RedundantModifier")
+    public AuthWebView(@NonNull Context context) {
         this(context, null);
     }
 
-    AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    @SuppressWarnings("RedundantModifier")
+    public AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         configureSettings();
     }
 
-    AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    @SuppressWarnings("RedundantModifier")
+    public AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         configureSettings();
     }
