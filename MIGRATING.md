@@ -41,9 +41,11 @@
 - [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
     - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
     - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
+    - `PaymentIntent.NextActionType.AuthorizeWithUrl` has been removed
     - `PaymentIntent#getNextSourceAction()` is now `PaymentIntent#getNextAction()`
     - `PaymentIntent#getAuthorizationUrl()` is now `PaymentIntent#getRedirectUrl()`
     - `PaymentIntent#requiresAction()` has been added as a convenience
+    - `PaymentIntent#getStatus()` now returns a `PaymentIntent.Status` enum value instead of a `String`
 
 - [`Address`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
   Use `Address.Builder` to create a new `Address` object.

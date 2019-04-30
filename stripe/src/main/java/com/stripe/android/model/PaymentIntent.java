@@ -48,7 +48,8 @@ public class PaymentIntent extends StripeJsonModel {
     static final String FIELD_RECEIPT_EMAIL = "receipt_email";
     static final String FIELD_SOURCE = "source";
     static final String FIELD_STATUS = "status";
-    static final String FIELD_TYPE = "type";
+
+    private static final String FIELD_NEXT_ACTION_TYPE = "type";
 
     @Nullable private final String mId;
     @Nullable private final String mObjectType;
@@ -63,10 +64,9 @@ public class PaymentIntent extends StripeJsonModel {
     @Nullable private final String mDescription;
     @Nullable private final Boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
-
     @Nullable private final String mReceiptEmail;
     @Nullable private final String mSource;
-    @Nullable private final String mStatus;
+    @Nullable private final Status mStatus;
 
     @Nullable
     public String getId() {
@@ -124,7 +124,7 @@ public class PaymentIntent extends StripeJsonModel {
     }
 
     public boolean requiresAction() {
-        return Status.fromCode(mStatus) == Status.RequiresAction;
+        return mStatus == Status.RequiresAction;
     }
 
     @Nullable
@@ -146,8 +146,7 @@ public class PaymentIntent extends StripeJsonModel {
     public RedirectData getRedirectData() {
         final Map<String, Object> nextAction;
 
-        final Status status = Status.fromCode(mStatus);
-        if (Status.RequiresAction == status) {
+        if (Status.RequiresAction == mStatus) {
             nextAction = mNextAction;
         } else {
             nextAction = null;
@@ -158,9 +157,8 @@ public class PaymentIntent extends StripeJsonModel {
         }
 
         final NextActionType nextActionType = NextActionType
-                .fromCode((String) nextAction.get(FIELD_TYPE));
-        if (NextActionType.RedirectToUrl == nextActionType ||
-                NextActionType.AuthorizeWithUrl == nextActionType) {
+                .fromCode((String) nextAction.get(FIELD_NEXT_ACTION_TYPE));
+        if (NextActionType.RedirectToUrl == nextActionType) {
             final Object redirectToUrl = nextAction.get(nextActionType.code);
             if (redirectToUrl instanceof Map) {
                 return RedirectData.create((Map) redirectToUrl);
@@ -181,7 +179,7 @@ public class PaymentIntent extends StripeJsonModel {
     }
 
     @Nullable
-    public String getStatus() {
+    public Status getStatus() {
         return mStatus;
     }
 
@@ -201,7 +199,7 @@ public class PaymentIntent extends StripeJsonModel {
             @Nullable Map<String, Object> nextAction,
             @Nullable String receiptEmail,
             @Nullable String source,
-            @Nullable String status
+            @Nullable Status status
     ) {
         mId = id;
         mObjectType = objectType;
@@ -256,7 +254,7 @@ public class PaymentIntent extends StripeJsonModel {
         final String description = optString(jsonObject, FIELD_DESCRIPTION);
         final Boolean livemode = optBoolean(jsonObject, FIELD_LIVEMODE);
         final String receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL);
-        final String status = optString(jsonObject, FIELD_STATUS);
+        final Status status = Status.fromCode(optString(jsonObject, FIELD_STATUS));
         final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
         final String source = optString(jsonObject, FIELD_SOURCE);
 
@@ -314,7 +312,7 @@ public class PaymentIntent extends StripeJsonModel {
         putMapIfNotNull(jsonObject, FIELD_NEXT_ACTION, mNextAction);
         putStringIfNotNull(jsonObject, FIELD_RECEIPT_EMAIL, mReceiptEmail);
         putStringIfNotNull(jsonObject, FIELD_SOURCE, mSource);
-        putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
+        putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus != null ? mStatus.code : null);
         return jsonObject;
     }
 
@@ -336,7 +334,7 @@ public class PaymentIntent extends StripeJsonModel {
         map.put(FIELD_LIVEMODE, mLiveMode);
         map.put(FIELD_NEXT_ACTION, mNextAction);
         map.put(FIELD_RECEIPT_EMAIL, mReceiptEmail);
-        map.put(FIELD_STATUS, mStatus);
+        map.put(FIELD_STATUS, mStatus != null ? mStatus.code : null);
         map.put(FIELD_SOURCE, mSource);
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
@@ -371,9 +369,12 @@ public class PaymentIntent extends StripeJsonModel {
                 mDescription, mLiveMode, mReceiptEmail, mSource, mStatus);
     }
 
+    /**
+     * See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-type
+     */
     public enum NextActionType {
         RedirectToUrl("redirect_to_url"),
-        AuthorizeWithUrl("authorize_with_url");
+        UseStripeSdk("use_stripe_sdk");
 
         @NonNull public final String code;
 
@@ -394,6 +395,12 @@ public class PaymentIntent extends StripeJsonModel {
             }
 
             return null;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return code;
         }
     }
 
@@ -430,6 +437,12 @@ public class PaymentIntent extends StripeJsonModel {
             }
 
             return null;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return code;
         }
     }
 

@@ -60,8 +60,8 @@ public class PaymentIntentTest {
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
             "  \"next_action\": {" +
-            "       \"type\": \"authorize_with_url\"," +
-            "           \"authorize_with_url\": {" +
+            "       \"type\": \"redirect_to_url\"," +
+            "           \"redirect_to_url\": {" +
             "             \"url\": \""+ BAD_URL +"\"," +
             "             \"return_url\": \"yourapp://post-authentication-return-url\"" +
             "           } " +
@@ -148,8 +148,8 @@ public class PaymentIntentTest {
             "\t\"object\": \"payment_intent\",\n" +
             "\t\"status\": \"requires_action\",\n" +
             "\t\"next_action\": {\n" +
-            "\t\t\"type\": \"authorize_with_url\",\n" +
-            "\t\t\"authorize_with_url\": {\n" +
+            "\t\t\"type\": \"redirect_to_url\",\n" +
+            "\t\t\"redirect_to_url\": {\n" +
             "\t\t\t\"url\": \"https://example.com/redirect\",\n" +
             "\t\t\t\"return_url\": \"yourapp://post-authentication-return-url\"\n" +
             "\t\t}\n" +
@@ -176,7 +176,7 @@ public class PaymentIntentTest {
                 put(PaymentIntent.FIELD_LIVEMODE, false);
                 put(PaymentIntent.FIELD_SOURCE, "src_1CkiC3LENEVhOs7YMSa4yx4G");
                 put(PaymentIntent.FIELD_CAPTURE_METHOD, "automatic");
-                put(PaymentIntent.FIELD_STATUS, "succeeded");
+                put(PaymentIntent.FIELD_STATUS, PaymentIntent.Status.Succeeded.code);
             }};
 
     private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE = PaymentIntent
