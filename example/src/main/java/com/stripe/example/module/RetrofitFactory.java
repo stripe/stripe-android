@@ -1,5 +1,8 @@
 package com.stripe.example.module;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -17,19 +20,20 @@ public class RetrofitFactory {
     // Put your Base URL here. Unless you customized it, the URL will be something like
     // https://hidden-beach-12345.herokuapp.com/
     private static final String BASE_URL = "put your url here";
-    private static Retrofit mInstance = null;
+    @Nullable private static Retrofit mInstance = null;
 
+    @NonNull
     public static Retrofit getInstance() {
         if (mInstance == null) {
+            final HttpLoggingInterceptor logging = new HttpLoggingInterceptor()
+                    // Set your desired log level. Use Level.BODY for debugging errors.
+                    .setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            // Set your desired log level. Use Level.BODY for debugging errors.
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            final OkHttpClient httpClient = new OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .build();
 
-            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(logging);
-
-            Gson gson = new GsonBuilder()
+            final Gson gson = new GsonBuilder()
                     .setLenient()
                     .create();
 
@@ -39,9 +43,10 @@ public class RetrofitFactory {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .baseUrl(BASE_URL)
-                    .client(httpClient.build())
+                    .client(httpClient)
                     .build();
         }
+
         return mInstance;
     }
 }

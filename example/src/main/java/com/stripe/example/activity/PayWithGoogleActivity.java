@@ -12,8 +12,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.identity.intents.model.UserAddress;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.CardInfo;
 import com.google.android.gms.wallet.CardRequirements;
@@ -52,12 +50,7 @@ public class PayWithGoogleActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.pwg_progress_bar);
         mPayWithGoogleButton = findViewById(R.id.btn_buy_pwg);
         mPayWithGoogleButton.setEnabled(false);
-        mPayWithGoogleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                payWithGoogle();
-            }
-        });
+        mPayWithGoogleButton.setOnClickListener(v -> payWithGoogle());
 
         isReadyToPay();
     }
@@ -75,28 +68,26 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
                 .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
                 .build();
-        final Task<Boolean> task = mPaymentsClient.isReadyToPay(request);
-        task.addOnCompleteListener(new OnCompleteListener<Boolean>() {
-            public void onComplete(@NonNull Task<Boolean> task) {
-                try {
-                    final boolean result = task.getResult(ApiException.class);
-                    mProgressBar.setVisibility(View.INVISIBLE);
-                    if (result) {
-                        Toast.makeText(PayWithGoogleActivity.this, "Ready",
-                                Toast.LENGTH_SHORT).show();
-                        mPayWithGoogleButton.setEnabled(true);
-                    } else {
-                        Toast.makeText(PayWithGoogleActivity.this, "No PWG",
-                                Toast.LENGTH_SHORT).show();
-                        //hide Google as payment option
+        mPaymentsClient.isReadyToPay(request)
+                .addOnCompleteListener(task -> {
+                    try {
+                        final boolean result = task.getResult(ApiException.class);
+                        mProgressBar.setVisibility(View.INVISIBLE);
+                        if (result) {
+                            Toast.makeText(PayWithGoogleActivity.this, "Ready",
+                                    Toast.LENGTH_SHORT).show();
+                            mPayWithGoogleButton.setEnabled(true);
+                        } else {
+                            Toast.makeText(PayWithGoogleActivity.this, "No PWG",
+                                    Toast.LENGTH_SHORT).show();
+                            //hide Google as payment option
+                        }
+                    } catch (ApiException exception) {
+                        Toast.makeText(PayWithGoogleActivity.this,
+                                "Exception: " + exception.getLocalizedMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
-                } catch (ApiException exception) {
-                    Toast.makeText(PayWithGoogleActivity.this,
-                            "Exception: " + exception.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+                });
 
     }
 

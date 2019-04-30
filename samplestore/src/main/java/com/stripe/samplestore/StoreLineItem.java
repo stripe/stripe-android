@@ -20,19 +20,19 @@ public class StoreLineItem implements Parcelable {
     }
 
     @NonNull
-    public String getDescription() {
+    String getDescription() {
         return mDescription;
     }
 
-    public int getQuantity() {
+    int getQuantity() {
         return mQuantity;
     }
 
-    public long getUnitPrice() {
+    long getUnitPrice() {
         return mUnitPrice;
     }
 
-    public long getTotalPrice() {
+    long getTotalPrice() {
         return mUnitPrice * mQuantity;
     }
 

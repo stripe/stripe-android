@@ -1,6 +1,7 @@
 package com.stripe.samplestore;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,7 +20,7 @@ public class RetrofitFactory {
     // Put your Base URL here. Unless you customized it, the URL will be something like
     // https://hidden-beach-12345.herokuapp.com/
     private static final String BASE_URL = "put your base url here";
-    private static Retrofit mInstance = null;
+    @Nullable private static Retrofit mInstance = null;
 
     @NonNull
     public static Retrofit getInstance() {

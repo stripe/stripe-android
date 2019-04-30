@@ -46,25 +46,17 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
-                    new ExampleEphemeralKeyProvider.ProgressListener() {
-                        @Override
-                        public void onStringResponse(String string) {
+                        string -> {
                             if (string.startsWith("Error: ")) {
                                 mErrorDialogHandler.show(string);
                             }
-                        }
-                    }));
+                        }));
 
         mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.getInstance().retrieveCurrentCustomer(
                 new CustomerRetrievalListenerImpl(this));
 
-        mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchWithCustomer();
-            }
-        });
+        mSelectSourceButton.setOnClickListener(v -> launchWithCustomer());
     }
 
     private void launchWithCustomer() {

@@ -28,12 +28,8 @@ public class RedirectDialogController {
 
         final TextView linkView = dialogView.findViewById(R.id.tv_link_redirect);
         linkView.setText(R.string.verify);
-        linkView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-            }
-        });
+        linkView.setOnClickListener(v ->
+                mActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))));
 
         mAlertDialog = new AlertDialog.Builder(mActivity)
                 .setView(dialogView)

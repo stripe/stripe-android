@@ -84,7 +84,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
@@ -117,6 +117,8 @@ public class PaymentActivity extends AppCompatActivity {
             mConfirmPaymentButton.setEnabled(false);
         }
 
+        final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -135,11 +137,10 @@ public class PaymentActivity extends AppCompatActivity {
                     shippingInfoProcessedIntent
                             .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.get(0));
                 }
-                LocalBroadcastManager.getInstance(PaymentActivity.this)
-                        .sendBroadcast(shippingInfoProcessedIntent);
+                localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent);
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+        localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
     }
 
