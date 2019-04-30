@@ -38,12 +38,15 @@
    CustomerSession.getInstance().setCustomerShippingInformation(listener);
    ```
 
-- `PaymentIntent` has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
+- [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
     - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
     - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
     - `PaymentIntent#getNextSourceAction()` is now `PaymentIntent#getNextAction()`
     - `PaymentIntent#getAuthorizationUrl()` is now `PaymentIntent#getRedirectUrl()`
     - `PaymentIntent#requiresAction()` has been added as a convenience
+
+- [`Address`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
+  Use `Address.Builder` to create a new `Address` object.
 
 ### Migrating from versions < 7.0.0
 - Remove Bitcoin source support because Stripe [no longer processes Bitcoin payments](https://stripe.com/blog/ending-bitcoin-support)
