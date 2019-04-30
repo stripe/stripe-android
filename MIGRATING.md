@@ -41,9 +41,11 @@
 - `PaymentIntent` has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
     - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
     - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
+    - `PaymentIntent.NextActionType.AuthorizeWithUrl` has been removed
     - `PaymentIntent#getNextSourceAction()` is now `PaymentIntent#getNextAction()`
     - `PaymentIntent#getAuthorizationUrl()` is now `PaymentIntent#getRedirectUrl()`
     - `PaymentIntent#requiresAction()` has been added as a convenience
+    - `PaymentIntent#getStatus()` now returns a `PaymentIntent.Status` enum value instead of a `String`
 
 ### Migrating from versions < 7.0.0
 - Remove Bitcoin source support because Stripe [no longer processes Bitcoin payments](https://stripe.com/blog/ending-bitcoin-support)
