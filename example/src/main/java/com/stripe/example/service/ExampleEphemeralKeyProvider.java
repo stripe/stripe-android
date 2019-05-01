@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -39,26 +37,20 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
         Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
-        mCompositeSubscription.add(
-                mStripeService.createEphemeralKey(apiParamMap)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<ResponseBody>() {
-                            @Override
-                            public void call(ResponseBody response) {
-                                try {
-                                    String rawKey = response.string();
-                                    keyUpdateListener.onKeyUpdate(rawKey);
-                                    mProgressListener.onStringResponse(rawKey);
-                                } catch (IOException ignored) {
-                                }
+        mCompositeSubscription.add(mStripeService.createEphemeralKey(apiParamMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> {
+                            try {
+                                String rawKey = response.string();
+                                keyUpdateListener.onKeyUpdate(rawKey);
+                                mProgressListener.onStringResponse(rawKey);
+                            } catch (IOException ignored) {
                             }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mProgressListener.onStringResponse(throwable.getMessage());
-                            }
-                        }));
+                        },
+                        throwable ->
+                                mProgressListener.onStringResponse(throwable.getMessage())));
     }
 
     public interface ProgressListener {

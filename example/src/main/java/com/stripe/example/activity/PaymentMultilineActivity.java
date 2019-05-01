@@ -23,12 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -67,12 +64,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
         listView.setAdapter(mSimpleAdapter);
         mCompositeSubscription.add(
-                RxView.clicks(findViewById(R.id.save_payment)).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCard();
-                    }
-                }));
+                RxView.clicks(findViewById(R.id.save_payment)).subscribe(aVoid -> saveCard()));
     }
 
     private void saveCard() {
@@ -88,44 +80,19 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         // will not be called until we subscribe to it.
         final Observable<PaymentMethod> tokenObservable =
                 Observable.fromCallable(
-                        new Callable<PaymentMethod>() {
-                            @Override
-                            public PaymentMethod call() throws Exception {
-                                return stripe.createPaymentMethodSynchronous(cardSourceParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
+                        () -> stripe.createPaymentMethodSynchronous(cardSourceParams,
+                                PaymentConfiguration.getInstance().getPublishableKey()));
 
         mCompositeSubscription.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.show(R.string.progressMessage);
-                            }
-                        })
+                        () -> mProgressDialogController.show(R.string.progressMessage))
                 .doOnUnsubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.dismiss();
-                            }
-                        })
+                        () -> mProgressDialogController.dismiss())
                 .subscribe(
-                        new Action1<PaymentMethod>() {
-                            @Override
-                            public void call(PaymentMethod paymentMethod) {
-                                addToList(paymentMethod);
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
-                            }
-                        }));
+                        this::addToList,
+                        throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())));
     }
 
     private void addToList(@Nullable PaymentMethod paymentMethod) {

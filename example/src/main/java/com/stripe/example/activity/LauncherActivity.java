@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
@@ -26,58 +25,26 @@ public class LauncherActivity extends AppCompatActivity {
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
 
-        findViewById(R.id.btn_payment_intent).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(PaymentIntentActivity.class);
-            }
-        });
+        findViewById(R.id.btn_payment_intent)
+                .setOnClickListener(v -> startActivity(PaymentIntentActivity.class));
 
-        findViewById(R.id.btn_make_card_tokens).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(PaymentActivity.class);
-            }
-        });
+        findViewById(R.id.btn_make_card_tokens)
+                .setOnClickListener(v -> startActivity(PaymentActivity.class));
 
         findViewById(R.id.btn_make_card_payment_methods)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(PaymentMultilineActivity.class);
-                    }
-                });
+                .setOnClickListener(v -> startActivity(PaymentMultilineActivity.class));
 
-        findViewById(R.id.btn_make_sources).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(RedirectActivity.class);
-            }
-        });
+        findViewById(R.id.btn_make_sources)
+                .setOnClickListener(v -> startActivity(RedirectActivity.class));
 
         findViewById(R.id.btn_customer_session_launch)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(CustomerSessionActivity.class);
-                    }
-                });
+                .setOnClickListener(v -> startActivity(CustomerSessionActivity.class));
 
         findViewById(R.id.btn_payment_session_launch)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(PaymentSessionActivity.class);
-                    }
-                });
+                .setOnClickListener(v -> startActivity(PaymentSessionActivity.class));
 
         findViewById(R.id.btn_payment_with_google_launch)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startActivity(PayWithGoogleActivity.class);
-                    }
-                });
+                .setOnClickListener(v -> startActivity(PayWithGoogleActivity.class));
 
     }
 

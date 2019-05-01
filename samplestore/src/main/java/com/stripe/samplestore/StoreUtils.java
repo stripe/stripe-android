@@ -9,7 +9,7 @@ import java.util.Currency;
 /**
  * Class for utility functions.
  */
-public class StoreUtils {
+class StoreUtils {
 
     @NonNull
     static String getEmojiByUnicode(int unicode){

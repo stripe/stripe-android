@@ -103,30 +103,18 @@ public class PaymentSessionActivity extends AppCompatActivity {
         };
         localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
-        mSelectPaymentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPaymentSession.presentPaymentMethodSelection();
-            }
-        });
-        mSelectShippingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mPaymentSession.presentShippingFlow();
-            }
-        });
+        mSelectPaymentButton.setOnClickListener(v ->
+                mPaymentSession.presentPaymentMethodSelection());
+        mSelectShippingButton.setOnClickListener(v -> mPaymentSession.presentShippingFlow());
 
     }
 
     private void setupCustomerSession() {
         CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
-                        new ExampleEphemeralKeyProvider.ProgressListener() {
-                            @Override
-                            public void onStringResponse(String string) {
-                                if (string.startsWith("Error: ")) {
-                                    mErrorDialogHandler.show(string);
-                                }
+                        string -> {
+                            if (string.startsWith("Error: ")) {
+                                mErrorDialogHandler.show(string);
                             }
                         }));
         CustomerSession.getInstance().retrieveCurrentCustomer(

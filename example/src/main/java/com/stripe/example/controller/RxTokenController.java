@@ -13,12 +13,8 @@ import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 
-import java.util.concurrent.Callable;
-
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -52,12 +48,7 @@ public class RxTokenController {
         mProgressDialogController = progressDialogController;
 
         mCompositeSubscription.add(
-                RxView.clicks(button).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCard();
-                    }
-                })
+                RxView.clicks(button).subscribe(aVoid -> saveCard())
         );
     }
 
@@ -81,43 +72,19 @@ public class RxTokenController {
         // will not be called until we subscribe to it.
         final Observable<Token> tokenObservable =
                 Observable.fromCallable(
-                        new Callable<Token>() {
-                            @Override
-                            public Token call() throws Exception {
-                                return stripe.createTokenSynchronous(cardToSave,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
+                        () -> stripe.createTokenSynchronous(cardToSave,
+                                PaymentConfiguration.getInstance().getPublishableKey()));
 
         mCompositeSubscription.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.show(R.string.progressMessage);
-                            }
-                        })
-                .doOnUnsubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.dismiss();
-                            }
-                        })
+                        () -> mProgressDialogController.show(R.string.progressMessage))
+                .doOnUnsubscribe(mProgressDialogController::dismiss)
                 .subscribe(
-                        new Action1<Token>() {
-                            @Override
-                            public void call(Token token) {
-                                mOutputListController.addToList(token);
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
-                            }
-                        }));
+                        mOutputListController::addToList,
+                        throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())
+                )
+        );
     }
 }
