@@ -2,67 +2,67 @@
 
 ## 9.0.0 (on deck)
 Note: this release has breaking changes. See [MIGRATING.md](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md)
-* Update pinned API version to `2019-03-14` (#873)
-* Inject `Context` in `CustomerSession` and `StripeApiHandler` (#875)
-* Update `PaymentIntent` model for API `2019-02-11` (#907)
-* Upgrade Android Gradle Plugin to 3.4.0 (#894)
-* Create `CustomerSession.ActivityCustomerRetrievalListener` to handle `Activity` weak refs (#872)
+* [#873](https://github.com/stripe/stripe-android/pull/873) Update pinned API version to `2019-03-14`
+* [#875](https://github.com/stripe/stripe-android/pull/875) Inject `Context` in `CustomerSession` and `StripeApiHandler`
+* [#907](https://github.com/stripe/stripe-android/pull/907) Update `PaymentIntent` model for API `2019-02-11`
+* [#894](https://github.com/stripe/stripe-android/pull/894) Upgrade Android Gradle Plugin to 3.4.0
+* [#872](https://github.com/stripe/stripe-android/pull/872) Create `CustomerSession.ActivityCustomerRetrievalListener` to handle `Activity` weak refs
 
 ## 8.7.0 2019-04-12
-* Fix garbage-collection issues with `Stripe` callbacks [#863]
-* Fix race-conditions with `CustomerSession` listeners [#856]
-* Correctly parse JSON when creating or deleting customer card source [#857]
-* Fix crash on some devices (e.g. Meizu) related to `TextInputEditText` [#858]
-* Improve `PaymentMethodCreateParams.Card` creation [#862]
-* Update `PaymentIntent#Status` enum [#870]
-* Fix some memory leak issues in example app [#865]
+* [#863](https://github.com/stripe/stripe-android/pull/863) Fix garbage-collection issues with `Stripe` callbacks
+* [#856](https://github.com/stripe/stripe-android/pull/856) Fix race-conditions with `CustomerSession` listeners
+* [#857](https://github.com/stripe/stripe-android/pull/857) Correctly parse JSON when creating or deleting customer card source
+* [#858](https://github.com/stripe/stripe-android/pull/858) Fix crash on some devices (e.g. Meizu) related to `TextInputEditText`
+* [#862](https://github.com/stripe/stripe-android/pull/862) Improve `PaymentMethodCreateParams.Card` creation
+* [#870](https://github.com/stripe/stripe-android/pull/870) Update `PaymentIntent#Status` enum
+* [#865](https://github.com/stripe/stripe-android/pull/865) Fix some memory leak issues in example app
 
 ## 8.6.0 2019-04-05
-* Downgrade from AndroidX to Android Support Library [#849]
-* Add setter for custom CVC field label on `CardMultilineWidget` [#843]
-* Fix a11y traversal order in `CardInputWidget` [#850]
-* Refactor `StripeApiHandler` to use instance methods [#839]
+* [#849](https://github.com/stripe/stripe-android/pull/849) Downgrade from AndroidX to Android Support Library
+* [#843](https://github.com/stripe/stripe-android/pull/843) Add setter for custom CVC field label on `CardMultilineWidget`
+* [#850](https://github.com/stripe/stripe-android/pull/850) Fix a11y traversal order in `CardInputWidget`
+* [#839](https://github.com/stripe/stripe-android/pull/839) Refactor `StripeApiHandler` to use instance methods
 
 ## 8.5.0 2019-03-05
-* Clean up `PaymentIntent` [#805]
-* Pass `StripeError` in onError [#806]
-* Create `ErrorMessageTranslator` and default implementation [#807]
-* Make `StripeSourceTypeModel` public [#809]
-* Fix TalkBack crash in `CardInputWidget` [#817]
-* Fix account token failure on latest API version [#822]
-* Upgrade Android Gradle Plugin to 3.3.2 [#827]
-* Support save to customer param on `PaymentIntent` confirm [#828]
-* Add `"not_required"` as possible value of `Source` `redirect[status]` [#829]
-* Add `"recommended"` as possible value of `Source` `card[three_d_secure]` [#830]
-* Pin all Stripe requests to API version `2017-06-05` [#832]
+* [#805](https://github.com/stripe/stripe-android/pull/805) Clean up `PaymentIntent`
+* [#806](https://github.com/stripe/stripe-android/pull/806) Pass `StripeError` in onError
+* [#807](https://github.com/stripe/stripe-android/pull/807) Create `ErrorMessageTranslator` and default implementation
+* [#809](https://github.com/stripe/stripe-android/pull/809) Make `StripeSourceTypeModel` public
+* [#817](https://github.com/stripe/stripe-android/pull/817) Fix TalkBack crash in `CardInputWidget`
+* [#822](https://github.com/stripe/stripe-android/pull/822) Fix account token failure on latest API version
+* [#827](https://github.com/stripe/stripe-android/pull/827) Upgrade Android Gradle Plugin to 3.3.2
+* [#828](https://github.com/stripe/stripe-android/pull/828) Support save to customer param on `PaymentIntent` confirm
+* [#829](https://github.com/stripe/stripe-android/pull/829) Add `"not_required"` as possible value of `Source` `redirect[status]`
+* [#830](https://github.com/stripe/stripe-android/pull/830) Add `"recommended"` as possible value of `Source` `card[three_d_secure]`
+* [#832](https://github.com/stripe/stripe-android/pull/832) Pin all Stripe requests to API version `2017-06-05`
 
 ## 8.4.0 2019-02-06
-* Add StripeError field to StripeException [#793]
-* Add support for creating a CVC update Token [#787]
-* Prevent AddSourceActivity's SourceCallback from being garbage collected [#791]
-* Fix IME action logic on CVC field in CardMultilineWidget [#790]
-* Add metadata field to Card [#786]
+* [#793](https://github.com/stripe/stripe-android/pull/793) Add StripeError field to StripeException
+* [#787](https://github.com/stripe/stripe-android/pull/787) Add support for creating a CVC update Token
+* [#791](https://github.com/stripe/stripe-android/pull/791) Prevent AddSourceActivity's SourceCallback from being garbage collected
+* [#790](https://github.com/stripe/stripe-android/pull/790) Fix IME action logic on CVC field in CardMultilineWidget
+* [#786](https://github.com/stripe/stripe-android/pull/786) Add metadata field to Card
 
 ## 8.3.0 2019-01-25
-* Fix bug related to ephemeral keys introduced in 8.2.0 [#780]
-* Migrate to Android X [#778]
-* Add errorCode and errorDeclineCode fields to InvalidRequestException [#771]
-* Upgrade to Android Gradle Plugin 3.3.0 [#766]
-* Remove Saudi Arabia from the no postal code countries list [#770]
+* [#780](https://github.com/stripe/stripe-android/pull/780) Fix bug related to ephemeral keys introduced in 8.2.0
+* [#778](https://github.com/stripe/stripe-android/pull/778) Migrate to Android X
+* [#771](https://github.com/stripe/stripe-android/pull/771) Add errorCode and errorDeclineCode fields to InvalidRequestException
+* [#766](https://github.com/stripe/stripe-android/pull/766) Upgrade to Android Gradle Plugin 3.3.0
+* [#770](https://github.com/stripe/stripe-android/pull/770) Remove Saudi Arabia from the no postal code countries list
 
 ## 8.2.0 2019-01-10
-* Add support for Android 28 [#675]
+* [#675](https://github.com/stripe/stripe-android/pull/675) Add support for Android 28
     * Update Android SDK Build Tools to 28.0.3
     * Update Android Gradle plugin to 3.2.1
     * Update compileSdkVersion and targetSdkVersion to 28
     * Update Android Support Library to 28.0.0
-* Add ability to set card number and validate on `CardMultilineWidget` [#671]
-* Add support for iDeal Source with connected account [#537]
-* Add support for Portuguese [#669]
-* Add ability to cancel callbacks without destroying `CustomerSession` instance [#624]
-* Improve accessibility on card input fields [#673]
-* Add `AccessibilityNodeInfo` to widgets [#656]
-* Fix crash in `ShippingMethodView` on API 16 [#678]
+* [#671](https://github.com/stripe/stripe-android/pull/671) Add ability to set card number and validate on `CardMultilineWidget`
+* [#537](https://github.com/stripe/stripe-android/pull/537) Add support for iDeal Source with connected account
+* [#669](https://github.com/stripe/stripe-android/pull/669) Add support for Portuguese
+* [#624](https://github.com/stripe/stripe-android/pull/624) Add ability to cancel callbacks without destroying `CustomerSession` instance
+* [#673](https://github.com/stripe/stripe-android/pull/673) Improve accessibility on card input fields
+* [#656](https://github.com/stripe/stripe-android/pull/656) Add `AccessibilityNodeInfo` to widgets 
+* [#678](https://github.com/stripe/stripe-android/pull/678) Fix crash in `ShippingMethodView` on API 16
 
 ## 8.1.0 2018-11-13
 * Add support for latest version of PaymentIntents
@@ -72,27 +72,27 @@ Note: this release has breaking changes. See [MIGRATING.md](https://github.com/s
 * Fix bug with Canadian and UK postal code validation
 
 ## 8.0.0 2018-7-13
-* **BREAKING** Renamed PaymentIntentParams methods for readibility [#609](https://github.com/stripe/stripe-android/pull/609)
+* [#609](https://github.com/stripe/stripe-android/pull/609) **BREAKING** Renamed PaymentIntentParams methods for readibility
 
 ## 7.2.0 2018-07-12
 * Add beta support for PaymentIntents for usage with card sources []
 * Add sample integration with PaymentIntents
 * Fix crash in MaskedCardAdapter
-* **BREAKING** Add `preferredLanguage` parameter to `SourceParams.createBancontactParams` [#589](https://github.com/stripe/stripe-android/pull/589)
+* [#589](https://github.com/stripe/stripe-android/pull/589) **BREAKING** Add `preferredLanguage` parameter to `SourceParams.createBancontactParams`
 
 ## 7.1.0 2018-06-11
-* Add EPS and Multibanco support to `SourceParams` [#583](https://github.com/stripe/stripe-android/pull/583)
-* Add `RequiredBillingAddressFields.NAME` option to enumeration [#586](https://github.com/stripe/stripe-android/pull/586)
-* **BREAKING** Fix `@Nullable` and `@NonNull` annotations for `createP24Params` function [#583](https://github.com/stripe/stripe-android/pull/583/commits/d95d5969bbf4c01b61624ccb9626790c124f0647)
+* [#583](https://github.com/stripe/stripe-android/pull/583) Add EPS and Multibanco support to `SourceParams`
+* [#586](https://github.com/stripe/stripe-android/pull/586) Add `RequiredBillingAddressFields.NAME` option to enumeration 
+* [#583](https://github.com/stripe/stripe-android/pull/583) **BREAKING** Fix `@Nullable` and `@NonNull` annotations for `createP24Params` function 
 
 ## 7.0.1 2018-05-25
 * Make iDEAL params match API - `name` is optional and optional ideal `bank` and `statement_descriptor` can be set independently
 
 ## 7.0.0 2018-04-25
-* Remove Bitcoin source support. See MIGRATING.md. [#559](https://github.com/stripe/stripe-android/pull/559)
-* Add create Masterpass source support [#549](https://github.com/stripe/stripe-android/pull/549)
-* Add support for 3 digit American Express CVC [#548](https://github.com/stripe/stripe-android/pull/548)
-* Fix crash when JCB icon is shown [#547](https://github.com/stripe/stripe-android/pull/547)
+* [#559](https://github.com/stripe/stripe-android/pull/559) Remove Bitcoin source support. See MIGRATING.md.
+* [#549](https://github.com/stripe/stripe-android/pull/549) Add create Masterpass source support 
+* [#548](https://github.com/stripe/stripe-android/pull/548) Add support for 3 digit American Express CVC
+* [#547](https://github.com/stripe/stripe-android/pull/547) Fix crash when JCB icon is shown
 
 ## 6.1.2 2018-03-16
 * Handle soft enter key in AddSourceActivity
