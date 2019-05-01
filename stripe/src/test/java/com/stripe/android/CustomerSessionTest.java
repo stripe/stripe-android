@@ -15,6 +15,7 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
@@ -110,6 +111,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                     "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
                     "  }\n" +
                     "}";
+
     private static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -175,6 +177,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
     @Captor private ArgumentCaptor<Source> mSourceArgumentCaptor;
     @Captor private ArgumentCaptor<PaymentMethod> mPaymentMethodArgumentCaptor;
+    @Captor private ArgumentCaptor<List<PaymentMethod>> mPaymentMethodsArgumentCaptor;
     @Captor private ArgumentCaptor<Customer> mCustomerArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
@@ -203,8 +206,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Before
     public void setup()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
 
@@ -266,6 +268,15 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString()
         ))
                 .thenReturn(mPaymentMethod);
+
+        when(mApiHandler.getPaymentMethods(
+                anyString(),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString()
+        ))
+                .thenReturn(Collections.singletonList(mPaymentMethod));
 
         doAnswer(new Answer() {
             @Override
@@ -512,8 +523,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -616,8 +626,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -719,8 +728,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -851,8 +859,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void attachPaymentMethodToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -952,8 +959,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void detachPaymentMethodFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -997,9 +1003,61 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
     }
 
+    @Test
+    public void getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs()
+            throws StripeException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        final CustomerSession.PaymentMethodsRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodsRetrievalListener.class);
+
+        customerSession.getPaymentMethods(PaymentMethod.Type.Card, mockListener);
+
+//        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+        assertNotNull(FIRST_CUSTOMER);
+        assertNotNull(FIRST_CUSTOMER.getId());
+        verify(mApiHandler).getPaymentMethods(
+                eq(FIRST_CUSTOMER.getId()),
+                eq("card"),
+                eq("pk_test_abc123"),
+                mListArgumentCaptor.capture(),
+                eq(firstKey.getSecret())
+        );
+
+        final List<String> productUsage = mListArgumentCaptor.getValue();
+        assertEquals(2, productUsage.size());
+        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("PaymentMethodsActivity"));
+
+        verify(mockListener).onPaymentMethodsRetrieved(mPaymentMethodsArgumentCaptor.capture());
+        final List<PaymentMethod> paymentMethods = mPaymentMethodsArgumentCaptor.getValue();
+        assertNotNull(paymentMethods);
+    }
+
+
     private void setupErrorProxy()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         when(mApiHandler.addCustomerSource(
                 anyString(),
                 anyString(),
@@ -1043,6 +1101,15 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
+                anyString()))
+                .thenThrow(new APIException("The payment method does not exist", "request_123",
+                        404, null, null));
+
+        when(mApiHandler.getPaymentMethods(
+                anyString(),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
                 anyString()))
                 .thenThrow(new APIException("The payment method does not exist", "request_123",
                         404, null, null));

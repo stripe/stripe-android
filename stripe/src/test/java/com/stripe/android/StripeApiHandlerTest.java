@@ -9,9 +9,11 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
@@ -21,11 +23,13 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +41,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link StripeApiHandler}.
@@ -416,5 +422,197 @@ public class StripeApiHandlerTest {
                 RequestOptions.builder("some_key")
                         .build());
         verifyNoMoreInteractions(mRequestExecutor);
+    }
+
+    @Test
+    public void getPaymentMethods_whenPopulated_returnsExpectedList()
+            throws StripeException, JSONException {
+        final String responseBody =
+                "{\n" +
+                "    \"object\": \"list\",\n" +
+                "    \"data\": [\n" +
+                "        {\n" +
+                "            \"id\": \"pm_1EVNYJCRMbs6FrXfG8n52JaK\",\n" +
+                "            \"object\": \"payment_method\",\n" +
+                "            \"billing_details\": {\n" +
+                "                \"address\": {\n" +
+                "                    \"city\": null,\n" +
+                "                    \"country\": null,\n" +
+                "                    \"line1\": null,\n" +
+                "                    \"line2\": null,\n" +
+                "                    \"postal_code\": null,\n" +
+                "                    \"state\": null\n" +
+                "                },\n" +
+                "                \"email\": null,\n" +
+                "                \"name\": null,\n" +
+                "                \"phone\": null\n" +
+                "            },\n" +
+                "            \"card\": {\n" +
+                "                \"brand\": \"visa\",\n" +
+                "                \"checks\": {\n" +
+                "                    \"address_line1_check\": null,\n" +
+                "                    \"address_postal_code_check\": null,\n" +
+                "                    \"cvc_check\": null\n" +
+                "                },\n" +
+                "                \"country\": \"US\",\n" +
+                "                \"exp_month\": 5,\n" +
+                "                \"exp_year\": 2020,\n" +
+                "                \"fingerprint\": \"atmHgDo9nxHpQJiw\",\n" +
+                "                \"funding\": \"credit\",\n" +
+                "                \"generated_from\": null,\n" +
+                "                \"last4\": \"4242\",\n" +
+                "                \"three_d_secure_usage\": {\n" +
+                "                    \"supported\": true\n" +
+                "                },\n" +
+                "                \"wallet\": null\n" +
+                "            },\n" +
+                "            \"created\": 1556736791,\n" +
+                "            \"customer\": \"cus_EzHwfOXxvAwRIW\",\n" +
+                "            \"livemode\": false,\n" +
+                "            \"metadata\": {},\n" +
+                "            \"type\": \"card\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"pm_1EVNXtCRMbs6FrXfTlZGIdGq\",\n" +
+                "            \"object\": \"payment_method\",\n" +
+                "            \"billing_details\": {\n" +
+                "                \"address\": {\n" +
+                "                    \"city\": null,\n" +
+                "                    \"country\": null,\n" +
+                "                    \"line1\": null,\n" +
+                "                    \"line2\": null,\n" +
+                "                    \"postal_code\": null,\n" +
+                "                    \"state\": null\n" +
+                "                },\n" +
+                "                \"email\": null,\n" +
+                "                \"name\": null,\n" +
+                "                \"phone\": null\n" +
+                "            },\n" +
+                "            \"card\": {\n" +
+                "                \"brand\": \"visa\",\n" +
+                "                \"checks\": {\n" +
+                "                    \"address_line1_check\": null,\n" +
+                "                    \"address_postal_code_check\": null,\n" +
+                "                    \"cvc_check\": null\n" +
+                "                },\n" +
+                "                \"country\": \"US\",\n" +
+                "                \"exp_month\": 5,\n" +
+                "                \"exp_year\": 2020,\n" +
+                "                \"fingerprint\": \"atmHgDo9nxHpQJiw\",\n" +
+                "                \"funding\": \"credit\",\n" +
+                "                \"generated_from\": null,\n" +
+                "                \"last4\": \"4242\",\n" +
+                "                \"three_d_secure_usage\": {\n" +
+                "                    \"supported\": true\n" +
+                "                },\n" +
+                "                \"wallet\": null\n" +
+                "            },\n" +
+                "            \"created\": 1556736765,\n" +
+                "            \"customer\": \"cus_EzHwfOXxvAwRIW\",\n" +
+                "            \"livemode\": false,\n" +
+                "            \"metadata\": {},\n" +
+                "            \"type\": \"card\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"src_1EVO8DCRMbs6FrXf2Dspj49a\",\n" +
+                "            \"object\": \"payment_method\",\n" +
+                "            \"billing_details\": {\n" +
+                "                \"address\": {\n" +
+                "                    \"city\": null,\n" +
+                "                    \"country\": null,\n" +
+                "                    \"line1\": null,\n" +
+                "                    \"line2\": null,\n" +
+                "                    \"postal_code\": null,\n" +
+                "                    \"state\": null\n" +
+                "                },\n" +
+                "                \"email\": null,\n" +
+                "                \"name\": null,\n" +
+                "                \"phone\": null\n" +
+                "            },\n" +
+                "            \"card\": {\n" +
+                "                \"brand\": \"visa\",\n" +
+                "                \"checks\": {\n" +
+                "                    \"address_line1_check\": null,\n" +
+                "                    \"address_postal_code_check\": null,\n" +
+                "                    \"cvc_check\": null\n" +
+                "                },\n" +
+                "                \"country\": \"US\",\n" +
+                "                \"exp_month\": 5,\n" +
+                "                \"exp_year\": 2020,\n" +
+                "                \"fingerprint\": \"Ep3vs1pdQAjtri7D\",\n" +
+                "                \"funding\": \"credit\",\n" +
+                "                \"generated_from\": null,\n" +
+                "                \"last4\": \"3063\",\n" +
+                "                \"three_d_secure_usage\": {\n" +
+                "                    \"supported\": true\n" +
+                "                },\n" +
+                "                \"wallet\": null\n" +
+                "            },\n" +
+                "            \"created\": 1556739017,\n" +
+                "            \"customer\": \"cus_EzHwfOXxvAwRIW\",\n" +
+                "            \"livemode\": false,\n" +
+                "            \"metadata\": {},\n" +
+                "            \"type\": \"card\"\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"has_more\": false,\n" +
+                "    \"url\": \"/v1/payment_methods\"\n" +
+                "}";
+        final StripeResponse stripeResponse = new StripeResponse(200, responseBody, null);
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("customer", "cus_123");
+        queryParams.put("type", PaymentMethod.Type.Card.code);
+        when(mRequestExecutor.execute(
+                eq(RequestExecutor.RestMethod.GET),
+                eq(StripeApiHandler.getPaymentMethodsUrl()),
+                eq(queryParams),
+                ArgumentMatchers.<RequestOptions>any()))
+                .thenReturn(stripeResponse);
+        final StripeApiHandler apiHandler = new StripeApiHandler(
+                ApplicationProvider.getApplicationContext(),
+                mRequestExecutor,
+                false
+        );
+        final List<PaymentMethod> paymentMethods = apiHandler
+                .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
+                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        "secret");
+        assertEquals(3, paymentMethods.size());
+        assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods.get(0).id);
+        assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods.get(1).id);
+        assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods.get(2).id);
+    }
+
+    @Test
+    public void getPaymentMethods_whenNotPopulated_returnsEmptydList()
+            throws StripeException, JSONException {
+        final String responseBody =
+                "{\n" +
+                        "    \"object\": \"list\",\n" +
+                        "    \"data\": [\n" +
+                        "    ],\n" +
+                        "    \"has_more\": false,\n" +
+                        "    \"url\": \"/v1/payment_methods\"\n" +
+                        "}";
+        final StripeResponse stripeResponse = new StripeResponse(200, responseBody, null);
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("customer", "cus_123");
+        queryParams.put("type", PaymentMethod.Type.Card.code);
+        when(mRequestExecutor.execute(
+                eq(RequestExecutor.RestMethod.GET),
+                eq(StripeApiHandler.getPaymentMethodsUrl()),
+                eq(queryParams),
+                ArgumentMatchers.<RequestOptions>any()))
+                .thenReturn(stripeResponse);
+        final StripeApiHandler apiHandler = new StripeApiHandler(
+                ApplicationProvider.getApplicationContext(),
+                mRequestExecutor,
+                false
+        );
+        final List<PaymentMethod> paymentMethods = apiHandler
+                .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
+                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        "secret");
+        assertTrue(paymentMethods.isEmpty());
     }
 }

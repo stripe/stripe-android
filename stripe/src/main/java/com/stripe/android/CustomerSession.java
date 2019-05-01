@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -48,9 +49,11 @@ public class CustomerSession {
     private static final String ACTION_DELETE_SOURCE = "delete_source";
     private static final String ACTION_ATTACH_PAYMENT_METHOD = "attach_payment_method";
     private static final String ACTION_DETACH_PAYMENT_METHOD = "detach_payment_method";
+    private static final String ACTION_GET_PAYMENT_METHODS = "get_payment_methods";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
     private static final String ACTION_SET_CUSTOMER_SHIPPING_INFO = "set_shipping_info";
     private static final String KEY_PAYMENT_METHOD = "payment_method";
+    private static final String KEY_PAYMENT_METHOD_TYPE = "payment_method_type";
     private static final String KEY_SOURCE = "source";
     private static final String KEY_SOURCE_TYPE = "source_type";
     private static final String KEY_SHIPPING_INFO = "shipping_info";
@@ -68,7 +71,9 @@ public class CustomerSession {
             MessageCode.CUSTOMER_RETRIEVED,
             MessageCode.SOURCE_RETRIEVED,
             MessageCode.PAYMENT_METHOD_RETRIEVED,
-            MessageCode.CUSTOMER_SHIPPING_INFO_SAVED})
+            MessageCode.CUSTOMER_SHIPPING_INFO_SAVED,
+            MessageCode.PAYMENT_METHODS_RETRIEVED
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MessageCode {
         int ERROR = 1;
@@ -76,6 +81,7 @@ public class CustomerSession {
         int SOURCE_RETRIEVED = 3;
         int PAYMENT_METHOD_RETRIEVED = 4;
         int CUSTOMER_SHIPPING_INFO_SAVED = 5;
+        int PAYMENT_METHODS_RETRIEVED = 6;
     }
 
     // The maximum number of active threads we support
@@ -218,6 +224,16 @@ public class CustomerSession {
                         getPaymentMethodRetrievalListener(operationId);
                 if (listener != null && paymentMethod != null) {
                     listener.onPaymentMethodRetrieved(paymentMethod);
+                }
+            }
+
+            @Override
+            public void onPaymentMethodsRetrieved(@NonNull List<PaymentMethod> paymentMethods,
+                                                  @NonNull String operationId) {
+                final PaymentMethodsRetrievalListener listener =
+                        getPaymentMethodsRetrievalListener(operationId);
+                if (listener != null) {
+                    listener.onPaymentMethodsRetrieved(paymentMethods);
                 }
             }
 
@@ -383,6 +399,20 @@ public class CustomerSession {
     }
 
     /**
+     * Gets a Customer's PaymentMethods
+     */
+    public void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
+                                  @NonNull PaymentMethodsRetrievalListener listener) {
+        final Map<String, String> arguments = new HashMap<>();
+        arguments.put(KEY_PAYMENT_METHOD_TYPE, paymentMethodType.code);
+
+        final String operationId = mOperationIdFactory.create();
+        mCustomerListeners.put(operationId, listener);
+        mEphemeralKeyManager
+                .retrieveEphemeralKey(operationId, ACTION_GET_PAYMENT_METHODS, arguments);
+    }
+
+    /**
      * Set the shipping information on the current customer object.
      *
      * @param shippingInformation the data to be set
@@ -506,6 +536,21 @@ public class CustomerSession {
     }
 
     @NonNull
+    private Runnable createGetPaymentMethodsRunnable(
+            @NonNull final CustomerEphemeralKey key,
+            @NonNull final String paymentMethodType,
+            @NonNull final String operationId) {
+        return new CustomerSessionRunnable<List<PaymentMethod>>(mUiThreadHandler,
+                mLocalBroadcastManager, MessageCode.PAYMENT_METHOD_RETRIEVED, operationId) {
+            @NonNull
+            @Override
+            public List<PaymentMethod> createMessageObject() throws StripeException {
+                return getCustomerPaymentMethodsWithKey(key, paymentMethodType);
+            }
+        };
+    }
+
+    @NonNull
     private Runnable createSetCustomerSourceDefaultRunnable(
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
@@ -599,6 +644,11 @@ public class CustomerSession {
                             ephemeralKey,
                             (String) arguments.get(KEY_PAYMENT_METHOD),
                             operationId);
+                } else if (ACTION_GET_PAYMENT_METHODS.equals(actionString)) {
+                    runnable = createGetPaymentMethodsRunnable(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_PAYMENT_METHOD_TYPE),
+                            operationId);
                 } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString) &&
                         arguments.containsKey(KEY_SOURCE) &&
                         arguments.containsKey(KEY_SOURCE_TYPE)) {
@@ -627,22 +677,9 @@ public class CustomerSession {
             public void onKeyError(@NonNull String operationId, int httpCode,
                                    @Nullable String errorMessage) {
                 // Any error eliminates all listeners
-                final CustomerRetrievalListener customerRetrievalListener =
-                        getCustomerRetrievalListener(operationId);
-                if (customerRetrievalListener != null) {
-                    customerRetrievalListener.onError(httpCode, errorMessage, null);
-                }
-
-                final SourceRetrievalListener sourceRetrievalListener =
-                        getSourceRetrievalListener(operationId);
-                if (sourceRetrievalListener != null) {
-                    sourceRetrievalListener.onError(httpCode, errorMessage, null);
-                }
-
-                final PaymentMethodRetrievalListener  paymentMethodRetrievalListener =
-                        getPaymentMethodRetrievalListener(operationId);
-                if (paymentMethodRetrievalListener != null) {
-                    paymentMethodRetrievalListener.onError(httpCode, errorMessage, null);
+                final RetrievalListener retrievalListener = mCustomerListeners.remove(operationId);
+                if (retrievalListener != null) {
+                    retrievalListener.onError(httpCode, errorMessage, null);
                 }
             }
         };
@@ -731,6 +768,19 @@ public class CustomerSession {
         );
     }
 
+    @NonNull
+    private List<PaymentMethod> getCustomerPaymentMethodsWithKey(
+            @NonNull CustomerEphemeralKey key,
+            @NonNull String paymentMethodType) throws StripeException {
+        return mApiHandler.getPaymentMethods(
+                key.getCustomerId(),
+                paymentMethodType,
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                key.getSecret()
+        );
+    }
+
     @Nullable
     private Customer setCustomerShippingInfoWithKey(
             @NonNull CustomerEphemeralKey key,
@@ -790,6 +840,12 @@ public class CustomerSession {
         return (PaymentMethodRetrievalListener) mCustomerListeners.remove(operationId);
     }
 
+    @Nullable
+    private PaymentMethodsRetrievalListener getPaymentMethodsRetrievalListener(
+            @NonNull String operationId) {
+        return (PaymentMethodsRetrievalListener) mCustomerListeners.remove(operationId);
+    }
+
     public abstract static class ActivityCustomerRetrievalListener<A extends Activity>
             implements CustomerRetrievalListener {
 
@@ -815,6 +871,10 @@ public class CustomerSession {
 
     public interface PaymentMethodRetrievalListener extends RetrievalListener {
         void onPaymentMethodRetrieved(@NonNull PaymentMethod paymentMethod);
+    }
+
+    public interface PaymentMethodsRetrievalListener extends RetrievalListener {
+        void onPaymentMethodsRetrieved(@NonNull List<PaymentMethod> paymentMethods);
     }
 
     interface RetrievalListener {
@@ -954,6 +1014,10 @@ public class CustomerSession {
                     mListener.onCustomerShippingInfoSaved((Customer) obj);
                     break;
                 }
+                case MessageCode.PAYMENT_METHODS_RETRIEVED: {
+                    mListener.onPaymentMethodsRetrieved((List<PaymentMethod>) obj, operationId);
+                    break;
+                }
                 case MessageCode.ERROR: {
                     if (obj instanceof StripeException) {
                         mListener.onError((StripeException) obj, operationId);
@@ -973,6 +1037,9 @@ public class CustomerSession {
 
             void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
                                           @NonNull String operationId);
+
+            void onPaymentMethodsRetrieved(@NonNull List<PaymentMethod> paymentMethods,
+                                           @NonNull String operationId);
 
             void onCustomerShippingInfoSaved(@Nullable Customer customer);
 
