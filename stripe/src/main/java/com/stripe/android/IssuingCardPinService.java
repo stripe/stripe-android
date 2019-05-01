@@ -167,20 +167,17 @@ public class IssuingCardPinService
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                else if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                else if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
                             null);
-                }
-                else if ("already_redeemed".equals(e.getErrorCode())) {
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
                             "The verification challenge was already redeemed",
@@ -242,25 +239,22 @@ public class IssuingCardPinService
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                else if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                else if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
                             null);
-                }
-                else if ("already_redeemed".equals(e.getErrorCode())) {
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
                             "The verification challenge was already redeemed",
                             null);
-                }  else {
+                } else {
                     listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
                             "The call to update the PIN failed, possibly an error " +
