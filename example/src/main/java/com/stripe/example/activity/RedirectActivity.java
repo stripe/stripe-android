@@ -23,10 +23,10 @@ import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.controller.RedirectDialogController;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
@@ -40,8 +40,7 @@ public class RedirectActivity extends AppCompatActivity {
     private static final String QUERY_CLIENT_SECRET = "client_secret";
     private static final String QUERY_SOURCE_ID = "source";
 
-    @NonNull private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private CardInputWidget mCardInputWidget;
     private RedirectAdapter mRedirectAdapter;
@@ -52,7 +51,7 @@ public class RedirectActivity extends AppCompatActivity {
     private Stripe mStripe;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polling);
 
@@ -99,7 +98,7 @@ public class RedirectActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 
@@ -123,10 +122,10 @@ public class RedirectActivity extends AppCompatActivity {
                                 cardSourceParams,
                                 PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(cardSourceObservable
+        mCompositeDisposable.add(cardSourceObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> mProgressDialogController.show(R.string.createSource))
+                .doOnSubscribe((d) -> mProgressDialogController.show(R.string.createSource))
                 .subscribe(
                         // Because we've made the mapping above, we're now subscribing
                         // to the result of creating a 3DS Source
@@ -178,10 +177,10 @@ public class RedirectActivity extends AppCompatActivity {
                         threeDParams,
                         PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(threeDSecureObservable
+        mCompositeDisposable.add(threeDSecureObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe(() -> mProgressDialogController.dismiss())
+                .doOnComplete(() -> mProgressDialogController.dismiss())
                 .subscribe(
                         // Because we've made the mapping above, we're now subscribing
                         // to the result of creating a 3DS Source

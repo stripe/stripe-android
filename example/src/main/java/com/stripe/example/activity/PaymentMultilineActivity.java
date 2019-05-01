@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class PaymentMultilineActivity extends AppCompatActivity {
 
@@ -36,9 +36,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
     private CardMultilineWidget mCardMultilineWidget;
 
-    @NonNull private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
-
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private SimpleAdapter mSimpleAdapter;
     @NonNull private final List<Map<String, String>> mCardSources = new ArrayList<>();
 
@@ -63,7 +61,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                 new int[]{R.id.last4, R.id.tokenId});
 
         listView.setAdapter(mSimpleAdapter);
-        mCompositeSubscription.add(
+        mCompositeDisposable.add(
                 RxView.clicks(findViewById(R.id.save_payment)).subscribe(aVoid -> saveCard()));
     }
 
@@ -83,12 +81,12 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                         () -> stripe.createPaymentMethodSynchronous(cardSourceParams,
                                 PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(tokenObservable
+        mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                        () -> mProgressDialogController.show(R.string.progressMessage))
-                .doOnUnsubscribe(
+                        (d) -> mProgressDialogController.show(R.string.progressMessage))
+                .doOnComplete(
                         () -> mProgressDialogController.dismiss())
                 .subscribe(
                         this::addToList,
@@ -111,7 +109,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 }
