@@ -144,8 +144,7 @@ public class StoreActivity
     }
 
     private void handleRetrievedPaymentIntent(@NonNull PaymentIntent paymentIntent) {
-        final PaymentIntent.Status status =
-                PaymentIntent.Status.fromCode(paymentIntent.getStatus());
+        final PaymentIntent.Status status = paymentIntent.getStatus();
         if (status == PaymentIntent.Status.Succeeded) {
             if (paymentIntent.getAmount() != null) {
                 displayPurchase(paymentIntent.getAmount());
