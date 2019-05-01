@@ -30,12 +30,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 public class PaymentIntentActivity extends AppCompatActivity {
     private static final String TAG = PaymentIntentActivity.class.getName();
@@ -43,7 +43,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
     private static final String RETURN_URL = "stripe://payment_intent_return";
 
     @NonNull
-    private final CompositeSubscription mCompositeSubscription = new CompositeSubscription();
+    private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private ProgressDialogController mProgressDialogController;
     private ErrorDialogHandler mErrorDialogHandler;
@@ -85,7 +85,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 
@@ -115,12 +115,12 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
     void createPaymentIntent() {
         final Map<String, Object> params = createPaymentIntentParams();
-        final Subscription subscription = mStripeService.createPaymentIntent(params)
+        final Disposable disposable = mStripeService.createPaymentIntent(params)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() ->
+                .doOnSubscribe((d) ->
                         mProgressDialogController.show(R.string.creating_payment_intent))
-                .doOnUnsubscribe(() ->
+                .doOnComplete(() ->
                         mProgressDialogController.dismiss())
 
                 // Because we've made the mapping above, we're now subscribing
@@ -140,7 +140,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                         },
                         throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())
                 );
-        mCompositeSubscription.add(subscription);
+        mCompositeDisposable.add(disposable);
     }
 
     private void retrievePaymentIntent() {
@@ -149,11 +149,11 @@ public class PaymentIntentActivity extends AppCompatActivity {
                         PaymentIntentParams
                                 .createRetrievePaymentIntentParams(mClientSecret),
                         PaymentConfiguration.getInstance().getPublishableKey()));
-        final Subscription subscription = paymentIntentObservable
+        final Disposable disposable = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
-                .doOnSubscribe(() ->
+                .doOnSubscribe((d) ->
                         mProgressDialogController.show(R.string.retrieving_payment_intent))
-                .doOnUnsubscribe(() -> mProgressDialogController.dismiss())
+                .doOnComplete(() -> mProgressDialogController.dismiss())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         paymentIntent -> mPaymentIntentValue.setText(paymentIntent != null ?
@@ -161,7 +161,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                                 getString(R.string.error_while_retrieving_payment_intent)),
                         throwable -> Log.e(TAG, throwable.toString())
                 );
-        mCompositeSubscription.add(subscription);
+        mCompositeDisposable.add(disposable);
     }
 
     private void confirmPaymentIntent(@NonNull final Card card) {
@@ -177,12 +177,12 @@ public class PaymentIntentActivity extends AppCompatActivity {
                             PaymentConfiguration.getInstance().getPublishableKey());
                 });
 
-        final Subscription subscription = paymentIntentObservable
+        final Disposable disposable = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() ->
+                .doOnSubscribe((d) ->
                         mProgressDialogController.show(R.string.confirming_payment_intent))
-                .doOnUnsubscribe(() ->
+                .doOnComplete(() ->
                         mProgressDialogController.dismiss())
                 .subscribe(
                         paymentIntent -> {
@@ -201,6 +201,6 @@ public class PaymentIntentActivity extends AppCompatActivity {
                         },
                         throwable -> Log.e(TAG, throwable.toString())
                 );
-        mCompositeSubscription.add(subscription);
+        mCompositeDisposable.add(disposable);
     }
 }

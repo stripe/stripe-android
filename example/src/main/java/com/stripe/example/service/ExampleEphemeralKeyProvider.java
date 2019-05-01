@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * An implementation of {@link EphemeralKeyProvider} that can be used to generate
@@ -21,13 +21,13 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
 
-    @NonNull private final CompositeSubscription mCompositeSubscription;
+    @NonNull private final CompositeDisposable mCompositeDisposable;
     @NonNull private final StripeService mStripeService;
     @NonNull private final ProgressListener mProgressListener;
 
     public ExampleEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
         mStripeService = RetrofitFactory.getInstance().create(StripeService.class);
-        mCompositeSubscription = new CompositeSubscription();
+        mCompositeDisposable = new CompositeDisposable();
         mProgressListener = progressListener;
     }
 
@@ -37,13 +37,13 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
         Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
-        mCompositeSubscription.add(mStripeService.createEphemeralKey(apiParamMap)
+        mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response -> {
                             try {
-                                String rawKey = response.string();
+                                final String rawKey = response.string();
                                 keyUpdateListener.onKeyUpdate(rawKey);
                                 mProgressListener.onStringResponse(rawKey);
                             } catch (IOException ignored) {
@@ -54,6 +54,6 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
     }
 
     public interface ProgressListener {
-        void onStringResponse(String string);
+        void onStringResponse(@NonNull String string);
     }
 }

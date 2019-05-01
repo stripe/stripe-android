@@ -64,7 +64,7 @@ public class PaymentActivity extends AppCompatActivity {
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private BroadcastReceiver mBroadcastReceiver;
-    private ProgressDialogFragment mProgressDialogFragment;
+    @Nullable private ProgressDialogFragment mProgressDialogFragment;
 
     private LinearLayout mCartItemLayout;
 
@@ -276,9 +276,8 @@ public class PaymentActivity extends AppCompatActivity {
                         mProgressDialogFragment.show(fragmentManager, "progress");
                     }
                 })
-                .doOnDispose(() -> {
-                    if (mProgressDialogFragment != null &&
-                            mProgressDialogFragment.isVisible()) {
+                .doOnComplete(() -> {
+                    if (mProgressDialogFragment != null && mProgressDialogFragment.isVisible()) {
                         mProgressDialogFragment.dismiss();
                     }
                 })
@@ -350,10 +349,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void onCommunicatingStateChanged(boolean isCommunicating) {
-        if (isCommunicating) {
-            mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
-        } else {
-            mProgressDialogFragment.dismiss();
+        if (mProgressDialogFragment != null) {
+            if (isCommunicating) {
+                mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
+            } else {
+                mProgressDialogFragment.dismiss();
+            }
         }
     }
 
