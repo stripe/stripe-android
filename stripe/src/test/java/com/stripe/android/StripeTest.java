@@ -399,10 +399,12 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
+    public void createSourceSynchronous_withCardParams_passesIntegrationTest()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
         final Stripe stripe = getNonLoggingStripe(mContext);
         stripe.setDefaultPublishableKey("pk_test_dCyfhfyeO2CZkcvT5xyIDdJj");
-        stripe.setStripeAccount("acct_19YLYlE7cWSP2tMo");
+        stripe.setStripeAccount("acct_28DT589O8KAxCGbLmxyZ");
 
         final Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         card.setAddressCity("Sheboygan");
@@ -419,29 +421,24 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        try {
-            Source cardSource =
-                    stripe.createSourceSynchronous(params);
-            assertNotNull(cardSource);
-            assertNotNull(cardSource.getClientSecret());
-            assertNotNull(cardSource.getId());
-            assertEquals(Source.CARD, cardSource.getType());
-            assertNotNull(cardSource.getSourceTypeData());
-            assertNotNull(cardSource.getSourceTypeModel());
-            assertTrue(cardSource.getSourceTypeModel() instanceof SourceCardData);
-            assertNotNull(cardSource.getOwner());
-            assertNotNull(cardSource.getOwner().getAddress());
-            assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
-            assertEquals("WI", cardSource.getOwner().getAddress().getState());
-            assertEquals("53081", cardSource.getOwner().getAddress().getPostalCode());
-            assertEquals("123 Main St", cardSource.getOwner().getAddress().getLine1());
-            assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
-            assertEquals("US", cardSource.getOwner().getAddress().getCountry());
-            assertEquals("Winnie Hoop", cardSource.getOwner().getName());
-            JsonTestUtils.assertMapEquals(metamap, cardSource.getMetaData());
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+        final Source cardSource = stripe.createSourceSynchronous(params);
+        assertNotNull(cardSource);
+        assertNotNull(cardSource.getClientSecret());
+        assertNotNull(cardSource.getId());
+        assertEquals(Source.CARD, cardSource.getType());
+        assertNotNull(cardSource.getSourceTypeData());
+        assertNotNull(cardSource.getSourceTypeModel());
+        assertTrue(cardSource.getSourceTypeModel() instanceof SourceCardData);
+        assertNotNull(cardSource.getOwner());
+        assertNotNull(cardSource.getOwner().getAddress());
+        assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
+        assertEquals("WI", cardSource.getOwner().getAddress().getState());
+        assertEquals("53081", cardSource.getOwner().getAddress().getPostalCode());
+        assertEquals("123 Main St", cardSource.getOwner().getAddress().getLine1());
+        assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
+        assertEquals("US", cardSource.getOwner().getAddress().getCountry());
+        assertEquals("Winnie Hoop", cardSource.getOwner().getName());
+        JsonTestUtils.assertMapEquals(metamap, cardSource.getMetaData());
     }
 
     @Test
