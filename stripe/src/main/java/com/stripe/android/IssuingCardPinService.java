@@ -48,7 +48,7 @@ public class IssuingCardPinService
      * Create a IssuingCardPinService with the provided {@link EphemeralKeyProvider}.
      *
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
-     *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
+     *                    {@link IssuingCardEphemeralKey EphemeralKeys} as needed
      */
     @NonNull
     public static IssuingCardPinService create(
@@ -167,17 +167,20 @@ public class IssuingCardPinService
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
+                            null);
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed",
                             null);
                 } else {
                     listener.onError(
@@ -236,17 +239,20 @@ public class IssuingCardPinService
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
+                            null);
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed",
                             null);
                 } else {
                     listener.onError(
@@ -294,6 +300,7 @@ public class IssuingCardPinService
         ONE_TIME_CODE_INCORRECT,
         ONE_TIME_CODE_EXPIRED,
         ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+        ONE_TIME_CODE_ALREADY_REDEEMED,
     }
 
     public interface IssuingCardPinRetrievalListener {
