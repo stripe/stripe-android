@@ -16,7 +16,9 @@ import java.util.Map;
 import static com.stripe.android.testharness.JsonTestUtils.assertJsonEqualsExcludingNulls;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentTest {
@@ -24,9 +26,6 @@ public class PaymentIntentTest {
     private static final String PAYMENT_INTENT_WITH_SOURCE_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
-            "  \"allowed_source_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
             "  \"payment_method_types\": [\n" +
             "    \"card\"\n" +
             "  ],\n" +
@@ -39,7 +38,7 @@ public class PaymentIntentTest {
             "  \"currency\": \"usd\",\n" +
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
-            "  \"next_source_action\": null,\n" +
+            "  \"next_action\": null,\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
             "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
@@ -51,9 +50,6 @@ public class PaymentIntentTest {
     private static final String PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON = "{\n" +
             "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
             "  \"object\": \"payment_intent\",\n" +
-            "  \"allowed_source_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
             "  \"amount\": 1000,\n" +
             "  \"canceled_at\": 1530839340,\n" +
             "  \"capture_method\": \"automatic\",\n" +
@@ -63,15 +59,17 @@ public class PaymentIntentTest {
             "  \"currency\": \"usd\",\n" +
             "  \"description\": \"Example PaymentIntent charge\",\n" +
             "  \"livemode\": false,\n" +
-            "  \"next_source_action\": {" +
-            "       \"type\": \"authorize_with_url\"," +
-            "           authorize_with_url: {" +
-            "           url: \""+ BAD_URL +"\" } " +
+            "  \"next_action\": {" +
+            "       \"type\": \"redirect_to_url\"," +
+            "           \"redirect_to_url\": {" +
+            "             \"url\": \""+ BAD_URL +"\"," +
+            "             \"return_url\": \"yourapp://post-authentication-return-url\"" +
+            "           } " +
             "       },\n" +
             "  \"receipt_email\": null,\n" +
             "  \"shipping\": null,\n" +
             "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
-            "  \"status\": \"requires_source_action\"\n" +
+            "  \"status\": \"requires_action\"\n" +
             "}\n";
 
     private static final String PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON = "{\n" +
@@ -139,7 +137,8 @@ public class PaymentIntentTest {
             "\t\"next_action\": {\n" +
             "\t\t\"type\": \"redirect_to_url\",\n" +
             "\t\t\"redirect_to_url\": {\n" +
-            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\",\n" +
+            "\t\t\t\"return_url\": \"yourapp://post-authentication-return-url\"\n" +
             "\t\t}\n" +
             "\t}\n" +
             "}";
@@ -149,14 +148,15 @@ public class PaymentIntentTest {
             "\t\"object\": \"payment_intent\",\n" +
             "\t\"status\": \"requires_action\",\n" +
             "\t\"next_action\": {\n" +
-            "\t\t\"type\": \"authorize_with_url\",\n" +
-            "\t\t\"authorize_with_url\": {\n" +
-            "\t\t\t\"url\": \"https://example.com/redirect\"\n" +
+            "\t\t\"type\": \"redirect_to_url\",\n" +
+            "\t\t\"redirect_to_url\": {\n" +
+            "\t\t\t\"url\": \"https://example.com/redirect\",\n" +
+            "\t\t\t\"return_url\": \"yourapp://post-authentication-return-url\"\n" +
             "\t\t}\n" +
             "\t}\n" +
             "}";
 
-    private static final List<String> ALLOWED_SOURCE_TYPES = new ArrayList<String>() {{
+    private static final List<String> PAYMENT_METHOD_TYPES = new ArrayList<String>() {{
         add("card");
     }};
 
@@ -164,8 +164,7 @@ public class PaymentIntentTest {
             new HashMap<String, Object>() {{
                 put(PaymentIntent.FIELD_ID, "pi_1CkiBMLENEVhOs7YMtUehLau");
                 put(PaymentIntent.FIELD_OBJECT, "payment_intent");
-                put(PaymentIntent.FIELD_ALLOWED_SOURCE_TYPES, ALLOWED_SOURCE_TYPES);
-                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, ALLOWED_SOURCE_TYPES);
+                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, PAYMENT_METHOD_TYPES);
                 put(PaymentIntent.FIELD_AMOUNT, 1000L);
                 put(PaymentIntent.FIELD_CANCELED, 1530839340L);
                 put(PaymentIntent.FIELD_CLIENT_SECRET,
@@ -177,7 +176,7 @@ public class PaymentIntentTest {
                 put(PaymentIntent.FIELD_LIVEMODE, false);
                 put(PaymentIntent.FIELD_SOURCE, "src_1CkiC3LENEVhOs7YMSa4yx4G");
                 put(PaymentIntent.FIELD_CAPTURE_METHOD, "automatic");
-                put(PaymentIntent.FIELD_STATUS, "succeeded");
+                put(PaymentIntent.FIELD_STATUS, PaymentIntent.Status.Succeeded.code);
             }};
 
     private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE = PaymentIntent
@@ -204,9 +203,8 @@ public class PaymentIntentTest {
                 PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON);
         assertNotNull(paymentIntent);
 
-        final Uri authUrl = paymentIntent.getAuthorizationUrl();
+        final Uri authUrl = paymentIntent.getRedirectUrl();
         assertNotNull(authUrl);
-
         assertEquals(BAD_URL, authUrl.getEncodedPath());
     }
 
@@ -215,6 +213,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent = PaymentIntent
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
         assertNotNull(paymentIntent);
+        assertTrue(paymentIntent.requiresAction());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -242,6 +241,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent =
                 PaymentIntent.fromString(PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON);
         assertNotNull(paymentIntent);
+        assertFalse(paymentIntent.requiresAction());
         assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
     }
 }

@@ -55,10 +55,8 @@ public class DependencyHandler {
      * Only gets attached once, unless you call {@link #clearReferences()}.
      *
      * @param button a button that, when clicked, gets a token.
-     * @return a reference to the {@link AsyncTaskTokenController}
      */
-    @NonNull
-    public AsyncTaskTokenController attachAsyncTaskTokenController(@NonNull Button button) {
+    public void attachAsyncTaskTokenController(@NonNull Button button) {
         if (mAsyncTaskController == null) {
             mAsyncTaskController = new AsyncTaskTokenController(
                     button,
@@ -68,7 +66,6 @@ public class DependencyHandler {
                     mListViewController,
                     mProgressDialogController);
         }
-        return mAsyncTaskController;
     }
 
     /**
@@ -78,10 +75,8 @@ public class DependencyHandler {
      * Only gets attached once, unless you call {@link #clearReferences()}.
      *
      * @param button a button that, when clicked, gets a token.
-     * @return a reference to the {@link IntentServiceTokenController}
      */
-    @NonNull
-    public IntentServiceTokenController attachIntentServiceTokenController(
+    public void attachIntentServiceTokenController(
             @NonNull Activity activity,
             @NonNull Button button) {
         if (mIntentServiceTokenController == null) {
@@ -93,7 +88,6 @@ public class DependencyHandler {
                     mListViewController,
                     mProgressDialogController);
         }
-        return mIntentServiceTokenController;
     }
 
     /**
@@ -103,10 +97,8 @@ public class DependencyHandler {
      * Only gets attached once, unless you call {@link #clearReferences()}.
      *
      * @param button a button that, when clicked, gets a token.
-     * @return a reference to the {@link RxTokenController}
      */
-    @NonNull
-    public RxTokenController attachRxTokenController(Button button) {
+    public void attachRxTokenController(@NonNull Button button) {
         if (mRxTokenController == null) {
             mRxTokenController = new RxTokenController(
                     button,
@@ -116,7 +108,6 @@ public class DependencyHandler {
                     mListViewController,
                     mProgressDialogController);
         }
-        return mRxTokenController;
     }
 
     /**

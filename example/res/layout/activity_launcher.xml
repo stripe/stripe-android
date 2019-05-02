@@ -41,12 +41,12 @@
             />
 
         <Button
-            android:id="@+id/btn_make_card_sources"
+            android:id="@+id/btn_make_card_payment_methods"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:text="@string/createCardSources"
+            android:text="@string/createCardPaymentMethods"
             />
 
         <Button

@@ -7,13 +7,12 @@ import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ShippingInfoWidget}
  */
 @RunWith(RobolectricTestRunner.class)
-public class ShippingInfoWidgetTest {
+public class ShippingInfoWidgetTest extends BaseViewTest<ShippingInfoTestActivity> {
 
     private ShippingInfoWidget mShippingInfoWidget;
     private TextInputLayout mAddressLine1TextInputLayout;
@@ -47,16 +46,17 @@ public class ShippingInfoWidgetTest {
     private CountryAutoCompleteTextView mCountryAutoCompleteTextView;
 
     private String mNoPostalCodeCountry = "ZW"; // Zimbabwe
-    private Address mAddress;
     private ShippingInformation mShippingInfo;
+
+    public ShippingInfoWidgetTest() {
+        super(ShippingInfoTestActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
-        ActivityController<ShippingInfoTestActivity> activityController =
-                Robolectric.buildActivity(ShippingInfoTestActivity.class).create().start();
-        mShippingInfoWidget = activityController.get().getShippingInfoWidget();
+        mShippingInfoWidget = createStartedActivity().getShippingInfoWidget();
         mAddressLine1TextInputLayout = mShippingInfoWidget.findViewById(R.id.tl_address_line1_aaw);
         mAddressLine2TextInputLayout = mShippingInfoWidget.findViewById(R.id.tl_address_line2_aaw);
         mCityTextInputLayout = mShippingInfoWidget.findViewById(R.id.tl_city_aaw);
@@ -71,7 +71,7 @@ public class ShippingInfoWidgetTest {
         mStateEditText = mShippingInfoWidget.findViewById(R.id.et_state_aaw);
         mPhoneEditText = mShippingInfoWidget.findViewById(R.id.et_phone_number_aaw);
         mCountryAutoCompleteTextView = mShippingInfoWidget.findViewById(R.id.country_autocomplete_aaw);
-        mAddress = new Address.Builder()
+        final Address address = new Address.Builder()
                 .setCity("San Francisco")
                 .setState("CA")
                 .setCountry("US")
@@ -79,7 +79,13 @@ public class ShippingInfoWidgetTest {
                 .setLine2("10th Floor")
                 .setPostalCode("12345")
                 .build();
-        mShippingInfo = new ShippingInformation(mAddress, "Fake Name", "(123) 456 - 7890");
+        mShippingInfo = new ShippingInformation(address, "Fake Name", "(123) 456 - 7890");
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test

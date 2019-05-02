@@ -11,22 +11,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
-    @NonNull private final CompositeSubscription mCompositeSubscription;
+    @NonNull private final CompositeDisposable mCompositeDisposable;
     @NonNull private final StripeService mStripeService;
     @NonNull private final ProgressListener mProgressListener;
 
     public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
         final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
-        mCompositeSubscription = new CompositeSubscription();
+        mCompositeDisposable = new CompositeDisposable();
         mProgressListener = progressListener;
     }
 
@@ -36,26 +34,25 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
         final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
-        mCompositeSubscription.add(
+        mCompositeDisposable.add(
                 mStripeService.createEphemeralKey(apiParamMap)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<ResponseBody>() {
-                            @Override
-                            public void call(ResponseBody response) {
-                                try {
-                                    String rawKey = response.string();
-                                    keyUpdateListener.onKeyUpdate(rawKey);
-                                    mProgressListener.onStringResponse(rawKey);
-                                } catch (IOException ignored) {
-                                }
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mProgressListener.onStringResponse(throwable.getMessage());
-                            }
-                        }));
+                        .subscribe(
+                                response -> {
+                                    try {
+                                        String rawKey = response.string();
+                                        keyUpdateListener.onKeyUpdate(rawKey);
+                                        mProgressListener.onStringResponse(rawKey);
+                                    } catch (IOException ignored) {
+                                    }
+                                },
+                                throwable -> mProgressListener
+                                        .onStringResponse(throwable.getMessage())));
+    }
+
+    public void destroy() {
+        mCompositeDisposable.dispose();
     }
 
     public interface ProgressListener {

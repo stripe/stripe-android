@@ -65,6 +65,7 @@
             android:id="@+id/payment_intent_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:typeface="monospace"
             />
 
     </LinearLayout>

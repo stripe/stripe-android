@@ -1,6 +1,7 @@
 package com.stripe.example.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -37,38 +38,40 @@ public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHo
             mSourceTypeView = pollingLayout.findViewById(R.id.tv_source_type);
         }
 
-        public void setFinalStatus(String finalStatus) {
+        void setFinalStatus(@Nullable String finalStatus) {
             mFinalStatusView.setText(finalStatus);
         }
 
-        public void setSourceId(String sourceId) {
+        void setSourceId(@Nullable String sourceId) {
             final String last6 = sourceId == null || sourceId.length() < 6
                     ? sourceId
                     : sourceId.substring(sourceId.length() - 6);
             mSourceIdView.setText(last6);
         }
 
-        public void setSourceType(String sourceType) {
-            String viewableType = sourceType;
+        void setSourceType(@Nullable String sourceType) {
+            final String viewableType;
             if (Source.THREE_D_SECURE.equals(sourceType)) {
                 viewableType = "3DS";
+            } else {
+                viewableType = sourceType;
             }
             mSourceTypeView.setText(viewableType);
         }
 
-        public void setRedirectStatus(String redirectStatus) {
+        void setRedirectStatus(@Nullable String redirectStatus) {
             mRedirectStatusView.setText(redirectStatus);
         }
     }
 
     private static class ViewModel {
-        private final String mFinalStatus;
-        private final String mRedirectStatus;
-        private final String mSourceId;
-        private final String mSourceType;
+        @Nullable private final String mFinalStatus;
+        @Nullable private final String mRedirectStatus;
+        @Nullable private final String mSourceId;
+        @Nullable private final String mSourceType;
 
-        private ViewModel(String finalStatus, String redirectStatus, String sourceId,
-                          String sourceType) {
+        private ViewModel(@Nullable String finalStatus, @Nullable String redirectStatus,
+                          @Nullable String sourceId, @Nullable String sourceType) {
             mFinalStatus = finalStatus;
             mRedirectStatus = redirectStatus;
             mSourceId = sourceId;
@@ -85,10 +88,8 @@ public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHo
     public RedirectAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                          int viewType) {
         // create a new view
-
-        LinearLayout pollingView = (LinearLayout) LayoutInflater.from(parent.getContext())
+        final ViewGroup pollingView = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.polling_list_item, parent, false);
-
         return new ViewHolder(pollingView);
     }
 
@@ -97,7 +98,7 @@ public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        ViewModel model = mDataset.get(position);
+        final ViewModel model = mDataset.get(position);
         holder.setFinalStatus(model.mFinalStatus);
         holder.setRedirectStatus(model.mRedirectStatus);
         holder.setSourceId(model.mSourceId);
@@ -110,7 +111,8 @@ public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHo
         return mDataset.size();
     }
 
-    public void addItem(String finalStatus, String redirectStatus, String sourceId, String sourceType) {
+    public void addItem(@Nullable String finalStatus, @Nullable String redirectStatus,
+                        @Nullable String sourceId, @Nullable String sourceType) {
         mDataset.add(new ViewModel(finalStatus, redirectStatus, sourceId, sourceType));
         notifyDataSetChanged();
     }

@@ -81,7 +81,12 @@ afterEvaluate { project ->
 
     signing {
         required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        useGpgCmd()
         sign configurations.archives
+    }
+
+    tasks.withType(Sign) {
+        onlyIf { isReleaseBuild() && project.hasProperty('signing.gnupg.keyName') }
     }
 
     task androidJavadocs(type: Javadoc) {

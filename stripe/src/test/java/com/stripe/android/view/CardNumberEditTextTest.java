@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -8,9 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
 import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
@@ -34,18 +34,15 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 @RunWith(RobolectricTestRunner.class)
 public class CardNumberEditTextTest {
 
-    @Mock CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
-    @Mock CardNumberEditText.CardBrandChangeListener mCardBrandChangeListener;
+    @Mock private CardNumberEditText.CardNumberCompleteListener mCardNumberCompleteListener;
+    @Mock private CardNumberEditText.CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberEditText mCardNumberEditText;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
 
-        mCardNumberEditText =
-                activityController.get().getCardNumberEditText();
+        mCardNumberEditText = new CardNumberEditText(ApplicationProvider.getApplicationContext());
         mCardNumberEditText.setText("");
         mCardNumberEditText.setCardNumberCompleteListener(mCardNumberCompleteListener);
         mCardNumberEditText.setCardBrandChangeListener(mCardBrandChangeListener);

@@ -43,8 +43,8 @@ public class ExpiryDateEditText extends StripeEditText {
     public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         String accLabel = getResources().getString(
-            R.string.acc_label_expiry_date_node,
-            getText()
+                R.string.acc_label_expiry_date_node,
+                getText()
         );
         info.setText(accLabel);
     }

@@ -10,14 +10,13 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.Calendar;
 
@@ -45,7 +44,7 @@ import static org.mockito.Mockito.verify;
  * Test class for {@link CardMultilineWidget}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class CardMultilineWidgetTest {
+public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
     // Every Card made by the CardInputView should have the card widget token.
     private static final String[] EXPECTED_LOGGING_ARRAY = {CARD_MULTILINE_TOKEN};
@@ -55,23 +54,31 @@ public class CardMultilineWidgetTest {
     private WidgetControlGroup mFullGroup;
     private WidgetControlGroup mNoZipGroup;
 
-    @Mock
-    CardInputListener mFullCardListener;
-    @Mock
-    CardInputListener mNoZipCardListener;
+    @Mock private CardInputListener mFullCardListener;
+    @Mock private CardInputListener mNoZipCardListener;
+
+    public CardMultilineWidgetTest() {
+        super(CardInputTestActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
-        mCardMultilineWidget = activityController.get().getCardMultilineWidget();
+
+        final CardInputTestActivity activity = createStartedActivity();
+        mCardMultilineWidget = activity.getCardMultilineWidget();
         mFullGroup = new WidgetControlGroup(mCardMultilineWidget);
 
-        mNoZipCardMultilineWidget = activityController.get().getNoZipCardMulitlineWidget();
+        mNoZipCardMultilineWidget = activity.getNoZipCardMulitlineWidget();
         mNoZipGroup = new WidgetControlGroup(mNoZipCardMultilineWidget);
 
         mFullGroup.cardNumberEditText.setText("");
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test

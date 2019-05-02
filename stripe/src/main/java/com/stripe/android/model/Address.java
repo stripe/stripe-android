@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -47,12 +48,12 @@ public class Address extends StripeJsonModel implements Parcelable {
     private static final String FIELD_POSTAL_CODE = "postal_code";
     private static final String FIELD_STATE = "state";
 
-    @Nullable private String mCity;
-    @Nullable private String mCountry;
-    @Nullable private String mLine1;
-    @Nullable private String mLine2;
-    @Nullable private String mPostalCode;
-    @Nullable private String mState;
+    @Nullable private final String mCity;
+    @Nullable private final String mCountry;
+    @Nullable private final String mLine1;
+    @Nullable private final String mLine2;
+    @Nullable private final String mPostalCode;
+    @Nullable private final String mState;
 
     private Address(
             @Nullable String city,
@@ -88,19 +89,9 @@ public class Address extends StripeJsonModel implements Parcelable {
         return mCity;
     }
 
-    @Deprecated
-    public void setCity(String city) {
-        mCity = city;
-    }
-
     @Nullable
     public String getCountry() {
         return mCountry;
-    }
-
-    @Deprecated
-    public void setCountry(String country) {
-        mCountry = country;
     }
 
     @Nullable
@@ -108,19 +99,9 @@ public class Address extends StripeJsonModel implements Parcelable {
         return mLine1;
     }
 
-    @Deprecated
-    public void setLine1(String line1) {
-        mLine1 = line1;
-    }
-
     @Nullable
     public String getLine2() {
         return mLine2;
-    }
-
-    @Deprecated
-    public void setLine2(String line2) {
-        mLine2 = line2;
     }
 
     @Nullable
@@ -128,25 +109,15 @@ public class Address extends StripeJsonModel implements Parcelable {
         return mPostalCode;
     }
 
-    @Deprecated
-    public void setPostalCode(String postalCode) {
-        mPostalCode = postalCode;
-    }
-
     @Nullable
     public String getState() {
         return mState;
     }
 
-    @Deprecated
-    public void setState(String state) {
-        mState = state;
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        final Map<String, Object> map = new HashMap<>();
+        final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_CITY, mCity);
         map.put(FIELD_COUNTRY, mCountry);
         map.put(FIELD_LINE_1, mLine1);

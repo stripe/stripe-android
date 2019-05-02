@@ -141,7 +141,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
     @Nullable private SourceRedirect mRedirect;
     @Nullable @SourceStatus private String mStatus;
     @Nullable private Map<String, Object> mSourceTypeData;
-    @Nullable private StripeSourceTypeModel mSourceTypeModel;
+    @Nullable private final StripeSourceTypeModel mSourceTypeModel;
     @Nullable @SourceType private String mType;
     @Nullable @Usage private String mUsage;
 
