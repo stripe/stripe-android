@@ -541,7 +541,7 @@ public class CustomerSession {
             @NonNull final String paymentMethodType,
             @NonNull final String operationId) {
         return new CustomerSessionRunnable<List<PaymentMethod>>(mUiThreadHandler,
-                mLocalBroadcastManager, MessageCode.PAYMENT_METHOD_RETRIEVED, operationId) {
+                mLocalBroadcastManager, MessageCode.PAYMENT_METHODS_RETRIEVED, operationId) {
             @NonNull
             @Override
             public List<PaymentMethod> createMessageObject() throws StripeException {
