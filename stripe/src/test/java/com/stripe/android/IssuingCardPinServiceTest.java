@@ -39,12 +39,9 @@ public class IssuingCardPinServiceTest {
             "            }]\n" +
             "}";
 
-    @Mock
-    private RequestExecutor mRequestExecutor;
-    @Mock
-    IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
-    @Mock
-    IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
+    @Mock private RequestExecutor mRequestExecutor;
+    @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
+    @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
 
     private IssuingCardPinService service;
 
@@ -58,10 +55,10 @@ public class IssuingCardPinServiceTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false
-        );
+                false);
 
-        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler);
+        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
+                new OperationIdFactory());
     }
 
     @Test
