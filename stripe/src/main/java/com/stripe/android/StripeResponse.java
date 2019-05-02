@@ -37,6 +37,10 @@ class StripeResponse {
         return mResponseCode;
     }
 
+    boolean hasErrorCode() {
+        return mResponseCode < 200 || mResponseCode >= 300;
+    }
+
     /**
      * @return the {@link #mResponseBody response body}.
      */
@@ -51,5 +55,19 @@ class StripeResponse {
     @Nullable
     Map<String, List<String>> getResponseHeaders() {
         return mResponseHeaders;
+    }
+
+    @Nullable
+    String getRequestId() {
+        final Map<String, List<String>> headers = getResponseHeaders();
+        final List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
+        final String requestId;
+        if (requestIdList != null && requestIdList.size() > 0) {
+            requestId = requestIdList.get(0);
+        } else {
+            requestId = null;
+        }
+
+        return requestId;
     }
 }

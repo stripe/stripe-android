@@ -19,7 +19,7 @@ public class PaymentConfigurationTest {
     @Before
     public void setup() {
         // Make sure we initialize before each test.
-        PaymentConfiguration.setInstance(null);
+        PaymentConfiguration.clearInstance();
     }
 
     @Test(expected = IllegalStateException.class)

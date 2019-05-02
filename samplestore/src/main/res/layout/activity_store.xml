@@ -22,7 +22,7 @@
             android:elevation="4dp"
             android:theme="@style/WhiteTextTheme"
             app:popupTheme="@style/WhiteTextTheme"
-            />
+            tools:ignore="UnusedAttribute" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_store_items"
@@ -44,9 +44,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:clickable="true"
+        android:focusable="true"
         app:elevation="12dp"
         app:useCompatPadding="true"
-        app:pressedTranslationZ="12dp"
-        />
+        app:pressedTranslationZ="12dp" />
 
 </RelativeLayout>

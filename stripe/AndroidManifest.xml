@@ -18,6 +18,10 @@
         <activity
             android:name=".view.PaymentFlowActivity"
             android:theme="@style/StripeDefaultTheme" />
+
+        <activity
+            android:name=".view.AuthWebViewActivity"
+            android:theme="@style/StripeDefaultTheme" />
     </application>
 
 </manifest>

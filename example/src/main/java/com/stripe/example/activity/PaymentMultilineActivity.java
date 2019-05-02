@@ -7,43 +7,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
-import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.view.CardMultilineWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class PaymentMultilineActivity extends AppCompatActivity {
 
-    ProgressDialogController mProgressDialogController;
-    ErrorDialogHandler mErrorDialogHandler;
+    private ProgressDialogController mProgressDialogController;
+    private ErrorDialogHandler mErrorDialogHandler;
 
-    CardMultilineWidget mCardMultilineWidget;
+    private CardMultilineWidget mCardMultilineWidget;
 
-    @NonNull private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
-
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private SimpleAdapter mSimpleAdapter;
-    private List<Map<String, String>> mCardSources= new ArrayList<>();
+    @NonNull private final List<Map<String, String>> mCardSources = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +52,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
 
-        ListView listView = findViewById(R.id.card_list_pma);
+        final ListView listView = findViewById(R.id.card_list_pma);
         mSimpleAdapter = new SimpleAdapter(
                 this,
                 mCardSources,
@@ -66,13 +61,8 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                 new int[]{R.id.last4, R.id.tokenId});
 
         listView.setAdapter(mSimpleAdapter);
-        mCompositeSubscription.add(
-                RxView.clicks(findViewById(R.id.save_payment)).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCard();
-                    }
-                }));
+        mCompositeDisposable.add(
+                RxView.clicks(findViewById(R.id.save_payment)).subscribe(aVoid -> saveCard()));
     }
 
     private void saveCard() {
@@ -82,68 +72,44 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         }
 
         final Stripe stripe = new Stripe(getApplicationContext());
-        final SourceParams cardSourceParams = SourceParams.createCardParams(card);
+        final PaymentMethodCreateParams cardSourceParams =
+                PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
-        final Observable<Source> tokenObservable =
+        final Observable<PaymentMethod> tokenObservable =
                 Observable.fromCallable(
-                        new Callable<Source>() {
-                            @Override
-                            public Source call() throws Exception {
-                                return stripe.createSourceSynchronous(cardSourceParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
+                        () -> stripe.createPaymentMethodSynchronous(cardSourceParams,
+                                PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(tokenObservable
+        mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.show(R.string.progressMessage);
-                            }
-                        })
-                .doOnUnsubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.dismiss();
-                            }
-                        })
+                        (d) -> mProgressDialogController.show(R.string.progressMessage))
+                .doOnComplete(
+                        () -> mProgressDialogController.dismiss())
                 .subscribe(
-                        new Action1<Source>() {
-                            @Override
-                            public void call(Source source) {
-                                addToList(source);
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
-                            }
-                        }));
+                        this::addToList,
+                        throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())));
     }
 
-    private void addToList(@Nullable Source source) {
-        if (source == null || !Source.CARD.equals(source.getType())) {
+    private void addToList(@Nullable PaymentMethod paymentMethod) {
+        if (paymentMethod == null || paymentMethod.card == null) {
             return;
         }
-        SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
 
-        String endingIn = getString(R.string.endingIn);
-        Map<String, String> map = new HashMap<>();
-        map.put("last4", endingIn + " " + sourceCardData.getLast4());
-        map.put("tokenId", source.getId());
+        final PaymentMethod.Card paymentMethodCard = paymentMethod.card;
+        final String endingIn = getString(R.string.endingIn);
+        final AbstractMap<String, String> map = new HashMap<>();
+        map.put("last4", endingIn + " " + paymentMethodCard.last4);
+        map.put("tokenId", paymentMethod.id);
         mCardSources.add(map);
         mSimpleAdapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 }

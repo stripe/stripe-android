@@ -12,10 +12,10 @@ import java.util.UUID;
 
 public class StoreCart implements Parcelable {
 
-    @NonNull private Currency mCurrency;
-    @NonNull private LinkedHashMap<String, StoreLineItem> mStoreLineItems;
+    @NonNull private final Currency mCurrency;
+    @NonNull private final LinkedHashMap<String, StoreLineItem> mStoreLineItems;
 
-    public StoreCart(@NonNull Currency currency) {
+    StoreCart(@NonNull Currency currency) {
         mCurrency = currency;
         // LinkedHashMap because we want iteration order to be the same.
         mStoreLineItems = new LinkedHashMap<>();
@@ -25,15 +25,12 @@ public class StoreCart implements Parcelable {
         this(Currency.getInstance(currencyCode));
     }
 
-    public String addStoreLineItem(@NonNull String description, int quantity, long unitPrice) {
-        return addStoreLineItem(new StoreLineItem(description, quantity, unitPrice));
+    void addStoreLineItem(@NonNull String description, int quantity, long unitPrice) {
+        addStoreLineItem(new StoreLineItem(description, quantity, unitPrice));
     }
 
-    @NonNull
-    public String addStoreLineItem(@NonNull StoreLineItem storeLineItem) {
-        String uuid = UUID.randomUUID().toString();
-        mStoreLineItems.put(uuid, storeLineItem);
-        return uuid;
+    private void addStoreLineItem(@NonNull StoreLineItem storeLineItem) {
+        mStoreLineItems.put(UUID.randomUUID().toString(), storeLineItem);
     }
 
     public boolean removeLineItem(@NonNull String itemId) {
@@ -41,22 +38,22 @@ public class StoreCart implements Parcelable {
     }
 
     @NonNull
-    public List<StoreLineItem> getLineItems() {
+    List<StoreLineItem> getLineItems() {
         return new ArrayList<>(mStoreLineItems.values());
     }
 
-    public int getSize() {
+    int getSize() {
         return mStoreLineItems.size();
     }
 
     @NonNull
-    public Currency getCurrency() {
+    Currency getCurrency() {
         return mCurrency;
     }
 
-    public long getTotalPrice() {
+    long getTotalPrice() {
         long total = 0L;
-        for(StoreLineItem item : mStoreLineItems.values()) {
+        for (StoreLineItem item : mStoreLineItems.values()) {
             total += item.getTotalPrice();
         }
         return total;
@@ -69,7 +66,7 @@ public class StoreCart implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeSerializable(mCurrency);
+        dest.writeString(mCurrency.getCurrencyCode());
         dest.writeInt(mStoreLineItems.size());
         for (String key : mStoreLineItems.keySet()) {
             dest.writeString(key);
@@ -77,25 +74,26 @@ public class StoreCart implements Parcelable {
         }
     }
 
-    protected StoreCart(Parcel in) {
-        mCurrency = (Currency) in.readSerializable();
+    private StoreCart(@NonNull Parcel in) {
+        mCurrency = Currency.getInstance(in.readString());
         int count = in.readInt();
         mStoreLineItems = new LinkedHashMap<>();
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             mStoreLineItems.put(in.readString(),
-                    (StoreLineItem) in.readParcelable(StoreLineItem.class.getClassLoader()));
+                    in.readParcelable(StoreLineItem.class.getClassLoader()));
         }
     }
 
-    public static final Parcelable.Creator<StoreCart> CREATOR = new Parcelable.Creator<StoreCart>() {
-        @Override
-        public StoreCart createFromParcel(Parcel source) {
-            return new StoreCart(source);
-        }
+    public static final Parcelable.Creator<StoreCart> CREATOR =
+            new Parcelable.Creator<StoreCart>() {
+                @Override
+                public StoreCart createFromParcel(Parcel source) {
+                    return new StoreCart(source);
+                }
 
-        @Override
-        public StoreCart[] newArray(int size) {
-            return new StoreCart[size];
-        }
-    };
+                @Override
+                public StoreCart[] newArray(int size) {
+                    return new StoreCart[size];
+                }
+            };
 }

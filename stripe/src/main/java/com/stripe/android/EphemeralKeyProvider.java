@@ -18,5 +18,5 @@ public interface EphemeralKeyProvider {
      */
     void createEphemeralKey(
             @NonNull @Size(min = 4) String apiVersion,
-            @NonNull final EphemeralKeyUpdateListener keyUpdateListener);
+            @NonNull EphemeralKeyUpdateListener keyUpdateListener);
 }

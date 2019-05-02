@@ -1,8 +1,6 @@
 package com.stripe.android.view;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,13 +14,13 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.Source;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowActivity;
@@ -47,7 +45,7 @@ import static org.mockito.Mockito.when;
  * Test class for {@link PaymentMethodsActivity}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class PaymentMethodsActivityTest {
+public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActivity> {
 
     static final String TEST_CUSTOMER_OBJECT_WITH_SOURCES =
             "{\n" +
@@ -92,18 +90,28 @@ public class PaymentMethodsActivityTest {
     private View mAddCardView;
     private ShadowActivity mShadowActivity;
 
+    public PaymentMethodsActivityTest() {
+        super(PaymentMethodsActivity.class);
+    }
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
 
-        mPaymentMethodsActivity = createActivity(createIntent()
+        mPaymentMethodsActivity = createActivity(new Intent()
                 .putExtra(EXTRA_PROXY_DELAY, true));
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
 
         mProgressBar = mPaymentMethodsActivity.findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = mPaymentMethodsActivity.findViewById(R.id.payment_methods_recycler);
         mAddCardView = mPaymentMethodsActivity.findViewById(R.id.payment_methods_add_payment_container);
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
@@ -165,7 +173,7 @@ public class PaymentMethodsActivityTest {
 
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
-        final PaymentMethodsActivity paymentMethodsActivity = createActivity(createIntent()
+        final PaymentMethodsActivity paymentMethodsActivity = createActivity(new Intent()
                 .putExtra(EXTRA_PROXY_DELAY, true)
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true));
         mShadowActivity = Shadows.shadowOf(paymentMethodsActivity);
@@ -323,21 +331,5 @@ public class PaymentMethodsActivityTest {
         assertNotNull(customerSource);
         assertEquals(customerSource.toJson().toString(),
                 intent.getStringExtra(EXTRA_SELECTED_PAYMENT));
-    }
-
-    @NonNull
-    private PaymentMethodsActivity createActivity(@NonNull Intent intent) {
-        return Robolectric.buildActivity(PaymentMethodsActivity.class, intent)
-                .create()
-                .start()
-                .resume()
-                .visible()
-                .get();
-    }
-
-    @NonNull
-    private Intent createIntent() {
-        return new PaymentMethodsActivityStarter(Robolectric.buildActivity(Activity.class).get())
-                .newIntent();
     }
 }

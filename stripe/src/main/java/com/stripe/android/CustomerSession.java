@@ -15,6 +15,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 
@@ -34,8 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
-public class CustomerSession
-        implements EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
+public class CustomerSession {
 
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";
@@ -44,8 +44,11 @@ public class CustomerSession
 
     private static final String ACTION_ADD_SOURCE = "add_source";
     private static final String ACTION_DELETE_SOURCE = "delete_source";
+    private static final String ACTION_ATTACH_PAYMENT_METHOD = "attach_payment_method";
+    private static final String ACTION_DETACH_PAYMENT_METHOD = "detach_payment_method";
     private static final String ACTION_SET_DEFAULT_SOURCE = "default_source";
     private static final String ACTION_SET_CUSTOMER_SHIPPING_INFO = "set_shipping_info";
+    private static final String KEY_PAYMENT_METHOD = "payment_method";
     private static final String KEY_SOURCE = "source";
     private static final String KEY_SOURCE_TYPE = "source_type";
     private static final String KEY_SHIPPING_INFO = "shipping_info";
@@ -61,7 +64,9 @@ public class CustomerSession
     private static final int CUSTOMER_RETRIEVED = 7;
     private static final int CUSTOMER_ERROR = 11;
     private static final int SOURCE_RETRIEVED = 13;
+    private static final int PAYMENT_METHOD_RETRIEVED = 15;
     private static final int SOURCE_ERROR = 17;
+    private static final int PAYMENT_METHOD_ERROR = 21;
     private static final int CUSTOMER_SHIPPING_INFO_SAVED = 19;
 
     // The maximum number of active threads we support
@@ -83,6 +88,8 @@ public class CustomerSession
             new HashMap<>();
     @NonNull private final Map<String, SourceRetrievalListener> mSourceRetrievalListeners =
             new HashMap<>();
+    @NonNull private final Map<String, PaymentMethodRetrievalListener>
+            mPaymentMethodRetrievalListeners = new HashMap<>();
 
     @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
     @NonNull private final Handler mUiThreadHandler;
@@ -200,6 +207,16 @@ public class CustomerSession
             }
 
             @Override
+            public void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
+                                                 @Nullable String operationId) {
+                final PaymentMethodRetrievalListener listener =
+                        getPaymentMethodRetrievalListener(operationId);
+                if (listener != null && paymentMethod != null) {
+                    listener.onPaymentMethodRetrieved(paymentMethod);
+                }
+            }
+
+            @Override
             public void onCustomerShippingInfoSaved(@Nullable Customer customer) {
                 mCustomer = customer;
                 mLocalBroadcastManager
@@ -217,10 +234,16 @@ public class CustomerSession
                                       @Nullable String operationId) {
                 handleRetrievalError(operationId, exception, SOURCE_ERROR);
             }
+
+            @Override
+            public void onPaymentMethodError(@NonNull StripeException exception,
+                                             @Nullable String operationId) {
+                handleRetrievalError(operationId, exception, PAYMENT_METHOD_ERROR);
+            }
         });
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
-                this,
+                createKeyListener(),
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 CustomerEphemeralKey.class);
@@ -322,6 +345,48 @@ public class CustomerSession
             mSourceRetrievalListeners.put(operationId, listener);
         }
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
+    }
+
+    /**
+     * Attaches a PaymentMethod to a Customer.
+     *
+     * @param paymentMethodId the ID of the payment method to be attached
+     * @param listener        a {@link PaymentMethodRetrievalListener} to be notified when the
+     *                        api call is complete
+     */
+    public void attachPaymentMethod(
+            @NonNull String paymentMethodId,
+            @Nullable PaymentMethodRetrievalListener listener) {
+        final Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mPaymentMethodRetrievalListeners.put(operationId, listener);
+        }
+        mEphemeralKeyManager
+                .retrieveEphemeralKey(operationId, ACTION_ATTACH_PAYMENT_METHOD, arguments);
+    }
+
+    /**
+     * Detaches a PaymentMethod from a Customer.
+     *
+     * @param paymentMethodId the ID of the payment method to be detached
+     * @param listener        a {@link PaymentMethodRetrievalListener} to be notified when the
+     *                        api call is complete. The api call will return the removed source.
+     */
+    public void detachPaymentMethod(
+            @NonNull String paymentMethodId,
+            @Nullable PaymentMethodRetrievalListener listener) {
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
+
+        final String operationId = UUID.randomUUID().toString();
+        if (listener != null) {
+            mPaymentMethodRetrievalListeners.put(operationId, listener);
+        }
+        mEphemeralKeyManager
+                .retrieveEphemeralKey(operationId, ACTION_DETACH_PAYMENT_METHOD, arguments);
     }
 
     /**
@@ -439,6 +504,58 @@ public class CustomerSession
         executeRunnable(fetchCustomerRunnable);
     }
 
+    private void attachPaymentMethod(
+            @NonNull final CustomerEphemeralKey key,
+            @NonNull final String paymentMethodId,
+            @Nullable final String operationId) {
+        final Runnable fetchCustomerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final PaymentMethodMessage paymentMethodMessage = new PaymentMethodMessage(
+                            operationId,
+                            attachCustomerPaymentMethodWithKey(key, paymentMethodId)
+                    );
+                    mUiThreadHandler.sendMessage(mUiThreadHandler
+                            .obtainMessage(PAYMENT_METHOD_RETRIEVED, paymentMethodMessage));
+                } catch (StripeException stripeEx) {
+                    mUiThreadHandler
+                            .sendMessage(mUiThreadHandler.obtainMessage(PAYMENT_METHOD_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
+                }
+            }
+        };
+
+        executeRunnable(fetchCustomerRunnable);
+    }
+
+    private void detachPaymentMethod(
+            @NonNull final CustomerEphemeralKey key,
+            @NonNull final String paymentMethodId,
+            @Nullable final String operationId) {
+        final Runnable fetchCustomerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final PaymentMethodMessage paymentMethodMessage = new PaymentMethodMessage(
+                            operationId,
+                            detachCustomerPaymentMethodWithKey(key, paymentMethodId)
+                    );
+                    mUiThreadHandler.sendMessage(mUiThreadHandler
+                            .obtainMessage(PAYMENT_METHOD_RETRIEVED, paymentMethodMessage));
+
+                } catch (StripeException stripeEx) {
+                    mUiThreadHandler.sendMessage(mUiThreadHandler
+                            .obtainMessage(PAYMENT_METHOD_ERROR,
+                                    new ExceptionMessage(operationId, stripeEx)));
+                    sendErrorIntent(stripeEx);
+                }
+            }
+        };
+        executeRunnable(fetchCustomerRunnable);
+    }
+
     private void setCustomerSourceDefault(
             @NonNull final CustomerEphemeralKey key,
             @NonNull final String sourceId,
@@ -518,70 +635,97 @@ public class CustomerSession
         mThreadPoolExecutor.execute(runnable);
     }
 
-    @Override
-    public void onKeyUpdate(
-            @NonNull CustomerEphemeralKey ephemeralKey,
-            @Nullable String operationId,
-            @Nullable String actionString,
-            @Nullable Map<String, Object> arguments) {
-        if (actionString == null) {
-            updateCustomer(ephemeralKey, operationId);
-            return;
-        }
+    @NonNull
+    private EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> createKeyListener() {
+        return new EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>() {
+            @Override
+            public void onKeyUpdate(
+                    @NonNull CustomerEphemeralKey ephemeralKey,
+                    @Nullable String operationId,
+                    @Nullable String actionString,
+                    @Nullable Map<String, Object> arguments) {
+                if (actionString == null) {
+                    updateCustomer(ephemeralKey, operationId);
+                    return;
+                }
 
-        if (arguments == null) {
-            return;
-        }
+                if (arguments == null) {
+                    return;
+                }
 
-        if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
-                arguments.containsKey(KEY_SOURCE_TYPE)) {
-            addCustomerSource(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE),
-                    operationId
-            );
-            resetUsageTokens();
-        } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
-                arguments.containsKey(KEY_SOURCE)) {
-            deleteCustomerSource(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    operationId);
-            resetUsageTokens();
-        } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString)
-                && arguments.containsKey(KEY_SOURCE) && arguments.containsKey(KEY_SOURCE_TYPE)) {
-            setCustomerSourceDefault(
-                    ephemeralKey,
-                    (String) arguments.get(KEY_SOURCE),
-                    (String) arguments.get(KEY_SOURCE_TYPE),
-                    operationId);
-            resetUsageTokens();
-        } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
-                arguments.containsKey(KEY_SHIPPING_INFO)) {
-            setCustomerShippingInformation(
-                    ephemeralKey,
-                    (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
-                    operationId);
-            resetUsageTokens();
-        }
-    }
+                if (ACTION_ADD_SOURCE.equals(actionString) && arguments.containsKey(KEY_SOURCE) &&
+                        arguments.containsKey(KEY_SOURCE_TYPE)) {
+                    addCustomerSource(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            operationId
+                    );
+                    resetUsageTokens();
+                } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
+                        arguments.containsKey(KEY_SOURCE)) {
+                    deleteCustomerSource(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            operationId);
+                    resetUsageTokens();
+                } else if (ACTION_ATTACH_PAYMENT_METHOD.equals(actionString) &&
+                        arguments.containsKey(KEY_PAYMENT_METHOD)) {
+                    attachPaymentMethod(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_PAYMENT_METHOD),
+                            operationId
+                    );
+                    resetUsageTokens();
+                } else if (ACTION_DETACH_PAYMENT_METHOD.equals(actionString) &&
+                        arguments.containsKey(KEY_PAYMENT_METHOD)) {
+                    detachPaymentMethod(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_PAYMENT_METHOD),
+                            operationId);
+                    resetUsageTokens();
+                } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString) &&
+                        arguments.containsKey(KEY_SOURCE) &&
+                        arguments.containsKey(KEY_SOURCE_TYPE)) {
+                    setCustomerSourceDefault(
+                            ephemeralKey,
+                            (String) arguments.get(KEY_SOURCE),
+                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            operationId);
+                    resetUsageTokens();
+                } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
+                        arguments.containsKey(KEY_SHIPPING_INFO)) {
+                    setCustomerShippingInformation(
+                            ephemeralKey,
+                            (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                            operationId);
+                    resetUsageTokens();
+                }
+            }
 
-    @Override
-    public void onKeyError(@Nullable String operationId, int httpCode,
-                           @Nullable String errorMessage) {
-        // Any error eliminates all listeners
-        final CustomerRetrievalListener customerRetrievalListener =
-                getCustomerRetrievalListener(operationId);
-        if (customerRetrievalListener != null) {
-            customerRetrievalListener.onError(httpCode, errorMessage, null);
-        }
+            @Override
+            public void onKeyError(@Nullable String operationId, int httpCode,
+                                   @Nullable String errorMessage) {
+                // Any error eliminates all listeners
+                final CustomerRetrievalListener customerRetrievalListener =
+                        getCustomerRetrievalListener(operationId);
+                if (customerRetrievalListener != null) {
+                    customerRetrievalListener.onError(httpCode, errorMessage, null);
+                }
 
-        final SourceRetrievalListener sourceRetrievalListener =
-                getSourceRetrievalListener(operationId);
-        if (sourceRetrievalListener != null) {
-            sourceRetrievalListener.onError(httpCode, errorMessage, null);
-        }
+                final SourceRetrievalListener sourceRetrievalListener =
+                        getSourceRetrievalListener(operationId);
+                if (sourceRetrievalListener != null) {
+                    sourceRetrievalListener.onError(httpCode, errorMessage, null);
+                }
+
+                final PaymentMethodRetrievalListener  paymentMethodRetrievalListener =
+                        getPaymentMethodRetrievalListener(operationId);
+                if (paymentMethodRetrievalListener != null) {
+                    paymentMethodRetrievalListener.onError(httpCode, errorMessage, null);
+                }
+            }
+        };
     }
 
     private void handleRetrievalError(@Nullable String operationId,
@@ -592,6 +736,8 @@ public class CustomerSession
             listener = mSourceRetrievalListeners.remove(operationId);
         } else if (errorType == CUSTOMER_ERROR) {
             listener = mCustomerRetrievalListeners.remove(operationId);
+        } else if (errorType == PAYMENT_METHOD_ERROR) {
+            listener = mPaymentMethodRetrievalListeners.remove(operationId);
         } else {
             listener = null;
         }
@@ -634,8 +780,8 @@ public class CustomerSession
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -647,8 +793,33 @@ public class CustomerSession
                 PaymentConfiguration.getInstance().getPublishableKey(),
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
+    }
+
+    @Nullable
+    private PaymentMethod attachCustomerPaymentMethodWithKey(
+            @NonNull CustomerEphemeralKey key,
+            @NonNull String paymentMethodId) throws StripeException {
+        return mApiHandler.attachPaymentMethod(
+                key.getCustomerId(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                paymentMethodId,
+                key.getSecret()
+        );
+    }
+
+    @Nullable
+    private PaymentMethod detachCustomerPaymentMethodWithKey(
+            @NonNull CustomerEphemeralKey key,
+            @NonNull String paymentMethodId) throws StripeException {
+        return mApiHandler.detachPaymentMethod(
+                PaymentConfiguration.getInstance().getPublishableKey(),
+                new ArrayList<>(mProductUsageTokens),
+                paymentMethodId,
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -660,8 +831,8 @@ public class CustomerSession
                 PaymentConfiguration.getInstance().getPublishableKey(),
                 new ArrayList<>(mProductUsageTokens),
                 shippingInformation,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     @Nullable
@@ -675,8 +846,8 @@ public class CustomerSession
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,
-                key.getSecret(),
-                null);
+                key.getSecret()
+        );
     }
 
     /**
@@ -712,6 +883,12 @@ public class CustomerSession
         return mSourceRetrievalListeners.remove(operationId);
     }
 
+    @Nullable
+    private PaymentMethodRetrievalListener getPaymentMethodRetrievalListener(
+            @Nullable String operationId) {
+        return mPaymentMethodRetrievalListeners.remove(operationId);
+    }
+
     public abstract static class ActivityCustomerRetrievalListener<A extends Activity>
             implements CustomerRetrievalListener {
 
@@ -735,6 +912,10 @@ public class CustomerSession
         void onSourceRetrieved(@NonNull Source source);
     }
 
+    public interface PaymentMethodRetrievalListener extends RetrievalListener {
+        void onPaymentMethodRetrieved(@NonNull PaymentMethod paymentMethod);
+    }
+
     interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
@@ -749,6 +930,24 @@ public class CustomerSession
         @NonNull private final WeakReference<A> mActivityRef;
 
         public ActivitySourceRetrievalListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
+    }
+
+    /**
+     * Abstract implementation of {@link PaymentMethodRetrievalListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivityPaymentMethodRetrievalListener<A extends Activity>
+            implements PaymentMethodRetrievalListener {
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityPaymentMethodRetrievalListener(@NonNull A activity) {
             this.mActivityRef = new WeakReference<>(activity);
         }
 
@@ -775,6 +974,17 @@ public class CustomerSession
         private SourceMessage(@Nullable String operationId, @Nullable Source source) {
             this.operationId = operationId;
             this.source = source;
+        }
+    }
+
+    private static class PaymentMethodMessage {
+        @Nullable private final String operationId;
+        @Nullable private final PaymentMethod paymentMethod;
+
+        private PaymentMethodMessage(@Nullable String operationId,
+                                     @Nullable PaymentMethod paymentMethod) {
+            this.operationId = operationId;
+            this.paymentMethod = paymentMethod;
         }
     }
 
@@ -818,6 +1028,16 @@ public class CustomerSession
 
                     break;
                 }
+                case PAYMENT_METHOD_RETRIEVED: {
+                    if (msg.obj instanceof PaymentMethodMessage) {
+                        final PaymentMethodMessage paymentMethodMessage =
+                                (PaymentMethodMessage) msg.obj;
+                        mListener.onPaymentMethodRetrieved(paymentMethodMessage.paymentMethod,
+                                paymentMethodMessage.operationId);
+                    }
+
+                    break;
+                }
                 case CUSTOMER_SHIPPING_INFO_SAVED: {
                     if (msg.obj instanceof CustomerMessage) {
                         final CustomerMessage customerMessage = (CustomerMessage) msg.obj;
@@ -842,6 +1062,15 @@ public class CustomerSession
 
                     break;
                 }
+                case PAYMENT_METHOD_ERROR: {
+                    if (msg.obj instanceof ExceptionMessage) {
+                        final ExceptionMessage exceptionMessage = (ExceptionMessage) msg.obj;
+                        mListener.onPaymentMethodError(exceptionMessage.exception,
+                                exceptionMessage.operationId);
+                    }
+
+                    break;
+                }
                 default: {
                     break;
                 }
@@ -853,11 +1082,17 @@ public class CustomerSession
 
             void onSourceRetrieved(@Nullable Source source, @Nullable String operationId);
 
+            void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
+                                          @Nullable String operationId);
+
             void onCustomerShippingInfoSaved(@Nullable Customer customer);
 
             void onCustomerError(@NonNull StripeException exception, @Nullable String operationId);
 
             void onSourceError(@NonNull StripeException exception, @Nullable String operationId);
+
+            void onPaymentMethodError(@NonNull StripeException exception,
+                                      @Nullable String operationId);
         }
     }
 }
