@@ -12,7 +12,6 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
-import com.stripe.android.PaymentConfiguration;
 
 import java.lang.ref.WeakReference;
 
