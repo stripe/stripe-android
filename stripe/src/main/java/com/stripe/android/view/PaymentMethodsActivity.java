@@ -26,7 +26,10 @@ import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.GooglePayMethod;
+import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.view.i18n.TranslatorManager;
+
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -41,6 +44,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SHOW_GOOGLE_PAY = "show_google_pay";
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
+    public static final String EXTRA_SELECTED_PAYMENT_TYPE = "selected_payment_type";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
@@ -262,7 +266,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         final CustomerSource customerSource = mCustomer.getSourceById(selectedSourceId);
         if (customerSource != null) {
             Intent intent = new Intent();
-            intent.putExtra(EXTRA_SELECTED_PAYMENT, customerSource.toJson().toString());
+            JSONObject customerJsonObject = customerSource.toJson();
+            intent.putExtra(EXTRA_SELECTED_PAYMENT, customerJsonObject.toString());
+            intent.putExtra(EXTRA_SELECTED_PAYMENT_TYPE, customerJsonObject.optString(StripePaymentSource.FIELD_OBJECT));
             setResult(RESULT_OK, intent);
         } else {
             setResult(RESULT_CANCELED);
@@ -275,6 +281,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         final GooglePayMethod googlePayMethod = new GooglePayMethod();
         Intent intent = new Intent();
         intent.putExtra(EXTRA_SELECTED_PAYMENT, googlePayMethod.toJson().toString());
+        intent.putExtra(EXTRA_SELECTED_PAYMENT_TYPE, GooglePayMethod.VALUE_GOOGLE_PAY);
         setResult(RESULT_OK, intent);
         finish();
     }
