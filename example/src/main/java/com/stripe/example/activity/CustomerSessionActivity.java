@@ -76,12 +76,10 @@ public class CustomerSessionActivity extends AppCompatActivity {
         final Intent paymentMethodsIntent = new PaymentMethodsActivityStarter(this).newIntent()
                 .putExtra(PaymentMethodsActivity.EXTRA_SHOW_GOOGLE_PAY, true);
         this.startActivityForResult(paymentMethodsIntent, REQUEST_CODE_SELECT_SOURCE);
-
-        // new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
     }
 
     @Nullable
-    private String readPaymentObjectType(String selectedPayment) {
+    private String getPaymentObjectType(@Nullable String selectedPayment) {
         // This should be available through a higher level static
         JSONObject jsonObject;
         try {
@@ -101,9 +99,9 @@ public class CustomerSessionActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
             String selectedPayment = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            String objectType = readPaymentObjectType(selectedPayment);
+            String objectType = getPaymentObjectType(selectedPayment);
             if(objectType.equals(GooglePayMethod.VALUE_GOOGLE_PAY)) {
-                mSelectedSourceTextView.setText("Google Pay");
+                mSelectedSourceTextView.setText(R.string.selected_google_pay);
             } else {
                 // plain source
                 Source source = Source.fromString(selectedPayment);

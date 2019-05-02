@@ -49,10 +49,8 @@ public class GooglePayView extends LinearLayout {
     private AppCompatTextView mGoogleInformationTextView;
     private AppCompatImageView mCheckMarkImageView;
 
-    @ColorInt int mSelectedAlphaColorInt;
     @ColorInt int mSelectedColorInt;
     @ColorInt int mUnselectedColorInt;
-    @ColorInt int mUnselectedTextAlphaColorInt;
     @ColorInt int mUnselectedTextColorInt;
 
     public GooglePayView(Context context) {
@@ -89,17 +87,7 @@ public class GooglePayView extends LinearLayout {
         setSelected(!mIsSelected);
     }
 
-    @VisibleForTesting
-    int[] getTextColorValues() {
-        int[] colorValues = new int[4];
-        colorValues[0] = mSelectedColorInt;
-        colorValues[1] = mSelectedAlphaColorInt;
-        colorValues[2] = mUnselectedTextColorInt;
-        colorValues[3] = mUnselectedTextAlphaColorInt;
-        return colorValues;
-    }
-
-    void init() {
+    private void init() {
         inflate(getContext(), R.layout.pay_with_google_view, this);
         setOrientation(HORIZONTAL);
         setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
@@ -114,7 +102,6 @@ public class GooglePayView extends LinearLayout {
         mUnselectedColorInt = getThemeColorControlNormal(getContext()).data;
         mUnselectedTextColorInt = getThemeTextColorSecondary(getContext()).data;
         useDefaultColorsIfThemeColorsAreInvisible();
-        setLightTextColorValues();
 
         initializeCheckMark();
         updateCheckMark();
@@ -141,9 +128,6 @@ public class GooglePayView extends LinearLayout {
         String googleText = getResources().getString(R.string.pay_with_google);
         int googleLength = googleText.length();
         @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
-        @ColorInt int lightTextColor = mIsSelected
-                ? mSelectedAlphaColorInt
-                : mUnselectedTextAlphaColorInt;
 
         SpannableString str = new SpannableString(googleText);
         str.setSpan(
@@ -177,13 +161,6 @@ public class GooglePayView extends LinearLayout {
         mUnselectedTextColorInt = ViewUtils.isColorTransparent(mUnselectedTextColorInt) ?
                 ContextCompat.getColor(getContext(), R.color.color_text_secondary_default) :
                 mUnselectedTextColorInt;
-    }
-
-    private void setLightTextColorValues() {
-        mSelectedAlphaColorInt = ColorUtils.setAlphaComponent(mSelectedColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
-        mUnselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(mUnselectedTextColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
     }
 
 }

@@ -70,4 +70,5 @@
     <string name="confirm_payment_intent">Confirm payment intent</string>
     <string name="retrieve_payment_intent">Retrieve payment intent</string>
     <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the payment intent</string>
+    <string name="selected_google_pay">"Google Pay"</string>
 </resources>

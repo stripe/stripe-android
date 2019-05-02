@@ -118,4 +118,5 @@
     <!--Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application-->
     <string name="add_card">Adicione um novo cartão de débito ou cartão de crédito para fazer compras neste app.</string>
     <string name="invalid_shipping_information">Endereço de entrega inválido</string>
+    <string name="pay_with_google">Pague com o Google</string>
 </resources>

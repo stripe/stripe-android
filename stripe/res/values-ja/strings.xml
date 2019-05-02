@@ -118,4 +118,5 @@
     <!-- Screen title telling users they should select a shipping address -->
     <string name="title_select_shipping_method">配送方法を選択してください</string>
     <string name="invalid_shipping_information">配送先住所エラー</string>
+    <string name="pay_with_google">Googleで支払います</string>
 </resources>

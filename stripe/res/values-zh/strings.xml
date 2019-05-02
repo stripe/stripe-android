@@ -118,4 +118,5 @@
     <!-- Screen title telling users they should select a shipping address -->
     <string name="title_select_shipping_method">选择送货方式</string>
     <string name="invalid_shipping_information">无效配送地址</string>
+    <string name="pay_with_google">用Google付款</string>
 </resources>
