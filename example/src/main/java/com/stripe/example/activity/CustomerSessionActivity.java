@@ -74,12 +74,14 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            String objectType = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT_TYPE);
-            if(objectType.equals(GooglePayMethod.VALUE_GOOGLE_PAY)) {
+            String objectType = data.getStringExtra(
+                    PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT_TYPE);
+            if (objectType.equals(GooglePayMethod.VALUE_GOOGLE_PAY)) {
                 mSelectedSourceTextView.setText(R.string.selected_google_pay);
             } else {
                 // plain source
-                String selectedPayment = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+                String selectedPayment = data.getStringExtra(
+                        PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
                 Source source = Source.fromString(selectedPayment);
                 if (source != null && Source.CARD.equals(source.getType())) {
                     SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();

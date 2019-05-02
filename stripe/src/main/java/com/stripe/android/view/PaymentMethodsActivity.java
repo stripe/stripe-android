@@ -268,7 +268,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             Intent intent = new Intent();
             JSONObject customerJsonObject = customerSource.toJson();
             intent.putExtra(EXTRA_SELECTED_PAYMENT, customerJsonObject.toString());
-            intent.putExtra(EXTRA_SELECTED_PAYMENT_TYPE, customerJsonObject.optString(StripePaymentSource.FIELD_OBJECT));
+            intent.putExtra(EXTRA_SELECTED_PAYMENT_TYPE,
+                    customerJsonObject.optString(StripePaymentSource.FIELD_OBJECT));
             setResult(RESULT_OK, intent);
         } else {
             setResult(RESULT_CANCELED);
