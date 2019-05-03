@@ -1,6 +1,8 @@
 ## Migration Guides
 
 ### Migration from versions < 9.0.0
+- `minSdkVersion` is now 16
+
 - `AccountParams.createAccountParams()` requires a `AccountParams#BusinessType` parameter
     ```java
     // before

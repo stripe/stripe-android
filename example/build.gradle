@@ -5,6 +5,7 @@ check.dependsOn('checkstyle')
 
 dependencies {
     implementation project(':stripe')
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "com.android.support:appcompat-v7:28.0.0"
     implementation "com.android.support:recyclerview-v7:28.0.0"
     implementation "com.android.support:support-v4:28.0.0"
@@ -46,8 +47,9 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion rootProject.ext.compileSdkVersion
+        multiDexEnabled true
     }
     packagingOptions {
         exclude 'LICENSE.txt'
