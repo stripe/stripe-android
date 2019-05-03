@@ -1034,7 +1034,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         customerSession.getPaymentMethods(PaymentMethod.Type.Card, mockListener);
 
-//        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).getPaymentMethods(
@@ -1054,7 +1054,6 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         final List<PaymentMethod> paymentMethods = mPaymentMethodsArgumentCaptor.getValue();
         assertNotNull(paymentMethods);
     }
-
 
     private void setupErrorProxy()
             throws StripeException {
