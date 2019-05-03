@@ -50,6 +50,18 @@ public class PaymentMethod extends StripeJsonModel {
     @Nullable public final String customerId;
     @Nullable public final Map<String, String> metadata;
 
+    public enum Type {
+        Card("card"),
+        CardPresent("card_present"),
+        Ideal("ideal");
+
+        @NonNull public final String code;
+
+        Type(@NonNull String code) {
+            this.code = code;
+        }
+    }
+
     private PaymentMethod(@NonNull Builder builder) {
         id = builder.mId;
         liveMode = builder.mLiveMode;
@@ -368,7 +380,7 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
-    public static final class Card extends StripeJsonModel {
+    public static final class Card extends PaymentMethodTypeImpl {
         private static final String FIELD_BRAND = "brand";
         private static final String FIELD_CHECKS = "checks";
         private static final String FIELD_COUNTRY = "country";
@@ -390,6 +402,7 @@ public class PaymentMethod extends StripeJsonModel {
         @Nullable public final Wallet wallet;
 
         private Card(@NonNull Builder builder) {
+            super(Type.Card);
             brand = builder.mBrand;
             checks = builder.checks;
             country = builder.mCountry;
@@ -720,10 +733,12 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
-    public static final class CardPresent extends StripeJsonModel {
+    public static final class CardPresent extends PaymentMethodTypeImpl {
         public static final CardPresent EMPTY = new CardPresent();
 
-        private CardPresent() {}
+        private CardPresent() {
+            super(Type.CardPresent);
+        }
 
         @NonNull
         @Override
@@ -738,7 +753,7 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
-    public static final class Ideal extends StripeJsonModel {
+    public static final class Ideal extends PaymentMethodTypeImpl {
         private static final String FIELD_BANK = "bank";
         private static final String FIELD_BIC = "bic";
 
@@ -746,6 +761,7 @@ public class PaymentMethod extends StripeJsonModel {
         @Nullable public final String bankIdentifierCode;
 
         private Ideal(@NonNull Builder builder) {
+            super(Type.Ideal);
             bank = builder.mBank;
             bankIdentifierCode = builder.mBankIdentifierCode;
         }
@@ -819,6 +835,14 @@ public class PaymentMethod extends StripeJsonModel {
             public Ideal build() {
                 return new Ideal(this);
             }
+        }
+    }
+
+    private abstract static class PaymentMethodTypeImpl extends StripeJsonModel {
+        @NonNull public final Type type;
+
+        private PaymentMethodTypeImpl(@NonNull Type type) {
+            this.type = type;
         }
     }
 }

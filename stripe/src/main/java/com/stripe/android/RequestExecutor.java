@@ -62,7 +62,7 @@ class RequestExecutor {
     StripeResponse execute(
             @RestMethod @NonNull String method,
             @NonNull String url,
-            @Nullable Map<String, Object> params,
+            @Nullable Map<String, ?> params,
             @NonNull RequestOptions options)
             throws APIConnectionException, InvalidRequestException {
         // HttpURLConnection verifies SSL cert by default
@@ -142,7 +142,7 @@ class RequestExecutor {
         @NonNull
         private HttpURLConnection create(@RestMethod @NonNull String method,
                                          @NonNull String url,
-                                         @Nullable Map<String, Object> params,
+                                         @Nullable Map<String, ?> params,
                                          @NonNull RequestOptions options)
                 throws IOException, InvalidRequestException {
             final URL stripeURL = new URL(getUrl(method, url, params));
@@ -188,7 +188,7 @@ class RequestExecutor {
         @NonNull
         private String getUrl(@RestMethod @NonNull String method,
                               @NonNull String url,
-                              @Nullable Map<String, Object> params)
+                              @Nullable Map<String, ?> params)
                 throws UnsupportedEncodingException, InvalidRequestException {
             if (RestMethod.GET.equals(method)) {
                 return formatUrl(url, createQuery(params));
@@ -237,7 +237,7 @@ class RequestExecutor {
 
         @NonNull
         private byte[] getOutputBytes(
-                @Nullable Map<String, Object> params,
+                @Nullable Map<String, ?> params,
                 @NonNull RequestOptions options) throws InvalidRequestException {
             try {
                 if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
@@ -336,7 +336,7 @@ class RequestExecutor {
         }
 
         @NonNull
-        String createQuery(@Nullable Map<String, Object> params)
+        String createQuery(@Nullable Map<String, ?> params)
                 throws UnsupportedEncodingException, InvalidRequestException {
             final StringBuilder queryStringBuffer = new StringBuilder();
             final List<Parameter> flatParams = flattenParams(params);
@@ -352,7 +352,7 @@ class RequestExecutor {
         }
 
         @NonNull
-        private List<Parameter> flattenParams(@Nullable Map<String, Object> params)
+        private List<Parameter> flattenParams(@Nullable Map<String, ?> params)
                 throws InvalidRequestException {
             return flattenParamsMap(params, null);
         }
@@ -380,7 +380,7 @@ class RequestExecutor {
         }
 
         @NonNull
-        private List<Parameter> flattenParamsMap(@Nullable Map<String, Object> params,
+        private List<Parameter> flattenParamsMap(@Nullable Map<String, ?> params,
                                                  @Nullable String keyPrefix)
                 throws InvalidRequestException {
             final List<Parameter> flatParams = new LinkedList<>();
@@ -388,7 +388,7 @@ class RequestExecutor {
                 return flatParams;
             }
 
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
+            for (Map.Entry<String, ?> entry : params.entrySet()) {
                 final String key = entry.getKey();
                 final Object value = entry.getValue();
                 final String newPrefix;

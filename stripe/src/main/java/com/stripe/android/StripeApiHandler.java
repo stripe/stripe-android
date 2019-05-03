@@ -28,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -247,7 +248,7 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+        final Map<String, String> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
         final RequestOptions options;
         if (stripeAccount == null) {
             options = RequestOptions.builder(publishableKey).build();
@@ -475,6 +476,54 @@ class StripeApiHandler {
         return PaymentMethod.fromString(response.getResponseBody());
     }
 
+    /**
+     * Retrieve a Customer's {@link PaymentMethod}s
+     */
+    @NonNull
+    List<PaymentMethod> getPaymentMethods(
+            @NonNull String customerId,
+            @NonNull String paymentMethodType,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, String> queryParams = new HashMap<>(2);
+        queryParams.put("customer", customerId);
+        queryParams.put("type", paymentMethodType);
+
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.GET,
+                getPaymentMethodsUrl(),
+                queryParams,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+
+        final JSONArray data;
+        try {
+            data = new JSONObject(response.getResponseBody()).optJSONArray("data");
+        } catch (JSONException e) {
+            return new ArrayList<>();
+        }
+
+        final List<PaymentMethod> paymentMethods = new ArrayList<>();
+        for (int i = 0; i < data.length(); i++) {
+            paymentMethods.add(PaymentMethod.fromJson(data.optJSONObject(i)));
+        }
+        return paymentMethods;
+    }
+
     @Nullable
     Customer setDefaultCustomerSource(
             @NonNull String customerId,
@@ -565,9 +614,9 @@ class StripeApiHandler {
     }
 
     @NonNull
-    private static Map<String, Object> createVerificationParam(@NonNull String verificationId,
+    private static Map<String, String> createVerificationParam(@NonNull String verificationId,
                                                                @NonNull String userOneTimeCode) {
-        final Map<String, Object> verificationMap = new HashMap<>();
+        final Map<String, String> verificationMap = new HashMap<>();
         verificationMap.put("id", verificationId);
         verificationMap.put("one_time_code", userOneTimeCode);
         return verificationMap;
@@ -584,7 +633,7 @@ class StripeApiHandler {
             APIException,
             AuthenticationException,
             CardException, JSONException {
-        final Map<String, Object> paramsMap = new HashMap<>();
+        final Map<String, Map<String, String>> paramsMap = new HashMap<>();
         paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
         StripeResponse response = getStripeResponse(
@@ -908,7 +957,7 @@ class StripeApiHandler {
     private StripeResponse getStripeResponse(
             @RequestExecutor.RestMethod @NonNull String method,
             @NonNull String url,
-            @Nullable Map<String, Object> params,
+            @Nullable Map<String, ?> params,
             @NonNull RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
         return mRequestExecutor.execute(method, url, params, options);
@@ -968,7 +1017,7 @@ class StripeApiHandler {
     StripeResponse requestData(
             @RequestExecutor.RestMethod String method,
             @NonNull String url,
-            @NonNull Map<String, Object> params,
+            @NonNull Map<String, ?> params,
             @NonNull RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
