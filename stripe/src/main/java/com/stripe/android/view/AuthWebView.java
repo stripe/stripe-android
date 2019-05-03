@@ -3,7 +3,6 @@ package com.stripe.android.view;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,9 +11,11 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.stripe.android.R;
 
@@ -44,6 +45,7 @@ class AuthWebView extends WebView {
 
     void init(@NonNull Activity activity, @NonNull String returnUrl) {
         setWebViewClient(new AuthWebViewClient(activity, returnUrl));
+        setWebChromeClient(new AuthWebViewChromeClient(activity));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -52,15 +54,34 @@ class AuthWebView extends WebView {
         getSettings().setAllowContentAccess(false);
     }
 
+    static class AuthWebViewChromeClient extends WebChromeClient {
+        @NonNull private final ProgressBar mProgressBar;
+
+        AuthWebViewChromeClient(@NonNull Activity activity) {
+            mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
+        }
+
+        @Override
+        public void onProgressChanged(@NonNull WebView view, int progress) {
+            if (progress < 100) {
+                if (mProgressBar.getVisibility() == GONE) {
+                    mProgressBar.setVisibility(VISIBLE);
+                }
+                mProgressBar.setProgress(progress);
+            } else if (progress == 100) {
+                mProgressBar.setVisibility(GONE);
+                mProgressBar.setProgress(0);
+            }
+        }
+    }
+
     static class AuthWebViewClient extends WebViewClient {
         @NonNull private final Activity mActivity;
         @NonNull private final Uri mReturnUrl;
-        @NonNull private final ProgressDialog mProgressDialog;
 
         AuthWebViewClient(@NonNull Activity activity, @NonNull String returnUrl) {
             mActivity = activity;
             mReturnUrl = Uri.parse(returnUrl);
-            mProgressDialog = new AuthWebViewProgressDialog(mActivity);
         }
 
         @Override
@@ -89,37 +110,6 @@ class AuthWebView extends WebView {
                     mReturnUrl.getScheme().equals(uri.getScheme()) &&
                     mReturnUrl.getHost() != null &&
                     mReturnUrl.getHost().equals(uri.getHost());
-        }
-
-        @Override
-        public void onPageStarted(@NonNull WebView view, @NonNull String url,
-                                  @Nullable Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            if (!mProgressDialog.isShowing()) {
-                mProgressDialog.show();
-            }
-        }
-
-        @Override
-        public void onPageFinished(@NonNull WebView view, @NonNull String url) {
-            super.onPageFinished(view, url);
-            if (mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
-        }
-    }
-
-    private static class AuthWebViewProgressDialog extends ProgressDialog {
-        AuthWebViewProgressDialog(@NonNull Context context) {
-            super(context);
-            setIndeterminate(true);
-            setCancelable(false);
-        }
-
-        @Override
-        public void onStart() {
-            super.onStart();
-            setContentView(R.layout.auth_web_view_dialog_layout);
         }
     }
 }
