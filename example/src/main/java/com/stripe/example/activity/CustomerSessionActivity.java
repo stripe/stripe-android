@@ -46,25 +46,17 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
         CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
-                    new ExampleEphemeralKeyProvider.ProgressListener() {
-                        @Override
-                        public void onStringResponse(String string) {
+                        string -> {
                             if (string.startsWith("Error: ")) {
                                 mErrorDialogHandler.show(string);
                             }
-                        }
-                    }));
+                        }));
 
         mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.getInstance().retrieveCurrentCustomer(
                 new CustomerRetrievalListenerImpl(this));
 
-        mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchWithCustomer();
-            }
-        });
+        mSelectSourceButton.setOnClickListener(v -> launchWithCustomer());
     }
 
     private void launchWithCustomer() {
@@ -75,8 +67,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            String selectedSource = data.getStringExtra(
-                    PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            final String selectedSource = data
+                    .getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
             Source source = Source.fromString(selectedSource);
             // Note: it isn't possible for a null or non-card source to be returned.
             if (source != null && Source.CARD.equals(source.getType())) {

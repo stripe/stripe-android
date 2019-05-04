@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
@@ -23,14 +23,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class PaymentMultilineActivity extends AppCompatActivity {
 
@@ -39,13 +36,9 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
     private CardMultilineWidget mCardMultilineWidget;
 
-    @NonNull
-    private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
-
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private SimpleAdapter mSimpleAdapter;
-    @NonNull
-    private final List<Map<String, String>> mCardSources = new ArrayList<>();
+    @NonNull private final List<Map<String, String>> mCardSources = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +61,8 @@ public class PaymentMultilineActivity extends AppCompatActivity {
                 new int[]{R.id.last4, R.id.tokenId});
 
         listView.setAdapter(mSimpleAdapter);
-        mCompositeSubscription.add(
-                RxView.clicks(findViewById(R.id.save_payment)).subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        saveCard();
-                    }
-                }));
+        mCompositeDisposable.add(
+                RxView.clicks(findViewById(R.id.save_payment)).subscribe(aVoid -> saveCard()));
     }
 
     private void saveCard() {
@@ -90,44 +78,19 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         // will not be called until we subscribe to it.
         final Observable<PaymentMethod> tokenObservable =
                 Observable.fromCallable(
-                        new Callable<PaymentMethod>() {
-                            @Override
-                            public PaymentMethod call() throws Exception {
-                                return stripe.createPaymentMethodSynchronous(cardSourceParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
+                        () -> stripe.createPaymentMethodSynchronous(cardSourceParams,
+                                PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(tokenObservable
+        mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.show(R.string.progressMessage);
-                            }
-                        })
-                .doOnUnsubscribe(
-                        new Action0() {
-                            @Override
-                            public void call() {
-                                mProgressDialogController.dismiss();
-                            }
-                        })
+                        (d) -> mProgressDialogController.show(R.string.progressMessage))
+                .doOnComplete(
+                        () -> mProgressDialogController.dismiss())
                 .subscribe(
-                        new Action1<PaymentMethod>() {
-                            @Override
-                            public void call(PaymentMethod paymentMethod) {
-                                addToList(paymentMethod);
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getLocalizedMessage());
-                            }
-                        }));
+                        this::addToList,
+                        throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())));
     }
 
     private void addToList(@Nullable PaymentMethod paymentMethod) {
@@ -146,7 +109,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 }

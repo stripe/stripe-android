@@ -607,9 +607,9 @@ public class SourceParams {
      * the server.
      */
     @NonNull
-    public static Map<String, Object> createRetrieveSourceParams(
+    public static Map<String, String> createRetrieveSourceParams(
             @NonNull @Size(min = 1) String clientSecret) {
-        final Map<String, Object> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put(API_PARAM_CLIENT_SECRET, clientSecret);
         return params;
     }

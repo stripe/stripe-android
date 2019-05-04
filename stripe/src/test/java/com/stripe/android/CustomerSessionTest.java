@@ -15,7 +15,9 @@ import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
@@ -109,6 +111,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                     "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
                     "  }\n" +
                     "}";
+
     private static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -152,6 +155,16 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                     "  }\n" +
                     "}";
 
+    private static final String PAYMENT_METHOD_OBJECT = "{\n" +
+            "  \"id\": \"pm_abc123\",\n" +
+            "  \"object\": \"payment_method\",\n" +
+            "  \"created\": 1556220472,\n" +
+            "  \"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
+            "  \"livemode\": false,\n" +
+            "  \"metadata\": {},\n" +
+            "  \"type\": \"card\"\n" +
+            "}";
+
     private static final Customer FIRST_CUSTOMER =
             Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
     private static final Customer SECOND_CUSTOMER =
@@ -163,11 +176,14 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
     @Captor private ArgumentCaptor<Source> mSourceArgumentCaptor;
+    @Captor private ArgumentCaptor<PaymentMethod> mPaymentMethodArgumentCaptor;
+    @Captor private ArgumentCaptor<List<PaymentMethod>> mPaymentMethodsArgumentCaptor;
     @Captor private ArgumentCaptor<Customer> mCustomerArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
     private Source mAddedSource;
+    private PaymentMethod mPaymentMethod;
 
     public CustomerSessionTest() {
         super(PaymentFlowActivity.class);
@@ -190,8 +206,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Before
     public void setup()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init("pk_test_abc123");
 
@@ -206,6 +221,9 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(mAddedSource);
+
+        mPaymentMethod = PaymentMethod.fromString(PAYMENT_METHOD_OBJECT);
+        assertNotNull(mPaymentMethod);
 
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
@@ -233,6 +251,32 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString()))
                 .thenReturn(SECOND_CUSTOMER);
+
+        when(mApiHandler.attachPaymentMethod(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenReturn(mPaymentMethod);
+
+        when(mApiHandler.detachPaymentMethod(
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenReturn(mPaymentMethod);
+
+        when(mApiHandler.getPaymentMethods(
+                anyString(),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString()
+        ))
+                .thenReturn(Collections.singletonList(mPaymentMethod));
 
         doAnswer(new Answer() {
             @Override
@@ -479,8 +523,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -583,8 +626,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -686,8 +728,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -762,9 +803,260 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .contains("ShippingMethodScreen"));
     }
 
+    @Test
+    public void attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs()
+            throws CardException, APIException, InvalidRequestException, AuthenticationException,
+            APIConnectionException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.PaymentMethodRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodRetrievalListener.class);
+
+        customerSession.attachPaymentMethod("pm_abc123", mockListener);
+
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+        assertNotNull(FIRST_CUSTOMER);
+        assertNotNull(FIRST_CUSTOMER.getId());
+        verify(mApiHandler).attachPaymentMethod(
+                eq(FIRST_CUSTOMER.getId()),
+                eq("pk_test_abc123"),
+                mListArgumentCaptor.capture(),
+                eq("pm_abc123"),
+                eq(firstKey.getSecret())
+        );
+
+        final List<String> productUsage = mListArgumentCaptor.getValue();
+        assertEquals(2, productUsage.size());
+        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("PaymentMethodsActivity"));
+
+        verify(mockListener).onPaymentMethodRetrieved(mPaymentMethodArgumentCaptor.capture());
+        final PaymentMethod capturedPaymentMethod = mPaymentMethodArgumentCaptor.getValue();
+        assertNotNull(capturedPaymentMethod);
+        assertEquals(mPaymentMethod.id, capturedPaymentMethod.id);
+    }
+
+    @Test
+    public void attachPaymentMethodToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
+            throws StripeException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertFalse(customerSession.getProductUsageTokens().isEmpty());
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.PaymentMethodRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodRetrievalListener.class);
+
+        setupErrorProxy();
+        customerSession.attachPaymentMethod("pm_abc123", mockListener);
+
+        verify(mBroadcastReceiver).onReceive(any(Context.class), mIntentArgumentCaptor.capture());
+
+        Intent captured = mIntentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
+
+        verify(mockListener)
+                .onError(404, "The payment method is invalid", null);
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+    }
+
+
+    @Test
+    public void detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethodAndEmptiesLogs()
+            throws CardException, APIException, InvalidRequestException, AuthenticationException,
+            APIConnectionException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.PaymentMethodRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodRetrievalListener.class);
+
+        customerSession.detachPaymentMethod(
+                "pm_abc123",
+                mockListener);
+
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+        assertNotNull(FIRST_CUSTOMER);
+        assertNotNull(FIRST_CUSTOMER.getId());
+        verify(mApiHandler).detachPaymentMethod(
+                eq("pk_test_abc123"),
+                mListArgumentCaptor.capture(),
+                eq("pm_abc123"),
+                eq(firstKey.getSecret()));
+        final List productUsage = mListArgumentCaptor.getValue();
+        assertEquals(2, productUsage.size());
+        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("PaymentMethodsActivity"));
+
+        verify(mockListener).onPaymentMethodRetrieved(mPaymentMethodArgumentCaptor.capture());
+        final PaymentMethod capturedPaymentMethod = mPaymentMethodArgumentCaptor.getValue();
+        assertNotNull(capturedPaymentMethod);
+        assertEquals(mPaymentMethod.id, capturedPaymentMethod.id);
+    }
+
+    @Test
+    public void detachPaymentMethodFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
+            throws StripeException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertFalse(customerSession.getProductUsageTokens().isEmpty());
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        CustomerSession.PaymentMethodRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodRetrievalListener.class);
+
+        setupErrorProxy();
+        customerSession.detachPaymentMethod("pm_abc123", mockListener);
+
+        verify(mBroadcastReceiver).onReceive(any(Context.class),
+                mIntentArgumentCaptor.capture());
+        final Intent captured = mIntentArgumentCaptor.getValue();
+        assertNotNull(captured);
+        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION));
+        APIException ex = (APIException)
+                captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
+        assertNotNull(ex);
+
+        verify(mockListener)
+                .onError(404, "The payment method does not exist", null);
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+    }
+
+    @Test
+    public void getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs()
+            throws StripeException {
+        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        assertNotNull(firstKey);
+
+        Calendar proxyCalendar = Calendar.getInstance();
+        long firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.getExpires());
+        long enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2);
+        proxyCalendar.setTimeInMillis(firstExpiryTimeInMillis + enoughTimeNotToBeExpired);
+
+        // Make sure the calendar is set before it gets used.
+        assertTrue(proxyCalendar.getTimeInMillis() > 0);
+
+        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        final CustomerSession customerSession = createCustomerSession(proxyCalendar);
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+
+        long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
+        long shortIntervalInMilliseconds = 10L;
+
+        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
+        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
+                proxyCalendar.getTimeInMillis());
+        final CustomerSession.PaymentMethodsRetrievalListener mockListener =
+                mock(CustomerSession.PaymentMethodsRetrievalListener.class);
+
+        customerSession.getPaymentMethods(PaymentMethod.Type.Card, mockListener);
+
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
+        assertNotNull(FIRST_CUSTOMER);
+        assertNotNull(FIRST_CUSTOMER.getId());
+        verify(mApiHandler).getPaymentMethods(
+                eq(FIRST_CUSTOMER.getId()),
+                eq("card"),
+                eq("pk_test_abc123"),
+                mListArgumentCaptor.capture(),
+                eq(firstKey.getSecret())
+        );
+
+        final List<String> productUsage = mListArgumentCaptor.getValue();
+        assertEquals(2, productUsage.size());
+        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("PaymentMethodsActivity"));
+
+        verify(mockListener).onPaymentMethodsRetrieved(mPaymentMethodsArgumentCaptor.capture());
+        final List<PaymentMethod> paymentMethods = mPaymentMethodsArgumentCaptor.getValue();
+        assertNotNull(paymentMethods);
+    }
+
     private void setupErrorProxy()
-            throws APIException, APIConnectionException, InvalidRequestException,
-            AuthenticationException, CardException {
+            throws StripeException {
         when(mApiHandler.addCustomerSource(
                 anyString(),
                 anyString(),
@@ -793,6 +1085,33 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString()))
                 .thenThrow(new APIException("auth error", "reqId", 405, null, null));
+
+        when(mApiHandler.attachPaymentMethod(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()
+        ))
+                .thenThrow(new APIException("The payment method is invalid", "request_123", 404,
+                        null, null));
+
+        when(mApiHandler.detachPaymentMethod(
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString()))
+                .thenThrow(new APIException("The payment method does not exist", "request_123",
+                        404, null, null));
+
+        when(mApiHandler.getPaymentMethods(
+                anyString(),
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString()))
+                .thenThrow(new APIException("The payment method does not exist", "request_123",
+                        404, null, null));
     }
 
     @NonNull

@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.model.Card;
@@ -44,12 +43,7 @@ public class IntentServiceTokenController {
         mOutputListViewController = outputListController;
         mProgressDialogController = progressDialogController;
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveCard();
-            }
-        });
+        button.setOnClickListener(v -> saveCard());
         registerBroadcastReceiver();
     }
 

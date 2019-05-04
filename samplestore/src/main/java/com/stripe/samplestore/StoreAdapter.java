@@ -49,12 +49,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     };
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private Currency mCurrency;
-        private TextView mEmojiTextView;
-        private TextView mPriceTextView;
-        private TextView mQuantityTextView;
-        private ImageButton mAddButton;
-        private ImageButton mRemoveButton;
+        @NonNull private final Currency mCurrency;
+        @NonNull private final TextView mEmojiTextView;
+        @NonNull private final TextView mPriceTextView;
+        @NonNull private final TextView mQuantityTextView;
+        @NonNull private final ImageButton mAddButton;
+        @NonNull private final ImageButton mRemoveButton;
 
         private int mPosition;
 

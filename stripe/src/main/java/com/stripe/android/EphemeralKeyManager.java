@@ -27,16 +27,17 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             @NonNull KeyManagerListener<TEphemeralKey> keyManagerListener,
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
+            @NonNull OperationIdFactory operationIdFactory,
             @NonNull Class<TEphemeralKey> ephemeralKeyClass) {
         mEphemeralKeyClass = ephemeralKeyClass;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
-        retrieveEphemeralKey(null, null, null);
+        retrieveEphemeralKey(operationIdFactory.create(), null, null);
     }
 
-    void retrieveEphemeralKey(@Nullable String operationId,
+    void retrieveEphemeralKey(@NonNull String operationId,
                               @Nullable String actionString,
                               @Nullable Map<String, Object> arguments) {
         if (shouldRefreshKey(
@@ -58,7 +59,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void updateKey(
-            @Nullable String operationId,
+            @NonNull String operationId,
             @NonNull String key,
             @Nullable String actionString,
             @Nullable Map<String, Object> arguments) {
@@ -90,7 +91,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         }
     }
 
-    private void updateKeyError(@Nullable String operationId, int errorCode,
+    private void updateKeyError(@NonNull String operationId, int errorCode,
                                 @Nullable String errorMessage) {
         mEphemeralKey = null;
         mListener.onKeyError(operationId, errorCode, errorMessage);
@@ -112,22 +113,22 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
     }
 
     interface KeyManagerListener<TEphemeralKey extends AbstractEphemeralKey> {
-        void onKeyUpdate(@NonNull TEphemeralKey ephemeralKey, @Nullable String operationId,
+        void onKeyUpdate(@NonNull TEphemeralKey ephemeralKey, @NonNull String operationId,
                          @Nullable String action, @Nullable Map<String, Object> arguments);
 
-        void onKeyError(@Nullable String operationId, int errorCode, @Nullable String errorMessage);
+        void onKeyError(@NonNull String operationId, int errorCode, @Nullable String errorMessage);
     }
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
 
         @Nullable private final String mActionString;
-        @Nullable private final String mOperationId;
+        @NonNull private final String mOperationId;
         @Nullable private final Map<String, Object> mArguments;
         @NonNull private final WeakReference<EphemeralKeyManager> mEphemeralKeyManagerRef;
 
         ClientKeyUpdateListener(
                 @NonNull EphemeralKeyManager keyManager,
-                @Nullable String operationId,
+                @NonNull String operationId,
                 @Nullable String actionString,
                 @Nullable Map<String, Object> arguments) {
             mEphemeralKeyManagerRef = new WeakReference<>(keyManager);

@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.CustomerSession;
@@ -28,12 +29,14 @@ import com.stripe.android.PaymentSessionData;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.samplestore.service.StripeService;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -61,7 +64,7 @@ public class PaymentActivity extends AppCompatActivity {
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private BroadcastReceiver mBroadcastReceiver;
-    private ProgressDialogFragment mProgressDialogFragment;
+    @Nullable private ProgressDialogFragment mProgressDialogFragment;
 
     private LinearLayout mCartItemLayout;
 
@@ -81,7 +84,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
@@ -114,6 +117,8 @@ public class PaymentActivity extends AppCompatActivity {
             mConfirmPaymentButton.setEnabled(false);
         }
 
+        final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -132,11 +137,10 @@ public class PaymentActivity extends AppCompatActivity {
                     shippingInfoProcessedIntent
                             .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.get(0));
                 }
-                LocalBroadcastManager.getInstance(PaymentActivity.this)
-                        .sendBroadcast(shippingInfoProcessedIntent);
+                localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent);
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+        localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
     }
 
@@ -239,40 +243,24 @@ public class PaymentActivity extends AppCompatActivity {
         return new TextView[]{labelView, quantityView, unitPriceView, totalPriceView};
     }
 
-    private void proceedWithPurchaseIf3DSCheckIsNotNecessary(@Nullable Source source,
-                                                             @Nullable String customerId) {
-        if (source == null || !Source.CARD.equals(source.getType())) {
-            displayError("Something went wrong - this should be rare");
-            return;
-        }
-
-        final SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
-        if (cardData != null && SourceCardData.REQUIRED.equals(cardData.getThreeDSecureStatus())) {
-            // In this case, you would need to ask the user to verify the purchase.
-            // You can see an example of how to do this in the 3DS example application.
-            // In stripe-android/example.
-        } else {
-            // If 3DS is not required, you can charge the source.
-            completePurchase(source.getId(), customerId);
-        }
-    }
-
     @NonNull
-    private Map<String, Object> createParams(long price, @Nullable String sourceId,
+    private Map<String, Object> createParams(long price,
+                                             @Nullable String sourceId,
                                              @Nullable String customerId,
-                                             @NonNull ShippingInformation shippingInformation) {
-        final Map<String, Object> params = new HashMap<>();
+                                             @Nullable ShippingInformation shippingInformation) {
+        final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
         params.put("source", sourceId);
         params.put("customer_id", customerId);
-        params.put("shipping", shippingInformation.toMap());
+        params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
+        params.put("return_url", "stripe://payment-auth-return");
         return params;
     }
 
-    private void completePurchase(@Nullable String sourceId, @Nullable String customerId) {
+    private void capturePayment(@Nullable String sourceId, @Nullable String customerId) {
         final StripeService stripeService = RetrofitFactory.getInstance()
                 .create(StripeService.class);
-        long price = mStoreCart.getTotalPrice() + mShippingCosts;
+        final long price = mStoreCart.getTotalPrice() + mShippingCosts;
 
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
@@ -288,19 +276,18 @@ public class PaymentActivity extends AppCompatActivity {
                         mProgressDialogFragment.show(fragmentManager, "progress");
                     }
                 })
-                .doOnDispose(() -> {
-                    if (mProgressDialogFragment != null &&
-                            mProgressDialogFragment.isVisible()) {
+                .doOnComplete(() -> {
+                    if (mProgressDialogFragment != null && mProgressDialogFragment.isVisible()) {
                         mProgressDialogFragment.dismiss();
                     }
                 })
                 .subscribe(
-                        response -> finishCharge(),
+                        response -> handlePaymentIntentCapture(response.string()),
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
     private void displayError(@NonNull String errorMessage) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Error");
         alertDialog.setMessage(errorMessage);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -308,7 +295,19 @@ public class PaymentActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void finishCharge() {
+    private void handlePaymentIntentCapture(@NonNull String responseBody) {
+        final PaymentIntent paymentIntent = PaymentIntent.fromString(responseBody);
+        if (paymentIntent == null) {
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        if (paymentIntent.requiresAction()) {
+            startActivity(new Intent(Intent.ACTION_VIEW, paymentIntent.getRedirectUrl()));
+            return;
+        }
+
         final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
@@ -322,11 +321,13 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Nullable
-    private String formatSourceDescription(Source source) {
+    private String formatSourceDescription(@NonNull Source source) {
         if (Source.CARD.equals(source.getType())) {
             final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            return sourceCardData.getBrand() + getString(R.string.ending_in) +
-                    sourceCardData.getLast4();
+            if (sourceCardData != null) {
+                return sourceCardData.getBrand() + getString(R.string.ending_in) +
+                        sourceCardData.getLast4();
+            }
         }
         return source.getType();
     }
@@ -348,10 +349,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void onCommunicatingStateChanged(boolean isCommunicating) {
-        if (isCommunicating) {
-            mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
-        } else {
-            mProgressDialogFragment.dismiss();
+        if (mProgressDialogFragment != null) {
+            if (isCommunicating) {
+                mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
+            } else {
+                mProgressDialogFragment.dismiss();
+            }
         }
     }
 
@@ -429,8 +432,11 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            final CustomerSource source = customer.getSourceById(sourceId);
-            activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source.asSource()));
+            final CustomerSource customerSource = customer.getSourceById(sourceId);
+            final Source source = customerSource != null ? customerSource.asSource() : null;
+            if (source != null) {
+                activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source));
+            }
         }
 
         @Override
@@ -464,9 +470,15 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            final CustomerSource source = customer.getSourceById(sourceId);
-            activity.proceedWithPurchaseIf3DSCheckIsNotNecessary(source.asSource(),
-                    customer.getId());
+            final CustomerSource customerSource = customer.getSourceById(sourceId);
+            final Source source = customerSource != null ? customerSource.asSource() : null;
+
+            if (source == null || !Source.CARD.equals(source.getType())) {
+                activity.displayError("Something went wrong - this should be rare");
+                return;
+            }
+
+            activity.capturePayment(source.getId(), customer.getId());
         }
 
         @Override

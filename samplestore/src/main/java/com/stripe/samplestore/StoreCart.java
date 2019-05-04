@@ -38,20 +38,20 @@ public class StoreCart implements Parcelable {
     }
 
     @NonNull
-    public List<StoreLineItem> getLineItems() {
+    List<StoreLineItem> getLineItems() {
         return new ArrayList<>(mStoreLineItems.values());
     }
 
-    public int getSize() {
+    int getSize() {
         return mStoreLineItems.size();
     }
 
     @NonNull
-    public Currency getCurrency() {
+    Currency getCurrency() {
         return mCurrency;
     }
 
-    public long getTotalPrice() {
+    long getTotalPrice() {
         long total = 0L;
         for (StoreLineItem item : mStoreLineItems.values()) {
             total += item.getTotalPrice();

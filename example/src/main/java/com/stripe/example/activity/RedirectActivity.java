@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.Button;
 
 import com.stripe.android.PaymentConfiguration;
@@ -24,14 +23,10 @@ import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.controller.RedirectDialogController;
 
-import java.util.concurrent.Callable;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
@@ -45,8 +40,7 @@ public class RedirectActivity extends AppCompatActivity {
     private static final String QUERY_CLIENT_SECRET = "client_secret";
     private static final String QUERY_SOURCE_ID = "source";
 
-    @NonNull private final CompositeSubscription mCompositeSubscription =
-            new CompositeSubscription();
+    @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private CardInputWidget mCardInputWidget;
     private RedirectAdapter mRedirectAdapter;
@@ -57,7 +51,7 @@ public class RedirectActivity extends AppCompatActivity {
     private Stripe mStripe;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polling);
 
@@ -69,20 +63,10 @@ public class RedirectActivity extends AppCompatActivity {
         mStripe = new Stripe(getApplicationContext());
 
         final Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
-        threeDSecureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                beginSequence();
-            }
-        });
+        threeDSecureButton.setOnClickListener(v -> beginSequence());
 
         final Button threeDSyncButton = findViewById(R.id.btn_three_d_secure_sync);
-        threeDSyncButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                beginSequence();
-            }
-        });
+        threeDSyncButton.setOnClickListener(v -> beginSequence());
 
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         final RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -114,7 +98,7 @@ public class RedirectActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mCompositeSubscription.unsubscribe();
+        mCompositeDisposable.dispose();
         super.onDestroy();
     }
 
@@ -133,62 +117,43 @@ public class RedirectActivity extends AppCompatActivity {
      */
     void createCardSource(@NonNull Card card) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
-        final Observable<Source> cardSourceObservable =
-                Observable.fromCallable(
-                        new Callable<Source>() {
-                            @Override
-                            public Source call() throws Exception {
-                                return mStripe.createSourceSynchronous(
-                                        cardSourceParams,
-                                        PaymentConfiguration.getInstance().getPublishableKey());
-                            }
-                        });
+        final Observable<Source> cardSourceObservable = Observable.fromCallable(
+                        () -> mStripe.createSourceSynchronous(
+                                cardSourceParams,
+                                PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(cardSourceObservable
+        mCompositeDisposable.add(cardSourceObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mProgressDialogController.show(R.string.createSource);
-                    }
-                })
+                .doOnSubscribe((d) -> mProgressDialogController.show(R.string.createSource))
                 .subscribe(
                         // Because we've made the mapping above, we're now subscribing
                         // to the result of creating a 3DS Source
-                        new Action1<Source>() {
-                            @Override
-                            public void call(Source source) {
-                                SourceCardData sourceCardData =
-                                        (SourceCardData) source.getSourceTypeModel();
+                        source -> {
+                            SourceCardData sourceCardData =
+                                    (SourceCardData) source.getSourceTypeModel();
 
-                                final String threeDSecureStatus = sourceCardData != null ?
-                                        sourceCardData.getThreeDSecureStatus() : null;
+                            final String threeDSecureStatus = sourceCardData != null ?
+                                    sourceCardData.getThreeDSecureStatus() : null;
 
-                                // Making a note of the Card Source in our list.
-                                mRedirectAdapter.addItem(
-                                        source.getStatus(),
-                                        threeDSecureStatus,
-                                        source.getId(),
-                                        source.getType());
-                                // If we need to get 3DS verification for this card, we
-                                // first create a 3DS Source.
-                                if (SourceCardData.REQUIRED.equals(threeDSecureStatus)) {
+                            // Making a note of the Card Source in our list.
+                            mRedirectAdapter.addItem(
+                                    source.getStatus(),
+                                    threeDSecureStatus,
+                                    source.getId(),
+                                    source.getType());
+                            // If we need to get 3DS verification for this card, we
+                            // first create a 3DS Source.
+                            if (SourceCardData.REQUIRED.equals(threeDSecureStatus)) {
 
-                                    // The card Source can be used to create a 3DS Source
-                                    createThreeDSecureSource(source.getId());
-                                } else {
-                                    mProgressDialogController.dismiss();
-                                }
-
+                                // The card Source can be used to create a 3DS Source
+                                createThreeDSecureSource(source.getId());
+                            } else {
+                                mProgressDialogController.dismiss();
                             }
+
                         },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getMessage());
-                            }
-                        }
+                        throwable -> mErrorDialogHandler.show(throwable.getMessage())
                 ));
     }
 
@@ -197,7 +162,7 @@ public class RedirectActivity extends AppCompatActivity {
      * to verify the third-party approval. The only information from the Card source
      * that is used is the ID field.
      *
-     * @param sourceId the {@link Source#mId} from the {@link Card}-created {@link Source}.
+     * @param sourceId the {@link Source#getId()} from the {@link Card}-created {@link Source}.
      */
     void createThreeDSecureSource(String sourceId) {
         // This represents a request for a 3DS purchase of 10.00 euro.
@@ -208,46 +173,27 @@ public class RedirectActivity extends AppCompatActivity {
                 sourceId);
 
         Observable<Source> threeDSecureObservable = Observable.fromCallable(
-                new Callable<Source>() {
-                    @Nullable
-                    @Override
-                    public Source call() throws Exception {
-                        return mStripe.createSourceSynchronous(
-                                threeDParams,
-                                PaymentConfiguration.getInstance().getPublishableKey());
-                    }
-                });
+                () -> mStripe.createSourceSynchronous(
+                        threeDParams,
+                        PaymentConfiguration.getInstance().getPublishableKey()));
 
-        mCompositeSubscription.add(threeDSecureObservable
+        mCompositeDisposable.add(threeDSecureObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mProgressDialogController.dismiss();
-                    }
-                })
+                .doOnComplete(() -> mProgressDialogController.dismiss())
                 .subscribe(
                         // Because we've made the mapping above, we're now subscribing
                         // to the result of creating a 3DS Source
-                        new Action1<Source>() {
-                            @Override
-                            public void call(@Nullable Source source) {
-                                if (source == null) {
-                                    return;
-                                }
+                        source -> {
+                            if (source == null) {
+                                return;
+                            }
 
-                                // Once a 3DS Source is created, that is used
-                                // to initiate the third-party verification
-                                showDialog(source);
-                            }
+                            // Once a 3DS Source is created, that is used
+                            // to initiate the third-party verification
+                            showDialog(source);
                         },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mErrorDialogHandler.show(throwable.getMessage());
-                            }
-                        }
+                        throwable -> mErrorDialogHandler.show(throwable.getMessage())
                 ));
     }
 

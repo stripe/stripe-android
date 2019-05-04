@@ -11,7 +11,7 @@
         android:layout_marginEnd="@dimen/card_icon_padding"
         android:layout_marginRight="@dimen/card_icon_padding"
         android:src="@drawable/ic_unknown"
-        />
+        android:contentDescription="@null" />
 
     <FrameLayout
         android:id="@+id/frame_container"

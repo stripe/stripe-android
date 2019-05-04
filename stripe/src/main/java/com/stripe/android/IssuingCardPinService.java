@@ -16,7 +16,6 @@ import org.json.JSONException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card
@@ -38,6 +37,8 @@ public class IssuingCardPinService
     @NonNull
     private final StripeApiHandler mApiHandler;
     @NonNull
+    private final OperationIdFactory mOperationIdFactory;
+    @NonNull
     private final Map<String, IssuingCardPinRetrievalListener> mRetrievalListeners =
             new HashMap<>();
     @NonNull
@@ -48,25 +49,28 @@ public class IssuingCardPinService
      * Create a IssuingCardPinService with the provided {@link EphemeralKeyProvider}.
      *
      * @param keyProvider an {@link EphemeralKeyProvider} used to get
-     *                    {@link CustomerEphemeralKey EphemeralKeys} as needed
+     *                    {@link IssuingCardEphemeralKey EphemeralKeys} as needed
      */
     @NonNull
     public static IssuingCardPinService create(
             @NonNull Context context,
             @NonNull EphemeralKeyProvider keyProvider) {
-        return new IssuingCardPinService(keyProvider, new StripeApiHandler(context));
+        return new IssuingCardPinService(keyProvider, new StripeApiHandler(context),
+                new OperationIdFactory());
     }
 
     @VisibleForTesting
     IssuingCardPinService(
             @NonNull EphemeralKeyProvider keyProvider,
-            @NonNull StripeApiHandler apiHandler
-    ) {
+            @NonNull StripeApiHandler apiHandler,
+            @NonNull OperationIdFactory operationIdFactory) {
+        mOperationIdFactory = operationIdFactory;
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 null,
+                operationIdFactory,
                 IssuingCardEphemeralKey.class);
         mApiHandler = apiHandler;
     }
@@ -84,15 +88,13 @@ public class IssuingCardPinService
             @NonNull String cardId,
             @NonNull String verificationId,
             @NonNull String userOneTimeCode,
-            @NonNull IssuingCardPinRetrievalListener listener
-    ) {
-
-        Map<String, Object> arguments = new HashMap<>();
+            @NonNull IssuingCardPinRetrievalListener listener) {
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(ARGUMENT_CARD_ID, cardId);
         arguments.put(ARGUMENT_VERIFICATION_ID, verificationId);
         arguments.put(ARGUMENT_ONE_TIME_CODE, userOneTimeCode);
 
-        final String operationId = UUID.randomUUID().toString();
+        final String operationId = mOperationIdFactory.create();
         mRetrievalListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, PIN_RETRIEVE, arguments);
     }
@@ -112,16 +114,14 @@ public class IssuingCardPinService
             @NonNull String newPin,
             @NonNull String verificationId,
             @NonNull String userOneTimeCode,
-            @NonNull IssuingCardPinUpdateListener listener
-    ) {
-
-        Map<String, Object> arguments = new HashMap<>();
+            @NonNull IssuingCardPinUpdateListener listener) {
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(ARGUMENT_CARD_ID, cardId);
         arguments.put(ARGUMENT_NEW_PIN, newPin);
         arguments.put(ARGUMENT_VERIFICATION_ID, verificationId);
         arguments.put(ARGUMENT_ONE_TIME_CODE, userOneTimeCode);
 
-        final String operationId = UUID.randomUUID().toString();
+        final String operationId = mOperationIdFactory.create();
         mUpdateListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, PIN_UPDATE, arguments);
     }
@@ -153,7 +153,6 @@ public class IssuingCardPinService
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
             try {
-
                 String pin = mApiHandler.retrieveIssuingCardPin(
                         cardId,
                         verificationId,
@@ -167,17 +166,20 @@ public class IssuingCardPinService
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
+                            null);
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed",
                             null);
                 } else {
                     listener.onError(
@@ -221,7 +223,6 @@ public class IssuingCardPinService
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
             try {
-
                 mApiHandler.updateIssuingCardPin(
                         cardId,
                         newPin,
@@ -229,24 +230,26 @@ public class IssuingCardPinService
                         userOneTimeCode,
                         ephemeralKey.getSecret());
                 listener.onIssuingCardPinUpdated();
-
             } catch (InvalidRequestException e) {
                 if ("expired".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_EXPIRED,
                             "The one-time code has expired",
                             null);
-                }
-                if ("incorrect_code".equals(e.getErrorCode())) {
+                } else if ("incorrect_code".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect",
                             null);
-                }
-                if ("too_many_attempts".equals(e.getErrorCode())) {
+                } else if ("too_many_attempts".equals(e.getErrorCode())) {
                     listener.onError(
                             CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
                             "The verification challenge was attempted too many times",
+                            null);
+                } else if ("already_redeemed".equals(e.getErrorCode())) {
+                    listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed",
                             null);
                 } else {
                     listener.onError(
@@ -294,6 +297,7 @@ public class IssuingCardPinService
         ONE_TIME_CODE_INCORRECT,
         ONE_TIME_CODE_EXPIRED,
         ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+        ONE_TIME_CODE_ALREADY_REDEEMED,
     }
 
     public interface IssuingCardPinRetrievalListener {

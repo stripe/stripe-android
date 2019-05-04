@@ -15,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMapOf;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,12 +39,9 @@ public class IssuingCardPinServiceTest {
             "            }]\n" +
             "}";
 
-    @Mock
-    private StripeApiHandler.RequestExecutor mRequestExecutor;
-    @Mock
-    IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
-    @Mock
-    IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
+    @Mock private RequestExecutor mRequestExecutor;
+    @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
+    @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
 
     private IssuingCardPinService service;
 
@@ -59,10 +55,10 @@ public class IssuingCardPinServiceTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false
-        );
+                false);
 
-        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler);
+        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
+                new OperationIdFactory());
     }
 
     @Test
@@ -75,7 +71,7 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                eq(StripeApiHandler.RestMethod.GET),
+                eq(RequestExecutor.RestMethod.GET),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
                 ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
@@ -103,7 +99,7 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                eq(StripeApiHandler.RestMethod.POST),
+                eq(RequestExecutor.RestMethod.POST),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
                 ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
@@ -133,7 +129,7 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                eq(StripeApiHandler.RestMethod.GET),
+                eq(RequestExecutor.RestMethod.GET),
                 eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
                 ArgumentMatchers.<String, Object>anyMap(),
                 any(RequestOptions.class)
