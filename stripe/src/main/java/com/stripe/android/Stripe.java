@@ -2,11 +2,10 @@ package com.stripe.android;
 
 import android.content.Context;
 import android.os.AsyncTask;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -26,13 +25,10 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static com.stripe.android.StripeNetworkUtils.hashMapFromBankAccount;
-import static com.stripe.android.StripeNetworkUtils.hashMapFromCard;
 import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
 import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
 
@@ -44,6 +40,7 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
  */
 public class Stripe {
 
+    @NonNull
     private final SourceCreator mSourceCreator = new SourceCreator() {
         @Override
         public void create(
@@ -52,7 +49,7 @@ public class Stripe {
                 @Nullable final String stripeAccount,
                 @Nullable Executor executor,
                 @NonNull final SourceCallback sourceCallback) {
-            executeTask(executor, new CreateSourceTask(mContext, mApiHandler, sourceParams,
+            executeTask(executor, new CreateSourceTask(mApiHandler, sourceParams,
                     publishableKey, stripeAccount, sourceCallback));
         }
     };
@@ -67,16 +64,16 @@ public class Stripe {
                 @NonNull @Token.TokenType final String tokenType,
                 @Nullable final Executor executor,
                 @NonNull final TokenCallback callback) {
-            executeTask(executor, new CreateTokenTask(mContext, mApiHandler, tokenParams,
-                    publishableKey, stripeAccount, tokenType, callback, mLoggingResponseListener));
+            executeTask(executor, new CreateTokenTask(mApiHandler, tokenParams,
+                    publishableKey, stripeAccount, tokenType, callback));
         }
     };
 
-    @NonNull private final Context mContext;
-    @Nullable private StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
     private String mDefaultPublishableKey;
     private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final LoggingUtils mLoggingUtils;
+    @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
 
     /**
      * A constructor with only context, to set the key later.
@@ -84,8 +81,8 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        mContext = context.getApplicationContext();
-        mApiHandler = new StripeApiHandler();
+        this(new StripeApiHandler(context), new LoggingUtils(context),
+                new StripeNetworkUtils(context));
     }
 
     /**
@@ -94,10 +91,18 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      * @param publishableKey the client's publishable key
      */
-    public Stripe(@NonNull Context context, String publishableKey) {
-        mContext = context.getApplicationContext();
-        mApiHandler = new StripeApiHandler();
+    public Stripe(@NonNull Context context, @NonNull String publishableKey) {
+        this(new StripeApiHandler(context), new LoggingUtils(context),
+                new StripeNetworkUtils(context));
         setDefaultPublishableKey(publishableKey);
+    }
+
+    @VisibleForTesting
+    Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
+           @NonNull StripeNetworkUtils stripeNetworkUtils) {
+        mApiHandler = apiHandler;
+        mLoggingUtils = loggingUtils;
+        mStripeNetworkUtils = stripeNetworkUtils;
     }
 
     /**
@@ -134,7 +139,7 @@ public class Stripe {
         }
 
         createTokenFromParams(
-                hashMapFromBankAccount(mContext, bankAccount),
+                mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 publishableKey,
                 Token.TYPE_BANK_ACCOUNT,
                 executor,
@@ -232,11 +237,10 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
-                hashMapFromBankAccount(mContext, bankAccount),
+                mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 requestOptions,
-                Token.TYPE_BANK_ACCOUNT,
-                mLoggingResponseListener);
+                Token.TYPE_BANK_ACCOUNT
+        );
     }
 
     /**
@@ -366,7 +370,7 @@ public class Stripe {
         }
 
         createTokenFromParams(
-                hashMapFromCard(mContext, card),
+                mStripeNetworkUtils.hashMapFromCard(card),
                 publishableKey,
                 Token.TYPE_CARD,
                 executor,
@@ -410,6 +414,7 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
+    @Nullable
     public Source createSourceSynchronous(
             @NonNull SourceParams params,
             @Nullable String publishableKey)
@@ -421,8 +426,7 @@ public class Stripe {
         if (apiKey == null) {
             return null;
         }
-        return mApiHandler.createSource(
-                null, mContext, params, apiKey, mStripeAccount, mLoggingResponseListener);
+        return mApiHandler.createSource(params, apiKey, mStripeAccount);
     }
 
     /**
@@ -445,11 +449,10 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.retrievePaymentIntent(
-                mContext,
                 paymentIntentParams,
                 publishableKey,
-                mStripeAccount,
-                mLoggingResponseListener);
+                mStripeAccount
+        );
     }
 
     /**
@@ -465,6 +468,7 @@ public class Stripe {
      * @throws APIConnectionException
      * @throws APIException
      */
+    @Nullable
     public PaymentIntent confirmPaymentIntentSynchronous(
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey) throws AuthenticationException,
@@ -472,12 +476,10 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.confirmPaymentIntent(
-                null,
-                mContext,
                 paymentIntentParams,
                 publishableKey,
-                mStripeAccount,
-                mLoggingResponseListener);
+                mStripeAccount
+        );
     }
 
     /**
@@ -499,8 +501,8 @@ public class Stripe {
             @NonNull String publishableKey)
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
-        return mApiHandler.createPaymentMethod(paymentMethodCreateParams, mContext,
-                publishableKey, mStripeAccount, mLoggingResponseListener);
+        return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
+                publishableKey, mStripeAccount);
     }
 
     /**
@@ -553,11 +555,10 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
-                hashMapFromCard(mContext, card),
+                mStripeNetworkUtils.hashMapFromCard(card),
                 requestOptions,
-                Token.TYPE_CARD,
-                mLoggingResponseListener);
+                Token.TYPE_CARD
+        );
     }
 
     /**
@@ -608,11 +609,10 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
                 hashMapFromPersonalId(personalId),
                 requestOptions,
-                Token.TYPE_PII,
-                mLoggingResponseListener);
+                Token.TYPE_PII
+        );
     }
 
     /**
@@ -666,11 +666,10 @@ public class Stripe {
                 mStripeAccount,
                 RequestOptions.TYPE_QUERY).build();
         return mApiHandler.createToken(
-                mContext,
                 mapFromCvc(cvc),
                 requestOptions,
-                Token.TYPE_CVC_UPDATE,
-                mLoggingResponseListener);
+                Token.TYPE_CVC_UPDATE
+        );
     }
 
     /**
@@ -729,11 +728,10 @@ public class Stripe {
                 .build();
         try {
             return mApiHandler.createToken(
-                    mContext,
                     accountParams.toParamMap(),
                     requestOptions,
-                    Token.TYPE_ACCOUNT,
-                    mLoggingResponseListener);
+                    Token.TYPE_ACCOUNT
+            );
         } catch (CardException exception) {
             // Should never occur. CardException is only for card related requests.
         }
@@ -753,20 +751,18 @@ public class Stripe {
         final Map<String, Object> loggingMap;
         if (paymentSource instanceof Token) {
             Token token = (Token) paymentSource;
-            loggingMap = LoggingUtils.getTokenCreationParams(
-                    mContext,
+            loggingMap = mLoggingUtils.getTokenCreationParams(
                     productUsageTokens,
                     mDefaultPublishableKey,
                     token.getType());
         } else {
             Source source = (Source) paymentSource;
-            loggingMap = LoggingUtils.getSourceCreationParams(
-                    mContext,
+            loggingMap = mLoggingUtils.getSourceCreationParams(
                     productUsageTokens,
                     mDefaultPublishableKey,
                     source.getType());
         }
-        mApiHandler.logApiCall(loggingMap, options, mLoggingResponseListener);
+        mApiHandler.logApiCall(loggingMap, options);
     }
 
     /**
@@ -846,11 +842,6 @@ public class Stripe {
      */
     public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
         mStripeAccount = stripeAccount;
-    }
-
-    @VisibleForTesting
-    void setLoggingResponseListener(StripeApiHandler.LoggingResponseListener listener) {
-        mLoggingResponseListener = listener;
     }
 
     private void createTokenFromParams(
@@ -943,37 +934,32 @@ public class Stripe {
     }
 
     private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper> {
-        @NonNull private final WeakReference<Context> mContextRef;
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
-        @NonNull private final WeakReference<SourceCallback> mSourceCallbackRef;
+        @NonNull private final SourceCallback mSourceCallback;
 
-        CreateSourceTask(@NonNull Context context,
-                         @NonNull StripeApiHandler apiHandler,
+        CreateSourceTask(@NonNull StripeApiHandler apiHandler,
                          @NonNull SourceParams sourceParams,
                          @NonNull String publishableKey,
                          @Nullable String stripeAccount,
                          @NonNull SourceCallback sourceCallback) {
-            mContextRef = new WeakReference<>(context);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
-            mSourceCallbackRef = new WeakReference<>(sourceCallback);
+            mSourceCallback = sourceCallback;
         }
 
         @Override
         protected ResponseWrapper doInBackground(Void... params) {
             try {
                 final Source source = mApiHandler.createSource(
-                        null,
-                        mContextRef.get(),
                         mSourceParams,
                         mPublishableKey,
-                        mStripeAccount,
-                        null);
+                        mStripeAccount
+                );
                 return new ResponseWrapper(source);
             } catch (StripeException stripeException) {
                 return new ResponseWrapper(stripeException);
@@ -982,43 +968,35 @@ public class Stripe {
 
         @Override
         protected void onPostExecute(@NonNull ResponseWrapper responseWrapper) {
-            final SourceCallback sourceCallback = mSourceCallbackRef.get();
-            if (sourceCallback != null) {
-                if (responseWrapper.source != null) {
-                    sourceCallback.onSuccess(responseWrapper.source);
-                } else if (responseWrapper.error != null) {
-                    sourceCallback.onError(responseWrapper.error);
-                }
+            if (responseWrapper.source != null) {
+                mSourceCallback.onSuccess(responseWrapper.source);
+            } else if (responseWrapper.error != null) {
+                mSourceCallback.onError(responseWrapper.error);
             }
         }
     }
 
     private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper> {
-        @NonNull private final WeakReference<Context> mContextRef;
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
         @NonNull @Token.TokenType private final String mTokenType;
-        @NonNull private final WeakReference<TokenCallback> mCallbackRef;
-        @Nullable private final StripeApiHandler.LoggingResponseListener mLoggingResponseListener;
+        @NonNull private final TokenCallback mCallback;
 
-        CreateTokenTask(@NonNull Context context,
+        CreateTokenTask(
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull final Map<String, Object> tokenParams,
                 @NonNull final String publishableKey,
                 @Nullable final String stripeAccount,
                 @NonNull @Token.TokenType final String tokenType,
-                @Nullable final TokenCallback callback,
-                @Nullable final StripeApiHandler.LoggingResponseListener loggingResponseListener) {
-            mContextRef = new WeakReference<>(context);
+                @NonNull final TokenCallback callback) {
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
             mTokenType = tokenType;
-            mLoggingResponseListener = loggingResponseListener;
-            mCallbackRef = new WeakReference<>(callback);
+            mCallback = callback;
         }
 
         @Override
@@ -1027,11 +1005,10 @@ public class Stripe {
                 final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
                         mStripeAccount, RequestOptions.TYPE_QUERY).build();
                 final Token token = mApiHandler.createToken(
-                        mContextRef.get(),
                         mTokenParams,
                         requestOptions,
-                        mTokenType,
-                        mLoggingResponseListener);
+                        mTokenType
+                );
                 return new ResponseWrapper(token);
             } catch (StripeException e) {
                 return new ResponseWrapper(e);
@@ -1044,16 +1021,13 @@ public class Stripe {
         }
 
         private void tokenTaskPostExecution(@NonNull ResponseWrapper result) {
-            final TokenCallback callback = mCallbackRef.get();
-            if (callback != null) {
-                if (result.token != null) {
-                    callback.onSuccess(result.token);
-                } else if (result.error != null) {
-                    callback.onError(result.error);
-                } else {
-                    callback.onError(new RuntimeException("Somehow got neither a token response or"
-                            + " an error response"));
-                }
+            if (result.token != null) {
+                mCallback.onSuccess(result.token);
+            } else if (result.error != null) {
+                mCallback.onError(result.error);
+            } else {
+                mCallback.onError(new RuntimeException(
+                        "Somehow got neither a token response or an error response"));
             }
         }
     }

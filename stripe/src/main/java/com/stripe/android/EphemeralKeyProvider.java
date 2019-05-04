@@ -1,7 +1,7 @@
 package com.stripe.android;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Size;
+import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 /**
  * Represents an object that can call to a server and create
@@ -18,5 +18,5 @@ public interface EphemeralKeyProvider {
      */
     void createEphemeralKey(
             @NonNull @Size(min = 4) String apiVersion,
-            @NonNull final EphemeralKeyUpdateListener keyUpdateListener);
+            @NonNull EphemeralKeyUpdateListener keyUpdateListener);
 }

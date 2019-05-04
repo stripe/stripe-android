@@ -1,9 +1,9 @@
 package com.stripe.android.model;
 
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -525,9 +525,8 @@ public class SourceParams {
             sofortMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
         }
 
-        params.setApiParameterMap(sofortMap);
-
-        return params;
+        return params
+                .setApiParameterMap(sofortMap);
     }
 
     /**
@@ -548,13 +547,12 @@ public class SourceParams {
             @NonNull String currency,
             @NonNull String returnUrl,
             @NonNull String cardID) {
-        final SourceParams params = new SourceParams()
+        return new SourceParams()
                 .setType(Source.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-        params.setApiParameterMap(createSimpleMap(FIELD_CARD, cardID));
-        return params;
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setApiParameterMap(createSimpleMap(FIELD_CARD, cardID));
     }
 
     /**
@@ -608,9 +606,9 @@ public class SourceParams {
      * the server.
      */
     @NonNull
-    public static Map<String, Object> createRetrieveSourceParams(
+    public static Map<String, String> createRetrieveSourceParams(
             @NonNull @Size(min = 1) String clientSecret) {
-        final Map<String, Object> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put(API_PARAM_CLIENT_SECRET, clientSecret);
         return params;
     }
@@ -694,6 +692,7 @@ public class SourceParams {
      * @param amount currency amount for this source, in the lowest denomination.
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setAmount(long amount) {
         mAmount = amount;
         return this;
@@ -703,6 +702,7 @@ public class SourceParams {
      * @param apiParameterMap a map of parameters specific for this type of source
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setApiParameterMap(
             @NonNull Map<String, Object> apiParameterMap) {
         mApiParameterMap = apiParameterMap;
@@ -713,6 +713,7 @@ public class SourceParams {
      * @param currency currency code for this source (i.e. "EUR")
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setCurrency(String currency) {
         mCurrency = currency;
         return this;
@@ -722,6 +723,7 @@ public class SourceParams {
      * @param owner an {@link SourceOwner} object for this source
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setOwner(Map<String, Object> owner) {
         mOwner = owner;
         return this;
@@ -734,6 +736,7 @@ public class SourceParams {
      * @param redirect a set of redirect parameters
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setRedirect(Map<String, Object> redirect) {
         mRedirect = redirect;
         return this;
@@ -745,6 +748,7 @@ public class SourceParams {
      * @param extraParams a set of params
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setExtraParams(final Map<String, Object> extraParams) {
         mExtraParams = extraParams;
         return this;
@@ -754,6 +758,7 @@ public class SourceParams {
      * @param returnUrl a redirect URL for this source.
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setReturnUrl(@NonNull @Size(min = 1) String returnUrl) {
         if (mRedirect == null) {
             setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -770,6 +775,7 @@ public class SourceParams {
      * @param type the {@link SourceType}
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setType(@Source.SourceType String type) {
         mType = type;
         mTypeRaw = type;
@@ -783,6 +789,7 @@ public class SourceParams {
      * @param typeRaw the name of the source type
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setTypeRaw(@NonNull String typeRaw) {
         mType = Source.asSourceType(typeRaw);
         mTypeRaw = typeRaw;
@@ -795,6 +802,7 @@ public class SourceParams {
      * @param metaData
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setMetaData(@NonNull Map<String, String> metaData) {
         mMetaData = metaData;
         return this;
@@ -806,6 +814,7 @@ public class SourceParams {
      * @param token a token ID
      * @return {@code this}, for chaining purposes
      */
+    @NonNull
     public SourceParams setToken(@NonNull String token) {
         mToken = token;
         return this;
@@ -819,6 +828,7 @@ public class SourceParams {
      * @param usage either "single_use" or "reusable"
      * @return {@code this} for chaining purposes
      */
+    @NonNull
     public SourceParams setUsage(@NonNull @Source.Usage String usage) {
         mUsage = usage;
         return this;
@@ -853,7 +863,7 @@ public class SourceParams {
     @NonNull
     private static Map<String, Object> createSimpleMap(
             @NonNull String key, @NonNull Object value) {
-        Map<String, Object> simpleMap = new HashMap<>();
+        final Map<String, Object> simpleMap = new HashMap<>();
         simpleMap.put(key, value);
         return simpleMap;
     }
@@ -862,7 +872,7 @@ public class SourceParams {
     private static Map<String, Object> createSimpleMap(
             @NonNull String key1, @NonNull Object value1,
             @NonNull String key2, @NonNull Object value2) {
-        Map<String, Object> simpleMap = new HashMap<>();
+        final Map<String, Object> simpleMap = new HashMap<>();
         simpleMap.put(key1, value1);
         simpleMap.put(key2, value2);
         return simpleMap;

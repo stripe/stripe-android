@@ -1,7 +1,6 @@
 package com.stripe.android;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
@@ -27,12 +26,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link EphemeralKeyManager}.
@@ -59,20 +59,15 @@ public class EphemeralKeyManagerTest {
     @Mock private EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> mKeyManagerListener;
     @Captor private ArgumentCaptor<Map<String, Object>> mArgumentCaptor;
 
-    private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
+    private final OperationIdFactory mOperationIdFactory = new OperationIdFactory();
 
-    @Nullable
-    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
-        try {
-            return CustomerEphemeralKey.fromString(key);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private CustomerEphemeralKey mCustomerEphemeralKey;
+    private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
     
     @Before
-    public void setup() {
+    public void setup() throws JSONException {
         MockitoAnnotations.initMocks(this);
+        mCustomerEphemeralKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
         mTestEphemeralKeyProvider = new TestEphemeralKeyProvider();
     }
 
@@ -126,40 +121,41 @@ public class EphemeralKeyManagerTest {
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsInFutureButWithinBuffer_returnsTrue() {
         Calendar fixedCalendar = Calendar.getInstance();
-        CustomerEphemeralKey key = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(key);
+        assertNotNull(mCustomerEphemeralKey);
 
-        long parsedExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(key.getExpires());
+        long parsedExpiryTimeInMillis = TimeUnit.SECONDS
+                .toMillis(mCustomerEphemeralKey.getExpires());
         long bufferTimeInMillis = TimeUnit.SECONDS.toMillis(TEST_SECONDS_BUFFER);
 
         long notFarEnoughInTheFuture = parsedExpiryTimeInMillis + bufferTimeInMillis / 2;
         fixedCalendar.setTimeInMillis(notFarEnoughInTheFuture);
         assertEquals(notFarEnoughInTheFuture, fixedCalendar.getTimeInMillis());
 
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(key,
+        assertTrue(EphemeralKeyManager.shouldRefreshKey(mCustomerEphemeralKey,
                 TEST_SECONDS_BUFFER,
                 fixedCalendar));
     }
 
     @Test
     public void createKeyManager_updatesEphemeralKey_notifiesListener() {
-        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(testKey);
+        assertNotNull(mCustomerEphemeralKey);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
+        final EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
+                mOperationIdFactory,
                 CustomerEphemeralKey.class);
 
         verify(mKeyManagerListener).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>any(),
+                anyString(),
                 ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
         assertNotNull(keyManager.getEphemeralKey());
-        assertEquals(testKey.getId(), keyManager.getEphemeralKey().getId());
+        assertEquals(mCustomerEphemeralKey.getId(), keyManager.getEphemeralKey().getId());
     }
 
     @Test
@@ -172,15 +168,14 @@ public class EphemeralKeyManagerTest {
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 fixedCalendar,
+                mOperationIdFactory,
                 CustomerEphemeralKey.class);
 
-        // We already tested this setup, so let's reset the mock to avoid confusion.
-        reset(mKeyManagerListener);
-
-        final String ACTION_STRING = "action";
-        final Map<String, Object> ACTION_ARGS = new HashMap<>();
-        ACTION_ARGS.put("key", "value");
-        keyManager.retrieveEphemeralKey(ACTION_STRING, ACTION_ARGS);
+        final String operationId = mOperationIdFactory.create();
+        final String actionString = "action";
+        final Map<String, Object> actionArgs = new HashMap<>();
+        actionArgs.put("key", "value");
+        keyManager.retrieveEphemeralKey(operationId, actionString, actionArgs);
 
         ArgumentCaptor<CustomerEphemeralKey> keyArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerEphemeralKey.class);
@@ -189,6 +184,7 @@ public class EphemeralKeyManagerTest {
 
         verify(mKeyManagerListener).onKeyUpdate(
                 keyArgumentCaptor.capture(),
+                eq(operationId),
                 stringArgumentCaptor.capture(),
                 mArgumentCaptor.capture());
 
@@ -197,16 +193,15 @@ public class EphemeralKeyManagerTest {
         assertNotNull(keyArgumentCaptor.getValue());
         assertEquals(1, capturedMap.size());
         assertEquals("value", capturedMap.get("key"));
-        assertEquals(ACTION_STRING, stringArgumentCaptor.getValue());
+        assertEquals(actionString, stringArgumentCaptor.getValue());
     }
 
     @Test
     public void updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
-        CustomerEphemeralKey testKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(testKey);
+        assertNotNull(mCustomerEphemeralKey);
 
         Calendar proxyCalendar = Calendar.getInstance();
-        long expiryTimeInMillis = TimeUnit.SECONDS.toMillis(testKey.getExpires());
+        long expiryTimeInMillis = TimeUnit.SECONDS.toMillis(mCustomerEphemeralKey.getExpires());
         // The time is one millisecond past the expiration date for this test.
         proxyCalendar.setTimeInMillis(expiryTimeInMillis + 1L);
         // Testing this just to invoke getTime
@@ -218,11 +213,13 @@ public class EphemeralKeyManagerTest {
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 proxyCalendar,
+                mOperationIdFactory,
                 CustomerEphemeralKey.class);
 
         // Make sure we're in a good state
         verify(mKeyManagerListener).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>any(),
+                anyString(),
                 ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
         assertNotNull(keyManager.getEphemeralKey());
@@ -232,15 +229,19 @@ public class EphemeralKeyManagerTest {
         mTestEphemeralKeyProvider.setNextError(404, errorMessage);
 
         // It should be necessary to update because the key is expired.
-        keyManager.retrieveEphemeralKey(null, null);
+        final String operationId = mOperationIdFactory.create();
+        keyManager.retrieveEphemeralKey(operationId, null, null);
 
-        verify(mKeyManagerListener).onKeyError(404, errorMessage);
+        verify(mKeyManagerListener).onKeyError(operationId, 404, errorMessage);
         verifyNoMoreInteractions(mKeyManagerListener);
         assertNull(keyManager.getEphemeralKey());
     }
 
     @Test
     public void triggerCorrectErrorOnInvalidRawKey() {
+        final String operationId = "12345";
+        final OperationIdFactory operationIdFactory = mock(OperationIdFactory.class);
+        when(operationIdFactory.create()).thenReturn(operationId);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON");
         EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
@@ -248,13 +249,15 @@ public class EphemeralKeyManagerTest {
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
+                operationIdFactory,
                 CustomerEphemeralKey.class);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
                 ArgumentMatchers.<String>isNull(),
+                ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
-        verify(mKeyManagerListener).onKeyError(
+        verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
                         "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
@@ -265,19 +268,25 @@ public class EphemeralKeyManagerTest {
 
     @Test
     public void triggerCorrectErrorOnInvalidJsonKey() {
+        final String operationId = "12345";
+        final OperationIdFactory operationIdFactory = mock(OperationIdFactory.class);
+        when(operationIdFactory.create()).thenReturn(operationId);
+
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("{}");
         EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
+                operationIdFactory,
                 CustomerEphemeralKey.class);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
                 ArgumentMatchers.<String>isNull(),
+                ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
-        verify(mKeyManagerListener).onKeyError(
+        verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed a JSON String " +
                         "that was invalid: [Improperly formatted JSON for ephemeral " +
@@ -288,19 +297,25 @@ public class EphemeralKeyManagerTest {
 
     @Test
     public void triggerCorrectErrorOnNullKey() {
+        final String operationId = "12345";
+        final OperationIdFactory operationIdFactory = mock(OperationIdFactory.class);
+        when(operationIdFactory.create()).thenReturn(operationId);
+
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(null);
         EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
                 mTestEphemeralKeyProvider,
                 mKeyManagerListener,
                 TEST_SECONDS_BUFFER,
                 null,
+                operationIdFactory,
                 CustomerEphemeralKey.class);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
                 ArgumentMatchers.<String>isNull(),
+                ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
-        verify(mKeyManagerListener).onKeyError(
+        verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value");
         assertNull(keyManager.getEphemeralKey());

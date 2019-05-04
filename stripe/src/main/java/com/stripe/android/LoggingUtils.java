@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
@@ -33,6 +33,8 @@ class LoggingUtils {
     @StringDef({
             EVENT_TOKEN_CREATION,
             EVENT_ADD_PAYMENT_METHOD,
+            EVENT_ATTACH_PAYMENT_METHOD,
+            EVENT_DETACH_PAYMENT_METHOD,
             EVENT_SOURCE_CREATION,
             EVENT_ADD_SOURCE,
             EVENT_DEFAULT_SOURCE,
@@ -45,6 +47,8 @@ class LoggingUtils {
 
     static final String EVENT_TOKEN_CREATION = "token_creation";
     static final String EVENT_ADD_PAYMENT_METHOD = "add_payment_method";
+    static final String EVENT_ATTACH_PAYMENT_METHOD = "attach_payment_method";
+    static final String EVENT_DETACH_PAYMENT_METHOD = "detach_payment_method";
     static final String EVENT_SOURCE_CREATION = "source_creation";
     static final String EVENT_ADD_SOURCE = "add_source";
     static final String EVENT_DEFAULT_SOURCE = "default_source";
@@ -88,111 +92,124 @@ class LoggingUtils {
     private static final String ANALYTICS_NAME = "stripe_android";
     private static final String ANALYTICS_VERSION = "1.0";
 
+    @Nullable private final PackageManager mPackageManager;
+    @Nullable private final String mPackageName;
+
+    LoggingUtils(@NonNull Context context) {
+        this(context.getPackageManager(), context.getPackageName());
+    }
+
+    @VisibleForTesting
+    LoggingUtils(@Nullable PackageManager packageManager, @Nullable String packageName) {
+        mPackageManager = packageManager;
+        mPackageName = packageName;
+    }
+
     @NonNull
-    static Map<String, Object> getTokenCreationParams(
-            @NonNull Context context,
+    Map<String, Object> getTokenCreationParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @Nullable String tokenType) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 tokenType,
-                publishableApiKey,
-                EVENT_TOKEN_CREATION);
+                publishableApiKey, EVENT_TOKEN_CREATION);
     }
 
     @NonNull
-    static Map<String, Object> getPaymentMethodCreationParams(
-            @NonNull Context context,
+    Map<String, Object> getPaymentMethodCreationParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey,
-                EVENT_ADD_PAYMENT_METHOD);
+                publishableApiKey, EVENT_ADD_PAYMENT_METHOD);
     }
 
     @NonNull
-    static Map<String, Object> getSourceCreationParams(
-            @NonNull Context context,
+    Map<String, Object> getSourceCreationParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableApiKey,
-                EVENT_SOURCE_CREATION);
+                publishableApiKey, EVENT_SOURCE_CREATION);
     }
 
     @NonNull
-    static Map<String, Object> getAddSourceParams(
-            @NonNull Context context,
+    Map<String, Object> getAddSourceParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey,
             @NonNull @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableKey,
-                EVENT_ADD_SOURCE);
+                publishableKey, EVENT_ADD_SOURCE);
     }
 
     @NonNull
-    static Map<String, Object> getDeleteSourceParams(
-            @NonNull Context context,
+    Map<String, Object> getDeleteSourceParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 null,
-                publishableKey,
-                EVENT_DELETE_SOURCE);
+                publishableKey, EVENT_DELETE_SOURCE);
     }
 
     @NonNull
-    static Map<String, Object> getPaymentIntentConfirmationParams(
-            @NonNull Context context,
+    Map<String, Object> getAttachPaymentMethodParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableKey, EVENT_ATTACH_PAYMENT_METHOD);
+    }
+
+    @NonNull
+    Map<String, Object> getDetachPaymentMethodParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableKey, EVENT_DETACH_PAYMENT_METHOD);
+    }
+
+    @NonNull
+    Map<String, Object> getPaymentIntentConfirmationParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey,
             @Nullable @Source.SourceType String sourceType) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableApiKey,
-                EVENT_CONFIRM_PAYMENT_INTENT);
+                publishableApiKey, EVENT_CONFIRM_PAYMENT_INTENT);
     }
 
     @NonNull
-    static Map<String, Object> getPaymentIntentRetrieveParams(
-            @NonNull Context context,
+    Map<String, Object> getPaymentIntentRetrieveParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey) {
         return getEventLoggingParams(
-                context.getApplicationContext(),
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey,
-                EVENT_RETRIEVE_PAYMENT_INTENT);
+                publishableApiKey, EVENT_RETRIEVE_PAYMENT_INTENT);
     }
 
     @NonNull
-    static Map<String, Object> getEventLoggingParams(
-            @NonNull Context context,
+    Map<String, Object> getEventLoggingParams(
             @Nullable List<String> productUsageTokens,
             @Nullable @Source.SourceType String sourceType,
             @Nullable @Token.TokenType String tokenType,
@@ -208,7 +225,7 @@ class LoggingUtils {
         paramsObject.put(FIELD_DEVICE_TYPE, getDeviceLoggingString());
         paramsObject.put(FIELD_BINDINGS_VERSION, BuildConfig.VERSION_NAME);
 
-        addNameAndVersion(paramsObject, context.getPackageManager(), context.getPackageName());
+        addNameAndVersion(paramsObject);
 
         if (productUsageTokens != null) {
             paramsObject.put(FIELD_PRODUCT_USAGE, productUsageTokens);
@@ -229,21 +246,18 @@ class LoggingUtils {
         return paramsObject;
     }
 
-    static void addNameAndVersion(
-            @NonNull Map<String, Object> paramsObject,
-            @Nullable PackageManager packageManager,
-            @Nullable String packageName) {
-        if (packageManager != null) {
+    void addNameAndVersion(@NonNull Map<String, Object> paramsObject) {
+        if (mPackageManager != null) {
             try {
-                PackageInfo info = packageManager.getPackageInfo(packageName, 0);
+                final PackageInfo info = mPackageManager.getPackageInfo(mPackageName, 0);
 
-                String nameString = null;
+                final String nameString;
                 if (info.applicationInfo != null) {
-                    CharSequence name = info.applicationInfo.loadLabel(packageManager);
-                    if (name != null) {
-                        nameString = name.toString();
-                    }
+                    final CharSequence name = info.applicationInfo.loadLabel(mPackageManager);
+                    nameString = name != null ? name.toString() : null;
                     paramsObject.put(FIELD_APP_NAME, nameString);
+                } else {
+                    nameString = null;
                 }
 
                 if (StripeTextUtils.isBlank(nameString)) {

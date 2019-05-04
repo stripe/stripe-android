@@ -1,7 +1,7 @@
 package com.stripe.samplestore.service;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Size;
+import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 import com.stripe.android.EphemeralKeyProvider;
 import com.stripe.android.EphemeralKeyUpdateListener;
@@ -11,56 +11,51 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
-    private @NonNull
-    CompositeSubscription mCompositeSubscription;
-    private @NonNull StripeService mStripeService;
-    private @NonNull ProgressListener mProgressListener;
+    @NonNull private final CompositeDisposable mCompositeDisposable;
+    @NonNull private final StripeService mStripeService;
+    @NonNull private final ProgressListener mProgressListener;
 
     public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
-        Retrofit retrofit = RetrofitFactory.getInstance();
+        final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
-        mCompositeSubscription = new CompositeSubscription();
+        mCompositeDisposable = new CompositeDisposable();
         mProgressListener = progressListener;
     }
 
     @Override
     public void createEphemeralKey(@NonNull @Size(min = 4) String apiVersion,
                                    @NonNull final EphemeralKeyUpdateListener keyUpdateListener) {
-        Map<String, String> apiParamMap = new HashMap<>();
+        final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
-        mCompositeSubscription.add(
+        mCompositeDisposable.add(
                 mStripeService.createEphemeralKey(apiParamMap)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<ResponseBody>() {
-                            @Override
-                            public void call(ResponseBody response) {
-                                try {
-                                    String rawKey = response.string();
-                                    keyUpdateListener.onKeyUpdate(rawKey);
-                                    mProgressListener.onStringResponse(rawKey);
-                                } catch (IOException iox) {
+                        .subscribe(
+                                response -> {
+                                    try {
+                                        String rawKey = response.string();
+                                        keyUpdateListener.onKeyUpdate(rawKey);
+                                        mProgressListener.onStringResponse(rawKey);
+                                    } catch (IOException ignored) {
+                                    }
+                                },
+                                throwable -> mProgressListener
+                                        .onStringResponse(throwable.getMessage())));
+    }
 
-                                }
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mProgressListener.onStringResponse(throwable.getMessage());
-                            }
-                        }));
+    public void destroy() {
+        mCompositeDisposable.dispose();
     }
 
     public interface ProgressListener {
-        void onStringResponse(String string);
+        void onStringResponse(@NonNull String string);
     }
 }

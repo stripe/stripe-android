@@ -1,8 +1,8 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
+
 /**
  * Model for a
  * https://stripe.com/docs/api/sources/object#source_object-code_verification

@@ -2,14 +2,13 @@ package com.stripe.example.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.StripeError;
@@ -17,6 +16,7 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.PaymentMethodsActivityStarter;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
@@ -44,52 +44,31 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs);
         mSelectSourceButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
-        CustomerSession.initCustomerSession(
+        CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
-                    new ExampleEphemeralKeyProvider.ProgressListener() {
-                        @Override
-                        public void onStringResponse(String string) {
+                        string -> {
                             if (string.startsWith("Error: ")) {
-                                mErrorDialogHandler.showError(string);
+                                mErrorDialogHandler.show(string);
                             }
-                        }
-                    }));
+                        }));
 
         mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.getInstance().retrieveCurrentCustomer(
-                new CustomerSession.CustomerRetrievalListener() {
-                    @Override
-                    public void onCustomerRetrieved(@NonNull Customer customer) {
-                        mSelectSourceButton.setEnabled(true);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
+                new CustomerRetrievalListenerImpl(this));
 
-                    @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
-                                        @Nullable StripeError stripeError) {
-                        mSelectSourceButton.setEnabled(false);
-                        mErrorDialogHandler.showError(errorMessage);
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-
-        mSelectSourceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchWithCustomer();
-            }
-        });
+        mSelectSourceButton.setOnClickListener(v -> launchWithCustomer());
     }
 
     private void launchWithCustomer() {
-        startActivityForResult(PaymentMethodsActivity.newIntent(this), REQUEST_CODE_SELECT_SOURCE);
+        new PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            final String selectedSource = data
+                    .getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
             Source source = Source.fromString(selectedSource);
             // Note: it isn't possible for a null or non-card source to be returned.
             if (source != null && Source.CARD.equals(source.getType())) {
@@ -102,5 +81,40 @@ public class CustomerSessionActivity extends AppCompatActivity {
     @NonNull
     private String buildCardString(@NonNull SourceCardData data) {
         return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
+    }
+
+    private void onCustomerRetrieved() {
+        mSelectSourceButton.setEnabled(true);
+        mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void onRetrieveError(@Nullable String errorMessage) {
+        mSelectSourceButton.setEnabled(false);
+        mErrorDialogHandler.show(errorMessage);
+        mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private static final class CustomerRetrievalListenerImpl
+            extends CustomerSession.ActivityCustomerRetrievalListener<CustomerSessionActivity> {
+        private CustomerRetrievalListenerImpl(@NonNull CustomerSessionActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final CustomerSessionActivity activity = getActivity();
+            if (activity != null) {
+                activity.onCustomerRetrieved();
+            }
+        }
+
+        @Override
+        public void onError(int httpCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final CustomerSessionActivity activity = getActivity();
+            if (activity != null) {
+                activity.onRetrieveError(errorMessage);
+            }
+        }
     }
 }

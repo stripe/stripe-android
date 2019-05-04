@@ -6,41 +6,42 @@ apply plugin: 'com.getkeepsafe.dexcount'
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
-version = VERSION_NAME
-
 configurations {
     javadocDeps
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:${rootProject.ext.androidxAnnotationVersion}"
-    implementation "androidx.appcompat:appcompat:${rootProject.ext.androidxAppCompatVersion}"
+    implementation "com.android.support:support-annotations:28.0.0"
+    implementation "com.android.support:appcompat-v7:28.0.0"
+    implementation "com.android.support:recyclerview-v7:28.0.0"
     // Api for this import because we use reflection to alter TextInputLayout
-    api "com.google.android.material:material:${rootProject.ext.androidxMaterialVersion}"
+    api "com.android.support:design:28.0.0"
 
-    javadocDeps "androidx.annotation:annotation:${rootProject.ext.androidxAnnotationVersion}"
-    javadocDeps "androidx.appcompat:appcompat:${rootProject.ext.androidxAppCompatVersion}"
-    javadocDeps "com.google.android.material:material:${rootProject.ext.androidxMaterialVersion}"
+    javadocDeps "com.android.support:support-annotations:28.0.0"
+    javadocDeps "com.android.support:appcompat-v7:28.0.0"
+    javadocDeps "com.android.support:design:28.0.0"
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
-    testImplementation "junit:junit:${rootProject.ext.junitVersion}"
-    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
-    testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:2.26.0"
+    testImplementation "org.robolectric:robolectric:4.2.1"
     testImplementation 'androidx.test:core:1.1.0'
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestUtil 'androidx.test:orchestrator:1.1.1'
 }
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
     sourceSets {
         main {

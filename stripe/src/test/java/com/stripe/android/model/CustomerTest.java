@@ -1,7 +1,6 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.testharness.JsonTestUtils;
 

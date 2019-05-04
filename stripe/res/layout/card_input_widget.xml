@@ -11,7 +11,7 @@
         android:layout_marginEnd="@dimen/card_icon_padding"
         android:layout_marginRight="@dimen/card_icon_padding"
         android:src="@drawable/ic_unknown"
-        />
+        android:contentDescription="@null" />
 
     <FrameLayout
         android:id="@+id/frame_container"
@@ -83,8 +83,8 @@
             android:hint="@string/expiry_date_hint"
             tools:ignore="UnusedAttribute"
             tools:importantForAccessibility="yes"
-            android:accessibilityTraversalBefore="@id/et_card_number"
-            android:accessibilityTraversalAfter="@+id/et_cvc_number"
+            android:accessibilityTraversalBefore="@+id/et_cvc_number"
+            android:accessibilityTraversalAfter="@+id/et_card_number"
             android:nextFocusRight="@+id/et_cvc_number"
             android:nextFocusForward="@+id/et_cvc_number"
             android:nextFocusDown="@+id/et_cvc_number"
@@ -107,6 +107,7 @@
             android:layout_height="wrap_content"
             tools:ignore="UnusedAttribute"
             tools:importantForAccessibility="yes"
+            android:accessibilityTraversalAfter="@+id/et_expiry_date"
             android:nextFocusLeft="@id/et_expiry_date"
             android:nextFocusUp="@id/et_expiry_date"
             android:background="@android:color/transparent"

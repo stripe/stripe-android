@@ -2,12 +2,11 @@ package com.stripe.android.testharness;
 
 
 import android.os.Build;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.view.KeyEvent;
 import android.widget.EditText;
-
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
 
 /**
  * Utility class for common actions to perform on Views under test.

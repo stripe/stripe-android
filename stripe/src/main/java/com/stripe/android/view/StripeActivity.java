@@ -7,18 +7,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.ProgressBar;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
@@ -130,7 +129,7 @@ abstract class StripeActivity extends AppCompatActivity {
             mAlertMessageListener.onAlertMessageDisplayed(error);
         }
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setMessage(error)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -139,8 +138,8 @@ abstract class StripeActivity extends AppCompatActivity {
                         dialogInterface.dismiss();
                     }
                 })
-                .create();
-        alertDialog.show();
+                .create()
+                .show();
     }
 
     interface AlertMessageListener {

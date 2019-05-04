@@ -1,7 +1,11 @@
 package com.stripe.android.view;
 
-import androidx.annotation.ColorInt;
-import androidx.core.content.ContextCompat;
+import android.content.Context;
+import android.support.annotation.ColorInt;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.R;
 import com.stripe.android.testharness.ViewTestUtils;
@@ -11,11 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,17 +33,20 @@ public class StripeEditTextTest {
 
     @Mock private StripeEditText.AfterTextChangedListener mAfterTextChangedListener;
     @Mock private StripeEditText.DeleteEmptyListener mDeleteEmptyListener;
-    private ActivityController<CardInputTestActivity> mActivityController;
     private StripeEditText mEditText;
+
+    @NonNull private final Context mContext;
+
+    public StripeEditTextTest() {
+        mContext = ApplicationProvider.getApplicationContext();
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mActivityController = Robolectric.buildActivity(CardInputTestActivity.class)
-                .create().start();
 
         // Note that the CVC EditText is a StripeEditText
-        mEditText =  mActivityController.get().getCvcEditText();
+        mEditText = new StripeEditText(mContext);
         mEditText.setText("");
         mEditText.setDeleteEmptyListener(mDeleteEmptyListener);
         mEditText.setAfterTextChangedListener(mAfterTextChangedListener);
@@ -93,20 +99,20 @@ public class StripeEditTextTest {
 
     @Test
     public void getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
-        mEditText.setTextColor(mActivityController.get().getResources()
+        mEditText.setTextColor(mContext.getResources()
                 .getColor(android.R.color.primary_text_dark));
         @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
-        @ColorInt int expectedErrorInt = ContextCompat.getColor(mActivityController.get(),
+        @ColorInt int expectedErrorInt = ContextCompat.getColor(mContext,
                 R.color.error_text_dark_theme);
         assertEquals(expectedErrorInt, colorInt);
     }
 
     @Test
     public void getDefaultErrorColorInt_onLightTheme_returnsLightError() {
-        mEditText.setTextColor(mActivityController.get().getResources()
+        mEditText.setTextColor(mContext.getResources()
                 .getColor(android.R.color.primary_text_light));
         @ColorInt int colorInt = mEditText.getDefaultErrorColorInt();
-        @ColorInt int expectedErrorInt = ContextCompat.getColor(mActivityController.get(),
+        @ColorInt int expectedErrorInt = ContextCompat.getColor(mContext,
                 R.color.error_text_light_theme);
         assertEquals(expectedErrorInt, colorInt);
     }
@@ -119,5 +125,10 @@ public class StripeEditTextTest {
         mEditText.setShouldShowError(true);
         int currentColorInt = mEditText.getTextColors().getDefaultColor();
         assertEquals(blueError, currentColorInt);
+    }
+
+    @Test
+    public void getCachedColorStateList_afterInit_returnsNotNull() {
+        assertNotNull(mEditText.getCachedColorStateList());
     }
 }

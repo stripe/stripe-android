@@ -1,33 +1,37 @@
 package com.stripe.android;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.test.core.app.ApplicationProvider;
 
-import com.stripe.android.exception.StripeException;
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
@@ -38,10 +42,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -55,196 +59,155 @@ public class PaymentSessionTest {
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
 
-    private AppCompatActivity mActivity;
-    @Mock private CustomerSession.StripeApiProxy mStripeApiProxy;
+    @Mock private Activity mActivity;
+    @Mock private StripeApiHandler mApiHandler;
+    @Mock private ThreadPoolExecutor mThreadPoolExecutor;
+    @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
 
-    @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(String key) {
-        try {
-            return CustomerEphemeralKey.fromString(key);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
+    @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
+    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
+
     @Before
-    public void setup() {
+    public void setup()
+            throws CardException, APIException, InvalidRequestException, AuthenticationException,
+            APIConnectionException {
         MockitoAnnotations.initMocks(this);
 
         PaymentConfiguration.init("pk_test_abc123");
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider, mStripeApiProxy, null);
-        mActivity = Robolectric.buildActivity(AppCompatActivity.class).create().start().get();
 
-        Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
+        final Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
         assertNotNull(firstCustomer);
-        Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
+        final Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
         assertNotNull(secondCustomer);
 
-        mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-
-        Source addedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
+        final Source addedSource =
+                Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(addedSource);
 
-        try {
-            when(mStripeApiProxy.retrieveCustomerWithKey(anyString(), anyString()))
-                    .thenReturn(firstCustomer, secondCustomer);
-            when(mStripeApiProxy.addCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenReturn(addedSource);
-            when(mStripeApiProxy.setDefaultCustomerSourceWithKey(
-                    any(Context.class),
-                    anyString(),
-                    anyString(),
-                    ArgumentMatchers.<String>anyList(),
-                    anyString(),
-                    anyString(),
-                    anyString()))
-                    .thenReturn(secondCustomer);
-        } catch (StripeException exception) {
-            fail("Exception when accessing mock api proxy: " + exception.getMessage());
-        }
+        when(mApiHandler.retrieveCustomer(anyString(), anyString()))
+                .thenReturn(firstCustomer, secondCustomer);
+        when(mApiHandler.addCustomerSource(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()
+        ))
+                .thenReturn(addedSource);
+        when(mApiHandler.setDefaultCustomerSource(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.<String>anyList(),
+                anyString(),
+                anyString(),
+                anyString()))
+                .thenReturn(secondCustomer);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                invocation.<Runnable>getArgument(0).run();
+                return null;
+            }
+        }).when(mThreadPoolExecutor).execute(any(Runnable.class));
     }
 
     @Test
     public void init_addsPaymentSessionToken_andFetchesCustomer() {
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+        final CustomerSession customerSession = createCustomerSession();
+        CustomerSession.setInstance(customerSession);
 
-        Set<String> tokenSet = CustomerSession.getInstance().getProductUsageTokens();
-        assertTrue(tokenSet.contains(PaymentSession.TOKEN_PAYMENT_SESSION));
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
-        verify(mockListener).onCommunicatingStateChanged(eq(true));
+        assertTrue(customerSession.getProductUsageTokens()
+                .contains(PaymentSession.TOKEN_PAYMENT_SESSION));
+
+        verify(mPaymentSessionListener).onCommunicatingStateChanged(eq(true));
     }
 
     @Test
     public void init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
-        verify(mockListener).onCommunicatingStateChanged(eq(true));
-        verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
-        verify(mockListener).onCommunicatingStateChanged(eq(false));
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
+        verify(mPaymentSessionListener).onCommunicatingStateChanged(eq(true));
+        verify(mPaymentSessionListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
+        verify(mPaymentSessionListener).onCommunicatingStateChanged(eq(false));
     }
 
     @Test
     public void setCartTotal_setsExpectedValueAndNotifiesListener() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
-
-        ArgumentCaptor<PaymentSessionData> dataArgumentCaptor = getDataCaptor();
-
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
         paymentSession.setCartTotal(500L);
 
-        verify(mockListener).onPaymentSessionDataChanged(dataArgumentCaptor.capture());
-        PaymentSessionData data = dataArgumentCaptor.getValue();
+        verify(mPaymentSessionListener)
+                .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
+        final PaymentSessionData data = mPaymentSessionDataArgumentCaptor.getValue();
         assertNotNull(data);
         assertEquals(500L, data.getCartTotal());
     }
 
     @Test
     public void handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         // We have already tested the functionality up to here.
-        reset(mockListener);
+        reset(mPaymentSessionListener);
 
         boolean handled = paymentSession.handlePaymentData(
                 PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK, new Intent());
 
         assertTrue(handled);
-        verify(mockListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
+        verify(mPaymentSessionListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
     }
 
     @Test
     public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
-        PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         paymentSession.presentPaymentMethodSelection();
 
-        ShadowActivity.IntentForResult intentForResult =
-                Shadows.shadowOf(mActivity).getNextStartedActivityForResult();
-        assertNotNull(intentForResult);
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
+                eq(PaymentSession.PAYMENT_METHOD_REQUEST));
+
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertNotNull(intent.getComponent());
         assertEquals(PaymentMethodsActivity.class.getName(),
-                intentForResult.intent.getComponent().getClassName());
-        assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+                intent.getComponent().getClassName());
+        assertTrue(intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
 
     @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        final CustomerSession customerSession = createCustomerSession();
+        CustomerSession.setInstance(customerSession);
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
-        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
-
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
         // The init removes PaymentMethodsActivity, but then adds PaymentSession
-        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        final Set<String> loggingTokens = customerSession.getProductUsageTokens();
         assertEquals(1, loggingTokens.size());
         assertFalse(loggingTokens.contains("PaymentMethodsActivity"));
         assertTrue(loggingTokens.contains("PaymentSession"));
@@ -252,25 +215,18 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        final CustomerSession customerSession = createCustomerSession();
+        CustomerSession.setInstance(customerSession);
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
-        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
-
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivity);
         // If it is given any saved state at all, the tokens are not cleared out.
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
+        paymentSession.init(mPaymentSessionListener,
+                new PaymentSessionConfig.Builder().build(), new Bundle());
 
-        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        final Set<String> loggingTokens = customerSession.getProductUsageTokens();
         assertEquals(2, loggingTokens.size());
         assertTrue(loggingTokens.contains("PaymentMethodsActivity"));
         assertTrue(loggingTokens.contains("PaymentSession"));
@@ -278,28 +234,21 @@ public class PaymentSessionTest {
 
     @Test
     public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        final CustomerSession customerSession = createCustomerSession();
+        CustomerSession.setInstance(customerSession);
+        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        assertEquals(1, customerSession.getProductUsageTokens().size());
 
-        CustomerSession.getInstance().addProductUsageTokenIfValid("PaymentMethodsActivity");
-        assertEquals(1, CustomerSession.getInstance().getProductUsageTokens().size());
-
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivity);
         // If it is given any saved state at all, the tokens are not cleared out.
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build(), new Bundle());
+        paymentSession.init(mPaymentSessionListener,
+                new PaymentSessionConfig.Builder().build(), new Bundle());
 
-        Set<String> loggingTokens = CustomerSession.getInstance().getProductUsageTokens();
+        final Set<String> loggingTokens = customerSession.getProductUsageTokens();
         assertEquals(2, loggingTokens.size());
 
-        reset(mockListener);
+        reset(mPaymentSessionListener);
         paymentSession.completePayment(new PaymentCompletionProvider() {
             @Override
             public void completePayment(@NonNull PaymentSessionData data,
@@ -310,51 +259,47 @@ public class PaymentSessionTest {
 
         ArgumentCaptor<PaymentSessionData> dataArgumentCaptor =
                 ArgumentCaptor.forClass(PaymentSessionData.class);
-        verify(mockListener).onPaymentSessionDataChanged(dataArgumentCaptor.capture());
+        verify(mPaymentSessionListener).onPaymentSessionDataChanged(dataArgumentCaptor.capture());
         PaymentSessionData capturedData = dataArgumentCaptor.getValue();
         assertNotNull(capturedData);
         assertEquals(PaymentResultListener.SUCCESS, capturedData.getPaymentResult());
-        assertTrue(CustomerSession.getInstance().getProductUsageTokens().isEmpty());
+        assertTrue(customerSession.getProductUsageTokens().isEmpty());
     }
 
     @Test
     public void init_withSavedState_setsPaymentSessionData() {
-        CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        assertNotNull(firstKey);
-
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        CustomerSession.initCustomerSession(
-                mEphemeralKeyProvider,
-                mStripeApiProxy,
-                null);
+        CustomerSession.setInstance(createCustomerSession());
 
-        PaymentSession.PaymentSessionListener mockListener =
-                mock(PaymentSession.PaymentSessionListener.class);
         PaymentSession paymentSession = new PaymentSession(mActivity);
-        paymentSession.init(mockListener, new PaymentSessionConfig.Builder().build());
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
 
-        ArgumentCaptor<PaymentSessionData> paySessionDataCaptor = getDataCaptor();
         paymentSession.setCartTotal(300L);
 
-        verify(mockListener).onPaymentSessionDataChanged(paySessionDataCaptor.capture());
-        Bundle bundle = new Bundle();
+        verify(mPaymentSessionListener)
+                .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
+        final Bundle bundle = new Bundle();
         paymentSession.savePaymentSessionInstanceState(bundle);
+        PaymentSessionData firstPaymentSessionData = mPaymentSessionDataArgumentCaptor.getValue();
 
         PaymentSession.PaymentSessionListener secondListener =
                 mock(PaymentSession.PaymentSessionListener.class);
-        ArgumentCaptor<PaymentSessionData> secondSessionDataCaptor = getDataCaptor();
 
         paymentSession.init(secondListener, new PaymentSessionConfig.Builder().build(), bundle);
-        verify(secondListener).onPaymentSessionDataChanged(secondSessionDataCaptor.capture());
+        verify(secondListener)
+                .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
 
-        PaymentSessionData firstData = paySessionDataCaptor.getValue();
-        PaymentSessionData secondData = secondSessionDataCaptor.getValue();
-        assertEquals(firstData.getCartTotal(), secondData.getCartTotal());
-        assertEquals(firstData.getSelectedPaymentMethodId(),
-                secondData.getSelectedPaymentMethodId());
+        final PaymentSessionData secondPaymentSessionData =
+                mPaymentSessionDataArgumentCaptor.getValue();
+        assertEquals(firstPaymentSessionData.getCartTotal(),
+                secondPaymentSessionData.getCartTotal());
+        assertEquals(firstPaymentSessionData.getSelectedPaymentMethodId(),
+                secondPaymentSessionData.getSelectedPaymentMethodId());
     }
 
-    private ArgumentCaptor<PaymentSessionData> getDataCaptor() {
-        return ArgumentCaptor.forClass(PaymentSessionData.class);
+    @NonNull
+    private CustomerSession createCustomerSession() {
+        return new CustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler);
     }
 }

@@ -1,7 +1,7 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -15,41 +15,11 @@ import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
  */
 public class AccountParams {
 
-    private static final String API_PARAM_LEGAL_ENTITY = "legal_entity";
     private static final String API_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted";
 
-    @Nullable private Boolean mTosShownAndAccepted;
-    @Nullable private final BusinessType mBusinessType;
-    @Nullable private Map<String, Object> mBusinessData;
-
-    private AccountParams(@Nullable BusinessType businessType) {
-        mBusinessType = businessType;
-    }
-
-    /**
-     * @param tosShownAndAccepted indicates that the platform showed the user the appropriate text
-     *                            and links to Stripe's terms of service. Tokens will only generated
-     *                            when this is true.
-     *
-     * @param legalEntity         Map that specifies the legal entity for which the connect account
-     *                            is being created. Can contain any of the fields specified by
-     *                            legal_entity in the API docs.
-     *
-     *                            See https://stripe.com/docs/api/accounts/create
-     *
-     *                            The object in the map is expected to be a string or a list or map
-     *                            of strings. All {@link StripeJsonModel} types have a toMap()
-     *                            function that can be used to convert the {@link StripeJsonModel}
-     *                            to map representation that can be passed in here.
-     */
-    @NonNull
-    public static AccountParams createAccountParams(
-            boolean tosShownAndAccepted,
-            @Nullable Map<String, Object> legalEntity) {
-        return new AccountParams(null)
-                .setTosShownAndAccepted(tosShownAndAccepted)
-                .setLegalEntity(legalEntity);
-    }
+    private final boolean mTosShownAndAccepted;
+    @NonNull private final BusinessType mBusinessType;
+    @Nullable private final Map<String, Object> mBusinessData;
 
     /**
      * Create an {@link AccountParams} instance for a {@link BusinessType#Individual} or
@@ -58,18 +28,21 @@ public class AccountParams {
      * Note: API version {@code 2019-02-19} [0] replaced {@code legal_entity} with
      * {@code individual} and {@code company}.
      *
-     * @param tosShownAndAccepted Indicates that the platform showed the user the appropriate text
-     *                            and links to Stripe's terms of service. Tokens will only generated
-     *                            when this is true.
+     * @param tosShownAndAccepted Whether the user described by the data in the token has been shown
+     *                            the Stripe Connected Account Agreement [1]. When creating an
+     *                            account token to create a new Connect account, this value must
+     *                            be true.
      * @param businessType        See {@link BusinessType}
-     * @param businessParams      A map of company [1] or individual [2] params.
+     * @param businessData        A map of company [2] or individual [3] params.
      *
      * [0] <a href="https://stripe.com/docs/upgrades#2019-02-19">
      *     https://stripe.com/docs/upgrades#2019-02-19</a>
-     * [1] <a href="https://stripe.com/docs/api/accounts/create#create_account-company">
+     * [1] https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted
+     * [2] <a href="https://stripe.com/docs/api/accounts/create#create_account-company">
      *     https://stripe.com/docs/api/accounts/create#create_account-company</a>
-     * [2] <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">
+     * [3] <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">
      *     https://stripe.com/docs/api/accounts/create#create_account-individual</a>
+     *
      *
      * @return {@link AccountParams}
      */
@@ -77,32 +50,16 @@ public class AccountParams {
     public static AccountParams createAccountParams(
             boolean tosShownAndAccepted,
             @NonNull BusinessType businessType,
-            @Nullable Map<String, Object> businessParams) {
-        return new AccountParams(businessType)
-                .setTosShownAndAccepted(tosShownAndAccepted)
-                .setLegalEntity(businessParams);
+            @Nullable Map<String, Object> businessData) {
+        return new AccountParams(businessType, businessData, tosShownAndAccepted);
     }
 
-    /**
-     * @param tosShownAndAccepted whether the platform showed the user the appropriate text and
-     *                            links to Stripe's terms of service. Tokens will only generated
-     *                            when this is true.
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public AccountParams setTosShownAndAccepted(boolean tosShownAndAccepted) {
+    private AccountParams(@NonNull BusinessType businessType,
+                          @Nullable Map<String, Object> businessData,
+                          boolean tosShownAndAccepted) {
+        mBusinessType = businessType;
+        mBusinessData = businessData;
         mTosShownAndAccepted = tosShownAndAccepted;
-        return this;
-    }
-
-    /**
-     * @param legalEntity see documentation on {@link #createAccountParams}
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public AccountParams setLegalEntity(@Nullable Map<String, Object> legalEntity) {
-        mBusinessData = legalEntity;
-        return this;
     }
 
     /**
@@ -114,16 +71,10 @@ public class AccountParams {
     public Map<String, Object> toParamMap() {
         final Map<String, Object> networkReadyMap = new HashMap<>();
         final Map<String, Object> tokenMap = new HashMap<>();
-        if (mTosShownAndAccepted != null) {
-            tokenMap.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
-        }
+        tokenMap.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
 
         if (mBusinessData != null) {
-            if (mBusinessType != null) {
-                tokenMap.put(mBusinessType.code, mBusinessData);
-            } else {
-                tokenMap.put(API_PARAM_LEGAL_ENTITY, mBusinessData);
-            }
+            tokenMap.put(mBusinessType.code, mBusinessData);
         }
 
         networkReadyMap.put("account", tokenMap);

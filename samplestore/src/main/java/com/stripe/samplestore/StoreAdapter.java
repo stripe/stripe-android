@@ -2,14 +2,13 @@ package com.stripe.samplestore;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Currency;
 
@@ -49,16 +48,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             6000
     };
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        private Currency mCurrency;
-        private TextView mEmojiTextView;
-        private TextView mPriceTextView;
-        private TextView mQuantityTextView;
-        private ImageButton mAddButton;
-        private ImageButton mRemoveButton;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        @NonNull private final Currency mCurrency;
+        @NonNull private final TextView mEmojiTextView;
+        @NonNull private final TextView mPriceTextView;
+        @NonNull private final TextView mQuantityTextView;
+        @NonNull private final ImageButton mAddButton;
+        @NonNull private final ImageButton mRemoveButton;
 
         private int mPosition;
-        ViewHolder(final LinearLayout pollingLayout, Currency currency) {
+
+        ViewHolder(@NonNull final View pollingLayout, @NonNull Currency currency,
+                   @NonNull StoreAdapter adapter) {
             super(pollingLayout);
             mEmojiTextView = pollingLayout.findViewById(R.id.tv_emoji);
             mPriceTextView = pollingLayout.findViewById(R.id.tv_price);
@@ -67,19 +68,9 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             mRemoveButton = pollingLayout.findViewById(R.id.tv_minus);
 
             mCurrency = currency;
-            mAddButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    StoreAdapter.this.bumpItemQuantity(mPosition, true);
-                }
-            });
+            mAddButton.setOnClickListener(v -> adapter.bumpItemQuantity(mPosition, true));
 
-            mRemoveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    StoreAdapter.this.bumpItemQuantity(mPosition, false);
-                }
-            });
+            mRemoveButton.setOnClickListener(v -> adapter.bumpItemQuantity(mPosition, false));
         }
 
         void setHidden(boolean hidden) {
@@ -109,14 +100,14 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     // Storing an activity here only so we can launch for result
-    private Activity mActivity;
-    private Currency mCurrency;
+    @NonNull private final Activity mActivity;
+    @NonNull private final Currency mCurrency;
 
     private int[] mQuantityOrdered;
     private int mTotalOrdered;
-    private TotalItemsChangedListener mTotalItemsChangedListener;
+    @NonNull private final TotalItemsChangedListener mTotalItemsChangedListener;
 
-    public StoreAdapter(StoreActivity activity) {
+    StoreAdapter(@NonNull StoreActivity activity) {
         mActivity = activity;
         mTotalItemsChangedListener = activity;
         // Note: our sample backend assumes USD as currency. This code would be
@@ -126,13 +117,13 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         mQuantityOrdered = new int[EMOJI_CLOTHES.length];
     }
 
-    public void bumpItemQuantity(int index, boolean increase) {
+    private void bumpItemQuantity(int index, boolean increase) {
         if (index >= 0 && index < mQuantityOrdered.length) {
             if (increase) {
                 mQuantityOrdered[index]++;
                 mTotalOrdered++;
                 mTotalItemsChangedListener.onTotalItemsChanged(mTotalOrdered);
-            } else if(mQuantityOrdered[index] > 0) {
+            } else if (mQuantityOrdered[index] > 0) {
                 mQuantityOrdered[index]--;
                 mTotalOrdered--;
                 mTotalItemsChangedListener.onTotalItemsChanged(mTotalOrdered);
@@ -142,7 +133,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (position == EMOJI_CLOTHES.length) {
             holder.setHidden(true);
         } else {
@@ -160,15 +151,16 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         return EMOJI_CLOTHES.length + 1;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LinearLayout pollingView = (LinearLayout) LayoutInflater.from(parent.getContext())
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View pollingView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.store_item, parent, false);
 
-        return new ViewHolder(pollingView, mCurrency);
+        return new ViewHolder(pollingView, mCurrency, this);
     }
 
-    public void launchPurchaseActivityWithCart() {
+    void launchPurchaseActivityWithCart() {
         StoreCart cart = new StoreCart(mCurrency);
         for (int i = 0; i < mQuantityOrdered.length; i++) {
             if (mQuantityOrdered[i] > 0) {
@@ -183,12 +175,10 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 paymentLaunchIntent, StoreActivity.PURCHASE_REQUEST);
     }
 
-    public void clearItemSelections() {
+    void clearItemSelections() {
         mQuantityOrdered = new int[EMOJI_CLOTHES.length];
         notifyDataSetChanged();
-        if (mTotalItemsChangedListener != null) {
-            mTotalItemsChangedListener.onTotalItemsChanged(0);
-        }
+        mTotalItemsChangedListener.onTotalItemsChanged(0);
     }
 
     public interface TotalItemsChangedListener {

@@ -1,23 +1,17 @@
 package com.stripe.android;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Address;
-
-import java.util.Currency;
 
 public class PaymentConfiguration {
 
     private static PaymentConfiguration mInstance;
 
-    private @Nullable ClassLoader mEphemeralKeyProviderClassLoader;
-    private @NonNull String mPublishableKey;
-    private @Address.RequiredBillingAddressFields
-    int mRequiredBillingAddressFields;
+    @NonNull private final String mPublishableKey;
+    @Address.RequiredBillingAddressFields private int mRequiredBillingAddressFields;
     private boolean mShouldUseSourcesForCards; // deprecated- this value is not used.
-    private Currency mCurrency;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
         mPublishableKey = publishableKey;
@@ -43,8 +37,8 @@ public class PaymentConfiguration {
         return mPublishableKey;
     }
 
-    public @Address.RequiredBillingAddressFields
-    int getRequiredBillingAddressFields() {
+    @Address.RequiredBillingAddressFields
+    public int getRequiredBillingAddressFields() {
         return mRequiredBillingAddressFields;
     }
 
@@ -68,7 +62,7 @@ public class PaymentConfiguration {
     }
 
     @VisibleForTesting
-    static void setInstance(@Nullable PaymentConfiguration paymentConfiguration) {
-        mInstance = paymentConfiguration;
+    static void clearInstance() {
+        mInstance = null;
     }
 }

@@ -1,10 +1,9 @@
 package com.stripe.android.model;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -58,14 +57,14 @@ public class Token implements StripePaymentSource {
             @NonNull String id,
             boolean livemode,
             @NonNull Date created,
-            boolean used,
+            @Nullable Boolean used,
             @Nullable Card card) {
         mId = id;
         mType = TYPE_CARD;
         mCreated = created;
         mLivemode = livemode;
         mCard = card;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mBankAccount = null;
     }
 
@@ -77,14 +76,14 @@ public class Token implements StripePaymentSource {
             @NonNull String id,
             boolean livemode,
             @NonNull Date created,
-            boolean used,
+            @Nullable Boolean used,
             @NonNull BankAccount bankAccount) {
         mId = id;
         mType = TYPE_BANK_ACCOUNT;
         mCreated = created;
         mLivemode = livemode;
         mCard = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mBankAccount = bankAccount;
     }
 
@@ -97,14 +96,13 @@ public class Token implements StripePaymentSource {
             @NonNull String type,
             boolean livemode,
             @NonNull Date created,
-            boolean used
-    ) {
+            @Nullable Boolean used) {
         mId = id;
         mType = type;
         mCreated = created;
         mCard = null;
         mBankAccount = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mLivemode = livemode;
     }
 

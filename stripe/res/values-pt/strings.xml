@@ -104,7 +104,7 @@
     <string name="invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
     <string name="invalid_cvc">O código de segurança do seu cartão é inválido.</string>
     <string name="invalid_zip">Seu código postal está incompleto.</string>
-    <string name="payment_method_add_new_card">Adicionar novo cartão...</string>
+    <string name="payment_method_add_new_card">Adicionar novo cartão…</string>
     <!--Human-friendly label for something with $0 price-->
     <string name="price_free">Grátis</string>
     <string name="title_add_a_card">Adicionar um cartão</string>

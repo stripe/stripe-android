@@ -1,8 +1,8 @@
 package com.stripe.android.model;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,9 +24,9 @@ public abstract class StripeJsonModel {
     public abstract JSONObject toJson();
 
     static void putStripeJsonModelMapIfNotNull(
-        @NonNull Map<String, Object> upperLevelMap,
-        @NonNull @Size(min = 1) String key,
-        @Nullable StripeJsonModel jsonModel){
+            @NonNull Map<String, Object> upperLevelMap,
+            @NonNull @Size(min = 1) String key,
+            @Nullable StripeJsonModel jsonModel) {
         if (jsonModel == null) {
             return;
         }
@@ -44,7 +44,8 @@ public abstract class StripeJsonModel {
 
         try {
             jsonObject.put(key, jsonModel.toJson());
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
     }
 
     static void putStripeJsonModelListIfNotNull(
@@ -77,6 +78,7 @@ public abstract class StripeJsonModel {
                 array.put(model.toJson());
             }
             jsonObject.put(key, array);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
     }
 }

@@ -2,10 +2,9 @@ package com.stripe.example.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-
-import androidx.fragment.app.DialogFragment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 
 import com.stripe.example.R;
 
@@ -26,6 +25,7 @@ public class ErrorDialogFragment extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         int titleId = getArguments().getInt("titleId");
@@ -34,12 +34,7 @@ public class ErrorDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(getActivity())
             .setTitle(titleId)
             .setMessage(message)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            })
+            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
             .create();
     }
 }

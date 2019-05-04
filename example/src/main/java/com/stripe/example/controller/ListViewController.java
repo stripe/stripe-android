@@ -2,10 +2,9 @@ package com.stripe.example.controller;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-import androidx.annotation.NonNull;
 
 import com.stripe.android.model.Token;
 import com.stripe.example.R;
@@ -40,7 +39,7 @@ public class ListViewController {
         addToList(token.getCard().getLast4(), token.getId());
     }
 
-    public void addToList(@NonNull String last4, @NonNull String tokenId) {
+    void addToList(@NonNull String last4, @NonNull String tokenId) {
         final Map<String, String> map = new HashMap<>();
         map.put("last4", mResources.getString(R.string.endingIn) + " " + last4);
         map.put("tokenId", tokenId);

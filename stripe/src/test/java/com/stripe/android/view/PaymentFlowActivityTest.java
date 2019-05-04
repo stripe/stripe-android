@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.CustomerSession;
@@ -29,7 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowActivity;
 
@@ -40,10 +39,10 @@ import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
-import static com.stripe.android.view.PaymentFlowActivity.EVENT_SHIPPING_INFO_PROCESSED;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_IS_SHIPPING_INFO_VALID;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_SHIPPING_INFO_DATA;
-import static com.stripe.android.view.PaymentFlowActivity.EXTRA_VALID_SHIPPING_METHODS;
+import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA;
+import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -55,26 +54,33 @@ import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
-public class PaymentFlowActivityTest {
+public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     private ShippingInfoWidget mShippingInfoWidget;
+    private LocalBroadcastManager mLocalBroadcastManager;
     @Mock private EphemeralKeyProvider mEphemeralKeyProvider;
     @Mock private BroadcastReceiver mBroadcastReceiver;
+
+    public PaymentFlowActivityTest() {
+        super(PaymentFlowActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        LocalBroadcastManager localBroadcastManager =
-                LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext());
-        localBroadcastManager.registerReceiver(mBroadcastReceiver,
-                new IntentFilter(PaymentFlowActivity.EVENT_SHIPPING_INFO_SUBMITTED));
-        CustomerSession.initCustomerSession(mEphemeralKeyProvider);
+        mLocalBroadcastManager = LocalBroadcastManager
+                .getInstance(ApplicationProvider.getApplicationContext());
+        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver,
+                new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED));
+        CustomerSession.initCustomerSession(ApplicationProvider.getApplicationContext(),
+                mEphemeralKeyProvider);
     }
 
     @After
+    @Override
     public void tearDown() {
-        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
-                .unregisterReceiver(mBroadcastReceiver);
+        super.tearDown();
+        mLocalBroadcastManager.unregisterReceiver(mBroadcastReceiver);
     }
 
     @Test
@@ -243,8 +249,10 @@ public class PaymentFlowActivityTest {
                 .sendBroadcast(shippingInfoSaved);
         assertTrue(paymentFlowActivity.isFinishing());
         assertEquals(shadowActivity.getResultCode(), Activity.RESULT_OK);
-        PaymentSessionData resultSessionData = shadowActivity.getResultIntent().getExtras()
-                .getParcelable(PAYMENT_SESSION_DATA_KEY);
+        final Bundle extras = shadowActivity.getResultIntent().getExtras();
+        assertNotNull(extras);
+        PaymentSessionData resultSessionData = extras.getParcelable(PAYMENT_SESSION_DATA_KEY);
+        assertNotNull(resultSessionData);
         assertEquals(resultSessionData.getShippingInformation(), getExampleShippingInfo());
     }
 
@@ -259,15 +267,5 @@ public class PaymentFlowActivityTest {
                 .setState("CA")
                 .build();
         return new ShippingInformation(address, "Fake Name", "(555) 555-5555");
-    }
-
-    @NonNull
-    private PaymentFlowActivity createActivity(@NonNull Intent intent) {
-        return Robolectric.buildActivity(PaymentFlowActivity.class, intent)
-                .create()
-                .start()
-                .resume()
-                .visible()
-                .get();
     }
 }

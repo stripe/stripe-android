@@ -1,13 +1,9 @@
 package com.stripe.android;
 
 import android.content.Context;
-import android.os.Build;
-import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -31,106 +27,81 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.security.Security;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Handler for calls to the Stripe API.
  */
 class StripeApiHandler {
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            GET,
-            POST,
-            DELETE
-    })
-    @interface RestMethod { }
-    static final String GET = "GET";
-    static final String POST = "POST";
-    static final String DELETE = "DELETE";
-
-    private static final String LIVE_API_BASE = "https://api.stripe.com";
-    private static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
-    private static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
-
-    private static final String CHARSET = "UTF-8";
-    private static final String CUSTOMERS = "customers";
-    private static final String TOKENS = "tokens";
-    private static final String SOURCES = "sources";
-    private static final String PAYMENT_METHODS = "payment_methods";
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
-    private static final SSLSocketFactory SSL_SOCKET_FACTORY = new StripeSSLSocketFactory();
 
-    @NonNull private final ApiVersion mApiVersion;
+    @NonNull private final LoggingUtils mLoggingUtils;
+    @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
+    @NonNull private final StripeNetworkUtils mNetworkUtils;
+    @NonNull private final RequestExecutor mRequestExecutor;
+    private final boolean mShouldLogRequest;
 
-    StripeApiHandler() {
-        this(ApiVersion.getDefault());
+    StripeApiHandler(@NonNull Context context) {
+        this(context, new RequestExecutor(), true);
     }
 
-    private StripeApiHandler(@NonNull ApiVersion apiVersion) {
-        mApiVersion = apiVersion;
+    @VisibleForTesting
+    StripeApiHandler(@NonNull Context context,
+                     @NonNull RequestExecutor requestExecutor,
+                     boolean shouldLogRequest) {
+        mRequestExecutor = requestExecutor;
+        mShouldLogRequest = shouldLogRequest;
+        mLoggingUtils = new LoggingUtils(context);
+        mTelemetryClientUtil = new TelemetryClientUtil(context);
+        mNetworkUtils = new StripeNetworkUtils(context);
     }
 
-    void logApiCall(
+    /**
+     * @return true if a request was made and it was successful
+     */
+    boolean logApiCall(
             @NonNull Map<String, Object> loggingMap,
-            @NonNull RequestOptions options,
-            @Nullable LoggingResponseListener listener) {
-        if (options == null || (listener != null && !listener.shouldLogTest())) {
-            return;
+            @NonNull RequestOptions options) {
+        if (!mShouldLogRequest || options == null) {
+            return false;
         }
 
         final String apiKey = options.getPublishableApiKey();
         if (apiKey == null || apiKey.trim().isEmpty()) {
             // if there is no apiKey associated with the request, we don't need to react here.
-            return;
+            return false;
         }
 
-        fireAndForgetApiCall(loggingMap, LIVE_LOGGING_BASE, GET, options, listener);
+        return fireAndForgetApiCall(loggingMap, RequestExecutor.LIVE_LOGGING_BASE,
+                RequestExecutor.RestMethod.GET, options);
     }
 
     /**
      * Confirm a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
      *
-     * @param uidProvider a provider for UUID items in test
-     * @param context a {@link Context} object for acquiring resources
      * @param paymentIntentParams contains the confirmation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      * @return a {@link PaymentIntent} reflecting the updated state after applying the parameter
      * provided
      */
     @Nullable
     PaymentIntent confirmPaymentIntent(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
-        StripeNetworkUtils.addUidParamsToPaymentIntent(uidProvider, context, paramMap);
+        mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY)
                 .build();
@@ -141,17 +112,17 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
+            logTelemetryData();
             final SourceParams sourceParams = paymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
-            final Map<String, Object> loggingParams = LoggingUtils
-                    .getPaymentIntentConfirmationParams(context, null, apiKey, sourceType);
+            final Map<String, Object> loggingParams = mLoggingUtils
+                    .getPaymentIntentConfirmationParams(null, apiKey, sourceType);
             RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            logApiCall(loggingParams, loggingOptions);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
-            final StripeResponse response = requestData(
-                    POST, confirmPaymentIntentUrl(paymentIntentId), paramMap, options);
+            final StripeResponse response = requestData(RequestExecutor.RestMethod.POST,
+                    getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options);
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -162,19 +133,15 @@ class StripeApiHandler {
 
     /**
      * Retrieve a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
-     *  @param context a {@link Context} object for acquiring resources
-     * @param paymentIntentParams contains the retrieval params
+     *  @param paymentIntentParams contains the retrieval params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      */
     @Nullable
     PaymentIntent retrievePaymentIntent(
-            @NonNull Context context,
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -189,15 +156,15 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
-            final Map<String, Object> loggingParams =
-                    LoggingUtils.getPaymentIntentRetrieveParams(context, null, apiKey);
+            logTelemetryData();
+            final Map<String, Object> loggingParams = mLoggingUtils
+                    .getPaymentIntentRetrieveParams(null, apiKey);
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+            logApiCall(loggingParams, loggingOptions);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     paymentIntentParams.getClientSecret());
-            final StripeResponse response = requestData(GET,
-                    retrievePaymentIntentUrl(paymentIntentId), paramMap, options);
+            final StripeResponse response = requestData(RequestExecutor.RestMethod.GET,
+                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options);
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -209,12 +176,9 @@ class StripeApiHandler {
     /**
      * Create a {@link Source} using the input {@link SourceParams}.
      *
-     * @param uidProvider a provider for UUID items in test
-     * @param context a {@link Context} object for acquiring resources
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
-     * @param loggingResponseListener a listener for logging responses
      * @return a {@link Source} if one could be created from the input params,
      * or {@code null} if not
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
@@ -224,42 +188,15 @@ class StripeApiHandler {
      */
     @Nullable
     Source createSource(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
             @NonNull SourceParams sourceParams,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return createSource(
-                uidProvider,
-                context,
-                sourceParams,
-                publishableKey,
-                stripeAccount,
-                loggingResponseListener,
-                null);
-    }
-
-    @VisibleForTesting
-    @Nullable
-    Source createSource(
-            @Nullable StripeNetworkUtils.UidProvider uidProvider,
-            @NonNull Context context,
-            @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener,
-            @Nullable StripeResponseListener stripeResponseListener)
+            @Nullable String stripeAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
-        StripeNetworkUtils.addUidParams(uidProvider, context, paramMap);
+        mNetworkUtils.addUidParams(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
@@ -269,18 +206,15 @@ class StripeApiHandler {
                 return null;
             }
 
-            setTelemetryData(context, loggingResponseListener);
-            final Map<String, Object> loggingParams = LoggingUtils.getSourceCreationParams(
-                    context,
+            logTelemetryData();
+            final Map<String, Object> loggingParams = mLoggingUtils.getSourceCreationParams(
                     null,
                     apiKey,
                     sourceParams.getType());
             final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-            logApiCall(loggingParams, loggingOptions, loggingResponseListener);
-            final StripeResponse response = requestData(POST, getSourcesUrl(), paramMap, options);
-            if (stripeResponseListener != null) {
-                stripeResponseListener.onStripeResponse(response);
-            }
+            logApiCall(loggingParams, loggingOptions);
+            final StripeResponse response = requestData(RequestExecutor.RestMethod.POST,
+                    getSourcesUrl(), paramMap, options);
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -292,8 +226,8 @@ class StripeApiHandler {
     /**
      * Retrieve an existing {@link Source} object from the server.
      *
-     * @param sourceId the {@link Source#mId} field for the Source to query
-     * @param clientSecret the {@link Source#mClientSecret} field for the Source to query
+     * @param sourceId the {@link Source#getId()} field for the Source to query
+     * @param clientSecret the {@link Source#getClientSecret()} field for the Source to query
      * @param publishableKey an API key
      * @param stripeAccount a connected Stripe Account ID
      * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
@@ -306,40 +240,38 @@ class StripeApiHandler {
      */
     @Nullable
     Source retrieveSource(
-           @NonNull String sourceId,
-           @NonNull String clientSecret,
-           @NonNull String publishableKey,
-           @Nullable String stripeAccount)
-           throws AuthenticationException,
-           InvalidRequestException,
-           APIConnectionException,
-           APIException {
-       final Map<String, Object> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
-       final RequestOptions options;
-       if (stripeAccount == null) {
-           options = RequestOptions.builder(publishableKey).build();
-       } else {
-           options = RequestOptions.builder(publishableKey, stripeAccount,
-                   RequestOptions.TYPE_QUERY).build();
-       }
-       try {
-           final StripeResponse response =
-                   requestData(GET, getRetrieveSourceApiUrl(sourceId), paramMap, options);
-           return Source.fromString(response.getResponseBody());
-       } catch (CardException unexpected) {
-           // This particular kind of exception should not be possible from a Source API endpoint.
-           throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
-                   unexpected.getStatusCode(), null, unexpected);
-       }
+            @NonNull String sourceId,
+            @NonNull String clientSecret,
+            @NonNull String publishableKey,
+            @Nullable String stripeAccount)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        final Map<String, String> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
+        final RequestOptions options;
+        if (stripeAccount == null) {
+            options = RequestOptions.builder(publishableKey).build();
+        } else {
+            options = RequestOptions.builder(publishableKey, stripeAccount,
+                    RequestOptions.TYPE_QUERY).build();
+        }
+        try {
+            final StripeResponse response = requestData(RequestExecutor.RestMethod.GET,
+                    getRetrieveSourceApiUrl(sourceId), paramMap, options);
+            return Source.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a Source API endpoint.
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
+        }
     }
 
     @Nullable
     PaymentMethod createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull Context context,
             @NonNull String publishableKey,
-            @Nullable String stripeAccount,
-            @Nullable LoggingResponseListener loggingResponseListener)
+            @Nullable String stripeAccount)
 
             throws AuthenticationException,
             InvalidRequestException,
@@ -347,7 +279,7 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
 
-        StripeNetworkUtils.addUidParams(null, context, params);
+        mNetworkUtils.addUidParams(params);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
                 RequestOptions.TYPE_QUERY).build();
 
@@ -356,15 +288,15 @@ class StripeApiHandler {
             return null;
         }
 
-        setTelemetryData(context, loggingResponseListener);
-        final Map<String, Object> loggingParams = LoggingUtils.getPaymentMethodCreationParams(
-                context, null, apiKey);
+        logTelemetryData();
+        final Map<String, Object> loggingParams = mLoggingUtils.getPaymentMethodCreationParams(
+                null, apiKey);
         final RequestOptions loggingOptions = RequestOptions.builder(publishableKey).build();
-        logApiCall(loggingParams, loggingOptions, loggingResponseListener);
+        logApiCall(loggingParams, loggingOptions);
 
         try {
-            final StripeResponse response = requestData(POST, getPaymentMethodsUrl(), params,
-                    options);
+            final StripeResponse response = requestData(RequestExecutor.RestMethod.POST,
+                    getPaymentMethodsUrl(), params, options);
             return PaymentMethod.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
@@ -375,14 +307,11 @@ class StripeApiHandler {
     /**
      * Create a {@link Token} using the input token parameters.
      *
-     * @param context the {@link Context} in which this method is working
      * @param tokenParams a mapped set of parameters representing the object for which this token
      *                   is being created
      * @param options a {@link RequestOptions} object that contains connection data like the api
      *                key, api version, etc
-     * @param tokenType the {@link com.stripe.android.model.Token.TokenType} being created
-     * @param listener a {@link LoggingResponseListener} useful for testing logging calls
-     *
+     * @param tokenType the {@link Token.TokenType} being created
      * @return a {@link Token} that can be used to perform other operations with this card
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
      * @throws InvalidRequestException if one or more of the parameters is incorrect
@@ -393,11 +322,9 @@ class StripeApiHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     Token createToken(
-            @NonNull Context context,
             @NonNull Map<String, Object> tokenParams,
             @NonNull RequestOptions options,
-            @NonNull @Token.TokenType String tokenType,
-            @Nullable LoggingResponseListener listener)
+            @NonNull @Token.TokenType String tokenType)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -414,11 +341,11 @@ class StripeApiHandler {
                     (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
-            setTelemetryData(context, listener);
+            logTelemetryData();
 
             final Map<String, Object> loggingParams =
-                    LoggingUtils.getTokenCreationParams(context, loggingTokens, apiKey, tokenType);
-            logApiCall(loggingParams, options, listener);
+                    mLoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType);
+            logApiCall(loggingParams, options);
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -429,14 +356,12 @@ class StripeApiHandler {
 
     @Nullable
     Source addCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -445,17 +370,15 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("source", sourceId);
 
-        if (context != null) {
-            final Map<String, Object> loggingParamsMap = LoggingUtils.getAddSourceParams(
-                    context, productUsageTokens, publicKey, sourceType);
+        final Map<String, Object> loggingParamsMap = mLoggingUtils.getAddSourceParams(
+                productUsageTokens, publicKey, sourceType);
 
-            // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-            logApiCall(loggingParamsMap, loggingOptions, listener);
-        }
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RequestExecutor.RestMethod.POST,
                 getAddCustomerSourceUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -466,32 +389,27 @@ class StripeApiHandler {
 
     @Nullable
     Source deleteCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
             AuthenticationException,
             CardException {
-        final Map<String, Object> paramsMap = new HashMap<>();
-        if (context != null) {
-            final Map<String, Object> loggingParamsMap =
-                    LoggingUtils.getDeleteSourceParams(context, productUsageTokens, publicKey);
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDeleteSourceParams(productUsageTokens, publicKey);
 
-            // We use the public key to log, so we need different RequestOptions.
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
-            logApiCall(loggingParamsMap, loggingOptions, listener);
-        }
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                DELETE,
+                RequestExecutor.RestMethod.DELETE,
                 getDeleteCustomerSourceUrl(customerId, sourceId),
-                paramsMap,
+                null,
                 RequestOptions.builder(secret).build());
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -499,15 +417,121 @@ class StripeApiHandler {
     }
 
     @Nullable
+    PaymentMethod attachPaymentMethod(
+            @NonNull String customerId,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String paymentMethodId,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("customer", customerId);
+
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.POST,
+                getAttachPaymentMethodUrl(paymentMethodId),
+                paramsMap,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return PaymentMethod.fromString(response.getResponseBody());
+    }
+
+    @Nullable
+    PaymentMethod detachPaymentMethod(
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String paymentMethodId,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.POST,
+                getDetachPaymentMethodUrl(paymentMethodId),
+                null,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return PaymentMethod.fromString(response.getResponseBody());
+    }
+
+    /**
+     * Retrieve a Customer's {@link PaymentMethod}s
+     */
+    @NonNull
+    List<PaymentMethod> getPaymentMethods(
+            @NonNull String customerId,
+            @NonNull String paymentMethodType,
+            @NonNull String publicKey,
+            @NonNull List<String> productUsageTokens,
+            @NonNull String secret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        final Map<String, String> queryParams = new HashMap<>(2);
+        queryParams.put("customer", customerId);
+        queryParams.put("type", paymentMethodType);
+
+        final Map<String, Object> loggingParamsMap =
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey);
+
+        // We use the public key to log, so we need different RequestOptions.
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        logApiCall(loggingParamsMap, loggingOptions);
+
+        final StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.GET,
+                getPaymentMethodsUrl(),
+                queryParams,
+                RequestOptions.builder(secret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+
+        final JSONArray data;
+        try {
+            data = new JSONObject(response.getResponseBody()).optJSONArray("data");
+        } catch (JSONException e) {
+            return new ArrayList<>();
+        }
+
+        final List<PaymentMethod> paymentMethods = new ArrayList<>();
+        for (int i = 0; i < data.length(); i++) {
+            paymentMethods.add(PaymentMethod.fromJson(data.optJSONObject(i)));
+        }
+        return paymentMethods;
+    }
+
+    @Nullable
     Customer setDefaultCustomerSource(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -516,23 +540,18 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("default_source", sourceId);
 
-        // Context can be nullable because this action is performed with only a weak reference
-        if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
-            final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context.getApplicationContext(),
-                    productUsageTokens,
-                    sourceType,
-                    null,
-                    publicKey,
-                    LoggingUtils.EVENT_DEFAULT_SOURCE);
+        final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(
+                productUsageTokens,
+                sourceType,
+                null,
+                publicKey, LoggingUtils.EVENT_DEFAULT_SOURCE);
 
-            logApiCall(loggingParameters, loggingOptions, listener);
-        }
+        logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RequestExecutor.RestMethod.POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -544,13 +563,11 @@ class StripeApiHandler {
 
     @Nullable
     Customer setCustomerShippingInfo(
-            @Nullable Context context,
             @NonNull String customerId,
             @NonNull String publicKey,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
-            @NonNull String secret,
-            @Nullable LoggingResponseListener listener)
+            @NonNull String secret)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -559,23 +576,18 @@ class StripeApiHandler {
         final Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("shipping", shippingInformation.toMap());
 
-        // Context can be nullable because this action is performed with only a weak reference
-        if (context != null) {
-            final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
+        final RequestOptions loggingOptions = RequestOptions.builder(publicKey).build();
 
-            final Map<String, Object> loggingParameters = LoggingUtils.getEventLoggingParams(
-                    context.getApplicationContext(),
-                    productUsageTokens,
-                    null,
-                    null,
-                    publicKey,
-                    LoggingUtils.EVENT_SET_SHIPPING_INFO);
+        final Map<String, Object> loggingParameters = mLoggingUtils.getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publicKey, LoggingUtils.EVENT_SET_SHIPPING_INFO);
 
-            logApiCall(loggingParameters, loggingOptions, listener);
-        }
+        logApiCall(loggingParameters, loggingOptions);
 
         final StripeResponse response = getStripeResponse(
-                POST,
+                RequestExecutor.RestMethod.POST,
                 getRetrieveCustomerUrl(customerId),
                 paramsMap,
                 RequestOptions.builder(secret).build());
@@ -593,7 +605,7 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         final StripeResponse response = getStripeResponse(
-                GET,
+                RequestExecutor.RestMethod.GET,
                 getRetrieveCustomerUrl(customerId),
                 null,
                 RequestOptions.builder(secret).build());
@@ -602,133 +614,201 @@ class StripeApiHandler {
     }
 
     @NonNull
-    String createQuery(@Nullable Map<String, Object> params)
-            throws UnsupportedEncodingException, InvalidRequestException {
-        final StringBuilder queryStringBuffer = new StringBuilder();
-        final List<Parameter> flatParams = flattenParams(params);
-
-        for (Parameter flatParam : flatParams) {
-            if (queryStringBuffer.length() > 0) {
-                queryStringBuffer.append("&");
-            }
-            queryStringBuffer.append(urlEncodePair(flatParam.key, flatParam.value));
-        }
-
-        return queryStringBuffer.toString();
+    private static Map<String, String> createVerificationParam(@NonNull String verificationId,
+                                                               @NonNull String userOneTimeCode) {
+        final Map<String, String> verificationMap = new HashMap<>();
+        verificationMap.put("id", verificationId);
+        verificationMap.put("one_time_code", userOneTimeCode);
+        return verificationMap;
     }
 
     @NonNull
-    Map<String, String> getHeaders(@Nullable RequestOptions options) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Accept-Charset", CHARSET);
-        headers.put("Accept", "application/json");
-        headers.put("User-Agent",
-                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                        BuildConfig.VERSION_NAME));
+    String retrieveIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException, JSONException {
+        final Map<String, Map<String, String>> paramsMap = new HashMap<>();
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
-        if (options != null) {
-            headers.put("Authorization", String.format(Locale.ENGLISH,
-                    "Bearer %s", options.getPublishableApiKey()));
-        }
+        StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.GET,
+                getIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+        JSONObject jsonResponse = new JSONObject(response.getResponseBody());
+        return jsonResponse.getString("pin");
+    }
 
-        // debug headers
-        final Map<String, String> propertyMap = new HashMap<>();
+    void updateIssuingCardPin(
+            @NonNull String cardId,
+            @NonNull String newPin,
+            @NonNull String verificationId,
+            @NonNull String userOneTimeCode,
+            @NonNull String ephemeralKeySecret)
+            throws InvalidRequestException,
+            APIConnectionException,
+            APIException,
+            AuthenticationException,
+            CardException {
+        Map<String, Object> paramsMap = new HashMap<>();
 
-        final String systemPropertyName = "java.version";
-        propertyMap.put(systemPropertyName, System.getProperty(systemPropertyName));
-        propertyMap.put("os.name", "android");
-        propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
-        propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
-        propertyMap.put("lang", "Java");
-        propertyMap.put("publisher", "Stripe");
-        final JSONObject headerMappingObject = new JSONObject(propertyMap);
-        headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
-        headers.put("Stripe-Version", mApiVersion.getCode());
+        paramsMap.put("verification", createVerificationParam(verificationId, userOneTimeCode));
+        paramsMap.put("pin", newPin);
 
-        if (options != null && options.getStripeAccount() != null) {
-            headers.put("Stripe-Account", options.getStripeAccount());
-        }
-
-        if (options != null && options.getIdempotencyKey() != null) {
-            headers.put("Idempotency-Key", options.getIdempotencyKey());
-        }
-
-        return headers;
+        StripeResponse response = getStripeResponse(
+                RequestExecutor.RestMethod.POST,
+                getIssuingCardPinUrl(cardId),
+                paramsMap,
+                RequestOptions.builder(ephemeralKeySecret).build());
+        // Method throws if errors are found, so no return value occurs.
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
     }
 
     @VisibleForTesting
-    String getTokensUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, TOKENS);
+    void start3ds2Auth(@NonNull Stripe3DS2AuthParams authParams,
+                       @NonNull String publishableKey)
+            throws InvalidRequestException, APIConnectionException, APIException, CardException,
+            AuthenticationException {
+        final StripeResponse response = getStripeResponse(RequestExecutor.RestMethod.POST,
+                getApiUrl("3ds2/authenticate"),
+                authParams.toParamMap(),
+                RequestOptions.builder(publishableKey).build()
+        );
+        convertErrorsToExceptionsAndThrowIfNecessary(response);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/tokens
+     */
+    @NonNull
+    static String getTokensUrl() {
+        return getApiUrl("tokens");
     }
 
     /**
      * @return https://api.stripe.com/v1/sources
      */
+    @NonNull
     @VisibleForTesting
-    String getSourcesUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, SOURCES);
+    static String getSourcesUrl() {
+        return getApiUrl("sources");
     }
 
     /**
      * @return https://api.stripe.com/v1/payment_methods
      */
     @VisibleForTesting
-    String getPaymentMethodsUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, PAYMENT_METHODS);
+    @NonNull
+    static String getPaymentMethodsUrl() {
+        return getApiUrl("payment_methods");
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_intents/:id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getRetrievePaymentIntentUrl(@NonNull String paymentIntentId) {
+        return getApiUrl("payment_intents/%s", paymentIntentId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_intents/:id/confirm
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getConfirmPaymentIntentUrl(@NonNull String paymentIntentId) {
+        return getApiUrl("payment_intents/%s/confirm", paymentIntentId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/customers/:customer_id/sources
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getAddCustomerSourceUrl(@NonNull String customerId) {
+        return getApiUrl("customers/%s/sources", customerId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/customers/:customer_id/sources/:source_id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getDeleteCustomerSourceUrl(@NonNull String customerId, @NonNull String sourceId) {
+        return getApiUrl("customers/%s/sources/%s", customerId, sourceId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_methods/:id/attach
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getAttachPaymentMethodUrl(@NonNull String paymentMethodId) {
+        return getApiUrl("payment_methods/%s/attach", paymentMethodId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_methods/:id/detach
+     */
+    @VisibleForTesting
+    @NonNull
+    String getDetachPaymentMethodUrl(@NonNull String paymentMethodId) {
+        return getApiUrl("payment_methods/%s/detach", paymentMethodId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/customers/:id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getRetrieveCustomerUrl(@NonNull String customerId) {
+        return getApiUrl("customers/%s", customerId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/sources/:id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getRetrieveSourceApiUrl(@NonNull String sourceId) {
+        return getApiUrl("sources/%s", sourceId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/tokens/:id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getRetrieveTokenApiUrl(@NonNull String tokenId) {
+        return getApiUrl("tokens/%s", tokenId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/issuing/cards/:id/pin
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getIssuingCardPinUrl(@NonNull String cardId) {
+        return getApiUrl("issuing/cards/%s/pin", cardId);
     }
 
     @NonNull
-    private String createPaymentIntentUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/payment_intents", LIVE_API_BASE);
+    private static String getApiUrl(@NonNull String path, @NonNull Object... args) {
+        return getApiUrl(String.format(Locale.ENGLISH, path, args));
     }
 
     @NonNull
-    private String retrievePaymentIntentUrl(@NonNull String paymentIntentId) {
-        return String.format(
-                Locale.ENGLISH,
-                "%s/v1/payment_intents/%s",
-                LIVE_API_BASE, paymentIntentId);
-    }
-
-    @NonNull
-    private String confirmPaymentIntentUrl(@NonNull String paymentIntentId) {
-        return String.format(
-                Locale.ENGLISH,
-                "%s/v1/payment_intents/%s/confirm",
-                LIVE_API_BASE,
-                paymentIntentId);
-    }
-
-    @VisibleForTesting
-    private String getCustomersUrl() {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", LIVE_API_BASE, CUSTOMERS);
-    }
-
-    @VisibleForTesting
-    String getAddCustomerSourceUrl(@NonNull String customerId) {
-        return String.format(Locale.ENGLISH, "%s/%s",
-                getRetrieveCustomerUrl(customerId), SOURCES);
-    }
-
-    @VisibleForTesting
-    String getDeleteCustomerSourceUrl(@NonNull String customerId, @NonNull String sourceId) {
-        return String.format(Locale.ENGLISH,
-                "%s/%s", getAddCustomerSourceUrl(customerId), sourceId);
-    }
-
-    @VisibleForTesting
-    String getRetrieveCustomerUrl(@NonNull String customerId) {
-        return String.format(Locale.ENGLISH, "%s/%s", getCustomersUrl(), customerId);
-    }
-
-    @VisibleForTesting
-    String getRetrieveSourceApiUrl(@NonNull String sourceId) {
-        return String.format(Locale.ENGLISH, "%s/%s", getSourcesUrl(), sourceId);
-    }
-
-    @VisibleForTesting
-    String getRetrieveTokenApiUrl(@NonNull String tokenId) {
-        return String.format(Locale.ROOT, "%s/%s", getTokensUrl(), tokenId);
+    private static String getApiUrl(@NonNull String path) {
+        return String.format(Locale.ENGLISH, "%s/v1/%s", RequestExecutor.LIVE_API_BASE, path);
     }
 
     private void convertErrorsToExceptionsAndThrowIfNecessary(
@@ -828,322 +908,63 @@ class StripeApiHandler {
         return jsonArray;
     }
 
-    private void attachPseudoCookie(
-            @NonNull HttpURLConnection connection,
-            @NonNull RequestOptions options) {
-        if (options.getGuid() != null && !TextUtils.isEmpty(options.getGuid())) {
-            connection.setRequestProperty("Cookie", "m=" + options.getGuid());
-        }
-    }
-
-    @NonNull
-    private java.net.HttpURLConnection createDeleteConnection(
-            @NonNull String url,
-            @NonNull RequestOptions options) throws IOException {
-        final java.net.HttpURLConnection conn = createStripeConnection(url, options);
-        conn.setRequestMethod(DELETE);
-
-        return conn;
-    }
-
-    @NonNull
-    private java.net.HttpURLConnection createGetConnection(
-            @NonNull String url,
-            @NonNull String query,
-            @NonNull RequestOptions options) throws IOException {
-        final HttpURLConnection conn = createStripeConnection(formatURL(url, query), options);
-        conn.setRequestMethod(GET);
-
-        return conn;
-    }
-
-    @NonNull
-    private java.net.HttpURLConnection createPostConnection(
-            @NonNull String url,
-            @Nullable Map<String, Object> params,
-            @NonNull RequestOptions options) throws IOException, InvalidRequestException {
-        final java.net.HttpURLConnection conn = createStripeConnection(url, options);
-
-        conn.setDoOutput(true);
-        conn.setRequestMethod(POST);
-        conn.setRequestProperty("Content-Type", getContentType(options));
-
-        OutputStream output = null;
-        try {
-            output = conn.getOutputStream();
-            output.write(getOutputBytes(params, options));
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        return conn;
-    }
-
-    @NonNull
-    private java.net.HttpURLConnection createStripeConnection(
-            @NonNull String url,
-            @NonNull RequestOptions options)
-            throws IOException {
-        final URL stripeURL = new URL(url);
-        final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
-        conn.setConnectTimeout(30 * 1000);
-        conn.setReadTimeout(80 * 1000);
-        conn.setUseCaches(false);
-
-        if (urlNeedsHeaderData(url)) {
-            for (Map.Entry<String, String> header : getHeaders(options).entrySet()) {
-                conn.setRequestProperty(header.getKey(), header.getValue());
-            }
-        }
-
-        if (urlNeedsPseudoCookie(url)) {
-            attachPseudoCookie(conn, options);
-        }
-
-        if (conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
-        }
-
-        return conn;
-    }
-
-    private void fireAndForgetApiCall(
+    /**
+     * @return true if a request was made and it was successful
+     */
+    private boolean fireAndForgetApiCall(
             @NonNull Map<String, Object> paramMap,
             @NonNull String url,
-            @NonNull @RestMethod String method,
-            @NonNull RequestOptions options,
-            @Nullable LoggingResponseListener listener) {
+            @NonNull @RequestExecutor.RestMethod String method,
+            @NonNull RequestOptions options) {
         String originalDNSCacheTTL = null;
         boolean allowedToSetTTL = true;
 
         try {
-            originalDNSCacheTTL = java.security.Security
-                    .getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
             // disable DNS cache
-            java.security.Security
-                    .setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
         } catch (SecurityException se) {
             allowedToSetTTL = false;
         }
 
+        boolean isSuccessful = false;
         try {
-            StripeResponse response = getStripeResponse(
+            final StripeResponse response = getStripeResponse(
                     method,
                     url,
                     paramMap,
                     options);
-
-            if (listener != null) {
-                listener.onLoggingResponse(response);
-            }
-        } catch (StripeException stripeException) {
-            if (listener != null) {
-                listener.onStripeException(stripeException);
-            }
+            isSuccessful = response.getResponseCode() == 200;
+        } catch (StripeException ignore) {
             // We're just logging. No need to crash here or attempt to re-log things.
         } finally {
             if (allowedToSetTTL) {
                 if (originalDNSCacheTTL == null) {
                     // value unspecified by implementation
                     // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                    java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
                 } else {
-                    java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
+                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
                             originalDNSCacheTTL);
                 }
             }
         }
-    }
 
-    @NonNull
-    private List<Parameter> flattenParams(@Nullable Map<String, Object> params)
-            throws InvalidRequestException {
-        return flattenParamsMap(params, null);
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsList(@NonNull List<?> params,
-                                                     @NonNull String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams = new LinkedList<>();
-
-        // Because application/x-www-form-urlencoded cannot represent an empty
-        // list, convention is to take the list parameter and just set it to an
-        // empty string. (e.g. A regular list might look like `a[]=1&b[]=2`.
-        // Emptying it would look like `a=`.)
-        if (params.isEmpty()) {
-            flatParams.add(new Parameter(keyPrefix, ""));
-        } else {
-            final String newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix);
-            for (Object param : params) {
-                flatParams.addAll(flattenParamsValue(param, newPrefix));
-            }
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsMap(@Nullable Map<String, Object> params,
-                                                    @Nullable String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams = new LinkedList<>();
-        if (params == null) {
-            return flatParams;
-        }
-
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            final String key = entry.getKey();
-            final Object value = entry.getValue();
-            final String newPrefix;
-            if (keyPrefix != null) {
-                newPrefix = String.format(Locale.ROOT, "%s[%s]", keyPrefix, key);
-            } else {
-                newPrefix = key;
-            }
-
-            flatParams.addAll(flattenParamsValue(value, newPrefix));
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private List<Parameter> flattenParamsValue(@NonNull Object value,
-                                                      @Nullable String keyPrefix)
-            throws InvalidRequestException {
-        final List<Parameter> flatParams;
-        if (value instanceof Map<?, ?>) {
-            flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
-        } else if (value instanceof List<?>) {
-            flatParams = flattenParamsList((List<?>) value, keyPrefix);
-        } else if ("".equals(value)) {
-            throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty " +
-                    "string. " + "We interpret empty strings as null in requests. " + "You may " +
-                    "set '" + keyPrefix + "' to null to delete the property.", keyPrefix, null,
-                    0, null, null, null, null);
-        } else if (value == null) {
-            flatParams = new LinkedList<>();
-            flatParams.add(new Parameter(keyPrefix, ""));
-        } else {
-            flatParams = new LinkedList<>();
-            flatParams.add(new Parameter(keyPrefix, value.toString()));
-        }
-
-        return flatParams;
-    }
-
-    @NonNull
-    private String formatURL(@NonNull String url, @Nullable String query) {
-        if (query == null || query.isEmpty()) {
-            return url;
-        } else {
-            // In some cases, URL can already contain a question mark (eg, upcoming invoice lines)
-            String separator = url.contains("?") ? "&" : "?";
-            return String.format(Locale.ROOT, "%s%s%s", url, separator, query);
-        }
-    }
-
-    @NonNull
-    private String getContentType(@NonNull RequestOptions options) {
-        if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-            return String.format(Locale.ROOT, "application/json; charset=%s", CHARSET);
-        } else {
-            return String.format(Locale.ROOT, "application/x-www-form-urlencoded;charset=%s",
-                    CHARSET);
-        }
-    }
-
-    @NonNull
-    private byte[] getOutputBytes(
-            @Nullable Map<String, Object> params,
-            @NonNull RequestOptions options) throws InvalidRequestException {
-        try {
-            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                JSONObject jsonData = mapToJsonObject(params);
-                if (jsonData == null) {
-                    throw new InvalidRequestException("Unable to create JSON data from parameters. "
-                            + "Please contact support@stripe.com for assistance.",
-                            null, null, 0, null, null, null, null);
-                }
-                return jsonData.toString().getBytes(CHARSET);
-            } else {
-                return createQuery(params).getBytes(CHARSET);
-            }
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidRequestException("Unable to encode parameters to " + CHARSET + "." +
-                    " Please contact support@stripe.com for assistance.",
-                    null, null, 0, null, null, null, e);
-        }
-    }
-
-    @Nullable
-    private String getResponseBody(@NonNull InputStream responseStream)
-            throws IOException {
-        //\A is the beginning of
-        // the stream boundary
-        final Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");
-        final String rBody = scanner.hasNext() ? scanner.next() : null;
-        responseStream.close();
-        return rBody;
+        return isSuccessful;
     }
 
     @NonNull
     private StripeResponse getStripeResponse(
-            @RestMethod String method,
+            @RequestExecutor.RestMethod @NonNull String method,
             @NonNull String url,
-            @Nullable Map<String, Object> params,
+            @Nullable Map<String, ?> params,
             @NonNull RequestOptions options)
             throws InvalidRequestException, APIConnectionException {
-        // HTTPSURLConnection verifies SSL cert by default
-        java.net.HttpURLConnection conn = null;
-        try {
-            switch (method) {
-                case GET:
-                    conn = createGetConnection(url, createQuery(params), options);
-                    break;
-                case POST:
-                    conn = createPostConnection(url, params, options);
-                    break;
-                case DELETE:
-                    conn = createDeleteConnection(url, options);
-                    break;
-                default:
-                    throw new APIConnectionException(
-                            String.format(Locale.ENGLISH,
-                                    "Unrecognized HTTP method %s. "
-                                            + "This indicates a bug in the Stripe bindings. "
-                                            + "Please contact support@stripe.com for assistance.",
-                                    method));
-            }
-            // trigger the request
-            final int rCode = conn.getResponseCode();
-            final String rBody;
-            if (rCode >= 200 && rCode < 300) {
-                rBody = getResponseBody(conn.getInputStream());
-            } else {
-                rBody = getResponseBody(conn.getErrorStream());
-            }
-            return new StripeResponse(rCode, rBody, conn.getHeaderFields());
-        } catch (IOException e) {
-            throw new APIConnectionException(
-                    String.format(Locale.ENGLISH,
-                            "IOException during API request to Stripe (%s): %s "
-                                    + "Please check your internet connection and try again. "
-                                    + "If this problem persists, you should check Stripe's "
-                                    + "service status at https://twitter.com/stripestatus, "
-                                    + "or let us know at support@stripe.com.",
-                            getTokensUrl(), e.getMessage()), e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
+        return mRequestExecutor.execute(method, url, params, options);
     }
 
     private void handleAPIError(@Nullable String responseBody, int responseCode,
-                                       @Nullable String requestId)
+                                @Nullable String requestId)
             throws InvalidRequestException, AuthenticationException, CardException, APIException {
 
         final StripeError stripeError = ErrorParser.parseError(responseBody);
@@ -1192,10 +1013,11 @@ class StripeApiHandler {
     }
 
     @NonNull
-    private StripeResponse requestData(
-            @RestMethod String method,
+    @VisibleForTesting
+    StripeResponse requestData(
+            @RequestExecutor.RestMethod String method,
             @NonNull String url,
-            @NonNull Map<String, Object> params,
+            @NonNull Map<String, ?> params,
             @NonNull RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
@@ -1204,9 +1026,9 @@ class StripeApiHandler {
         boolean allowedToSetTTL = true;
 
         try {
-            originalDNSCacheTTL = java.security.Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
             // disable DNS cache
-            java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
         } catch (SecurityException se) {
             allowedToSetTTL = false;
         }
@@ -1220,106 +1042,49 @@ class StripeApiHandler {
         }
 
         final StripeResponse response = getStripeResponse(method, url, params, options);
-
-        final int rCode = response.getResponseCode();
-        final String rBody = response.getResponseBody();
-
-        final Map<String, List<String>> headers = response.getResponseHeaders();
-        final List<String> requestIdList = headers == null ? null : headers.get("Request-Id");
-        final String requestId;
-        if (requestIdList != null && requestIdList.size() > 0) {
-            requestId = requestIdList.get(0);
-        } else {
-            requestId = null;
-        }
-
-        if (rCode < 200 || rCode >= 300) {
-            handleAPIError(rBody, rCode, requestId);
+        if (response.hasErrorCode()) {
+            handleAPIError(response.getResponseBody(), response.getResponseCode(),
+                    response.getRequestId());
         }
 
         if (allowedToSetTTL) {
             if (originalDNSCacheTTL == null) {
                 // value unspecified by implementation
                 // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
+                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
             } else {
-                java.security.Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
+                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
                         originalDNSCacheTTL);
             }
         }
+
         return response;
     }
 
     @Nullable
     private Token requestToken(
-            String url,
-            Map<String, Object> params,
+            @NonNull String url,
+            @NonNull Map<String, Object> params,
             @NonNull RequestOptions options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-        final StripeResponse response = requestData(StripeApiHandler.POST, url, params, options);
+        final StripeResponse response = requestData(RequestExecutor.RestMethod.POST, url, params,
+                options);
         return Token.fromString(response.getResponseBody());
     }
 
-    private void setTelemetryData(@NonNull Context context,
-                                         @Nullable LoggingResponseListener listener) {
-        final Map<String, Object> telemetry = TelemetryClientUtil.createTelemetryMap(context);
+    private void logTelemetryData() {
+        final Map<String, Object> telemetry = mTelemetryClientUtil.createTelemetryMap();
         StripeNetworkUtils.removeNullAndEmptyParams(telemetry);
-        if (listener != null && !listener.shouldLogTest()) {
+        if (!mShouldLogRequest) {
             return;
         }
 
         final RequestOptions options =
                 RequestOptions.builder(null, RequestOptions.TYPE_JSON)
-                        .setGuid(TelemetryClientUtil.getHashedId(context))
+                        .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
-        fireAndForgetApiCall(telemetry, LOGGING_ENDPOINT, POST, options, listener);
-    }
-
-    private boolean urlNeedsHeaderData(@NonNull String url) {
-        return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
-    }
-
-    private boolean urlNeedsPseudoCookie(@NonNull String url) {
-        return url.startsWith(LOGGING_ENDPOINT);
-    }
-
-    @NonNull
-    private String urlEncodePair(@NonNull String k, @NonNull String v)
-            throws UnsupportedEncodingException {
-        return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v));
-    }
-
-    @Nullable
-    private String urlEncode(@Nullable String str) throws UnsupportedEncodingException {
-        // Preserve original behavior that passing null for an object id will lead
-        // to us actually making a request to /v1/foo/null
-        if (str == null) {
-            return null;
-        } else {
-            return URLEncoder.encode(str, CHARSET);
-        }
-    }
-
-    interface LoggingResponseListener {
-        boolean shouldLogTest();
-
-        void onLoggingResponse(StripeResponse response);
-
-        void onStripeException(StripeException exception);
-    }
-
-    interface StripeResponseListener {
-        void onStripeResponse(@NonNull StripeResponse response);
-    }
-
-    private final class Parameter {
-        @NonNull private final String key;
-        @NonNull private final String value;
-
-        Parameter(@NonNull String key, @NonNull String value) {
-            this.key = key;
-            this.value = value;
-        }
+        fireAndForgetApiCall(telemetry, RequestExecutor.LOGGING_ENDPOINT,
+                RequestExecutor.RestMethod.POST, options);
     }
 }

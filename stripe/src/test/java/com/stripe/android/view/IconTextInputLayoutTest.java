@@ -1,13 +1,13 @@
 package com.stripe.android.view;
 
-import com.google.android.material.textfield.TextInputLayout;
+import android.support.design.widget.TextInputLayout;
+
 import com.stripe.android.R;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import static org.junit.Assert.assertTrue;
 
@@ -17,16 +17,23 @@ import static org.junit.Assert.assertTrue;
  * is no need to otherwise test the behavior.
  */
 @RunWith(RobolectricTestRunner.class)
-public class IconTextInputLayoutTest {
+public class IconTextInputLayoutTest extends BaseViewTest<CardInputTestActivity> {
+
+    public IconTextInputLayoutTest() {
+        super(CardInputTestActivity.class);
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+    }
 
     @Test
     public void init_successfullyFindsFields() {
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
-
-        IconTextInputLayout iconTextInputLayout =
-                activityController.get().getCardMultilineWidget()
-                        .findViewById(R.id.tl_add_source_card_number_ml);
+        final IconTextInputLayout iconTextInputLayout = createActivity()
+                .getCardMultilineWidget()
+                .findViewById(R.id.tl_add_source_card_number_ml);
 
         assertTrue(iconTextInputLayout.hasObtainedCollapsingTextHelper());
     }

@@ -1,16 +1,15 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.R;
@@ -85,12 +84,12 @@ public class CardNumberEditText extends StripeEditText {
         return mLengthMax;
     }
 
-
-    @Override public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
+    @Override
+    public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         String accLabel = getResources().getString(
-            R.string.acc_label_card_number_node,
-            getText());
+                R.string.acc_label_card_number_node,
+                getText());
         info.setText(accLabel);
     }
 

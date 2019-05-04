@@ -2,9 +2,8 @@ package com.stripe.android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.model.StripeJsonModel;
 import com.stripe.android.utils.ObjectUtils;
@@ -206,9 +205,9 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         return mType;
     }
 
-    @Nullable
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
-    fromString(@Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
+    @NonNull
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromString(
+            @Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
         if (rawJson == null) {
             throw new IllegalArgumentException("Attempted to instantiate " +
                     ephemeralKeyClass.getSimpleName() + " with null raw key");
@@ -218,8 +217,8 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     @NonNull
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey
-    fromJson(@Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
+    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromJson(
+            @Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
         if (jsonObject == null) {
             throw new IllegalArgumentException("Exception instantiating " +
                     ephemeralKeyClass.getSimpleName() +

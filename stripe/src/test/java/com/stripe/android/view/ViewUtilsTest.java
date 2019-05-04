@@ -2,17 +2,15 @@ package com.stripe.android.view;
 
 import android.graphics.Color;
 import android.os.Build;
-
-import androidx.annotation.ColorInt;
+import android.support.annotation.ColorInt;
 
 import com.stripe.android.model.Card;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
@@ -24,39 +22,45 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link ViewUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-public class ViewUtilsTest {
+public class ViewUtilsTest extends BaseViewTest<CardInputTestActivity> {
 
-    private ActivityController<CardInputTestActivity> mActivityController;
+    public ViewUtilsTest() {
+        super(CardInputTestActivity.class);
+    }
 
     @Before
     public void setup() {
-        mActivityController = Robolectric.buildActivity(CardInputTestActivity.class)
-                .create().start();
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
     public void getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
+        @ColorInt int color = ViewUtils.getThemeAccentColor(createActivity()).data;
         assertTrue(Color.alpha(color) > 0);
     }
 
     @Test
     @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeAccentColor_whenOnPreKitKatConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeAccentColor(mActivityController.get()).data;
+        @ColorInt int color = ViewUtils.getThemeAccentColor(createActivity()).data;
         assertTrue(Color.alpha(color) > 0);
     }
 
     @Test
     public void getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
+        @ColorInt int color = ViewUtils.getThemeColorControlNormal(createActivity()).data;
         assertTrue(Color.alpha(color) > 0);
     }
 
     @Test
     @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
     public void getThemeColorControlNormal_whenOnPreKitKatConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeColorControlNormal(mActivityController.get()).data;
+        @ColorInt int color = ViewUtils.getThemeColorControlNormal(createActivity()).data;
         assertTrue(Color.alpha(color) > 0);
     }
 

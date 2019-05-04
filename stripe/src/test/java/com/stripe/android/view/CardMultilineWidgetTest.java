@@ -1,24 +1,22 @@
 package com.stripe.android.view;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.material.textfield.TextInputLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.testharness.ViewTestUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.android.controller.ActivityController;
 
 import java.util.Calendar;
 
@@ -46,7 +44,7 @@ import static org.mockito.Mockito.verify;
  * Test class for {@link CardMultilineWidget}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class CardMultilineWidgetTest {
+public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
     // Every Card made by the CardInputView should have the card widget token.
     private static final String[] EXPECTED_LOGGING_ARRAY = {CARD_MULTILINE_TOKEN};
@@ -56,23 +54,31 @@ public class CardMultilineWidgetTest {
     private WidgetControlGroup mFullGroup;
     private WidgetControlGroup mNoZipGroup;
 
-    @Mock
-    CardInputListener mFullCardListener;
-    @Mock
-    CardInputListener mNoZipCardListener;
+    @Mock private CardInputListener mFullCardListener;
+    @Mock private CardInputListener mNoZipCardListener;
+
+    public CardMultilineWidgetTest() {
+        super(CardInputTestActivity.class);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        ActivityController<CardInputTestActivity> activityController =
-                Robolectric.buildActivity(CardInputTestActivity.class).create().start();
-        mCardMultilineWidget = activityController.get().getCardMultilineWidget();
+
+        final CardInputTestActivity activity = createStartedActivity();
+        mCardMultilineWidget = activity.getCardMultilineWidget();
         mFullGroup = new WidgetControlGroup(mCardMultilineWidget);
 
-        mNoZipCardMultilineWidget = activityController.get().getNoZipCardMulitlineWidget();
+        mNoZipCardMultilineWidget = activity.getNoZipCardMulitlineWidget();
         mNoZipGroup = new WidgetControlGroup(mNoZipCardMultilineWidget);
 
         mFullGroup.cardNumberEditText.setText("");
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
@@ -298,6 +304,15 @@ public class CardMultilineWidgetTest {
         assertFalse(mFullGroup.expiryDateEditText.getShouldShowError());
         assertFalse(mFullGroup.cvcEditText.getShouldShowError());
         assertFalse(mFullGroup.postalCodeEditText.getShouldShowError());
+    }
+
+    @Test
+    public void setCvcLabel_shouldShowCustomLabelIfPresent() {
+        mCardMultilineWidget.setCvcLabel("my cool cvc");
+        assertEquals("my cool cvc", mFullGroup.cvcInputLayout.getHint());
+
+        mCardMultilineWidget.setCvcLabel(null);
+        assertEquals("CVC", mFullGroup.cvcInputLayout.getHint());
     }
 
     @Test
@@ -555,16 +570,15 @@ public class CardMultilineWidgetTest {
     }
 
     static class WidgetControlGroup {
-
-        CardNumberEditText cardNumberEditText;
-        TextInputLayout cardInputLayout;
-        ExpiryDateEditText expiryDateEditText;
-        TextInputLayout expiryInputLayout;
-        StripeEditText cvcEditText;
-        TextInputLayout cvcInputLayout;
-        StripeEditText postalCodeEditText;
-        TextInputLayout postalCodeInputLayout;
-        LinearLayout secondRowLayout;
+        @NonNull final CardNumberEditText cardNumberEditText;
+        @NonNull final TextInputLayout cardInputLayout;
+        @NonNull final ExpiryDateEditText expiryDateEditText;
+        @NonNull final TextInputLayout expiryInputLayout;
+        @NonNull final StripeEditText cvcEditText;
+        @NonNull final TextInputLayout cvcInputLayout;
+        @NonNull final StripeEditText postalCodeEditText;
+        @NonNull final TextInputLayout postalCodeInputLayout;
+        @NonNull final LinearLayout secondRowLayout;
 
         WidgetControlGroup(@NonNull CardMultilineWidget parentWidget) {
             cardNumberEditText = parentWidget.findViewById(R.id.et_add_source_card_number_ml);

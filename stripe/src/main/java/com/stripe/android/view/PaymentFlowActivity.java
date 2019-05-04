@@ -5,11 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.ViewPager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionConfig;
@@ -30,15 +29,6 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  * as well as select a shipping method.
  */
 public class PaymentFlowActivity extends StripeActivity {
-
-    public static final String EXTRA_DEFAULT_SHIPPING_METHOD = "default_shipping_method";
-    public static final String EXTRA_IS_SHIPPING_INFO_VALID = "shipping_is_shipping_info_valid";
-    public static final String EXTRA_SHIPPING_INFO_DATA = "shipping_info_data";
-    public static final String EXTRA_SHIPPING_INFO_ERROR = "shipping_info_error";
-    public static final String EVENT_SHIPPING_INFO_PROCESSED = "shipping_info_processed";
-    public static final String EVENT_SHIPPING_INFO_SUBMITTED = "shipping_info_submitted";
-    public static final String EXTRA_VALID_SHIPPING_METHODS = "valid_shipping_methods";
-
     static final String TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity";
 
     private BroadcastReceiver mShippingInfoSavedBroadcastReceiver;
@@ -72,7 +62,6 @@ public class PaymentFlowActivity extends StripeActivity {
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
-
             }
 
             @Override
@@ -91,18 +80,19 @@ public class PaymentFlowActivity extends StripeActivity {
         mShippingInfoSubmittedBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                boolean isShippingInfoValid = intent.getBooleanExtra(
-                        EXTRA_IS_SHIPPING_INFO_VALID,
+                final boolean isShippingInfoValid = intent.getBooleanExtra(
+                        PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID,
                         false);
                 if (isShippingInfoValid) {
                     onShippingInfoValidated();
-                    mValidShippingMethods =
-                            intent.getParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS);
-                    mDefaultShippingMethod =
-                            intent.getParcelableExtra(EXTRA_DEFAULT_SHIPPING_METHOD);
+                    mValidShippingMethods = intent.getParcelableArrayListExtra(
+                            PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS);
+                    mDefaultShippingMethod = intent
+                            .getParcelableExtra(PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD);
                 } else {
                     setCommunicatingProgress(false);
-                    String shippingInfoError = intent.getStringExtra(EXTRA_SHIPPING_INFO_ERROR);
+                    final String shippingInfoError = intent
+                            .getStringExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_ERROR);
                     if (shippingInfoError != null && !shippingInfoError.isEmpty()) {
                         showError(shippingInfoError);
                     } else {
@@ -124,8 +114,8 @@ public class PaymentFlowActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-        if (mPaymentFlowPagerAdapter.getPageAt(
-                mViewPager.getCurrentItem()).equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
+        if (PaymentFlowPagerEnum.SHIPPING_INFO
+                .equals(mPaymentFlowPagerAdapter.getPageAt(mViewPager.getCurrentItem()))) {
             onShippingInfoSubmitted();
         } else {
             onShippingMethodSave();
@@ -146,7 +136,7 @@ public class PaymentFlowActivity extends StripeActivity {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mShippingInfoSubmittedBroadcastReceiver,
-                new IntentFilter(EVENT_SHIPPING_INFO_PROCESSED));
+                new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED));
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mShippingInfoSavedBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SAVED));
@@ -154,7 +144,6 @@ public class PaymentFlowActivity extends StripeActivity {
 
     private void onShippingInfoValidated() {
         CustomerSession.getInstance().setCustomerShippingInformation(
-                this,
                 mShippingInformationSubmitted);
     }
 
@@ -186,9 +175,12 @@ public class PaymentFlowActivity extends StripeActivity {
     }
 
     private void broadcastShippingInfoSubmitted(ShippingInformation shippingInformation) {
-        Intent intent = new Intent(EVENT_SHIPPING_INFO_SUBMITTED);
-        intent.putExtra(EXTRA_SHIPPING_INFO_DATA, shippingInformation);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        LocalBroadcastManager
+                .getInstance(this)
+                .sendBroadcast(
+                        new Intent(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED)
+                                .putExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA,
+                                        shippingInformation));
     }
 
     private boolean hasNextPage() {

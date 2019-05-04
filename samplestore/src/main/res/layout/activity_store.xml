@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         >
 
-        <androidx.appcompat.widget.Toolbar
+        <android.support.v7.widget.Toolbar
             android:id="@+id/my_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -22,9 +22,9 @@
             android:elevation="4dp"
             android:theme="@style/WhiteTextTheme"
             app:popupTheme="@style/WhiteTextTheme"
-            />
+            tools:ignore="UnusedAttribute" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_store_items"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -33,7 +33,7 @@
 
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_checkout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,9 +44,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:clickable="true"
+        android:focusable="true"
         app:elevation="12dp"
         app:useCompatPadding="true"
-        app:pressedTranslationZ="12dp"
-        />
+        app:pressedTranslationZ="12dp" />
 
 </RelativeLayout>
