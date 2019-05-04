@@ -235,8 +235,8 @@ public class StripeTest {
     public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken()
             throws CardException, APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final Stripe stripe = new Stripe(mContext, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
-        stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
+        final Stripe stripe = new Stripe(mContext, "pk_test_dCyfhfyeO2CZkcvT5xyIDdJj");
+        stripe.setStripeAccount("acct_28DT589O8KAxCGbLmxyZ");
 
         final Token token = stripe.createTokenSynchronous(CARD);
 
@@ -402,7 +402,7 @@ public class StripeTest {
     public void createSourceSynchronous_withCardParams_passesIntegrationTest() {
         final Stripe stripe = getNonLoggingStripe(mContext);
         stripe.setDefaultPublishableKey("pk_test_dCyfhfyeO2CZkcvT5xyIDdJj");
-        stripe.setStripeAccount("acct_19YLYlE7cWSP2tMo");
+        stripe.setStripeAccount("acct_28DT589O8KAxCGbLmxyZ");
 
         final Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         card.setAddressCity("Sheboygan");

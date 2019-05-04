@@ -29,11 +29,15 @@ public class PaymentSession {
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
-    @NonNull private final Activity mHostActivity;
-    @NonNull private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
-    @NonNull private final CustomerSession mCustomerSession;
+    @NonNull
+    private final Activity mHostActivity;
+    @NonNull
+    private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    @NonNull
+    private final CustomerSession mCustomerSession;
     private PaymentSessionData mPaymentSessionData;
-    @Nullable private PaymentSessionListener mPaymentSessionListener;
+    @Nullable
+    private PaymentSessionListener mPaymentSessionListener;
     private PaymentSessionConfig mPaymentSessionConfig;
 
     /**
@@ -50,18 +54,21 @@ public class PaymentSession {
         mPaymentMethodsActivityStarter = new PaymentMethodsActivityStarter(hostActivity);
         mPaymentSessionData = new PaymentSessionData();
     }
-    
+
     public PaymentSession(@NonNull Activity hostActivity, boolean withzip) {
         mHostActivity = hostActivity;
+        mPaymentMethodsActivityStarter = new PaymentMethodsActivityStarter(hostActivity);
+        mCustomerSession = CustomerSession.getInstance();
         if (withzip) {
             PaymentConfiguration.getInstance().setRequiredBillingAddressFields(
-                Address.RequiredBillingAddressFields.ZIP);
+                    Address.RequiredBillingAddressFields.ZIP);
         }
         mPaymentSessionData = new PaymentSessionData();
     }
 
     /**
      * Complete a payment using the given provider.
+     *
      * @param provider a {@link PaymentCompletionProvider} that connects to a server and completes
      *                 a charge on a background thread.
      */
@@ -85,8 +92,10 @@ public class PaymentSession {
      * host Activity's {@link Activity#onActivityResult(int, int, Intent)} function.
      *
      * @param requestCode the request code used to open the resulting activity
-     * @param resultCode a result code representing the success of the intended action
-     * @param data an {@link Intent} with the resulting data from the Activity
+     * @param resultCode  a result code representing
+     *                    the success of the intended action
+     * @param data        an {@link Intent} with the resulting data
+     *                    from the Activity
      * @return {@code true} if the activity result was handled by this function,
      * otherwise {@code false}
      */
@@ -122,8 +131,8 @@ public class PaymentSession {
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
      * data changes.
      *
-     * @param listener a {@link PaymentSessionListener} that will receive notifications of changes
-     *                 in payment session status, including networking status
+     * @param listener             a {@link PaymentSessionListener} that will receive notifications
+     *                             of changes in payment session status, including networking status
      * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
      *                             necessary in the PaymentSession.
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
@@ -138,12 +147,15 @@ public class PaymentSession {
      * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
      * data changes.
      *
-     * @param listener a {@link PaymentSessionListener} that will receive notifications of changes
-     *                 in payment session status, including networking status
+     * @param listener             a {@link PaymentSessionListener}
+     *                             that will receive notifications
+     *                             of changes in payment session status,
+     *                             including networking status
      * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
      *                             necessary in the PaymentSession.
-     * @param savedInstanceState a {@link Bundle} containing the saved state of a PaymentSession
-     *                           that was stored in {@link #savePaymentSessionInstanceState(Bundle)}
+     * @param savedInstanceState   a {@link Bundle} containing the saved state
+     *                             of a PaymentSession that was stored in
+     *                             {@link #savePaymentSessionInstanceState(Bundle)}
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
      * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
      */
@@ -271,14 +283,14 @@ public class PaymentSession {
          * Notification method called when network communication is beginning or ending.
          *
          * @param isCommunicating {@code true} if communication is starting, {@code false} if it
-         * is stopping.
+         *                        is stopping.
          */
         void onCommunicatingStateChanged(boolean isCommunicating);
 
         /**
          * Notification method called when an error has occurred.
          *
-         * @param errorCode a network code associated with the error
+         * @param errorCode    a network code associated with the error
          * @param errorMessage a message associated with the error
          */
         void onError(int errorCode, @Nullable String errorMessage);

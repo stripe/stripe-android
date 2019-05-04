@@ -20,8 +20,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.stripe.android.CustomerSession;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.StripeError;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
 import com.stripe.android.view.i18n.TranslatorManager;
@@ -76,9 +78,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
+                boolean showZip = false;
+                int address = PaymentConfiguration.getInstance().getRequiredBillingAddressFields();
+                if (address == Address.RequiredBillingAddressFields.ZIP)
+                    showZip = true;
                 final Intent addSourceIntent = AddSourceActivity.newIntent(
                         PaymentMethodsActivity.this,
-                        PaymentConfiguration.getRequiredBillingAddressFields(),
+                         showZip,
                         true);
                 if (mStartedFromPaymentSession) {
                     addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
@@ -167,10 +173,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     /**
      * Update our currently displayed customer data. If the customer only has one
      * {@link CustomerSource} and does not have a
-     * @link Customer#getDefaultSource()} defaultSource}, then set that one source to be the
-     * default source before updating displayed source data.
      *
      * @param customer the new {@link Customer} object whose sources should be displayed
+     * @link Customer#getDefaultSource()} defaultSource}, then set that one source to be the
+     * default source before updating displayed source data.
      */
     private void updateCustomerAndSetDefaultSourceIfNecessary(@NonNull Customer customer) {
         // An inverted early return - we don't need to talk to the CustomerSession if there is
@@ -185,8 +191,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         final CustomerSource customerSource = customer.getSources().get(0);
         if (customerSource == null || customerSource.getId() == null) {
             // If the source ID is null for the only source we have, then there is nothing
-            // we can do but update the display. This should not happen. It is only possible
-            // for a CustomerSource to have null ID because a Card is a customer source, and
+            // we can do but update the display. This should not happen.
+            // It is only possible for a CustomerSource to have null ID
+            // because a Card is a customer source, and
             // before those are sent to Stripe, they haven't yet been assigned an ID.
             updateAdapterWithCustomer(customer);
             return;
