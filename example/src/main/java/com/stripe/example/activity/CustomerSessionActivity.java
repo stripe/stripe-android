@@ -75,7 +75,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            String selectedSource = data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            String selectedSource = data.getStringExtra(
+                    PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
             Source source = Source.fromString(selectedSource);
             // Note: it isn't possible for a null or non-card source to be returned.
             if (source != null && Source.CARD.equals(source.getType())) {

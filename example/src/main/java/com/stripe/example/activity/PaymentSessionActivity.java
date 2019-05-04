@@ -44,8 +44,8 @@ import static com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA
 import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS;
 
 /**
- * An example activity that handles working with a {@link com.stripe.android.PaymentSession}, allowing you to
- * collect information needed to request payment for the current customer.
+ * An example activity that handles working with a {@link com.stripe.android.PaymentSession},
+ * allowing you to collect information needed to request payment for the current customer.
  */
 public class PaymentSessionActivity extends AppCompatActivity {
 

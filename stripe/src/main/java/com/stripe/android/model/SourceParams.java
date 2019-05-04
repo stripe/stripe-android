@@ -188,8 +188,9 @@ public class SourceParams {
      * Create parameters necessary for creating a Bancontact source.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
-     *              charge the customer (e.g., 899 for a €8.99 payment). The charge amount must be
-     *              at least €1 or its equivalent in the given currency.
+     *              charge the customer (e.g., 1099 for a €10.99 payment).
+     *              The charge amount must be at least €1 or
+     *              its equivalent in the given currency.
      * @param name The full name of the account holder.
      * @param returnUrl The URL the customer should be redirected to after the authorization
      *                 process.

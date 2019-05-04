@@ -20,7 +20,7 @@ public class ErrorDialogFragment extends DialogFragment {
         fragment.setArguments(args);
 
         return fragment;
-   }
+    }
 
     public ErrorDialogFragment() {
         // Empty constructor required for DialogFragment
@@ -33,14 +33,14 @@ public class ErrorDialogFragment extends DialogFragment {
         String message = getArguments().getString("message");
 
         return new AlertDialog.Builder(getActivity())
-            .setTitle(titleId)
-            .setMessage(message)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            })
-            .create();
+                .setTitle(titleId)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .create();
     }
 }

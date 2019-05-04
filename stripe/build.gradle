@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'checkstyle'
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
 // make sure this line comes *after* you apply the Android plugin
 apply plugin: 'com.getkeepsafe.dexcount'
 

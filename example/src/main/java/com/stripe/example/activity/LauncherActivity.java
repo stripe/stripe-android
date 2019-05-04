@@ -55,26 +55,32 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btn_customer_session_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, CustomerSessionActivity.class));
-            }
-        });
+        findViewById(R.id.btn_customer_session_launch).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(LauncherActivity.this,
+                                CustomerSessionActivity.class));
+                    }
+                });
 
-        findViewById(R.id.btn_payment_session_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LauncherActivity.this, PaymentSessionActivity.class));
-            }
-        });
+        findViewById(R.id.btn_payment_session_launch).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(LauncherActivity.this,
+                                PaymentSessionActivity.class));
+                    }
+                });
 
-        findViewById(R.id.btn_payment_with_google_launch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LauncherActivity.this, PayWithGoogleActivity.class));
-            }
-        });
+        findViewById(R.id.btn_payment_with_google_launch).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(LauncherActivity.this,
+                                PayWithGoogleActivity.class));
+                    }
+                });
 
     }
 

@@ -86,11 +86,13 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                             boolean result =
                                     task.getResult(ApiException.class);
                             mProgressBar.setVisibility(View.INVISIBLE);
-                            if(result) {
-                                Toast.makeText(PayWithGoogleActivity.this, "Ready", Toast.LENGTH_SHORT).show();
+                            if (result) {
+                                Toast.makeText(PayWithGoogleActivity.this,
+                                        "Ready", Toast.LENGTH_SHORT).show();
                                 mPayWithGoogleButton.setEnabled(true);
                             } else {
-                                Toast.makeText(PayWithGoogleActivity.this, "No PWG", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PayWithGoogleActivity.this,
+                                        "No PWG", Toast.LENGTH_SHORT).show();
                                 //hide Google as payment option
                             }
                         } catch (ApiException exception) {
@@ -110,7 +112,8 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         PaymentData paymentData = PaymentData.getFromIntent(data);
-                        // You can get some data on the user's card, such as the brand and last 4 digits
+                        // You can get some data on the user's card,
+                        //  such as the brand and last 4 digits
                         CardInfo info = paymentData.getCardInfo();
                         // You can also pull the user address from the PaymentData object.
                         UserAddress address = paymentData.getShippingAddress();
@@ -120,11 +123,13 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                         // Now that you have a Stripe token object, charge that by using the id
                         Token stripeToken = Token.fromString(rawToken);
                         if (stripeToken != null) {
-                            // This chargeToken function is a call to your own server, which should then connect
+                            // This chargeToken function is a call to your own server,
+                            // which should then connect
                             // to Stripe's API to finish the charge.
                             // chargeToken(stripeToken.getId());
                             Toast.makeText(PayWithGoogleActivity.this,
-                                    "Got token " + stripeToken.toString(), Toast.LENGTH_LONG).show();
+                                    "Got token " + stripeToken.toString(),
+                                    Toast.LENGTH_LONG).show();
                         }
                         break;
                     case Activity.RESULT_CANCELED:
@@ -135,7 +140,8 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                     case AutoResolveHelper.RESULT_ERROR:
                         Status status = AutoResolveHelper.getStatusFromIntent(data);
                         Toast.makeText(PayWithGoogleActivity.this,
-                                "Got error " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+                                "Got error " + status.getStatusMessage(),
+                                Toast.LENGTH_SHORT).show();
 
                         // Log the status for debugging
                         // Generally there is no need to show an error to
@@ -152,7 +158,8 @@ public class PayWithGoogleActivity extends AppCompatActivity {
 
     private PaymentMethodTokenizationParameters createTokenizationParameters() {
         return PaymentMethodTokenizationParameters.newBuilder()
-                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
+                .setPaymentMethodTokenizationType(
+                        WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
                 .addParameter("gateway", "stripe")
                 .addParameter("stripe:publishableKey",
                         PaymentConfiguration.getInstance().getPublishableKey())
@@ -165,7 +172,8 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                 PaymentDataRequest.newBuilder()
                         .setTransactionInfo(
                                 TransactionInfo.newBuilder()
-                                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
+                                        .setTotalPriceStatus(
+                                                WalletConstants.TOTAL_PRICE_STATUS_FINAL)
                                         .setTotalPrice("10.00")
                                         .setCurrencyCode("USD")
                                         .build())

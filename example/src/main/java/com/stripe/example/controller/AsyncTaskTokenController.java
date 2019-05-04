@@ -20,11 +20,15 @@ import com.stripe.example.R;
  */
 public class AsyncTaskTokenController {
 
-    @NonNull private final Stripe mStripe;
-    @NonNull private final ErrorDialogHandler mErrorDialogHandler;
-    @NonNull private final ProgressDialogController mProgressDialogController;
+    @NonNull
+    private final Stripe mStripe;
+    @NonNull
+    private final ErrorDialogHandler mErrorDialogHandler;
+    @NonNull
+    private final ProgressDialogController mProgressDialogController;
 
-    @Nullable private CardInputWidget mCardInputWidget;
+    @Nullable
+    private CardInputWidget mCardInputWidget;
 
     public AsyncTaskTokenController(
             @NonNull Button button,
@@ -69,22 +73,27 @@ public class AsyncTaskTokenController {
     }
 
     private static class TokenCallbackImpl implements TokenCallback {
-        @NonNull private final ErrorDialogHandler mErrorDialogHandler;
-        @NonNull private final ListViewController mOutputListController;
-        @NonNull private final ProgressDialogController mProgressDialogController;
+        @NonNull
+        private final ErrorDialogHandler mErrorDialogHandler;
+        @NonNull
+        private final ListViewController mOutputListController;
+        @NonNull
+        private final ProgressDialogController mProgressDialogController;
 
         private TokenCallbackImpl(@NonNull ErrorDialogHandler errorDialogHandler,
-                                 @NonNull ListViewController outputListController,
-                                 @NonNull ProgressDialogController progressDialogController) {
+                                  @NonNull ListViewController outputListController,
+                                  @NonNull ProgressDialogController progressDialogController) {
             this.mErrorDialogHandler = errorDialogHandler;
             this.mOutputListController = outputListController;
             this.mProgressDialogController = progressDialogController;
+
         }
 
         public void onSuccess(@NonNull Token token) {
             mOutputListController.addToList(token);
             mProgressDialogController.dismiss();
         }
+
         public void onError(@NonNull Exception error) {
             mErrorDialogHandler.show(error.getLocalizedMessage());
             mProgressDialogController.dismiss();
