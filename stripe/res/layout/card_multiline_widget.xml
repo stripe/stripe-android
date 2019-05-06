@@ -16,7 +16,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:digits="@string/valid_digits"
-            android:drawableLeft="@drawable/ic_unknown"
             android:drawablePadding="@dimen/card_icon_multiline_padding"
             android:drawableStart="@drawable/ic_unknown"
             android:imeOptions="actionNext"
@@ -41,7 +40,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
-            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/acc_label_expiry_date"
             >
@@ -64,7 +62,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
-            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
             android:layout_weight="1"
             >
 

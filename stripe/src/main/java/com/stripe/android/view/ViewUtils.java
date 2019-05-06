@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -84,18 +83,6 @@ class ViewUtils {
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);
         return outValue;
-    }
-
-    @NonNull
-    static Drawable getTintedIcon(
-            @NonNull Context context,
-            @DrawableRes int iconResourceId,
-            @ColorRes int colorResourceId) {
-        @ColorInt final int color = ContextCompat.getColor(context, colorResourceId);
-        final Drawable icon = ContextCompat.getDrawable(context, iconResourceId);
-        Drawable compatIcon = DrawableCompat.wrap(icon);
-        DrawableCompat.setTint(compatIcon.mutate(), color);
-        return compatIcon;
     }
 
     @NonNull

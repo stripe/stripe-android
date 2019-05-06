@@ -11,7 +11,6 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/emoji_left_margin"
         android:layout_marginStart="@dimen/emoji_left_margin"
         style="@style/EmojiStyle"
         />
@@ -31,7 +30,6 @@
         android:id="@+id/tv_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/emoji_left_margin"
         android:layout_marginStart="@dimen/emoji_left_margin"
         android:layout_gravity="center_vertical"
         android:textSize="36sp"
@@ -44,7 +42,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/button_padding"
-        android:layout_marginLeft="@dimen/emoji_left_margin"
         android:layout_marginStart="@dimen/emoji_left_margin"
         android:layout_gravity="center_vertical"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -60,7 +57,6 @@
         android:gravity="end"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/price_right_margin"
-        android:layout_marginRight="@dimen/price_right_margin"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         />
 

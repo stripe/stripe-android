@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.view.View;
@@ -323,9 +322,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
                 mFullGroup.cvcInputLayout.getLayoutParams();
         assertEquals(0, params.rightMargin);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            assertEquals(0, params.getMarginEnd());
-        }
+        assertEquals(0, params.getMarginEnd());
     }
 
     @Test
@@ -347,9 +344,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
                 mNoZipGroup.cvcInputLayout.getLayoutParams();
         assertEquals(expectedMargin, params.rightMargin);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            assertEquals(expectedMargin, params.getMarginEnd());
-        }
+        assertEquals(expectedMargin, params.getMarginEnd());
     }
 
     @Test

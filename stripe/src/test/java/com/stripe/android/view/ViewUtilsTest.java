@@ -1,7 +1,6 @@
 package com.stripe.android.view;
 
 import android.graphics.Color;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 
 import com.stripe.android.model.Card;
@@ -11,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,21 +43,7 @@ public class ViewUtilsTest extends BaseViewTest<CardInputTestActivity> {
     }
 
     @Test
-    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
-    public void getThemeAccentColor_whenOnPreKitKatConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeAccentColor(createActivity()).data;
-        assertTrue(Color.alpha(color) > 0);
-    }
-
-    @Test
     public void getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeColorControlNormal(createActivity()).data;
-        assertTrue(Color.alpha(color) > 0);
-    }
-
-    @Test
-    @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
-    public void getThemeColorControlNormal_whenOnPreKitKatConfig_getsNonzeroColor() {
         @ColorInt int color = ViewUtils.getThemeColorControlNormal(createActivity()).data;
         assertTrue(Color.alpha(color) > 0);
     }
