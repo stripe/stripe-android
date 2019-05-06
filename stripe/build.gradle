@@ -6,10 +6,6 @@ apply plugin: 'com.getkeepsafe.dexcount'
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
-nexusStaging {
-    packageGroup = GROUP
-}
-
 configurations {
     javadocDeps
 }
