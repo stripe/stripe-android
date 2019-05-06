@@ -7,7 +7,7 @@ Note: this release has breaking changes. See [MIGRATING.md](https://github.com/s
 * [#907](https://github.com/stripe/stripe-android/pull/907) Update `PaymentIntent` model for API `2019-02-11`
 * [#894](https://github.com/stripe/stripe-android/pull/894) Upgrade Android Gradle Plugin to 3.4.0
 * [#872](https://github.com/stripe/stripe-android/pull/872) Create `CustomerSession.ActivityCustomerRetrievalListener` to handle `Activity` weak refs
-* Increase `minSdkVersion` to 16
+* Increase `minSdkVersion` from 14 to 19
 
 ## 8.7.0 2019-04-12
 * [#863](https://github.com/stripe/stripe-android/pull/863) Fix garbage-collection issues with `Stripe` callbacks

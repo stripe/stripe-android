@@ -1,7 +1,6 @@
 package com.stripe.android.view;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -89,9 +88,7 @@ class ShippingMethodView extends RelativeLayout {
     private void initView() {
         final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams
                 .MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            params.addRule(Gravity.CENTER_VERTICAL);
-        }
+        params.addRule(Gravity.CENTER_VERTICAL);
         final int height = getResources()
                 .getDimensionPixelSize(R.dimen.shipping_method_view_height);
         params.height = ViewUtils.getPxFromDp(getContext(), height);

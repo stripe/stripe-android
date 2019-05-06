@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="@dimen/example_activity_total_margin"
-        android:layout_marginRight="@dimen/example_activity_total_margin"
+        android:layout_marginStart="@dimen/example_activity_total_margin"
+        android:layout_marginEnd="@dimen/example_activity_total_margin"
         android:layout_marginTop="@dimen/example_vertical_spacing"
         android:orientation="horizontal"
         >
@@ -20,7 +20,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/example_customer_view_padding"
-            android:layout_marginRight="@dimen/example_customer_view_padding"
             android:layout_weight="3"
             android:text="@string/selected_card"
             android:textAppearance="?attr/actionMenuTextAppearance"

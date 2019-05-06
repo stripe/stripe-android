@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"

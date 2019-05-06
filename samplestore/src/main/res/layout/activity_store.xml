@@ -41,7 +41,6 @@
         android:tint="@android:color/white"
         app:rippleColor="@color/colorPrimary"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:clickable="true"
         android:focusable="true"
