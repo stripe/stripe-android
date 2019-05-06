@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
@@ -18,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -44,14 +41,6 @@ class RequestExecutor {
 
     private static final String CHARSET = "UTF-8";
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({RestMethod.GET, RestMethod.POST, RestMethod.DELETE})
-    @interface RestMethod {
-        String GET = "GET";
-        String POST = "POST";
-        String DELETE = "DELETE";
-    }
-
     @NonNull private final ConnectionFactory mConnectionFactory;
 
     RequestExecutor() {
@@ -59,36 +48,12 @@ class RequestExecutor {
     }
 
     @NonNull
-    StripeResponse execute(
-            @RestMethod @NonNull String method,
-            @NonNull String url,
-            @Nullable Map<String, ?> params,
-            @NonNull RequestOptions options)
+    StripeResponse execute(@NonNull StripeRequest request)
             throws APIConnectionException, InvalidRequestException {
         // HttpURLConnection verifies SSL cert by default
         HttpURLConnection conn = null;
         try {
-            switch (method) {
-                case RestMethod.GET: {
-                    conn = mConnectionFactory.create(RestMethod.GET, url, params, options);
-                    break;
-                }
-                case RestMethod.POST: {
-                    conn = mConnectionFactory.create(RestMethod.POST, url, params, options);
-                    break;
-                }
-                case RestMethod.DELETE: {
-                    conn = mConnectionFactory.create(RestMethod.DELETE, url, null, options);
-                    break;
-                }
-                default: {
-                    throw new APIConnectionException(String.format(Locale.ENGLISH,
-                            "Unrecognized HTTP method %s. "
-                                    + "This indicates a bug in the Stripe bindings. "
-                                    + "Please contact support@stripe.com for assistance.",
-                            method));
-                }
-            }
+            conn = mConnectionFactory.create(request);
             // trigger the request
             final int rCode = conn.getResponseCode();
             final String rBody;
@@ -140,41 +105,38 @@ class RequestExecutor {
         }
 
         @NonNull
-        private HttpURLConnection create(@RestMethod @NonNull String method,
-                                         @NonNull String url,
-                                         @Nullable Map<String, ?> params,
-                                         @NonNull RequestOptions options)
+        private HttpURLConnection create(@NonNull StripeRequest request)
                 throws IOException, InvalidRequestException {
-            final URL stripeURL = new URL(getUrl(method, url, params));
+            final URL stripeURL = new URL(getUrl(request));
             final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
             conn.setConnectTimeout(30 * 1000);
             conn.setReadTimeout(80 * 1000);
             conn.setUseCaches(false);
 
-            if (urlNeedsHeaderData(url)) {
-                for (Map.Entry<String, String> header : getHeaders(options).entrySet()) {
+            if (urlNeedsHeaderData(request.url)) {
+                for (Map.Entry<String, String> header : getHeaders(request.options).entrySet()) {
                     conn.setRequestProperty(header.getKey(), header.getValue());
                 }
             }
 
-            if (urlNeedsPseudoCookie(url)) {
-                attachPseudoCookie(conn, options);
+            if (urlNeedsPseudoCookie(request.url)) {
+                attachPseudoCookie(conn, request.options);
             }
 
             if (conn instanceof HttpsURLConnection) {
                 ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
             }
 
-            conn.setRequestMethod(method);
+            conn.setRequestMethod(request.method.code);
 
-            if (RestMethod.POST.equals(method)) {
+            if (StripeRequest.Method.POST == request.method) {
                 conn.setDoOutput(true);
-                conn.setRequestProperty("Content-Type", getContentType(options));
+                conn.setRequestProperty("Content-Type", getContentType(request.options));
 
                 OutputStream output = null;
                 try {
                     output = conn.getOutputStream();
-                    output.write(getOutputBytes(params, options));
+                    output.write(getOutputBytes(request.params, request.options));
                 } finally {
                     if (output != null) {
                         output.close();
@@ -186,15 +148,13 @@ class RequestExecutor {
         }
 
         @NonNull
-        private String getUrl(@RestMethod @NonNull String method,
-                              @NonNull String url,
-                              @Nullable Map<String, ?> params)
+        private String getUrl(@NonNull StripeRequest request)
                 throws UnsupportedEncodingException, InvalidRequestException {
-            if (RestMethod.GET.equals(method)) {
-                return formatUrl(url, createQuery(params));
+            if (StripeRequest.Method.GET == request.method) {
+                return formatUrl(request.url, createQuery(request.params));
             }
 
-            return url;
+            return request.url;
         }
 
         @NonNull
