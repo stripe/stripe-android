@@ -64,10 +64,7 @@ public class PaymentActivity extends AppCompatActivity {
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private BroadcastReceiver mBroadcastReceiver;
-    @Nullable private ProgressDialogFragment mProgressDialogFragment;
-
     private LinearLayout mCartItemLayout;
-
     private Button mConfirmPaymentButton;
     private TextView mEnterShippingInfo;
     private TextView mEnterPaymentInfo;
@@ -94,9 +91,6 @@ public class PaymentActivity extends AppCompatActivity {
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
         addCartItems();
-
-        mProgressDialogFragment = ProgressDialogFragment
-                .newInstance(getString(R.string.completing_purchase));
 
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
@@ -265,20 +259,23 @@ public class PaymentActivity extends AppCompatActivity {
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        final ProgressDialogFragment progressDialogFragment = ProgressDialogFragment
+                .newInstance(getString(R.string.completing_purchase));
+
         final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
                 createParams(price, sourceId, customerId, shippingInformation));
-        final FragmentManager fragmentManager = getSupportFragmentManager();
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> {
-                    if (mProgressDialogFragment != null && !mProgressDialogFragment.isAdded()) {
-                        mProgressDialogFragment.show(fragmentManager, "progress");
+                    if (!progressDialogFragment.isAdded()) {
+                        progressDialogFragment.show(fragmentManager, "progress");
                     }
                 })
                 .doOnComplete(() -> {
-                    if (mProgressDialogFragment != null && mProgressDialogFragment.isVisible()) {
-                        mProgressDialogFragment.dismiss();
+                    if (progressDialogFragment.isVisible()) {
+                        progressDialogFragment.dismiss();
                     }
                 })
                 .subscribe(
@@ -348,16 +345,6 @@ public class PaymentActivity extends AppCompatActivity {
         return shippingMethods;
     }
 
-    private void onCommunicatingStateChanged(boolean isCommunicating) {
-        if (mProgressDialogFragment != null) {
-            if (isCommunicating) {
-                mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
-            } else {
-                mProgressDialogFragment.dismiss();
-            }
-        }
-    }
-
     private void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
         if (data.getShippingMethod() != null) {
             mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
@@ -384,12 +371,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         @Override
         public void onCommunicatingStateChanged(boolean isCommunicating) {
-            final PaymentActivity activity = getListenerActivity();
-            if (activity == null) {
-                return;
-            }
-
-            activity.onCommunicatingStateChanged(isCommunicating);
         }
 
         @Override
