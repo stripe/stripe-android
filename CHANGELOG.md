@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 9.0.0 - 2019-05-06
+## 9.0.0 2019-05-06
 Note: this release has breaking changes. See [MIGRATING.md](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md)
 * [#873](https://github.com/stripe/stripe-android/pull/873) Update pinned API version to `2019-03-14`
 * [#875](https://github.com/stripe/stripe-android/pull/875) Inject `Context` in `CustomerSession` and `StripeApiHandler`

@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'io.codearte.nexus-staging' version '0.20.0'
+}
+
 allprojects {
     group = GROUP
 
