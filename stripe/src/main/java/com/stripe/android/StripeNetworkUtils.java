@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
@@ -136,14 +135,17 @@ public class StripeNetworkUtils {
 
             if (mapToEdit.get(key) instanceof CharSequence) {
                 CharSequence sequence = (CharSequence) mapToEdit.get(key);
-                if (TextUtils.isEmpty(sequence)) {
+                if (StripeTextUtils.isEmpty(sequence)) {
                     mapToEdit.remove(key);
                 }
             }
 
             if (mapToEdit.get(key) instanceof Map) {
-                Map<String, Object> stringObjectMap = (Map<String, Object>) mapToEdit.get(key);
-                removeNullAndEmptyParams(stringObjectMap);
+                final Map<String, Object> stringObjectMap =
+                        (Map<String, Object>) mapToEdit.get(key);
+                if (stringObjectMap != null) {
+                    removeNullAndEmptyParams(stringObjectMap);
+                }
             }
         }
     }
