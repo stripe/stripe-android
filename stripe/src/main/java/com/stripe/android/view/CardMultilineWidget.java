@@ -24,7 +24,10 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -109,6 +112,54 @@ public class CardMultilineWidget extends LinearLayout {
     public void setCardInputListener(@Nullable CardInputListener cardInputListener) {
         mCardInputListener = cardInputListener;
     }
+
+    /**
+     * Gets a {@link PaymentMethodCreateParams.Card} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams.Card} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethodCreateParams.Card getPaymentMethodCard() {
+        if (validateAllFields()) {
+            final PaymentMethodCreateParams.Card.Builder builder =
+                    new PaymentMethodCreateParams.Card.Builder();
+            final int[] cardDate = mExpiryDateEditText.getValidDateFields();
+
+            builder.setNumber(mCardNumberEditText.getCardNumber())
+                    .setCvc(mCvcEditText.getText().toString())
+                    .setExpiryMonth(cardDate[0])
+                    .setExpiryYear(cardDate[1]);
+
+            return builder.build();
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets a {@link PaymentMethod.BillingDetails} object from the user input, if all fields are
+     * valid. If not returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethod.BillingDetails} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethod.BillingDetails getPaymentMethodBillingDetails() {
+        if (mShouldShowPostalCode && validateAllFields()) {
+            final Address.Builder addressBuilder = new Address.Builder();
+            addressBuilder.setPostalCode(mPostalCodeEditText.getText().toString());
+            final Address address = addressBuilder.build();
+            final PaymentMethod.BillingDetails.Builder billingDetailsBuilder =
+                    new PaymentMethod.BillingDetails.Builder();
+            billingDetailsBuilder.setAddress(address);
+            return billingDetailsBuilder.build();
+        }
+
+        return null;
+    }
+
 
     /**
      * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
