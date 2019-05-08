@@ -40,20 +40,6 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
  */
 public class Stripe {
 
-    @NonNull
-    private final SourceCreator mSourceCreator = new SourceCreator() {
-        @Override
-        public void create(
-                @NonNull final SourceParams sourceParams,
-                @NonNull final String publishableKey,
-                @Nullable final String stripeAccount,
-                @Nullable Executor executor,
-                @NonNull final SourceCallback sourceCallback) {
-            executeTask(executor, new CreateSourceTask(mApiHandler, sourceParams,
-                    publishableKey, stripeAccount, sourceCallback));
-        }
-    };
-
     @VisibleForTesting
     TokenCreator mTokenCreator = new TokenCreator() {
         @Override
@@ -307,7 +293,43 @@ public class Stripe {
         if (apiKey == null) {
             return;
         }
-        mSourceCreator.create(sourceParams, apiKey, mStripeAccount, executor, callback);
+        executeTask(executor,
+                new CreateSourceTask(mApiHandler, sourceParams, publishableKey, mStripeAccount,
+                        callback));
+    }
+
+    /**
+     * Create a {@link PaymentMethod} using an {@link AsyncTask} on the default {@link Executor}
+     * with a publishable api key that has already been set on this {@link Stripe} instance.
+     *
+     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
+     * @param callback a {@link PaymentMethodCallback} to receive a result or an error message
+     */
+    public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+                                    @NonNull PaymentMethodCallback callback) {
+        createPaymentMethod(paymentMethodCreateParams, callback, null, null);
+    }
+
+    /**
+     * Create a {@link PaymentMethod} using an {@link AsyncTask}.
+     *
+     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
+     * @param callback a {@link PaymentMethodCallback} to receive a result or an error message
+     * @param publishableKey the publishable api key to be used
+     * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
+     */
+    public void createPaymentMethod(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull PaymentMethodCallback callback,
+            @Nullable String publishableKey,
+            @Nullable Executor executor) {
+        final String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+        if (apiKey == null) {
+            return;
+        }
+
+        executeTask(executor, new CreatePaymentMethodTask(mApiHandler, paymentMethodCreateParams,
+                apiKey, mStripeAccount, callback));
     }
 
     /**
@@ -882,7 +904,7 @@ public class Stripe {
     }
 
     private void executeTask(@Nullable Executor executor,
-                             @NonNull AsyncTask<Void, Void, ResponseWrapper> task) {
+                             @NonNull AsyncTask<Void, Void, ?> task) {
         if (executor != null) {
             task.executeOnExecutor(executor);
         } else {
@@ -890,37 +912,19 @@ public class Stripe {
         }
     }
 
-    private static class ResponseWrapper {
-        @Nullable final Source source;
-        @Nullable final Token token;
+    private static class ResponseWrapper<T> {
+        @Nullable final T result;
         @Nullable final Exception error;
 
-        private ResponseWrapper(@Nullable Token token) {
-            this.token = token;
-            this.source = null;
+        private ResponseWrapper(@Nullable T result) {
+            this.result = result;
             this.error = null;
-        }
-
-        private ResponseWrapper(@Nullable Source source) {
-            this.source = source;
-            this.error = null;
-            this.token = null;
         }
 
         private ResponseWrapper(@NonNull Exception error) {
             this.error = error;
-            this.source = null;
-            this.token = null;
+            this.result = null;
         }
-    }
-
-    interface SourceCreator {
-        void create(
-                @NonNull SourceParams params,
-                @NonNull String publishableKey,
-                @Nullable String stripeAccount,
-                @Nullable Executor executor,
-                @NonNull SourceCallback sourceCallback);
     }
 
     @VisibleForTesting
@@ -933,7 +937,7 @@ public class Stripe {
                     TokenCallback callback);
     }
 
-    private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper> {
+    private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper<Source>> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
@@ -953,30 +957,74 @@ public class Stripe {
         }
 
         @Override
-        protected ResponseWrapper doInBackground(Void... params) {
+        protected ResponseWrapper<Source> doInBackground(Void... params) {
             try {
                 final Source source = mApiHandler.createSource(
                         mSourceParams,
                         mPublishableKey,
                         mStripeAccount
                 );
-                return new ResponseWrapper(source);
+                return new ResponseWrapper<>(source);
             } catch (StripeException stripeException) {
-                return new ResponseWrapper(stripeException);
+                return new ResponseWrapper<>(stripeException);
             }
         }
 
         @Override
-        protected void onPostExecute(@NonNull ResponseWrapper responseWrapper) {
-            if (responseWrapper.source != null) {
-                mSourceCallback.onSuccess(responseWrapper.source);
+        protected void onPostExecute(@NonNull ResponseWrapper<Source> responseWrapper) {
+            if (responseWrapper.result != null) {
+                mSourceCallback.onSuccess(responseWrapper.result);
             } else if (responseWrapper.error != null) {
                 mSourceCallback.onError(responseWrapper.error);
             }
         }
     }
 
-    private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper> {
+    private static class CreatePaymentMethodTask extends AsyncTask<Void, Void,
+            ResponseWrapper<PaymentMethod>> {
+        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
+        @NonNull private final String mPublishableKey;
+        @Nullable private final String mStripeAccount;
+        @NonNull private final PaymentMethodCallback mPaymentMethodCallback;
+
+        CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
+                                @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+                                @NonNull String publishableKey,
+                                @Nullable String stripeAccount,
+                                @NonNull PaymentMethodCallback paymentMethodCallback) {
+            mApiHandler = apiHandler;
+            mPaymentMethodCreateParams = paymentMethodCreateParams;
+            mPublishableKey = publishableKey;
+            mStripeAccount = stripeAccount;
+            mPaymentMethodCallback = paymentMethodCallback;
+        }
+
+        @Override
+        protected ResponseWrapper<PaymentMethod> doInBackground(Void... params) {
+            try {
+                final PaymentMethod paymentMethod = mApiHandler.createPaymentMethod(
+                        mPaymentMethodCreateParams,
+                        mPublishableKey,
+                        mStripeAccount
+                );
+                return new ResponseWrapper<>(paymentMethod);
+            } catch (StripeException stripeException) {
+                return new ResponseWrapper<>(stripeException);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull ResponseWrapper<PaymentMethod> responseWrapper) {
+            if (responseWrapper.result != null) {
+                mPaymentMethodCallback.onSuccess(responseWrapper.result);
+            } else if (responseWrapper.error != null) {
+                mPaymentMethodCallback.onError(responseWrapper.error);
+            }
+        }
+    }
+
+    private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper<Token>> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final String mPublishableKey;
@@ -1000,7 +1048,7 @@ public class Stripe {
         }
 
         @Override
-        protected ResponseWrapper doInBackground(Void... params) {
+        protected ResponseWrapper<Token> doInBackground(Void... params) {
             try {
                 final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
                         mStripeAccount, RequestOptions.TYPE_QUERY).build();
@@ -1009,22 +1057,18 @@ public class Stripe {
                         requestOptions,
                         mTokenType
                 );
-                return new ResponseWrapper(token);
+                return new ResponseWrapper<>(token);
             } catch (StripeException e) {
-                return new ResponseWrapper(e);
+                return new ResponseWrapper<>(e);
             }
         }
 
         @Override
-        protected void onPostExecute(@NonNull ResponseWrapper result) {
-            tokenTaskPostExecution(result);
-        }
-
-        private void tokenTaskPostExecution(@NonNull ResponseWrapper result) {
-            if (result.token != null) {
-                mCallback.onSuccess(result.token);
-            } else if (result.error != null) {
-                mCallback.onError(result.error);
+        protected void onPostExecute(@NonNull ResponseWrapper<Token> response) {
+            if (response.result != null) {
+                mCallback.onSuccess(response.result);
+            } else if (response.error != null) {
+                mCallback.onError(response.error);
             } else {
                 mCallback.onError(new RuntimeException(
                         "Somehow got neither a token response or an error response"));
