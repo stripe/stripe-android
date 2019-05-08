@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.stripe.android.ActivityPaymentMethodCallback;
 import com.stripe.android.ActivitySourceCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
@@ -19,8 +20,9 @@ import com.stripe.android.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.StripePaymentSource;
 
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
@@ -30,17 +32,17 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  * Activity used to display a {@link CardMultilineWidget} and receive the resulting
  * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of the launching activity.
  */
-public class AddSourceActivity extends StripeActivity {
+public class AddPaymentMethodActivity extends StripeActivity {
 
-    public static final String EXTRA_NEW_SOURCE = "new_source";
+    public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
 
-    static final String ADD_SOURCE_ACTIVITY = "AddSourceActivity";
+    static final String ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
     @Nullable private CardMultilineWidget mCardMultilineWidget;
-    @Nullable private CustomerSessionProxy mCustomerSessionProxy;
+    @Nullable private CustomerSession mCustomerSession;
     @Nullable private StripeProvider mStripeProvider;
 
     private boolean mStartedFromPaymentSession;
@@ -63,20 +65,20 @@ public class AddSourceActivity extends StripeActivity {
             };
 
     /**
-     * Create an {@link Intent} to start a {@link AddSourceActivity}.
+     * Create an {@link Intent} to start a {@link AddPaymentMethodActivity}.
      *
-     * @param context the {@link Context} used to launch the activity
+     * @param context            the {@link Context} used to launch the activity
      * @param requirePostalField {@code true} to require a postal code field
-     * @param updatesCustomer {@code true} if the activity should update using an
-     * already-initialized {@link CustomerSession}, or {@code false} if it should just
-     * return a source.
+     * @param updatesCustomer    {@code true} if the activity should update using an
+     *                           already-initialized {@link CustomerSession}, or {@code false} if it should just
+     *                           return a source.
      * @return an {@link Intent} that can be used to start this activity
      */
     @NonNull
     public static Intent newIntent(@NonNull Context context,
                                    boolean requirePostalField,
                                    boolean updatesCustomer) {
-        return new Intent(context, AddSourceActivity.class)
+        return new Intent(context, AddPaymentMethodActivity.class)
                 .putExtra(EXTRA_SHOW_ZIP, requirePostalField)
                 .putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
     }
@@ -114,74 +116,57 @@ public class AddSourceActivity extends StripeActivity {
 
     @VisibleForTesting
     void initCustomerSessionTokens() {
-        logToCustomerSessionIf(ADD_SOURCE_ACTIVITY, mUpdatesCustomer);
+        logToCustomerSessionIf(ADD_PAYMENT_METHOD_ACTIVITY, mUpdatesCustomer);
         logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
     }
 
     @Override
     protected void onActionSave() {
-        final Card card = mCardMultilineWidget != null ? mCardMultilineWidget.getCard() : null;
+        if (mCardMultilineWidget == null) {
+            return;
+        }
+
+        final PaymentMethodCreateParams.Card card = mCardMultilineWidget.getPaymentMethodCard();
+        final PaymentMethod.BillingDetails billingDetails =
+                mCardMultilineWidget.getPaymentMethodBillingDetails();
+
         if (card == null) {
             // In this case, the error will be displayed on the card widget itself.
             return;
         }
 
-        card.addLoggingToken(ADD_SOURCE_ACTIVITY);
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(card, billingDetails);
+
+//        card.addLoggingToken(ADD_PAYMENT_METHOD_ACTIVITY);
+
         final Stripe stripe = getStripe();
         stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
 
-        final SourceParams sourceParams = SourceParams.createCardParams(card);
         setCommunicatingProgress(true);
 
-        stripe.createSource(sourceParams, new SourceCallbackImpl(this, mUpdatesCustomer));
+        stripe.createPaymentMethod(paymentMethodCreateParams,
+                new PaymentMethodCallbackImpl(this, mUpdatesCustomer));
 
     }
 
-    private void attachCardToCustomer(@NonNull final StripePaymentSource source) {
-        final CustomerSession.SourceRetrievalListener listener =
-                new SourceRetrievalListenerImpl(this);
+    private void attachPaymentMethodToCustomer(@NonNull final PaymentMethod paymentMethod) {
+        final CustomerSession.PaymentMethodRetrievalListener listener =
+                new PaymentMethodRetrievalListenerImpl(this);
 
-        if (mCustomerSessionProxy == null) {
-            @Source.SourceType final String sourceType;
-            if (source instanceof Source) {
-                sourceType = ((Source) source).getType();
-            } else if (source instanceof Card){
-                sourceType = Source.CARD;
-            } else {
-                // This isn't possible from this activity.
-                sourceType = Source.UNKNOWN;
-            }
-
-            CustomerSession.getInstance().addCustomerSource(
-                    source.getId(),
-                    sourceType,
-                    listener);
-        } else {
-            mCustomerSessionProxy.addCustomerSource(source.getId(), listener);
-        }
+        CustomerSession.getInstance().attachPaymentMethod(paymentMethod.id, listener);
     }
 
     private void logToCustomerSessionIf(@NonNull String logToken, boolean condition) {
-        if (mCustomerSessionProxy != null) {
-            logToProxyIf(logToken, condition);
-            return;
-        }
-
         if (condition) {
             CustomerSession.getInstance().addProductUsageTokenIfValid(logToken);
         }
     }
 
-    private void logToProxyIf(@NonNull String logToken, boolean condition) {
-        if (mCustomerSessionProxy != null && condition) {
-            mCustomerSessionProxy.addProductUsageTokenIfValid(logToken);
-        }
-    }
-
-    private void finishWithSource(@NonNull Source source) {
+    private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {
         setCommunicatingProgress(false);
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_NEW_SOURCE, source.toJson().toString());
+        final Intent intent = new Intent().putExtra(EXTRA_NEW_PAYMENT_METHOD,
+                paymentMethod.toJson().toString());
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -204,39 +189,29 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     @VisibleForTesting
-    void setCustomerSessionProxy(CustomerSessionProxy proxy) {
-        mCustomerSessionProxy = proxy;
-    }
-
-    @VisibleForTesting
     void setStripeProvider(@NonNull StripeProvider stripeProvider) {
         mStripeProvider = stripeProvider;
     }
 
     interface StripeProvider {
-        @NonNull Stripe getStripe(@NonNull Context context);
+        @NonNull
+        Stripe getStripe(@NonNull Context context);
     }
 
-    interface CustomerSessionProxy {
-        void addProductUsageTokenIfValid(@NonNull String token);
+    private static final class PaymentMethodCallbackImpl
+            extends ActivityPaymentMethodCallback<AddPaymentMethodActivity> {
 
-        void addCustomerSource(String sourceId,
-                               @NonNull CustomerSession.SourceRetrievalListener listener);
-    }
-
-    private static final class SourceCallbackImpl
-            extends ActivitySourceCallback<AddSourceActivity> {
         private final boolean mUpdatesCustomer;
 
-        private SourceCallbackImpl(@NonNull AddSourceActivity activity,
-                                   boolean updatesCustomer) {
+        private PaymentMethodCallbackImpl(@NonNull AddPaymentMethodActivity activity,
+                                          boolean updatesCustomer) {
             super(activity);
             mUpdatesCustomer = updatesCustomer;
         }
 
         @Override
         public void onError(@NonNull Exception error) {
-            final AddSourceActivity activity = getActivity();
+            final AddPaymentMethodActivity activity = getActivity();
             if (activity == null) {
                 return;
             }
@@ -247,40 +222,41 @@ public class AddSourceActivity extends StripeActivity {
         }
 
         @Override
-        public void onSuccess(@NonNull Source source) {
-            final AddSourceActivity activity = getActivity();
+        public void onSuccess(@NonNull PaymentMethod paymentMethod) {
+            final AddPaymentMethodActivity activity = getActivity();
             if (activity == null) {
                 return;
             }
 
             if (mUpdatesCustomer) {
-                activity.attachCardToCustomer(source);
+                activity.attachPaymentMethodToCustomer(paymentMethod);
             } else {
-                activity.finishWithSource(source);
+                activity.finishWithPaymentMethod(paymentMethod);
             }
         }
     }
 
-    private static final class SourceRetrievalListenerImpl
-            extends CustomerSession.ActivitySourceRetrievalListener<AddSourceActivity> {
-        private SourceRetrievalListenerImpl(@NonNull AddSourceActivity activity) {
+    private static final class PaymentMethodRetrievalListenerImpl
+            extends CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity> {
+
+        public PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
             super(activity);
         }
 
         @Override
-        public void onSourceRetrieved(@NonNull Source source) {
-            final AddSourceActivity activity = getActivity();
+        public void onPaymentMethodRetrieved(@NonNull PaymentMethod paymentMethod) {
+            final AddPaymentMethodActivity activity = getActivity();
             if (activity == null) {
                 return;
             }
 
-            activity.finishWithSource(source);
+            activity.finishWithPaymentMethod(paymentMethod);
         }
 
         @Override
         public void onError(int errorCode, @Nullable String errorMessage,
                             @Nullable StripeError stripeError) {
-            final AddSourceActivity activity = getActivity();
+            final AddPaymentMethodActivity activity = getActivity();
             if (activity == null) {
                 return;
             }

@@ -76,7 +76,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-                final Intent addSourceIntent = AddSourceActivity.newIntent(
+                final Intent addSourceIntent = AddPaymentMethodActivity.newIntent(
                         PaymentMethodsActivity.this,
                         false,
                         true);

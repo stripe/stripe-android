@@ -59,7 +59,7 @@ public class CustomerSession {
     private static final String KEY_SHIPPING_INFO = "shipping_info";
     private static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
     private static final Set<String> VALID_TOKENS =
-            new HashSet<>(Arrays.asList("AddSourceActivity",
+            new HashSet<>(Arrays.asList("AddPaymentMethodActivity",
                     "PaymentMethodsActivity",
                     "PaymentFlowActivity",
                     TOKEN_PAYMENT_SESSION,
