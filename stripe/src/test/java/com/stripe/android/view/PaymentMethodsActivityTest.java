@@ -12,6 +12,8 @@ import com.stripe.android.CustomerSessionTestHelper;
 import com.stripe.android.R;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.model.Source;
 
 import org.junit.After;
@@ -166,7 +168,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mShadowActivity.getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertNotNull(intentForResult.intent.getComponent());
-        assertEquals(AddSourceActivity.class.getName(),
+        assertEquals(AddPaymentMethodActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
         assertFalse(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
@@ -190,7 +192,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mShadowActivity.getNextStartedActivityForResult();
         assertNotNull(intentForResult);
         assertNotNull(intentForResult.intent.getComponent());
-        assertEquals(AddSourceActivity.class.getName(),
+        assertEquals(AddPaymentMethodActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
         assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
     }
@@ -201,11 +203,13 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 .thenReturn(Customer.fromString(CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT));
         mPaymentMethodsActivity.initializeCustomerSourceData();
 
-        final Source source = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(source);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
 
-        final Intent resultIntent = new Intent()
-                .putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toJson().toString());
+        final Intent resultIntent =
+                new Intent().putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD,
+                        paymentMethod.toJson().toString());
 
         ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);
@@ -235,11 +239,13 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         when(mCustomerSession.getCachedCustomer()).thenReturn(customer);
         mPaymentMethodsActivity.initializeCustomerSourceData();
 
-        Source source = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(source);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
 
         Intent resultIntent = new Intent()
-                .putExtra(AddSourceActivity.EXTRA_NEW_SOURCE, source.toJson().toString());
+                .putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD,
+                        paymentMethod.toJson().toString());
 
         ArgumentCaptor<CustomerSession.CustomerRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.CustomerRetrievalListener.class);

@@ -297,10 +297,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void addProductUsageTokenIfValid_whenValid_addsExpectedTokens() {
         final CustomerSession customerSession = createCustomerSession(null);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
 
         List<String> expectedTokens = new ArrayList<>();
-        expectedTokens.add("AddSourceActivity");
+        expectedTokens.add("AddPaymentMethodActivity");
 
         JsonTestUtils.assertListEquals(expectedTokens,
                 new ArrayList<>(customerSession.getProductUsageTokens()));
@@ -481,13 +481,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -512,7 +512,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         );
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
-        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("AddPaymentMethodActivity"));
         assertTrue(productUsage.contains("PaymentMethodsActivity"));
 
         verify(mockListener).onSourceRetrieved(mSourceArgumentCaptor.capture());
@@ -537,7 +537,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertFalse(customerSession.getProductUsageTokens().isEmpty());
 
@@ -587,13 +587,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -615,7 +615,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(firstKey.getSecret()));
         final List productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
-        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("AddPaymentMethodActivity"));
         assertTrue(productUsage.contains("PaymentMethodsActivity"));
 
         verify(mockListener).onSourceRetrieved(mSourceArgumentCaptor.capture());
@@ -640,7 +640,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertFalse(customerSession.getProductUsageTokens().isEmpty());
 
@@ -820,13 +820,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -848,7 +848,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
-        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("AddPaymentMethodActivity"));
         assertTrue(productUsage.contains("PaymentMethodsActivity"));
 
         verify(mockListener).onPaymentMethodRetrieved(mPaymentMethodArgumentCaptor.capture());
@@ -873,7 +873,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertFalse(customerSession.getProductUsageTokens().isEmpty());
 
@@ -921,13 +921,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -948,7 +948,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(firstKey.getSecret()));
         final List productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
-        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("AddPaymentMethodActivity"));
         assertTrue(productUsage.contains("PaymentMethodsActivity"));
 
         verify(mockListener).onPaymentMethodRetrieved(mPaymentMethodArgumentCaptor.capture());
@@ -973,7 +973,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
         assertFalse(customerSession.getProductUsageTokens().isEmpty());
 
@@ -1019,13 +1019,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(proxyCalendar);
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
 
-        customerSession.addProductUsageTokenIfValid("AddSourceActivity");
+        customerSession.addProductUsageTokenIfValid("AddPaymentMethodActivity");
         proxyCalendar.setTimeInMillis(firstCustomerCacheTime + shortIntervalInMilliseconds);
         assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
                 proxyCalendar.getTimeInMillis());
@@ -1047,7 +1047,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
-        assertTrue(productUsage.contains("AddSourceActivity"));
+        assertTrue(productUsage.contains("AddPaymentMethodActivity"));
         assertTrue(productUsage.contains("PaymentMethodsActivity"));
 
         verify(mockListener).onPaymentMethodsRetrieved(mPaymentMethodsArgumentCaptor.capture());
