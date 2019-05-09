@@ -50,7 +50,7 @@ public class PaymentMultilineActivity extends AppCompatActivity {
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
 
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
 
         final ListView listView = findViewById(R.id.card_list_pma);
         mSimpleAdapter = new SimpleAdapter(

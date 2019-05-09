@@ -1,5 +1,6 @@
 package com.stripe.samplestore;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +22,8 @@ import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider;
+
+import java.lang.ref.WeakReference;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -179,13 +182,30 @@ public class StoreActivity
     private void setupCustomerSession() {
         // CustomerSession only needs to be initialized once per app.
         mEphemeralKeyProvider = new SampleStoreEphemeralKeyProvider(
-                string -> {
-                    if (string.startsWith("Error: ")) {
-                        new AlertDialog.Builder(StoreActivity.this)
-                                .setMessage(string)
-                                .show();
-                    }
-                });
+                new ProgressListenerImpl(this));
         CustomerSession.initCustomerSession(this, mEphemeralKeyProvider);
+    }
+
+    private static final class ProgressListenerImpl
+            implements SampleStoreEphemeralKeyProvider.ProgressListener {
+        private final WeakReference<Activity> mActivityRef;
+
+        private ProgressListenerImpl(Activity activity) {
+            mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void onStringResponse(@NonNull String string) {
+            final Activity activity = mActivityRef.get();
+            if (activity == null) {
+                return;
+            }
+
+            if (string.startsWith("Error: ")) {
+                new AlertDialog.Builder(activity)
+                        .setMessage(string)
+                        .show();
+            }
+        }
     }
 }

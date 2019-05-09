@@ -47,7 +47,7 @@ public class DependencyHandler {
 
         mListViewController = new ListViewController(outputListView);
 
-        mErrorDialogHandler = new ErrorDialogHandler(activity.getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(activity);
     }
 
     /**

@@ -43,7 +43,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mSelectedSourceTextView = findViewById(R.id.tv_customer_default_source_acs);
         mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs);
         mSelectSourceButton.setEnabled(false);
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
                         string -> {
