@@ -41,7 +41,7 @@ public class IssuingCardPinServiceTest {
     @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mMockRetrievalListener;
     @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mMockUpdateListener;
 
-    private IssuingCardPinService service;
+    private IssuingCardPinService mService;
 
     @Before
     public void before() {
@@ -55,7 +55,7 @@ public class IssuingCardPinServiceTest {
                 mRequestExecutor,
                 false);
 
-        service = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
+        mService = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
                 new OperationIdFactory());
     }
 
@@ -71,14 +71,14 @@ public class IssuingCardPinServiceTest {
         when(mRequestExecutor.execute(
                 argThat(new StripeRequestMatcher(
                         StripeRequest.Method.GET,
-                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456"
                 ))))
                 .thenReturn(response);
 
         mMockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
-        service.retrievePin(
+        mService.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",
@@ -106,7 +106,7 @@ public class IssuingCardPinServiceTest {
         mMockUpdateListener =
                 mock(IssuingCardPinService.IssuingCardPinUpdateListener.class);
 
-        service.updatePin(
+        mService.updatePin(
                 "ic_abcdef",
                 "1234",
                 "iv_abcd",
@@ -129,14 +129,14 @@ public class IssuingCardPinServiceTest {
         when(mRequestExecutor.execute(
                 argThat(new StripeRequestMatcher(
                         StripeRequest.Method.GET,
-                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456"
                 ))))
                 .thenReturn(response);
 
         mMockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
-        service.retrievePin(
+        mService.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",

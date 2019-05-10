@@ -103,7 +103,7 @@ class StripeApiHandler {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.TYPE_QUERY)
+                RequestOptions.RequestType.QUERY)
                 .build();
 
         try {
@@ -148,7 +148,7 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                RequestOptions.RequestType.QUERY).build();
 
         try {
             final String apiKey = options.getPublishableApiKey();
@@ -198,7 +198,7 @@ class StripeApiHandler {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
         mNetworkUtils.addUidParams(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                RequestOptions.RequestType.QUERY).build();
 
         try {
             final String apiKey = options.getPublishableApiKey();
@@ -252,7 +252,7 @@ class StripeApiHandler {
             options = RequestOptions.builder(publishableKey).build();
         } else {
             options = RequestOptions.builder(publishableKey, stripeAccount,
-                    RequestOptions.TYPE_QUERY).build();
+                    RequestOptions.RequestType.QUERY).build();
         }
         try {
             final StripeResponse response = requestData(
@@ -279,7 +279,7 @@ class StripeApiHandler {
 
         mNetworkUtils.addUidParams(params);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.TYPE_QUERY).build();
+                RequestOptions.RequestType.QUERY).build();
 
         final String apiKey = options.getPublishableApiKey();
         if (StripeTextUtils.isBlank(apiKey)) {
@@ -1058,7 +1058,7 @@ class StripeApiHandler {
         }
 
         final RequestOptions options =
-                RequestOptions.builder(null, RequestOptions.TYPE_JSON)
+                RequestOptions.builder(null, RequestOptions.RequestType.JSON)
                         .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
         fireAndForgetApiCall(
