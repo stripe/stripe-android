@@ -17,7 +17,6 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="@color/underline"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
         />
@@ -34,7 +33,6 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="@color/underline"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
         />
@@ -52,7 +50,6 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="@color/underline"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
         />

@@ -33,7 +33,8 @@
             android:id="@+id/confirm_payment_intent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create_source_and_confirm_payment_intent"
+            android:text="@string/create_payment_method_and_confirm_payment_intent"
+            android:layout_marginTop="20dp"
             />
 
         <com.stripe.android.view.CardInputWidget

@@ -34,7 +34,6 @@ import com.stripe.android.model.Card;
 
 import java.util.Locale;
 
-import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -900,7 +899,7 @@ public class CardInputWidget extends LinearLayout {
             mCardIconImageView.setImageDrawable(icon);
             applyTint(false);
         } else {
-            mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
+            mCardIconImageView.setImageResource(Card.getBrandIcon(brand));
         }
     }
 
