@@ -10,7 +10,7 @@ import java.util.Calendar;
 
 class DateUtils {
 
-    static final int MAX_VALID_YEAR = 9980;
+    private static final int MAX_VALID_YEAR = 9980;
 
     /**
      * Checks to see if the string input represents a valid month.
