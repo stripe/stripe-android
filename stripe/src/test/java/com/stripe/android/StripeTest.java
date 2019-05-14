@@ -52,12 +52,23 @@ public class StripeTest {
     private static final String DEFAULT_PUBLISHABLE_KEY = "pk_default";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
     private static final Card DEFAULT_CARD = new Card(null, null, null, null);
+    private static final PaymentMethodCreateParams DEFAULT_PAYMENT_METHOD_CREATE_PARAMS = PaymentMethodCreateParams.create(DEFAULT_CARD.toPaymentMethodParamsCard(), null);
     private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
         @Override
         public void onError(@NonNull Exception error) {
         }
         @Override
         public void onSuccess(@NonNull Token token) {
+        }
+    };
+
+    private static final PaymentMethodCallback DEFAULT_PAYMENT_METHOD_CALLBACK = new PaymentMethodCallback() {
+        @Override
+        public void onError(@NonNull Exception error) {
+        }
+
+        @Override
+        public void onSuccess(@NonNull PaymentMethod paymentMethod) {
         }
     };
 
@@ -210,6 +221,28 @@ public class StripeTest {
             }
         };
         stripe.createToken(DEFAULT_CARD, expectedPublishableKey, DEFAULT_TOKEN_CALLBACK);
+    }
+
+    @Test
+    public void createPaymentMethodShouldCallPaymentMethodCreator() {
+        final boolean[] paymentMethodCreatedCalled = { false };
+        Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
+
+        stripe.mPaymentMethodCreator = new Stripe.PaymentMethodCreator() {
+            @Override
+            public void create(PaymentMethodCreateParams params,
+                               String publishableKey,
+                               String stripeAccount,
+                               Executor executor,
+                               PaymentMethodCallback callback) {
+                assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
+                assertEquals(DEFAULT_PAYMENT_METHOD_CALLBACK, callback);
+                paymentMethodCreatedCalled[0] = true;
+            }
+        };
+
+        stripe.createPaymentMethod(DEFAULT_PAYMENT_METHOD_CREATE_PARAMS, DEFAULT_PAYMENT_METHOD_CALLBACK);
+        assertTrue(paymentMethodCreatedCalled[0]);
     }
 
     @Test

@@ -69,6 +69,21 @@ public class Stripe {
         }
     };
 
+    @VisibleForTesting
+    PaymentMethodCreator mPaymentMethodCreator = new PaymentMethodCreator() {
+        @Override
+        public void create(
+                @NonNull final PaymentMethodCreateParams paymentMethodParams,
+                @NonNull final String publishableKey,
+                @Nullable final String stripeAccount,
+                @Nullable final Executor executor,
+                @NonNull final PaymentMethodCallback callback) {
+
+            executeTask(executor, new CreatePaymentMethodTask(mApiHandler, paymentMethodParams,
+                    publishableKey, stripeAccount, callback));
+        }
+    };
+
     private String mDefaultPublishableKey;
     private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
@@ -374,6 +389,29 @@ public class Stripe {
                 publishableKey,
                 Token.TYPE_CARD,
                 executor,
+                callback);
+    }
+
+    /**
+     * Create a payment method, using {@link PaymentMethodCreateParams} and
+     * {@link PaymentMethodCallback}. This runs on the default {@link Executor} and with the
+     * currently set {@link #mDefaultPublishableKey}.
+     *
+     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams}
+     *                                  used to create this payment method
+     * @param callback a {@link PaymentMethodCallback} to receive either the
+     *                 payment method or an error
+     */
+    public void createPaymentMethod(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull final PaymentMethodCallback callback) {
+
+        validateKey(mDefaultPublishableKey);
+        mPaymentMethodCreator.create(
+                paymentMethodCreateParams,
+                mDefaultPublishableKey,
+                mStripeAccount,
+                null,
                 callback);
     }
 
@@ -893,24 +931,34 @@ public class Stripe {
     private static class ResponseWrapper {
         @Nullable final Source source;
         @Nullable final Token token;
+        @Nullable final PaymentMethod paymentMethod;
         @Nullable final Exception error;
 
         private ResponseWrapper(@Nullable Token token) {
             this.token = token;
+            this.paymentMethod = null;
             this.source = null;
             this.error = null;
         }
 
+        private ResponseWrapper(@Nullable PaymentMethod paymentMethod) {
+            this.paymentMethod = paymentMethod;
+            this.source = null;
+            this.error = null;
+            this.token = null;
+        }
         private ResponseWrapper(@Nullable Source source) {
             this.source = source;
             this.error = null;
             this.token = null;
+            this.paymentMethod = null;
         }
 
         private ResponseWrapper(@NonNull Exception error) {
             this.error = error;
             this.source = null;
             this.token = null;
+            this.paymentMethod = null;
         }
     }
 
@@ -931,6 +979,15 @@ public class Stripe {
                     @NonNull @Token.TokenType String tokenType,
                     Executor executor,
                     TokenCallback callback);
+    }
+
+    @VisibleForTesting
+    interface PaymentMethodCreator {
+        void create(PaymentMethodCreateParams params,
+                    String publishableKey,
+                    String stripeAccount,
+                    Executor executor,
+                    PaymentMethodCallback callback);
     }
 
     private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper> {
@@ -1028,6 +1085,65 @@ public class Stripe {
             } else {
                 mCallback.onError(new RuntimeException(
                         "Somehow got neither a token response or an error response"));
+            }
+        }
+    }
+
+    private static class CreatePaymentMethodTask extends AsyncTask<Void, Void, ResponseWrapper> {
+        @NonNull
+        private final StripeApiHandler mApiHandler;
+        @NonNull
+        private final PaymentMethodCreateParams mPaymentMethodParams;
+        @NonNull
+        private final String mPublishableKey;
+        @Nullable
+        private final String mStripeAccount;
+        @NonNull
+        private final PaymentMethodCallback mCallback;
+
+        CreatePaymentMethodTask(
+                @NonNull StripeApiHandler apiHandler,
+                @NonNull final PaymentMethodCreateParams paymentMethodParams,
+                @NonNull final String publishableKey,
+                @Nullable final String stripeAccount,
+                @NonNull final PaymentMethodCallback callback) {
+            mApiHandler = apiHandler;
+            mPaymentMethodParams = paymentMethodParams;
+            mPublishableKey = publishableKey;
+            mStripeAccount = stripeAccount;
+            mCallback = callback;
+        }
+
+        @Override
+        protected ResponseWrapper doInBackground(Void... params) {
+            try {
+                final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
+                        mStripeAccount, RequestOptions.TYPE_QUERY).build();
+
+                final PaymentMethod paymentMethod = mApiHandler.createPaymentMethod(
+                        mPaymentMethodParams,
+                        mPublishableKey,
+                        mStripeAccount);
+
+                return new ResponseWrapper(paymentMethod);
+            } catch (StripeException e) {
+                return new ResponseWrapper(e);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull ResponseWrapper result) {
+            paymentMethodTaskPostExecution(result);
+        }
+
+        private void paymentMethodTaskPostExecution(@NonNull ResponseWrapper result) {
+            if (result.paymentMethod != null) {
+                mCallback.onSuccess(result.paymentMethod);
+            } else if (result.error != null) {
+                mCallback.onError(result.error);
+            } else {
+                mCallback.onError(new RuntimeException(
+                        "Somehow got neither a payment method response or an error response"));
             }
         }
     }
