@@ -947,6 +947,7 @@ public class Stripe {
             this.error = null;
             this.token = null;
         }
+        
         private ResponseWrapper(@Nullable Source source) {
             this.source = source;
             this.error = null;
