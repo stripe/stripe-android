@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.Token;
 
 import java.util.AbstractMap;
@@ -149,8 +150,17 @@ public class StripeNetworkUtils {
     }
 
     void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
-        if (params.containsKey("source_data") && params.get("source_data") instanceof Map) {
-            addUidParams((Map) params.get("source_data"));
+        final Object sourceData = params
+                .get(PaymentIntentParams.API_PARAM_SOURCE_DATA);
+        if (sourceData instanceof Map) {
+            addUidParams((Map) sourceData);
+            return;
+        }
+
+        final Object paymentMethodData = params
+                .get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
+        if (paymentMethodData instanceof Map) {
+            addUidParams((Map) paymentMethodData);
         }
     }
 
@@ -160,14 +170,13 @@ public class StripeNetworkUtils {
             return;
         }
 
-        String hashGuid = StripeTextUtils.shaHashInput(guid);
-        String muid = mPackageName + guid;
-        String hashMuid = StripeTextUtils.shaHashInput(muid);
-
+        final String hashGuid = StripeTextUtils.shaHashInput(guid);
         if (!StripeTextUtils.isBlank(hashGuid)) {
             params.put(GUID, hashGuid);
         }
 
+        final String muid = mPackageName + guid;
+        final String hashMuid = StripeTextUtils.shaHashInput(muid);
         if (!StripeTextUtils.isBlank(hashMuid)) {
             params.put(MUID, hashMuid);
         }

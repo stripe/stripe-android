@@ -36,7 +36,6 @@ public class PaymentIntentParamsTest {
 
     private static final String TEST_RETURN_URL = "stripe://return_url";
     private static final String TEST_SOURCE_ID = "src_123testsourceid";
-
     private static final String TEST_PAYMENT_METHOD_ID = "pm_123456789";
 
     @Test
@@ -150,7 +149,7 @@ public class PaymentIntentParamsTest {
     }
 
     @Test
-    public void createCustomParams_toParamMap_createsExpectedMap() {
+    public void createCustomParams_withSourceId_toParamMap_createsExpectedMap() {
         final PaymentIntentParams paymentIntentParams = PaymentIntentParams.createCustomParams()
                 .setReturnUrl(TEST_RETURN_URL)
                 .setClientSecret(TEST_CLIENT_SECRET)
@@ -159,6 +158,24 @@ public class PaymentIntentParamsTest {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
 
         Assert.assertEquals(paramMap.get(PaymentIntentParams.API_PARAM_SOURCE_ID), TEST_SOURCE_ID);
+        Assert.assertEquals(
+                paramMap.get(PaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
+        Assert.assertEquals(
+                paramMap.get(PaymentIntentParams.API_PARAM_RETURN_URL), TEST_RETURN_URL);
+        assertFalse(paramMap.containsKey(PaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
+    }
+
+    @Test
+    public void createCustomParams_withPaymentMethodId_toParamMap_createsExpectedMap() {
+        final PaymentIntentParams paymentIntentParams = PaymentIntentParams.createCustomParams()
+                .setReturnUrl(TEST_RETURN_URL)
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setPaymentMethodId(TEST_PAYMENT_METHOD_ID);
+
+        final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
+
+        Assert.assertEquals(paramMap.get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_ID),
+                TEST_PAYMENT_METHOD_ID);
         Assert.assertEquals(
                 paramMap.get(PaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
         Assert.assertEquals(
