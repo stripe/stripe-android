@@ -3,15 +3,12 @@ package com.stripe.android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(RobolectricTestRunner.class)
 public class PaymentMethodTest {
     private static final String RAW_CARD_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +

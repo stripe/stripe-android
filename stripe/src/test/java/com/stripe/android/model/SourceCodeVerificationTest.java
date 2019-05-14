@@ -4,8 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link SourceCodeVerification}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class SourceCodeVerificationTest {
 
     static final String EXAMPLE_JSON_CODE_VERIFICATION = "{" +

@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link SourceOwner} model.
  */
-@RunWith(RobolectricTestRunner.class)
 public class SourceOwnerTest {
 
     private static final String EXAMPLE_JSON_OWNER_WITH_NULLS = "{" +

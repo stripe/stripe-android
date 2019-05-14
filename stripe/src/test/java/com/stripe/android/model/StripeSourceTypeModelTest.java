@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link StripeSourceTypeModel}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class StripeSourceTypeModelTest {
 
     @Test

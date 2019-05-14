@@ -2,8 +2,6 @@ package com.stripe.android;
 
 import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Currency;
 import java.util.Locale;
@@ -14,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test class for {@link PayWithGoogleUtils}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class PayWithGoogleUtilsTest {
 
     @After

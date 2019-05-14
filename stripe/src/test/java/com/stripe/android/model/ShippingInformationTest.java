@@ -3,12 +3,9 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(RobolectricTestRunner.class)
 public class ShippingInformationTest {
 
     @Test

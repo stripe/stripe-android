@@ -1,15 +1,12 @@
 package com.stripe.android.model;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for {@link BankAccount}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class BankAccountTest {
 
     private static final String RAW_BANK_ACCOUNT = "{\n" +

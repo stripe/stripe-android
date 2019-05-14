@@ -3,8 +3,6 @@ package com.stripe.android.model;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricTestRunner.class)
 public class PaymentIntentParamsTest {
     private static final Card FULL_FIELDS_VISA_CARD =
             new Card(VALID_VISA_NO_SPACES,
