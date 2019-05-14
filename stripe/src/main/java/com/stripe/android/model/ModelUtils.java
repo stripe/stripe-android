@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -19,7 +18,21 @@ class ModelUtils {
      * @return {@code true} if the input value consists entirely of integers
      */
     static boolean isWholePositiveNumber(@Nullable String value) {
-        return value != null && TextUtils.isDigitsOnly(value);
+        return value != null && isDigitsOnly(value);
+    }
+
+    /**
+     * Returns whether the given CharSequence contains only digits.
+     */
+    private static boolean isDigitsOnly(@NonNull CharSequence str) {
+        final int len = str.length();
+        for (int cp, i = 0; i < len; i += Character.charCount(cp)) {
+            cp = Character.codePointAt(str, i);
+            if (!Character.isDigit(cp)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

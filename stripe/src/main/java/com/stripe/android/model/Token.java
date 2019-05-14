@@ -3,8 +3,8 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
-import android.text.TextUtils;
 
+import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -249,7 +249,7 @@ public class Token implements StripePaymentSource {
     @Nullable
     @TokenType
     private static String asTokenType(@Nullable String possibleTokenType) {
-        if (possibleTokenType == null || TextUtils.isEmpty(possibleTokenType.trim())) {
+        if (possibleTokenType == null || StripeTextUtils.isEmpty(possibleTokenType.trim())) {
             return null;
         }
 

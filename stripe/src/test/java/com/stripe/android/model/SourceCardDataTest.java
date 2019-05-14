@@ -1,8 +1,6 @@
 package com.stripe.android.model;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Map;
 
@@ -13,7 +11,6 @@ import static org.junit.Assert.assertNull;
 /**
  * Test class for {@link SourceCardData}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class SourceCardDataTest {
 
     static final String EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY =

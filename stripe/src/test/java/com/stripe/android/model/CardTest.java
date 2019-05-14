@@ -8,8 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -27,7 +25,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link Card}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class CardTest {
     private static final int YEAR_IN_FUTURE = 2100;
 

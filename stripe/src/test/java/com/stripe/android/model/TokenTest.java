@@ -1,8 +1,6 @@
 package com.stripe.android.model;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -14,7 +12,6 @@ import static org.junit.Assert.assertNull;
 /**
  * Test class for {@link Token}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class TokenTest {
     private static final Card CARD = new Card.Builder(null, 8, 2017, null)
             .id("card_189fi32eZvKYlo2CHK8NPRME")

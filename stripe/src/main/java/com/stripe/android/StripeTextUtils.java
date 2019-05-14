@@ -45,6 +45,15 @@ public class StripeTextUtils {
     }
 
     /**
+     * Returns true if the string is null or 0-length.
+     * @param str the string to be examined
+     * @return true if str is null or zero length
+     */
+    public static boolean isEmpty(@Nullable CharSequence str) {
+        return str == null || str.length() == 0;
+    }
+
+    /**
      * Converts a card number that may have spaces between the numbers into one without any spaces.
      * Note: method does not check that all characters are digits or spaces.
      *
