@@ -70,7 +70,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mSelectPaymentButton.setEnabled(false);
         mSelectShippingButton = findViewById(R.id.btn_start_payment_flow);
         mSelectShippingButton.setEnabled(false);
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.

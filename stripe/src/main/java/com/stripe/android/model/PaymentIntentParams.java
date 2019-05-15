@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class PaymentIntentParams {
 
-    static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";
-    static final String API_PARAM_PAYMENT_METHOD_ID = "payment_method";
+    public static final String API_PARAM_SOURCE_DATA = "source_data";
+    public static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";
 
-    static final String API_PARAM_SOURCE_DATA = "source_data";
+    static final String API_PARAM_PAYMENT_METHOD_ID = "payment_method";
     static final String API_PARAM_SOURCE_ID = "source";
 
     static final String API_PARAM_RETURN_URL = "return_url";

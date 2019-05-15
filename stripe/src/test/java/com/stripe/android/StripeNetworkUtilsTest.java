@@ -1,12 +1,15 @@
 package com.stripe.android;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
+import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.PaymentMethod;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +59,7 @@ public class StripeNetworkUtilsTest {
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
         final Map<String, Object> cardMap = getCardMapFromHashMappedCard(CardFixtures.CARD);
+        assertNotNull(cardMap);
 
         assertEquals(CARD_NUMBER, cardMap.get("number"));
         assertEquals(CARD_CVC, cardMap.get("cvc"));
@@ -76,6 +81,7 @@ public class StripeNetworkUtilsTest {
                 BANK_ACCOUNT_HOLDER_NAME, BankAccount.TYPE_INDIVIDUAL, null, "US",
                 "usd", null, null, BANK_ROUTING_NUMBER);
         final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        assertNotNull(bankAccountMap);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
         assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
@@ -90,7 +96,8 @@ public class StripeNetworkUtilsTest {
         final Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
                 .build();
 
-        Map<String, Object> cardMap = getCardMapFromHashMappedCard(card);
+        final Map<String, Object> cardMap = getCardMapFromHashMappedCard(card);
+        assertNotNull(cardMap);
 
         assertEquals(CARD_NUMBER, cardMap.get("number"));
         assertEquals(CARD_CVC, cardMap.get("cvc"));
@@ -111,6 +118,7 @@ public class StripeNetworkUtilsTest {
         final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER, "US",
                 "usd", BANK_ROUTING_NUMBER);
         final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        assertNotNull(bankAccountMap);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
         assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
@@ -122,7 +130,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void removeNullAndEmptyParams_removesNullParams() {
-        final Map<String, Object> testMap = new HashMap<>();
+        final AbstractMap<String, Object> testMap = new HashMap<>();
         testMap.put("a", null);
         testMap.put("b", "not null");
         StripeNetworkUtils.removeNullAndEmptyParams(testMap);
@@ -145,7 +153,7 @@ public class StripeNetworkUtilsTest {
     @Test
     public void removeNullAndEmptyParams_removesNestedEmptyParams() {
         final Map<String, Object> testMap = new HashMap<>();
-        final Map<String, Object> firstNestedMap = new HashMap<>();
+        final AbstractMap<String, Object> firstNestedMap = new HashMap<>();
         final Map<String, Object> secondNestedMap = new HashMap<>();
         testMap.put("a", "fun param");
         testMap.put("b", "not null");
@@ -180,10 +188,10 @@ public class StripeNetworkUtilsTest {
     }
 
     @Test
-    public void addUidParamsToPaymentIntent_addParamsAtRightLevel() {
+    public void addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
         final Map<String, Object> existingMap = new HashMap<>();
         final Map<String, Object> sourceDataMap = new HashMap<>();
-        existingMap.put("source_data", sourceDataMap);
+        existingMap.put(PaymentIntentParams.API_PARAM_SOURCE_DATA, sourceDataMap);
 
         when(mUidProvider.get()).thenReturn("abc123");
         new StripeNetworkUtils("abc123", mUidProvider)
@@ -193,7 +201,25 @@ public class StripeNetworkUtilsTest {
         assertTrue(sourceDataMap.containsKey("guid"));
     }
 
+    @Test
+    public void addUidParamsToPaymentIntent_withPaymentMethod_addsParamsAtRightLevel() {
+        final Map<String, Object> existingMap = new HashMap<>();
+        final Map<String, Object> paymentMethodData = new PaymentMethod.Builder()
+                .setType(PaymentMethod.Type.Card.code)
+                .build()
+                .toMap();
+        existingMap.put(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA, paymentMethodData);
+
+        when(mUidProvider.get()).thenReturn("abc123");
+        new StripeNetworkUtils("abc123", mUidProvider)
+                .addUidParamsToPaymentIntent(existingMap);
+        assertEquals(1, existingMap.size());
+        assertTrue(paymentMethodData.containsKey("muid"));
+        assertTrue(paymentMethodData.containsKey("guid"));
+    }
+
     @SuppressWarnings("unchecked")
+    @Nullable
     private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
         final Map<String, Object> tokenMap =
                 new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
@@ -203,6 +229,7 @@ public class StripeNetworkUtilsTest {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
         final Map<String, Object> tokenMap =
                 new StripeNetworkUtils(ApplicationProvider.getApplicationContext())

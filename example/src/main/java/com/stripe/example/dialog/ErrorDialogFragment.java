@@ -4,16 +4,20 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 
 import com.stripe.example.R;
 
 public class ErrorDialogFragment extends DialogFragment {
-    public static ErrorDialogFragment newInstance(int titleId, String message) {
-        ErrorDialogFragment fragment = new ErrorDialogFragment();
+    @NonNull
+    public static ErrorDialogFragment newInstance(@NonNull String title,
+                                                  @NonNull String message) {
+        final ErrorDialogFragment fragment = new ErrorDialogFragment();
 
-        Bundle args = new Bundle();
-        args.putInt("titleId", titleId);
+        final Bundle args = new Bundle();
+        args.putString("title", title);
         args.putString("message", message);
 
         fragment.setArguments(args);
@@ -27,14 +31,15 @@ public class ErrorDialogFragment extends DialogFragment {
 
     @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        int titleId = getArguments().getInt("titleId");
-        String message = getArguments().getString("message");
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        final String title = getArguments().getString("title");
+        final String message = getArguments().getString("message");
 
         return new AlertDialog.Builder(getActivity())
-            .setTitle(titleId)
-            .setMessage(message)
-            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
-            .create();
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok,
+                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .create();
     }
 }

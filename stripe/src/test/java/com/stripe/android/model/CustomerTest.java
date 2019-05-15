@@ -8,8 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import static com.stripe.android.model.CardTest.JSON_CARD;
 import static com.stripe.android.model.CustomerSourceTest.JSON_APPLE_PAY_CARD;
@@ -25,7 +23,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link Customer} model object.
  */
-@RunWith(RobolectricTestRunner.class)
 public class CustomerTest {
 
     private static final String NON_CUSTOMER_OBJECT =
