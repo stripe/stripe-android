@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 
@@ -146,6 +147,13 @@ public class MaskedCardView extends LinearLayout {
         if (card != null) {
             setCard(card);
         }
+    }
+
+    void setPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+        mCardBrand = paymentMethod.card.brand;
+        mLast4 = paymentMethod.card.last4;
+        updateBrandIcon();
+        updateCardInformation();
     }
 
     /**
