@@ -13,17 +13,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.stripe.android.ActivityPaymentMethodCallback;
-import com.stripe.android.ActivitySourceCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
-import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
-import com.stripe.android.model.StripePaymentSource;
 
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
@@ -42,7 +39,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
     @Nullable private CardMultilineWidget mCardMultilineWidget;
-    @Nullable private CustomerSession mCustomerSession;
     @Nullable private StripeProvider mStripeProvider;
 
     private boolean mStartedFromPaymentSession;
