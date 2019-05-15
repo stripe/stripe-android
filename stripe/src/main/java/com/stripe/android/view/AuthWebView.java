@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -88,8 +87,9 @@ class AuthWebView extends WebView {
         public boolean shouldOverrideUrlLoading(@NonNull WebView view,
                                                 @NonNull String urlString) {
             if (isReturnUrl(urlString)) {
-                mActivity.startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.parse(urlString)));
+                mActivity.setResult(Activity.RESULT_OK,
+                        new Intent()
+                                .setData(Uri.parse(urlString)));
                 mActivity.finish();
                 return true;
             }
