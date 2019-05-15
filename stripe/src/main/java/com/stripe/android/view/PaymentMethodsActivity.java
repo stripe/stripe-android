@@ -27,6 +27,7 @@ import java.util.List;
 
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
+import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD;
 
 /**
  * An activity that allows a user to select from a customer's available payment methods, or
@@ -98,10 +99,15 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
-            setCommunicatingProgress(true);
             initLoggingTokens();
-            mCustomerSession.getPaymentMethods(PaymentMethod.Type.Card,
-                    new GetPaymentMethodsRetrievalListener(this));
+
+            if (data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
+                final PaymentMethod paymentMethod =
+                        PaymentMethod.fromString(data.getStringExtra(EXTRA_NEW_PAYMENT_METHOD));
+                getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
+            } else {
+                getCustomerPaymentMethods(null);
+            }
         }
     }
 
@@ -139,9 +145,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
-    private void getCustomerPaymentMethods() {
+    private void getCustomerPaymentMethods(@Nullable String selectPaymentMethodId) {
+        setCommunicatingProgress(true);
         mCustomerSession.getPaymentMethods(PaymentMethod.Type.Card,
-                new GetPaymentMethodsRetrievalListener(this));
+                new GetPaymentMethodsRetrievalListener(this, selectPaymentMethodId));
     }
 
     private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
@@ -155,6 +162,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         } else {
             mMaskedCardAdapter.setPaymentMethods(paymentMethods);
         }
+    }
+
+    private void selectPaymentMethod(@NonNull String paymentMethodId) {
+        mMaskedCardAdapter.setSelectedPaymentMethod(paymentMethodId);
     }
 
     private void initLoggingTokens() {
@@ -214,8 +225,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private static final class GetPaymentMethodsRetrievalListener extends
             CustomerSession.ActivityPaymentMethodsRetrievalListener<PaymentMethodsActivity> {
 
-        GetPaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity) {
+        @Nullable final String mSelectPaymentMethodId;
+
+        GetPaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity,
+                                           @Nullable String selectPaymentMethodId) {
             super(activity);
+            mSelectPaymentMethodId = selectPaymentMethodId;
         }
 
         @Override
@@ -226,6 +241,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             }
 
             activity.updatePaymentMethods(paymentMethods);
+            if (mSelectPaymentMethodId != null) {
+                activity.selectPaymentMethod(mSelectPaymentMethodId);
+            }
             activity.setCommunicatingProgress(false);
         }
 
