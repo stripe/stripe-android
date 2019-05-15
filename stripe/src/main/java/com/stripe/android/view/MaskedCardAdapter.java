@@ -9,9 +9,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Customer;
 import com.stripe.android.model.CustomerSource;
-import com.stripe.android.model.Source;
+import com.stripe.android.model.PaymentMethod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,48 +22,35 @@ import java.util.List;
 class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
 
     private static final int NO_SELECTION = -1;
-    private @NonNull List<CustomerSource> mCustomerSourceList;
+    @NonNull private final List<PaymentMethod> mPaymentMethods;
     private int mSelectedIndex = NO_SELECTION;
 
-    MaskedCardAdapter(@NonNull List<CustomerSource> startingSources) {
-        mCustomerSourceList = new ArrayList<>();
-        setCustomerSourceList(startingSources);
+    MaskedCardAdapter(@NonNull List<PaymentMethod> paymentMethods) {
+        mPaymentMethods = new ArrayList<>();
+        setPaymentMethods(paymentMethods);
     }
 
-    void setCustomerSourceList(@NonNull List<CustomerSource> sourceList) {
-        mCustomerSourceList.clear();
-        CustomerSource[] customerSources = new CustomerSource[sourceList.size()];
-        addCustomerSourceIfSupported(sourceList.toArray(customerSources));
-    }
-
-    void updateCustomer(@NonNull Customer customer) {
-        mCustomerSourceList.clear();
-        CustomerSource[] customerSources = new CustomerSource[customer.getSources().size()];
-        addCustomerSourceIfSupported(customer.getSources().toArray(customerSources));
-        String sourceId = customer.getDefaultSource();
-        if (sourceId == null) {
-            updateSelectedIndex(NO_SELECTION);
-        } else {
-            setSelectedSource(sourceId);
-        }
-
+    void setPaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
+        mPaymentMethods.clear();
+        mPaymentMethods.addAll(paymentMethods);
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return mCustomerSourceList.size();
+        return mPaymentMethods.size();
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.setMaskedCardData(mCustomerSourceList.get(position));
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.setMaskedCardData(mPaymentMethods.get(position));
         holder.setIndex(position);
         holder.setSelected(position == mSelectedIndex);
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         FrameLayout itemView = (FrameLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.masked_card_row, parent, false);
         return new ViewHolder(itemView);
@@ -74,13 +60,13 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
      * Sets the selected source to the one whose ID is identical to the input string, if such
      * a value is found.
      *
-     * @param sourceId a stripe ID to search for among the list of {@link CustomerSource} objects
+     * @param paymentMethodId a stripe ID to search for among the list of {@link PaymentMethod} objects
      * @return {@code true} if the value was found, {@code false} if not
      */
-    boolean setSelectedSource(@NonNull String sourceId) {
-        for (int i = 0; i < mCustomerSourceList.size(); i++) {
-            if (sourceId.equals(mCustomerSourceList.get(i).getId())) {
-                updateSelectedIndex(i);
+    boolean setSelectedPaymentMethod(@NonNull String paymentMethodId) {
+        for (int i = 0; i < mPaymentMethods.size(); i++) {
+            if (paymentMethodId.equals(mPaymentMethods.get(i).id)) {
+                setSelectedIndex(i);
                 return true;
             }
         }
@@ -88,41 +74,22 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     @Nullable
-    CustomerSource getSelectedSource() {
+    PaymentMethod getSelectedPaymentMethod() {
         if (mSelectedIndex == NO_SELECTION) {
             return null;
         }
 
-        return mCustomerSourceList.get(mSelectedIndex);
+        return mPaymentMethods.get(mSelectedIndex);
     }
 
-    void addCustomerSourceIfSupported(CustomerSource... customerSources) {
-        if (customerSources == null) {
-            return;
-        }
-
-        for (CustomerSource customerSource : customerSources) {
-            if (customerSource.asCard() != null || canDisplaySource(customerSource.asSource())) {
-                // If it's a card, we can display it.
-                mCustomerSourceList.add(customerSource);
-            }
-        }
-
-        notifyDataSetChanged();
-    }
-
-    boolean canDisplaySource(@Nullable Source source) {
-        return source != null && Source.CARD.equals(source.getType());
-    }
-
-    void updateSelectedIndex(int selectedIndex) {
+    void setSelectedIndex(int selectedIndex) {
         mSelectedIndex = selectedIndex;
         notifyDataSetChanged();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        MaskedCardView maskedCardView;
+        @NonNull final MaskedCardView maskedCardView;
         int index;
 
         ViewHolder(FrameLayout itemLayout) {
@@ -133,14 +100,14 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
                 public void onClick(View view) {
                     if (!maskedCardView.isSelected()) {
                         maskedCardView.toggleSelected();
-                        updateSelectedIndex(index);
+                        setSelectedIndex(index);
                     }
                 }
             });
         }
 
-        void setMaskedCardData(@NonNull CustomerSource customerSource) {
-            maskedCardView.setCustomerSource(customerSource);
+        void setMaskedCardData(@NonNull PaymentMethod paymentMethod) {
+            maskedCardView.setPaymentMethod(paymentMethod);
         }
 
         void setIndex(int index) {
