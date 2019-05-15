@@ -56,7 +56,7 @@ public class RedirectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_polling);
 
         mCardInputWidget = findViewById(R.id.card_widget_three_d);
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mRedirectDialogController = new RedirectDialogController(this);
