@@ -32,7 +32,7 @@ public class PaymentMethodTest {
             "\t\t\"phone\": \"123-456-7890\"\n" +
             "\t},\n" +
             "\t\"card\": {\n" +
-            "\t\t\"brand\": \"Visa\",\n" +
+            "\t\t\"brand\": \"visa\",\n" +
             "\t\t\"checks\": {\n" +
             "\t\t\t\"address_line1_check\": \"unchecked\",\n" +
             "\t\t\t\"cvc_check\": \"unchecked\"\n" +
