@@ -401,7 +401,7 @@ public class CustomerSession {
     /**
      * Gets a Customer's PaymentMethods
      */
-    void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
+    public void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
                            @NonNull PaymentMethodsRetrievalListener listener) {
         final Map<String, String> arguments = new HashMap<>();
         arguments.put(KEY_PAYMENT_METHOD_TYPE, paymentMethodType.code);
