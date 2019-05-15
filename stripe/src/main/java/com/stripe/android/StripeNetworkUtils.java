@@ -142,8 +142,11 @@ public class StripeNetworkUtils {
             }
 
             if (mapToEdit.get(key) instanceof Map) {
-                Map<String, Object> stringObjectMap = (Map<String, Object>) mapToEdit.get(key);
-                removeNullAndEmptyParams(stringObjectMap);
+                final Map<String, Object> stringObjectMap =
+                        (Map<String, Object>) mapToEdit.get(key);
+                if (stringObjectMap != null) {
+                    removeNullAndEmptyParams(stringObjectMap);
+                }
             }
         }
     }
