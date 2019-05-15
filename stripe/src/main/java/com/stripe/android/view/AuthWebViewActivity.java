@@ -19,4 +19,10 @@ public class AuthWebViewActivity extends AppCompatActivity {
         webView.init(this, returnUrl);
         webView.loadUrl(getIntent().getStringExtra(AuthWebViewStarter.EXTRA_AUTH_URL));
     }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
+    }
 }
