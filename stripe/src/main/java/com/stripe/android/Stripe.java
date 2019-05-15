@@ -763,13 +763,6 @@ public class Stripe {
     public void logEventSynchronous(
             @NonNull List<String> productUsageTokens,
             @NonNull StripePaymentSource paymentSource) {
-        RequestOptions.RequestOptionsBuilder builder =
-                RequestOptions.builder(mDefaultPublishableKey);
-        if (mStripeAccount != null) {
-            builder.setStripeAccount(mStripeAccount);
-        }
-        RequestOptions options = builder.build();
-
         final Map<String, Object> loggingMap;
         if (paymentSource instanceof Token) {
             Token token = (Token) paymentSource;
@@ -784,7 +777,10 @@ public class Stripe {
                     mDefaultPublishableKey,
                     source.getType());
         }
-        mApiHandler.logApiCall(loggingMap, options);
+        mApiHandler.logApiCall(loggingMap,
+                RequestOptions.builder(mDefaultPublishableKey)
+                        .setStripeAccount(mStripeAccount)
+                        .build());
     }
 
     /**
@@ -792,8 +788,8 @@ public class Stripe {
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
      * to crash. This method uses the default publishable key for this {@link Stripe} instance.
      *
-     * @param sourceId the {@link Source#mId} field of the desired Source object
-     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @param sourceId the {@link Source#getId()} field of the desired Source object
+     * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
      * @return a {@link Source} if one could be found based on the input params, or {@code null} if
      * no such Source could be found.
      *
@@ -818,8 +814,8 @@ public class Stripe {
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
      * to crash.
      *
-     * @param sourceId the {@link Source#mId} field of the desired Source object
-     * @param clientSecret the {@link Source#mClientSecret} field of the desired Source object
+     * @param sourceId the {@link Source#getId()} field of the desired Source object
+     * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
      * @param publishableKey a publishable API key to use
      * @return a {@link Source} if one could be found based on the input params, or {@code null} if
      * no such Source could be found.

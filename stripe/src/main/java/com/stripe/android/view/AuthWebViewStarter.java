@@ -13,6 +13,8 @@ public class AuthWebViewStarter {
     static final String EXTRA_AUTH_URL = "auth_url";
     static final String EXTRA_RETURN_URL = "return_url";
 
+    private static final int REQUEST_CODE = 50000;
+
     @NonNull private final Activity mActivity;
 
     public AuthWebViewStarter(@NonNull Activity activity) {
@@ -21,10 +23,17 @@ public class AuthWebViewStarter {
 
     /**
      * @param redirectData typically obtained through {@link PaymentIntent#getRedirectData()}
+     *
      */
     public void start(@NonNull PaymentIntent.RedirectData redirectData) {
-        mActivity.startActivity(new Intent(mActivity, AuthWebViewActivity.class)
+        final Intent intent = new Intent(mActivity, AuthWebViewActivity.class)
                 .putExtra(EXTRA_AUTH_URL, redirectData.url.toString())
-                .putExtra(EXTRA_RETURN_URL, redirectData.returnUrl.toString()));
+                .putExtra(EXTRA_RETURN_URL, redirectData.returnUrl != null ?
+                        redirectData.returnUrl.toString() : null);
+        mActivity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    static boolean isAuthWebViewResult(int requestCode) {
+        return requestCode == REQUEST_CODE;
     }
 }

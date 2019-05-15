@@ -9,13 +9,11 @@ import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,8 +38,8 @@ public class IssuingCardPinServiceTest {
             "}";
 
     @Mock private RequestExecutor mRequestExecutor;
-    @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mockRetrievalListener;
-    @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mockUpdateListener;
+    @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mMockRetrievalListener;
+    @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mMockUpdateListener;
 
     private IssuingCardPinService service;
 
@@ -65,28 +63,28 @@ public class IssuingCardPinServiceTest {
     public void testRetrieval()
             throws InvalidRequestException, APIConnectionException {
 
-        StripeResponse response =
+        final StripeResponse response =
                 new StripeResponse(200,
                         "{\"card\":\"ic_abcdef\",\"pin\":\"1234\"}",
                         null);
 
         when(mRequestExecutor.execute(
-                eq(RequestExecutor.RestMethod.GET),
-                eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                ArgumentMatchers.<String, Object>anyMap(),
-                any(RequestOptions.class)
-        )).thenReturn(response);
+                argThat(new StripeRequestMatcher(
+                        StripeRequest.Method.GET,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                ))))
+                .thenReturn(response);
 
-        mockRetrievalListener =
+        mMockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
         service.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",
-                mockRetrievalListener);
+                mMockRetrievalListener);
 
-        verify(mockRetrievalListener).onIssuingCardPinRetrieved("1234");
+        verify(mMockRetrievalListener).onIssuingCardPinRetrieved("1234");
     }
 
     @Test
@@ -99,13 +97,13 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                eq(RequestExecutor.RestMethod.POST),
-                eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                ArgumentMatchers.<String, Object>anyMap(),
-                any(RequestOptions.class)
-        )).thenReturn(response);
+                argThat(new StripeRequestMatcher(
+                        StripeRequest.Method.POST,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                ))))
+                .thenReturn(response);
 
-        mockUpdateListener =
+        mMockUpdateListener =
                 mock(IssuingCardPinService.IssuingCardPinUpdateListener.class);
 
         service.updatePin(
@@ -113,38 +111,38 @@ public class IssuingCardPinServiceTest {
                 "1234",
                 "iv_abcd",
                 "123-456",
-                mockUpdateListener);
+                mMockUpdateListener);
 
-        verify(mockUpdateListener).onIssuingCardPinUpdated();
+        verify(mMockUpdateListener).onIssuingCardPinUpdated();
     }
 
     @Test
     public void testRetrievalFailsWithReason()
             throws InvalidRequestException, APIConnectionException {
 
-        StripeResponse response =
+        final StripeResponse response =
                 new StripeResponse(400,
                         "{\"error\": {\"code\": \"incorrect_code\", \"message\": " +
                                 "\"Verification failed\", \"type\": \"invalid_request_error\"}}",
                         null);
 
         when(mRequestExecutor.execute(
-                eq(RequestExecutor.RestMethod.GET),
-                eq("https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"),
-                ArgumentMatchers.<String, Object>anyMap(),
-                any(RequestOptions.class)
-        )).thenReturn(response);
+                argThat(new StripeRequestMatcher(
+                        StripeRequest.Method.GET,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                ))))
+                .thenReturn(response);
 
-        mockRetrievalListener =
+        mMockRetrievalListener =
                 mock(IssuingCardPinService.IssuingCardPinRetrievalListener.class);
 
         service.retrievePin(
                 "ic_abcdef",
                 "iv_abcd",
                 "123-456",
-                mockRetrievalListener);
+                mMockRetrievalListener);
 
-        verify(mockRetrievalListener).onError(
+        verify(mMockRetrievalListener).onError(
                 IssuingCardPinService.CardPinActionError.ONE_TIME_CODE_INCORRECT,
                 "The one-time code was incorrect",
                 null);

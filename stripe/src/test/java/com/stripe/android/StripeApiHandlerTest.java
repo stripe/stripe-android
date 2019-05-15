@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -41,7 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -303,11 +302,12 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
         final StripeResponse response = mApiHandler.requestData(
-                RequestExecutor.RestMethod.POST, StripeApiHandler.getSourcesUrl(),
-                SourceParams.createCardParams(CARD).toParamMap(),
-                RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                        connectAccountId, RequestOptions.TYPE_QUERY)
-                        .build()
+                StripeRequest.createPost(
+                        StripeApiHandler.getSourcesUrl(),
+                        SourceParams.createCardParams(CARD).toParamMap(),
+                        RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
+                                connectAccountId, RequestOptions.TYPE_QUERY)
+                                .build())
         );
         assertNotNull(response);
 
@@ -426,7 +426,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getPaymentMethods_whenPopulated_returnsExpectedList()
-            throws StripeException, JSONException {
+            throws StripeException {
         final String responseBody =
                 "{\n" +
                 "    \"object\": \"list\",\n" +
@@ -562,11 +562,12 @@ public class StripeApiHandlerTest {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("customer", "cus_123");
         queryParams.put("type", PaymentMethod.Type.Card.code);
-        when(mRequestExecutor.execute(
-                eq(RequestExecutor.RestMethod.GET),
-                eq(StripeApiHandler.getPaymentMethodsUrl()),
-                eq(queryParams),
-                ArgumentMatchers.<RequestOptions>any()))
+        when(mRequestExecutor.execute(argThat(
+                new StripeRequestMatcher(
+                        StripeRequest.Method.GET,
+                        StripeApiHandler.getPaymentMethodsUrl(),
+                        queryParams
+                ))))
                 .thenReturn(stripeResponse);
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
@@ -585,7 +586,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getPaymentMethods_whenNotPopulated_returnsEmptydList()
-            throws StripeException, JSONException {
+            throws StripeException {
         final String responseBody =
                 "{\n" +
                         "    \"object\": \"list\",\n" +
@@ -598,11 +599,12 @@ public class StripeApiHandlerTest {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("customer", "cus_123");
         queryParams.put("type", PaymentMethod.Type.Card.code);
-        when(mRequestExecutor.execute(
-                eq(RequestExecutor.RestMethod.GET),
-                eq(StripeApiHandler.getPaymentMethodsUrl()),
-                eq(queryParams),
-                ArgumentMatchers.<RequestOptions>any()))
+        when(mRequestExecutor.execute(argThat(
+                new StripeRequestMatcher(
+                        StripeRequest.Method.GET,
+                        StripeApiHandler.getPaymentMethodsUrl(),
+                        queryParams
+                ))))
                 .thenReturn(stripeResponse);
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),

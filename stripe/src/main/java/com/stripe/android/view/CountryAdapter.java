@@ -23,43 +23,44 @@ import java.util.Locale;
  * Adapter that populates a list of countries for a spinner.
  */
 class CountryAdapter extends ArrayAdapter {
+    @NonNull private final Context mContext;
+    @NonNull private final List<String> mCountries;
+    @NonNull private final Filter mFilter;
 
-    @VisibleForTesting
-    List<String> mCountries;
-    @VisibleForTesting
-    List<String> mSuggestions;
-    private Filter mFilter;
+    private List<String> mSuggestions;
 
-    private Context mContext;
-
-    CountryAdapter(Context context, List<String> countries) {
+    CountryAdapter(@NonNull Context context, @NonNull List<String> countries) {
         super(context, R.layout.menu_text_view);
         mContext = context;
         mCountries = getOrderedCountries(countries);
         mSuggestions = mCountries;
         mFilter = new Filter() {
+            @NonNull
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
-                FilterResults filterResults = new FilterResults();
-                List<String> suggestedCountries = new ArrayList<>();
+                final FilterResults filterResults = new FilterResults();
+                final List<String> suggestedCountries = new ArrayList<>();
                 if (charSequence == null) {
                     filterResults.values = mCountries;
                     return filterResults;
                 }
-                String charSequenceLowercase = charSequence.toString().toLowerCase(Locale.ROOT);
+                final String charSequenceLowercase = charSequence.toString()
+                        .toLowerCase(Locale.ROOT);
                 for (String country : mCountries) {
                     if (country.toLowerCase(Locale.ROOT).startsWith(charSequenceLowercase)) {
                         suggestedCountries.add(country);
                     }
                 }
                 if (suggestedCountries.size() == 0 || (suggestedCountries.size() == 1 &&
-                        suggestedCountries.get(0).equals(charSequence))) {
-                    suggestedCountries = mCountries;
+                        suggestedCountries.get(0).equals(charSequence.toString()))) {
+                    filterResults.values = mCountries;
+                } else {
+                    filterResults.values = suggestedCountries;
                 }
-                filterResults.values = suggestedCountries;
                 return filterResults;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 mSuggestions = (List<String>) filterResults.values;
@@ -83,13 +84,14 @@ class CountryAdapter extends ArrayAdapter {
         return i;
     }
 
+    @NonNull
     @Override
     public View getView(int i, View view, @NonNull ViewGroup viewGroup) {
         if (view instanceof TextView) {
             ((TextView) view).setText(getItem(i));
             return view;
         } else {
-            TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(
+            final TextView countryText = (TextView) LayoutInflater.from(mContext).inflate(
                     R.layout.menu_text_view, viewGroup, false);
             countryText.setText(getItem(i));
             return countryText;
@@ -102,13 +104,14 @@ class CountryAdapter extends ArrayAdapter {
         return mFilter;
     }
 
-    @VisibleForTesting
-    List<String> getOrderedCountries(List<String> countries) {
+    @NonNull
+    private List<String> getOrderedCountries(@NonNull List<String> countries) {
         // Show user's current locale first, followed by countries alphabetized by display name
         Collections.sort(countries, new Comparator<String>() {
             @Override
-            public int compare(String s, String t1) {
-                return s.toLowerCase(Locale.ROOT).compareTo(t1.toLowerCase(Locale.ROOT));
+            public int compare(String country1, String country2) {
+                return country1.toLowerCase(Locale.ROOT)
+                        .compareTo(country2.toLowerCase(Locale.ROOT));
             }
         });
         countries.remove(getCurrentLocale().getDisplayCountry());
