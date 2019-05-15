@@ -59,7 +59,8 @@ public class MaskedCardView extends LinearLayout {
     @ColorInt int mUnselectedTextAlphaColorInt;
     @ColorInt int mUnselectedTextColorInt;
 
-    static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+    @NonNull static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+    @NonNull static final Map<String, String> CARD_BRAND_MAP = new HashMap<>();
 
     static {
         TEMPLATE_RESOURCE_MAP.put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
@@ -70,6 +71,15 @@ public class MaskedCardView extends LinearLayout {
         TEMPLATE_RESOURCE_MAP.put(Card.VISA, R.drawable.ic_visa_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.ic_unknown);
+
+        CARD_BRAND_MAP.put(PaymentMethod.AMERICAN_EXPRESS, Card.AMERICAN_EXPRESS);
+        CARD_BRAND_MAP.put(PaymentMethod.DINERS_CLUB, Card.DINERS_CLUB);
+        CARD_BRAND_MAP.put(PaymentMethod.DISCOVER, Card.DISCOVER);
+        CARD_BRAND_MAP.put(PaymentMethod.JCB, Card.JCB);
+        CARD_BRAND_MAP.put(PaymentMethod.MASTERCARD, Card.MASTERCARD);
+        CARD_BRAND_MAP.put(PaymentMethod.VISA, Card.VISA);
+        CARD_BRAND_MAP.put(PaymentMethod.UNIONPAY, Card.UNIONPAY);
+        CARD_BRAND_MAP.put(PaymentMethod.UNKNOWN, Card.UNKNOWN);
     }
 
     public MaskedCardView(Context context) {
@@ -150,7 +160,7 @@ public class MaskedCardView extends LinearLayout {
     }
 
     void setPaymentMethod(@NonNull PaymentMethod paymentMethod) {
-        mCardBrand = paymentMethod.card.brand;
+        mCardBrand = CARD_BRAND_MAP.get(paymentMethod.card.brand);
         mLast4 = paymentMethod.card.last4;
         updateBrandIcon();
         updateCardInformation();

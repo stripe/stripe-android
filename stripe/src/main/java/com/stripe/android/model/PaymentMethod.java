@@ -62,6 +62,15 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
+    public static final String AMERICAN_EXPRESS = "amex";
+    public static final String DISCOVER = "discover";
+    public static final String JCB = "jcb";
+    public static final String DINERS_CLUB = "diners";
+    public static final String VISA = "visa";
+    public static final String MASTERCARD = "mastercard";
+    public static final String UNIONPAY = "unionpay";
+    public static final String UNKNOWN = "unknown";
+
     private PaymentMethod(@NonNull Builder builder) {
         id = builder.mId;
         liveMode = builder.mLiveMode;
