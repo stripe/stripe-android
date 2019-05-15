@@ -29,7 +29,7 @@ public class Stripe3ds2FingerprintTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void create_withEmptyJson_shouldThrowException() {
+    public void create_withEmptyJson_shouldThrowException() throws JSONException {
         Stripe3ds2Fingerprint.create(new JSONObject());
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 class Stripe3ds2Fingerprint {
@@ -17,7 +18,7 @@ class Stripe3ds2Fingerprint {
     @NonNull final String serverTransactionId;
 
     @NonNull
-    static Stripe3ds2Fingerprint create(@NonNull JSONObject json) {
+    static Stripe3ds2Fingerprint create(@NonNull JSONObject json) throws JSONException {
         final String type = json.optString(FIELD_TYPE);
         if (!TYPE.equals(type)) {
             throw new IllegalArgumentException(
@@ -25,9 +26,9 @@ class Stripe3ds2Fingerprint {
                             "Received type='" + type + "'");
         }
 
-        final String source = json.optString(FIELD_THREE_D_SECURE_2_SOURCE, null);
-        final String directoryServerName = json.optString(FIELD_DIRECTORY_SERVER_NAME, null);
-        final String serverTransactionId = json.optString(FIELD_SERVER_TRANSACTION_ID, null);
+        final String source = json.getString(FIELD_THREE_D_SECURE_2_SOURCE);
+        final String directoryServerName = json.getString(FIELD_DIRECTORY_SERVER_NAME);
+        final String serverTransactionId = json.getString(FIELD_SERVER_TRANSACTION_ID);
         return new Stripe3ds2Fingerprint(source, directoryServerName, serverTransactionId);
     }
 
