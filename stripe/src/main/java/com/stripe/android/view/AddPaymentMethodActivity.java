@@ -134,8 +134,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(card, billingDetails);
 
-//        card.addLoggingToken(ADD_PAYMENT_METHOD_ACTIVITY);
-
         final Stripe stripe = getStripe();
         stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
 
