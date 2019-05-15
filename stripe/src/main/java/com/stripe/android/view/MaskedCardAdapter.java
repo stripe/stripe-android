@@ -38,11 +38,27 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
         mPaymentMethods.clear();
         mPaymentMethods.addAll(paymentMethods);
 
-        if (selectedPaymentMethodId != null) {
-            setSelectedPaymentMethod(selectedPaymentMethodId);
+        // if there were no selected payment methods, or the previously selected payment method
+        // was not found and set selected, select the newest payment method
+        if (selectedPaymentMethodId == null || !setSelectedPaymentMethod(selectedPaymentMethodId)) {
+            setSelectedIndex(getNewestPaymentMethodIndex());
         }
 
         notifyDataSetChanged();
+    }
+
+    private int getNewestPaymentMethodIndex() {
+        int index = NO_SELECTION;
+        Long created = 0L;
+        for (int i = 0; i < mPaymentMethods.size(); i++) {
+            final PaymentMethod paymentMethod = mPaymentMethods.get(i);
+            if (paymentMethod.created != null && paymentMethod.created > created) {
+                created = paymentMethod.created;
+                index = i;
+            }
+        }
+
+        return index;
     }
 
     @Override
@@ -93,7 +109,6 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
 
     void setSelectedIndex(int selectedIndex) {
         mSelectedIndex = selectedIndex;
-        notifyDataSetChanged();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -110,6 +125,7 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
                     if (!maskedCardView.isSelected()) {
                         maskedCardView.toggleSelected();
                         setSelectedIndex(index);
+                        notifyDataSetChanged();
                     }
                 }
             });
