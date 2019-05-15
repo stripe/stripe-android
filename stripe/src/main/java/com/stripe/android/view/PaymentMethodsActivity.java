@@ -35,7 +35,6 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
-    static final String EXTRA_PROXY_DELAY = "proxy_delay";
     private static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
@@ -89,10 +88,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        boolean waitForProxy = getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false);
-        if (!waitForProxy) {
-            getCustomerPaymentMethods();
-        }
+        getCustomerPaymentMethods(null);
+
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
     }
