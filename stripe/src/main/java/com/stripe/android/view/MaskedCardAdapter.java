@@ -31,8 +31,17 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     void setPaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
+        final PaymentMethod selectedPaymentMethod = getSelectedPaymentMethod();
+        final String selectedPaymentMethodId =
+                selectedPaymentMethod != null ? selectedPaymentMethod.id : null;
+
         mPaymentMethods.clear();
         mPaymentMethods.addAll(paymentMethods);
+
+        if (selectedPaymentMethodId != null) {
+            setSelectedPaymentMethod(selectedPaymentMethodId);
+        }
+
         notifyDataSetChanged();
     }
 
