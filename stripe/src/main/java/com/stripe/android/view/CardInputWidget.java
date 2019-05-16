@@ -30,7 +30,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.util.Locale;
 
@@ -104,6 +107,31 @@ public class CardInputWidget extends LinearLayout {
     public CardInputWidget(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView(attrs);
+    }
+
+    /**
+     * Gets a {@link PaymentMethodCreateParams.Card} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams.Card} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethodCreateParams.Card getPaymentMethodCard() {
+        final String cardNumber = mCardNumberEditText.getCardNumber();
+        final int[] cardDate = mExpiryDateEditText.getValidDateFields();
+        final String cvcValue = mCvcNumberEditText.getText().toString().trim();
+
+        // CVC/CVV is the only field not validated by the entry control itself, so we check here.
+        if (cardNumber == null || cardDate == null || cardDate.length != 2 || !isCvcLengthValid()) {
+            return null;
+        }
+
+        return new PaymentMethodCreateParams.Card.Builder()
+                .setNumber(cardNumber)
+                .setCvc(cvcValue)
+                .setExpiryMonth(cardDate[0])
+                .setExpiryYear(cardDate[1]).build();
     }
 
     /**

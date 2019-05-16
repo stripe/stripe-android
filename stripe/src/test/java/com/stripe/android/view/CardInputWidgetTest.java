@@ -8,6 +8,8 @@ import android.widget.ImageView;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.testharness.TestFocusChangeListener;
 import com.stripe.android.testharness.ViewTestUtils;
 
@@ -138,6 +140,14 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         assertEquals("123", card.getCVC());
         assertTrue(card.validateCard());
         assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNotNull(paymentMethodCard);
+        final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_VISA_NO_SPACES)
+                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
     @Test
@@ -160,6 +170,14 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         assertEquals("1234", card.getCVC());
         assertTrue(card.validateCard());
         assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNotNull(paymentMethodCard);
+        final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("1234").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
     @Test
@@ -182,6 +200,14 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         assertEquals("123", card.getCVC());
         assertTrue(card.validateCard());
         assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNotNull(paymentMethodCard);
+        final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_DINERS_CLUB_NO_SPACES)
+                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
     @Test
@@ -197,6 +223,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNull(paymentMethodCard);
     }
 
     @Test
@@ -212,6 +242,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNull(paymentMethodCard);
     }
 
     @Test
@@ -226,6 +260,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNull(paymentMethodCard);
     }
 
     @Test
@@ -240,6 +278,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNotNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNotNull(paymentMethodCard);
     }
 
     @Test
@@ -254,6 +296,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNull(paymentMethodCard);
     }
 
     @Test
@@ -268,6 +314,10 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         Card card = mCardInputWidget.getCard();
         assertNull(card);
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNull(paymentMethodCard);
     }
 
     @Test
@@ -665,6 +715,14 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         assertEquals(2079, (int) card.getExpYear());
         assertEquals("1234", card.getCVC());
         assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+
+        final PaymentMethodCreateParams.Card paymentMethodCard =
+                mCardInputWidget.getPaymentMethodCard();
+        assertNotNull(paymentMethodCard);
+        final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("1234").setExpiryYear(2079).setExpiryMonth(12).build();
+        assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
     @Test
