@@ -12,15 +12,17 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
-import com.stripe.android.ActivityPaymentMethodCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentMethodCallback;
 import com.stripe.android.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
+
+import java.lang.ref.WeakReference;
 
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
@@ -258,6 +260,24 @@ public class AddPaymentMethodActivity extends StripeActivity {
             // No need to show this error, because it will be broadcast
             // from the CustomerSession
             activity.setCommunicatingProgress(false);
+        }
+    }
+
+    /**
+     * Abstract implementation of {@link PaymentMethodCallback} that holds a {@link WeakReference} to
+     * an {@link Activity} object.
+     */
+    public static abstract class ActivityPaymentMethodCallback<A extends Activity>
+            implements PaymentMethodCallback {
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityPaymentMethodCallback(@NonNull A activity) {
+            mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        public A getActivity() {
+            return mActivityRef.get();
         }
     }
 }
