@@ -161,6 +161,12 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertNotNull(mRecyclerView.getAdapter());
         assertEquals(2, mRecyclerView.getAdapter().getItemCount());
+
+        final MaskedCardAdapter maskedCardAdapter = (MaskedCardAdapter) mRecyclerView.getAdapter();
+        assertNotNull(maskedCardAdapter);
+        assertNotNull(maskedCardAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod.id, maskedCardAdapter.getSelectedPaymentMethod().id);
+
     }
 
     @Test
