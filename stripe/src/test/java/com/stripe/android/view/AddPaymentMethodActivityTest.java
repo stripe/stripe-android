@@ -41,7 +41,7 @@ import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
-import static com.stripe.android.view.AddPaymentMethodActivity.ADD_PAYMENT_METHOD_ACTIVITY;
+import static com.stripe.android.view.AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY;
 import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_PROXY_DELAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -291,7 +291,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         final ArgumentCaptor<String> paymentMethodIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.PaymentMethodRetrievalListener.class);
-        verify(mCustomerSession).addProductUsageTokenIfValid(ADD_PAYMENT_METHOD_ACTIVITY);
+        verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSession).attachPaymentMethod(
                 paymentMethodIdCaptor.capture(),
@@ -400,7 +400,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         final ArgumentCaptor<String> paymentMethodIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(CustomerSession.PaymentMethodRetrievalListener.class);
-        verify(mCustomerSession).addProductUsageTokenIfValid(ADD_PAYMENT_METHOD_ACTIVITY);
+        verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSession).attachPaymentMethod(
                 paymentMethodIdCaptor.capture(),

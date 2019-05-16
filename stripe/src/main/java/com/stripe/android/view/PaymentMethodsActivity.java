@@ -36,7 +36,7 @@ import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
-    private static final String PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
+    public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
@@ -172,7 +172,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (mStartedFromPaymentSession) {
             mCustomerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         }
-        mCustomerSession.addProductUsageTokenIfValid(PAYMENT_METHODS_ACTIVITY);
+        mCustomerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_METHODS_ACTIVITY);
     }
 
     private void cancelAndFinish() {

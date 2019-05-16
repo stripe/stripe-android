@@ -35,7 +35,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
 
-    static final String ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
+    public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
     static final String EXTRA_SHOW_ZIP = "show_zip";
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
@@ -114,7 +114,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     @VisibleForTesting
     void initCustomerSessionTokens() {
-        logToCustomerSessionIf(ADD_PAYMENT_METHOD_ACTIVITY, mUpdatesCustomer);
+        logToCustomerSessionIf(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY, mUpdatesCustomer);
         logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
     }
 

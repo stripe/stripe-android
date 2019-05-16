@@ -26,9 +26,6 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     private List<ShippingMethod> mValidShippingMethods = new ArrayList<>();
     private ShippingMethod mDefaultShippingMethod;
 
-    private static final String TOKEN_SHIPPING_INFO_SCREEN = "ShippingInfoScreen";
-    private static final String TOKEN_SHIPPING_METHOD_SCREEN = "ShippingMethodScreen";
-
     PaymentFlowPagerAdapter(@NonNull Context context,
                             @NonNull PaymentSessionConfig paymentSessionConfig) {
         mContext = context;
@@ -45,7 +42,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     private boolean shouldAddShippingScreen() {
         return mPaymentSessionConfig.isShippingMethodRequired() &&
                 (!mPaymentSessionConfig.isShippingInfoRequired() || mShippingInfoSaved) &&
-                    !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
+                !mPages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD);
     }
 
 
@@ -68,21 +65,24 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
         notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup collection, int position) {
+    public Object instantiateItem(@NonNull ViewGroup collection, int position) {
         PaymentFlowPagerEnum paymentFlowPagerEnum = mPages.get(position);
         LayoutInflater inflater = LayoutInflater.from(mContext);
         ViewGroup layout = (ViewGroup) inflater.inflate(paymentFlowPagerEnum.getLayoutResId(),
                 collection, false);
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_METHOD)) {
-            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_SHIPPING_METHOD_SCREEN);
+            CustomerSession.getInstance()
+                    .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN);
             SelectShippingMethodWidget selectShippingMethodWidget = layout.findViewById(R.id
                     .select_shipping_method_widget);
             selectShippingMethodWidget.setShippingMethods(mValidShippingMethods,
                     mDefaultShippingMethod);
         }
         if (paymentFlowPagerEnum.equals(PaymentFlowPagerEnum.SHIPPING_INFO)) {
-            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_SHIPPING_INFO_SCREEN);
+            CustomerSession.getInstance()
+                    .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_INFO_SCREEN);
             ShippingInfoWidget shippingInfoWidget = layout.findViewById(R.id.shipping_info_widget);
             shippingInfoWidget.setHiddenFields(mPaymentSessionConfig.getHiddenShippingInfoFields());
             shippingInfoWidget.setOptionalFields(mPaymentSessionConfig
@@ -95,7 +95,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public void destroyItem(ViewGroup collection, int position, Object view) {
+    public void destroyItem(@NonNull ViewGroup collection, int position, @NonNull Object view) {
         collection.removeView((View) view);
     }
 
@@ -113,7 +113,7 @@ class PaymentFlowPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object o) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
         return view == o;
     }
 
