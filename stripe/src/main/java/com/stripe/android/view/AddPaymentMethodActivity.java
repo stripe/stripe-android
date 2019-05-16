@@ -63,11 +63,11 @@ public class AddPaymentMethodActivity extends StripeActivity {
     /**
      * Create an {@link Intent} to start a {@link AddPaymentMethodActivity}.
      *
-     * @param context            the {@link Context} used to launch the activity
+     * @param context the {@link Context} used to launch the activity
      * @param requirePostalField {@code true} to require a postal code field
-     * @param updatesCustomer    {@code true} if the activity should update using an
-     *                           already-initialized {@link CustomerSession}, or {@code false} if it should just
-     *                           return a source.
+     * @param updatesCustomer {@code true} if the activity should update using an
+     *         already-initialized {@link CustomerSession}, or {@code false} if it should just
+     *         return a source.
      * @return an {@link Intent} that can be used to start this activity
      */
     @NonNull
@@ -230,10 +230,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
         }
     }
 
+    @SuppressWarnings("checkstyle:LineLength")
     private static final class PaymentMethodRetrievalListenerImpl
             extends CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity> {
-
-        public PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
+        PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
             super(activity);
         }
 

@@ -85,7 +85,8 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
      * Sets the selected source to the one whose ID is identical to the input string, if such
      * a value is found.
      *
-     * @param paymentMethodId a stripe ID to search for among the list of {@link PaymentMethod} objects
+     * @param paymentMethodId a stripe ID to search for among the list of {@link PaymentMethod}
+     *         objects
      * @return {@code true} if the value was found, {@code false} if not
      */
     boolean setSelectedPaymentMethod(@NonNull String paymentMethodId) {
