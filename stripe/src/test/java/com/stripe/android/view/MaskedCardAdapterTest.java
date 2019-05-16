@@ -1,11 +1,7 @@
 package com.stripe.android.view;
 
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 
-import com.stripe.android.model.Card;
-import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
 
@@ -13,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
@@ -22,11 +17,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Singleton;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
