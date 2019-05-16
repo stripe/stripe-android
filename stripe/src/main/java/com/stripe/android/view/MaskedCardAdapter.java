@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.PaymentMethod;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.List;
 
 /**
  * A {@link RecyclerView.Adapter} that holds a set of {@link MaskedCardView} items for a given set
- * of {@link CustomerSource} objects.
+ * of {@link PaymentMethod} objects.
  */
 class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
 
@@ -82,8 +81,8 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     /**
-     * Sets the selected source to the one whose ID is identical to the input string, if such
-     * a value is found.
+     * Sets the selected payment method to the one whose ID is identical to the input string, if
+     * such a value is found.
      *
      * @param paymentMethodId a stripe ID to search for among the list of {@link PaymentMethod}
      *         objects
