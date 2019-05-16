@@ -72,14 +72,14 @@ public class MaskedCardView extends LinearLayout {
         TEMPLATE_RESOURCE_MAP.put(Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
         TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.ic_unknown);
 
-        CARD_BRAND_MAP.put(PaymentMethod.AMERICAN_EXPRESS, Card.AMERICAN_EXPRESS);
-        CARD_BRAND_MAP.put(PaymentMethod.DINERS_CLUB, Card.DINERS_CLUB);
-        CARD_BRAND_MAP.put(PaymentMethod.DISCOVER, Card.DISCOVER);
-        CARD_BRAND_MAP.put(PaymentMethod.JCB, Card.JCB);
-        CARD_BRAND_MAP.put(PaymentMethod.MASTERCARD, Card.MASTERCARD);
-        CARD_BRAND_MAP.put(PaymentMethod.VISA, Card.VISA);
-        CARD_BRAND_MAP.put(PaymentMethod.UNIONPAY, Card.UNIONPAY);
-        CARD_BRAND_MAP.put(PaymentMethod.UNKNOWN, Card.UNKNOWN);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.AMERICAN_EXPRESS, Card.AMERICAN_EXPRESS);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.DINERS_CLUB, Card.DINERS_CLUB);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.DISCOVER, Card.DISCOVER);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.JCB, Card.JCB);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.MASTERCARD, Card.MASTERCARD);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.VISA, Card.VISA);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.UNIONPAY, Card.UNIONPAY);
+        CARD_BRAND_MAP.put(PaymentMethod.Card.UNKNOWN, Card.UNKNOWN);
     }
 
     public MaskedCardView(Context context) {

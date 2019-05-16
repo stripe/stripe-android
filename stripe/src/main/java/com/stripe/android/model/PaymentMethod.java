@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
@@ -10,6 +11,8 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,15 +64,6 @@ public class PaymentMethod extends StripeJsonModel {
             this.code = code;
         }
     }
-
-    public static final String AMERICAN_EXPRESS = "amex";
-    public static final String DISCOVER = "discover";
-    public static final String JCB = "jcb";
-    public static final String DINERS_CLUB = "diners";
-    public static final String VISA = "visa";
-    public static final String MASTERCARD = "mastercard";
-    public static final String UNIONPAY = "unionpay";
-    public static final String UNKNOWN = "unknown";
 
     private PaymentMethod(@NonNull Builder builder) {
         id = builder.mId;
@@ -400,7 +394,28 @@ public class PaymentMethod extends StripeJsonModel {
         private static final String FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage";
         private static final String FIELD_WALLET = "wallet";
 
-        @Nullable public final String brand;
+        @Retention(RetentionPolicy.SOURCE)
+        @StringDef({
+                AMERICAN_EXPRESS,
+                DISCOVER,
+                JCB,
+                DINERS_CLUB,
+                VISA,
+                MASTERCARD,
+                UNIONPAY,
+                UNKNOWN
+        })
+        public @interface Brand { }
+        public static final String AMERICAN_EXPRESS = "amex";
+        public static final String DISCOVER = "discover";
+        public static final String JCB = "jcb";
+        public static final String DINERS_CLUB = "diners";
+        public static final String VISA = "visa";
+        public static final String MASTERCARD = "mastercard";
+        public static final String UNIONPAY = "unionpay";
+        public static final String UNKNOWN = "unknown";
+
+        @Nullable @Brand public final String brand;
         @Nullable public final Checks checks;
         @Nullable public final String country;
         @Nullable public final Integer expiryMonth;
@@ -514,7 +529,7 @@ public class PaymentMethod extends StripeJsonModel {
             private Wallet mWallet;
 
             @NonNull
-            public Builder setBrand(@Nullable String brand) {
+            public Builder setBrand(@Nullable @Brand String brand) {
                 this.mBrand = brand;
                 return this;
             }

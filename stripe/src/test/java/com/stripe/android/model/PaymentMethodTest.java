@@ -73,7 +73,7 @@ public class PaymentMethodTest {
             "}";
 
     private static final PaymentMethod.Card CARD = new PaymentMethod.Card.Builder()
-            .setBrand("visa")
+            .setBrand(PaymentMethod.Card.VISA)
             .setChecks(new PaymentMethod.Card.Checks.Builder()
                     .setAddressLine1Check("unchecked")
                     .setAddressPostalCodeCheck(null)
