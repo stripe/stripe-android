@@ -114,8 +114,8 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @NonNull final MaskedCardView maskedCardView;
-        int index;
+        @NonNull private final MaskedCardView maskedCardView;
+        private int index;
 
         ViewHolder(FrameLayout itemLayout) {
             super(itemLayout);
