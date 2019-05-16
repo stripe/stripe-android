@@ -123,16 +123,13 @@ public class CardMultilineWidget extends LinearLayout {
     @Nullable
     public PaymentMethodCreateParams.Card getPaymentMethodCard() {
         if (validateAllFields()) {
-            final PaymentMethodCreateParams.Card.Builder builder =
-                    new PaymentMethodCreateParams.Card.Builder();
             final int[] cardDate = mExpiryDateEditText.getValidDateFields();
 
-            builder.setNumber(mCardNumberEditText.getCardNumber())
+            return new PaymentMethodCreateParams.Card.Builder()
+                    .setNumber(mCardNumberEditText.getCardNumber())
                     .setCvc(mCvcEditText.getText().toString())
                     .setExpiryMonth(cardDate[0])
-                    .setExpiryYear(cardDate[1]);
-
-            return builder.build();
+                    .setExpiryYear(cardDate[1]).build();
         }
 
         return null;
@@ -148,13 +145,9 @@ public class CardMultilineWidget extends LinearLayout {
     @Nullable
     public PaymentMethod.BillingDetails getPaymentMethodBillingDetails() {
         if (mShouldShowPostalCode && validateAllFields()) {
-            final Address.Builder addressBuilder = new Address.Builder();
-            addressBuilder.setPostalCode(mPostalCodeEditText.getText().toString());
-            final Address address = addressBuilder.build();
-            final PaymentMethod.BillingDetails.Builder billingDetailsBuilder =
-                    new PaymentMethod.BillingDetails.Builder();
-            billingDetailsBuilder.setAddress(address);
-            return billingDetailsBuilder.build();
+            return new PaymentMethod.BillingDetails.Builder().setAddress(
+                    new Address.Builder().setPostalCode(mPostalCodeEditText.getText().toString())
+                            .build()).build();
         }
 
         return null;
