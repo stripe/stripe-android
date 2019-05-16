@@ -267,7 +267,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
      * Abstract implementation of {@link PaymentMethodCallback} that holds a {@link WeakReference} to
      * an {@link Activity} object.
      */
-    public static abstract class ActivityPaymentMethodCallback<A extends Activity>
+    public abstract static class ActivityPaymentMethodCallback<A extends Activity>
             implements PaymentMethodCallback {
         @NonNull private final WeakReference<A> mActivityRef;
 
