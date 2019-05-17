@@ -55,19 +55,29 @@ public class MaskedCardView extends LinearLayout {
     @ColorInt private int mUnselectedTextAlphaColorInt;
     @ColorInt private int mUnselectedTextColorInt;
 
-    @NonNull private static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+    @NonNull private static final Map<String, Integer> ICON_RESOURCE_MAP = new HashMap<>();
+    @NonNull private static final Map<String, Integer> BRAND_RESOURCE_MAP = new HashMap<>();
 
     static {
-        TEMPLATE_RESOURCE_MAP
+        ICON_RESOURCE_MAP
                 .put(PaymentMethod.Card.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.DINERS_CLUB, R.drawable.ic_diners_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.DISCOVER, R.drawable.ic_discover_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.JCB, R.drawable.ic_jcb_template_32);
-        TEMPLATE_RESOURCE_MAP
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.DINERS_CLUB, R.drawable.ic_diners_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.DISCOVER, R.drawable.ic_discover_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.JCB, R.drawable.ic_jcb_template_32);
+        ICON_RESOURCE_MAP
                 .put(PaymentMethod.Card.MASTERCARD, R.drawable.ic_mastercard_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.VISA, R.drawable.ic_visa_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
-        TEMPLATE_RESOURCE_MAP.put(PaymentMethod.Card.UNKNOWN, R.drawable.ic_unknown);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.VISA, R.drawable.ic_visa_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.UNKNOWN, R.drawable.ic_unknown);
+
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.AMERICAN_EXPRESS, R.string.amex_short);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.DINERS_CLUB, R.string.diners_club);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.DISCOVER, R.string.discover);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.JCB, R.string.jcb);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.MASTERCARD, R.string.mastercard);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.VISA, R.string.visa);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.UNIONPAY, R.string.unionpay);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.UNKNOWN, R.string.unknown);
     }
 
     public MaskedCardView(Context context) {
@@ -161,10 +171,10 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateBrandIcon() {
-        if (mCardBrand == null || !TEMPLATE_RESOURCE_MAP.containsKey(mCardBrand)) {
+        if (mCardBrand == null || !ICON_RESOURCE_MAP.containsKey(mCardBrand)) {
             return;
         }
-        @DrawableRes int iconResourceId = TEMPLATE_RESOURCE_MAP.get(mCardBrand);
+        @DrawableRes int iconResourceId = ICON_RESOURCE_MAP.get(mCardBrand);
         updateDrawable(iconResourceId, mCardIconImageView, false);
     }
 
@@ -181,19 +191,22 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateCardInformation() {
-        String brandText = PaymentMethod.Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? getResources().getString(R.string.amex_short)
-                : mCardBrand;
-        String normalText = getResources().getString(R.string.ending_in);
-        int brandLength = brandText.length();
-        int middleLength = normalText.length();
-        int last4length = mLast4.length();
-        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
-        @ColorInt int lightTextColor = mIsSelected
+        final String brandText;
+        if (BRAND_RESOURCE_MAP.containsKey(mCardBrand)) {
+            brandText = getResources().getString(BRAND_RESOURCE_MAP.get(mCardBrand));
+        } else {
+            brandText = getResources().getString(R.string.unknown);
+        }
+        final String normalText = getResources().getString(R.string.ending_in);
+        final int brandLength = brandText.length();
+        final int middleLength = normalText.length();
+        final int last4length = mLast4.length();
+        @ColorInt final int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
+        @ColorInt final int lightTextColor = mIsSelected
                 ? mSelectedAlphaColorInt
                 : mUnselectedTextAlphaColorInt;
 
-        SpannableString str = new SpannableString(brandText + normalText + mLast4);
+        final SpannableString str = new SpannableString(brandText + normalText + mLast4);
         str.setSpan(
                 new TypefaceSpan("sans-serif-medium"),
                 0,
@@ -219,6 +232,7 @@ public class MaskedCardView extends LinearLayout {
                 brandLength + middleLength,
                 brandLength + middleLength + last4length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         mCardInformationTextView.setText(str);
     }
 
