@@ -12,9 +12,9 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
-import com.stripe.android.PaymentMethodCallback;
 import com.stripe.android.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
@@ -264,14 +264,14 @@ public class AddPaymentMethodActivity extends StripeActivity {
     }
 
     /**
-     * Abstract implementation of {@link PaymentMethodCallback} that holds a {@link WeakReference} to
-     * an {@link Activity} object.
+     * Abstract implementation of {@link ApiResultCallback<PaymentMethod>} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
      */
     public abstract static class ActivityPaymentMethodCallback<A extends Activity>
-            implements PaymentMethodCallback {
+            implements ApiResultCallback<PaymentMethod> {
         @NonNull private final WeakReference<A> mActivityRef;
 
-        public ActivityPaymentMethodCallback(@NonNull A activity) {
+        ActivityPaymentMethodCallback(@NonNull A activity) {
             mActivityRef = new WeakReference<>(activity);
         }
 

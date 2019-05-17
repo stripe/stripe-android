@@ -17,8 +17,6 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,7 +34,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -161,78 +158,6 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
-        String fakePublicKey = "fake_public_key";
-        String idempotencyKey = "idempotency_rules";
-        String stripeAccount = "acct_123abc";
-        final RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
-                .setIdempotencyKey(idempotencyKey)
-                .setStripeAccount(stripeAccount)
-                .build();
-        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
-                .getHeaders(requestOptions);
-
-        assertNotNull(headerMap);
-        assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
-        assertEquals(idempotencyKey, headerMap.get("Idempotency-Key"));
-        assertEquals(ApiVersion.DEFAULT_API_VERSION, headerMap.get("Stripe-Version"));
-        assertEquals(stripeAccount, headerMap.get("Stripe-Account"));
-    }
-
-    @Test
-    public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
-        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
-                .getHeaders(RequestOptions.builder("some_key")
-                        .build());
-
-        assertFalse(headerMap.containsKey("Idempotency-Key"));
-        assertTrue(headerMap.containsKey("Stripe-Version"));
-        assertFalse(headerMap.containsKey("Stripe-Account"));
-        assertTrue(headerMap.containsKey("Authorization"));
-    }
-
-    @Test
-    public void getHeaders_containsPropertyMapValues() throws JSONException {
-        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
-                .getHeaders(RequestOptions.builder("some_key")
-                        .build());
-
-        final String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
-        final JSONObject mapObject = new JSONObject(userAgentRawString);
-        assertEquals(BuildConfig.VERSION_NAME, mapObject.getString("bindings.version"));
-        assertEquals("Java", mapObject.getString("lang"));
-        assertEquals("Stripe", mapObject.getString("publisher"));
-        assertEquals("android", mapObject.getString("os.name"));
-        assertTrue(mapObject.has("java.version"));
-    }
-
-    @Test
-    public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
-        final Map<String, String> headerMap = new RequestExecutor.ConnectionFactory()
-                .getHeaders(RequestOptions.builder("some_key")
-                        .build());
-
-        final String expectedUserAgent =
-                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                        BuildConfig.VERSION_NAME);
-        assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
-        assertEquals("application/json", headerMap.get("Accept"));
-        assertEquals("UTF-8", headerMap.get("Accept-Charset"));
-    }
-
-    @Test
-    public void createQuery_withCardData_createsProperQueryString()
-            throws UnsupportedEncodingException, InvalidRequestException {
-        final Map<String, Object> cardMap =
-                new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                        .hashMapFromCard(CARD);
-        final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
-                "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
-        final String query = new RequestExecutor.ConnectionFactory().createQuery(cardMap);
-        assertEquals(expectedValue, query);
-    }
-
-    @Test
     public void createSource_shouldLogSourceCreation_andReturnSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
@@ -306,7 +231,7 @@ public class StripeApiHandlerTest {
                         StripeApiHandler.getSourcesUrl(),
                         SourceParams.createCardParams(CARD).toParamMap(),
                         RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                                connectAccountId, RequestOptions.TYPE_QUERY)
+                                connectAccountId, RequestOptions.RequestType.QUERY)
                                 .build())
         );
         assertNotNull(response);
@@ -426,7 +351,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getPaymentMethods_whenPopulated_returnsExpectedList()
-            throws StripeException {
+            throws StripeException, UnsupportedEncodingException {
         final String responseBody =
                 "{\n" +
                 "    \"object\": \"list\",\n" +
@@ -562,10 +487,17 @@ public class StripeApiHandlerTest {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("customer", "cus_123");
         queryParams.put("type", PaymentMethod.Type.Card.code);
+
+        final String url = StripeRequest.createGet(
+                StripeApiHandler.getPaymentMethodsUrl(),
+                queryParams,
+                RequestOptions.builder("key").build())
+                .getUrl();
+
         when(mRequestExecutor.execute(argThat(
                 new StripeRequestMatcher(
                         StripeRequest.Method.GET,
-                        StripeApiHandler.getPaymentMethodsUrl(),
+                        url,
                         queryParams
                 ))))
                 .thenReturn(stripeResponse);
@@ -586,7 +518,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void getPaymentMethods_whenNotPopulated_returnsEmptydList()
-            throws StripeException {
+            throws StripeException, UnsupportedEncodingException {
         final String responseBody =
                 "{\n" +
                         "    \"object\": \"list\",\n" +
@@ -599,10 +531,17 @@ public class StripeApiHandlerTest {
         final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("customer", "cus_123");
         queryParams.put("type", PaymentMethod.Type.Card.code);
+
+        final String url = StripeRequest.createGet(
+                StripeApiHandler.getPaymentMethodsUrl(),
+                queryParams,
+                RequestOptions.builder("key").build())
+                .getUrl();
+
         when(mRequestExecutor.execute(argThat(
                 new StripeRequestMatcher(
                         StripeRequest.Method.GET,
-                        StripeApiHandler.getPaymentMethodsUrl(),
+                        url,
                         queryParams
                 ))))
                 .thenReturn(stripeResponse);
