@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.0.1 2019-05-17
+* [#945](https://github.com/stripe/stripe-android/pull/945) Add `business_type` param to Account tokenization when available
+
 ## 9.0.0 2019-05-06
 Note: this release has breaking changes. See [MIGRATING.md](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md)
 * [#873](https://github.com/stripe/stripe-android/pull/873) Update pinned API version to `2019-03-14`
