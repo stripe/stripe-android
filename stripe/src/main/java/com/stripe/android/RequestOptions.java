@@ -13,10 +13,11 @@ import java.lang.annotation.RetentionPolicy;
 class RequestOptions {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_QUERY, TYPE_JSON})
-    public @interface RequestType {}
-    static final String TYPE_QUERY = "source";
-    static final String TYPE_JSON = "json_data";
+    @StringDef({RequestType.QUERY, RequestType.JSON})
+    public @interface RequestType {
+        String QUERY = "source";
+        String JSON = "json_data";
+    }
 
     @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
@@ -74,13 +75,13 @@ class RequestOptions {
 
     /**
      * Static accessor for the {@link Builder} class. Creates
-     * a builder for a {@link #TYPE_QUERY} options item
+     * a builder for a {@link RequestType#QUERY} options item
      *
      * @param publishableApiKey your publishable API key
      * @return a {@link Builder} instance
      */
     public static Builder builder(@Nullable String publishableApiKey) {
-        return builder(publishableApiKey, TYPE_QUERY);
+        return builder(publishableApiKey, RequestType.QUERY);
     }
 
     @NonNull
