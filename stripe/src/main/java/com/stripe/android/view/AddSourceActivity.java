@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.stripe.android.ActivitySourceCallback;
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
@@ -225,7 +226,8 @@ public class AddSourceActivity extends StripeActivity {
     }
 
     private static final class SourceCallbackImpl
-            extends ActivitySourceCallback<AddSourceActivity> {
+            extends ActivitySourceCallback<AddSourceActivity>
+            implements ApiResultCallback<Source> {
         private final boolean mUpdatesCustomer;
 
         private SourceCallbackImpl(@NonNull AddSourceActivity activity,
