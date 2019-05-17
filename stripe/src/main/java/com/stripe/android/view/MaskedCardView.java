@@ -101,7 +101,7 @@ public class MaskedCardView extends LinearLayout {
     void setPaymentMethod(@NonNull PaymentMethod paymentMethod) {
         mCardBrand = paymentMethod.card != null ?
                 paymentMethod.card.brand : PaymentMethod.Card.UNKNOWN;
-        mLast4 = paymentMethod.card != null ? paymentMethod.card.last4 : null;
+        mLast4 = paymentMethod.card != null ? paymentMethod.card.last4 : "";
         updateBrandIcon();
         updateCardInformation();
     }

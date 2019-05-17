@@ -9,6 +9,8 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 
@@ -63,70 +65,22 @@ public class MaskedCardViewTest {
     }
 
     @Test
-    public void setCard_setsCorrectData() {
-        Card card = new Card(CardInputTestActivity.VALID_AMEX_NO_SPACES, 12, 50, "1234");
-        mMaskedCardView.setCard(card);
-        assertEquals("0005", mMaskedCardView.getLast4());
-        assertEquals(Card.AMERICAN_EXPRESS, mMaskedCardView.getCardBrand());
-        assertFalse(mMaskedCardView.isSelected());
-    }
-
-    @Test
-    public void setSourceCardData_withCardSource_setsCorrectData() {
-        Source source = Source.fromString(EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(source);
-        assertTrue(source.getSourceTypeModel() instanceof SourceCardData);
-        SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-        assertNotNull(sourceCardData);
-
-        mMaskedCardView.setSourceCardData(sourceCardData);
-        assertEquals(Card.VISA, mMaskedCardView.getCardBrand());
+    public void setPaymentMethod_setsCorrectData() {
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
+        mMaskedCardView.setPaymentMethod(paymentMethod);
         assertEquals("4242", mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isSelected());
-    }
-
-    @Test
-    public void setCustomerSource_withNonCardSource_setsNoData() {
-        CustomerSource customerSource = CustomerSource.fromString(EXAMPLE_JSON_SOURCE_BITCOIN);
-        assertNotNull(customerSource);
-        assertNotNull(customerSource.asSource());
-
-        mMaskedCardView.setCustomerSource(customerSource);
-        assertNull(mMaskedCardView.getCardBrand());
-        assertNull(mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isSelected());
-    }
-
-    @Test
-    public void setCustomerSource_withCardSource_setsCorrectData() {
-        CustomerSource customerSource = CustomerSource.fromString(EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(customerSource);
-        assertNotNull(customerSource.asSource());
-
-        mMaskedCardView.setCustomerSource(customerSource);
-        assertEquals(Card.VISA, mMaskedCardView.getCardBrand());
-        assertEquals("4242", mMaskedCardView.getLast4());
-        assertFalse(mMaskedCardView.isSelected());
-    }
-
-    @Test
-    public void setCustomerSource_withCardObject_setsCorrectData() {
-        CustomerSource customerSource = CustomerSource.fromString(JSON_CARD);
-        assertNotNull(customerSource);
-        assertNotNull(customerSource.asCard());
-        assertNull(customerSource.asSource());
-
-        mMaskedCardView.setCustomerSource(customerSource);
-        assertEquals(Card.MASTERCARD, mMaskedCardView.getCardBrand());
-        assertEquals("5555", mMaskedCardView.getLast4());
+        assertEquals(PaymentMethod.Card.VISA, mMaskedCardView.getCardBrand());
         assertFalse(mMaskedCardView.isSelected());
     }
 
     @Test
     public void setSelected_changesCheckMarkVisibility() {
-        CustomerSource customerSource = CustomerSource.fromString(JSON_CARD);
-        assertNotNull(customerSource);
-        mMaskedCardView.setCustomerSource(customerSource);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
+        mMaskedCardView.setPaymentMethod(paymentMethod);
 
         assertFalse(mMaskedCardView.isSelected());
         assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
@@ -139,9 +93,10 @@ public class MaskedCardViewTest {
 
     @Test
     public void toggleSelected_switchesState() {
-        CustomerSource customerSource = CustomerSource.fromString(JSON_CARD);
-        assertNotNull(customerSource);
-        mMaskedCardView.setCustomerSource(customerSource);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
+        mMaskedCardView.setPaymentMethod(paymentMethod);
         assertFalse(mMaskedCardView.isSelected());
 
         mMaskedCardView.toggleSelected();
@@ -155,9 +110,7 @@ public class MaskedCardViewTest {
 
     @Test
     public void whenSourceNotCard_doesNotCrash() {
-        SourceCardData sourceCardData = Mockito.mock(SourceCardData.class);
-        Mockito.when(sourceCardData.getBrand()).thenReturn("unrecognized_brand");
-        Mockito.when(sourceCardData.getLast4()).thenReturn("");
-        mMaskedCardView.setSourceCardData(sourceCardData);
+        final PaymentMethod paymentMethod = Mockito.mock(PaymentMethod.class);
+        mMaskedCardView.setPaymentMethod(paymentMethod);
     }
 }
