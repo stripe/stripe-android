@@ -134,6 +134,10 @@ public class PaymentMethod extends StripeJsonModel {
 
     @Nullable
     public static PaymentMethod fromString(@Nullable String jsonString) {
+        if (jsonString == null) {
+            return null;
+        }
+
         try {
             return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
