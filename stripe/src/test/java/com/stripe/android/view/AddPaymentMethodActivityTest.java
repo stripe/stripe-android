@@ -12,10 +12,10 @@ import android.widget.ProgressBar;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.CustomerSessionTestHelper;
 import com.stripe.android.PaymentConfiguration;
-import com.stripe.android.PaymentMethodCallback;
 import com.stripe.android.R;
 import com.stripe.android.Stripe;
 import com.stripe.android.exception.StripeException;
@@ -41,8 +41,8 @@ import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
-import static com.stripe.android.view.AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY;
 import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_PROXY_DELAY;
+import static com.stripe.android.view.AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -68,7 +68,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     private AddPaymentMethodActivity mActivity;
     private ShadowActivity mShadowActivity;
     private ArgumentCaptor<PaymentMethodCreateParams> mParamsArgumentCaptor;
-    private ArgumentCaptor<PaymentMethodCallback> mCallbackArgumentCaptor;
+    private ArgumentCaptor<ApiResultCallback<PaymentMethod>> mCallbackArgumentCaptor;
 
 
     @Mock private Stripe mStripe;
@@ -86,7 +86,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         CustomerSessionTestHelper.setInstance(mCustomerSession);
 
         mParamsArgumentCaptor = ArgumentCaptor.forClass(PaymentMethodCreateParams.class);
-        mCallbackArgumentCaptor = ArgumentCaptor.forClass(PaymentMethodCallback.class);
+        mCallbackArgumentCaptor = ArgumentCaptor.forClass(ApiResultCallback.class);
     }
 
     @After
@@ -167,7 +167,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final PaymentMethodCallback callback = mCallbackArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);
         assertNotNull(callback);
 
@@ -207,7 +207,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
         verify(mStripe, never()).createPaymentMethod(
                 any(PaymentMethodCreateParams.class),
-                any(PaymentMethodCallback.class));
+                any(ApiResultCallback.class));
     }
 
     @Test
@@ -231,7 +231,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final PaymentMethodCallback callback = mCallbackArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);
         assertNotNull(callback);
 
@@ -276,7 +276,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final PaymentMethodCallback callback = mCallbackArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);
         assertNotNull(callback);
 
@@ -341,7 +341,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final PaymentMethodCallback callback = mCallbackArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);
         assertNotNull(callback);
 
@@ -385,7 +385,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final PaymentMethodCallback callback = mCallbackArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);
         assertNotNull(callback);
 

@@ -111,7 +111,7 @@ public class Stripe {
      * @param bankAccount the {@link BankAccount} for which to create a {@link Token}
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *                 default non-ui executor
+     *         default non-ui executor
      * @param callback a {@link TokenCallback} to receive the result or error message
      */
     public void createBankAccountToken(
@@ -152,7 +152,7 @@ public class Stripe {
      * @param personalId the personal id used to create this token
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *                 default non-ui executor
+     *         default non-ui executor
      * @param callback a {@link TokenCallback} to receive the result or error message
      */
     public void createPiiToken(
@@ -176,14 +176,13 @@ public class Stripe {
      *
      * @param bankAccount the {@link Card} to use for this token
      * @return a {@link Token} that can be used for this {@link BankAccount}
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws CardException should not be thrown with this type of token, but is theoretically
-     * possible given the underlying methods called
+     *         possible given the underlying methods called
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     *         Stripe's servers
      */
     public Token createBankAccountTokenSynchronous(final BankAccount bankAccount)
             throws AuthenticationException,
@@ -201,17 +200,16 @@ public class Stripe {
      * @param bankAccount the {@link BankAccount} to use for this token
      * @param publishableKey the publishable key to use with this request
      * @return a {@link Token} that can be used for this {@link BankAccount}
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws CardException should not be thrown with this type of token, but is theoretically
-     * possible given the underlying methods called
+     *         possible given the underlying methods called
      * @throws APIException any other type of problem
      */
     public Token createBankAccountTokenSynchronous(
-                final BankAccount bankAccount,
-                String publishableKey)
+            final BankAccount bankAccount,
+            String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -249,7 +247,7 @@ public class Stripe {
      * @param cvc the CVC used to create this token
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *                 default non-ui executor
+     *         default non-ui executor
      * @param callback a {@link TokenCallback} to receive the result or error message
      */
     public void createCvcUpdateToken(
@@ -303,10 +301,11 @@ public class Stripe {
      * with a publishable api key that has already been set on this {@link Stripe} instance.
      *
      * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link PaymentMethodCallback} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback<PaymentMethod>} to receive a result or an error
+     *         message
      */
     public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-                                    @NonNull PaymentMethodCallback callback) {
+                                    @NonNull ApiResultCallback<PaymentMethod> callback) {
         createPaymentMethod(paymentMethodCreateParams, callback, null, null);
     }
 
@@ -314,13 +313,14 @@ public class Stripe {
      * Create a {@link PaymentMethod} using an {@link AsyncTask}.
      *
      * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link PaymentMethodCallback} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback<PaymentMethod>} to receive a result or an error
+     *         message
      * @param publishableKey the publishable api key to be used
      * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
      */
     public void createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull PaymentMethodCallback callback,
+            @NonNull ApiResultCallback<PaymentMethod> callback,
             @Nullable String publishableKey,
             @Nullable Executor executor) {
         final String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
@@ -360,9 +360,10 @@ public class Stripe {
 
     /**
      * Call to create a {@link Token} on a specific {@link Executor}.
+     *
      * @param card the {@link Card} to use for this token creation
      * @param executor An {@link Executor} on which to run this operation. If you don't wish to
-     *                 specify an executor, use one of the other createTokenFromParams methods.
+     *         specify an executor, use one of the other createTokenFromParams methods.
      * @param callback a {@link TokenCallback} to receive the result of this operation
      */
     public void createToken(
@@ -378,7 +379,7 @@ public class Stripe {
      * @param card the {@link Card} used for this token
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *                 default non-ui executor
+     *         default non-ui executor
      * @param callback a {@link TokenCallback} to receive the result or error message
      */
     public void createToken(
@@ -407,12 +408,11 @@ public class Stripe {
      *
      * @param params a set of {@link SourceParams} with which to create the source
      * @return a {@link Source}, or {@code null} if a problem occurred
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     *         Stripe's servers
      */
     @Nullable
     public Source createSourceSynchronous(@NonNull SourceParams params)
@@ -434,7 +434,7 @@ public class Stripe {
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     *         Stripe's servers
      */
     @Nullable
     public Source createSourceSynchronous(
@@ -458,7 +458,6 @@ public class Stripe {
      * @param paymentIntentParams a set of params with which to retrieve the Payment Intent
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     *
      * @throws AuthenticationException
      * @throws InvalidRequestException
      * @throws APIConnectionException
@@ -484,7 +483,6 @@ public class Stripe {
      * @param paymentIntentParams a set of params with which to confirm the Payment Intent
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     *
      * @throws AuthenticationException
      * @throws InvalidRequestException
      * @throws APIConnectionException
@@ -511,7 +509,6 @@ public class Stripe {
      * @param paymentMethodCreateParams params with which to create the PaymentMethod
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentMethod} or {@code null} if a problem occurred
-     *
      * @throws AuthenticationException
      * @throws InvalidRequestException
      * @throws APIConnectionException
@@ -533,13 +530,12 @@ public class Stripe {
      *
      * @param card the {@link Card} to use for this token
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws CardException the card cannot be charged for some reason
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
+     *         Stripe's servers
      */
     public Token createTokenSynchronous(final Card card)
             throws AuthenticationException,
@@ -557,12 +553,11 @@ public class Stripe {
      * @param card the {@link Card} to use for this token
      * @param publishableKey the publishable key to use with this request
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     public Token createTokenSynchronous(final Card card, String publishableKey)
             throws AuthenticationException,
@@ -589,12 +584,11 @@ public class Stripe {
      *
      * @param personalId the personal ID to use for this token
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     public Token createPiiTokenSynchronous(@NonNull String personalId)
             throws AuthenticationException,
@@ -612,12 +606,11 @@ public class Stripe {
      * @param personalId the personal ID to use for this token
      * @param publishableKey the publishable key to use with this request
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     public Token createPiiTokenSynchronous(@NonNull String personalId, String publishableKey)
             throws AuthenticationException,
@@ -643,12 +636,11 @@ public class Stripe {
      *
      * @param cvc the CVC to use for this token
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     @Nullable
     public Token createCvcUpdateTokenSynchronous(@NonNull String cvc)
@@ -667,12 +659,11 @@ public class Stripe {
      * @param cvc the CVC to use for this token
      * @param publishableKey the publishable key to use with this request
      * @return a {@link Token} that can be used for this card
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     @Nullable
     public Token createCvcUpdateTokenSynchronous(@NonNull String cvc,
@@ -701,12 +692,11 @@ public class Stripe {
      *
      * @param accountParams params to use for this token.
      * @return a {@link Token} that can be used for this account.
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     @Nullable
     public Token createAccountTokenSynchronous(@NonNull final AccountParams accountParams)
@@ -723,14 +713,13 @@ public class Stripe {
      *
      * @param accountParams params to use for this token.
      * @param publishableKey the publishable key to use with this request. If null is passed in as
-     *                       the publishable key, we will use the default publishable key.
+     *         the publishable key, we will use the default publishable key.
      * @return a {@link Token} that can be used for this account.
-     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     @Nullable
     public Token createAccountTokenSynchronous(
@@ -791,13 +780,12 @@ public class Stripe {
      * @param sourceId the {@link Source#getId()} field of the desired Source object
      * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
      * @return a {@link Source} if one could be found based on the input params, or {@code null} if
-     * no such Source could be found.
-     *
+     *         no such Source could be found.
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     public Source retrieveSourceSynchronous(
             @NonNull @Size(min = 1) String sourceId,
@@ -818,13 +806,12 @@ public class Stripe {
      * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
      * @param publishableKey a publishable API key to use
      * @return a {@link Source} if one could be found based on the input params, or {@code null} if
-     * no such Source could be found.
-     *
+     *         no such Source could be found.
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
      * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
+     *         Stripe's servers)
      */
     public Source retrieveSourceSynchronous(
             @NonNull @Size(min = 1) String sourceId,
@@ -854,9 +841,9 @@ public class Stripe {
     /**
      * Set the Stripe Connect account to use with this Stripe instance.
      *
-     * @see <a href=https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header>
-     *     Authentication via the stripe account header</a>
      * @param stripeAccount the account ID to be set
+     * @see <a href=https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header>
+     *         Authentication via the stripe account header</a>
      */
     public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
         mStripeAccount = stripeAccount;
@@ -982,13 +969,13 @@ public class Stripe {
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
-        @NonNull private final PaymentMethodCallback mPaymentMethodCallback;
+        @NonNull private final ApiResultCallback<PaymentMethod> mPaymentMethodCallback;
 
         CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
                                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
                                 @NonNull String publishableKey,
                                 @Nullable String stripeAccount,
-                                @NonNull PaymentMethodCallback paymentMethodCallback) {
+                                @NonNull ApiResultCallback<PaymentMethod> paymentMethodCallback) {
             mApiHandler = apiHandler;
             mPaymentMethodCreateParams = paymentMethodCreateParams;
             mPublishableKey = publishableKey;
