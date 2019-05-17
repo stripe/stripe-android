@@ -7,12 +7,8 @@ import android.view.View;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Card;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,13 +18,9 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
 
-import static com.stripe.android.view.CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE;
-import static com.stripe.android.view.CardInputTestActivity.EXAMPLE_JSON_SOURCE_BITCOIN;
-import static com.stripe.android.view.CardInputTestActivity.JSON_CARD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**

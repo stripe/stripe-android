@@ -30,9 +30,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.util.Locale;
