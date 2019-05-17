@@ -8,7 +8,6 @@ import android.widget.ImageView;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.testharness.TestFocusChangeListener;
 import com.stripe.android.testharness.ViewTestUtils;
