@@ -61,13 +61,16 @@ public class MaskedCardView extends LinearLayout {
     static {
         ICON_RESOURCE_MAP
                 .put(PaymentMethod.Card.Brand.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
-        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.DINERS_CLUB, R.drawable.ic_diners_template_32);
-        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.DISCOVER, R.drawable.ic_discover_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.DINERS_CLUB, R.drawable.ic_diners_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.DISCOVER, R.drawable.ic_discover_template_32);
         ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.JCB, R.drawable.ic_jcb_template_32);
         ICON_RESOURCE_MAP
                 .put(PaymentMethod.Card.Brand.MASTERCARD, R.drawable.ic_mastercard_template_32);
         ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.VISA, R.drawable.ic_visa_template_32);
-        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.UNIONPAY, R.drawable.ic_unionpay_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.UNIONPAY, R.drawable.ic_unionpay_template_32);
         ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.UNKNOWN, R.drawable.ic_unknown);
 
         BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.AMERICAN_EXPRESS, R.string.amex_short);
