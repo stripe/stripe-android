@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-public class AuthWebViewStarterTest {
+public class PaymentPaymentAuthWebViewStarterTest {
     @Mock private Activity mActivity;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     @Captor private ArgumentCaptor<Integer> mRequestCodeCaptor;
@@ -33,7 +33,7 @@ public class AuthWebViewStarterTest {
 
     @Test
     public void start_startsWithCorrectIntentAndRequestCode() {
-        new AuthWebViewStarter(mActivity)
+        new PaymentAuthWebViewStarter(mActivity)
                 .start(PaymentIntentFixtures.REDIRECT_DATA);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 mRequestCodeCaptor.capture());
@@ -43,6 +43,6 @@ public class AuthWebViewStarterTest {
         assertNotNull(extras);
         assertEquals(2, extras.size());
 
-        assertTrue(AuthWebViewStarter.isAuthWebViewResult(mRequestCodeCaptor.getValue()));
+        assertTrue(PaymentAuthWebViewStarter.isAuthWebViewResult(mRequestCodeCaptor.getValue()));
     }
 }

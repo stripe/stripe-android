@@ -6,18 +6,19 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.android.R;
 
-public class AuthWebViewActivity extends AppCompatActivity {
+public class PaymentAuthWebViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.auth_web_view_layout);
+        setContentView(R.layout.payment_auth_web_view_layout);
 
-        final String returnUrl = getIntent().getStringExtra(AuthWebViewStarter.EXTRA_RETURN_URL);
+        final String returnUrl = getIntent()
+                .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
-        final AuthWebView webView = findViewById(R.id.auth_web_view);
+        final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
         webView.init(this, returnUrl);
-        webView.loadUrl(getIntent().getStringExtra(AuthWebViewStarter.EXTRA_AUTH_URL));
+        webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
     }
 
     @Override

@@ -7,9 +7,10 @@ import android.support.annotation.NonNull;
 import com.stripe.android.model.PaymentIntent;
 
 /**
- * A class that manages starting a {@link AuthWebViewActivity} instance with the correct arguments.
+ * A class that manages starting a {@link PaymentAuthWebViewActivity} instance with the correct
+ * arguments.
  */
-public class AuthWebViewStarter {
+public class PaymentAuthWebViewStarter {
     static final String EXTRA_AUTH_URL = "auth_url";
     static final String EXTRA_RETURN_URL = "return_url";
 
@@ -17,7 +18,7 @@ public class AuthWebViewStarter {
 
     @NonNull private final Activity mActivity;
 
-    public AuthWebViewStarter(@NonNull Activity activity) {
+    PaymentAuthWebViewStarter(@NonNull Activity activity) {
         mActivity = activity;
     }
 
@@ -26,7 +27,7 @@ public class AuthWebViewStarter {
      *
      */
     public void start(@NonNull PaymentIntent.RedirectData redirectData) {
-        final Intent intent = new Intent(mActivity, AuthWebViewActivity.class)
+        final Intent intent = new Intent(mActivity, PaymentAuthWebViewActivity.class)
                 .putExtra(EXTRA_AUTH_URL, redirectData.url.toString())
                 .putExtra(EXTRA_RETURN_URL, redirectData.returnUrl != null ?
                         redirectData.returnUrl.toString() : null);

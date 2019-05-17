@@ -24,27 +24,28 @@ import com.stripe.android.R;
  * <p>
  * [0] https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url
  */
-class AuthWebView extends WebView {
+class PaymentAuthWebView extends WebView {
     @SuppressWarnings("RedundantModifier")
-    public AuthWebView(@NonNull Context context) {
+    public PaymentAuthWebView(@NonNull Context context) {
         this(context, null);
     }
 
     @SuppressWarnings("RedundantModifier")
-    public AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public PaymentAuthWebView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         configureSettings();
     }
 
     @SuppressWarnings("RedundantModifier")
-    public AuthWebView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PaymentAuthWebView(@NonNull Context context, @Nullable AttributeSet attrs,
+                              int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         configureSettings();
     }
 
     void init(@NonNull Activity activity, @NonNull String returnUrl) {
-        setWebViewClient(new AuthWebViewClient(activity, returnUrl));
-        setWebChromeClient(new AuthWebViewChromeClient(activity));
+        setWebViewClient(new PaymentAuthWebViewClient(activity, returnUrl));
+        setWebChromeClient(new PaymentAuthWebViewChromeClient(activity));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -53,10 +54,10 @@ class AuthWebView extends WebView {
         getSettings().setAllowContentAccess(false);
     }
 
-    static class AuthWebViewChromeClient extends WebChromeClient {
+    static class PaymentAuthWebViewChromeClient extends WebChromeClient {
         @NonNull private final ProgressBar mProgressBar;
 
-        AuthWebViewChromeClient(@NonNull Activity activity) {
+        PaymentAuthWebViewChromeClient(@NonNull Activity activity) {
             mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
         }
 
@@ -74,11 +75,11 @@ class AuthWebView extends WebView {
         }
     }
 
-    static class AuthWebViewClient extends WebViewClient {
+    static class PaymentAuthWebViewClient extends WebViewClient {
         @NonNull private final Activity mActivity;
         @NonNull private final Uri mReturnUrl;
 
-        AuthWebViewClient(@NonNull Activity activity, @NonNull String returnUrl) {
+        PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull String returnUrl) {
             mActivity = activity;
             mReturnUrl = Uri.parse(returnUrl);
         }

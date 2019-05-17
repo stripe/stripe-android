@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-public class AuthWebViewTest {
+public class PaymentAuthWebViewTest {
 
     @Mock private Activity mActivity;
     @Mock private WebView mWebView;
@@ -33,10 +33,10 @@ public class AuthWebViewTest {
     public void shouldOverrideUrlLoading_shouldSetResult() {
         final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
                         "payment_intent_client_secret=pi_123_secret_456&source_type=card";
-        final AuthWebView.AuthWebViewClient authWebViewClient =
-                new AuthWebView.AuthWebViewClient(mActivity,
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
                         "stripe://payment_intent_return");
-        authWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
         verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
         verify(mActivity).finish();
 
