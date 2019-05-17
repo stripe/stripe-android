@@ -71,7 +71,7 @@ public class MaskedCardViewTest {
         assertNotNull(paymentMethod);
         mMaskedCardView.setPaymentMethod(paymentMethod);
         assertEquals("4242", mMaskedCardView.getLast4());
-        assertEquals(PaymentMethod.Card.VISA, mMaskedCardView.getCardBrand());
+        assertEquals(PaymentMethod.Card.Brand.VISA, mMaskedCardView.getCardBrand());
         assertFalse(mMaskedCardView.isSelected());
     }
 

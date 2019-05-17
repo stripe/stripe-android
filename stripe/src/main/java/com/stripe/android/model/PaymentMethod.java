@@ -400,24 +400,25 @@ public class PaymentMethod extends StripeJsonModel {
 
         @Retention(RetentionPolicy.SOURCE)
         @StringDef({
-                AMERICAN_EXPRESS,
-                DISCOVER,
-                JCB,
-                DINERS_CLUB,
-                VISA,
-                MASTERCARD,
-                UNIONPAY,
-                UNKNOWN
+                Brand.AMERICAN_EXPRESS,
+                Brand.DISCOVER,
+                Brand.JCB,
+                Brand.DINERS_CLUB,
+                Brand.VISA,
+                Brand.MASTERCARD,
+                Brand.UNIONPAY,
+                Brand.UNKNOWN
         })
-        public @interface Brand { }
-        public static final String AMERICAN_EXPRESS = "amex";
-        public static final String DISCOVER = "discover";
-        public static final String JCB = "jcb";
-        public static final String DINERS_CLUB = "diners";
-        public static final String VISA = "visa";
-        public static final String MASTERCARD = "mastercard";
-        public static final String UNIONPAY = "unionpay";
-        public static final String UNKNOWN = "unknown";
+        public @interface Brand {
+            String AMERICAN_EXPRESS = "amex";
+            String DISCOVER = "discover";
+            String JCB = "jcb";
+            String DINERS_CLUB = "diners";
+            String VISA = "visa";
+            String MASTERCARD = "mastercard";
+            String UNIONPAY = "unionpay";
+            String UNKNOWN = "unknown";
+        }
 
         @Nullable @Brand public final String brand;
         @Nullable public final Checks checks;
