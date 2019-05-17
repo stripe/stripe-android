@@ -235,7 +235,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @SuppressWarnings("checkstyle:LineLength")
     private static final class PaymentMethodRetrievalListenerImpl
             extends CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity> {
-        PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
+        private PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
             super(activity);
         }
 
