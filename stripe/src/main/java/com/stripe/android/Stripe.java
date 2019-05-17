@@ -959,6 +959,9 @@ public class Stripe {
                 mSourceCallback.onSuccess(responseWrapper.result);
             } else if (responseWrapper.error != null) {
                 mSourceCallback.onError(responseWrapper.error);
+            } else {
+                mSourceCallback.onError(new RuntimeException(
+                        "Somehow got neither a source response or an error response"));
             }
         }
     }
@@ -1003,6 +1006,9 @@ public class Stripe {
                 mPaymentMethodCallback.onSuccess(responseWrapper.result);
             } else if (responseWrapper.error != null) {
                 mPaymentMethodCallback.onError(responseWrapper.error);
+            } else {
+                mPaymentMethodCallback.onError(new RuntimeException(
+                        "Somehow got neither a payment method response or an error response"));
             }
         }
     }
