@@ -135,9 +135,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
     private void onCreatedPaymentIntent(@NonNull ResponseBody responseBody) {
         try {
             final JSONObject jsonObject = new JSONObject(responseBody.string());
-            final PaymentIntent paymentIntent = PaymentIntent.fromJson(jsonObject);
             mPaymentIntentValue.setText(jsonObject.toString());
-            mClientSecret = paymentIntent.getClientSecret();
+            mClientSecret = jsonObject.getString("secret");
             mConfirmPaymentIntent.setEnabled(mClientSecret != null);
             mRetrievePaymentIntent.setEnabled(mClientSecret != null);
 
