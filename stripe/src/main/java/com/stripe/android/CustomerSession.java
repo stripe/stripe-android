@@ -888,6 +888,24 @@ public class CustomerSession {
     }
 
     /**
+     * Abstract implementation of {@link PaymentMethodsRetrievalListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivityPaymentMethodsRetrievalListener<A extends Activity>
+            implements PaymentMethodsRetrievalListener {
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityPaymentMethodsRetrievalListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
+    }
+
+    /**
      * Abstract implementation of {@link SourceRetrievalListener} that holds a
      * {@link WeakReference} to an {@link Activity} object.
      */
@@ -914,24 +932,6 @@ public class CustomerSession {
         @NonNull private final WeakReference<A> mActivityRef;
 
         public ActivityPaymentMethodRetrievalListener(@NonNull A activity) {
-            this.mActivityRef = new WeakReference<>(activity);
-        }
-
-        @Nullable
-        protected A getActivity() {
-            return mActivityRef.get();
-        }
-    }
-
-    /**
-     * Abstract implementation of {@link PaymentMethodsRetrievalListener} that holds a
-     * {@link WeakReference} to an {@link Activity} object.
-     */
-    public abstract static class ActivityPaymentMethodsRetrievalListener<A extends Activity>
-            implements PaymentMethodsRetrievalListener {
-        @NonNull private final WeakReference<A> mActivityRef;
-
-        public ActivityPaymentMethodsRetrievalListener(@NonNull A activity) {
             this.mActivityRef = new WeakReference<>(activity);
         }
 
