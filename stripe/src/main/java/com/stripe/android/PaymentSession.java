@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
@@ -87,7 +88,18 @@ public class PaymentSession {
         } else if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case PAYMENT_METHOD_REQUEST: {
-                    fetchCustomer();
+                    final PaymentMethod paymentMethod = PaymentMethod.fromString(
+                                    data.getStringExtra(
+                                            PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT));
+                    if (paymentMethod != null) {
+                        mPaymentSessionData.setPaymentMethod(paymentMethod);
+                        mPaymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
+                        if (mPaymentSessionListener != null) {
+                            mPaymentSessionListener
+                                    .onPaymentSessionDataChanged(mPaymentSessionData);
+                            mPaymentSessionListener.onCommunicatingStateChanged(false);
+                        }
+                    }
                     return true;
                 }
                 case PAYMENT_SHIPPING_DETAILS_REQUEST: {
@@ -231,8 +243,6 @@ public class PaymentSession {
                 new CustomerSession.CustomerRetrievalListener() {
                     @Override
                     public void onCustomerRetrieved(@NonNull Customer customer) {
-                        String paymentId = customer.getDefaultSource();
-                        mPaymentSessionData.setSelectedPaymentMethodId(paymentId);
                         mPaymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener
