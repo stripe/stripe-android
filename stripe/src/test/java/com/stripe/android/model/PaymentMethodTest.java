@@ -10,7 +10,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class PaymentMethodTest {
-    private static final String RAW_CARD_JSON = "{\n" +
+    public static final String RAW_CARD_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +
             "\t\"created\": 1550757934255,\n" +
             "\t\"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -32,7 +32,7 @@ public class PaymentMethodTest {
             "\t\t\"phone\": \"123-456-7890\"\n" +
             "\t},\n" +
             "\t\"card\": {\n" +
-            "\t\t\"brand\": \"Visa\",\n" +
+            "\t\t\"brand\": \"visa\",\n" +
             "\t\t\"checks\": {\n" +
             "\t\t\t\"address_line1_check\": \"unchecked\",\n" +
             "\t\t\t\"cvc_check\": \"unchecked\"\n" +
@@ -73,7 +73,7 @@ public class PaymentMethodTest {
             "}";
 
     private static final PaymentMethod.Card CARD = new PaymentMethod.Card.Builder()
-            .setBrand("Visa")
+            .setBrand(PaymentMethod.Card.Brand.VISA)
             .setChecks(new PaymentMethod.Card.Checks.Builder()
                     .setAddressLine1Check("unchecked")
                     .setAddressPostalCodeCheck(null)

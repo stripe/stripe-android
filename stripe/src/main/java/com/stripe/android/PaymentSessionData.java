@@ -5,33 +5,33 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
+import com.stripe.android.utils.ObjectUtils;
 
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
  */
 public class PaymentSessionData implements Parcelable {
 
-    private static final String NO_PAYMENT = "NO_PAYMENT";
-
     private long mCartTotal = 0L;
     private boolean mIsPaymentReadyToCharge;
-    @NonNull private String mSelectedPaymentMethodId = NO_PAYMENT;
     private long mShippingTotal = 0L;
     @NonNull @PaymentResultListener.PaymentResult private String mPaymentResult =
             PaymentResultListener.INCOMPLETE;
     @Nullable private ShippingInformation mShippingInformation;
     @Nullable private ShippingMethod mShippingMethod;
+    @Nullable private PaymentMethod mPaymentMethod;
 
     public PaymentSessionData() { }
 
     /**
-     * @return the selected payment method ID for the associated {@link PaymentSession}
+     * @return the selected payment method for the associated {@link PaymentSession}
      */
     @Nullable
-    public String getSelectedPaymentMethodId() {
-        return mSelectedPaymentMethodId.equals(NO_PAYMENT) ? null : mSelectedPaymentMethodId;
+    public PaymentMethod getPaymentMethod() {
+        return mPaymentMethod;
     }
 
     /**
@@ -131,10 +131,8 @@ public class PaymentSessionData implements Parcelable {
         mPaymentResult = result;
     }
 
-    void setSelectedPaymentMethodId(@Nullable String selectedPaymentMethodId) {
-        mSelectedPaymentMethodId = selectedPaymentMethodId == null
-                ? NO_PAYMENT
-                : selectedPaymentMethodId;
+    void setPaymentMethod(@Nullable PaymentMethod paymentMethod) {
+        mPaymentMethod = paymentMethod;
     }
 
     void setShippingTotal(long shippingTotal) {
@@ -149,7 +147,7 @@ public class PaymentSessionData implements Parcelable {
      * @return whether the data is ready to charge
      */
     public boolean updateIsPaymentReadyToCharge(@NonNull PaymentSessionConfig config) {
-        if (StripeTextUtils.isBlank(getSelectedPaymentMethodId()) ||
+        if (getPaymentMethod() == null ||
                 (config.isShippingInfoRequired() && getShippingInformation() == null) ||
                 (config.isShippingMethodRequired() && getShippingMethod() == null)) {
             setPaymentReadyToCharge(false);
@@ -160,37 +158,25 @@ public class PaymentSessionData implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        return this == obj || (obj instanceof PaymentSessionData && typedEquals(
+                (PaymentSessionData) obj));
+    }
 
-        PaymentSessionData that = (PaymentSessionData) o;
-
-        if (mCartTotal != that.mCartTotal) return false;
-        if (mIsPaymentReadyToCharge != that.mIsPaymentReadyToCharge) return false;
-        if (mShippingTotal != that.mShippingTotal) return false;
-        if (!mSelectedPaymentMethodId.equals(that.mSelectedPaymentMethodId)) return false;
-        if (!mPaymentResult.equals(that.mPaymentResult)) return false;
-        if (mShippingInformation != null
-                ? !mShippingInformation.equals(that.mShippingInformation)
-                : that.mShippingInformation != null) {
-            return false;
-        }
-        return mShippingMethod != null
-                ? mShippingMethod.equals(that.mShippingMethod)
-                : that.mShippingMethod == null;
+    private boolean typedEquals(@NonNull PaymentSessionData data) {
+        return ObjectUtils.equals(mCartTotal, data.mCartTotal)
+                && ObjectUtils.equals(mIsPaymentReadyToCharge, data.mIsPaymentReadyToCharge)
+                && ObjectUtils.equals(mShippingTotal, data.mShippingTotal)
+                && ObjectUtils.equals(mShippingInformation, data.mShippingInformation)
+                && ObjectUtils.equals(mShippingMethod, data.mShippingMethod)
+                && ObjectUtils.equals(mPaymentMethod, data.mPaymentMethod)
+                && ObjectUtils.equals(mPaymentResult, data.mPaymentResult);
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (mCartTotal ^ (mCartTotal >>> 32));
-        result = 31 * result + (mIsPaymentReadyToCharge ? 1 : 0);
-        result = 31 * result + mSelectedPaymentMethodId.hashCode();
-        result = 31 * result + (int) (mShippingTotal ^ (mShippingTotal >>> 32));
-        result = 31 * result + mPaymentResult.hashCode();
-        result = 31 * result + (mShippingInformation != null ? mShippingInformation.hashCode() : 0);
-        result = 31 * result + (mShippingMethod != null ? mShippingMethod.hashCode() : 0);
-        return result;
+        return ObjectUtils.hash(mCartTotal, mIsPaymentReadyToCharge, mPaymentMethod,
+                mShippingTotal, mPaymentResult, mShippingInformation, mShippingMethod);
     }
 
     /************** Parcelable *********************/
@@ -204,7 +190,7 @@ public class PaymentSessionData implements Parcelable {
         parcel.writeLong(mCartTotal);
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeString(mPaymentResult);
-        parcel.writeString(mSelectedPaymentMethodId);
+        parcel.writeString(mPaymentMethod != null ? mPaymentMethod.toJson().toString() : null);
         parcel.writeParcelable(mShippingInformation, i);
         parcel.writeParcelable(mShippingMethod, i);
         parcel.writeLong(mShippingTotal);
@@ -226,7 +212,7 @@ public class PaymentSessionData implements Parcelable {
         mCartTotal = in.readLong();
         mIsPaymentReadyToCharge = in.readInt() == 1;
         mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
-        mSelectedPaymentMethodId = in.readString();
+        mPaymentMethod = PaymentMethod.fromString(in.readString());
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());
         mShippingTotal = in.readLong();

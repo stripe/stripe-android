@@ -2,7 +2,7 @@ package com.stripe.android;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import com.stripe.android.view.AddSourceActivity;
+import com.stripe.android.view.AddPaymentMethodActivity;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,11 +14,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 @RunWith(AndroidJUnit4.class)
-public class AddSourceActivityTest {
+public class AddPaymentMethodActivityTest {
 
     @Rule
-    public ActivityTestRule<AddSourceActivity> mActivityRule =
-            new ActivityTestRule(AddSourceActivity.class);
+    public ActivityTestRule<AddPaymentMethodActivity> mActivityRule =
+            new ActivityTestRule(AddPaymentMethodActivity.class);
 
     @Test
     public void titleRenders() {

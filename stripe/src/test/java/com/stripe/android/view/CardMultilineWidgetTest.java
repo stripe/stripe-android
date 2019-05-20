@@ -7,6 +7,8 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.testharness.ViewTestUtils;
 
 import org.junit.After;
@@ -247,6 +249,112 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertNull(card.getAddressZip());
         assertTrue(card.validateCard());
         assertArrayEquals(EXPECTED_LOGGING_ARRAY, card.getLoggingTokens().toArray());
+    }
+
+    @Test
+    public void getPaymentMethodCard_whenInputIsValidVisaWithZip_returnsCardAndBillingDetails() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mFullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        final PaymentMethodCreateParams.Card card =
+                mCardMultilineWidget.getPaymentMethodCard();
+        assertNotNull(card);
+
+        final PaymentMethodCreateParams.Card inputCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_VISA_NO_SPACES)
+                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(inputCard, card);
+
+        final PaymentMethod.BillingDetails billingDetails =
+                mCardMultilineWidget.getPaymentMethodBillingDetails();
+
+        assertEquals("12345", billingDetails.address.getPostalCode());
+    }
+
+    @Test
+    public void getPaymentMethodCard_whenInputIsValidVisaButInputHasNoZip_returnsNull() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mFullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+
+        final PaymentMethodCreateParams.Card card =
+                mNoZipCardMultilineWidget.getPaymentMethodCard();
+        assertNull(card);
+    }
+
+    @Test
+    public void getPaymentMethodCard_whenInputIsValidVisaAndNoZipRequired_returnsFullCard() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mNoZipGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mNoZipGroup.expiryDateEditText.append("12");
+        mNoZipGroup.expiryDateEditText.append("50");
+        mNoZipGroup.cvcEditText.append("123");
+        final PaymentMethodCreateParams.Card card =
+                mNoZipCardMultilineWidget.getPaymentMethodCard();
+        assertNotNull(card);
+
+        final PaymentMethodCreateParams.Card inputCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_VISA_NO_SPACES)
+                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(inputCard, card);
+
+        assertNull(mNoZipCardMultilineWidget.getPaymentMethodBillingDetails());
+    }
+
+    @Test
+    public void getPaymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCard() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mNoZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mNoZipGroup.expiryDateEditText.append("12");
+        mNoZipGroup.expiryDateEditText.append("50");
+        mNoZipGroup.cvcEditText.append("1234");
+
+        final PaymentMethodCreateParams.Card card =
+                mNoZipCardMultilineWidget.getPaymentMethodCard();
+
+        assertNotNull(card);
+
+        final PaymentMethodCreateParams.Card inputCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("1234").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(inputCard, card);
+
+        assertNull(mNoZipCardMultilineWidget.getPaymentMethodBillingDetails());
+    }
+
+    @Test
+    public void getPaymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCard() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mNoZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
+        mNoZipGroup.expiryDateEditText.append("12");
+        mNoZipGroup.expiryDateEditText.append("50");
+        mNoZipGroup.cvcEditText.append("123");
+        final PaymentMethodCreateParams.Card card =
+                mNoZipCardMultilineWidget.getPaymentMethodCard();
+
+        assertNotNull(card);
+        final PaymentMethodCreateParams.Card inputCard =
+                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+        assertEquals(inputCard, card);
+
+        assertNull(mNoZipCardMultilineWidget.getPaymentMethodBillingDetails());
     }
 
     @Test

@@ -13,9 +13,10 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.Source;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
-import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 import org.junit.Before;
@@ -82,21 +83,17 @@ public class PaymentSessionTest {
         final Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
         assertNotNull(secondCustomer);
 
-        final Source addedSource =
-                Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
-        assertNotNull(addedSource);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
 
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(firstCustomer, secondCustomer);
-        when(mApiHandler.addCustomerSource(
-                anyString(),
-                anyString(),
-                ArgumentMatchers.<String>anyList(),
-                anyString(),
+        when(mApiHandler.createPaymentMethod(
+                any(PaymentMethodCreateParams.class),
                 anyString(),
                 anyString()
-        ))
-                .thenReturn(addedSource);
+        )).thenReturn(paymentMethod);
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
                 anyString(),
@@ -169,10 +166,18 @@ public class PaymentSessionTest {
         reset(mPaymentSessionListener);
 
         boolean handled = paymentSession.handlePaymentData(
-                PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK, new Intent());
+                PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK,
+                new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
+                        PaymentMethodTest.RAW_CARD_JSON));
 
         assertTrue(handled);
-        verify(mPaymentSessionListener).onPaymentSessionDataChanged(any(PaymentSessionData.class));
+
+        verify(mPaymentSessionListener)
+                .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
+        final PaymentSessionData data = mPaymentSessionDataArgumentCaptor.getValue();
+        assertNotNull(data);
+        assertEquals(PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON),
+                data.getPaymentMethod());
     }
 
     @Test
@@ -200,7 +205,8 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
-        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        customerSession
+                .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY);
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
         PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -209,8 +215,8 @@ public class PaymentSessionTest {
         // The init removes PaymentMethodsActivity, but then adds PaymentSession
         final Set<String> loggingTokens = customerSession.getProductUsageTokens();
         assertEquals(1, loggingTokens.size());
-        assertFalse(loggingTokens.contains("PaymentMethodsActivity"));
-        assertTrue(loggingTokens.contains("PaymentSession"));
+        assertFalse(loggingTokens.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY));
+        assertTrue(loggingTokens.contains(PaymentSession.TOKEN_PAYMENT_SESSION));
     }
 
     @Test
@@ -218,7 +224,8 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
-        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        customerSession
+                .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY);
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
         PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -228,8 +235,8 @@ public class PaymentSessionTest {
 
         final Set<String> loggingTokens = customerSession.getProductUsageTokens();
         assertEquals(2, loggingTokens.size());
-        assertTrue(loggingTokens.contains("PaymentMethodsActivity"));
-        assertTrue(loggingTokens.contains("PaymentSession"));
+        assertTrue(loggingTokens.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY));
+        assertTrue(loggingTokens.contains(PaymentSession.TOKEN_PAYMENT_SESSION));
     }
 
     @Test
@@ -237,7 +244,8 @@ public class PaymentSessionTest {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
-        customerSession.addProductUsageTokenIfValid("PaymentMethodsActivity");
+        customerSession
+                .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY);
         assertEquals(1, customerSession.getProductUsageTokens().size());
 
         PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -293,8 +301,8 @@ public class PaymentSessionTest {
                 mPaymentSessionDataArgumentCaptor.getValue();
         assertEquals(firstPaymentSessionData.getCartTotal(),
                 secondPaymentSessionData.getCartTotal());
-        assertEquals(firstPaymentSessionData.getSelectedPaymentMethodId(),
-                secondPaymentSessionData.getSelectedPaymentMethodId());
+        assertEquals(firstPaymentSessionData.getPaymentMethod(),
+                secondPaymentSessionData.getPaymentMethod());
     }
 
     @NonNull

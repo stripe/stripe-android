@@ -23,10 +23,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
-import com.stripe.android.model.Card;
-import com.stripe.android.model.CustomerSource;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
+import com.stripe.android.model.PaymentMethod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +41,7 @@ import static com.stripe.android.view.ViewUtils.getThemeTextColorSecondary;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MaskedCardView extends LinearLayout {
 
-    private @Card.CardBrand String mCardBrand;
+    @PaymentMethod.Card.Brand private String mCardBrand;
     private String mLast4;
     private boolean mIsSelected;
 
@@ -52,23 +49,38 @@ public class MaskedCardView extends LinearLayout {
     private AppCompatTextView mCardInformationTextView;
     private AppCompatImageView mCheckMarkImageView;
 
-    @ColorInt int mSelectedAlphaColorInt;
-    @ColorInt int mSelectedColorInt;
-    @ColorInt int mUnselectedColorInt;
-    @ColorInt int mUnselectedTextAlphaColorInt;
-    @ColorInt int mUnselectedTextColorInt;
+    @ColorInt private int mSelectedAlphaColorInt;
+    @ColorInt private int mSelectedColorInt;
+    @ColorInt private int mUnselectedColorInt;
+    @ColorInt private int mUnselectedTextAlphaColorInt;
+    @ColorInt private int mUnselectedTextColorInt;
 
-    static final Map<String, Integer> TEMPLATE_RESOURCE_MAP = new HashMap<>();
+    @NonNull private static final Map<String, Integer> ICON_RESOURCE_MAP = new HashMap<>();
+    @NonNull private static final Map<String, Integer> BRAND_RESOURCE_MAP = new HashMap<>();
 
     static {
-        TEMPLATE_RESOURCE_MAP.put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.DINERS_CLUB, R.drawable.ic_diners_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.DISCOVER, R.drawable.ic_discover_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.JCB, R.drawable.ic_jcb_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.MASTERCARD, R.drawable.ic_mastercard_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.VISA, R.drawable.ic_visa_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.UNIONPAY, R.drawable.ic_unionpay_template_32);
-        TEMPLATE_RESOURCE_MAP.put(Card.UNKNOWN, R.drawable.ic_unknown);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.AMERICAN_EXPRESS, R.drawable.ic_amex_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.DINERS_CLUB, R.drawable.ic_diners_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.DISCOVER, R.drawable.ic_discover_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.JCB, R.drawable.ic_jcb_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.MASTERCARD, R.drawable.ic_mastercard_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.VISA, R.drawable.ic_visa_template_32);
+        ICON_RESOURCE_MAP
+                .put(PaymentMethod.Card.Brand.UNIONPAY, R.drawable.ic_unionpay_template_32);
+        ICON_RESOURCE_MAP.put(PaymentMethod.Card.Brand.UNKNOWN, R.drawable.ic_unknown);
+
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.AMERICAN_EXPRESS, R.string.amex_short);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.DINERS_CLUB, R.string.diners_club);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.DISCOVER, R.string.discover);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.JCB, R.string.jcb);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.MASTERCARD, R.string.mastercard);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.VISA, R.string.visa);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.UNIONPAY, R.string.unionpay);
+        BRAND_RESOURCE_MAP.put(PaymentMethod.Card.Brand.UNKNOWN, R.string.unknown);
     }
 
     public MaskedCardView(Context context) {
@@ -99,53 +111,12 @@ public class MaskedCardView extends LinearLayout {
         updateCardInformation();
     }
 
-    /**
-     * Set the card data displayed using a {@link Card} object. Note that
-     * the full number will not be accessed here.
-     *
-     * @param card the {@link Card} to be partially displayed
-     */
-    void setCard(@NonNull Card card) {
-        mCardBrand = card.getBrand();
-        mLast4 = card.getLast4();
+    void setPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+        mCardBrand = paymentMethod.card != null ?
+                paymentMethod.card.brand : PaymentMethod.Card.Brand.UNKNOWN;
+        mLast4 = paymentMethod.card != null ? paymentMethod.card.last4 : "";
         updateBrandIcon();
         updateCardInformation();
-    }
-
-    /**
-     * Set the card data displayed using a {@link SourceCardData} object.
-     *
-     * @param sourceCardData the {@link SourceCardData} to be partially displayed
-     */
-    void setSourceCardData(@NonNull SourceCardData sourceCardData) {
-        mCardBrand = sourceCardData.getBrand();
-        mLast4 = sourceCardData.getLast4();
-        updateBrandIcon();
-        updateCardInformation();
-    }
-
-    /**
-     * Set the card data displayed using a {@link CustomerSource} object. If the object
-     * is not a {@link Source} object that represents a card and the object returns {@code null}
-     * from its {@link CustomerSource#asCard()} method, then no values will be set on this control.
-     *
-     * @param customerSource the {@link CustomerSource} to be partially displayed
-     */
-    void setCustomerSource(@NonNull CustomerSource customerSource) {
-        Source source = customerSource.asSource();
-        if (source != null
-                && source.getSourceTypeModel() != null
-                && Source.CARD.equals(source.getType())
-                && source.getSourceTypeModel() instanceof SourceCardData) {
-            SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            setSourceCardData(sourceCardData);
-            return;
-        }
-
-        Card card = customerSource.asCard();
-        if (card != null) {
-            setCard(card);
-        }
     }
 
     /**
@@ -165,7 +136,7 @@ public class MaskedCardView extends LinearLayout {
         return colorValues;
     }
 
-    @Card.CardBrand
+    @PaymentMethod.Card.Brand
     @VisibleForTesting
     String getCardBrand() {
         return mCardBrand;
@@ -176,7 +147,7 @@ public class MaskedCardView extends LinearLayout {
         return mLast4;
     }
 
-    void init() {
+    private void init() {
         inflate(getContext(), R.layout.masked_card_view, this);
         setOrientation(HORIZONTAL);
         setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
@@ -203,10 +174,10 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateBrandIcon() {
-        if (mCardBrand == null || !TEMPLATE_RESOURCE_MAP.containsKey(mCardBrand)) {
+        if (mCardBrand == null || !ICON_RESOURCE_MAP.containsKey(mCardBrand)) {
             return;
         }
-        @DrawableRes int iconResourceId = TEMPLATE_RESOURCE_MAP.get(mCardBrand);
+        @DrawableRes int iconResourceId = ICON_RESOURCE_MAP.get(mCardBrand);
         updateDrawable(iconResourceId, mCardIconImageView, false);
     }
 
@@ -223,19 +194,22 @@ public class MaskedCardView extends LinearLayout {
     }
 
     private void updateCardInformation() {
-        String brandText = Card.AMERICAN_EXPRESS.equals(mCardBrand)
-                ? getResources().getString(R.string.amex_short)
-                : mCardBrand;
-        String normalText = getResources().getString(R.string.ending_in);
-        int brandLength = brandText.length();
-        int middleLength = normalText.length();
-        int last4length = mLast4.length();
-        @ColorInt int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
-        @ColorInt int lightTextColor = mIsSelected
+        final String brandText;
+        if (BRAND_RESOURCE_MAP.containsKey(mCardBrand)) {
+            brandText = getResources().getString(BRAND_RESOURCE_MAP.get(mCardBrand));
+        } else {
+            brandText = getResources().getString(R.string.unknown);
+        }
+        final String normalText = getResources().getString(R.string.ending_in);
+        final int brandLength = brandText.length();
+        final int middleLength = normalText.length();
+        final int last4length = mLast4.length();
+        @ColorInt final int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
+        @ColorInt final int lightTextColor = mIsSelected
                 ? mSelectedAlphaColorInt
                 : mUnselectedTextAlphaColorInt;
 
-        SpannableString str = new SpannableString(brandText + normalText + mLast4);
+        final SpannableString str = new SpannableString(brandText + normalText + mLast4);
         str.setSpan(
                 new TypefaceSpan("sans-serif-medium"),
                 0,
@@ -261,6 +235,7 @@ public class MaskedCardView extends LinearLayout {
                 brandLength + middleLength,
                 brandLength + middleLength + last4length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         mCardInformationTextView.setText(str);
     }
 

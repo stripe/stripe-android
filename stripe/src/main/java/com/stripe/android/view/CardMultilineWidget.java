@@ -24,7 +24,10 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -109,6 +112,47 @@ public class CardMultilineWidget extends LinearLayout {
     public void setCardInputListener(@Nullable CardInputListener cardInputListener) {
         mCardInputListener = cardInputListener;
     }
+
+    /**
+     * Gets a {@link PaymentMethodCreateParams.Card} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams.Card} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethodCreateParams.Card getPaymentMethodCard() {
+        if (validateAllFields()) {
+            final int[] cardDate = mExpiryDateEditText.getValidDateFields();
+
+            return new PaymentMethodCreateParams.Card.Builder()
+                    .setNumber(mCardNumberEditText.getCardNumber())
+                    .setCvc(mCvcEditText.getText().toString())
+                    .setExpiryMonth(cardDate[0])
+                    .setExpiryYear(cardDate[1]).build();
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets a {@link PaymentMethod.BillingDetails} object from the user input, if all fields are
+     * valid. If not returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethod.BillingDetails} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethod.BillingDetails getPaymentMethodBillingDetails() {
+        if (mShouldShowPostalCode && validateAllFields()) {
+            return new PaymentMethod.BillingDetails.Builder().setAddress(
+                    new Address.Builder().setPostalCode(mPostalCodeEditText.getText().toString())
+                            .build()).build();
+        }
+
+        return null;
+    }
+
 
     /**
      * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns

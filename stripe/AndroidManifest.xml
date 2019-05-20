@@ -7,7 +7,7 @@
 
     <application>
         <activity
-            android:name=".view.AddSourceActivity"
+            android:name=".view.AddPaymentMethodActivity"
             android:theme="@style/StripeDefaultTheme"
             android:windowSoftInputMode="stateVisible" />
 
