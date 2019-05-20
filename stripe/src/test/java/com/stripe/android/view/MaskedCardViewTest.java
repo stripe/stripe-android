@@ -102,7 +102,8 @@ public class MaskedCardViewTest {
 
     @Test
     public void whenSourceNotCard_doesNotCrash() {
-        final PaymentMethod paymentMethod = Mockito.mock(PaymentMethod.class);
+        final PaymentMethod paymentMethod = new PaymentMethod.Builder().build();
+
         mMaskedCardView.setPaymentMethod(paymentMethod);
     }
 }

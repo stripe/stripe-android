@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -49,7 +50,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Mock private CustomerSession mCustomerSession;
 
     private List<PaymentMethod> mPaymentMethods;
-    private ArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> mListenerArgumentCaptor;
+    @Captor private ArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> mListenerArgumentCaptor;
 
     private PaymentMethodsActivity mPaymentMethodsActivity;
     private ProgressBar mProgressBar;
@@ -68,9 +69,6 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
 
         mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON),
                 PaymentMethod.fromString(MaskedCardAdapterTest.PAYMENT_METHOD_JSON));
-
-        mListenerArgumentCaptor = ArgumentCaptor.forClass(
-                CustomerSession.PaymentMethodsRetrievalListener.class);
 
         mPaymentMethodsActivity = createActivity();
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);

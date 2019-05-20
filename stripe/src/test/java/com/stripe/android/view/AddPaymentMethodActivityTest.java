@@ -28,6 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -67,8 +70,8 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     private ProgressBar mProgressBar;
     private AddPaymentMethodActivity mActivity;
     private ShadowActivity mShadowActivity;
-    private ArgumentCaptor<PaymentMethodCreateParams> mParamsArgumentCaptor;
-    private ArgumentCaptor<ApiResultCallback<PaymentMethod>> mCallbackArgumentCaptor;
+    @Captor private ArgumentCaptor<PaymentMethodCreateParams> mParamsArgumentCaptor;
+    @Captor private ArgumentCaptor<ApiResultCallback<PaymentMethod>> mCallbackArgumentCaptor;
 
 
     @Mock private Stripe mStripe;
@@ -84,9 +87,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
-
-        mParamsArgumentCaptor = ArgumentCaptor.forClass(PaymentMethodCreateParams.class);
-        mCallbackArgumentCaptor = ArgumentCaptor.forClass(ApiResultCallback.class);
     }
 
     @After
@@ -207,7 +207,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
         verify(mStripe, never()).createPaymentMethod(
                 any(PaymentMethodCreateParams.class),
-                any(ApiResultCallback.class));
+                ArgumentMatchers.<ApiResultCallback<PaymentMethod>>any());
     }
 
     @Test
