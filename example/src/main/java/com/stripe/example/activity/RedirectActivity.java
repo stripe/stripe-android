@@ -74,7 +74,6 @@ public class RedirectActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         mRedirectAdapter = new RedirectAdapter();
         recyclerView.setAdapter(mRedirectAdapter);
-
     }
 
     @Override
@@ -209,7 +208,7 @@ public class RedirectActivity extends AppCompatActivity {
         final SourceRedirect sourceRedirect = source.getRedirect();
         final String redirectUrl = sourceRedirect != null ? sourceRedirect.getUrl() : null;
         if (redirectUrl != null) {
-            mRedirectDialogController.showDialog(redirectUrl);
+            mRedirectDialogController.showDialog(redirectUrl, source.getSourceTypeData());
         }
     }
 

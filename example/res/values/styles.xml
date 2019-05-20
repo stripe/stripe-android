@@ -1,39 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Button" parent="@android:style/Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
-        <item name="android:textColor">@color/buttonText</item>
-        <item name="android:background">@drawable/btn_default_holo_dark</item>
-    </style>
-
-    <style name="Save" parent="@style/Button">
-        <item name="android:layout_marginTop">4dp</item>
-    </style>
-
     <style name="Header" parent="@android:style/Widget.TextView">
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/header_dark</item>
         <item name="android:layout_marginBottom">5dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingStart">3dp</item>
+        <item name="android:paddingEnd">3dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/headerText</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="Header.Light" parent="@android:style/Widget.TextView">
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/header_light</item>
-        <item name="android:layout_marginBottom">5dp</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingLeft">3dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
-    </style>
 </resources>

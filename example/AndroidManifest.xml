@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.stripe.example"
-          android:versionCode="1"
-          android:versionName="1.0">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.stripe.example"
+    android:versionCode="1"
+    android:versionName="1.0">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/appName"
-        android:name=".ExampleApplication">
+        android:name=".ExampleApplication"
+        tools:ignore="AllowBackup">
 
         <!-- Enables the Google Payment API -->
         <meta-data
@@ -18,7 +20,7 @@
 
         <activity
             android:name=".activity.PaymentActivity"
-            android:theme="@style/SampleTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
@@ -26,7 +28,7 @@
         <activity
             android:name=".activity.PaymentIntentActivity"
             android:launchMode="singleInstance"
-            android:theme="@style/SampleTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,7 +46,7 @@
         <activity
             android:name=".activity.RedirectActivity"
             android:launchMode="singleTask"
-            android:theme="@style/SampleTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
@@ -69,7 +71,7 @@
         <activity
             android:name=".activity.LauncherActivity"
             android:launchMode="singleTask"
-            android:theme="@style/SampleTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -78,27 +80,27 @@
         </activity>
         <activity
             android:name=".activity.CustomerSessionActivity"
-            android:theme="@style/SampleThemeDefault">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".activity.PaymentMultilineActivity"
-            android:theme="@style/SampleThemeDefault">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".activity.PaymentSessionActivity"
-            android:theme="@style/SampleThemeDefault">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity android:name=".activity.PayWithGoogleActivity"
-                  android:theme="@style/SampleThemeDefault">
+                  android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>

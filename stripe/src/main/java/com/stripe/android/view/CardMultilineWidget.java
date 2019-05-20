@@ -32,7 +32,6 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
@@ -604,7 +603,7 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
         updateCvc();
-        updateDrawable(BRAND_RESOURCE_MAP.get(brand), Card.UNKNOWN.equals(brand));
+        updateDrawable(Card.getBrandIcon(brand), Card.UNKNOWN.equals(brand));
     }
 
     private void updateCvc() {

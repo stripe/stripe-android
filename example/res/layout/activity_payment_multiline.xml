@@ -11,7 +11,7 @@
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addPayment"
-              style="@style/Header.Light"
+              style="@style/Header"
         />
 
     <com.stripe.android.view.CardMultilineWidget
@@ -31,7 +31,7 @@
     <TextView android:id="@+id/source_list_title"
               android:text="@string/paymentMethods"
               android:layout_marginTop="12dp"
-              style="@style/Header.Light"
+              style="@style/Header"
         />
 
     <ListView
