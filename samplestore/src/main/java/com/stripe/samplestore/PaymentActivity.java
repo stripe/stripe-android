@@ -28,15 +28,11 @@ import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.model.Source;
 import com.stripe.samplestore.service.StripeService;
-
-import okhttp3.ResponseBody;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -48,6 +44,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED;
