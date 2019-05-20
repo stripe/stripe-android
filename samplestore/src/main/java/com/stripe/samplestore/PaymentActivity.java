@@ -240,12 +240,12 @@ public class PaymentActivity extends AppCompatActivity {
 
     @NonNull
     private Map<String, Object> createParams(long price,
-                                             @Nullable String sourceId,
+                                             @Nullable String paymentMethodId,
                                              @Nullable String customerId,
                                              @Nullable ShippingInformation shippingInformation) {
         final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
-        params.put("source", sourceId);
+        params.put("payment_method", paymentMethodId);
         params.put("customer_id", customerId);
         params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
         params.put("return_url", "stripe://payment-auth-return");
