@@ -13,8 +13,7 @@ import android.widget.TextView;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 import com.stripe.example.R;
@@ -67,20 +66,19 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            final String selectedSource = data
-                    .getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            Source source = Source.fromString(selectedSource);
-            // Note: it isn't possible for a null or non-card source to be returned.
-            if (source != null && Source.CARD.equals(source.getType())) {
-                SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
-                mSelectedSourceTextView.setText(buildCardString(cardData));
+            final String selectedPaymentMethod =
+                    data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            final PaymentMethod paymentMethod = PaymentMethod.fromString(selectedPaymentMethod);
+
+            if (paymentMethod != null && paymentMethod.card != null) {
+                mSelectedSourceTextView.setText(buildCardString(paymentMethod.card));
             }
         }
     }
 
     @NonNull
-    private String buildCardString(@NonNull SourceCardData data) {
-        return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
+    private String buildCardString(@NonNull PaymentMethod.Card data) {
+        return data.brand + getString(R.string.ending_in) + data.last4;
     }
 
     private void onCustomerRetrieved() {
