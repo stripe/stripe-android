@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
@@ -41,26 +43,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
     @Nullable private CardMultilineWidget mCardMultilineWidget;
-    @Nullable private StripeProvider mStripeProvider;
+    @Nullable private Stripe mStripe;
 
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
-
-    @NonNull private final TextView.OnEditorActionListener mOnEditorActionListener =
-            new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
-                        if (mCardMultilineWidget.getCard() != null) {
-                            ((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE))
-                                    .hideSoftInputFromWindow(mViewStub.getWindowToken(), 0);
-                        }
-                        onActionSave();
-                        return true;
-                    }
-                    return false;
-                }
-            };
 
     /**
      * Create an {@link Intent} to start a {@link AddPaymentMethodActivity}.
@@ -84,10 +70,11 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mStripe = new Stripe(getApplicationContext());
         mViewStub.setLayoutResource(R.layout.activity_add_source);
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
-        initEnterListeners();
+        initEnterListeners(mCardMultilineWidget);
         final boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mStartedFromPaymentSession =
@@ -101,15 +88,17 @@ public class AddPaymentMethodActivity extends StripeActivity {
         setTitle(R.string.title_add_a_card);
     }
 
-    private void initEnterListeners() {
-        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
-                .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
-                .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
-                .setOnEditorActionListener(mOnEditorActionListener);
-        ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
-                .setOnEditorActionListener(mOnEditorActionListener);
+    private void initEnterListeners(@NonNull View cardMultilineWidget) {
+        final TextView.OnEditorActionListener listener = new OnEditorActionListenerImpl(this,
+                (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE));
+        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
+                .setOnEditorActionListener(listener);
+        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
+                .setOnEditorActionListener(listener);
+        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
+                .setOnEditorActionListener(listener);
+        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
+                .setOnEditorActionListener(listener);
     }
 
     @VisibleForTesting
@@ -124,6 +113,11 @@ public class AddPaymentMethodActivity extends StripeActivity {
             return;
         }
 
+        createPaymentMethod(mStripe);
+    }
+
+    @VisibleForTesting
+    void createPaymentMethod(@NonNull Stripe stripe) {
         final PaymentMethodCreateParams.Card card = mCardMultilineWidget.getPaymentMethodCard();
         final PaymentMethod.BillingDetails billingDetails =
                 mCardMultilineWidget.getPaymentMethodBillingDetails();
@@ -136,14 +130,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(card, billingDetails);
 
-        final Stripe stripe = getStripe();
         stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
-
         setCommunicatingProgress(true);
-
         stripe.createPaymentMethod(paymentMethodCreateParams,
                 new PaymentMethodCallbackImpl(this, mUpdatesCustomer));
-
     }
 
     private void attachPaymentMethodToCustomer(@NonNull final PaymentMethod paymentMethod) {
@@ -167,13 +157,13 @@ public class AddPaymentMethodActivity extends StripeActivity {
         finish();
     }
 
-    @NonNull
-    private Stripe getStripe() {
-        if (mStripeProvider == null) {
-            return new Stripe(getApplicationContext());
-        } else {
-            return mStripeProvider.getStripe(this);
-        }
+    boolean hasValidCard() {
+        return mCardMultilineWidget.getCard() != null;
+    }
+
+    @Nullable
+    IBinder getWindowToken() {
+        return mViewStub.getWindowToken();
     }
 
     @Override
@@ -182,16 +172,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
         if (mCardMultilineWidget != null) {
             mCardMultilineWidget.setEnabled(!communicating);
         }
-    }
-
-    @VisibleForTesting
-    void setStripeProvider(@NonNull StripeProvider stripeProvider) {
-        mStripeProvider = stripeProvider;
-    }
-
-    interface StripeProvider {
-        @NonNull
-        Stripe getStripe(@NonNull Context context);
     }
 
     private static final class PaymentMethodCallbackImpl
@@ -232,9 +212,8 @@ public class AddPaymentMethodActivity extends StripeActivity {
         }
     }
 
-    @SuppressWarnings("checkstyle:LineLength")
-    private static final class PaymentMethodRetrievalListenerImpl
-            extends CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity> {
+    private static final class PaymentMethodRetrievalListenerImpl extends
+            CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity> {
         private PaymentMethodRetrievalListenerImpl(@NonNull AddPaymentMethodActivity activity) {
             super(activity);
         }
@@ -278,6 +257,32 @@ public class AddPaymentMethodActivity extends StripeActivity {
         @Nullable
         public A getActivity() {
             return mActivityRef.get();
+        }
+    }
+
+    @VisibleForTesting
+    static final class OnEditorActionListenerImpl
+            implements TextView.OnEditorActionListener {
+        @NonNull private final AddPaymentMethodActivity mActivity;
+        @NonNull private final InputMethodManager mInputMethodManager;
+
+        OnEditorActionListenerImpl(@NonNull AddPaymentMethodActivity activity,
+                                   @NonNull InputMethodManager inputMethodManager) {
+            mActivity = activity;
+            mInputMethodManager = inputMethodManager;
+
+        }
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (mActivity.hasValidCard()) {
+                    mInputMethodManager.hideSoftInputFromWindow(mActivity.getWindowToken(), 0);
+                }
+                mActivity.onActionSave();
+                return true;
+            }
+            return false;
         }
     }
 }
