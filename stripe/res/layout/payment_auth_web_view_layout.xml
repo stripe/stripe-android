@@ -11,7 +11,7 @@
         android:background="?attr/colorPrimary"
         android:elevation="@dimen/toolbar_elevation"
         android:theme="@style/StripeToolBarStyle"
-        app:title="@string/title_payment_auth_web_view" />
+        app:title="Secure Checkout" />
 
     <com.stripe.android.view.PaymentAuthWebView
         android:id="@+id/auth_web_view"
