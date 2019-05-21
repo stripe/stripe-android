@@ -511,7 +511,7 @@ public class PaymentIntent extends StripeJsonModel {
         }
     }
 
-    static final class SdkData {
+    public static final class SdkData {
         private static final String FIELD_TYPE = "type";
 
         private static final String TYPE_3DS2 = "stripe_3ds2_fingerprint";
@@ -525,11 +525,11 @@ public class PaymentIntent extends StripeJsonModel {
             this.data = data;
         }
 
-        boolean is3ds2() {
+        public boolean is3ds2() {
             return TYPE_3DS2.equals(type);
         }
 
-        boolean is3ds1() {
+        public boolean is3ds1() {
             return TYPE_3DS1.equals(type);
         }
     }

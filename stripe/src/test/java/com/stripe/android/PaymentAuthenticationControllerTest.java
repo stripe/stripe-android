@@ -23,11 +23,12 @@ public class PaymentAuthenticationControllerTest {
     private PaymentAuthenticationController mController;
 
     @Mock private Activity mActivity;
+    @Mock private StripeApiHandler mApiHandler;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new PaymentAuthenticationController();
+        mController = new PaymentAuthenticationController(mApiHandler);
     }
 
     @Test

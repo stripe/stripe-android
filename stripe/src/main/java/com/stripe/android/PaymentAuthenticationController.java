@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * A controller responsible for authenticating payment (typically through resolving any required
@@ -24,13 +25,19 @@ class PaymentAuthenticationController {
     static final int REQUEST_CODE = 50000;
     private static final String TAG = "PaymentAuthentication";
 
+    @NonNull private final StripeApiHandler mApiHandler;
+
+    PaymentAuthenticationController(@NonNull StripeApiHandler apiHandler) {
+        this.mApiHandler = apiHandler;
+    }
+
     /**
      * Confirm the PaymentIntent and resolve any next actions
      */
     void confirmAndAuth(@NonNull Stripe stripe,
                         @NonNull Activity activity,
                         @NonNull PaymentIntentParams paymentIntentParams,
-                        @NonNull String publishableKey) {
+                        @NonNull final String publishableKey) {
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         new ConfirmPaymentIntentTask(stripe, activity, paymentIntentParams, publishableKey,
                 new ApiResultCallback<PaymentIntent>() {
@@ -91,10 +98,34 @@ class PaymentAuthenticationController {
     void handleNextAction(@NonNull Activity activity,
                           @NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
-            begin3ds1Auth(activity, paymentIntent.getRedirectData());
+            final PaymentIntent.NextActionType nextActionType = paymentIntent.getNextActionType();
+            if (PaymentIntent.NextActionType.UseStripeSdk == nextActionType) {
+                final PaymentIntent.SdkData sdkData =
+                        Objects.requireNonNull(paymentIntent.getStripeSdkData());
+                if (sdkData.is3ds2()) {
+                    begin3ds2Auth();
+                } else {
+                    // authentication type is not supported
+                    bypassAuth(activity, paymentIntent);
+                }
+            } else if (PaymentIntent.NextActionType.RedirectToUrl == nextActionType) {
+                begin3ds1Auth(activity,
+                        Objects.requireNonNull(paymentIntent.getRedirectData()));
+            } else {
+                // next action type is not supported, so bypass authentication
+                bypassAuth(activity, paymentIntent);
+            }
         } else {
-            new PaymentAuthBypassStarter(activity, REQUEST_CODE).start(paymentIntent);
+            // no action required, so bypass authentication
+            bypassAuth(activity, paymentIntent);
         }
+    }
+
+    private void bypassAuth(@NonNull Activity activity, @NonNull PaymentIntent paymentIntent) {
+        new PaymentAuthBypassStarter(activity, REQUEST_CODE).start(paymentIntent);
+    }
+
+    private void begin3ds2Auth() {
     }
 
     /**
