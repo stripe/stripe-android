@@ -186,6 +186,7 @@ public class StripeApiHandlerTest {
         assertNotNull(source);
     }
 
+    @Ignore
     @Test
     public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
             throws APIConnectionException, APIException, CardException,
