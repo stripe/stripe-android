@@ -18,6 +18,7 @@ import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -214,6 +215,7 @@ public class PaymentIntentTest {
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
         assertNotNull(paymentIntent);
         assertTrue(paymentIntent.requiresAction());
+        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -224,6 +226,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent = PaymentIntent
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON);
         assertNotNull(paymentIntent);
+        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -243,5 +246,23 @@ public class PaymentIntentTest {
         assertNotNull(paymentIntent);
         assertFalse(paymentIntent.requiresAction());
         assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
+    }
+
+    @Test
+    public void getNextActionTypeAndStripeSdkData_whenUseStripeSdk() {
+        assertEquals(PaymentIntent.NextActionType.UseStripeSdk,
+                PaymentIntentFixtures.PI_REQUIRES_3DS2.getNextActionType());
+        final Map<String, ?> sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2.getStripeSdkData();
+        assertNotNull(sdkData);
+        assertEquals("stripe_3ds2_fingerprint", sdkData.get("type"));
+        assertEquals("visa", sdkData.get("directory_server_name"));
+    }
+
+
+    @Test
+    public void getNextActionTypeAndStripeSdkData_whenRedirectToUrl() {
+        assertEquals(PaymentIntent.NextActionType.RedirectToUrl,
+                PaymentIntentFixtures.PI_REQUIRES_ACTION.getNextActionType());
+        assertNull(PaymentIntentFixtures.PI_REQUIRES_ACTION.getStripeSdkData());
     }
 }

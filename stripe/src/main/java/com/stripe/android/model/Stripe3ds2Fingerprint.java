@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-class Stripe3ds2Fingerprint {
+public class Stripe3ds2Fingerprint {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source";
     private static final String FIELD_DIRECTORY_SERVER_NAME = "directory_server_name";
@@ -18,9 +18,9 @@ class Stripe3ds2Fingerprint {
 
     private static final String TYPE = "stripe_3ds2_fingerprint";
 
-    @NonNull final String source;
-    @Nullable @DirectoryServerName final String directoryServerName;
-    @NonNull final String serverTransactionId;
+    @NonNull public final String source;
+    @Nullable @DirectoryServerName public final String directoryServerName;
+    @NonNull public final String serverTransactionId;
 
     @NonNull
     static Stripe3ds2Fingerprint create(@NonNull JSONObject json) throws JSONException {
