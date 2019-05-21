@@ -14,7 +14,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginLeft="@dimen/masked_card_row_start_padding"
         android:layout_marginStart="@dimen/masked_card_row_start_padding"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         android:layout_gravity="center_vertical|start"
