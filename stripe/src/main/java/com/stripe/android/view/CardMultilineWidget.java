@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
@@ -399,6 +400,13 @@ public class CardMultilineWidget extends LinearLayout {
         mCvcEditText = findViewById(R.id.et_add_source_cvc_ml);
         mPostalCodeEditText = findViewById(R.id.et_add_source_postal_ml);
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mCardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            mExpiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            mCvcEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+            mPostalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE);
+        }
 
         mCardBrand = Card.UNKNOWN;
         // This sets the value of mShouldShowPostalCode

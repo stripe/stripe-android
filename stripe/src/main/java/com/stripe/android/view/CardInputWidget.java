@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
@@ -503,6 +504,12 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText = findViewById(R.id.et_card_number);
         mExpiryDateEditText = findViewById(R.id.et_expiry_date);
         mCvcNumberEditText = findViewById(R.id.et_cvc_number);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mCardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            mExpiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            mCvcNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+        }
 
         ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
             @Override
