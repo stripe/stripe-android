@@ -156,11 +156,12 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams,
-                               String publishableKey,
-                               String stripeAccount,
+            public void create(@NonNull Map<String, Object> tokenParams,
+                               @NonNull String publishableKey,
+                               @Nullable String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
-                               Executor executor, TokenCallback callback) {
+                               @Nullable Executor executor,
+                               @NonNull TokenCallback callback) {
                 tokenCreatorCalled[0] = true;
             }
         };
@@ -178,12 +179,12 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams,
-                               String publishableKey,
-                               String stripeAccount,
+            public void create(@NonNull Map<String, Object> tokenParams,
+                               @NonNull String publishableKey,
+                               @Nullable String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
-                               Executor executor,
-                               TokenCallback callback) {
+                               @Nullable Executor executor,
+                               @NonNull TokenCallback callback) {
                 assertEquals(expectedExecutor, executor);
                 assertEquals(DEFAULT_PUBLISHABLE_KEY, publishableKey);
                 assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -198,12 +199,12 @@ public class StripeTest {
         Stripe stripe = getNonLoggingStripe(mContext, DEFAULT_PUBLISHABLE_KEY);
         stripe.mTokenCreator = new Stripe.TokenCreator() {
             @Override
-            public void create(Map<String, Object> tokenParams,
-                               String publishableKey,
-                               String stripeAccount,
+            public void create(@NonNull Map<String, Object> tokenParams,
+                               @NonNull String publishableKey,
+                               @Nullable String stripeAccount,
                                @NonNull @Token.TokenType String tokenType,
-                               Executor executor,
-                               TokenCallback callback) {
+                               @Nullable Executor executor,
+                               @NonNull TokenCallback callback) {
                 assertEquals(expectedPublishableKey, publishableKey);
                 assertNull(executor);
                 assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -861,17 +862,17 @@ public class StripeTest {
                     "example://return",
                     cardSource.getId());
 
-            Map<String, String> metamap = new HashMap<String, String>() {{
+            final Map<String, String> metamap = new HashMap<String, String>() {{
                 put("dimensions", "three");
                 put("type", "beach ball");
             }};
             threeDParams.setMetaData(metamap);
-            Source threeDSource =
+            final Source threeDSource =
                     stripe.createSourceSynchronous(threeDParams, FUNCTIONAL_SOURCE_PUBLISHABLE_KEY);
+            assertNotNull(threeDSource);
 
-            String sourceId = threeDSource.getId();
-            String clientSecret = threeDSource.getClientSecret();
-
+            final String sourceId = threeDSource.getId();
+            final String clientSecret = threeDSource.getClientSecret();
             assertNotNull(sourceId);
             assertNotNull(clientSecret);
 
