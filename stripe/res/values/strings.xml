@@ -107,6 +107,8 @@
     <string name="payment_method_add_new_card">Add new card&#8230;</string>
     <!--Human-friendly label for something with $0 price-->
     <string name="price_free">Free</string>
+    <string name="title_payment_auth_web_view">Secure Checkout</string>
+    <string name="action_close">Close</string>
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_payment_method">Payment Method</string>
     <!--Screen title telling users they should add an address-->

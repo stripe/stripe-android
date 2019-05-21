@@ -10,6 +10,7 @@
 
     <style name="StripeToolBarStyle" parent="@style/ThemeOverlay.AppCompat">
         <item name="colorControlNormal">?attr/titleTextColor</item>
+        <item name="actionMenuTextColor">?attr/titleTextColor</item>
     </style>
 
     <style name="StripeErrorTextStyle">
