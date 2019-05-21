@@ -895,32 +895,17 @@ public class Stripe {
         }
     }
 
-    private static class ResponseWrapper<T> {
-        @Nullable final T result;
-        @Nullable final Exception error;
-
-        private ResponseWrapper(@Nullable T result) {
-            this.result = result;
-            this.error = null;
-        }
-
-        private ResponseWrapper(@NonNull Exception error) {
-            this.error = error;
-            this.result = null;
-        }
-    }
-
     @VisibleForTesting
     interface TokenCreator {
-        void create(Map<String, Object> params,
-                    String publishableKey,
-                    String stripeAccount,
+        void create(@NonNull Map<String, Object> params,
+                    @NonNull String publishableKey,
+                    @Nullable String stripeAccount,
                     @NonNull @Token.TokenType String tokenType,
-                    Executor executor,
-                    TokenCallback callback);
+                    @Nullable Executor executor,
+                    @NonNull TokenCallback callback);
     }
 
-    private static class CreateSourceTask extends AsyncTask<Void, Void, ResponseWrapper<Source>> {
+    private static class CreateSourceTask extends AsyncTask<Void, Void, ResultWrapper<Source>> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
@@ -940,21 +925,21 @@ public class Stripe {
         }
 
         @Override
-        protected ResponseWrapper<Source> doInBackground(Void... params) {
+        protected ResultWrapper<Source> doInBackground(Void... params) {
             try {
                 final Source source = mApiHandler.createSource(
                         mSourceParams,
                         mPublishableKey,
                         mStripeAccount
                 );
-                return new ResponseWrapper<>(source);
+                return new ResultWrapper<>(source);
             } catch (StripeException stripeException) {
-                return new ResponseWrapper<>(stripeException);
+                return new ResultWrapper<>(stripeException);
             }
         }
 
         @Override
-        protected void onPostExecute(@NonNull ResponseWrapper<Source> responseWrapper) {
+        protected void onPostExecute(@NonNull ResultWrapper<Source> responseWrapper) {
             if (responseWrapper.result != null) {
                 mSourceCallback.onSuccess(responseWrapper.result);
             } else if (responseWrapper.error != null) {
@@ -967,7 +952,7 @@ public class Stripe {
     }
 
     private static class CreatePaymentMethodTask extends AsyncTask<Void, Void,
-            ResponseWrapper<PaymentMethod>> {
+            ResultWrapper<PaymentMethod>> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
         @NonNull private final String mPublishableKey;
@@ -987,21 +972,21 @@ public class Stripe {
         }
 
         @Override
-        protected ResponseWrapper<PaymentMethod> doInBackground(Void... params) {
+        protected ResultWrapper<PaymentMethod> doInBackground(Void... params) {
             try {
                 final PaymentMethod paymentMethod = mApiHandler.createPaymentMethod(
                         mPaymentMethodCreateParams,
                         mPublishableKey,
                         mStripeAccount
                 );
-                return new ResponseWrapper<>(paymentMethod);
+                return new ResultWrapper<>(paymentMethod);
             } catch (StripeException stripeException) {
-                return new ResponseWrapper<>(stripeException);
+                return new ResultWrapper<>(stripeException);
             }
         }
 
         @Override
-        protected void onPostExecute(@NonNull ResponseWrapper<PaymentMethod> responseWrapper) {
+        protected void onPostExecute(@NonNull ResultWrapper<PaymentMethod> responseWrapper) {
             if (responseWrapper.result != null) {
                 mPaymentMethodCallback.onSuccess(responseWrapper.result);
             } else if (responseWrapper.error != null) {
@@ -1013,7 +998,7 @@ public class Stripe {
         }
     }
 
-    private static class CreateTokenTask extends AsyncTask<Void, Void, ResponseWrapper<Token>> {
+    private static class CreateTokenTask extends AsyncTask<Void, Void, ResultWrapper<Token>> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final String mPublishableKey;
@@ -1037,7 +1022,7 @@ public class Stripe {
         }
 
         @Override
-        protected ResponseWrapper<Token> doInBackground(Void... params) {
+        protected ResultWrapper<Token> doInBackground(Void... params) {
             try {
                 final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
                         mStripeAccount, RequestOptions.RequestType.QUERY).build();
@@ -1046,14 +1031,14 @@ public class Stripe {
                         requestOptions,
                         mTokenType
                 );
-                return new ResponseWrapper<>(token);
+                return new ResultWrapper<>(token);
             } catch (StripeException e) {
-                return new ResponseWrapper<>(e);
+                return new ResultWrapper<>(e);
             }
         }
 
         @Override
-        protected void onPostExecute(@NonNull ResponseWrapper<Token> response) {
+        protected void onPostExecute(@NonNull ResultWrapper<Token> response) {
             if (response.result != null) {
                 mCallback.onSuccess(response.result);
             } else if (response.error != null) {
