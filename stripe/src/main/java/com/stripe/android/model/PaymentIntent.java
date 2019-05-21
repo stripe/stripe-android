@@ -65,6 +65,7 @@ public class PaymentIntent extends StripeJsonModel {
     @Nullable private final String mDescription;
     @Nullable private final Boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
+    @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mReceiptEmail;
     @Nullable private final String mSource;
     @Nullable private final Status mStatus;
@@ -134,6 +135,11 @@ public class PaymentIntent extends StripeJsonModel {
     }
 
     @Nullable
+    public NextActionType getNextActionType() {
+        return mNextActionType;
+    }
+
+    @Nullable
     public Uri getRedirectUrl() {
         final RedirectData redirectData = getRedirectData();
         if (redirectData == null) {
@@ -145,6 +151,10 @@ public class PaymentIntent extends StripeJsonModel {
 
     @Nullable
     public RedirectData getRedirectData() {
+        if (NextActionType.RedirectToUrl != mNextActionType) {
+            return null;
+        }
+
         final Map<String, Object> nextAction;
 
         if (Status.RequiresAction == mStatus) {
@@ -218,6 +228,8 @@ public class PaymentIntent extends StripeJsonModel {
         mReceiptEmail = receiptEmail;
         mSource = source;
         mStatus = status;
+        mNextActionType = mNextAction != null ?
+                NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
     }
 
     @NonNull

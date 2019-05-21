@@ -214,6 +214,7 @@ public class PaymentIntentTest {
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
         assertNotNull(paymentIntent);
         assertTrue(paymentIntent.requiresAction());
+        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -224,6 +225,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent = PaymentIntent
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON);
         assertNotNull(paymentIntent);
+        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -243,5 +245,11 @@ public class PaymentIntentTest {
         assertNotNull(paymentIntent);
         assertFalse(paymentIntent.requiresAction());
         assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
+    }
+
+    @Test
+    public void getNextActionType_whenUseStripeSdk() {
+        assertEquals(PaymentIntent.NextActionType.UseStripeSdk,
+                PaymentIntentFixtures.PI_REQUIRES_3DS2.getNextActionType());
     }
 }
