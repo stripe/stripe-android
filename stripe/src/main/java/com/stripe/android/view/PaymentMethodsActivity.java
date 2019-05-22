@@ -35,6 +35,8 @@ import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT
  */
 public class PaymentMethodsActivity extends AppCompatActivity {
 
+    private static final String STATE_SELECTED_PAYMENT_METHOD = "state_selected_payment_method";
+
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     public static final String EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID =
             "initial_selected_payment_method_id";
@@ -91,8 +93,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        getCustomerPaymentMethods(
-                getIntent().getStringExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID));
+        final String selectedPaymentMethodId;
+
+        if (savedInstanceState != null &&
+                savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD)) {
+            selectedPaymentMethodId = savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD);
+        } else if (getIntent().hasExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID)) {
+            selectedPaymentMethodId =
+                    getIntent().getStringExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID);
+        } else {
+            selectedPaymentMethodId = null;
+        }
+
+        getCustomerPaymentMethods(selectedPaymentMethodId);
 
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
@@ -267,5 +280,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             activity.showError(displayedError);
             activity.setCommunicatingProgress(false);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(STATE_SELECTED_PAYMENT_METHOD,
+                mMaskedCardAdapter.getSelectedPaymentMethodId());
     }
 }
