@@ -1,4 +1,4 @@
-package com.stripe.android.view;
+package com.stripe.android;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -17,11 +17,10 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-public class PaymentPaymentAuthWebViewStarterTest {
+public class PaymentAuthWebViewStarterTest {
     @Mock private Activity mActivity;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     @Captor private ArgumentCaptor<Integer> mRequestCodeCaptor;
@@ -33,7 +32,7 @@ public class PaymentPaymentAuthWebViewStarterTest {
 
     @Test
     public void start_startsWithCorrectIntentAndRequestCode() {
-        new PaymentAuthWebViewStarter(mActivity)
+        new PaymentAuthWebViewStarter(mActivity, 50000)
                 .start(PaymentIntentFixtures.REDIRECT_DATA);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 mRequestCodeCaptor.capture());
@@ -42,7 +41,5 @@ public class PaymentPaymentAuthWebViewStarterTest {
         final Bundle extras = intent.getExtras();
         assertNotNull(extras);
         assertEquals(2, extras.size());
-
-        assertTrue(PaymentAuthWebViewStarter.isAuthWebViewResult(mRequestCodeCaptor.getValue()));
     }
 }

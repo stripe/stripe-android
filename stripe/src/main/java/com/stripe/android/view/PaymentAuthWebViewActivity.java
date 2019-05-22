@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.stripe.android.PaymentAuthWebViewStarter;
 import com.stripe.android.R;
 
 public class PaymentAuthWebViewActivity extends AppCompatActivity {

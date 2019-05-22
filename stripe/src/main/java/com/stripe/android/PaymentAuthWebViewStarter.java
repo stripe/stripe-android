@@ -1,25 +1,27 @@
-package com.stripe.android.view;
+package com.stripe.android;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.PaymentAuthWebViewActivity;
 
 /**
  * A class that manages starting a {@link PaymentAuthWebViewActivity} instance with the correct
  * arguments.
  */
-public class PaymentAuthWebViewStarter {
-    static final String EXTRA_AUTH_URL = "auth_url";
-    static final String EXTRA_RETURN_URL = "return_url";
-
-    private static final int REQUEST_CODE = 50000;
+public class PaymentAuthWebViewStarter implements ActivityStarter<PaymentIntent.RedirectData> {
+    public static final String EXTRA_AUTH_URL = "auth_url";
+    public static final String EXTRA_RETURN_URL = "return_url";
 
     @NonNull private final Activity mActivity;
+    private final int mRequestCode;
 
-    PaymentAuthWebViewStarter(@NonNull Activity activity) {
+    PaymentAuthWebViewStarter(@NonNull Activity activity, int requestCode) {
         mActivity = activity;
+        mRequestCode = requestCode;
     }
 
     /**
@@ -31,10 +33,6 @@ public class PaymentAuthWebViewStarter {
                 .putExtra(EXTRA_AUTH_URL, redirectData.url.toString())
                 .putExtra(EXTRA_RETURN_URL, redirectData.returnUrl != null ?
                         redirectData.returnUrl.toString() : null);
-        mActivity.startActivityForResult(intent, REQUEST_CODE);
-    }
-
-    static boolean isAuthWebViewResult(int requestCode) {
-        return requestCode == REQUEST_CODE;
+        mActivity.startActivityForResult(intent, mRequestCode);
     }
 }
