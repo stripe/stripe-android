@@ -23,6 +23,20 @@ public class Stripe3ds2Fingerprint {
     @NonNull public final String serverTransactionId;
 
     @NonNull
+    static Stripe3ds2Fingerprint create(@NonNull PaymentIntent.SdkData sdkData) {
+        if (!sdkData.is3ds2()) {
+            throw new IllegalArgumentException(
+                    "Expected PaymentIntent.SdkData with type='stripe_3ds2_fingerprint'.");
+        }
+
+        return new Stripe3ds2Fingerprint(
+                (String) sdkData.data.get(FIELD_THREE_D_SECURE_2_SOURCE),
+                toDirectoryServerName((String) sdkData.data.get(FIELD_DIRECTORY_SERVER_NAME)),
+                (String) sdkData.data.get(FIELD_SERVER_TRANSACTION_ID)
+        );
+    }
+
+    @NonNull
     static Stripe3ds2Fingerprint create(@NonNull JSONObject json) throws JSONException {
         final String type = json.optString(FIELD_TYPE);
         if (!TYPE.equals(type)) {
