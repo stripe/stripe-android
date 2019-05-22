@@ -99,6 +99,14 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     @Nullable
+    String getSelectedPaymentMethodId() {
+        if (mSelectedIndex == NO_SELECTION) {
+            return null;
+        }
+        return mPaymentMethods.get(mSelectedIndex).id;
+    }
+
+    @Nullable
     PaymentMethod getSelectedPaymentMethod() {
         if (mSelectedIndex == NO_SELECTION) {
             return null;

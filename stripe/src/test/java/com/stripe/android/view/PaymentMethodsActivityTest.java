@@ -36,7 +36,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -105,6 +108,32 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         listener.onPaymentMethodsRetrieved(mPaymentMethods);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
+    }
+
+    @Test
+    public void onCreate_initialGivenPaymentMethodIsSelected() {
+        // reset the mock because the activity is being re-created again
+        reset(mCustomerSession);
+        final PaymentMethod paymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(paymentMethod);
+        mPaymentMethodsActivity = createActivity(new Intent().putExtra(
+                PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id));
+        mRecyclerView = mPaymentMethodsActivity.findViewById(R.id.payment_methods_recycler);
+
+        verify(mCustomerSession).getPaymentMethods(eq(PaymentMethod.Type.Card),
+                mListenerArgumentCaptor.capture());
+
+        final CustomerSession.PaymentMethodsRetrievalListener listener =
+                mListenerArgumentCaptor.getValue();
+        assertNotNull(listener);
+
+        listener.onPaymentMethodsRetrieved(mPaymentMethods);
+
+        final MaskedCardAdapter maskedCardAdapter = (MaskedCardAdapter) mRecyclerView.getAdapter();
+        assertNotNull(maskedCardAdapter);
+        assertNotNull(maskedCardAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod.id, maskedCardAdapter.getSelectedPaymentMethod().id);
     }
 
     @Test
