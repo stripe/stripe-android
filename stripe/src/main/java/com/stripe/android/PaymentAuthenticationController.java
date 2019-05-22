@@ -11,6 +11,7 @@ import android.util.Log;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import java.lang.ref.WeakReference;
@@ -28,7 +29,7 @@ class PaymentAuthenticationController {
     @NonNull private final StripeApiHandler mApiHandler;
 
     PaymentAuthenticationController(@NonNull StripeApiHandler apiHandler) {
-        this.mApiHandler = apiHandler;
+        mApiHandler = apiHandler;
     }
 
     /**
@@ -43,7 +44,7 @@ class PaymentAuthenticationController {
                 new ApiResultCallback<PaymentIntent>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntent paymentIntent) {
-                        handleNextAction(activityRef.get(), paymentIntent);
+                        handleNextAction(activityRef.get(), paymentIntent, publishableKey);
                     }
 
                     @Override
@@ -96,14 +97,15 @@ class PaymentAuthenticationController {
      */
     @VisibleForTesting
     void handleNextAction(@NonNull Activity activity,
-                          @NonNull PaymentIntent paymentIntent) {
+                          @NonNull PaymentIntent paymentIntent,
+                          @NonNull String publishableKey) {
         if (paymentIntent.requiresAction()) {
             final PaymentIntent.NextActionType nextActionType = paymentIntent.getNextActionType();
             if (PaymentIntent.NextActionType.UseStripeSdk == nextActionType) {
                 final PaymentIntent.SdkData sdkData =
                         Objects.requireNonNull(paymentIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
-                    begin3ds2Auth();
+                    begin3ds2Auth(Stripe3ds2Fingerprint.create(sdkData), publishableKey);
                 } else {
                     // authentication type is not supported
                     bypassAuth(activity, paymentIntent);
@@ -125,7 +127,8 @@ class PaymentAuthenticationController {
         new PaymentAuthBypassStarter(activity, REQUEST_CODE).start(paymentIntent);
     }
 
-    private void begin3ds2Auth() {
+    private void begin3ds2Auth(@NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
+                               @NonNull String publishableKey) {
     }
 
     /**

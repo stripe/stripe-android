@@ -23,7 +23,7 @@ public class Stripe3ds2Fingerprint {
     @NonNull public final String serverTransactionId;
 
     @NonNull
-    static Stripe3ds2Fingerprint create(@NonNull PaymentIntent.SdkData sdkData) {
+    public static Stripe3ds2Fingerprint create(@NonNull PaymentIntent.SdkData sdkData) {
         if (!sdkData.is3ds2()) {
             throw new IllegalArgumentException(
                     "Expected PaymentIntent.SdkData with type='stripe_3ds2_fingerprint'.");
