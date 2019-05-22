@@ -1,7 +1,6 @@
 package com.stripe.android;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +20,7 @@ class Stripe3ds2AuthParams {
     private static final String FIELD_SDK_ENC_DATA = "sdkEncData";
     private static final String FIELD_SDK_EPHEM_PUB_KEY = "sdkEphemPubKey";
     private static final String FIELD_SDK_MAX_TIMEOUT = "sdkMaxTimeout";
+    private static final String FIELD_SDK_REFERENCE_NUMBER = "sdkReferenceNumber";
     private static final String FIELD_MESSAGE_VERSION = "messageVersion";
     private static final String FIELD_DEVICE_RENDER_OPTIONS = "deviceRenderOptions";
 
@@ -30,14 +30,15 @@ class Stripe3ds2AuthParams {
     @NonNull private final String mSourceId;
     @NonNull private final String mDeviceData;
     @NonNull private final String mSdkAppId;
+    @NonNull private final String mSdkReferenceNumber;
     @NonNull private final String mSdkTransactionId;
     @NonNull private final String mSdkEphemeralPublicKey;
     @NonNull private final String mMessageVersion;
     private final int mMaxTimeout;
 
-    @VisibleForTesting
     Stripe3ds2AuthParams(@NonNull String sourceId,
                          @NonNull String sdkAppId,
+                         @NonNull String sdkReferenceNumber,
                          @NonNull String sdkTransactionId,
                          @NonNull String deviceData,
                          @NonNull String sdkEphemeralPublicKey,
@@ -45,6 +46,7 @@ class Stripe3ds2AuthParams {
                          int maxTimeout) {
         mSourceId = sourceId;
         mSdkAppId = sdkAppId;
+        mSdkReferenceNumber = sdkReferenceNumber;
         mDeviceData = deviceData;
         mSdkTransactionId = sdkTransactionId;
         mSdkEphemeralPublicKey = sdkEphemeralPublicKey;
@@ -69,6 +71,7 @@ class Stripe3ds2AuthParams {
             appParams.put(FIELD_SDK_ENC_DATA, mDeviceData);
             appParams.put(FIELD_SDK_EPHEM_PUB_KEY, new JSONObject(mSdkEphemeralPublicKey));
             appParams.put(FIELD_SDK_MAX_TIMEOUT, mMaxTimeout);
+            appParams.put(FIELD_SDK_REFERENCE_NUMBER, mSdkReferenceNumber);
             appParams.put(FIELD_MESSAGE_VERSION, mMessageVersion);
             appParams.put(FIELD_DEVICE_RENDER_OPTIONS, createDeviceRenderOptions());
         } catch (JSONException ignore) { }

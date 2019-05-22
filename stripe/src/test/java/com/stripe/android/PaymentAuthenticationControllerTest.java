@@ -28,12 +28,14 @@ public class PaymentAuthenticationControllerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new PaymentAuthenticationController(mApiHandler);
+        mController = new PaymentAuthenticationController(
+                mApiHandler);
     }
 
     @Test
     public void handleNextAction_whenAuthRequired() {
-        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_ACTION);
+        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_ACTION,
+                "pk_test");
         verify(mActivity).startActivityForResult(any(Intent.class),
                 eq(PaymentAuthenticationController.REQUEST_CODE));
     }
