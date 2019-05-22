@@ -89,7 +89,8 @@ public class Stripe {
     @VisibleForTesting
     Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
            @NonNull StripeNetworkUtils stripeNetworkUtils) {
-        this(apiHandler, loggingUtils, stripeNetworkUtils, new PaymentAuthenticationController());
+        this(apiHandler, loggingUtils, stripeNetworkUtils,
+                new PaymentAuthenticationController(apiHandler));
     }
 
     @VisibleForTesting
