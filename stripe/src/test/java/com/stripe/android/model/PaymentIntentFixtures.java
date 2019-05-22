@@ -61,6 +61,59 @@ public final class PaymentIntentFixtures {
                     "}"));
 
     @NonNull
+    public static final PaymentIntent PI_REQUIRES_3DS1 = Objects.requireNonNull(
+            PaymentIntent.fromString("{\n" +
+                    "    \"id\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx\",\n" +
+                    "    \"object\": \"payment_intent\",\n" +
+                    "    \"amount\": 1000,\n" +
+                    "    \"amount_capturable\": 0,\n" +
+                    "    \"amount_received\": 0,\n" +
+                    "    \"application\": null,\n" +
+                    "    \"application_fee_amount\": null,\n" +
+                    "    \"canceled_at\": null,\n" +
+                    "    \"cancellation_reason\": null,\n" +
+                    "    \"capture_method\": \"automatic\",\n" +
+                    "    \"charges\": {\n" +
+                    "        \"object\": \"list\",\n" +
+                    "        \"data\": [],\n" +
+                    "        \"has_more\": false,\n" +
+                    "        \"total_count\": 0,\n" +
+                    "        \"url\": \"/v1/charges?payment_intent=pi_1EceMnCRMbs6FrXfCXdF8dnx\"\n" +
+                    "    },\n" +
+                    "    \"client_secret\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k\",\n" +
+                    "    \"confirmation_method\": \"automatic\",\n" +
+                    "    \"created\": 1558469721,\n" +
+                    "    \"currency\": \"usd\",\n" +
+                    "    \"customer\": null,\n" +
+                    "    \"description\": null,\n" +
+                    "    \"invoice\": null,\n" +
+                    "    \"last_payment_error\": null,\n" +
+                    "    \"livemode\": false,\n" +
+                    "    \"metadata\": {},\n" +
+                    "    \"next_action\": {\n" +
+                    "        \"type\": \"use_stripe_sdk\",\n" +
+                    "        \"use_stripe_sdk\": {\n" +
+                    "            \"type\": \"three_d_secure_redirect\",\n" +
+                    "            \"stripe_js\": \"https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW\"\n" +
+                    "        }\n" +
+                    "    },\n" +
+                    "    \"on_behalf_of\": null,\n" +
+                    "    \"payment_method\": \"pm_1Ecve6CRMbs6FrXf08xsGeHv\",\n" +
+                    "    \"payment_method_types\": [\n" +
+                    "        \"card\"\n" +
+                    "    ],\n" +
+                    "    \"receipt_email\": null,\n" +
+                    "    \"review\": null,\n" +
+                    "    \"shipping\": null,\n" +
+                    "    \"source\": null,\n" +
+                    "    \"statement_descriptor\": null,\n" +
+                    "    \"status\": \"requires_action\",\n" +
+                    "    \"transfer_data\": null,\n" +
+                    "    \"transfer_group\": null\n" +
+                    "}")
+    );
+
+    @NonNull
     public static final PaymentIntent PI_REQUIRES_ACTION =
             Objects.requireNonNull(PaymentIntent.fromString("{\n" +
                     "\t\"id\": \"pi_1EZlvVCRMbs6FrXfKpq2xMmy\",\n" +

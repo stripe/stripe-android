@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.model.StripeJsonUtils.listToJsonArray;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
@@ -151,12 +152,12 @@ public class PaymentIntent extends StripeJsonModel {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public Map<String, ?> getStripeSdkData() {
+    public SdkData getStripeSdkData() {
         if (mNextAction == null || NextActionType.UseStripeSdk != mNextActionType) {
             return null;
         }
 
-        return (Map<String, ?>) mNextAction.get(NextActionType.UseStripeSdk.code);
+        return new SdkData((Map<String, ?>) mNextAction.get(NextActionType.UseStripeSdk.code));
     }
 
     @Nullable
@@ -507,6 +508,29 @@ public class PaymentIntent extends StripeJsonModel {
         RedirectData(@NonNull String url, @Nullable String returnUrl) {
             this.url = Uri.parse(url);
             this.returnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
+        }
+    }
+
+    static final class SdkData {
+        private static final String FIELD_TYPE = "type";
+
+        private static final String TYPE_3DS2 = "stripe_3ds2_fingerprint";
+        private static final String TYPE_3DS1 = "three_d_secure_redirect";
+
+        @NonNull final String type;
+        @NonNull final Map<String, ?> data;
+
+        SdkData(@NonNull Map<String, ?> data) {
+            this.type = Objects.requireNonNull((String) data.get(FIELD_TYPE));
+            this.data = data;
+        }
+
+        boolean is3ds2() {
+            return TYPE_3DS2.equals(type);
+        }
+
+        boolean is3ds1() {
+            return TYPE_3DS1.equals(type);
         }
     }
 }
