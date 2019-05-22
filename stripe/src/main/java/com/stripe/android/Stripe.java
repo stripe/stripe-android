@@ -905,106 +905,70 @@ public class Stripe {
                     @NonNull TokenCallback callback);
     }
 
-    private static class CreateSourceTask extends AsyncTask<Void, Void, ResultWrapper<Source>> {
+    private static class CreateSourceTask extends ApiOperation<Source> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
-        @NonNull private final SourceCallback mSourceCallback;
 
         CreateSourceTask(@NonNull StripeApiHandler apiHandler,
                          @NonNull SourceParams sourceParams,
                          @NonNull String publishableKey,
                          @Nullable String stripeAccount,
-                         @NonNull SourceCallback sourceCallback) {
+                         @NonNull SourceCallback callback) {
+            super(callback);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
-            mSourceCallback = sourceCallback;
         }
 
+        @Nullable
         @Override
-        protected ResultWrapper<Source> doInBackground(Void... params) {
-            try {
-                final Source source = mApiHandler.createSource(
+        Source getResult() throws StripeException {
+                return mApiHandler.createSource(
                         mSourceParams,
                         mPublishableKey,
                         mStripeAccount
                 );
-                return new ResultWrapper<>(source);
-            } catch (StripeException stripeException) {
-                return new ResultWrapper<>(stripeException);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(@NonNull ResultWrapper<Source> responseWrapper) {
-            if (responseWrapper.result != null) {
-                mSourceCallback.onSuccess(responseWrapper.result);
-            } else if (responseWrapper.error != null) {
-                mSourceCallback.onError(responseWrapper.error);
-            } else {
-                mSourceCallback.onError(new RuntimeException(
-                        "Somehow got neither a source response or an error response"));
-            }
         }
     }
 
-    private static class CreatePaymentMethodTask extends AsyncTask<Void, Void,
-            ResultWrapper<PaymentMethod>> {
+    private static class CreatePaymentMethodTask extends ApiOperation<PaymentMethod> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
-        @NonNull private final ApiResultCallback<PaymentMethod> mPaymentMethodCallback;
 
         CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
                                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
                                 @NonNull String publishableKey,
                                 @Nullable String stripeAccount,
-                                @NonNull ApiResultCallback<PaymentMethod> paymentMethodCallback) {
+                                @NonNull ApiResultCallback<PaymentMethod> callback) {
+            super(callback);
             mApiHandler = apiHandler;
             mPaymentMethodCreateParams = paymentMethodCreateParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
-            mPaymentMethodCallback = paymentMethodCallback;
         }
 
+        @Nullable
         @Override
-        protected ResultWrapper<PaymentMethod> doInBackground(Void... params) {
-            try {
-                final PaymentMethod paymentMethod = mApiHandler.createPaymentMethod(
-                        mPaymentMethodCreateParams,
-                        mPublishableKey,
-                        mStripeAccount
-                );
-                return new ResultWrapper<>(paymentMethod);
-            } catch (StripeException stripeException) {
-                return new ResultWrapper<>(stripeException);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(@NonNull ResultWrapper<PaymentMethod> responseWrapper) {
-            if (responseWrapper.result != null) {
-                mPaymentMethodCallback.onSuccess(responseWrapper.result);
-            } else if (responseWrapper.error != null) {
-                mPaymentMethodCallback.onError(responseWrapper.error);
-            } else {
-                mPaymentMethodCallback.onError(new RuntimeException(
-                        "Somehow got neither a payment method response or an error response"));
-            }
+        PaymentMethod getResult() throws StripeException {
+            return mApiHandler.createPaymentMethod(
+                    mPaymentMethodCreateParams,
+                    mPublishableKey,
+                    mStripeAccount
+            );
         }
     }
 
-    private static class CreateTokenTask extends AsyncTask<Void, Void, ResultWrapper<Token>> {
+    private static class CreateTokenTask extends ApiOperation<Token> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final String mPublishableKey;
         @Nullable private final String mStripeAccount;
         @NonNull @Token.TokenType private final String mTokenType;
-        @NonNull private final TokenCallback mCallback;
 
         CreateTokenTask(
                 @NonNull StripeApiHandler apiHandler,
@@ -1013,40 +977,25 @@ public class Stripe {
                 @Nullable final String stripeAccount,
                 @NonNull @Token.TokenType final String tokenType,
                 @NonNull final TokenCallback callback) {
+            super(callback);
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
             mPublishableKey = publishableKey;
             mStripeAccount = stripeAccount;
             mTokenType = tokenType;
-            mCallback = callback;
         }
 
+        @Nullable
         @Override
-        protected ResultWrapper<Token> doInBackground(Void... params) {
-            try {
-                final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
-                        mStripeAccount, RequestOptions.RequestType.QUERY).build();
-                final Token token = mApiHandler.createToken(
-                        mTokenParams,
-                        requestOptions,
-                        mTokenType
-                );
-                return new ResultWrapper<>(token);
-            } catch (StripeException e) {
-                return new ResultWrapper<>(e);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(@NonNull ResultWrapper<Token> response) {
-            if (response.result != null) {
-                mCallback.onSuccess(response.result);
-            } else if (response.error != null) {
-                mCallback.onError(response.error);
-            } else {
-                mCallback.onError(new RuntimeException(
-                        "Somehow got neither a token response or an error response"));
-            }
+        Token getResult() throws StripeException {
+            final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
+                    mStripeAccount, RequestOptions.RequestType.QUERY)
+                    .build();
+            return mApiHandler.createToken(
+                    mTokenParams,
+                    requestOptions,
+                    mTokenType
+            );
         }
     }
 }

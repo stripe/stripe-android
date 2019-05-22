@@ -191,7 +191,7 @@ public class StripeApiHandlerTest {
     public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
             throws APIConnectionException, APIException, CardException,
             AuthenticationException {
-        final Stripe3DS2AuthParams authParams = new Stripe3DS2AuthParams(
+        final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(
                 "src_invalid",
                 "1.0.0",
                 UUID.randomUUID().toString(),
