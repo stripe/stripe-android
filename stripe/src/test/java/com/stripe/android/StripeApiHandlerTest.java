@@ -186,7 +186,7 @@ public class StripeApiHandlerTest {
         assertNotNull(source);
     }
 
-    @Ignore
+    @Ignore("test needs to be updated for backend change")
     @Test
     public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
             throws APIConnectionException, APIException, CardException,

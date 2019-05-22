@@ -110,18 +110,17 @@ public class Stripe {
      */
     private void startPaymentAuth(@NonNull Activity activity,
                                   @NonNull PaymentIntentParams confirmPaymentIntentParams,
-                                  @Nullable String publishableKey) {
-        final String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
+                                  @NonNull String publishableKey) {
         mPaymentAuthenticationController.confirmAndAuth(this, activity,
-                confirmPaymentIntentParams, apiKey);
+                confirmPaymentIntentParams, publishableKey);
     }
 
-    void startPaymentAuth(@NonNull Activity activity,
+    public void startPaymentAuth(@NonNull Activity activity,
                           @NonNull PaymentIntentParams paymentIntentParams) {
         startPaymentAuth(activity, paymentIntentParams, mDefaultPublishableKey);
     }
 
-    boolean onPaymentAuthResult(
+    private boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull String publishableKey,
             @NonNull ApiResultCallback<PaymentIntent> callback) {
@@ -135,7 +134,7 @@ public class Stripe {
         return false;
     }
 
-    boolean onPaymentAuthResult(
+    public boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull ApiResultCallback<PaymentIntent> callback) {
         return onPaymentAuthResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
