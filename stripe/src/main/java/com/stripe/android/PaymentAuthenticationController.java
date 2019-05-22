@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -12,7 +13,17 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
+import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
+import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
+import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl;
+import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters;
+import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
+import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
+import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
+import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.PaymentAuthenticationExtras;
+
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -25,11 +36,32 @@ import java.util.Objects;
 class PaymentAuthenticationController {
     static final int REQUEST_CODE = 50000;
     private static final String TAG = "PaymentAuthentication";
+    private static final int MAX_TIMEOUT = 5;
+    private static final String DIRECTORY_SERVER_ID = "F000000000";
 
+    @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
+    @NonNull private final String mDirectoryServerId;
 
-    PaymentAuthenticationController(@NonNull StripeApiHandler apiHandler) {
+    PaymentAuthenticationController(@NonNull Context context,
+                                    @NonNull StripeApiHandler apiHandler) {
+        this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
+                new MessageVersionRegistry(), DIRECTORY_SERVER_ID);
+    }
+
+    @VisibleForTesting
+    PaymentAuthenticationController(@NonNull Context context,
+                                    @NonNull StripeThreeDs2Service threeDs2Service,
+                                    @NonNull StripeApiHandler apiHandler,
+                                    @NonNull MessageVersionRegistry messageVersionRegistry,
+                                    @NonNull String directoryServerId) {
+        mThreeDs2Service = threeDs2Service;
+        mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
+                null);
         mApiHandler = apiHandler;
+        mMessageVersionRegistry = messageVersionRegistry;
+        mDirectoryServerId = directoryServerId;
     }
 
     /**
@@ -105,7 +137,7 @@ class PaymentAuthenticationController {
                 final PaymentIntent.SdkData sdkData =
                         Objects.requireNonNull(paymentIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
-                    begin3ds2Auth(Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                    begin3ds2Auth(activity, Stripe3ds2Fingerprint.create(sdkData), publishableKey);
                 } else {
                     // authentication type is not supported
                     bypassAuth(activity, paymentIntent);
@@ -127,8 +159,26 @@ class PaymentAuthenticationController {
         new PaymentAuthBypassStarter(activity, REQUEST_CODE).start(paymentIntent);
     }
 
-    private void begin3ds2Auth(@NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
+    private void begin3ds2Auth(@NonNull Activity activity,
+                               @NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
                                @NonNull String publishableKey) {
+        final Transaction transaction =
+                mThreeDs2Service.createTransaction(mDirectoryServerId,
+                        mMessageVersionRegistry.getCurrent(), false);
+        final AuthenticationRequestParameters areqParams =
+                transaction.getAuthenticationRequestParameters();
+        final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(
+                stripe3ds2Fingerprint.source,
+                areqParams.getSDKAppID(),
+                areqParams.getSDKReferenceNumber(),
+                areqParams.getSDKTransactionID(),
+                areqParams.getDeviceData(),
+                areqParams.getSDKEphemeralPublicKey(),
+                areqParams.getMessageVersion(),
+                MAX_TIMEOUT
+        );
+        mApiHandler.start3ds2Auth(authParams, publishableKey,
+                new Stripe3ds2AuthCallback(activity, transaction, MAX_TIMEOUT));
     }
 
     /**
@@ -231,6 +281,48 @@ class PaymentAuthenticationController {
                 mListener.onError(new RuntimeException(
                         "Somehow got neither a PaymentIntent response or an error response"));
             }
+        }
+    }
+
+    private static final class Stripe3ds2AuthCallback
+            implements ApiResultCallback<JSONObject> {
+        @NonNull private final WeakReference<Activity> mActivityRef;
+        @NonNull private final Transaction mTransaction;
+        private final int mMaxTimeout;
+
+        private Stripe3ds2AuthCallback(@NonNull Activity activity,
+                                       @NonNull Transaction transaction,
+                                       int maxTimeout) {
+            mActivityRef = new WeakReference<>(activity);
+            mTransaction = transaction;
+            mMaxTimeout = maxTimeout;
+        }
+
+        @Override
+        public void onSuccess(@NonNull JSONObject result) {
+            final Activity activity = mActivityRef.get();
+            if (activity == null) {
+                return;
+            }
+
+            final JSONObject ares = result.optJSONObject("ares");
+            final StripeChallengeParameters challengeParameters = new StripeChallengeParameters();
+            challengeParameters.setAcsSignedContent(ares.optString("acsSignedContent"));
+            challengeParameters.set3DSServerTransactionID(ares.optString("threeDSServerTransID"));
+            challengeParameters.setAcsTransactionID(ares.optString("acsTransID"));
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mTransaction.doChallenge(activity,
+                            challengeParameters,
+                            new StripeChallengeStatusReceiver(),
+                            mMaxTimeout);
+                }
+            });
+        }
+
+        @Override
+        public void onError(@NonNull Exception e) {
         }
     }
 }

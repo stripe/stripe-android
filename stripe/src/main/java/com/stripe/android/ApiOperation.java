@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.exception.StripeException;
 
+import org.json.JSONException;
+
 abstract class ApiOperation<ResultType>
         extends AsyncTask<Void, Void, ResultWrapper<ResultType>> {
     @NonNull private final ApiResultCallback<ResultType> mCallback;
@@ -18,7 +20,7 @@ abstract class ApiOperation<ResultType>
     protected final ResultWrapper<ResultType> doInBackground(Void... voids) {
         try {
             return new ResultWrapper<>(getResult());
-        } catch (StripeException e) {
+        } catch (StripeException | JSONException e) {
             return new ResultWrapper<>(e);
         }
     }
@@ -37,5 +39,5 @@ abstract class ApiOperation<ResultType>
     }
 
     @Nullable
-    abstract ResultType getResult() throws StripeException;
+    abstract ResultType getResult() throws StripeException, JSONException;
 }

@@ -271,7 +271,7 @@ public class PaymentIntentTest {
     @Test
     public void getNextActionTypeAndStripeSdkData_whenRedirectToUrl() {
         assertEquals(PaymentIntent.NextActionType.RedirectToUrl,
-                PaymentIntentFixtures.PI_REQUIRES_ACTION.getNextActionType());
-        assertNull(PaymentIntentFixtures.PI_REQUIRES_ACTION.getStripeSdkData());
+                PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getNextActionType());
+        assertNull(PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getStripeSdkData());
     }
 }

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public final class PaymentIntentFixtures {
     @NonNull
-    static final PaymentIntent PI_REQUIRES_3DS2 = Objects.requireNonNull(
+    public static final PaymentIntent PI_REQUIRES_3DS2 = Objects.requireNonNull(
             PaymentIntent.fromString("{\n" +
                     "    \"id\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx\",\n" +
                     "    \"object\": \"payment_intent\",\n" +
@@ -114,7 +114,7 @@ public final class PaymentIntentFixtures {
     );
 
     @NonNull
-    public static final PaymentIntent PI_REQUIRES_ACTION =
+    public static final PaymentIntent PI_REQUIRES_REDIRECT =
             Objects.requireNonNull(PaymentIntent.fromString("{\n" +
                     "\t\"id\": \"pi_1EZlvVCRMbs6FrXfKpq2xMmy\",\n" +
                     "\t\"object\": \"payment_intent\",\n" +
