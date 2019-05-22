@@ -187,6 +187,11 @@ public class PaymentSession {
     public void presentPaymentMethodSelection() {
         final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        if (mPaymentSessionData.getPaymentMethod() != null) {
+            paymentMethodsIntent.putExtra(
+                    PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
+                    mPaymentSessionData.getPaymentMethod().id);
+        }
         mHostActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
     }
 

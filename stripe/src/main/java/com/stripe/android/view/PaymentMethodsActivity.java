@@ -36,6 +36,8 @@ import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
+    public static final String EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID =
+            "initial_selected_payment_method_id";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
@@ -89,7 +91,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        getCustomerPaymentMethods(null);
+        getCustomerPaymentMethods(
+                getIntent().getStringExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID));
 
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
