@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(RobolectricTestRunner.class)
-public class Stripe3DS2AuthParamsTest {
+public class Stripe3ds2AuthParamsTest {
 
     @Test
     public void toParamMap_shouldReturnCorrectObject() {
@@ -22,12 +22,12 @@ public class Stripe3DS2AuthParamsTest {
         final String messageVersion = "2.1.0";
         final int timeout = 10;
 
-        final Stripe3DS2AuthParams authParams = new Stripe3DS2AuthParams(sourceId, appId,
+        final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(sourceId, appId,
                 sdkTransactionId, deviceData, sdkEphemeralPublicKey, messageVersion, timeout);
         final Map<String, Object> paramsMap = authParams.toParamMap();
-        assertEquals(sourceId, paramsMap.get(Stripe3DS2AuthParams.FIELD_SOURCE));
+        assertEquals(sourceId, paramsMap.get(Stripe3ds2AuthParams.FIELD_SOURCE));
 
-        final Object appParam = paramsMap.get(Stripe3DS2AuthParams.FIELD_APP);
+        final Object appParam = paramsMap.get(Stripe3ds2AuthParams.FIELD_APP);
         assertNotNull(appParam);
         final String appData = appParam.toString();
 

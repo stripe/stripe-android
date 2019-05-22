@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Token;
 
 import org.json.JSONArray;
@@ -666,8 +667,8 @@ class StripeApiHandler {
     }
 
     @VisibleForTesting
-    void start3ds2Auth(@NonNull Stripe3DS2AuthParams authParams,
-                       @NonNull String publishableKey)
+    Stripe3ds2AuthResult start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+                                       @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
         final StripeResponse response = getStripeResponse(
@@ -677,6 +678,14 @@ class StripeApiHandler {
                         RequestOptions.builder(publishableKey).build())
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
+        return new Stripe3ds2AuthResult();
+    }
+
+    void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+                       @NonNull String publishableKey,
+                       @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
+        new Start3ds2AuthTask(this, authParams, publishableKey, callback)
+                .execute();
     }
 
     /**
@@ -1063,5 +1072,27 @@ class StripeApiHandler {
                         .build();
         fireAndForgetApiCall(
                 StripeRequest.createPost(RequestExecutor.LOGGING_ENDPOINT, params, options));
+    }
+
+    private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {
+        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final Stripe3ds2AuthParams mParams;
+        @NonNull private final String mPublishableKey;
+
+        private Start3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
+                                  @NonNull Stripe3ds2AuthParams params,
+                                  @NonNull String publishableKey,
+                                  @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
+            super(callback);
+            mApiHandler = apiHandler;
+            mParams = params;
+            mPublishableKey = publishableKey;
+        }
+
+        @Nullable
+        @Override
+        Stripe3ds2AuthResult getResult() throws StripeException {
+            return mApiHandler.start3ds2Auth(mParams, mPublishableKey);
+        }
     }
 }

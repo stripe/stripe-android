@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-class Stripe3DS2AuthParams {
+class Stripe3ds2AuthParams {
 
     static final String FIELD_APP = "app";
     static final String FIELD_SOURCE = "source";
@@ -36,7 +36,7 @@ class Stripe3DS2AuthParams {
     private final int mMaxTimeout;
 
     @VisibleForTesting
-    Stripe3DS2AuthParams(@NonNull String sourceId,
+    Stripe3ds2AuthParams(@NonNull String sourceId,
                          @NonNull String sdkAppId,
                          @NonNull String sdkTransactionId,
                          @NonNull String deviceData,

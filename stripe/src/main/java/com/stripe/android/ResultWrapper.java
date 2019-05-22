@@ -3,11 +3,11 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-final class ResultWrapper<T> {
-    @Nullable final T result;
+final class ResultWrapper<ResultType> {
+    @Nullable final ResultType result;
     @Nullable final Exception error;
 
-    ResultWrapper(@Nullable T result) {
+    ResultWrapper(@Nullable ResultType result) {
         this.result = result;
         this.error = null;
     }
