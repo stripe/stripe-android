@@ -35,6 +35,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 
 public class PaymentIntentActivity extends AppCompatActivity {
@@ -67,7 +68,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         mStripe = new Stripe(getApplicationContext());
         Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
@@ -125,22 +126,23 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
                 // Because we've made the mapping above, we're now subscribing
                 // to the result of creating a 3DS Source
-                .subscribe(
-                        responseBody -> {
-                            try {
-                                JSONObject jsonObject = new JSONObject(responseBody.string());
-                                mPaymentIntentValue.setText(jsonObject.toString());
-                                mClientSecret = jsonObject.optString("secret");
-                                mConfirmPaymentIntent.setEnabled(mClientSecret != null);
-                                mRetrievePaymentIntent.setEnabled(mClientSecret != null);
-
-                            } catch (IOException | JSONException exception) {
-                                Log.e(TAG, exception.toString());
-                            }
-                        },
+                .subscribe(this::onCreatedPaymentIntent,
                         throwable -> mErrorDialogHandler.show(throwable.getLocalizedMessage())
                 );
         mCompositeDisposable.add(disposable);
+    }
+
+    private void onCreatedPaymentIntent(@NonNull ResponseBody responseBody) {
+        try {
+            final JSONObject jsonObject = new JSONObject(responseBody.string());
+            mPaymentIntentValue.setText(jsonObject.toString());
+            mClientSecret = jsonObject.getString("secret");
+            mConfirmPaymentIntent.setEnabled(mClientSecret != null);
+            mRetrievePaymentIntent.setEnabled(mClientSecret != null);
+
+        } catch (IOException | JSONException exception) {
+            Log.e(TAG, exception.toString());
+        }
     }
 
     private void retrievePaymentIntent() {

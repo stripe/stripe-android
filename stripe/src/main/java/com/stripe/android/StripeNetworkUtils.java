@@ -3,10 +3,10 @@ package com.stripe.android;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.Token;
 
 import java.util.AbstractMap;
@@ -136,21 +136,33 @@ public class StripeNetworkUtils {
 
             if (mapToEdit.get(key) instanceof CharSequence) {
                 CharSequence sequence = (CharSequence) mapToEdit.get(key);
-                if (TextUtils.isEmpty(sequence)) {
+                if (StripeTextUtils.isEmpty(sequence)) {
                     mapToEdit.remove(key);
                 }
             }
 
             if (mapToEdit.get(key) instanceof Map) {
-                Map<String, Object> stringObjectMap = (Map<String, Object>) mapToEdit.get(key);
-                removeNullAndEmptyParams(stringObjectMap);
+                final Map<String, Object> stringObjectMap =
+                        (Map<String, Object>) mapToEdit.get(key);
+                if (stringObjectMap != null) {
+                    removeNullAndEmptyParams(stringObjectMap);
+                }
             }
         }
     }
 
     void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
-        if (params.containsKey("source_data") && params.get("source_data") instanceof Map) {
-            addUidParams((Map) params.get("source_data"));
+        final Object sourceData = params
+                .get(PaymentIntentParams.API_PARAM_SOURCE_DATA);
+        if (sourceData instanceof Map) {
+            addUidParams((Map) sourceData);
+            return;
+        }
+
+        final Object paymentMethodData = params
+                .get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
+        if (paymentMethodData instanceof Map) {
+            addUidParams((Map) paymentMethodData);
         }
     }
 
@@ -160,14 +172,13 @@ public class StripeNetworkUtils {
             return;
         }
 
-        String hashGuid = StripeTextUtils.shaHashInput(guid);
-        String muid = mPackageName + guid;
-        String hashMuid = StripeTextUtils.shaHashInput(muid);
-
+        final String hashGuid = StripeTextUtils.shaHashInput(guid);
         if (!StripeTextUtils.isBlank(hashGuid)) {
             params.put(GUID, hashGuid);
         }
 
+        final String muid = mPackageName + guid;
+        final String hashMuid = StripeTextUtils.shaHashInput(muid);
         if (!StripeTextUtils.isBlank(hashMuid)) {
             params.put(MUID, hashMuid);
         }

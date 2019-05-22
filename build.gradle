@@ -6,9 +6,17 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:3.4.1'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.6'
     }
+}
+
+plugins {
+    id 'io.codearte.nexus-staging' version '0.20.0'
+}
+
+nexusStaging {
+    packageGroup = GROUP
 }
 
 allprojects {

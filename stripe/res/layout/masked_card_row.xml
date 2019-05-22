@@ -4,8 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingEnd="@dimen/masked_card_row_end_padding"
-    android:paddingRight="@dimen/masked_card_row_end_padding"
-    android:paddingLeft="@dimen/masked_card_row_start_padding"
     android:paddingStart="@dimen/masked_card_row_start_padding"
     >
 

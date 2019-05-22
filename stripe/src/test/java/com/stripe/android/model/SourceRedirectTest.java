@@ -1,12 +1,9 @@
 package com.stripe.android.model;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +15,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-@RunWith(RobolectricTestRunner.class)
 public class SourceRedirectTest {
 
     static final String EXAMPLE_JSON_REDIRECT = "  {" +

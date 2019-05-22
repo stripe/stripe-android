@@ -76,7 +76,7 @@ public class IconTextInputLayout extends TextInputLayout {
         }
 
         try {
-            mBounds.left = getEditText().getLeft() + getEditText().getPaddingLeft();
+            mBounds.left = getEditText().getLeft() + getEditText().getPaddingStart();
             mRecalculateMethod.invoke(mCollapsingTextHelper);
         } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
             // No need to overreact here - this will result in the animation rendering differently

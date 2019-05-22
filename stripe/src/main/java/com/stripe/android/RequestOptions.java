@@ -10,13 +10,14 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Data class representing options for a Stripe API request.
  */
-public class RequestOptions {
+class RequestOptions {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_QUERY, TYPE_JSON})
-    public @interface RequestType {}
-    public static final String TYPE_QUERY = "source";
-    public static final String TYPE_JSON = "json_data";
+    @StringDef({RequestType.QUERY, RequestType.JSON})
+    public @interface RequestType {
+        String QUERY = "source";
+        String JSON = "json_data";
+    }
 
     @Nullable private final String mGuid;
     @Nullable private final String mIdempotencyKey;
@@ -73,36 +74,37 @@ public class RequestOptions {
     }
 
     /**
-     * Static accessor for the {@link RequestOptionsBuilder} class. Creates
-     * a builder for a {@link #TYPE_QUERY} options item
+     * Static accessor for the {@link Builder} class. Creates
+     * a builder for a {@link RequestType#QUERY} options item
      *
      * @param publishableApiKey your publishable API key
-     * @return a {@link RequestOptionsBuilder} instance
+     * @return a {@link Builder} instance
      */
-    public static RequestOptions.RequestOptionsBuilder builder(@Nullable String publishableApiKey) {
-        return builder(publishableApiKey, TYPE_QUERY);
+    public static Builder builder(@Nullable String publishableApiKey) {
+        return builder(publishableApiKey, RequestType.QUERY);
     }
 
     @NonNull
-    public static RequestOptions.RequestOptionsBuilder builder(
+    public static Builder builder(
             @Nullable String publishableApiKey,
             @Nullable String stripeAccount,
             @NonNull @RequestType String requestType) {
-        return new RequestOptionsBuilder(publishableApiKey, requestType)
+        return new Builder(publishableApiKey, requestType)
                 .setStripeAccount(stripeAccount);
     }
 
     /**
-     * Static accessor for the {@link RequestOptionsBuilder} class with type.
+     * Static accessor for the {@link Builder} class with type.
      *
      * @param publishableApiKey your publishable API key
      * @param requestType your {@link RequestType}
-     * @return a {@link RequestOptionsBuilder} instance
+     * @return a {@link Builder} instance
      */
-    public static RequestOptions.RequestOptionsBuilder builder(
+    @NonNull
+    public static Builder builder(
             @Nullable String publishableApiKey,
             @NonNull @RequestType String requestType) {
-        return new RequestOptions.RequestOptionsBuilder(
+        return new Builder(
                 publishableApiKey,
                 requestType);
     }
@@ -110,8 +112,7 @@ public class RequestOptions {
     /**
      * Builder class for a set of {@link RequestOptions}.
      */
-    public static final class RequestOptionsBuilder {
-
+    static final class Builder {
         private String guid;
         private String idempotencyKey;
         private String publishableApiKey;
@@ -123,8 +124,7 @@ public class RequestOptions {
          *
          * @param publishableApiKey your publishable API key
          */
-        RequestOptionsBuilder(
-                @Nullable String publishableApiKey,
+        Builder(@Nullable String publishableApiKey,
                 @NonNull @RequestType String requestType) {
             this.publishableApiKey = publishableApiKey;
             this.requestType = requestType;
@@ -137,7 +137,7 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        RequestOptionsBuilder setPublishableApiKey(@NonNull String publishableApiKey) {
+        Builder setPublishableApiKey(@NonNull String publishableApiKey) {
             this.publishableApiKey = publishableApiKey;
             return this;
         }
@@ -150,7 +150,7 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        RequestOptionsBuilder setIdempotencyKey(@Nullable String idempotencyKey) {
+        Builder setIdempotencyKey(@Nullable String idempotencyKey) {
             this.idempotencyKey = idempotencyKey;
             return this;
         }
@@ -162,13 +162,13 @@ public class RequestOptions {
          * @return {@code this}, for chaining purposes
          */
         @NonNull
-        RequestOptionsBuilder setGuid(@Nullable String guid) {
+        Builder setGuid(@Nullable String guid) {
             this.guid = guid;
             return this;
         }
 
         @NonNull
-        RequestOptionsBuilder setStripeAccount(@Nullable String stripeAccount) {
+        Builder setStripeAccount(@Nullable String stripeAccount) {
             this.stripeAccount = stripeAccount;
             return this;
         }
@@ -178,6 +178,7 @@ public class RequestOptions {
          *
          * @return the new {@link RequestOptions} object
          */
+        @NonNull
         public RequestOptions build() {
             return new RequestOptions(
                     this.guid,

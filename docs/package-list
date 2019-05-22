@@ -1,0 +1,7 @@
+com.stripe.android
+com.stripe.android.exception
+com.stripe.android.model
+com.stripe.android.model.wallets
+com.stripe.android.utils
+com.stripe.android.view
+com.stripe.android.view.i18n

@@ -1,12 +1,14 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.design.widget.TextInputLayout;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
@@ -90,6 +92,13 @@ public class ShippingInfoWidget extends LinearLayout {
         mStateEditText = findViewById(R.id.et_state_aaw);
         mPhoneNumberEditText = findViewById(R.id.et_phone_number_aaw);
         mPhoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mNameEditText.setAutofillHints(View.AUTOFILL_HINT_NAME);
+            mAddressLine1TextInputLayout.setAutofillHints(View.AUTOFILL_HINT_POSTAL_ADDRESS);
+            mPostalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE);
+            mPhoneNumberEditText.setAutofillHints(View.AUTOFILL_HINT_PHONE);
+        }
 
         initView();
     }

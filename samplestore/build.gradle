@@ -10,8 +10,9 @@ android {
 
     defaultConfig {
         applicationId "com.stripe.samplestore"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion rootProject.ext.compileSdkVersion
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -37,7 +38,7 @@ android {
 
 dependencies {
     implementation project(':stripe')
-
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "com.android.support:appcompat-v7:28.0.0"
     implementation "com.android.support:recyclerview-v7:28.0.0"
     implementation "com.android.support:design:28.0.0"

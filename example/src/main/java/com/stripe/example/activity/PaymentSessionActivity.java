@@ -21,11 +21,9 @@ import com.stripe.android.PaymentSessionData;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
 import com.stripe.android.view.ShippingInfoWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
@@ -70,7 +68,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mSelectPaymentButton.setEnabled(false);
         mSelectShippingButton = findViewById(R.id.btn_start_payment_flow);
         mSelectShippingButton.setEnabled(false);
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
@@ -142,22 +140,16 @@ public class PaymentSessionActivity extends AppCompatActivity {
         final Currency currency = Currency.getInstance("USD");
         final StringBuilder stringBuilder = new StringBuilder();
 
-        if (data.getSelectedPaymentMethodId() != null && mCustomer != null) {
-            final CustomerSource source = mCustomer
-                    .getSourceById(data.getSelectedPaymentMethodId());
-            if (source != null) {
-                final Source cardSource = source.asSource();
-                stringBuilder.append("Payment Info:\n");
-                if (cardSource != null) {
-                    SourceCardData scd = (SourceCardData) cardSource.getSourceTypeModel();
-                    stringBuilder.append(scd.getBrand())
-                            .append(" ending in ")
-                            .append(scd.getLast4());
-                } else {
-                    stringBuilder.append('\n').append(source.toJson().toString()).append('\n');
-                }
-                String isOrNot = data.isPaymentReadyToCharge() ? " IS " : " IS NOT ";
-                stringBuilder.append(isOrNot).append("ready to charge.\n\n");
+        if (data.getPaymentMethod() != null) {
+            final PaymentMethod paymentMethod = data.getPaymentMethod();
+            final PaymentMethod.Card card = paymentMethod.card;
+
+            if (card != null) {
+                stringBuilder.append("Payment Info:\n").append(card.brand)
+                        .append(" ending in ")
+                        .append(card.last4)
+                        .append(data.isPaymentReadyToCharge() ? " IS " : " IS NOT ")
+                        .append("ready to charge.\n\n");
             }
         }
         if (data.getShippingInformation() != null) {

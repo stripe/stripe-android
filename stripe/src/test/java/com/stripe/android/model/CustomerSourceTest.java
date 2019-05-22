@@ -5,8 +5,6 @@ import com.stripe.android.testharness.JsonTestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import static com.stripe.android.model.CardTest.JSON_CARD;
 import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
@@ -19,7 +17,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link CustomerSource} model class.
  */
-@RunWith(RobolectricTestRunner.class)
 public class CustomerSourceTest {
 
     static final String JSON_APPLE_PAY_CARD = "{\n" +

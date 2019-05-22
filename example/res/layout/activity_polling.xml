@@ -6,15 +6,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="8dp"
     android:paddingStart="8dp"
-    android:paddingRight="8dp"
     android:paddingEnd="8dp"
     tools:context="com.stripe.example.activity.RedirectActivity">
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addThreeDSecureCard"
-              style="@style/Header.Light" />
+              style="@style/Header" />
 
     <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_widget_three_d"
@@ -40,7 +38,7 @@
         android:text="@string/addThreeDSecureCardSync"/>
 
     <TextView android:text="@string/updatedSources"
-              style="@style/Header.Light" />
+              style="@style/Header" />
 
     <include layout="@layout/polling_list_headers"/>
 

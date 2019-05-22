@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test class for {@link SourceParams}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class SourceParamsTest {
 
     private static final Card FULL_FIELDS_VISA_CARD;

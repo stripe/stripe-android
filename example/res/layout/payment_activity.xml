@@ -3,16 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="8dp"
     android:paddingStart="8dp"
-    android:paddingRight="8dp"
     android:paddingEnd="8dp"
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/addPayment"
-              style="@style/Header.Light" />
+              style="@style/Header" />
 
     <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_input_widget"
@@ -44,7 +42,7 @@
     <TextView android:id="@+id/token_list_title"
               android:text="@string/paymentMethods"
               android:layout_marginTop="12dp"
-              style="@style/Header.Light" />
+              style="@style/Header" />
 
     <ListView
         android:id="@+id/listview"

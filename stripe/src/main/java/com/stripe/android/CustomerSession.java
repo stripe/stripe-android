@@ -19,6 +19,9 @@ import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
+import com.stripe.android.view.AddPaymentMethodActivity;
+import com.stripe.android.view.PaymentFlowActivity;
+import com.stripe.android.view.PaymentMethodsActivity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -57,14 +60,16 @@ public class CustomerSession {
     private static final String KEY_SOURCE = "source";
     private static final String KEY_SOURCE_TYPE = "source_type";
     private static final String KEY_SHIPPING_INFO = "shipping_info";
-    private static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
+
     private static final Set<String> VALID_TOKENS =
-            new HashSet<>(Arrays.asList("AddSourceActivity",
-                    "PaymentMethodsActivity",
-                    "PaymentFlowActivity",
-                    TOKEN_PAYMENT_SESSION,
-                    "ShippingInfoScreen",
-                    "ShippingMethodScreen"));
+            new HashSet<>(Arrays.asList(
+                    AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY,
+                    PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY,
+                    PaymentFlowActivity.TOKEN_PAYMENT_FLOW_ACTIVITY,
+                    PaymentSession.TOKEN_PAYMENT_SESSION,
+                    PaymentFlowActivity.TOKEN_SHIPPING_INFO_SCREEN,
+                    PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN
+            ));
 
     @IntDef({
             MessageCode.ERROR,
@@ -401,8 +406,8 @@ public class CustomerSession {
     /**
      * Gets a Customer's PaymentMethods
      */
-    void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
-                           @NonNull PaymentMethodsRetrievalListener listener) {
+    public void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
+                                  @NonNull PaymentMethodsRetrievalListener listener) {
         final Map<String, String> arguments = new HashMap<>();
         arguments.put(KEY_PAYMENT_METHOD_TYPE, paymentMethodType.code);
 
@@ -880,6 +885,24 @@ public class CustomerSession {
     interface RetrievalListener {
         void onError(int errorCode, @Nullable String errorMessage,
                      @Nullable StripeError stripeError);
+    }
+
+    /**
+     * Abstract implementation of {@link PaymentMethodsRetrievalListener} that holds a
+     * {@link WeakReference} to an {@link Activity} object.
+     */
+    public abstract static class ActivityPaymentMethodsRetrievalListener<A extends Activity>
+            implements PaymentMethodsRetrievalListener {
+        @NonNull private final WeakReference<A> mActivityRef;
+
+        public ActivityPaymentMethodsRetrievalListener(@NonNull A activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Nullable
+        protected A getActivity() {
+            return mActivityRef.get();
+        }
     }
 
     /**

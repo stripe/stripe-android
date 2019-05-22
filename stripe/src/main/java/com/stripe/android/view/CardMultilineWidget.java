@@ -25,12 +25,14 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
@@ -110,6 +112,47 @@ public class CardMultilineWidget extends LinearLayout {
     public void setCardInputListener(@Nullable CardInputListener cardInputListener) {
         mCardInputListener = cardInputListener;
     }
+
+    /**
+     * Gets a {@link PaymentMethodCreateParams.Card} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams.Card} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethodCreateParams.Card getPaymentMethodCard() {
+        if (validateAllFields()) {
+            final int[] cardDate = mExpiryDateEditText.getValidDateFields();
+
+            return new PaymentMethodCreateParams.Card.Builder()
+                    .setNumber(mCardNumberEditText.getCardNumber())
+                    .setCvc(mCvcEditText.getText().toString())
+                    .setExpiryMonth(cardDate[0])
+                    .setExpiryYear(cardDate[1]).build();
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets a {@link PaymentMethod.BillingDetails} object from the user input, if all fields are
+     * valid. If not returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethod.BillingDetails} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethod.BillingDetails getPaymentMethodBillingDetails() {
+        if (mShouldShowPostalCode && validateAllFields()) {
+            return new PaymentMethod.BillingDetails.Builder().setAddress(
+                    new Address.Builder().setPostalCode(mPostalCodeEditText.getText().toString())
+                            .build()).build();
+        }
+
+        return null;
+    }
+
 
     /**
      * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
@@ -282,9 +325,7 @@ public class CardMultilineWidget extends LinearLayout {
         final LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
         linearParams.setMargins(0, 0, marginPixels, 0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            linearParams.setMarginEnd(marginPixels);
-        }
+        linearParams.setMarginEnd(marginPixels);
 
         mCvcTextInputLayout.setLayoutParams(linearParams);
     }
@@ -359,6 +400,13 @@ public class CardMultilineWidget extends LinearLayout {
         mCvcEditText = findViewById(R.id.et_add_source_cvc_ml);
         mPostalCodeEditText = findViewById(R.id.et_add_source_postal_ml);
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mCardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            mExpiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            mCvcEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+            mPostalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE);
+        }
 
         mCardBrand = Card.UNKNOWN;
         // This sets the value of mShouldShowPostalCode
@@ -563,7 +611,7 @@ public class CardMultilineWidget extends LinearLayout {
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
         updateCvc();
-        updateDrawable(BRAND_RESOURCE_MAP.get(brand), Card.UNKNOWN.equals(brand));
+        updateDrawable(Card.getBrandIcon(brand), Card.UNKNOWN.equals(brand));
     }
 
     private void updateCvc() {

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.android"
-          android:versionCode="34"
-          android:versionName="8.7.0"
+          android:versionCode="36"
+          android:versionName="9.0.1"
     >
 
     <application>
         <activity
-            android:name=".view.AddSourceActivity"
+            android:name=".view.AddPaymentMethodActivity"
             android:theme="@style/StripeDefaultTheme"
             android:windowSoftInputMode="stateVisible" />
 
@@ -20,7 +20,11 @@
             android:theme="@style/StripeDefaultTheme" />
 
         <activity
-            android:name=".view.AuthWebViewActivity"
+            android:name=".view.PaymentAuthWebViewActivity"
+            android:theme="@style/StripeDefaultTheme" />
+
+        <activity
+            android:name=".view.PaymentAuthBypassActivity"
             android:theme="@style/StripeDefaultTheme" />
     </application>
 

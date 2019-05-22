@@ -15,10 +15,11 @@ import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
  */
 public class AccountParams {
 
-    private static final String API_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted";
+    static final String API_BUSINESS_TYPE = "business_type";
+    static final String API_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted";
 
     private final boolean mTosShownAndAccepted;
-    @NonNull private final BusinessType mBusinessType;
+    @Nullable private final BusinessType mBusinessType;
     @Nullable private final Map<String, Object> mBusinessData;
 
     /**
@@ -49,12 +50,12 @@ public class AccountParams {
     @NonNull
     public static AccountParams createAccountParams(
             boolean tosShownAndAccepted,
-            @NonNull BusinessType businessType,
+            @Nullable BusinessType businessType,
             @Nullable Map<String, Object> businessData) {
         return new AccountParams(businessType, businessData, tosShownAndAccepted);
     }
 
-    private AccountParams(@NonNull BusinessType businessType,
+    private AccountParams(@Nullable BusinessType businessType,
                           @Nullable Map<String, Object> businessData,
                           boolean tosShownAndAccepted) {
         mBusinessType = businessType;
@@ -69,17 +70,20 @@ public class AccountParams {
      */
     @NonNull
     public Map<String, Object> toParamMap() {
-        final Map<String, Object> networkReadyMap = new HashMap<>();
-        final Map<String, Object> tokenMap = new HashMap<>();
-        tokenMap.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
+        final Map<String, Object> accountData = new HashMap<>();
+        if (mBusinessType != null) {
+            accountData.put(API_BUSINESS_TYPE, mBusinessType.code);
 
-        if (mBusinessData != null) {
-            tokenMap.put(mBusinessType.code, mBusinessData);
+            if (mBusinessData != null) {
+                accountData.put(mBusinessType.code, mBusinessData);
+            }
         }
+        accountData.put(API_TOS_SHOWN_AND_ACCEPTED, mTosShownAndAccepted);
 
-        networkReadyMap.put("account", tokenMap);
-        removeNullAndEmptyParams(networkReadyMap);
-        return networkReadyMap;
+        final Map<String, Object> params = new HashMap<>();
+        params.put("account", accountData);
+        removeNullAndEmptyParams(params);
+        return params;
     }
 
     @Override

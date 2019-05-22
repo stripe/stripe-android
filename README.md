@@ -13,7 +13,7 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
 ```
-implementation 'com.stripe:stripe-android:8.7.0'
+implementation 'com.stripe:stripe-android:9.0.1'
 ```
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.

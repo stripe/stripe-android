@@ -1,8 +1,6 @@
 package com.stripe.android.model;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
 
@@ -14,7 +12,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test class for {@link ModelUtils}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class ModelUtilsTest {
 
     @Test

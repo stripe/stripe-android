@@ -28,12 +28,10 @@ import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.CustomerSource;
 import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
 import com.stripe.samplestore.service.StripeService;
 
 import java.util.AbstractMap;
@@ -64,10 +62,7 @@ public class PaymentActivity extends AppCompatActivity {
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private BroadcastReceiver mBroadcastReceiver;
-    @Nullable private ProgressDialogFragment mProgressDialogFragment;
-
     private LinearLayout mCartItemLayout;
-
     private Button mConfirmPaymentButton;
     private TextView mEnterShippingInfo;
     private TextView mEnterPaymentInfo;
@@ -94,9 +89,6 @@ public class PaymentActivity extends AppCompatActivity {
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
         addCartItems();
-
-        mProgressDialogFragment = ProgressDialogFragment
-                .newInstance(getString(R.string.completing_purchase));
 
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
@@ -245,40 +237,51 @@ public class PaymentActivity extends AppCompatActivity {
 
     @NonNull
     private Map<String, Object> createParams(long price,
-                                             @Nullable String sourceId,
+                                             @Nullable String paymentMethodId,
                                              @Nullable String customerId,
                                              @Nullable ShippingInformation shippingInformation) {
         final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
-        params.put("source", sourceId);
+        params.put("payment_method", paymentMethodId);
         params.put("customer_id", customerId);
         params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
         params.put("return_url", "stripe://payment-auth-return");
         return params;
     }
 
-    private void capturePayment(@Nullable String sourceId, @Nullable String customerId) {
+    private void capturePayment(@Nullable String customerId) {
         final StripeService stripeService = RetrofitFactory.getInstance()
                 .create(StripeService.class);
         final long price = mStoreCart.getTotalPrice() + mShippingCosts;
 
+        final PaymentMethod paymentMethod =
+                mPaymentSession.getPaymentSessionData().getPaymentMethod();
+
+        if (paymentMethod == null) {
+            displayError("No payment method selected");
+            return;
+        }
+
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
-        final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
-                createParams(price, sourceId, customerId, shippingInformation));
         final FragmentManager fragmentManager = getSupportFragmentManager();
+        final ProgressDialogFragment progressDialogFragment = ProgressDialogFragment
+                .newInstance(getString(R.string.completing_purchase));
+
+        final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
+                createParams(price, paymentMethod.id, customerId, shippingInformation));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> {
-                    if (mProgressDialogFragment != null && !mProgressDialogFragment.isAdded()) {
-                        mProgressDialogFragment.show(fragmentManager, "progress");
+                    if (!progressDialogFragment.isAdded()) {
+                        progressDialogFragment.show(fragmentManager, "progress");
                     }
                 })
                 .doOnComplete(() -> {
-                    if (mProgressDialogFragment != null && mProgressDialogFragment.isVisible()) {
-                        mProgressDialogFragment.dismiss();
+                    if (progressDialogFragment.isVisible()) {
+                        progressDialogFragment.dismiss();
                     }
                 })
                 .subscribe(
@@ -321,15 +324,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @Nullable
-    private String formatSourceDescription(@NonNull Source source) {
-        if (Source.CARD.equals(source.getType())) {
-            final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-            if (sourceCardData != null) {
-                return sourceCardData.getBrand() + getString(R.string.ending_in) +
-                        sourceCardData.getLast4();
-            }
+    private String formatSourceDescription(@NonNull PaymentMethod paymentMethod) {
+        if (paymentMethod.card != null) {
+            return paymentMethod.card.brand + getString(R.string.ending_in) +
+                    paymentMethod.card.last4;
         }
-        return source.getType();
+        return null;
     }
 
     @NonNull
@@ -348,16 +348,6 @@ public class PaymentActivity extends AppCompatActivity {
         return shippingMethods;
     }
 
-    private void onCommunicatingStateChanged(boolean isCommunicating) {
-        if (mProgressDialogFragment != null) {
-            if (isCommunicating) {
-                mProgressDialogFragment.show(getSupportFragmentManager(), "progress");
-            } else {
-                mProgressDialogFragment.dismiss();
-            }
-        }
-    }
-
     private void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
         if (data.getShippingMethod() != null) {
             mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
@@ -366,9 +356,8 @@ public class PaymentActivity extends AppCompatActivity {
             updateConfirmPaymentButton();
         }
 
-        if (data.getSelectedPaymentMethodId() != null) {
-            CustomerSession.getInstance().retrieveCurrentCustomer(
-                    new PaymentSessionChangedCustomerRetrievalListener(this));
+        if (data.getPaymentMethod() != null) {
+            mEnterPaymentInfo.setText(formatSourceDescription(data.getPaymentMethod()));
         }
 
         if (data.isPaymentReadyToCharge()) {
@@ -384,12 +373,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         @Override
         public void onCommunicatingStateChanged(boolean isCommunicating) {
-            final PaymentActivity activity = getListenerActivity();
-            if (activity == null) {
-                return;
-            }
-
-            activity.onCommunicatingStateChanged(isCommunicating);
         }
 
         @Override
@@ -413,44 +396,6 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private static final class PaymentSessionChangedCustomerRetrievalListener
-            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
-        private PaymentSessionChangedCustomerRetrievalListener(@NonNull PaymentActivity activity) {
-            super(activity);
-        }
-
-        @Override
-        public void onCustomerRetrieved(@NonNull Customer customer) {
-            final PaymentActivity activity = getActivity();
-            if (activity == null) {
-                return;
-            }
-
-            final String sourceId = customer.getDefaultSource();
-            if (sourceId == null) {
-                activity.displayError("No payment method selected");
-                return;
-            }
-
-            final CustomerSource customerSource = customer.getSourceById(sourceId);
-            final Source source = customerSource != null ? customerSource.asSource() : null;
-            if (source != null) {
-                activity.mEnterPaymentInfo.setText(activity.formatSourceDescription(source));
-            }
-        }
-
-        @Override
-        public void onError(int httpCode, @Nullable String errorMessage,
-                            @Nullable StripeError stripeError) {
-            final PaymentActivity activity = getActivity();
-            if (activity == null) {
-                return;
-            }
-
-            activity.displayError(errorMessage);
-        }
-    }
-
     private static final class AttemptPurchaseCustomerRetrievalListener
             extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
         private AttemptPurchaseCustomerRetrievalListener(@NonNull PaymentActivity activity) {
@@ -464,21 +409,7 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            final String sourceId = customer.getDefaultSource();
-            if (sourceId == null) {
-                activity.displayError("No payment method selected");
-                return;
-            }
-
-            final CustomerSource customerSource = customer.getSourceById(sourceId);
-            final Source source = customerSource != null ? customerSource.asSource() : null;
-
-            if (source == null || !Source.CARD.equals(source.getType())) {
-                activity.displayError("Something went wrong - this should be rare");
-                return;
-            }
-
-            activity.capturePayment(source.getId(), customer.getId());
+            activity.capturePayment(customer.getId());
         }
 
         @Override

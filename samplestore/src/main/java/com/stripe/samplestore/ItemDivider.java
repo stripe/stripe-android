@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -24,8 +23,8 @@ class ItemDivider extends RecyclerView.ItemDecoration {
     @Override
     public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent,
                        @NonNull RecyclerView.State state) {
-        int left = parent.getPaddingLeft();
-        int right = parent.getWidth() - parent.getPaddingRight();
+        final int start = parent.getPaddingStart();
+        final int end = parent.getWidth() - parent.getPaddingEnd();
 
         int childCount = parent.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -36,7 +35,7 @@ class ItemDivider extends RecyclerView.ItemDecoration {
             int top = child.getBottom() + params.bottomMargin;
             int bottom = top + divider.getIntrinsicHeight();
 
-            divider.setBounds(left, top, right, bottom);
+            divider.setBounds(start, top, end, bottom);
             divider.draw(c);
         }
     }

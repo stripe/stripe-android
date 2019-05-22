@@ -3,6 +3,7 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
@@ -31,10 +32,10 @@ import android.widget.LinearLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.util.Locale;
 
-import static com.stripe.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -104,6 +105,31 @@ public class CardInputWidget extends LinearLayout {
     public CardInputWidget(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView(attrs);
+    }
+
+    /**
+     * Gets a {@link PaymentMethodCreateParams.Card} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams.Card} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethodCreateParams.Card getPaymentMethodCard() {
+        final String cardNumber = mCardNumberEditText.getCardNumber();
+        final int[] cardDate = mExpiryDateEditText.getValidDateFields();
+        final String cvcValue = mCvcNumberEditText.getText().toString().trim();
+
+        // CVC/CVV is the only field not validated by the entry control itself, so we check here.
+        if (cardNumber == null || cardDate == null || cardDate.length != 2 || !isCvcLengthValid()) {
+            return null;
+        }
+
+        return new PaymentMethodCreateParams.Card.Builder()
+                .setNumber(cardNumber)
+                .setCvc(cvcValue)
+                .setExpiryMonth(cardDate[0])
+                .setExpiryYear(cardDate[1]).build();
     }
 
     /**
@@ -478,6 +504,12 @@ public class CardInputWidget extends LinearLayout {
         mCardNumberEditText = findViewById(R.id.et_card_number);
         mExpiryDateEditText = findViewById(R.id.et_expiry_date);
         mCvcNumberEditText = findViewById(R.id.et_cvc_number);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mCardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            mExpiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            mCvcNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+        }
 
         ViewCompat.setAccessibilityDelegate(mCvcNumberEditText, new AccessibilityDelegateCompat() {
             @Override
@@ -900,7 +932,7 @@ public class CardInputWidget extends LinearLayout {
             mCardIconImageView.setImageDrawable(icon);
             applyTint(false);
         } else {
-            mCardIconImageView.setImageResource(BRAND_RESOURCE_MAP.get(brand));
+            mCardIconImageView.setImageResource(Card.getBrandIcon(brand));
         }
     }
 

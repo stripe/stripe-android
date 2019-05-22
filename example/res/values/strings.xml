@@ -12,9 +12,9 @@
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
-    <string name="createCardTokens">Create Card Tokens</string>
-    <string name="createCardPaymentMethods">Create Card PaymentMethods</string>
-    <string name="createThreeDSecure">Create 3DS Sources</string>
+    <string name="create_card_tokens">Create Card Tokens</string>
+    <string name="create_card_payment_methods">Create Card PaymentMethods</string>
+    <string name="create_three_d_secure">Create 3DS Sources</string>
     <string name="cardNumber">Card Number</string>
     <string name="createSource">Creating source&#8230;</string>
     <string name="confirmPayment">Confirm payment details</string>
@@ -22,7 +22,7 @@
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Launch Customer Session</string>
     <string name="launch_pay_with_google">Launch Pay with Google</string>
-    <string name="launchPaymentSession">Launch Payment Session</string>
+    <string name="launch_payment_session">Launch Payment Session</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
@@ -60,14 +60,24 @@
         <item>USD</item>
     </string-array>
 
-    <string name="launch_payment_intent_example">Launch Payment Intent Example</string>
-    <string name="creating_payment_intent">Creating payment intent&#8230;</string>
-    <string name="confirming_payment_intent">Confirming payment intent&#8230;</string>
-    <string name="retrieving_payment_intent">Retrieving payment intent&#8230;</string>
-    <string name="create_payment_intent_backend">First, create a payment intent on your backend.</string>
-    <string name="create_payment_intent">Create payment intent</string>
-    <string name="create_source_and_confirm_payment_intent">Second, create a source and confirm the payment intent</string>
-    <string name="confirm_payment_intent">Confirm payment intent</string>
-    <string name="retrieve_payment_intent">Retrieve payment intent</string>
-    <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the payment intent</string>
+    <string name="launch_payment_intent_example">Launch PaymentIntent Example</string>
+    <string name="creating_payment_intent">Creating PaymentIntent&#8230;</string>
+    <string name="confirming_payment_intent">Confirming PaymentIntent&#8230;</string>
+    <string name="retrieving_payment_intent">Retrieving PaymentIntent&#8230;</string>
+    <string name="create_payment_intent_backend">First, create a PaymentIntent on your backend.</string>
+    <string name="create_payment_intent">Create PaymentIntent</string>
+    <string name="create_payment_method_and_confirm_payment_intent">Second, create a payment method and confirm the PaymentIntent</string>
+    <string name="confirm_payment_intent">Confirm PaymentIntent</string>
+    <string name="retrieve_payment_intent">Retrieve PaymentIntent</string>
+    <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the PaymentIntent</string>
+
+    <string name="authentication_dialog_title">Authentication required</string>
+    <string name="authentication_dialog_message">Authenticate %1$s ending in %2$s?</string>
+    <string name="pay_with_google">Pay with Google</string>
+
+    <!-- Payment Auth example -->
+    <string name="launch_payment_auth_example">Launch Payment Auth Example</string>
+    <string name="buy">Buy!</string>
+    <string name="payment_intent_status">PaymentIntent status: %s</string>
+    <string name="payment_auth_intro">Tapping the button below will create a PaymentIntent then attempt to confirm it.</string>
 </resources>

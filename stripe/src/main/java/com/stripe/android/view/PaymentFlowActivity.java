@@ -29,7 +29,9 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  * as well as select a shipping method.
  */
 public class PaymentFlowActivity extends StripeActivity {
-    static final String TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity";
+    public static final String TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity";
+    public static final String TOKEN_SHIPPING_INFO_SCREEN = "ShippingInfoScreen";
+    public static final String TOKEN_SHIPPING_METHOD_SCREEN = "ShippingMethodScreen";
 
     private BroadcastReceiver mShippingInfoSavedBroadcastReceiver;
     private BroadcastReceiver mShippingInfoSubmittedBroadcastReceiver;

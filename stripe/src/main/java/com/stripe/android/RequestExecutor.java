@@ -1,9 +1,7 @@
 package com.stripe.android;
 
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
@@ -18,14 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,14 +36,6 @@ class RequestExecutor {
 
     private static final String CHARSET = "UTF-8";
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({RestMethod.GET, RestMethod.POST, RestMethod.DELETE})
-    @interface RestMethod {
-        String GET = "GET";
-        String POST = "POST";
-        String DELETE = "DELETE";
-    }
-
     @NonNull private final ConnectionFactory mConnectionFactory;
 
     RequestExecutor() {
@@ -59,36 +43,12 @@ class RequestExecutor {
     }
 
     @NonNull
-    StripeResponse execute(
-            @RestMethod @NonNull String method,
-            @NonNull String url,
-            @Nullable Map<String, ?> params,
-            @NonNull RequestOptions options)
+    StripeResponse execute(@NonNull StripeRequest request)
             throws APIConnectionException, InvalidRequestException {
         // HttpURLConnection verifies SSL cert by default
         HttpURLConnection conn = null;
         try {
-            switch (method) {
-                case RestMethod.GET: {
-                    conn = mConnectionFactory.create(RestMethod.GET, url, params, options);
-                    break;
-                }
-                case RestMethod.POST: {
-                    conn = mConnectionFactory.create(RestMethod.POST, url, params, options);
-                    break;
-                }
-                case RestMethod.DELETE: {
-                    conn = mConnectionFactory.create(RestMethod.DELETE, url, null, options);
-                    break;
-                }
-                default: {
-                    throw new APIConnectionException(String.format(Locale.ENGLISH,
-                            "Unrecognized HTTP method %s. "
-                                    + "This indicates a bug in the Stripe bindings. "
-                                    + "Please contact support@stripe.com for assistance.",
-                            method));
-                }
-            }
+            conn = mConnectionFactory.create(request);
             // trigger the request
             final int rCode = conn.getResponseCode();
             final String rBody;
@@ -140,41 +100,39 @@ class RequestExecutor {
         }
 
         @NonNull
-        private HttpURLConnection create(@RestMethod @NonNull String method,
-                                         @NonNull String url,
-                                         @Nullable Map<String, ?> params,
-                                         @NonNull RequestOptions options)
+        private HttpURLConnection create(@NonNull StripeRequest request)
                 throws IOException, InvalidRequestException {
-            final URL stripeURL = new URL(getUrl(method, url, params));
+            final URL stripeURL = new URL(request.getUrl());
             final HttpURLConnection conn = (HttpURLConnection) stripeURL.openConnection();
             conn.setConnectTimeout(30 * 1000);
             conn.setReadTimeout(80 * 1000);
             conn.setUseCaches(false);
 
-            if (urlNeedsHeaderData(url)) {
-                for (Map.Entry<String, String> header : getHeaders(options).entrySet()) {
+            if (request.urlStartsWith(LIVE_API_BASE, LIVE_LOGGING_BASE)) {
+                for (Map.Entry<String, String> header :
+                        request.getHeaders(mApiVersion).entrySet()) {
                     conn.setRequestProperty(header.getKey(), header.getValue());
                 }
             }
 
-            if (urlNeedsPseudoCookie(url)) {
-                attachPseudoCookie(conn, options);
+            if (request.urlStartsWith(LOGGING_ENDPOINT)) {
+                attachPseudoCookie(conn, request.options);
             }
 
             if (conn instanceof HttpsURLConnection) {
                 ((HttpsURLConnection) conn).setSSLSocketFactory(SSL_SOCKET_FACTORY);
             }
 
-            conn.setRequestMethod(method);
+            conn.setRequestMethod(request.method.code);
 
-            if (RestMethod.POST.equals(method)) {
+            if (StripeRequest.Method.POST == request.method) {
                 conn.setDoOutput(true);
-                conn.setRequestProperty("Content-Type", getContentType(options));
+                conn.setRequestProperty("Content-Type", request.getContentType());
 
                 OutputStream output = null;
                 try {
                     output = conn.getOutputStream();
-                    output.write(getOutputBytes(params, options));
+                    output.write(getOutputBytes(request));
                 } finally {
                     if (output != null) {
                         output.close();
@@ -183,38 +141,6 @@ class RequestExecutor {
             }
 
             return conn;
-        }
-
-        @NonNull
-        private String getUrl(@RestMethod @NonNull String method,
-                              @NonNull String url,
-                              @Nullable Map<String, ?> params)
-                throws UnsupportedEncodingException, InvalidRequestException {
-            if (RestMethod.GET.equals(method)) {
-                return formatUrl(url, createQuery(params));
-            }
-
-            return url;
-        }
-
-        @NonNull
-        private String formatUrl(@NonNull String url, @Nullable String query) {
-            if (query == null || query.isEmpty()) {
-                return url;
-            } else {
-                // In some cases, URL can already contain a question mark
-                // (eg, upcoming invoice lines)
-                final String separator = url.contains("?") ? "&" : "?";
-                return String.format(Locale.ROOT, "%s%s%s", url, separator, query);
-            }
-        }
-
-        private boolean urlNeedsHeaderData(@NonNull String url) {
-            return url.startsWith(LIVE_API_BASE) || url.startsWith(LIVE_LOGGING_BASE);
-        }
-
-        private boolean urlNeedsPseudoCookie(@NonNull String url) {
-            return url.startsWith(LOGGING_ENDPOINT);
         }
 
         private void attachPseudoCookie(
@@ -226,22 +152,11 @@ class RequestExecutor {
         }
 
         @NonNull
-        private String getContentType(@NonNull RequestOptions options) {
-            if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                return String.format(Locale.ROOT, "application/json; charset=%s", CHARSET);
-            } else {
-                return String.format(Locale.ROOT, "application/x-www-form-urlencoded;charset=%s",
-                        CHARSET);
-            }
-        }
-
-        @NonNull
-        private byte[] getOutputBytes(
-                @Nullable Map<String, ?> params,
-                @NonNull RequestOptions options) throws InvalidRequestException {
+        private byte[] getOutputBytes(@NonNull StripeRequest request)
+                throws InvalidRequestException {
             try {
-                if (RequestOptions.TYPE_JSON.equals(options.getRequestType())) {
-                    JSONObject jsonData = mapToJsonObject(params);
+                if (RequestOptions.RequestType.JSON.equals(request.options.getRequestType())) {
+                    final JSONObject jsonData = mapToJsonObject(request.params);
                     if (jsonData == null) {
                         throw new InvalidRequestException("Unable to create JSON data from " +
                                 "parameters. Please contact support@stripe.com for assistance.",
@@ -249,7 +164,7 @@ class RequestExecutor {
                     }
                     return jsonData.toString().getBytes(CHARSET);
                 } else {
-                    return createQuery(params).getBytes(CHARSET);
+                    return request.createQuery().getBytes(CHARSET);
                 }
             } catch (UnsupportedEncodingException e) {
                 throw new InvalidRequestException("Unable to encode parameters to " + CHARSET
@@ -334,163 +249,6 @@ class RequestExecutor {
             }
             return jsonArray;
         }
-
-        @NonNull
-        String createQuery(@Nullable Map<String, ?> params)
-                throws UnsupportedEncodingException, InvalidRequestException {
-            final StringBuilder queryStringBuffer = new StringBuilder();
-            final List<Parameter> flatParams = flattenParams(params);
-
-            for (Parameter flatParam : flatParams) {
-                if (queryStringBuffer.length() > 0) {
-                    queryStringBuffer.append("&");
-                }
-                queryStringBuffer.append(urlEncodePair(flatParam.key, flatParam.value));
-            }
-
-            return queryStringBuffer.toString();
-        }
-
-        @NonNull
-        private List<Parameter> flattenParams(@Nullable Map<String, ?> params)
-                throws InvalidRequestException {
-            return flattenParamsMap(params, null);
-        }
-
-        @NonNull
-        private List<Parameter> flattenParamsList(@NonNull List<?> params,
-                                                  @NonNull String keyPrefix)
-                throws InvalidRequestException {
-            final List<Parameter> flatParams = new LinkedList<>();
-
-            // Because application/x-www-form-urlencoded cannot represent an empty
-            // list, convention is to take the list parameter and just set it to an
-            // empty string. (e.g. A regular list might look like `a[]=1&b[]=2`.
-            // Emptying it would look like `a=`.)
-            if (params.isEmpty()) {
-                flatParams.add(new Parameter(keyPrefix, ""));
-            } else {
-                final String newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix);
-                for (Object param : params) {
-                    flatParams.addAll(flattenParamsValue(param, newPrefix));
-                }
-            }
-
-            return flatParams;
-        }
-
-        @NonNull
-        private List<Parameter> flattenParamsMap(@Nullable Map<String, ?> params,
-                                                 @Nullable String keyPrefix)
-                throws InvalidRequestException {
-            final List<Parameter> flatParams = new LinkedList<>();
-            if (params == null) {
-                return flatParams;
-            }
-
-            for (Map.Entry<String, ?> entry : params.entrySet()) {
-                final String key = entry.getKey();
-                final Object value = entry.getValue();
-                final String newPrefix;
-                if (keyPrefix != null) {
-                    newPrefix = String.format(Locale.ROOT, "%s[%s]", keyPrefix, key);
-                } else {
-                    newPrefix = key;
-                }
-
-                flatParams.addAll(flattenParamsValue(value, newPrefix));
-            }
-
-            return flatParams;
-        }
-
-        @NonNull
-        private List<Parameter> flattenParamsValue(@Nullable Object value,
-                                                   @NonNull String keyPrefix)
-                throws InvalidRequestException {
-            final List<Parameter> flatParams;
-            if (value instanceof Map<?, ?>) {
-                flatParams = flattenParamsMap((Map<String, Object>) value, keyPrefix);
-            } else if (value instanceof List<?>) {
-                flatParams = flattenParamsList((List<?>) value, keyPrefix);
-            } else if ("".equals(value)) {
-                throw new InvalidRequestException("You cannot set '" + keyPrefix + "' to an empty "
-                        + "string. " + "We interpret empty strings as null in requests. "
-                        + "You may set '" + keyPrefix + "' to null to delete the property.",
-                        keyPrefix, null, 0, null, null, null, null);
-            } else if (value == null) {
-                flatParams = new LinkedList<>();
-                flatParams.add(new Parameter(keyPrefix, ""));
-            } else {
-                flatParams = new LinkedList<>();
-                flatParams.add(new Parameter(keyPrefix, value.toString()));
-            }
-
-            return flatParams;
-        }
-
-        @NonNull
-        private String urlEncodePair(@NonNull String k, @NonNull String v)
-                throws UnsupportedEncodingException {
-            return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v));
-        }
-
-        @Nullable
-        private String urlEncode(@Nullable String str) throws UnsupportedEncodingException {
-            // Preserve original behavior that passing null for an object id will lead
-            // to us actually making a request to /v1/foo/null
-            if (str == null) {
-                return null;
-            } else {
-                return URLEncoder.encode(str, CHARSET);
-            }
-        }
-
-        @NonNull
-        @VisibleForTesting
-        Map<String, String> getHeaders(@NonNull RequestOptions options) {
-            final Map<String, String> headers = new HashMap<>();
-            headers.put("Accept-Charset", CHARSET);
-            headers.put("Accept", "application/json");
-            headers.put("User-Agent",
-                    String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                            BuildConfig.VERSION_NAME));
-
-            headers.put("Authorization", String.format(Locale.ENGLISH,
-                    "Bearer %s", options.getPublishableApiKey()));
-
-            // debug headers
-            final AbstractMap<String, String> propertyMap = new HashMap<>();
-            propertyMap.put("java.version", System.getProperty("java.version"));
-            propertyMap.put("os.name", "android");
-            propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
-            propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
-            propertyMap.put("lang", "Java");
-            propertyMap.put("publisher", "Stripe");
-
-            final JSONObject headerMappingObject = new JSONObject(propertyMap);
-            headers.put("X-Stripe-Client-User-Agent", headerMappingObject.toString());
-            headers.put("Stripe-Version", mApiVersion.getCode());
-
-            if (options.getStripeAccount() != null) {
-                headers.put("Stripe-Account", options.getStripeAccount());
-            }
-
-            if (options.getIdempotencyKey() != null) {
-                headers.put("Idempotency-Key", options.getIdempotencyKey());
-            }
-
-            return headers;
-        }
     }
 
-    private static final class Parameter {
-        @NonNull private final String key;
-        @NonNull private final String value;
-
-        Parameter(@NonNull String key, @NonNull String value) {
-            this.key = key;
-            this.value = value;
-        }
-    }
 }

@@ -3,8 +3,6 @@ package com.stripe.android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,6 @@ import static org.junit.Assert.fail;
 /**
  * Test class for {@link Address}.
  */
-@RunWith(RobolectricTestRunner.class)
 public class AddressTest {
 
     static final String JSON_ADDRESS = "{" +

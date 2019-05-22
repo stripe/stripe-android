@@ -13,13 +13,14 @@ import android.widget.TextView;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
-import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
+import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
+
+import java.lang.ref.WeakReference;
 
 /**
  * An example activity that handles working with a {@link CustomerSession}, allowing you to
@@ -43,14 +44,9 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mSelectedSourceTextView = findViewById(R.id.tv_customer_default_source_acs);
         mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs);
         mSelectSourceButton.setEnabled(false);
-        mErrorDialogHandler = new ErrorDialogHandler(getSupportFragmentManager());
+        mErrorDialogHandler = new ErrorDialogHandler(this);
         CustomerSession.initCustomerSession(this,
-                new ExampleEphemeralKeyProvider(
-                        string -> {
-                            if (string.startsWith("Error: ")) {
-                                mErrorDialogHandler.show(string);
-                            }
-                        }));
+                new ExampleEphemeralKeyProvider(new ProgressListenerImpl(this)));
 
         mProgressBar.setVisibility(View.VISIBLE);
         CustomerSession.getInstance().retrieveCurrentCustomer(
@@ -67,20 +63,19 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            final String selectedSource = data
-                    .getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            Source source = Source.fromString(selectedSource);
-            // Note: it isn't possible for a null or non-card source to be returned.
-            if (source != null && Source.CARD.equals(source.getType())) {
-                SourceCardData cardData = (SourceCardData) source.getSourceTypeModel();
-                mSelectedSourceTextView.setText(buildCardString(cardData));
+            final String selectedPaymentMethod =
+                    data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+            final PaymentMethod paymentMethod = PaymentMethod.fromString(selectedPaymentMethod);
+
+            if (paymentMethod != null && paymentMethod.card != null) {
+                mSelectedSourceTextView.setText(buildCardString(paymentMethod.card));
             }
         }
     }
 
     @NonNull
-    private String buildCardString(@NonNull SourceCardData data) {
-        return data.getBrand() + getString(R.string.ending_in) + data.getLast4();
+    private String buildCardString(@NonNull PaymentMethod.Card data) {
+        return data.brand + getString(R.string.ending_in) + data.last4;
     }
 
     private void onCustomerRetrieved() {
@@ -114,6 +109,24 @@ public class CustomerSessionActivity extends AppCompatActivity {
             final CustomerSessionActivity activity = getActivity();
             if (activity != null) {
                 activity.onRetrieveError(errorMessage);
+            }
+        }
+    }
+
+    private static final class ProgressListenerImpl
+            implements ExampleEphemeralKeyProvider.ProgressListener {
+
+        @NonNull private final WeakReference<CustomerSessionActivity> mActivityRef;
+
+        private ProgressListenerImpl(@NonNull CustomerSessionActivity activity) {
+            this.mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void onStringResponse(@NonNull String response) {
+            final CustomerSessionActivity activity = mActivityRef.get();
+            if (activity != null && response.startsWith("Error: ")) {
+                activity.mErrorDialogHandler.show(response);
             }
         }
     }

@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
@@ -10,6 +11,8 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,6 +134,10 @@ public class PaymentMethod extends StripeJsonModel {
 
     @Nullable
     public static PaymentMethod fromString(@Nullable String jsonString) {
+        if (jsonString == null) {
+            return null;
+        }
+
         try {
             return fromJson(new JSONObject(jsonString));
         } catch (JSONException ignored) {
@@ -391,7 +398,29 @@ public class PaymentMethod extends StripeJsonModel {
         private static final String FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage";
         private static final String FIELD_WALLET = "wallet";
 
-        @Nullable public final String brand;
+        @Retention(RetentionPolicy.SOURCE)
+        @StringDef({
+                Brand.AMERICAN_EXPRESS,
+                Brand.DISCOVER,
+                Brand.JCB,
+                Brand.DINERS_CLUB,
+                Brand.VISA,
+                Brand.MASTERCARD,
+                Brand.UNIONPAY,
+                Brand.UNKNOWN
+        })
+        public @interface Brand {
+            String AMERICAN_EXPRESS = "amex";
+            String DISCOVER = "discover";
+            String JCB = "jcb";
+            String DINERS_CLUB = "diners";
+            String VISA = "visa";
+            String MASTERCARD = "mastercard";
+            String UNIONPAY = "unionpay";
+            String UNKNOWN = "unknown";
+        }
+
+        @Nullable @Brand public final String brand;
         @Nullable public final Checks checks;
         @Nullable public final String country;
         @Nullable public final Integer expiryMonth;
@@ -505,7 +534,7 @@ public class PaymentMethod extends StripeJsonModel {
             private Wallet mWallet;
 
             @NonNull
-            public Builder setBrand(@Nullable String brand) {
+            public Builder setBrand(@Nullable @Brand String brand) {
                 this.mBrand = brand;
                 return this;
             }

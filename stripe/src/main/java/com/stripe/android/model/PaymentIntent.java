@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.model.StripeJsonUtils.listToJsonArray;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
@@ -64,6 +66,7 @@ public class PaymentIntent extends StripeJsonModel {
     @Nullable private final String mDescription;
     @Nullable private final Boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
+    @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mReceiptEmail;
     @Nullable private final String mSource;
     @Nullable private final Status mStatus;
@@ -133,6 +136,11 @@ public class PaymentIntent extends StripeJsonModel {
     }
 
     @Nullable
+    public NextActionType getNextActionType() {
+        return mNextActionType;
+    }
+
+    @Nullable
     public Uri getRedirectUrl() {
         final RedirectData redirectData = getRedirectData();
         if (redirectData == null) {
@@ -142,8 +150,22 @@ public class PaymentIntent extends StripeJsonModel {
         return redirectData.url;
     }
 
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public SdkData getStripeSdkData() {
+        if (mNextAction == null || NextActionType.UseStripeSdk != mNextActionType) {
+            return null;
+        }
+
+        return new SdkData((Map<String, ?>) mNextAction.get(NextActionType.UseStripeSdk.code));
+    }
+
     @Nullable
     public RedirectData getRedirectData() {
+        if (NextActionType.RedirectToUrl != mNextActionType) {
+            return null;
+        }
+
         final Map<String, Object> nextAction;
 
         if (Status.RequiresAction == mStatus) {
@@ -217,6 +239,8 @@ public class PaymentIntent extends StripeJsonModel {
         mReceiptEmail = receiptEmail;
         mSource = source;
         mStatus = status;
+        mNextActionType = mNextAction != null ?
+                NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
     }
 
     @NonNull
@@ -480,9 +504,33 @@ public class PaymentIntent extends StripeJsonModel {
             return new RedirectData(url, returnUrl);
         }
 
-        private RedirectData(@NonNull String url, @Nullable String returnUrl) {
+        @VisibleForTesting
+        RedirectData(@NonNull String url, @Nullable String returnUrl) {
             this.url = Uri.parse(url);
             this.returnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
+        }
+    }
+
+    public static final class SdkData {
+        private static final String FIELD_TYPE = "type";
+
+        private static final String TYPE_3DS2 = "stripe_3ds2_fingerprint";
+        private static final String TYPE_3DS1 = "three_d_secure_redirect";
+
+        @NonNull final String type;
+        @NonNull final Map<String, ?> data;
+
+        SdkData(@NonNull Map<String, ?> data) {
+            this.type = Objects.requireNonNull((String) data.get(FIELD_TYPE));
+            this.data = data;
+        }
+
+        public boolean is3ds2() {
+            return TYPE_3DS2.equals(type);
+        }
+
+        public boolean is3ds1() {
+            return TYPE_3DS1.equals(type);
         }
     }
 }

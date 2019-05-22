@@ -1,7 +1,5 @@
 package com.stripe.android.view;
 
-import android.widget.Filter;
-
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
@@ -15,7 +13,9 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link CountryAdapter}
@@ -30,50 +30,50 @@ public class CountryAdapterTest {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
 
-        List<String> countries = new ArrayList<>(CountryUtils.getCountryNameToCodeMap().keySet());
-        mCountryAdapter = new CountryAdapter(ApplicationProvider.getApplicationContext(), countries);
+        final List<String> countries = new ArrayList<>(
+                CountryUtils.getCountryNameToCodeMap().keySet());
+        mCountryAdapter = new CountryAdapter(ApplicationProvider.getApplicationContext(),
+                countries);
     }
 
     @Test
     public void getOrderedSystemLocalesTest() {
-        Locale currentLocale = mCountryAdapter.getCurrentLocale();
-        assertEquals(mCountryAdapter.getItem(0), currentLocale.getDisplayCountry());
-        boolean ordered = true;
+        assertEquals(mCountryAdapter.getItem(0),
+                mCountryAdapter.getCurrentLocale().getDisplayCountry());
         // Skip the first comparision since we moved the current locale up
         for (int i = 2; i < mCountryAdapter.getCount(); i++) {
-            if (mCountryAdapter.getItem(i).compareTo(mCountryAdapter.getItem(i-1)) < 0) {
-                ordered = false;
+            final String country = mCountryAdapter.getItem(i);
+            final String prevCountry = mCountryAdapter.getItem(i - 1);
+            if (prevCountry != null && country != null && country.compareTo(prevCountry) < 0) {
+                fail("Countries are not ordered");
             }
         }
-        assertTrue(ordered);
     }
 
     @Test
     public void filter_whenCountryInputNoMatch_showsAllResults() {
-        Filter filter = mCountryAdapter.getFilter();
-        filter.filter("NONEXISTANT COUNTRY");
-        int countryLength = mCountryAdapter.mCountries.size();
-        assertEquals(mCountryAdapter.mSuggestions.size(), countryLength);
+        final int initialCount = mCountryAdapter.getCount();
+        mCountryAdapter.getFilter().filter("NONEXISTENT COUNTRY");
+        assertEquals(mCountryAdapter.getCount(), initialCount);
     }
 
     @Test
     public void filter_whenCountryInputMatches_filters() {
-        Filter filter = mCountryAdapter.getFilter();
-        int countryLength = mCountryAdapter.mCountries.size();
-        filter.filter("a");
-        assertTrue(mCountryAdapter.mSuggestions.size() < countryLength);
-        for (String suggestedCountry: mCountryAdapter.mSuggestions) {
+        final int initialCount = mCountryAdapter.getCount();
+        mCountryAdapter.getFilter().filter("a");
+        assertTrue(mCountryAdapter.getCount() < initialCount);
+
+        for (int i = 0; i < mCountryAdapter.getCount(); i++) {
+            final String suggestedCountry = mCountryAdapter.getItem(i);
+            assertNotNull(suggestedCountry);
             assertTrue(suggestedCountry.toLowerCase(Locale.ROOT).startsWith("a"));
         }
     }
 
     @Test
     public void filter_whenCountryInputMatchesExactly_showsAllResults() {
-        Filter filter = mCountryAdapter.getFilter();
-        int countryLength = mCountryAdapter.mCountries.size();
-        filter.filter("Uganda");
-        assertEquals(mCountryAdapter.mSuggestions.size(), countryLength);
+        final int initialCount = mCountryAdapter.getCount();
+        mCountryAdapter.getFilter().filter("Uganda");
+        assertEquals(mCountryAdapter.getCount(), initialCount);
     }
-
-
 }

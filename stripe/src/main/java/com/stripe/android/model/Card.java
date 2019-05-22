@@ -1,11 +1,11 @@
 package com.stripe.android.model;
 
+import android.support.annotation.DrawableRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
-import android.text.TextUtils;
 
 import com.stripe.android.CardUtils;
 import com.stripe.android.R;
@@ -76,18 +76,6 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     public static final String FUNDING_PREPAID = "prepaid";
     public static final String FUNDING_UNKNOWN = "unknown";
 
-    public static final Map<String , Integer> BRAND_RESOURCE_MAP =
-            new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
-                put(Card.DINERS_CLUB, R.drawable.ic_diners);
-                put(Card.DISCOVER, R.drawable.ic_discover);
-                put(Card.JCB, R.drawable.ic_jcb);
-                put(Card.MASTERCARD, R.drawable.ic_mastercard);
-                put(Card.VISA, R.drawable.ic_visa);
-                put(Card.UNIONPAY, R.drawable.ic_unionpay);
-                put(Card.UNKNOWN, R.drawable.ic_unknown);
-            }};
-
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
     public static final String[] PREFIXES_DISCOVER = {"60", "64", "65"};
@@ -133,6 +121,18 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     private static final String FIELD_LAST4 = "last4";
     private static final String FIELD_ID = "id";
     private static final String FIELD_TOKENIZATION_METHOD = "tokenization_method";
+
+    private static final Map<String , Integer> BRAND_RESOURCE_MAP =
+            new HashMap<String , Integer>() {{
+                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(Card.DINERS_CLUB, R.drawable.ic_diners);
+                put(Card.DISCOVER, R.drawable.ic_discover);
+                put(Card.JCB, R.drawable.ic_jcb);
+                put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.VISA, R.drawable.ic_visa);
+                put(Card.UNIONPAY, R.drawable.ic_unionpay);
+                put(Card.UNKNOWN, R.drawable.ic_unknown);
+            }};
 
     @Nullable private String number;
     @Nullable private String cvc;
@@ -348,7 +348,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     @Nullable
     @CardBrand
     public static String asCardBrand(@Nullable String possibleCardType) {
-        if (possibleCardType == null || TextUtils.isEmpty(possibleCardType.trim())) {
+        if (possibleCardType == null || StripeTextUtils.isEmpty(possibleCardType.trim())) {
             return null;
         }
 
@@ -380,7 +380,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     @Nullable
     @FundingType
     public static String asFundingType(@Nullable String possibleFundingType) {
-        if (possibleFundingType == null || TextUtils.isEmpty(possibleFundingType.trim())) {
+        if (possibleFundingType == null || StripeTextUtils.isEmpty(possibleFundingType.trim())) {
             return null;
         }
 
@@ -393,6 +393,12 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         } else {
             return Card.FUNDING_UNKNOWN;
         }
+    }
+
+    @DrawableRes
+    public static int getBrandIcon(@Nullable String brand) {
+        final Integer brandIcon = BRAND_RESOURCE_MAP.get(brand);
+        return brandIcon != null ? brandIcon : R.drawable.ic_unknown;
     }
 
     /**
