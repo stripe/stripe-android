@@ -249,15 +249,24 @@ public class PaymentIntentTest {
     }
 
     @Test
-    public void getNextActionTypeAndStripeSdkData_whenUseStripeSdk() {
+    public void getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds2() {
         assertEquals(PaymentIntent.NextActionType.UseStripeSdk,
                 PaymentIntentFixtures.PI_REQUIRES_3DS2.getNextActionType());
-        final Map<String, ?> sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2.getStripeSdkData();
+        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2.getStripeSdkData();
         assertNotNull(sdkData);
-        assertEquals("stripe_3ds2_fingerprint", sdkData.get("type"));
-        assertEquals("visa", sdkData.get("directory_server_name"));
+        assertTrue(sdkData.is3ds2());
+        assertEquals("visa", sdkData.data.get("directory_server_name"));
     }
 
+    @Test
+    public void getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds1() {
+        final PaymentIntent paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1;
+        assertEquals(PaymentIntent.NextActionType.UseStripeSdk, paymentIntent.getNextActionType());
+        final PaymentIntent.SdkData sdkData = paymentIntent.getStripeSdkData();
+        assertNotNull(sdkData);
+        assertTrue(sdkData.is3ds1());
+        assertNotNull(sdkData.data.get("stripe_js"));
+    }
 
     @Test
     public void getNextActionTypeAndStripeSdkData_whenRedirectToUrl() {
