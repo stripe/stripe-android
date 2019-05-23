@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.PaymentAuthBypassActivity;
+import com.stripe.android.view.PaymentAuthRelayActivity;
 import com.stripe.android.view.PaymentAuthenticationExtras;
 
 /**
@@ -24,7 +24,7 @@ class PaymentAuthBypassStarter implements ActivityStarter<PaymentIntent> {
 
     @Override
     public void start(@NonNull PaymentIntent paymentIntent) {
-        final Intent intent = new Intent(mActivity, PaymentAuthBypassActivity.class)
+        final Intent intent = new Intent(mActivity, PaymentAuthRelayActivity.class)
                 .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
                         paymentIntent.getClientSecret());
         mActivity.startActivityForResult(intent, mRequestCode);

@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
+import com.stripe.android.view.ActivityStarter;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -39,6 +40,7 @@ public class PaymentAuthenticationControllerTest {
     @Mock private Transaction mTransaction;
     @Mock private StripeApiHandler mApiHandler;
     @Mock private MessageVersionRegistry mMessageVersionRegistry;
+    @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
 
     @Before
     public void setup() {
@@ -77,5 +79,14 @@ public class PaymentAuthenticationControllerTest {
     @Test
     public void shouldHandleResult_withInvalidResultCode() {
         assertFalse(mController.shouldHandleResult(500, Activity.RESULT_OK, new Intent()));
+    }
+
+    @Test
+    public void test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
+        new PaymentAuthenticationController.PaymentAuth3ds2ChallengeStatusReceiver(m3ds2Starter)
+                .cancelled();
+        verify(m3ds2Starter).start(
+                new Stripe3ds2CompletionStarter.StartData(
+                        Stripe3ds2CompletionStarter.Status.CANCEL));
     }
 }

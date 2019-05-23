@@ -24,7 +24,7 @@
             android:theme="@style/StripeDefaultTheme" />
 
         <activity
-            android:name=".view.PaymentAuthBypassActivity"
+            android:name=".view.PaymentAuthRelayActivity"
             android:theme="@style/StripeDefaultTheme" />
     </application>
 
