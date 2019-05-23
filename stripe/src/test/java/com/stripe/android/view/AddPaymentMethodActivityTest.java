@@ -1,13 +1,11 @@
 package com.stripe.android.view;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -28,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -54,7 +51,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -70,12 +66,22 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     private ProgressBar mProgressBar;
     private AddPaymentMethodActivity mActivity;
     private ShadowActivity mShadowActivity;
-    @Captor private ArgumentCaptor<PaymentMethodCreateParams> mParamsArgumentCaptor;
-    @Captor private ArgumentCaptor<ApiResultCallback<PaymentMethod>> mCallbackArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<PaymentMethodCreateParams> mParamsArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<ApiResultCallback<PaymentMethod>> mCallbackArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<String> mPaymentMethodIdCaptor;
+    @Captor
+    private ArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> mListenerArgumentCaptor;
 
-    @Mock private Stripe mStripe;
-    @Mock private CustomerSession mCustomerSession;
+    @Mock
+    private Stripe mStripe;
+    @Mock
+    private CustomerSession mCustomerSession;
+    @Mock
+    private InputMethodManager mInputMethodManager;
 
     public AddPaymentMethodActivityTest() {
         super(AddPaymentMethodActivity.class);
@@ -102,13 +108,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(mActivity);
-        mActivity.setStripeProvider(new AddPaymentMethodActivity.StripeProvider() {
-            @NonNull
-            @Override
-            public Stripe getStripe(@NonNull Context context) {
-                return mStripe;
-            }
-        });
     }
 
     private void setUpForProxySessionTest() {
@@ -122,13 +121,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
 
         mShadowActivity = shadowOf(mActivity);
-        mActivity.setStripeProvider(new AddPaymentMethodActivity.StripeProvider() {
-            @NonNull
-            @Override
-            public Stripe getStripe(@NonNull Context context) {
-                return mStripe;
-            }
-        });
         mActivity.initCustomerSessionTokens();
     }
 
@@ -147,46 +139,13 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     }
 
     @Test
-    public void softEnterKey_whenDataIsValid_hidesKeyboardAndFinishesWithIntent() {
-        setUpForLocalTest();
-
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("1234");
-
-        PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
-
-        assertEquals(View.GONE, mProgressBar.getVisibility());
-
-        mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
-        verify(mStripe).createPaymentMethod(
-                mParamsArgumentCaptor.capture(),
-                mCallbackArgumentCaptor.capture());
-        final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
-        assertNotNull(params);
-        assertNotNull(callback);
-
-        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
-
-        final PaymentMethod expectedPaymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
-        assertNotNull(expectedPaymentMethod);
-        callback.onSuccess(expectedPaymentMethod);
-        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
-        Intent intent = mShadowActivity.getResultIntent();
-
-        assertTrue(mActivity.isFinishing());
-        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        final PaymentMethod newPaymentMethod =
-                PaymentMethod.fromString(
-                        intent.getStringExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        assertNotNull(newPaymentMethod);
-        assertEquals(expectedPaymentMethod, newPaymentMethod);
+    public void softEnterKey_whenDataIsValid_hidesKeyboardAndAttemptsToSave() {
+        final AddPaymentMethodActivity activity = mock(AddPaymentMethodActivity.class);
+        when(activity.hasValidCard()).thenReturn(true);
+        new AddPaymentMethodActivity.OnEditorActionListenerImpl(activity, mInputMethodManager)
+                .onEditorAction(null, EditorInfo.IME_ACTION_DONE, null);
+        verify(mInputMethodManager).hideSoftInputFromWindow(null, 0);
+        verify(activity).onActionSave();
     }
 
     @Test
@@ -199,12 +158,10 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.cvcEditText.append("12");
 
         PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mWidgetControlGroup.cvcEditText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+        mActivity.createPaymentMethod(mStripe);
         verify(mStripe, never()).createPaymentMethod(
                 any(PaymentMethodCreateParams.class),
                 ArgumentMatchers.<ApiResultCallback<PaymentMethod>>any());
@@ -221,36 +178,11 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.cvcEditText.append("1234");
 
         PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mActivity.onOptionsItemSelected(menuItem);
-        verify(mStripe).createPaymentMethod(
-                mParamsArgumentCaptor.capture(),
-                mCallbackArgumentCaptor.capture());
-        final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
-        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
-        assertNotNull(params);
-        assertNotNull(callback);
-
-        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
-
-        final PaymentMethod expectedPaymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
-        assertNotNull(expectedPaymentMethod);
-        callback.onSuccess(expectedPaymentMethod);
-        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
-        final Intent intent = mShadowActivity.getResultIntent();
-
-        assertTrue(mActivity.isFinishing());
-        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        final PaymentMethod newPaymentMethod =
-                PaymentMethod.fromString(
-                        intent.getStringExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        assertNotNull(newPaymentMethod);
-        assertEquals(expectedPaymentMethod, newPaymentMethod);
+        mActivity.createPaymentMethod(mStripe);
+        verifyFinishesWithIntent();
     }
 
     @Test
@@ -265,13 +197,11 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.postalCodeEditText.append("90210");
 
         PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivity.onOptionsItemSelected(menuItem);
+        mActivity.createPaymentMethod(mStripe);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -288,18 +218,15 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertNotNull(expectedPaymentMethod);
         callback.onSuccess(expectedPaymentMethod);
 
-        final ArgumentCaptor<String> paymentMethodIdCaptor = ArgumentCaptor.forClass(String.class);
-        final ArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.PaymentMethodRetrievalListener.class);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSession).attachPaymentMethod(
-                paymentMethodIdCaptor.capture(),
-                listenerArgumentCaptor.capture());
+                mPaymentMethodIdCaptor.capture(),
+                mListenerArgumentCaptor.capture());
 
-        assertEquals(expectedPaymentMethod.id, paymentMethodIdCaptor.getValue());
+        assertEquals(expectedPaymentMethod.id, mPaymentMethodIdCaptor.getValue());
         final CustomerSession.PaymentMethodRetrievalListener listener =
-                listenerArgumentCaptor.getValue();
+                mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
         listener.onPaymentMethodRetrieved(expectedPaymentMethod);
@@ -331,12 +258,9 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.cvcEditText.append("1234");
 
         PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mActivity.onOptionsItemSelected(menuItem);
+        mActivity.createPaymentMethod(mStripe);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -352,15 +276,14 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         when(error.getLocalizedMessage()).thenReturn(errorMessage);
         callback.onError(error);
 
-        final Intent intent = mShadowActivity.getResultIntent();
-        assertNull(intent);
+        assertNull(mShadowActivity.getResultIntent());
         assertFalse(mActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
-        verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
+        verify(alertMessageListener).onAlertMessageDisplayed(errorMessage);
     }
 
     @Test
-    public void addCardData_whenPaymentMethodCreationWorksButAddToCustomerFails_showsErrorNotFinish() {
+    public void addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
         setUpForProxySessionTest();
         final StripeActivity.AlertMessageListener alertMessageListener =
                 Mockito.mock(StripeActivity.AlertMessageListener.class);
@@ -374,13 +297,11 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.postalCodeEditText.append("90210");
 
         PaymentConfiguration.init("pk_test_abc123");
-        final MenuItem menuItem = mock(MenuItem.class);
-        when(menuItem.getItemId()).thenReturn(R.id.action_save);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivity.onOptionsItemSelected(menuItem);
+        mActivity.createPaymentMethod(mStripe);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -397,17 +318,15 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertNotNull(expectedPaymentMethod);
         callback.onSuccess(expectedPaymentMethod);
 
-        final ArgumentCaptor<String> paymentMethodIdCaptor = ArgumentCaptor.forClass(String.class);
-        final ArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(CustomerSession.PaymentMethodRetrievalListener.class);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
         verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         verify(mCustomerSession).attachPaymentMethod(
-                paymentMethodIdCaptor.capture(),
-                listenerArgumentCaptor.capture());
+                mPaymentMethodIdCaptor.capture(),
+                mListenerArgumentCaptor.capture());
 
-        assertEquals(expectedPaymentMethod.id, paymentMethodIdCaptor.getValue());
-        CustomerSession.PaymentMethodRetrievalListener listener = listenerArgumentCaptor.getValue();
+        assertEquals(expectedPaymentMethod.id, mPaymentMethodIdCaptor.getValue());
+        final CustomerSession.PaymentMethodRetrievalListener listener =
+                mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
         final StripeException error = mock(StripeException.class);
@@ -418,14 +337,41 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         // We're mocking the CustomerSession, so we have to replicate its broadcast behavior.
         final Bundle bundle = new Bundle();
         bundle.putSerializable(EXTRA_EXCEPTION, error);
-        final Intent errorIntent = new Intent(ACTION_API_EXCEPTION);
-        errorIntent.putExtras(bundle);
-        LocalBroadcastManager.getInstance(mActivity).sendBroadcast(errorIntent);
+        LocalBroadcastManager.getInstance(mActivity)
+                .sendBroadcast(new Intent(ACTION_API_EXCEPTION)
+                        .putExtras(bundle));
 
         final Intent intent = mShadowActivity.getResultIntent();
         assertNull(intent);
         assertFalse(mActivity.isFinishing());
         assertEquals(View.GONE, mProgressBar.getVisibility());
-        verify(alertMessageListener, times(1)).onAlertMessageDisplayed(errorMessage);
+        verify(alertMessageListener).onAlertMessageDisplayed(errorMessage);
+    }
+
+    private void verifyFinishesWithIntent() {
+        verify(mStripe).createPaymentMethod(
+                mParamsArgumentCaptor.capture(),
+                mCallbackArgumentCaptor.capture());
+        final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
+        assertNotNull(params);
+        assertNotNull(callback);
+
+        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+
+        final PaymentMethod expectedPaymentMethod =
+                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+        assertNotNull(expectedPaymentMethod);
+        callback.onSuccess(expectedPaymentMethod);
+        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
+        final Intent intent = mShadowActivity.getResultIntent();
+
+        assertTrue(mActivity.isFinishing());
+        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
+        final PaymentMethod newPaymentMethod =
+                PaymentMethod.fromString(
+                        intent.getStringExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
+        assertNotNull(newPaymentMethod);
+        assertEquals(expectedPaymentMethod, newPaymentMethod);
     }
 }
