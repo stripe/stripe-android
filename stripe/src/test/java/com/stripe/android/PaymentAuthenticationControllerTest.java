@@ -33,6 +33,12 @@ public class PaymentAuthenticationControllerTest {
     private static final String MESSAGE_VERSION = "2.1.0";
     private static final String PUBLISHABLE_KEY = "pk_test";
 
+    private static final PaymentAuthConfig CONFIG = new PaymentAuthConfig.Builder()
+            .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                    .setTimeout(10)
+                    .build())
+            .build();
+
     private PaymentAuthenticationController mController;
 
     @Mock private Activity mActivity;
@@ -55,7 +61,8 @@ public class PaymentAuthenticationControllerTest {
                 mThreeDs2Service,
                 mApiHandler,
                 mMessageVersionRegistry,
-                DIRECTORY_SERVER_ID);
+                DIRECTORY_SERVER_ID,
+                CONFIG);
     }
 
     @Test
