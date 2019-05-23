@@ -48,7 +48,6 @@ import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_MET
 public class PaymentSessionActivity extends AppCompatActivity {
 
     private BroadcastReceiver mBroadcastReceiver;
-    private Customer mCustomer;
     private ErrorDialogHandler mErrorDialogHandler;
     private PaymentSession mPaymentSession;
     private ProgressBar mProgressBar;
@@ -71,7 +70,9 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mErrorDialogHandler = new ErrorDialogHandler(this);
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
+
         setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
+        setupPaymentSession();
 
         final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -263,9 +264,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.mCustomer = customer;
             activity.mProgressBar.setVisibility(View.INVISIBLE);
-            activity.setupPaymentSession();
         }
 
         @Override
@@ -276,7 +275,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.mCustomer = null;
             activity.mSelectPaymentButton.setEnabled(false);
             activity.mSelectShippingButton.setEnabled(false);
             activity.mErrorDialogHandler.show(errorMessage);
@@ -298,7 +296,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.mCustomer = customer;
             activity.mProgressBar.setVisibility(View.INVISIBLE);
             if (activity.mPaymentSessionData != null) {
                 activity.mResultTitleTextView.setVisibility(View.VISIBLE);
