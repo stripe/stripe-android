@@ -17,10 +17,14 @@ import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl;
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters;
+import com.stripe.android.stripe3ds2.transaction.CompletionEvent;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
+import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
+import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
+import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import org.json.JSONObject;
@@ -315,7 +319,7 @@ class PaymentAuthenticationController {
                 public void run() {
                     mTransaction.doChallenge(activity,
                             challengeParameters,
-                            new StripeChallengeStatusReceiver(),
+                            PaymentAuth3ds2ChallengeStatusReceiver.create(activity),
                             mMaxTimeout);
                 }
             });
@@ -323,6 +327,62 @@ class PaymentAuthenticationController {
 
         @Override
         public void onError(@NonNull Exception e) {
+        }
+    }
+
+    static final class PaymentAuth3ds2ChallengeStatusReceiver
+            extends StripeChallengeStatusReceiver {
+        @NonNull private final ActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
+
+        @NonNull
+        static PaymentAuth3ds2ChallengeStatusReceiver create(@NonNull Activity activity) {
+            return new PaymentAuth3ds2ChallengeStatusReceiver(
+                    new Stripe3ds2CompletionStarter(activity, REQUEST_CODE)
+            );
+        }
+
+        PaymentAuth3ds2ChallengeStatusReceiver(
+                @NonNull ActivityStarter<Stripe3ds2CompletionStarter.StartData> starter) {
+            mStarter = starter;
+        }
+
+        @Override
+        public void completed(@NonNull CompletionEvent completionEvent) {
+            super.completed(completionEvent);
+            start(Stripe3ds2CompletionStarter.StartData.createForComplete(
+                    completionEvent.getTransactionStatus()));
+        }
+
+        @Override
+        public void cancelled() {
+            super.cancelled();
+            start(new Stripe3ds2CompletionStarter.StartData(
+                    Stripe3ds2CompletionStarter.Status.CANCEL));
+        }
+
+        @Override
+        public void timedout() {
+            super.timedout();
+            start(new Stripe3ds2CompletionStarter.StartData(
+                    Stripe3ds2CompletionStarter.Status.TIMEOUT));
+        }
+
+        @Override
+        public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
+            super.protocolError(protocolErrorEvent);
+            start(new Stripe3ds2CompletionStarter.StartData(
+                    Stripe3ds2CompletionStarter.Status.PROTOCOL_ERROR));
+        }
+
+        @Override
+        public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
+            super.runtimeError(runtimeErrorEvent);
+            start(new Stripe3ds2CompletionStarter.StartData(
+                    Stripe3ds2CompletionStarter.Status.RUNTIME_ERROR));
+        }
+
+        private void start(@NonNull Stripe3ds2CompletionStarter.StartData startData) {
+            mStarter.start(startData);
         }
     }
 }
