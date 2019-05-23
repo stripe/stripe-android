@@ -13,7 +13,7 @@ import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
 class PaymentAuthConfig {
 
     @Nullable
-    private static PaymentAuthConfig INSTANCE;
+    private static PaymentAuthConfig sInstance;
 
     @NonNull
     private static final PaymentAuthConfig DEFAULT = new PaymentAuthConfig.Builder()
@@ -21,17 +21,17 @@ class PaymentAuthConfig {
             .build();
 
     static void init(@NonNull PaymentAuthConfig config) {
-        INSTANCE = config;
+        sInstance = config;
     }
 
     @NonNull
     static PaymentAuthConfig get() {
-        return INSTANCE != null ? INSTANCE : DEFAULT;
+        return sInstance != null ? sInstance : DEFAULT;
     }
 
     @VisibleForTesting
     static void reset() {
-        INSTANCE = null;
+        sInstance = null;
     }
 
     @NonNull
