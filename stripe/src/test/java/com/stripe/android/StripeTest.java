@@ -1273,7 +1273,7 @@ public class StripeTest {
 
     @NonNull
     private Stripe createNonLoggingStripe(@Nullable String publishableKey) {
-        final Stripe stripe = new Stripe(
+        final Stripe stripe = new Stripe(mContext,
                 new StripeApiHandler(
                         mContext,
                         new RequestExecutor(),

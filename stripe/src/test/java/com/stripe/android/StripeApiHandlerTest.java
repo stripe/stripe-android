@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -186,11 +187,10 @@ public class StripeApiHandlerTest {
         assertNotNull(source);
     }
 
-    @Ignore("test needs to be updated for backend change")
     @Test
     public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
             throws APIConnectionException, APIException, CardException,
-            AuthenticationException {
+            AuthenticationException, JSONException {
         final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(
                 "src_invalid",
                 "1.0.0",
