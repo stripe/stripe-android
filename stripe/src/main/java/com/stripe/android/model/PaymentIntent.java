@@ -383,14 +383,17 @@ public class PaymentIntent extends StripeJsonModel {
                 && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
                 && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
                 && ObjectUtils.equals(mSource, paymentIntent.mSource)
-                && ObjectUtils.equals(mStatus, paymentIntent.mStatus);
+                && ObjectUtils.equals(mStatus, paymentIntent.mStatus)
+                && ObjectUtils.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
+                && ObjectUtils.equals(mNextAction, paymentIntent.mNextAction)
+                && ObjectUtils.equals(mNextActionType, paymentIntent.mNextActionType);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt,
-                mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
-                mDescription, mLiveMode, mReceiptEmail, mSource, mStatus);
+        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCaptureMethod,
+                mClientSecret, mConfirmationMethod, mCreated, mCurrency, mDescription, mLiveMode,
+                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction, mNextActionType);
     }
 
     /**
