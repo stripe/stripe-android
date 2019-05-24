@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 
 import org.junit.Before;
@@ -28,7 +27,7 @@ public class StripePaymentAuthTest {
 
     @Mock private Activity mActivity;
     @Mock private PaymentAuthenticationController mPaymentAuthenticationController;
-    @Mock private ApiResultCallback<PaymentIntent> mCallback;
+    @Mock private ApiResultCallback<PaymentAuthResult> mCallback;
 
     @Before
     public void setup() {

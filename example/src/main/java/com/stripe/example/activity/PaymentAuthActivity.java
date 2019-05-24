@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.stripe.android.ApiResultCallback;
+import com.stripe.android.PaymentAuthResult;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
@@ -137,7 +138,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
         return params;
     }
 
-    private static class AuthResultListener implements ApiResultCallback<PaymentIntent> {
+    private static class AuthResultListener implements ApiResultCallback<PaymentAuthResult> {
         @NonNull private final WeakReference<PaymentAuthActivity> mActivityRef;
 
         private AuthResultListener(@NonNull PaymentAuthActivity activity) {
@@ -145,12 +146,13 @@ public class PaymentAuthActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSuccess(@NonNull PaymentIntent paymentIntent) {
+        public void onSuccess(@NonNull PaymentAuthResult paymentAuthResult) {
             final PaymentAuthActivity activity = mActivityRef.get();
             if (activity == null) {
                 return;
             }
 
+            final PaymentIntent paymentIntent = paymentAuthResult.paymentIntent;
             activity.mStatusTextView.append("\n\n" +
                     activity.getString(R.string.payment_intent_status, paymentIntent.getStatus()));
         }

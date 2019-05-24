@@ -112,7 +112,7 @@ class PaymentAuthenticationController {
      * @param data the result Intent
      */
     void handleResult(@NonNull Stripe stripe, @NonNull Intent data, @NonNull String publishableKey,
-                      @NonNull final ApiResultCallback<PaymentIntent> listener) {
+                      @NonNull final ApiResultCallback<PaymentAuthResult> listener) {
         final String clientSecret = data.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET);
         final PaymentIntentParams paymentIntentParams = PaymentIntentParams
                 .createRetrievePaymentIntentParams(clientSecret);
@@ -120,7 +120,9 @@ class PaymentAuthenticationController {
                 new ApiResultCallback<PaymentIntent>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntent paymentIntent) {
-                        listener.onSuccess(paymentIntent);
+                        listener.onSuccess(new PaymentAuthResult.Builder()
+                                .setPaymentIntent(paymentIntent)
+                                .build());
                     }
 
                     @Override
