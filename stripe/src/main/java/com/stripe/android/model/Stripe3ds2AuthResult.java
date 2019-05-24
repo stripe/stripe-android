@@ -259,61 +259,73 @@ public final class Stripe3ds2AuthResult {
             private String mMessageVersion;
             private String mSdkTransId;
 
+            @NonNull
             Builder setThreeDSServerTransId(@NonNull String threeDSServerTransId) {
                 mThreeDSServerTransId = threeDSServerTransId;
                 return this;
             }
 
+            @NonNull
             Builder setAcsChallengeMandated(@Nullable String acsChallengeMandated) {
                 mAcsChallengeMandated = acsChallengeMandated;
                 return this;
             }
 
+            @NonNull
             Builder setAcsSignedContent(@Nullable String acsSignedContent) {
                 mAcsSignedContent = acsSignedContent;
                 return this;
             }
 
+            @NonNull
             Builder setAcsTransId(@NonNull String acsTransId) {
                 mAcsTransId = acsTransId;
                 return this;
             }
 
+            @NonNull
             Builder setAcsUrl(@Nullable String acsUrl) {
                 mAcsUrl = acsUrl;
                 return this;
             }
 
+            @NonNull
             Builder setAuthenticationType(@Nullable String authenticationType) {
                 mAuthenticationType = authenticationType;
                 return this;
             }
 
+            @NonNull
             Builder setCardholderInfo(@Nullable String cardholderInfo) {
                 mCardholderInfo = cardholderInfo;
                 return this;
             }
 
+            @NonNull
             Builder setMessageExtension(@Nullable List<MessageExtension> messageExtension) {
                 mMessageExtension = messageExtension;
                 return this;
             }
 
+            @NonNull
             Builder setMessageType(@NonNull String messageType) {
                 mMessageType = messageType;
                 return this;
             }
 
+            @NonNull
             Builder setMessageVersion(@NonNull String messageVersion) {
                 mMessageVersion = messageVersion;
                 return this;
             }
 
+            @NonNull
             Builder setSdkTransId(@Nullable String sdkTransId) {
                 mSdkTransId = sdkTransId;
                 return this;
             }
 
+            @NonNull
             Ares build() {
                 return new Stripe3ds2AuthResult.Ares(mThreeDSServerTransId, mAcsChallengeMandated,
                         mAcsSignedContent, mAcsTransId, mAcsUrl, mAuthenticationType,
@@ -416,26 +428,31 @@ public final class Stripe3ds2AuthResult {
             private String mId;
             private Map<String, String> mData;
 
-            Builder setName(String name) {
+            @NonNull
+            Builder setName(@NonNull String name) {
                 mName = name;
                 return this;
             }
 
+            @NonNull
             Builder setCriticalityIndicator(boolean criticalityIndicator) {
                 mCriticalityIndicator = criticalityIndicator;
                 return this;
             }
 
-            Builder setId(String id) {
+            @NonNull
+            Builder setId(@NonNull String id) {
                 mId = id;
                 return this;
             }
 
-            Builder setData(Map<String, String> data) {
+            @NonNull
+            Builder setData(@NonNull Map<String, String> data) {
                 mData = data;
                 return this;
             }
 
+            @NonNull
             MessageExtension build() {
                 return new MessageExtension(mName, mCriticalityIndicator, mId, mData);
             }
