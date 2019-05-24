@@ -6,9 +6,11 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentAuthRelayActivity;
+import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,8 +27,9 @@ class Stripe3ds2CompletionStarter
 
     @Override
     public void start(@NonNull StartData data) {
-        // TODO(mshafrir) set extras
-        final Intent intent = new Intent(mActivity, PaymentAuthRelayActivity.class);
+        final Intent intent = new Intent(mActivity, PaymentAuthRelayActivity.class)
+                .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
+                        data.mPaymentIntent.getClientSecret());
         mActivity.startActivityForResult(intent, mRequestCode);
     }
 
@@ -42,27 +45,31 @@ class Stripe3ds2CompletionStarter
     }
 
     static class StartData {
+        @NonNull private final PaymentIntent mPaymentIntent;
         @Status private final int mStatus;
         @Nullable private final String mCompletionTransactionStatus;
 
         @NonNull
-        static StartData createForComplete(@NonNull String completionTransactionStatus) {
-            return new StartData(Status.COMPLETE, completionTransactionStatus);
+        static StartData createForComplete(@NonNull PaymentIntent paymentIntent,
+                                           @NonNull String completionTransactionStatus) {
+            return new StartData(paymentIntent, Status.COMPLETE, completionTransactionStatus);
         }
 
-        StartData(@Status int status) {
-            this(status, null);
+        StartData(@NonNull PaymentIntent paymentIntent,
+                  @Status int status) {
+            this(paymentIntent, status, null);
         }
 
-        StartData(@Status int status,
-                  @Nullable String completionTransactionStatus) {
+        private StartData(@NonNull PaymentIntent paymentIntent, @Status int status,
+                          @Nullable String completionTransactionStatus) {
+            mPaymentIntent = paymentIntent;
             mStatus = status;
             mCompletionTransactionStatus = completionTransactionStatus;
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mStatus, mCompletionTransactionStatus);
+            return ObjectUtils.hash(mPaymentIntent, mStatus, mCompletionTransactionStatus);
         }
 
         @Override
@@ -71,7 +78,8 @@ class Stripe3ds2CompletionStarter
         }
 
         private boolean typedEquals(@NonNull StartData startData) {
-            return ObjectUtils.equals(mStatus, startData.mStatus) &&
+            return ObjectUtils.equals(mPaymentIntent, startData.mPaymentIntent) &&
+                    ObjectUtils.equals(mStatus, startData.mStatus) &&
                     ObjectUtils.equals(mCompletionTransactionStatus,
                             startData.mCompletionTransactionStatus);
         }

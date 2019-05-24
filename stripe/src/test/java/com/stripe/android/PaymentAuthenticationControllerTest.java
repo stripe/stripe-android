@@ -90,10 +90,11 @@ public class PaymentAuthenticationControllerTest {
 
     @Test
     public void test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
-        new PaymentAuthenticationController.PaymentAuth3ds2ChallengeStatusReceiver(m3ds2Starter)
+        new PaymentAuthenticationController.PaymentAuth3ds2ChallengeStatusReceiver(m3ds2Starter,
+                PaymentIntentFixtures.PI_REQUIRES_3DS2)
                 .cancelled();
         verify(m3ds2Starter).start(
-                new Stripe3ds2CompletionStarter.StartData(
+                new Stripe3ds2CompletionStarter.StartData(PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         Stripe3ds2CompletionStarter.Status.CANCEL));
     }
 }

@@ -145,7 +145,8 @@ class PaymentAuthenticationController {
                 final PaymentIntent.SdkData sdkData =
                         Objects.requireNonNull(paymentIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
-                    begin3ds2Auth(activity, Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                    begin3ds2Auth(activity, paymentIntent,
+                            Stripe3ds2Fingerprint.create(sdkData), publishableKey);
                 } else {
                     // authentication type is not supported
                     bypassAuth(activity, paymentIntent);
@@ -168,6 +169,7 @@ class PaymentAuthenticationController {
     }
 
     private void begin3ds2Auth(@NonNull Activity activity,
+                               @NonNull PaymentIntent paymentIntent,
                                @NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
                                @NonNull String publishableKey) {
         final Transaction transaction =
@@ -187,7 +189,7 @@ class PaymentAuthenticationController {
                 timeout
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
-                new Stripe3ds2AuthCallback(activity, transaction, timeout));
+                new Stripe3ds2AuthCallback(activity, transaction, timeout, paymentIntent));
     }
 
     /**
@@ -298,13 +300,16 @@ class PaymentAuthenticationController {
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final Transaction mTransaction;
         private final int mMaxTimeout;
+        @NonNull private final PaymentIntent mPaymentIntent;
 
         private Stripe3ds2AuthCallback(@NonNull Activity activity,
                                        @NonNull Transaction transaction,
-                                       int maxTimeout) {
+                                       int maxTimeout,
+                                       @NonNull PaymentIntent paymentIntent) {
             mActivityRef = new WeakReference<>(activity);
             mTransaction = transaction;
             mMaxTimeout = maxTimeout;
+            mPaymentIntent = paymentIntent;
         }
 
         @Override
@@ -324,7 +329,7 @@ class PaymentAuthenticationController {
                 public void run() {
                     mTransaction.doChallenge(activity,
                             challengeParameters,
-                            PaymentAuth3ds2ChallengeStatusReceiver.create(activity),
+                            PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mPaymentIntent),
                             mMaxTimeout);
                 }
             });
@@ -338,51 +343,57 @@ class PaymentAuthenticationController {
     static final class PaymentAuth3ds2ChallengeStatusReceiver
             extends StripeChallengeStatusReceiver {
         @NonNull private final ActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
+        @NonNull private final PaymentIntent mPaymentIntent;
 
         @NonNull
-        static PaymentAuth3ds2ChallengeStatusReceiver create(@NonNull Activity activity) {
+        static PaymentAuth3ds2ChallengeStatusReceiver create(
+                @NonNull Activity activity,
+                @NonNull PaymentIntent paymentIntent) {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
-                    new Stripe3ds2CompletionStarter(activity, REQUEST_CODE)
+                    new Stripe3ds2CompletionStarter(activity, REQUEST_CODE),
+                    paymentIntent
             );
         }
 
         PaymentAuth3ds2ChallengeStatusReceiver(
-                @NonNull ActivityStarter<Stripe3ds2CompletionStarter.StartData> starter) {
+                @NonNull ActivityStarter<Stripe3ds2CompletionStarter.StartData> starter,
+                @NonNull PaymentIntent paymentIntent) {
             mStarter = starter;
+            mPaymentIntent = paymentIntent;
         }
 
         @Override
         public void completed(@NonNull CompletionEvent completionEvent) {
             super.completed(completionEvent);
-            start(Stripe3ds2CompletionStarter.StartData.createForComplete(
+            start(Stripe3ds2CompletionStarter.StartData.createForComplete(mPaymentIntent,
                     completionEvent.getTransactionStatus()));
         }
 
         @Override
         public void cancelled() {
             super.cancelled();
-            start(new Stripe3ds2CompletionStarter.StartData(
+            start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
                     Stripe3ds2CompletionStarter.Status.CANCEL));
         }
 
         @Override
         public void timedout() {
             super.timedout();
-            start(new Stripe3ds2CompletionStarter.StartData(
+            start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
                     Stripe3ds2CompletionStarter.Status.TIMEOUT));
         }
 
         @Override
         public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
             super.protocolError(protocolErrorEvent);
-            start(new Stripe3ds2CompletionStarter.StartData(
+            start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
                     Stripe3ds2CompletionStarter.Status.PROTOCOL_ERROR));
         }
 
         @Override
         public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent);
-            start(new Stripe3ds2CompletionStarter.StartData(
+            start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
                     Stripe3ds2CompletionStarter.Status.RUNTIME_ERROR));
         }
 
