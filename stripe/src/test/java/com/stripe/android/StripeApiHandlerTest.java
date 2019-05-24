@@ -232,7 +232,7 @@ public class StripeApiHandlerTest {
                         StripeApiHandler.getSourcesUrl(),
                         SourceParams.createCardParams(CARD).toParamMap(),
                         RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                                connectAccountId, RequestOptions.RequestType.QUERY)
+                                connectAccountId, RequestOptions.RequestType.API)
                                 .build())
         );
         assertNotNull(response);
