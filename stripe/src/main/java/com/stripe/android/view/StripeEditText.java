@@ -37,8 +37,8 @@ public class StripeEditText extends AppCompatEditText {
     @Nullable private DeleteEmptyListener mDeleteEmptyListener;
     @Nullable private ColorStateList mCachedColorStateList;
     private boolean mShouldShowError;
-    @ColorRes private int mDefaultErrorColorResId;
-    @ColorInt private int mErrorColor;
+    @ColorInt private int mDefaultErrorColor;
+    @Nullable @ColorInt private Integer mErrorColor;
 
     @NonNull private final Handler mHandler;
     private String mErrorMessage;
@@ -82,7 +82,7 @@ public class StripeEditText extends AppCompatEditText {
         // It's possible that we need to verify this value again
         // in case the user programmatically changes the text color.
         determineDefaultErrorColor();
-        return ContextCompat.getColor(getContext(), mDefaultErrorColorResId);
+        return mDefaultErrorColor;
     }
 
     @Override
@@ -131,6 +131,11 @@ public class StripeEditText extends AppCompatEditText {
         mErrorColor = errorColor;
     }
 
+    @ColorInt
+    private int getErrorColor() {
+        return mErrorColor != null ? mErrorColor : mDefaultErrorColor;
+    }
+
     /**
      * Change the hint value of this control after a delay.
      *
@@ -161,7 +166,7 @@ public class StripeEditText extends AppCompatEditText {
         } else {
             mShouldShowError = shouldShowError;
             if (mShouldShowError) {
-                setTextColor(mErrorColor);
+                setTextColor(getErrorColor());
             } else {
                 setTextColor(mCachedColorStateList);
             }
@@ -186,14 +191,18 @@ public class StripeEditText extends AppCompatEditText {
 
     private void determineDefaultErrorColor() {
         mCachedColorStateList = getTextColors();
-        int color = mCachedColorStateList.getDefaultColor();
+        final int color = mCachedColorStateList.getDefaultColor();
+
+        @ColorRes final int defaultErrorColorResId;
         if (isColorDark(color)) {
             // Note: if the _text_ color is dark, then this is a
             // light theme, and vice-versa.
-            mDefaultErrorColorResId = R.color.error_text_light_theme;
+            defaultErrorColorResId = R.color.error_text_light_theme;
         } else {
-            mDefaultErrorColorResId = R.color.error_text_dark_theme;
+            defaultErrorColorResId = R.color.error_text_dark_theme;
         }
+
+        mDefaultErrorColor = ContextCompat.getColor(getContext(), defaultErrorColorResId);
     }
 
     private void listenForTextChanges() {

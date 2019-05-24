@@ -131,4 +131,11 @@ public class StripeEditTextTest {
     public void getCachedColorStateList_afterInit_returnsNotNull() {
         assertNotNull(mEditText.getCachedColorStateList());
     }
+
+    @Test
+    public void setShouldShowError_whenErrorColorNotSet_shouldUseDefaultErrorColor() {
+        mEditText.setShouldShowError(true);
+        assertEquals(ContextCompat.getColor(mContext, R.color.error_text_light_theme),
+                mEditText.getTextColors().getDefaultColor());
+    }
 }
