@@ -30,9 +30,9 @@ import javax.net.ssl.SSLSocketFactory;
  * Used by {@link StripeApiHandler} to make HTTP requests
  */
 class RequestExecutor {
-    static final String LIVE_API_BASE = "https://api.stripe.com";
-    static final String LIVE_LOGGING_BASE = "https://q.stripe.com";
-    static final String LOGGING_ENDPOINT = "https://m.stripe.com/4";
+    static final String API_HOST = "https://api.stripe.com";
+    static final String ANALYTICS_HOST = "https://q.stripe.com";
+    static final String FINGERPRINTING_ENDPOINT = "https://m.stripe.com/4";
 
     private static final String CHARSET = "UTF-8";
 
@@ -108,14 +108,14 @@ class RequestExecutor {
             conn.setReadTimeout(80 * 1000);
             conn.setUseCaches(false);
 
-            if (request.urlStartsWith(LIVE_API_BASE, LIVE_LOGGING_BASE)) {
+            if (request.urlStartsWith(API_HOST, ANALYTICS_HOST)) {
                 for (Map.Entry<String, String> header :
                         request.getHeaders(mApiVersion).entrySet()) {
                     conn.setRequestProperty(header.getKey(), header.getValue());
                 }
             }
 
-            if (request.urlStartsWith(LOGGING_ENDPOINT)) {
+            if (request.urlStartsWith(FINGERPRINTING_ENDPOINT)) {
                 attachPseudoCookie(conn, request.options);
             }
 
@@ -155,7 +155,7 @@ class RequestExecutor {
         private byte[] getOutputBytes(@NonNull StripeRequest request)
                 throws InvalidRequestException {
             try {
-                if (RequestOptions.RequestType.JSON.equals(request.options.getRequestType())) {
+                if (RequestOptions.RequestType.FINGERPRINTING == request.options.getRequestType()) {
                     final JSONObject jsonData = mapToJsonObject(request.params);
                     if (jsonData == null) {
                         throw new InvalidRequestException("Unable to create JSON data from " +

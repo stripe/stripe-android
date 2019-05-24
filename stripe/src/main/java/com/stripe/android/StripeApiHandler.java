@@ -78,7 +78,7 @@ class StripeApiHandler {
             return false;
         }
 
-        return fireAndForgetApiCall(StripeRequest.createGet(RequestExecutor.LIVE_LOGGING_BASE,
+        return fireAndForgetApiCall(StripeRequest.createGet(RequestExecutor.ANALYTICS_HOST,
                 loggingMap, options));
     }
 
@@ -103,7 +103,7 @@ class StripeApiHandler {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.RequestType.QUERY)
+                RequestOptions.RequestType.API)
                 .build();
 
         try {
@@ -148,7 +148,7 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.RequestType.QUERY).build();
+                RequestOptions.RequestType.API).build();
 
         try {
             final String apiKey = options.getPublishableApiKey();
@@ -198,7 +198,7 @@ class StripeApiHandler {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
         mNetworkUtils.addUidParams(paramMap);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.RequestType.QUERY).build();
+                RequestOptions.RequestType.API).build();
 
         try {
             final String apiKey = options.getPublishableApiKey();
@@ -252,7 +252,7 @@ class StripeApiHandler {
             options = RequestOptions.builder(publishableKey).build();
         } else {
             options = RequestOptions.builder(publishableKey, stripeAccount,
-                    RequestOptions.RequestType.QUERY).build();
+                    RequestOptions.RequestType.API).build();
         }
         try {
             final StripeResponse response = requestData(
@@ -279,7 +279,7 @@ class StripeApiHandler {
 
         mNetworkUtils.addUidParams(params);
         final RequestOptions options = RequestOptions.builder(publishableKey, stripeAccount,
-                RequestOptions.RequestType.QUERY).build();
+                RequestOptions.RequestType.API).build();
 
         final String apiKey = options.getPublishableApiKey();
         if (StripeTextUtils.isBlank(apiKey)) {
@@ -811,7 +811,7 @@ class StripeApiHandler {
 
     @NonNull
     private static String getApiUrl(@NonNull String path) {
-        return String.format(Locale.ENGLISH, "%s/v1/%s", RequestExecutor.LIVE_API_BASE, path);
+        return String.format(Locale.ENGLISH, "%s/v1/%s", RequestExecutor.API_HOST, path);
     }
 
     private void convertErrorsToExceptionsAndThrowIfNecessary(
@@ -1067,11 +1067,11 @@ class StripeApiHandler {
         }
 
         final RequestOptions options =
-                RequestOptions.builder(null, RequestOptions.RequestType.JSON)
+                RequestOptions.builder(null, RequestOptions.RequestType.FINGERPRINTING)
                         .setGuid(mTelemetryClientUtil.getHashedId())
                         .build();
         fireAndForgetApiCall(
-                StripeRequest.createPost(RequestExecutor.LOGGING_ENDPOINT, params, options));
+                StripeRequest.createPost(RequestExecutor.FINGERPRINTING_ENDPOINT, params, options));
     }
 
     private static final class Start3ds2AuthTask extends ApiOperation<JSONObject> {
