@@ -9,4 +9,5 @@
     <color name="color_text_unselected_primary_default">#ff000000</color>
     <color name="slate_50">#3332325d</color>
     <color name="toolbar_color_default">#ff3f51b5</color>
+    <color name="toolbar_color_default_dark">#ff324090</color>
 </resources>

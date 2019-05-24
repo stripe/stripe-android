@@ -4,6 +4,7 @@
         <item name="colorAccent">@color/accent_color_default</item>
         <item name="colorControlNormal">@color/control_normal_color_default</item>
         <item name="colorPrimary">@color/toolbar_color_default</item>
+        <item name="colorPrimaryDark">@color/toolbar_color_default_dark</item>
         <item name="titleTextColor">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
     </style>
