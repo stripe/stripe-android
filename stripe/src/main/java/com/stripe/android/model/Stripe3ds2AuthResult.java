@@ -1,31 +1,5 @@
 package com.stripe.android.model;
 
-/*
-{
-    "id": "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
-    "object": "three_d_secure_2",
-    "ares": {
-        "acsChallengeMandated": "Y",
-        "acsSignedContent": "eyJhbGciOiJFUzI1NiJ9.eyJhY3NFcGhlbVB1YktleSI6eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6IjNoU0tOdml0STVrVUtkVGVHSUZjSFJ1cjNlSGx1ZEEtaDRPbTA0djZUd2MiLCJ5IjoicWpoSjlISTFDZWN3SFktSmRqNXozWXIyNXVCLXZFakU2S3djRExhSTA5YyJ9LCJzZGtFcGhlbVB1YktleSI6eyJrdHkiOiJFQyIsInVzZSI6InNpZyIsImNydiI6IlAtMjU2Iiwia2lkIjoiM2ZlMGNiMjAtNDhiZi00NGY5LTk5YWUtMTI2OTFlYmQwMzgyIiwieCI6IkpQdWhiSTRpaTd6MVg4U1RpVU9FVTVsWTdqaHFYMk1zV1NnN3RIbU5RUFEiLCJ5IjoiU2txSDJPMmlwbUJzS2F4czN3SnpDbC0wNDlkR2xTQXA3QS1kcnVSTlJuTSJ9LCJhY3NVUkwiOiJodHRwczovL2hvb2tzLnN0cmlwZS5jb20vM2Rfc2VjdXJlXzJfdGVzdC9hcHBfY2hhbGxlbmdlL2hCbUR6MlFSWTNVTlBQU1N5QWRNTXQxSXNYZWN3YzhVNlRlckJiNEJfY289In0.aER-DQLnhHTjReHDkneOlDjVUcxg_TZjv41X6VjpKvzOcEpwPzxDo6xFTYONNoQbjK3j8Q9YTzX4jLjup2cWSQ",
-        "acsTransID": "dd23c757-211a-4c1b-add5-06a1450a642e",
-        "acsURL": null,
-        "authenticationType": "02",
-        "cardholderInfo": null,
-        "messageExtension": null,
-        "messageType": "ARes",
-        "messageVersion": "2.1.0",
-        "sdkTransID": "20158862-9d9d-4d71-83d4-9e65554ed92c",
-        "threeDSServerTransID": "e8ea0b42-0e74-42b2-92b4-1b27005f0596"
-    },
-    "created": 1558541285,
-    "error": null,
-    "livemode": false,
-    "source": "src_1Ecwz1CRMbs6FrXfUwt98lxf",
-    "state": "challenge_required"
-}
- */
-
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
