@@ -125,7 +125,7 @@ public class Stripe {
     private boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull String publishableKey,
-            @NonNull ApiResultCallback<PaymentIntent> callback) {
+            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
         if (data != null && mPaymentAuthenticationController
                 .shouldHandleResult(requestCode, resultCode, data)) {
             mPaymentAuthenticationController.handleResult(this, data,
@@ -138,7 +138,7 @@ public class Stripe {
 
     public boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<PaymentIntent> callback) {
+            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
         return onPaymentAuthResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
