@@ -30,13 +30,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeError;
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,31 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.stripe.android.model.StripeJsonUtils.putArrayIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putBooleanIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putObjectIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
-
-/*
-module ResourceFields
-      include Opus::Field::FieldSpecs
-
-      required :threeDSServerTransID, StringField.new
-
-      optional :acsChallengeMandated, StringField.new
-      optional :acsSignedContent, StringField.new
-      required :acsTransID, StringField.new
-      optional :acsURL, StringField.new
-      optional :authenticationType, StringField.new
-      optional :cardholderInfo, StringField.new
-      optional :messageExtension, ArrayField.new(HashField.new(T.untyped, T.untyped))
-      required :messageType, StringField.new
-      required :messageVersion, StringField.new
-      optional :sdkTransID, StringField.new
-    end
- */
-public final class Stripe3ds2AuthResult extends StripeJsonModel {
+public final class Stripe3ds2AuthResult {
     private static final String FIELD_ID = "id";
     private static final String FIELD_OBJECT = "object";
     private static final String FIELD_ARES = "ares";
@@ -100,37 +74,6 @@ public final class Stripe3ds2AuthResult extends StripeJsonModel {
         this.state = state;
         this.liveMode = liveMode;
         this.error = error;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_ID, id);
-        map.put(FIELD_OBJECT, objectType);
-        map.put(FIELD_ARES, ares != null ? ares.toMap() : null);
-        map.put(FIELD_CREATED, created);
-        map.put(FIELD_ERROR, error);
-        map.put(FIELD_LIVEMODE, liveMode);
-        map.put(FIELD_SOURCE, source);
-        map.put(FIELD_STATE, state);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_ID, id);
-        putStringIfNotNull(jsonObject, FIELD_OBJECT, objectType);
-        putObjectIfNotNull(jsonObject, FIELD_ARES, ares != null ? ares.toJson() : null);
-        putLongIfNotNull(jsonObject, FIELD_CREATED, created);
-        putStringIfNotNull(jsonObject, FIELD_ERROR, error);
-        putBooleanIfNotNull(jsonObject, FIELD_LIVEMODE, liveMode);
-        putStringIfNotNull(jsonObject, FIELD_SOURCE, source);
-        putStringIfNotNull(jsonObject, FIELD_STATE, state);
-        return jsonObject;
     }
 
     @NonNull
@@ -234,7 +177,7 @@ public final class Stripe3ds2AuthResult extends StripeJsonModel {
         }
     }
 
-    public static class Ares extends StripeJsonModel {
+    public static class Ares {
         static final String FIELD_ACS_CHALLENGE_MANDATED = "acsChallengeMandated";
         static final String FIELD_ACS_SIGNED_CONTENT = "acsSignedContent";
         static final String FIELD_ACS_TRANS_ID = "acsTransID";
@@ -276,44 +219,6 @@ public final class Stripe3ds2AuthResult extends StripeJsonModel {
             this.messageType = messageType;
             this.messageVersion = messageVersion;
             this.sdkTransId = sdkTransId;
-        }
-
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> map = new HashMap<>();
-            map.put(FIELD_ACS_CHALLENGE_MANDATED, acsChallengeMandated);
-            map.put(FIELD_ACS_SIGNED_CONTENT, acsSignedContent);
-            map.put(FIELD_ACS_TRANS_ID, acsTransId);
-            map.put(FIELD_ACS_URL, acsUrl);
-            map.put(FIELD_AUTHENTICATION_TYPE, authenticationType);
-            map.put(FIELD_CARDHOLDER_INFO, cardholderInfo);
-            map.put(FIELD_MESSAGE_TYPE, messageType);
-            map.put(FIELD_MESSAGE_VERSION, messageVersion);
-            map.put(FIELD_SDK_TRANS_ID, sdkTransId);
-            map.put(FIELD_THREE_DS_SERVER_TRANS_ID, threeDSServerTransId);
-            map.put(FIELD_MESSAGE_EXTENSION, messageExtension);
-            StripeNetworkUtils.removeNullAndEmptyParams(map);
-            return map;
-        }
-
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject jsonObject = new JSONObject();
-            putStringIfNotNull(jsonObject, FIELD_THREE_DS_SERVER_TRANS_ID, threeDSServerTransId);
-            putStringIfNotNull(jsonObject, FIELD_SDK_TRANS_ID, sdkTransId);
-            putStringIfNotNull(jsonObject, FIELD_MESSAGE_VERSION, messageVersion);
-            putStringIfNotNull(jsonObject, FIELD_MESSAGE_TYPE, messageType);
-            putStringIfNotNull(jsonObject, FIELD_CARDHOLDER_INFO, cardholderInfo);
-            putStringIfNotNull(jsonObject, FIELD_AUTHENTICATION_TYPE, authenticationType);
-            putStringIfNotNull(jsonObject, FIELD_ACS_URL, acsUrl);
-            putStringIfNotNull(jsonObject, FIELD_ACS_TRANS_ID, acsTransId);
-            putStringIfNotNull(jsonObject, FIELD_ACS_SIGNED_CONTENT, acsSignedContent);
-            putStringIfNotNull(jsonObject, FIELD_ACS_CHALLENGE_MANDATED, acsChallengeMandated);
-            putArrayIfNotNull(jsonObject, FIELD_MESSAGE_EXTENSION, MessageExtension.toJsonArray(
-                    messageExtension));
-            return jsonObject;
         }
 
         @NonNull
@@ -444,7 +349,7 @@ public final class Stripe3ds2AuthResult extends StripeJsonModel {
         }
     }
 
-    public static class MessageExtension extends StripeJsonModel {
+    public static class MessageExtension {
 
         static final String FIELD_NAME = "name";
         static final String FIELD_ID = "id";
@@ -473,43 +378,6 @@ public final class Stripe3ds2AuthResult extends StripeJsonModel {
             this.criticalityIndicator = criticalityIndicator;
             this.id = id;
             this.data = data;
-        }
-
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> map = new HashMap<>();
-            map.put(FIELD_NAME, name);
-            map.put(FIELD_ID, id);
-            map.put(FIELD_CRITICALITY_INDICATOR, criticalityIndicator);
-            map.put(FIELD_DATA, new JSONObject(data));
-            StripeNetworkUtils.removeNullAndEmptyParams(map);
-            return map;
-        }
-
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject jsonObject = new JSONObject();
-            putStringIfNotNull(jsonObject, FIELD_NAME, name);
-            putStringIfNotNull(jsonObject, FIELD_ID, id);
-            putBooleanIfNotNull(jsonObject, FIELD_CRITICALITY_INDICATOR, criticalityIndicator);
-            putObjectIfNotNull(jsonObject, FIELD_DATA, new JSONObject(data));
-            return jsonObject;
-        }
-
-        @Nullable
-        static JSONArray toJsonArray(@Nullable List<MessageExtension> messageExtensions) {
-            if (messageExtensions == null) {
-                return null;
-            }
-
-            final JSONArray messageExtensionJsonArray = new JSONArray();
-            for (final MessageExtension messageExtension : messageExtensions) {
-                messageExtensionJsonArray.put(messageExtension.toJson());
-            }
-
-            return messageExtensionJsonArray;
         }
 
         @Nullable
