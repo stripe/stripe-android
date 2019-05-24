@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 9.1.0
+Status: unreleased
+* [#952](https://github.com/stripe/stripe-android/pull/952) Update standard integration UI to use PaymentMethods instead of Sources
+* [#962](https://github.com/stripe/stripe-android/pull/962) Add initial dark theme support to widgets
+* [#963](https://github.com/stripe/stripe-android/pull/963) Add Autofill hints to forms
+* [#964](https://github.com/stripe/stripe-android/pull/964) Upgrade Android Gradle Plugin to 3.4.1
+* [#972](https://github.com/stripe/stripe-android/pull/964) Add PaymentIntent#getNextActionType()
+
 ## 9.0.1 2019-05-17
 * [#945](https://github.com/stripe/stripe-android/pull/945) Add `business_type` param to Account tokenization when available
 
