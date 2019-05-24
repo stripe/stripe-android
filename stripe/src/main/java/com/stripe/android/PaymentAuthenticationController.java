@@ -40,18 +40,19 @@ import java.util.Objects;
 class PaymentAuthenticationController {
     static final int REQUEST_CODE = 50000;
     private static final String TAG = "PaymentAuthentication";
-    private static final int MAX_TIMEOUT = 5;
     private static final String DIRECTORY_SERVER_ID = "F000000000";
 
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final String mDirectoryServerId;
+    @NonNull private final PaymentAuthConfig mConfig;
 
     PaymentAuthenticationController(@NonNull Context context,
                                     @NonNull StripeApiHandler apiHandler) {
         this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
-                new MessageVersionRegistry(), DIRECTORY_SERVER_ID);
+                new MessageVersionRegistry(), DIRECTORY_SERVER_ID,
+                PaymentAuthConfig.get());
     }
 
     @VisibleForTesting
@@ -59,10 +60,13 @@ class PaymentAuthenticationController {
                                     @NonNull StripeThreeDs2Service threeDs2Service,
                                     @NonNull StripeApiHandler apiHandler,
                                     @NonNull MessageVersionRegistry messageVersionRegistry,
-                                    @NonNull String directoryServerId) {
+                                    @NonNull String directoryServerId,
+                                    @NonNull PaymentAuthConfig config) {
+
+        mConfig = config;
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
-                null);
+                config.stripe3ds2Config.uiCustomization);
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
         mDirectoryServerId = directoryServerId;
@@ -171,6 +175,7 @@ class PaymentAuthenticationController {
                         mMessageVersionRegistry.getCurrent(), false);
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
+        final int timeout = mConfig.stripe3ds2Config.timeout;
         final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(
                 stripe3ds2Fingerprint.source,
                 areqParams.getSDKAppID(),
@@ -179,10 +184,10 @@ class PaymentAuthenticationController {
                 areqParams.getDeviceData(),
                 areqParams.getSDKEphemeralPublicKey(),
                 areqParams.getMessageVersion(),
-                MAX_TIMEOUT
+                timeout
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
-                new Stripe3ds2AuthCallback(activity, transaction, MAX_TIMEOUT));
+                new Stripe3ds2AuthCallback(activity, transaction, timeout));
     }
 
     /**
