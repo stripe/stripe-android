@@ -31,6 +31,7 @@ dependencies {
     testImplementation 'org.json:json:20180813'
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'androidx.test:runner:1.2.0-beta01'
     androidTestUtil 'androidx.test:orchestrator:1.2.0-beta01'
 }
