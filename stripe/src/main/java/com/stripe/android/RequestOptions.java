@@ -10,8 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Data class representing options for a Stripe API request.
  */
-class RequestOptions {
-
+final class RequestOptions {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RequestType.API, RequestType.FINGERPRINTING})
     public @interface RequestType {
@@ -24,11 +23,28 @@ class RequestOptions {
     @RequestType private final int mRequestType;
     @Nullable private final String mStripeAccount;
 
-    private RequestOptions(
-            @Nullable String guid,
-            @Nullable String publishableApiKey,
-            @RequestType int requestType,
+    @NonNull
+    static RequestOptions createForFingerprinting(@NonNull String guid) {
+        return new RequestOptions(RequestType.FINGERPRINTING, null, null, guid);
+    }
+
+    @NonNull
+    static RequestOptions createForApi(@NonNull String publishableApiKey) {
+        return new RequestOptions(RequestType.API, publishableApiKey, null, null);
+    }
+
+    @NonNull
+    static RequestOptions createForApi(
+            @NonNull String publishableApiKey,
             @Nullable String stripeAccount) {
+        return new RequestOptions(RequestType.API, publishableApiKey, stripeAccount, null);
+    }
+
+    private RequestOptions(
+            @RequestType int requestType,
+            @Nullable String publishableApiKey,
+            @Nullable String stripeAccount,
+            @Nullable String guid) {
         mGuid = guid;
         mPublishableApiKey = publishableApiKey;
         mRequestType = requestType;
@@ -59,95 +75,5 @@ class RequestOptions {
     @Nullable
     String getStripeAccount() {
         return mStripeAccount;
-    }
-
-    /**
-     * Static accessor for the {@link Builder} class. Creates
-     * a builder for a {@link RequestType#API} options item
-     *
-     * @param publishableApiKey your publishable API key
-     * @return a {@link Builder} instance
-     */
-    @NonNull
-    public static Builder builder(@Nullable String publishableApiKey) {
-        return builder(publishableApiKey, RequestType.API);
-    }
-
-    @NonNull
-    public static Builder builder(
-            @Nullable String publishableApiKey,
-            @Nullable String stripeAccount,
-            @RequestType int requestType) {
-        return new Builder(publishableApiKey, requestType)
-                .setStripeAccount(stripeAccount);
-    }
-
-    /**
-     * Static accessor for the {@link Builder} class with type.
-     *
-     * @param publishableApiKey your publishable API key
-     * @param requestType your {@link RequestType}
-     * @return a {@link Builder} instance
-     */
-    @NonNull
-    public static Builder builder(
-            @Nullable String publishableApiKey,
-            @RequestType int requestType) {
-        return new Builder(
-                publishableApiKey,
-                requestType);
-    }
-
-    /**
-     * Builder class for a set of {@link RequestOptions}.
-     */
-    static final class Builder {
-        private String guid;
-        private String publishableApiKey;
-        @RequestType private int requestType;
-        private String stripeAccount;
-
-        /**
-         * Builder constructor requiring an API key.
-         *
-         * @param publishableApiKey your publishable API key
-         */
-        Builder(@Nullable String publishableApiKey,
-                @RequestType int requestType) {
-            this.publishableApiKey = publishableApiKey;
-            this.requestType = requestType;
-        }
-
-        /**
-         * Setter for the optional guid value of the {@link RequestOptions}.
-         *
-         * @param guid the guid
-         * @return {@code this}, for chaining purposes
-         */
-        @NonNull
-        Builder setGuid(@Nullable String guid) {
-            this.guid = guid;
-            return this;
-        }
-
-        @NonNull
-        Builder setStripeAccount(@Nullable String stripeAccount) {
-            this.stripeAccount = stripeAccount;
-            return this;
-        }
-
-        /**
-         * Construct the {@link RequestOptions} object.
-         *
-         * @return the new {@link RequestOptions} object
-         */
-        @NonNull
-        public RequestOptions build() {
-            return new RequestOptions(
-                    this.guid,
-                    this.publishableApiKey,
-                    this.requestType,
-                    this.stripeAccount);
-        }
     }
 }

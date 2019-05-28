@@ -216,8 +216,7 @@ public class StripeApiHandlerTest {
         // we are testing whether or not we log.
         final boolean isSuccessful = mApiHandler.logApiCall(
                 new HashMap<String, Object>(),
-                RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX")
-                        .build()
+                RequestOptions.createForApi("pk_test_fdjfCYpGSwAX24KUEiuaAAWX")
         );
         assertTrue(isSuccessful);
     }
@@ -231,9 +230,8 @@ public class StripeApiHandlerTest {
                 StripeRequest.createPost(
                         StripeApiHandler.getSourcesUrl(),
                         SourceParams.createCardParams(CARD).toParamMap(),
-                        RequestOptions.builder("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                                connectAccountId, RequestOptions.RequestType.API)
-                                .build())
+                        RequestOptions.createForApi("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
+                                connectAccountId))
         );
         assertNotNull(response);
 
@@ -345,8 +343,7 @@ public class StripeApiHandlerTest {
                 false
         );
         apiHandler.logApiCall(new HashMap<String, Object>(),
-                RequestOptions.builder("some_key")
-                        .build());
+                RequestOptions.createForApi("some_key"));
         verifyNoMoreInteractions(mRequestExecutor);
     }
 
@@ -492,7 +489,7 @@ public class StripeApiHandlerTest {
         final String url = StripeRequest.createGet(
                 StripeApiHandler.getPaymentMethodsUrl(),
                 queryParams,
-                RequestOptions.builder("key").build())
+                RequestOptions.createForApi("key"))
                 .getUrl();
 
         when(mRequestExecutor.execute(argThat(
@@ -536,7 +533,7 @@ public class StripeApiHandlerTest {
         final String url = StripeRequest.createGet(
                 StripeApiHandler.getPaymentMethodsUrl(),
                 queryParams,
-                RequestOptions.builder("key").build())
+                RequestOptions.createForApi("key"))
                 .getUrl();
 
         when(mRequestExecutor.execute(argThat(
