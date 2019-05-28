@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.1.1 - 2019-05-28
+* [#1006](https://github.com/stripe/stripe-android/pull/1006) Remove null values in `PaymentMethod.BillingDetails#toMap()`
+
 ## 9.1.0 - 2019-05-28
 * [#952](https://github.com/stripe/stripe-android/pull/952) Update standard integration UI to use PaymentMethods instead of Sources
 * [#962](https://github.com/stripe/stripe-android/pull/962) Add initial dark theme support to widgets
