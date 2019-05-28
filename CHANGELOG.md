@@ -1,7 +1,6 @@
 # CHANGELOG
 
-## 9.1.0
-Status: unreleased
+## 9.1.0 - 2019-05-28
 * [#952](https://github.com/stripe/stripe-android/pull/952) Update standard integration UI to use PaymentMethods instead of Sources
 * [#962](https://github.com/stripe/stripe-android/pull/962) Add initial dark theme support to widgets
 * [#963](https://github.com/stripe/stripe-android/pull/963) Add Autofill hints to forms
