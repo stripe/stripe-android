@@ -67,13 +67,6 @@ class PaymentAuthWebView extends WebView {
         }
 
         @Override
-        public void onPageStarted(@NonNull WebView view, @NonNull String url,
-                                  @Nullable Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            mProgressBar.setVisibility(VISIBLE);
-        }
-
-        @Override
         public void onPageCommitVisible(@NonNull WebView view, @NonNull String url) {
             super.onPageCommitVisible(view, url);
             mProgressBar.setVisibility(GONE);
