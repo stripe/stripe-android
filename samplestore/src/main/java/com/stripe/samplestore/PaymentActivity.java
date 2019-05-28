@@ -97,7 +97,7 @@ public class PaymentActivity extends AppCompatActivity {
         mCompositeDisposable.add(RxView.clicks(mEnterShippingInfo)
                 .subscribe(aVoid -> mPaymentSession.presentShippingFlow()));
         mCompositeDisposable.add(RxView.clicks(mEnterPaymentInfo)
-                .subscribe(aVoid -> mPaymentSession.presentPaymentMethodSelection()));
+                .subscribe(aVoid -> mPaymentSession.presentPaymentMethodSelection(true)));
         mCompositeDisposable.add(RxView.clicks(mConfirmPaymentButton)
                 .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
                         new AttemptPurchaseCustomerRetrievalListener(

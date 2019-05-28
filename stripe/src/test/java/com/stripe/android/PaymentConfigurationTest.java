@@ -1,7 +1,5 @@
 package com.stripe.android;
 
-import com.stripe.android.model.Address;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,19 +29,7 @@ public class PaymentConfigurationTest {
     @Test
     public void getInstance_withPublicKey_returnsDefaultInstance() {
         PaymentConfiguration.init("pk_test_key");
-        PaymentConfiguration payConfig = PaymentConfiguration.getInstance();
-        assertEquals("pk_test_key", payConfig.getPublishableKey());
-        assertEquals(Address.RequiredBillingAddressFields.NONE, payConfig.getRequiredBillingAddressFields());
-    }
-
-    @Test
-    public void setValues_setsForSingletonInstance() {
-        PaymentConfiguration.init("pk_test_key");
-        PaymentConfiguration.getInstance()
-                .setRequiredBillingAddressFields(Address.RequiredBillingAddressFields.FULL);
-
-        assertEquals("pk_test_key", PaymentConfiguration.getInstance().getPublishableKey());
-        assertEquals(Address.RequiredBillingAddressFields.FULL,
-                PaymentConfiguration.getInstance().getRequiredBillingAddressFields());
+        assertEquals("pk_test_key",
+                PaymentConfiguration.getInstance().getPublishableKey());
     }
 }
