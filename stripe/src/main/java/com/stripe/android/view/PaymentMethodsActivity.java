@@ -62,7 +62,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_methods);
 
@@ -73,17 +73,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
 
+        final boolean shouldShowPostalField = getIntent()
+                .getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE, false);
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-                final Intent addSourceIntent = AddPaymentMethodActivity.newIntent(
+                final Intent addPaymentMethodIntent = AddPaymentMethodActivity.newIntent(
                         PaymentMethodsActivity.this,
-                        false,
+                        shouldShowPostalField,
                         true);
                 if (mStartedFromPaymentSession) {
-                    addSourceIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+                    addPaymentMethodIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
                 }
-                startActivityForResult(addSourceIntent, REQUEST_CODE_ADD_CARD);
+                startActivityForResult(addPaymentMethodIntent, REQUEST_CODE_ADD_CARD);
             }
         });
 

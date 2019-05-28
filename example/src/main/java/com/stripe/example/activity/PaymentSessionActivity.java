@@ -103,9 +103,8 @@ public class PaymentSessionActivity extends AppCompatActivity {
         localBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED));
         mSelectPaymentButton.setOnClickListener(v ->
-                mPaymentSession.presentPaymentMethodSelection());
+                mPaymentSession.presentPaymentMethodSelection(true));
         mSelectShippingButton.setOnClickListener(v -> mPaymentSession.presentShippingFlow());
-
     }
 
     private void setupCustomerSession() {

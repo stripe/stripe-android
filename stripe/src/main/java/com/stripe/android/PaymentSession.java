@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
@@ -185,12 +186,22 @@ public class PaymentSession {
      * or to add a new one.
      */
     public void presentPaymentMethodSelection() {
+        presentPaymentMethodSelection(false);
+    }
+
+    /**
+     * @param shouldRequirePostalCode if true, require postal code when adding a payment method
+     */
+    public void presentPaymentMethodSelection(boolean shouldRequirePostalCode) {
         final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true)
+                .putExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
+                        shouldRequirePostalCode);
         if (mPaymentSessionData.getPaymentMethod() != null) {
-            paymentMethodsIntent.putExtra(
-                    PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
-                    mPaymentSessionData.getPaymentMethod().id);
+            paymentMethodsIntent
+                    .putExtra(
+                            PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
+                            mPaymentSessionData.getPaymentMethod().id);
         }
         mHostActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
     }
