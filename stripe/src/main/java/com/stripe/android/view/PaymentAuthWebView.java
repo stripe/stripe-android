@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -64,13 +63,6 @@ class PaymentAuthWebView extends WebView {
             mActivity = activity;
             mReturnUrl = Uri.parse(returnUrl);
             mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
-        }
-
-        @Override
-        public void onPageStarted(@NonNull WebView view, @NonNull String url,
-                                  @Nullable Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            mProgressBar.setVisibility(VISIBLE);
         }
 
         @Override
