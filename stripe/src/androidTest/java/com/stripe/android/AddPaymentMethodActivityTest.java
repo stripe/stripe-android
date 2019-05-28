@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.stripe.android.view.AddPaymentMethodActivity;
@@ -18,11 +19,10 @@ public class AddPaymentMethodActivityTest {
 
     @Rule
     public ActivityTestRule<AddPaymentMethodActivity> mActivityRule =
-            new ActivityTestRule(AddPaymentMethodActivity.class);
+            new ActivityTestRule<>(AddPaymentMethodActivity.class);
 
     @Test
     public void titleRenders() {
         onView(withText(R.string.title_add_a_card)).check(matches(isDisplayed()));
     }
-
 }
