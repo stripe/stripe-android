@@ -1,11 +1,14 @@
 # CHANGELOG
 
+## 9.1.1 - 2019-05-28
+* [#1006](https://github.com/stripe/stripe-android/pull/1006) Remove null values in `PaymentMethod.BillingDetails#toMap()`
+
 ## 9.1.0 - 2019-05-28
 * [#952](https://github.com/stripe/stripe-android/pull/952) Update standard integration UI to use PaymentMethods instead of Sources
 * [#962](https://github.com/stripe/stripe-android/pull/962) Add initial dark theme support to widgets
 * [#963](https://github.com/stripe/stripe-android/pull/963) Add Autofill hints to forms
 * [#964](https://github.com/stripe/stripe-android/pull/964) Upgrade Android Gradle Plugin to 3.4.1
-* [#972](https://github.com/stripe/stripe-android/pull/964) Add PaymentIntent#getNextActionType()
+* [#972](https://github.com/stripe/stripe-android/pull/964) Add `PaymentIntent#getNextActionType()`
 * [#989](https://github.com/stripe/stripe-android/pull/989) Fix StripeEditText's error color logic
 * [#1001](https://github.com/stripe/stripe-android/pull/1001) Overload `PaymentSession#presentPaymentMethodSelection` to allow requiring postal field
 
