@@ -81,7 +81,9 @@ afterEvaluate { project ->
 
     signing {
         required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
-        useGpgCmd()
+        if (isReleaseBuild() && project.hasProperty('signing.gnupg.keyName')) {
+            useGpgCmd()
+        }
         sign configurations.archives
     }
 

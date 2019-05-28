@@ -5,15 +5,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.stripe.android.ApiResultCallback;
+import com.stripe.android.PaymentAuthResult;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.example.R;
-import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.module.RetrofitFactory;
 import com.stripe.example.service.StripeService;
 
@@ -50,8 +53,9 @@ public class PaymentAuthActivity extends AppCompatActivity {
 
     private Stripe mStripe;
     private StripeService mStripeService;
-    private ProgressDialogController mProgressDialogController;
     private TextView mStatusTextView;
+    private Button mBuyButton;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,12 +67,13 @@ public class PaymentAuthActivity extends AppCompatActivity {
             mStatusTextView.setText(savedInstanceState.getString(STATE_STATUS));
         }
 
-        mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
-                getResources());
-
         mStripeService = RetrofitFactory.getInstance().create(StripeService.class);
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
-        findViewById(R.id.buy_button).setOnClickListener((v) -> createPaymentIntent());
+
+        mBuyButton = findViewById(R.id.buy_button);
+        mBuyButton.setOnClickListener((v) -> createPaymentIntent());
+
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     private void confirmPaymentIntent(@NonNull String paymentIntentClientSecret) {
@@ -84,9 +89,16 @@ public class PaymentAuthActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        mStatusTextView.append("\n\nPayment authentication completed");
+        mProgressBar.setVisibility(View.VISIBLE);
+        mStatusTextView.append("\n\nPayment authentication completed, getting result");
         mStripe.onPaymentAuthResult(requestCode, resultCode, data,
                 new AuthResultListener(this));
+    }
+
+    @Override
+    protected void onPause() {
+        mProgressBar.setVisibility(View.INVISIBLE);
+        super.onPause();
     }
 
     @Override
@@ -107,11 +119,10 @@ public class PaymentAuthActivity extends AppCompatActivity {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe((d) -> {
+                            mProgressBar.setVisibility(View.VISIBLE);
+                            mBuyButton.setEnabled(false);
                             mStatusTextView.setText(R.string.creating_payment_intent);
-                            mProgressDialogController.show(R.string.creating_payment_intent);
                         })
-                        .doOnComplete(() ->
-                                mProgressDialogController.dismiss())
                         .subscribe(this::handleCreatePaymentIntentResponse));
     }
 
@@ -128,6 +139,11 @@ public class PaymentAuthActivity extends AppCompatActivity {
         }
     }
 
+    private void onAuthComplete() {
+        mBuyButton.setEnabled(true);
+        mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
     @NonNull
     private Map<String, Object> createPaymentIntentParams() {
         final Map<String, Object> params = new HashMap<>();
@@ -137,7 +153,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
         return params;
     }
 
-    private static class AuthResultListener implements ApiResultCallback<PaymentIntent> {
+    private static class AuthResultListener implements ApiResultCallback<PaymentAuthResult> {
         @NonNull private final WeakReference<PaymentAuthActivity> mActivityRef;
 
         private AuthResultListener(@NonNull PaymentAuthActivity activity) {
@@ -145,14 +161,16 @@ public class PaymentAuthActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSuccess(@NonNull PaymentIntent paymentIntent) {
+        public void onSuccess(@NonNull PaymentAuthResult paymentAuthResult) {
             final PaymentAuthActivity activity = mActivityRef.get();
             if (activity == null) {
                 return;
             }
 
+            final PaymentIntent paymentIntent = paymentAuthResult.paymentIntent;
             activity.mStatusTextView.append("\n\n" +
                     activity.getString(R.string.payment_intent_status, paymentIntent.getStatus()));
+            activity.onAuthComplete();
         }
 
         @Override
@@ -163,6 +181,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
             }
 
             activity.mStatusTextView.append("\n\nException: " + e.getMessage());
+            activity.onAuthComplete();
         }
     }
 }

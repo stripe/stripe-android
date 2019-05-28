@@ -82,7 +82,7 @@ class StripeRequest {
     @NonNull
     String getContentType() {
         final String mimeType;
-        if (RequestOptions.RequestType.JSON.equals(options.getRequestType())) {
+        if (RequestOptions.RequestType.FINGERPRINTING == options.getRequestType()) {
             mimeType = "application/json";
         } else {
             mimeType = "application/x-www-form-urlencoded";
@@ -116,10 +116,6 @@ class StripeRequest {
 
         if (options.getStripeAccount() != null) {
             headers.put("Stripe-Account", options.getStripeAccount());
-        }
-
-        if (options.getIdempotencyKey() != null) {
-            headers.put("Idempotency-Key", options.getIdempotencyKey());
         }
 
         return headers;

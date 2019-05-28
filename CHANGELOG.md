@@ -7,6 +7,7 @@ Status: unreleased
 * [#963](https://github.com/stripe/stripe-android/pull/963) Add Autofill hints to forms
 * [#964](https://github.com/stripe/stripe-android/pull/964) Upgrade Android Gradle Plugin to 3.4.1
 * [#972](https://github.com/stripe/stripe-android/pull/964) Add PaymentIntent#getNextActionType()
+* [#989](https://github.com/stripe/stripe-android/pull/989) Fix StripeEditText's error color logic
 
 ## 9.0.1 2019-05-17
 * [#945](https://github.com/stripe/stripe-android/pull/945) Add `business_type` param to Account tokenization when available

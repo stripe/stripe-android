@@ -125,7 +125,7 @@ public class Stripe {
     private boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull String publishableKey,
-            @NonNull ApiResultCallback<PaymentIntent> callback) {
+            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
         if (data != null && mPaymentAuthenticationController
                 .shouldHandleResult(requestCode, resultCode, data)) {
             mPaymentAuthenticationController.handleResult(this, data,
@@ -138,7 +138,7 @@ public class Stripe {
 
     public boolean onPaymentAuthResult(
             int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<PaymentIntent> callback) {
+            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
         return onPaymentAuthResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
@@ -267,13 +267,9 @@ public class Stripe {
             CardException,
             APIException {
         validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey,
-                mStripeAccount,
-                RequestOptions.RequestType.QUERY).build();
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
-                requestOptions,
+                RequestOptions.createForApi(publishableKey, mStripeAccount),
                 Token.TYPE_BANK_ACCOUNT
         );
     }
@@ -618,13 +614,9 @@ public class Stripe {
             APIException {
         validateKey(publishableKey);
 
-        RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey,
-                mStripeAccount,
-                RequestOptions.RequestType.QUERY).build();
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromCard(card),
-                requestOptions,
+                RequestOptions.createForApi(publishableKey, mStripeAccount),
                 Token.TYPE_CARD
         );
     }
@@ -670,13 +662,9 @@ public class Stripe {
             CardException,
             APIException {
         validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey,
-                mStripeAccount,
-                RequestOptions.RequestType.QUERY).build();
         return mApiHandler.createToken(
                 hashMapFromPersonalId(personalId),
-                requestOptions,
+                RequestOptions.createForApi(publishableKey, mStripeAccount),
                 Token.TYPE_PII
         );
     }
@@ -725,13 +713,9 @@ public class Stripe {
             CardException,
             APIException {
         validateKey(publishableKey);
-        final RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey,
-                mStripeAccount,
-                RequestOptions.RequestType.QUERY).build();
         return mApiHandler.createToken(
                 mapFromCvc(cvc),
-                requestOptions,
+                RequestOptions.createForApi(publishableKey, mStripeAccount),
                 Token.TYPE_CVC_UPDATE
         );
     }
@@ -785,13 +769,10 @@ public class Stripe {
             return null;
         }
         validateKey(publishableKey);
-        RequestOptions requestOptions = RequestOptions.builder(
-                publishableKey, mStripeAccount, RequestOptions.RequestType.QUERY)
-                .build();
         try {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
-                    requestOptions,
+                    RequestOptions.createForApi(publishableKey, mStripeAccount),
                     Token.TYPE_ACCOUNT
             );
         } catch (CardException exception) {
@@ -818,9 +799,7 @@ public class Stripe {
                     source.getType());
         }
         mApiHandler.logApiCall(loggingMap,
-                RequestOptions.builder(mDefaultPublishableKey)
-                        .setStripeAccount(mStripeAccount)
-                        .build());
+                RequestOptions.createForApi(mDefaultPublishableKey, mStripeAccount));
     }
 
     /**
@@ -1039,9 +1018,8 @@ public class Stripe {
         @Nullable
         @Override
         Token getResult() throws StripeException {
-            final RequestOptions requestOptions = RequestOptions.builder(mPublishableKey,
-                    mStripeAccount, RequestOptions.RequestType.QUERY)
-                    .build();
+            final RequestOptions requestOptions = RequestOptions.createForApi(mPublishableKey,
+                    mStripeAccount);
             return mApiHandler.createToken(
                     mTokenParams,
                     requestOptions,

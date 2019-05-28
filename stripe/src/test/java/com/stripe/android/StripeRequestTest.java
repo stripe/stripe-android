@@ -28,19 +28,14 @@ public class StripeRequestTest {
     @Test
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         final String fakePublicKey = "fake_public_key";
-        final String idempotencyKey = "idempotency_rules";
         final String stripeAccount = "acct_123abc";
-        final RequestOptions requestOptions = RequestOptions.builder(fakePublicKey)
-                .setIdempotencyKey(idempotencyKey)
-                .setStripeAccount(stripeAccount)
-                .build();
         final Map<String, String> headerMap =
-                StripeRequest.createGet(StripeApiHandler.getSourcesUrl(), requestOptions)
+                StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
+                        RequestOptions.createForApi(fakePublicKey, stripeAccount))
                         .getHeaders(ApiVersion.getDefault());
 
         assertNotNull(headerMap);
         assertEquals("Bearer " + fakePublicKey, headerMap.get("Authorization"));
-        assertEquals(idempotencyKey, headerMap.get("Idempotency-Key"));
         assertEquals(ApiVersion.DEFAULT_API_VERSION, headerMap.get("Stripe-Version"));
         assertEquals(stripeAccount, headerMap.get("Stripe-Account"));
     }
@@ -49,10 +44,9 @@ public class StripeRequestTest {
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         final Map<String, String> headerMap =
                 StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        RequestOptions.builder("some_key").build())
+                        RequestOptions.createForApi("some_key"))
                         .getHeaders(ApiVersion.getDefault());
 
-        assertFalse(headerMap.containsKey("Idempotency-Key"));
         assertTrue(headerMap.containsKey("Stripe-Version"));
         assertFalse(headerMap.containsKey("Stripe-Account"));
         assertTrue(headerMap.containsKey("Authorization"));
@@ -62,7 +56,7 @@ public class StripeRequestTest {
     public void getHeaders_containsPropertyMapValues() throws JSONException {
         final Map<String, String> headerMap =
                 StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        RequestOptions.builder("some_key").build())
+                        RequestOptions.createForApi("some_key"))
                         .getHeaders(ApiVersion.getDefault());
 
         final String userAgentRawString = headerMap.get("X-Stripe-Client-User-Agent");
@@ -78,7 +72,7 @@ public class StripeRequestTest {
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
         final Map<String, String> headerMap =
                 StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        RequestOptions.builder("some_key").build())
+                        RequestOptions.createForApi("some_key"))
                         .getHeaders(ApiVersion.getDefault());
 
         final String expectedUserAgent =
@@ -98,24 +92,23 @@ public class StripeRequestTest {
         final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
         final String query = StripeRequest.createGet(StripeApiHandler.getSourcesUrl(), cardMap,
-                RequestOptions.builder("some_key").build()).createQuery();
+                RequestOptions.createForApi("some_key"))
+                .createQuery();
         assertEquals(expectedValue, query);
     }
 
     @Test
-    public void getContentType_withRequestTypeQuery() {
+    public void getContentType_withRequestTypeApi() {
         final String contentType = StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                RequestOptions.builder("some_key", RequestOptions.RequestType.QUERY)
-                        .build())
+                RequestOptions.createForApi("some_key"))
                 .getContentType();
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType);
     }
 
     @Test
-    public void getContentType_withRequestTypeJson() {
+    public void getContentType_withRequestTypeFingerprinting() {
         final String contentType = StripeRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                RequestOptions.builder("some_key", RequestOptions.RequestType.JSON)
-                        .build())
+                RequestOptions.createForFingerprinting("guid"))
                 .getContentType();
         assertEquals("application/json; charset=UTF-8", contentType);
     }
