@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class PaymentMethodTest {
     public static final String RAW_CARD_JSON = "{\n" +
@@ -164,5 +166,17 @@ public class PaymentMethodTest {
     @Test
     public void fromString_shouldReturnExpectedPaymentMethod() {
         assertEquals(CARD_PAYMENT_METHOD, PaymentMethod.fromString(RAW_CARD_JSON));
+    }
+
+    @Test
+    public void billingDetailsToMap_removesNullValues() {
+        final Map<String, Object> billingDetails =
+                new PaymentMethod.BillingDetails.Builder()
+                        .setName("name")
+                        .build()
+                        .toMap();
+        assertEquals(1, billingDetails.size());
+        assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_ADDRESS));
+        assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_NAME));
     }
 }

@@ -118,12 +118,24 @@ public class Address extends StripeJsonModel implements Parcelable {
     @Override
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_CITY, mCity);
-        map.put(FIELD_COUNTRY, mCountry);
-        map.put(FIELD_LINE_1, mLine1);
-        map.put(FIELD_LINE_2, mLine2);
-        map.put(FIELD_POSTAL_CODE, mPostalCode);
-        map.put(FIELD_STATE, mState);
+        if (mCity != null) {
+            map.put(FIELD_CITY, mCity);
+        }
+        if (mCountry != null) {
+            map.put(FIELD_COUNTRY, mCountry);
+        }
+        if (mLine1 != null) {
+            map.put(FIELD_LINE_1, mLine1);
+        }
+        if (mLine2 != null) {
+            map.put(FIELD_LINE_2, mLine2);
+        }
+        if (mPostalCode != null) {
+            map.put(FIELD_POSTAL_CODE, mPostalCode);
+        }
+        if (mState != null) {
+            map.put(FIELD_STATE, mState);
+        }
         return map;
     }
 
