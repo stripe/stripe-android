@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
 import com.stripe.android.utils.ObjectUtils;
@@ -275,12 +276,12 @@ public class PaymentMethod extends StripeJsonModel {
     }
 
     public static final class BillingDetails extends StripeJsonModel {
-        private static final String FIELD_ADDRESS = "address";
-        private static final String FIELD_EMAIL = "email";
-        private static final String FIELD_NAME = "name";
-        private static final String FIELD_PHONE = "phone";
+        static final String FIELD_ADDRESS = "address";
+        static final String FIELD_EMAIL = "email";
+        static final String FIELD_NAME = "name";
+        static final String FIELD_PHONE = "phone";
 
-        @NonNull public final Address address;
+        @Nullable public final Address address;
         public final String email;
         public final String name;
         public final String phone;
@@ -296,10 +297,19 @@ public class PaymentMethod extends StripeJsonModel {
         @Override
         public Map<String, Object> toMap() {
             final Map<String, Object> billingDetails = new HashMap<>();
-            billingDetails.put(FIELD_ADDRESS, address.toMap());
-            billingDetails.put(FIELD_EMAIL, email);
-            billingDetails.put(FIELD_NAME, name);
-            billingDetails.put(FIELD_PHONE, phone);
+            if (address != null) {
+                billingDetails.put(FIELD_ADDRESS, address.toMap());
+            }
+            if (email != null) {
+                billingDetails.put(FIELD_EMAIL, email);
+            }
+            if (name != null) {
+                billingDetails.put(FIELD_NAME, name);
+            }
+            if (phone != null) {
+                billingDetails.put(FIELD_PHONE, phone);
+            }
+            StripeNetworkUtils.removeNullAndEmptyParams(billingDetails);
             return billingDetails;
         }
 
@@ -308,7 +318,7 @@ public class PaymentMethod extends StripeJsonModel {
         public JSONObject toJson() {
             final JSONObject billingDetails = new JSONObject();
             try {
-                billingDetails.put(FIELD_ADDRESS, address.toJson());
+                billingDetails.put(FIELD_ADDRESS, address != null ? address.toJson() : null);
                 billingDetails.put(FIELD_EMAIL, email);
                 billingDetails.put(FIELD_NAME, name);
                 billingDetails.put(FIELD_PHONE, phone);

@@ -11,7 +11,6 @@ import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link Address}.
@@ -39,14 +38,10 @@ public class AddressTest {
     private static final Address ADDRESS = Address.fromString(JSON_ADDRESS);
 
     @Test
-    public void fromJsonString_backToJson_createsIdenticalElement() {
+    public void fromJsonString_backToJson_createsIdenticalElement() throws JSONException {
         assertNotNull(ADDRESS);
-        try {
-            JSONObject rawConversion = new JSONObject(JSON_ADDRESS);
-            assertJsonEquals(rawConversion, ADDRESS.toJson());
-        } catch (JSONException jsonException) {
-            fail("Test Data failure: " + jsonException.getLocalizedMessage());
-        }
+        JSONObject rawConversion = new JSONObject(JSON_ADDRESS);
+        assertJsonEquals(rawConversion, ADDRESS.toJson());
     }
 
     @Test
