@@ -8,6 +8,7 @@ Status: unreleased
 * [#964](https://github.com/stripe/stripe-android/pull/964) Upgrade Android Gradle Plugin to 3.4.1
 * [#972](https://github.com/stripe/stripe-android/pull/964) Add PaymentIntent#getNextActionType()
 * [#989](https://github.com/stripe/stripe-android/pull/989) Fix StripeEditText's error color logic
+* [#1001](https://github.com/stripe/stripe-android/pull/1001) Overload `PaymentSession#presentPaymentMethodSelection` to allow requiring postal field
 
 ## 9.0.1 2019-05-17
 * [#945](https://github.com/stripe/stripe-android/pull/945) Add `business_type` param to Account tokenization when available
