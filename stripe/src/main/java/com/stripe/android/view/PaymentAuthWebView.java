@@ -5,12 +5,12 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -45,7 +45,6 @@ class PaymentAuthWebView extends WebView {
 
     void init(@NonNull Activity activity, @NonNull String returnUrl) {
         setWebViewClient(new PaymentAuthWebViewClient(activity, returnUrl));
-        setWebChromeClient(new PaymentAuthWebViewChromeClient(activity));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -54,36 +53,30 @@ class PaymentAuthWebView extends WebView {
         getSettings().setAllowContentAccess(false);
     }
 
-    static class PaymentAuthWebViewChromeClient extends WebChromeClient {
-        @NonNull private final ProgressBar mProgressBar;
-
-        PaymentAuthWebViewChromeClient(@NonNull Activity activity) {
-            mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
-        }
-
-        @Override
-        public void onProgressChanged(@NonNull WebView view, int progress) {
-            if (progress < 100) {
-                if (mProgressBar.getVisibility() == GONE) {
-                    mProgressBar.setVisibility(VISIBLE);
-                }
-                mProgressBar.setProgress(progress);
-            } else if (progress == 100) {
-                mProgressBar.setVisibility(GONE);
-                mProgressBar.setProgress(0);
-            }
-        }
-    }
-
     static class PaymentAuthWebViewClient extends WebViewClient {
         static final String PARAM_CLIENT_SECRET = "payment_intent_client_secret";
 
         @NonNull private final Activity mActivity;
         @NonNull private final Uri mReturnUrl;
+        @NonNull private final ProgressBar mProgressBar;
 
         PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull String returnUrl) {
             mActivity = activity;
             mReturnUrl = Uri.parse(returnUrl);
+            mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
+        }
+
+        @Override
+        public void onPageStarted(@NonNull WebView view, @NonNull String url,
+                                  @Nullable Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            mProgressBar.setVisibility(VISIBLE);
+        }
+
+        @Override
+        public void onPageCommitVisible(@NonNull WebView view, @NonNull String url) {
+            super.onPageCommitVisible(view, url);
+            mProgressBar.setVisibility(GONE);
         }
 
         @Override
