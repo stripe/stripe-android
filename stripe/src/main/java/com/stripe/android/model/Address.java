@@ -6,6 +6,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -136,6 +137,7 @@ public class Address extends StripeJsonModel implements Parcelable {
         if (mState != null) {
             map.put(FIELD_STATE, mState);
         }
+        StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
     }
 
