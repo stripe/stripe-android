@@ -35,10 +35,11 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  */
 public class AddPaymentMethodActivity extends StripeActivity {
 
-    public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
-
     public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
-    static final String EXTRA_SHOW_ZIP = "show_zip";
+
+    public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
+    public static final String EXTRA_SHOULD_REQUIRE_POSTAL_CODE = "require_postal";
+
     static final String EXTRA_PROXY_DELAY = "proxy_delay";
     static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
@@ -52,7 +53,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
      * Create an {@link Intent} to start a {@link AddPaymentMethodActivity}.
      *
      * @param context the {@link Context} used to launch the activity
-     * @param requirePostalField {@code true} to require a postal code field
+     * @param shouldRequirePostalCode {@code true} to require the postal code
      * @param updatesCustomer {@code true} if the activity should update using an
      *         already-initialized {@link CustomerSession}, or {@code false} if it should just
      *         return a source.
@@ -60,10 +61,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
      */
     @NonNull
     public static Intent newIntent(@NonNull Context context,
-                                   boolean requirePostalField,
+                                   boolean shouldRequirePostalCode,
                                    boolean updatesCustomer) {
         return new Intent(context, AddPaymentMethodActivity.class)
-                .putExtra(EXTRA_SHOW_ZIP, requirePostalField)
+                .putExtra(EXTRA_SHOULD_REQUIRE_POSTAL_CODE, shouldRequirePostalCode)
                 .putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
     }
 
@@ -75,11 +76,12 @@ public class AddPaymentMethodActivity extends StripeActivity {
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         initEnterListeners(mCardMultilineWidget);
-        final boolean showZip = getIntent().getBooleanExtra(EXTRA_SHOW_ZIP, false);
+        final boolean shouldShowPostalCode = getIntent()
+                .getBooleanExtra(EXTRA_SHOULD_REQUIRE_POSTAL_CODE, false);
         mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
         mStartedFromPaymentSession =
                 getIntent().getBooleanExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mCardMultilineWidget.setShouldShowPostalCode(showZip);
+        mCardMultilineWidget.setShouldShowPostalCode(shouldShowPostalCode);
 
         if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
             initCustomerSessionTokens();

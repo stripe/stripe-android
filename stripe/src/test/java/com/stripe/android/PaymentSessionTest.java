@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
+import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 import org.junit.Before;
@@ -156,7 +157,6 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
         PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -182,7 +182,6 @@ public class PaymentSessionTest {
 
     @Test
     public void selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         CustomerSession.setInstance(createCustomerSession());
 
         final PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -198,11 +197,30 @@ public class PaymentSessionTest {
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intent.getComponent().getClassName());
         assertTrue(intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+        assertFalse(
+                intent.getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
+                        false));
+    }
+
+    @Test
+    public void presentPaymentMethodSelection_withShouldRequirePostalCode_shouldPassInIntent() {
+        CustomerSession.setInstance(createCustomerSession());
+
+        final PaymentSession paymentSession = new PaymentSession(mActivity);
+        paymentSession.init(mPaymentSessionListener, new PaymentSessionConfig.Builder().build());
+        paymentSession.presentPaymentMethodSelection(true);
+
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
+                eq(PaymentSession.PAYMENT_METHOD_REQUEST));
+
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertTrue(
+                intent.getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
+                        false));
     }
 
     @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
         customerSession
@@ -221,7 +239,6 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
         customerSession
@@ -241,7 +258,6 @@ public class PaymentSessionTest {
 
     @Test
     public void completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
         customerSession
