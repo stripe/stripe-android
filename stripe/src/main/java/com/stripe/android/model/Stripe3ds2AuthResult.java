@@ -33,13 +33,13 @@ public final class Stripe3ds2AuthResult {
     @Nullable public final String source;
     @Nullable public final String state;
     @Nullable public final Boolean liveMode;
-    @Nullable public final StripeError error;
+    @Nullable public final ThreeDS2Error error;
 
 
     private Stripe3ds2AuthResult(@Nullable String id, @Nullable String objectType,
                                  @Nullable Ares ares, @Nullable Long created,
                                  @Nullable String source, @Nullable String state,
-                                 @Nullable Boolean liveMode, @Nullable StripeError error) {
+                                 @Nullable Boolean liveMode, @Nullable ThreeDS2Error error) {
         this.id = id;
         this.objectType = objectType;
         this.ares = ares;
@@ -60,6 +60,8 @@ public final class Stripe3ds2AuthResult {
                 .setSource(authResultJson.optString(FIELD_SOURCE))
                 .setState(authResultJson.optString(FIELD_STATE))
                 .setAres(Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES)))
+                .setError(authResultJson.isNull(FIELD_ERROR) ? null :
+                        ThreeDS2Error.fromJson(authResultJson.optJSONObject(FIELD_ERROR)))
                 .build();
     }
 
@@ -94,7 +96,7 @@ public final class Stripe3ds2AuthResult {
         @Nullable private String mSource;
         @Nullable private String mState;
         @Nullable private Boolean mLiveMode;
-        @Nullable private StripeError mError;
+        @Nullable private ThreeDS2Error mError;
 
         @NonNull
         Builder setId(@Nullable String id) {
@@ -139,7 +141,7 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        Builder setError(@Nullable StripeError error) {
+        Builder setError(@Nullable ThreeDS2Error error) {
             mError = error;
             return this;
         }
@@ -247,17 +249,17 @@ public final class Stripe3ds2AuthResult {
         }
 
         static class Builder {
-            private String mThreeDSServerTransId;
-            private String mAcsChallengeMandated;
-            private String mAcsSignedContent;
-            private String mAcsTransId;
-            private String mAcsUrl;
-            private String mAuthenticationType;
-            private String mCardholderInfo;
-            private List<Stripe3ds2AuthResult.MessageExtension> mMessageExtension;
-            private String mMessageType;
-            private String mMessageVersion;
-            private String mSdkTransId;
+            @Nullable private String mThreeDSServerTransId;
+            @Nullable private String mAcsChallengeMandated;
+            @Nullable private String mAcsSignedContent;
+            @Nullable private String mAcsTransId;
+            @Nullable private String mAcsUrl;
+            @Nullable private String mAuthenticationType;
+            @Nullable private String mCardholderInfo;
+            @Nullable private List<Stripe3ds2AuthResult.MessageExtension> mMessageExtension;
+            @Nullable private String mMessageType;
+            @Nullable private String mMessageVersion;
+            @Nullable private String mSdkTransId;
 
             @NonNull
             Builder setThreeDSServerTransId(@NonNull String threeDSServerTransId) {
@@ -423,10 +425,10 @@ public final class Stripe3ds2AuthResult {
         }
 
         static final class Builder {
-            private String mName;
+            @Nullable private String mName;
             private boolean mCriticalityIndicator;
-            private String mId;
-            private Map<String, String> mData;
+            @Nullable private String mId;
+            @Nullable private Map<String, String> mData;
 
             @NonNull
             Builder setName(@NonNull String name) {
@@ -455,6 +457,187 @@ public final class Stripe3ds2AuthResult {
             @NonNull
             MessageExtension build() {
                 return new MessageExtension(mName, mCriticalityIndicator, mId, mData);
+            }
+        }
+    }
+
+    public static class ThreeDS2Error {
+
+        static final String FIELD_THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID";
+        static final String FIELD_ACS_TRANS_ID = "acsTransID";
+        static final String FIELD_DS_TRANS_ID = "dsTransID";
+        static final String FIELD_ERROR_CODE = "errorCode";
+        static final String FIELD_ERROR_COMPONENT = "errorComponent";
+        static final String FIELD_ERROR_DESCRIPTION = "errorDescription";
+        static final String FIELD_ERROR_DETAIL = "errorDetail";
+        static final String FIELD_ERROR_MESSAGE_TYPE = "errorMessageType";
+        static final String FIELD_MESSAGE_TYPE = "messageType";
+        static final String FIELD_MESSAGE_VERSION = "messageVersion";
+        static final String FIELD_SDK_TRANS_ID = "sdkTransID";
+
+        @Nullable public final String threeDSServerTransId;
+        @Nullable public final String acsTransId;
+        @Nullable public final String dsTransId;
+        @Nullable public final String errorCode;
+        @Nullable public final String errorComponent;
+        @Nullable public final String errorDescription;
+        @Nullable public final String errorDetail;
+        @Nullable public final String errorMessageType;
+        @Nullable public final String messageType;
+        @Nullable public final String messageVersion;
+        @Nullable public final String sdkTransId;
+
+        private ThreeDS2Error(@Nullable String threeDSServerTransId, @Nullable String acsTransId,
+                      @Nullable String dsTransId, @Nullable String errorCode,
+                      @Nullable String errorComponent, @Nullable String errorDescription,
+                      @Nullable String errorDetail, @Nullable String errorMessageType,
+                      @Nullable String messageType, @Nullable String messageVersion,
+                      @Nullable String sdkTransId) {
+            this.threeDSServerTransId = threeDSServerTransId;
+            this.acsTransId = acsTransId;
+            this.dsTransId = dsTransId;
+            this.errorCode = errorCode;
+            this.errorComponent = errorComponent;
+            this.errorDescription = errorDescription;
+            this.errorDetail = errorDetail;
+            this.errorMessageType = errorMessageType;
+            this.messageType = messageType;
+            this.messageVersion = messageVersion;
+            this.sdkTransId = sdkTransId;
+        }
+
+        @NonNull
+        static ThreeDS2Error fromJson(@NonNull JSONObject errorJson) {
+            return new ThreeDS2Error.Builder()
+                    .setThreeDSServerTransId(errorJson.optString(FIELD_THREE_DS_SERVER_TRANS_ID))
+                    .setAcsTransId(errorJson.isNull(FIELD_ACS_TRANS_ID) ? null :
+                            errorJson.optString(FIELD_ACS_TRANS_ID))
+                    .setDsTransId(errorJson.isNull(FIELD_DS_TRANS_ID) ? null :
+                            errorJson.optString(FIELD_DS_TRANS_ID))
+                    .setErrorCode(errorJson.optString(FIELD_ERROR_CODE))
+                    .setErrorComponent(errorJson.optString(FIELD_ERROR_COMPONENT))
+                    .setErrorDescription(errorJson.optString(FIELD_ERROR_DESCRIPTION))
+                    .setErrorDetail(errorJson.optString(FIELD_ERROR_DETAIL))
+                    .setErrorMessageType(errorJson.isNull(FIELD_ERROR_MESSAGE_TYPE) ? null :
+                            errorJson.optString(FIELD_ERROR_MESSAGE_TYPE))
+                    .setMessageType(errorJson.optString(FIELD_MESSAGE_TYPE))
+                    .setMessageVersion(errorJson.optString(FIELD_MESSAGE_VERSION))
+                    .setSdkTransId(errorJson.isNull(FIELD_SDK_TRANS_ID) ? null :
+                            errorJson.optString(FIELD_SDK_TRANS_ID))
+                    .build();
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(threeDSServerTransId, acsTransId, dsTransId, errorCode,
+                    errorComponent, errorDescription, errorDetail, errorMessageType, messageType,
+                    messageVersion, sdkTransId);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return super.equals(obj)
+                    || (obj instanceof ThreeDS2Error && typedEquals((ThreeDS2Error) obj));
+        }
+
+        private boolean typedEquals(@NonNull ThreeDS2Error obj) {
+            return Objects.equals(threeDSServerTransId, obj.threeDSServerTransId)
+                    && Objects.equals(acsTransId, obj.acsTransId)
+                    && Objects.equals(dsTransId, obj.dsTransId)
+                    && Objects.equals(errorCode, obj.errorCode)
+                    && Objects.equals(errorComponent, obj.errorComponent)
+                    && Objects.equals(errorDescription, obj.errorDescription)
+                    && Objects.equals(errorDetail, obj.errorDetail)
+                    && Objects.equals(errorMessageType, obj.errorMessageType)
+                    && Objects.equals(messageType, obj.messageType)
+                    && Objects.equals(messageVersion, obj.messageVersion)
+                    && Objects.equals(sdkTransId, obj.sdkTransId);
+        }
+
+        static class Builder {
+            @Nullable private String mThreeDSServerTransId;
+            @Nullable private String mAcsTransId;
+            @Nullable private String mDsTransId;
+            @Nullable private String mErrorCode;
+            @Nullable private String mErrorComponent;
+            @Nullable private String mErrorDescription;
+            @Nullable private String mErrorDetail;
+            @Nullable private String mErrorMessageType;
+            @Nullable private String mMessageType;
+            @Nullable private String mMessageVersion;
+            @Nullable private String mSdkTransId;
+
+            @NonNull
+            Builder setThreeDSServerTransId(@NonNull String threeDSServerTransId) {
+                mThreeDSServerTransId = threeDSServerTransId;
+                return this;
+            }
+
+            @NonNull
+            Builder setAcsTransId(@Nullable String acsTransId) {
+                mAcsTransId = acsTransId;
+                return this;
+            }
+
+            @NonNull
+            Builder setDsTransId(@Nullable String dsTransId) {
+                mDsTransId = dsTransId;
+                return this;
+            }
+
+            @NonNull
+            Builder setErrorCode(@NonNull String errorCode) {
+                mErrorCode = errorCode;
+                return this;
+            }
+
+            @NonNull
+            Builder setErrorComponent(@NonNull String errorComponent) {
+                mErrorComponent = errorComponent;
+                return this;
+            }
+
+            @NonNull
+            Builder setErrorDescription(@NonNull String errorDescription) {
+                mErrorDescription = errorDescription;
+                return this;
+            }
+
+            @NonNull
+            Builder setErrorDetail(@NonNull String errorDetail) {
+                mErrorDetail = errorDetail;
+                return this;
+            }
+
+            @NonNull
+            Builder setErrorMessageType(@Nullable String errorMessageType) {
+                mErrorMessageType = errorMessageType;
+                return this;
+            }
+
+            @NonNull
+            Builder setMessageType(@NonNull String messageType) {
+                mMessageType = messageType;
+                return this;
+            }
+
+            @NonNull
+            Builder setMessageVersion(@NonNull String messageVersion) {
+                mMessageVersion = messageVersion;
+                return this;
+            }
+
+            @NonNull
+            Builder setSdkTransId(@Nullable String sdkTransId) {
+                mSdkTransId = sdkTransId;
+                return this;
+            }
+
+            @NonNull
+            Stripe3ds2AuthResult.ThreeDS2Error build() {
+                return new Stripe3ds2AuthResult.ThreeDS2Error(mThreeDSServerTransId, mAcsTransId,
+                        mDsTransId, mErrorCode, mErrorComponent, mErrorDescription, mErrorDetail,
+                        mErrorMessageType, mMessageType, mMessageVersion, mSdkTransId);
             }
         }
     }

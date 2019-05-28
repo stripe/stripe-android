@@ -12,9 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2AuthResultTest {
@@ -51,7 +49,7 @@ public class Stripe3ds2AuthResultTest {
             "\t\t\"acsURL\": null,\n" +
             "\t\t\"authenticationType\": \"02\",\n" +
             "\t\t\"cardholderInfo\": null,\n" +
-            "\t\t\"messageExtension\": [\n"+
+            "\t\t\"messageExtension\": [\n" +
             "\t\t\t{\n" +
             "\t\t\t\t\"name\":\"extension1\",\n" +
             "\t\t\t\t\"id\":\"ID1\",\n" +
@@ -85,6 +83,41 @@ public class Stripe3ds2AuthResultTest {
             "\t},\n" +
             "\t\"created\": 1558541285,\n" +
             "\t\"error\": null,\n" +
+            "\t\"livemode\": false,\n" +
+            "\t\"source\": \"src_1Ecwz1CRMbs6FrXfUwt98lxf\",\n" +
+            "\t\"state\": \"challenge_required\"\n" +
+            "}";
+
+    private static final String AUTH_RESULT_ERROR_JSON = "{\n" +
+            "\t\"id\": \"threeds2_1Ecwz3CRMbs6FrXfThtfogua\",\n" +
+            "\t\"object\": \"three_d_secure_2\",\n" +
+            "\t\"ares\": {\n" +
+            "\t\t\"acsChallengeMandated\": \"Y\",\n" +
+            "\t\t\"acsSignedContent\": \"eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa\",\n" +
+            "\t\t\"acsTransID\": \"dd23c757-211a-4c1b-add5-06a1450a642e\",\n" +
+            "\t\t\"acsURL\": null,\n" +
+            "\t\t\"authenticationType\": \"02\",\n" +
+            "\t\t\"cardholderInfo\": null,\n" +
+            "\t\t\"messageExtension\": null,\n" +
+            "\t\t\"messageType\": \"ARes\",\n" +
+            "\t\t\"messageVersion\": \"2.1.0\",\n" +
+            "\t\t\"sdkTransID\": \"20158862-9d9d-4d71-83d4-9e65554ed92c\",\n" +
+            "\t\t\"threeDSServerTransID\": \"e8ea0b42-0e74-42b2-92b4-1b27005f0596\"\n" +
+            "\t},\n" +
+            "\t\"created\": 1558541285,\n" +
+            "\t\"error\": {\n" +
+            "\t\t\"threeDSServerTransID\": \"e8ea0b42-0e74-42b2-92b4-1b27005f0596\",\n" +
+            "\t\t\"acsTransID\": \"dd23c757-211a-4c1b-add5-06a1450a642e\",\n" +
+            "\t\t\"dsTransID\": \"ff23c757-211a-4c1b-add5-06a1450a642e\",\n" +
+            "\t\t\"errorCode\": \"error code 1234\",\n" +
+            "\t\t\"errorDescription\": \"error description\",\n" +
+            "\t\t\"errorDetail\": \"error detail\",\n" +
+            "\t\t\"errorComponent\": \"error component\",\n" +
+            "\t\t\"errorMessageType\": \"error message type\",\n" +
+            "\t\t\"messageType\": \"Error\",\n" +
+            "\t\t\"messageVersion\": \"2.1.0\",\n" +
+            "\t\t\"sdkTransID\": \"20158862-9d9d-4d71-83d4-9e65554ed92c\"\n" +
+            "\t},\n" +
             "\t\"livemode\": false,\n" +
             "\t\"source\": \"src_1Ecwz1CRMbs6FrXfUwt98lxf\",\n" +
             "\t\"state\": \"challenge_required\"\n" +
@@ -170,6 +203,46 @@ public class Stripe3ds2AuthResultTest {
                         .setMessageExtension(extensions)
                         .setSdkTransId("20158862-9d9d-4d71-83d4-9e65554ed92c")
                         .setThreeDSServerTransId("e8ea0b42-0e74-42b2-92b4-1b27005f0596")
+                        .build())
+                .build();
+
+        assertEquals(expectedResult, jsonResult);
+    }
+
+    @Test
+    public void fromJSON_errorData_createsObjectWithError() throws JSONException {
+        final Stripe3ds2AuthResult jsonResult = Stripe3ds2AuthResult
+                .fromJson(new JSONObject(AUTH_RESULT_ERROR_JSON));
+
+        final Stripe3ds2AuthResult expectedResult = new Stripe3ds2AuthResult.Builder()
+                .setId("threeds2_1Ecwz3CRMbs6FrXfThtfogua")
+                .setObjectType("three_d_secure_2")
+                .setLiveMode(false)
+                .setCreated(1558541285L)
+                .setSource("src_1Ecwz1CRMbs6FrXfUwt98lxf")
+                .setState("challenge_required")
+                .setAres(new Stripe3ds2AuthResult.Ares.Builder()
+                        .setAcsChallengeMandated("Y")
+                        .setAcsTransId("dd23c757-211a-4c1b-add5-06a1450a642e")
+                        .setAcsSignedContent("eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa")
+                        .setAuthenticationType("02")
+                        .setMessageType("ARes")
+                        .setMessageVersion("2.1.0")
+                        .setSdkTransId("20158862-9d9d-4d71-83d4-9e65554ed92c")
+                        .setThreeDSServerTransId("e8ea0b42-0e74-42b2-92b4-1b27005f0596")
+                        .build())
+                .setError(new Stripe3ds2AuthResult.ThreeDS2Error.Builder()
+                        .setThreeDSServerTransId("e8ea0b42-0e74-42b2-92b4-1b27005f0596")
+                        .setAcsTransId("dd23c757-211a-4c1b-add5-06a1450a642e")
+                        .setDsTransId("ff23c757-211a-4c1b-add5-06a1450a642e")
+                        .setErrorCode("error code 1234")
+                        .setErrorComponent("error component")
+                        .setErrorDetail("error detail")
+                        .setErrorDescription("error description")
+                        .setErrorMessageType("error message type")
+                        .setMessageType("Error")
+                        .setMessageVersion("2.1.0")
+                        .setSdkTransId("20158862-9d9d-4d71-83d4-9e65554ed92c")
                         .build())
                 .build();
 
