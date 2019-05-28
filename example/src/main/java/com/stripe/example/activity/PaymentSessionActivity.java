@@ -64,15 +64,14 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.customer_progress_bar);
         mProgressBar.setVisibility(View.VISIBLE);
         mSelectPaymentButton = findViewById(R.id.btn_select_payment_method_aps);
-        mSelectPaymentButton.setEnabled(false);
         mSelectShippingButton = findViewById(R.id.btn_start_payment_flow);
-        mSelectShippingButton.setEnabled(false);
         mErrorDialogHandler = new ErrorDialogHandler(this);
         mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title);
         mResultTextView = findViewById(R.id.tv_payment_session_data);
 
-        setupCustomerSession(); // CustomerSession only needs to be initialized once per app.
-        setupPaymentSession();
+        // CustomerSession only needs to be initialized once per app.
+        final CustomerSession customerSession = setupCustomerSession();
+        setupPaymentSession(customerSession);
 
         final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -107,7 +106,8 @@ public class PaymentSessionActivity extends AppCompatActivity {
         mSelectShippingButton.setOnClickListener(v -> mPaymentSession.presentShippingFlow());
     }
 
-    private void setupCustomerSession() {
+    @NonNull
+    private CustomerSession setupCustomerSession() {
         CustomerSession.initCustomerSession(this,
                 new ExampleEphemeralKeyProvider(
                         string -> {
@@ -115,22 +115,22 @@ public class PaymentSessionActivity extends AppCompatActivity {
                                 mErrorDialogHandler.show(string);
                             }
                         }));
-        CustomerSession.getInstance().retrieveCurrentCustomer(
+        final CustomerSession customerSession = CustomerSession.getInstance();
+        customerSession.retrieveCurrentCustomer(
                 new InitialCustomerRetrievalListener(this));
+        return customerSession;
     }
 
-    private void setupPaymentSession() {
+    private void setupPaymentSession(@NonNull CustomerSession customerSession) {
         mPaymentSession = new PaymentSession(this);
         final boolean paymentSessionInitialized = mPaymentSession.init(
-                new PaymentSessionListenerImpl(this),
+                new PaymentSessionListenerImpl(this, customerSession),
                 new PaymentSessionConfig.Builder()
                         .setPrepopulatedShippingInfo(getExampleShippingInfo())
                         .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD,
                                 ShippingInfoWidget.CITY_FIELD)
                         .build());
         if (paymentSessionInitialized) {
-            mSelectPaymentButton.setEnabled(true);
-            mSelectShippingButton.setEnabled(true);
             mPaymentSession.setCartTotal(2000L);
         }
     }
@@ -205,17 +205,22 @@ public class PaymentSessionActivity extends AppCompatActivity {
         return new ShippingInformation(address, "Fake Name", "(555) 555-5555");
     }
 
-    private void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
+    private void onPaymentSessionDataChanged(@NonNull CustomerSession customerSession,
+                                             @NonNull PaymentSessionData data) {
         mPaymentSessionData = data;
         mProgressBar.setVisibility(View.VISIBLE);
-        CustomerSession.getInstance().retrieveCurrentCustomer(
+        customerSession.retrieveCurrentCustomer(
                 new PaymentSessionChangeCustomerRetrievalListener(this));
     }
 
     private static final class PaymentSessionListenerImpl
             extends PaymentSession.ActivityPaymentSessionListener<PaymentSessionActivity> {
-        private PaymentSessionListenerImpl(@NonNull PaymentSessionActivity activity) {
+        @NonNull private final CustomerSession mCustomerSession;
+
+        private PaymentSessionListenerImpl(@NonNull PaymentSessionActivity activity,
+                                           @NonNull CustomerSession customerSession) {
             super(activity);
+            mCustomerSession = customerSession;
         }
 
         @Override
@@ -246,7 +251,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.onPaymentSessionDataChanged(data);
+            activity.onPaymentSessionDataChanged(mCustomerSession, data);
         }
     }
 
@@ -274,8 +279,6 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.mSelectPaymentButton.setEnabled(false);
-            activity.mSelectShippingButton.setEnabled(false);
             activity.mErrorDialogHandler.show(errorMessage);
             activity.mProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -296,6 +299,9 @@ public class PaymentSessionActivity extends AppCompatActivity {
             }
 
             activity.mProgressBar.setVisibility(View.INVISIBLE);
+            activity.mSelectPaymentButton.setEnabled(true);
+            activity.mSelectShippingButton.setEnabled(true);
+
             if (activity.mPaymentSessionData != null) {
                 activity.mResultTitleTextView.setVisibility(View.VISIBLE);
                 activity.mResultTextView.setText(
