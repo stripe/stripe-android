@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.ApiResultCallback;
@@ -37,6 +36,7 @@ import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.samplestore.service.StripeService;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +72,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private Stripe mStripe;
     private PaymentSession mPaymentSession;
+    private StripeService mService;
 
     private StoreCart mStoreCart;
     private long mShippingCosts = 0L;
@@ -88,6 +89,8 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
+        mService = RetrofitFactory.getInstance().create(StripeService.class);
+
         final Bundle extras = getIntent().getExtras();
         mStoreCart = extras != null ? extras.getParcelable(EXTRA_CART) : null;
 
@@ -166,7 +169,7 @@ public class PaymentActivity extends AppCompatActivity {
                 new ApiResultCallback<PaymentAuthResult>() {
                     @Override
                     public void onSuccess(@NonNull PaymentAuthResult result) {
-                        finishPayment();
+                        processPaymentIntent(result.paymentIntent);
                     }
 
                     @Override
@@ -255,10 +258,11 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createParams(long price,
-                                             @NonNull String paymentMethodId,
-                                             @Nullable String customerId,
-                                             @Nullable ShippingInformation shippingInformation) {
+    private Map<String, Object> createCapturePaymentParams(
+            long price,
+            @NonNull String paymentMethodId,
+            @NonNull String customerId,
+            @Nullable ShippingInformation shippingInformation) {
         final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(price));
         params.put("payment_method", paymentMethodId);
@@ -268,9 +272,7 @@ public class PaymentActivity extends AppCompatActivity {
         return params;
     }
 
-    private void capturePayment(@Nullable String customerId) {
-        final StripeService stripeService = RetrofitFactory.getInstance()
-                .create(StripeService.class);
+    private void capturePayment(@NonNull String customerId) {
         final long price = mStoreCart.getTotalPrice() + mShippingCosts;
 
         final PaymentMethod paymentMethod =
@@ -284,16 +286,15 @@ public class PaymentActivity extends AppCompatActivity {
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
-        final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
-                createParams(price, Objects.requireNonNull(paymentMethod.id), customerId,
-                        shippingInformation));
+        final Observable<ResponseBody> stripeResponse = mService.capturePayment(
+                createCapturePaymentParams(price, Objects.requireNonNull(paymentMethod.id),
+                        customerId, shippingInformation));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
                 .doOnComplete(this::stopLoading)
-                .subscribe(
-                        response -> handlePaymentIntentCapture(response.string()),
+                .subscribe(this::onPaymentIntentResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
@@ -306,20 +307,35 @@ public class PaymentActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void handlePaymentIntentCapture(@NonNull String responseBody) {
-        final PaymentIntent paymentIntent = PaymentIntent.fromString(responseBody);
-        if (paymentIntent == null) {
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
+    private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
             mStripe.startPaymentAuth(this, paymentIntent);
+            return;
+        } else if (paymentIntent.requiresConfirmation()) {
+            confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
             return;
         }
 
         finishPayment();
+    }
+
+    private void confirmPaymentIntent(@NonNull String paymentIntentId) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("payment_intent_id", paymentIntentId);
+        mCompositeDisposable.add(mService.confirmPayment(params)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> startLoading())
+                .doOnComplete(this::stopLoading)
+                .subscribe(
+                        this::onPaymentIntentResponse,
+                        throwable -> displayError(throwable.getLocalizedMessage())));
+    }
+
+    private void onPaymentIntentResponse(@NonNull ResponseBody responseBody) throws IOException {
+        final PaymentIntent paymentIntent = Objects.requireNonNull(
+                PaymentIntent.fromString(responseBody.string()));
+        processPaymentIntent(paymentIntent);
     }
 
     private void finishPayment() {
@@ -434,7 +450,7 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.capturePayment(customer.getId());
+            activity.capturePayment(Objects.requireNonNull(customer.getId()));
         }
 
         @Override
