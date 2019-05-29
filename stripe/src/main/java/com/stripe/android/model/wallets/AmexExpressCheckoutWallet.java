@@ -43,7 +43,6 @@ public final class AmexExpressCheckoutWallet extends Wallet {
         }
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<AmexExpressCheckoutWallet> CREATOR =
             new Parcelable.Creator<AmexExpressCheckoutWallet>() {
                 @Override

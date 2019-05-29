@@ -43,7 +43,6 @@ public final class ApplePayWallet extends Wallet {
         }
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<ApplePayWallet> CREATOR =
             new Parcelable.Creator<ApplePayWallet>() {
                 @Override

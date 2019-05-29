@@ -144,7 +144,6 @@ public final class VisaCheckoutWallet extends Wallet {
         dest.writeParcelable(shippingAddress, flags);
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<VisaCheckoutWallet> CREATOR =
             new Parcelable.Creator<VisaCheckoutWallet>() {
                 @Override

@@ -144,7 +144,6 @@ public final class MasterpassWallet extends Wallet {
         dest.writeParcelable(shippingAddress, flags);
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<MasterpassWallet> CREATOR =
             new Parcelable.Creator<MasterpassWallet>() {
                 @Override

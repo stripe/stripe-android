@@ -250,7 +250,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<PaymentMethod> CREATOR =
             new Parcelable.Creator<PaymentMethod>() {
                 @NonNull
@@ -382,7 +381,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             dest.writeString(phone);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<BillingDetails> CREATOR =
                 new Parcelable.Creator<BillingDetails>() {
                     @Override
@@ -598,7 +596,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             dest.writeParcelable(wallet, flags);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<Card> CREATOR = new Parcelable.Creator<Card>() {
             @Override
             public Card createFromParcel(@NonNull Parcel in) {
@@ -796,7 +793,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
                 dest.writeString(cvcCheck);
             }
 
-            @SuppressWarnings("unused")
             public static final Parcelable.Creator<Checks> CREATOR =
                     new Parcelable.Creator<Checks>() {
                         @Override
@@ -916,7 +912,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
                 dest.writeByte((byte) (isSupported ? 0x01 : 0x00));
             }
 
-            @SuppressWarnings("unused")
             public static final Parcelable.Creator<ThreeDSecureUsage> CREATOR =
                     new Parcelable.Creator<ThreeDSecureUsage>() {
                         @Override
@@ -1004,7 +999,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             super(in);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<CardPresent> CREATOR =
                 new Parcelable.Creator<CardPresent>() {
                     @Override
@@ -1071,7 +1065,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             dest.writeString(bankIdentifierCode);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<Ideal> CREATOR = new Parcelable.Creator<Ideal>() {
             @Override
             public Ideal createFromParcel(@NonNull Parcel in) {

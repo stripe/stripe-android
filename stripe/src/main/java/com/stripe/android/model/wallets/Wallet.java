@@ -176,7 +176,6 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
             dest.writeString(state);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<Address> CREATOR =
                 new Parcelable.Creator<Address>() {
                     @Override

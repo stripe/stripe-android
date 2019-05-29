@@ -43,7 +43,6 @@ public final class GooglePayWallet extends Wallet {
         }
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<GooglePayWallet> CREATOR =
             new Parcelable.Creator<GooglePayWallet>() {
                 @Override

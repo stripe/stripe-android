@@ -43,7 +43,6 @@ public final class SamsungPayWallet extends Wallet {
         }
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<SamsungPayWallet> CREATOR =
             new Parcelable.Creator<SamsungPayWallet>() {
                 @Override
