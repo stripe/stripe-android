@@ -197,7 +197,7 @@ class PaymentAuthenticationController {
      * Start in-app WebView activity.
      *
      * @param activity the payment authentication result will be returned as a result to this
-     *                 {@link Activity}
+     *         {@link Activity}
      */
     private void begin3ds1Auth(@NonNull Activity activity,
                                @NonNull PaymentIntent.RedirectData redirectData) {
@@ -321,7 +321,8 @@ class PaymentAuthenticationController {
             }
 
             if (result.ares != null) {
-                final StripeChallengeParameters challengeParameters = new StripeChallengeParameters();
+                final StripeChallengeParameters challengeParameters =
+                        new StripeChallengeParameters();
                 challengeParameters.setAcsSignedContent(result.ares.acsSignedContent);
                 challengeParameters.set3DSServerTransactionID(result.ares.threeDSServerTransId);
                 challengeParameters.setAcsTransactionID(result.ares.acsTransId);
