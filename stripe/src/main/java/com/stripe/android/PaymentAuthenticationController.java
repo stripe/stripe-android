@@ -12,6 +12,7 @@ import android.util.Log;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
@@ -26,8 +27,6 @@ import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentAuthenticationExtras;
-
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -198,7 +197,7 @@ class PaymentAuthenticationController {
      * Start in-app WebView activity.
      *
      * @param activity the payment authentication result will be returned as a result to this
-     *                 {@link Activity}
+     *         {@link Activity}
      */
     private void begin3ds1Auth(@NonNull Activity activity,
                                @NonNull PaymentIntent.RedirectData redirectData) {
@@ -298,7 +297,7 @@ class PaymentAuthenticationController {
     }
 
     private static final class Stripe3ds2AuthCallback
-            implements ApiResultCallback<JSONObject> {
+            implements ApiResultCallback<Stripe3ds2AuthResult> {
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final Transaction mTransaction;
         private final int mMaxTimeout;
@@ -315,26 +314,29 @@ class PaymentAuthenticationController {
         }
 
         @Override
-        public void onSuccess(@NonNull JSONObject result) {
+        public void onSuccess(@NonNull Stripe3ds2AuthResult result) {
             final Activity activity = mActivityRef.get();
             if (activity == null) {
                 return;
             }
 
-            final JSONObject ares = result.optJSONObject("ares");
-            final StripeChallengeParameters challengeParameters = new StripeChallengeParameters();
-            challengeParameters.setAcsSignedContent(ares.optString("acsSignedContent"));
-            challengeParameters.set3DSServerTransactionID(ares.optString("threeDSServerTransID"));
-            challengeParameters.setAcsTransactionID(ares.optString("acsTransID"));
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mTransaction.doChallenge(activity,
-                            challengeParameters,
-                            PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mPaymentIntent),
-                            mMaxTimeout);
-                }
-            });
+            if (result.ares != null) {
+                final StripeChallengeParameters challengeParameters =
+                        new StripeChallengeParameters();
+                challengeParameters.setAcsSignedContent(result.ares.acsSignedContent);
+                challengeParameters.set3DSServerTransactionID(result.ares.threeDSServerTransId);
+                challengeParameters.setAcsTransactionID(result.ares.acsTransId);
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTransaction.doChallenge(activity,
+                                challengeParameters,
+                                PaymentAuth3ds2ChallengeStatusReceiver
+                                        .create(activity, mPaymentIntent),
+                                mMaxTimeout);
+                    }
+                });
+            }
         }
 
         @Override

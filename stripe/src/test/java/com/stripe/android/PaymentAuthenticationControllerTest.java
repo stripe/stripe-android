@@ -6,12 +6,12 @@ import android.content.Intent;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.PaymentIntentFixtures;
+import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +72,7 @@ public class PaymentAuthenticationControllerTest {
         verify(mThreeDs2Service).createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false);
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
-                ArgumentMatchers.<ApiResultCallback<JSONObject>>any());
+                ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
     }
 
     @Test
