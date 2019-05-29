@@ -1,5 +1,7 @@
 package com.stripe.android.model.wallets;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -15,7 +17,7 @@ import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
-public abstract class Wallet extends StripeJsonModel {
+public abstract class Wallet extends StripeJsonModel implements Parcelable {
     static final String FIELD_DYANMIC_LAST4 = "dynamic_last4";
     static final String FIELD_TYPE = "type";
 
@@ -25,6 +27,22 @@ public abstract class Wallet extends StripeJsonModel {
     Wallet(@NonNull Type walletType, @NonNull Builder builder) {
         this.walletType = walletType;
         dynamicLast4 = builder.mDynamicLast4;
+    }
+
+    Wallet(@NonNull Parcel in) {
+        dynamicLast4 = in.readString();
+        walletType = Type.fromCode(in.readString());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(dynamicLast4);
+        dest.writeString(walletType.code);
     }
 
     @NonNull
@@ -45,8 +63,24 @@ public abstract class Wallet extends StripeJsonModel {
             wallet.put(FIELD_TYPE, walletType.code);
             wallet.put(FIELD_DYANMIC_LAST4, dynamicLast4);
             wallet.put(walletType.code, getWalletTypeJson());
-        } catch (JSONException ignore) {}
+        } catch (JSONException ignore) {
+        }
         return wallet;
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(dynamicLast4, walletType);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof Wallet && typedEquals((Wallet) obj));
+    }
+
+    private boolean typedEquals(@NonNull Wallet wallet) {
+        return ObjectUtils.equals(dynamicLast4, wallet.dynamicLast4)
+                && ObjectUtils.equals(walletType, wallet.walletType);
     }
 
     @NonNull
@@ -94,14 +128,14 @@ public abstract class Wallet extends StripeJsonModel {
         }
     }
 
-    public static class Address extends StripeJsonModel {
+    public static class Address extends StripeJsonModel implements Parcelable {
         static final String FIELD_CITY = "city";
         static final String FIELD_COUNTRY = "country";
         static final String FIELD_LINE1 = "line1";
         static final String FIELD_LINE2 = "line2";
         static final String FIELD_POSTAL_CODE = "postal_code";
         static final String FIELD_STATE = "state";
-        
+
         @Nullable public final String city;
         @Nullable public final String country;
         @Nullable public final String line1;
@@ -117,6 +151,43 @@ public abstract class Wallet extends StripeJsonModel {
             postalCode = builder.mPostalCode;
             state = builder.mState;
         }
+
+        private Address(@NonNull Parcel in) {
+            city = in.readString();
+            country = in.readString();
+            line1 = in.readString();
+            line2 = in.readString();
+            postalCode = in.readString();
+            state = in.readString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(city);
+            dest.writeString(country);
+            dest.writeString(line1);
+            dest.writeString(line2);
+            dest.writeString(postalCode);
+            dest.writeString(state);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<Address> CREATOR = new Parcelable.Creator<Address>() {
+            @Override
+            public Address createFromParcel(@NonNull Parcel in) {
+                return new Address(in);
+            }
+
+            @Override
+            public Address[] newArray(int size) {
+                return new Address[size];
+            }
+        };
 
         @NonNull
         @Override
@@ -142,7 +213,8 @@ public abstract class Wallet extends StripeJsonModel {
                 address.put(FIELD_LINE2, line2);
                 address.put(FIELD_POSTAL_CODE, postalCode);
                 address.put(FIELD_STATE, state);
-            } catch (JSONException ignore) {}
+            } catch (JSONException ignore) {
+            }
             return address;
         }
 

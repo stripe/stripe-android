@@ -1,5 +1,7 @@
 package com.stripe.android.model.wallets;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.json.JSONObject;
@@ -10,6 +12,10 @@ import java.util.Map;
 public final class GooglePayWallet extends Wallet {
     private GooglePayWallet(@NonNull Builder builder) {
         super(Type.GooglePay, builder);
+    }
+
+    private GooglePayWallet(@NonNull Parcel in) {
+        super(in);
     }
 
     @NonNull
@@ -36,4 +42,18 @@ public final class GooglePayWallet extends Wallet {
             return new GooglePayWallet(this);
         }
     }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<GooglePayWallet> CREATOR =
+            new Parcelable.Creator<GooglePayWallet>() {
+                @Override
+                public GooglePayWallet createFromParcel(@NonNull Parcel in) {
+                    return new GooglePayWallet(in);
+                }
+
+                @Override
+                public GooglePayWallet[] newArray(int size) {
+                    return new GooglePayWallet[size];
+                }
+            };
 }
