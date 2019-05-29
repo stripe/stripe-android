@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -27,20 +28,20 @@ public final class Stripe3ds2AuthResult {
     private static final String FIELD_SOURCE = "source";
     private static final String FIELD_STATE = "state";
 
-    @Nullable public final String id;
-    @Nullable public final String objectType;
+    @NonNull public final String id;
+    @NonNull public final String objectType;
     @Nullable public final Ares ares;
-    @Nullable public final Long created;
-    @Nullable public final String source;
+    @NonNull public final Long created;
+    @NonNull public final String source;
     @Nullable public final String state;
-    @Nullable public final Boolean liveMode;
+    @NonNull public final Boolean liveMode;
     @Nullable public final ThreeDS2Error error;
 
 
-    private Stripe3ds2AuthResult(@Nullable String id, @Nullable String objectType,
-                                 @Nullable Ares ares, @Nullable Long created,
-                                 @Nullable String source, @Nullable String state,
-                                 @Nullable Boolean liveMode, @Nullable ThreeDS2Error error) {
+    private Stripe3ds2AuthResult(@NonNull String id, @NonNull String objectType,
+                                 @Nullable Ares ares, @NonNull Long created,
+                                 @NonNull String source, @Nullable String state,
+                                 @NonNull Boolean liveMode, @Nullable ThreeDS2Error error) {
         this.id = id;
         this.objectType = objectType;
         this.ares = ares;
@@ -52,13 +53,13 @@ public final class Stripe3ds2AuthResult {
     }
 
     @NonNull
-    static Stripe3ds2AuthResult fromJson(@NonNull JSONObject authResultJson) {
+    static Stripe3ds2AuthResult fromJson(@NonNull JSONObject authResultJson) throws JSONException {
         return new Stripe3ds2AuthResult.Builder()
-                .setId(authResultJson.optString(FIELD_ID))
-                .setObjectType(authResultJson.optString(FIELD_OBJECT))
-                .setCreated(authResultJson.optLong(FIELD_CREATED))
-                .setLiveMode(authResultJson.optBoolean(FIELD_LIVEMODE))
-                .setSource(authResultJson.optString(FIELD_SOURCE))
+                .setId(authResultJson.getString(FIELD_ID))
+                .setObjectType(authResultJson.getString(FIELD_OBJECT))
+                .setCreated(authResultJson.getLong(FIELD_CREATED))
+                .setLiveMode(authResultJson.getBoolean(FIELD_LIVEMODE))
+                .setSource(authResultJson.getString(FIELD_SOURCE))
                 .setState(authResultJson.optString(FIELD_STATE))
                 .setAres(Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES)))
                 .setError(authResultJson.isNull(FIELD_ERROR) ? null :
@@ -90,23 +91,23 @@ public final class Stripe3ds2AuthResult {
     }
 
     static class Builder {
-        @Nullable private String mId;
-        @Nullable private String mObjectType;
+        private String mId;
+        private String mObjectType;
         @Nullable private Stripe3ds2AuthResult.Ares mAres;
-        @Nullable private Long mCreated;
-        @Nullable private String mSource;
+        private Long mCreated;
+        private String mSource;
         @Nullable private String mState;
-        @Nullable private Boolean mLiveMode;
+        private Boolean mLiveMode;
         @Nullable private ThreeDS2Error mError;
 
         @NonNull
-        Builder setId(@Nullable String id) {
+        Builder setId(@NonNull String id) {
             mId = id;
             return this;
         }
 
         @NonNull
-        Builder setObjectType(@Nullable String objectType) {
+        Builder setObjectType(@NonNull String objectType) {
             mObjectType = objectType;
             return this;
         }
@@ -118,13 +119,13 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        Builder setCreated(@Nullable Long created) {
+        Builder setCreated(@NonNull Long created) {
             mCreated = created;
             return this;
         }
 
         @NonNull
-        Builder setSource(@Nullable String source) {
+        Builder setSource(@NonNull String source) {
             mSource = source;
             return this;
         }
@@ -136,7 +137,7 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        Builder setLiveMode(@Nullable Boolean liveMode) {
+        Builder setLiveMode(@NonNull Boolean liveMode) {
             mLiveMode = liveMode;
             return this;
         }
@@ -199,17 +200,17 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        static Ares fromJson(@NonNull JSONObject aresJson) {
+        static Ares fromJson(@NonNull JSONObject aresJson) throws JSONException {
             return new Ares.Builder()
-                    .setThreeDSServerTransId(optString(aresJson, FIELD_THREE_DS_SERVER_TRANS_ID))
+                    .setThreeDSServerTransId(aresJson.getString(FIELD_THREE_DS_SERVER_TRANS_ID))
                     .setAcsChallengeMandated(optString(aresJson, FIELD_ACS_CHALLENGE_MANDATED))
                     .setAcsSignedContent(optString(aresJson, FIELD_ACS_SIGNED_CONTENT))
-                    .setAcsTransId(optString(aresJson, FIELD_ACS_TRANS_ID))
+                    .setAcsTransId(aresJson.getString(FIELD_ACS_TRANS_ID))
                     .setAcsUrl(optString(aresJson, FIELD_ACS_URL))
                     .setAuthenticationType(optString(aresJson, FIELD_AUTHENTICATION_TYPE))
                     .setCardholderInfo(optString(aresJson, FIELD_CARDHOLDER_INFO))
-                    .setMessageType(optString(aresJson, FIELD_MESSAGE_TYPE))
-                    .setMessageVersion(optString(aresJson, FIELD_MESSAGE_VERSION))
+                    .setMessageType(aresJson.getString(FIELD_MESSAGE_TYPE))
+                    .setMessageVersion(aresJson.getString(FIELD_MESSAGE_VERSION))
                     .setSdkTransId(optString(aresJson, FIELD_SDK_TRANS_ID))
                     .setMessageExtension(MessageExtension.fromJson(
                             aresJson.optJSONArray(FIELD_MESSAGE_EXTENSION)))
@@ -364,7 +365,8 @@ public final class Stripe3ds2AuthResult {
         }
 
         @Nullable
-        static List<MessageExtension> fromJson(@Nullable JSONArray messageExtensionsJson) {
+        static List<MessageExtension> fromJson(@Nullable JSONArray messageExtensionsJson)
+                throws JSONException {
             if (messageExtensionsJson == null) {
                 return null;
             }
@@ -381,14 +383,15 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        private static MessageExtension fromJson(@NonNull JSONObject messageExtensionJson) {
+        private static MessageExtension fromJson(@NonNull JSONObject messageExtensionJson)
+                throws JSONException {
             final Map<String, String> data = new HashMap<>();
             final JSONObject dataJson = messageExtensionJson.optJSONObject(FIELD_DATA);
             if (dataJson != null) {
                 final Iterator<String> keys = dataJson.keys();
                 while (keys.hasNext()) {
                     final String key = keys.next();
-                    data.put(key, dataJson.optString(key));
+                    data.put(key, dataJson.getString(key));
                 }
             }
 
@@ -502,18 +505,18 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        static ThreeDS2Error fromJson(@NonNull JSONObject errorJson) {
+        static ThreeDS2Error fromJson(@NonNull JSONObject errorJson) throws JSONException {
             return new ThreeDS2Error.Builder()
-                    .setThreeDSServerTransId(optString(errorJson, FIELD_THREE_DS_SERVER_TRANS_ID))
+                    .setThreeDSServerTransId(errorJson.getString(FIELD_THREE_DS_SERVER_TRANS_ID))
                     .setAcsTransId(optString(errorJson, FIELD_ACS_TRANS_ID))
                     .setDsTransId(optString(errorJson, FIELD_DS_TRANS_ID))
-                    .setErrorCode(optString(errorJson, FIELD_ERROR_CODE))
-                    .setErrorComponent(optString(errorJson, FIELD_ERROR_COMPONENT))
-                    .setErrorDescription(optString(errorJson, FIELD_ERROR_DESCRIPTION))
-                    .setErrorDetail(optString(errorJson, FIELD_ERROR_DETAIL))
+                    .setErrorCode(errorJson.getString(FIELD_ERROR_CODE))
+                    .setErrorComponent(errorJson.getString(FIELD_ERROR_COMPONENT))
+                    .setErrorDescription(errorJson.getString(FIELD_ERROR_DESCRIPTION))
+                    .setErrorDetail(errorJson.getString(FIELD_ERROR_DETAIL))
                     .setErrorMessageType(optString(errorJson, FIELD_ERROR_MESSAGE_TYPE))
-                    .setMessageType(optString(errorJson, FIELD_MESSAGE_TYPE))
-                    .setMessageVersion(optString(errorJson, FIELD_MESSAGE_VERSION))
+                    .setMessageType(errorJson.getString(FIELD_MESSAGE_TYPE))
+                    .setMessageVersion(errorJson.getString(FIELD_MESSAGE_VERSION))
                     .setSdkTransId(optString(errorJson, FIELD_SDK_TRANS_ID))
                     .build();
         }
