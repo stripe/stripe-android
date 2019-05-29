@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.PaymentMethodsActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
 import static com.stripe.android.CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT;
@@ -49,6 +51,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,6 +68,8 @@ public class PaymentSessionTest {
     @Mock private StripeApiHandler mApiHandler;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
+    @Mock private CustomerSession mCustomerSession;
+    @Mock private PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
@@ -319,6 +324,25 @@ public class PaymentSessionTest {
                 secondPaymentSessionData.getCartTotal());
         assertEquals(firstPaymentSessionData.getPaymentMethod(),
                 secondPaymentSessionData.getPaymentMethod());
+    }
+
+    @Test
+    public void handlePaymentData_withInvalidRequestCode_aborts() {
+        final PaymentSession paymentSession = new PaymentSession(mActivity, mCustomerSession,
+                mPaymentMethodsActivityStarter, new PaymentSessionData());
+        assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, new Intent()));
+        verify(mCustomerSession, never()).retrieveCurrentCustomer(
+                ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
+    }
+
+    @Test
+    public void handlePaymentData_withValidRequestCodeAndCanceledResult_retrievesCustomer() {
+        final PaymentSession paymentSession = new PaymentSession(mActivity, mCustomerSession,
+                mPaymentMethodsActivityStarter, new PaymentSessionData());
+        assertFalse(paymentSession.handlePaymentData(PaymentSession.PAYMENT_METHOD_REQUEST,
+                RESULT_CANCELED, new Intent()));
+        verify(mCustomerSession).retrieveCurrentCustomer(
+                ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
     }
 
     @NonNull
