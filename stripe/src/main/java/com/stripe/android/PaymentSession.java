@@ -89,9 +89,8 @@ public class PaymentSession {
         } else if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case PAYMENT_METHOD_REQUEST: {
-                    final PaymentMethod paymentMethod = PaymentMethod.fromString(
-                                    data.getStringExtra(
-                                            PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT));
+                    final PaymentMethod paymentMethod =
+                            data.getParcelableExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
                     if (paymentMethod != null) {
                         mPaymentSessionData.setPaymentMethod(paymentMethod);
                         mPaymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);

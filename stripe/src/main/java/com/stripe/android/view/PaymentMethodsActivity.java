@@ -220,8 +220,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        final Intent intent = new Intent().putExtra(EXTRA_SELECTED_PAYMENT,
-                paymentMethod.toJson().toString());
+        final Intent intent = new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod);
         setResult(RESULT_OK, intent);
         finish();
     }

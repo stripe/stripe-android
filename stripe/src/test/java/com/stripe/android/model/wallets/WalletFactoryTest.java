@@ -1,12 +1,18 @@
 package com.stripe.android.model.wallets;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(RobolectricTestRunner.class)
 public class WalletFactoryTest {
     private static final String VISA_WALLET_JSON = "{\n" +
             "\t\"type\": \"visa_checkout\",\n" +
@@ -130,5 +136,30 @@ public class WalletFactoryTest {
         assertTrue(wallet instanceof SamsungPayWallet);
         final SamsungPayWallet samsungPayWallet = (SamsungPayWallet) wallet;
         assertEquals(samsungPayWallet.toJson().toString(), walletJson.toString());
+    }
+
+    @Test
+    public void testParcelable_shouldBeEqualAfterParcel() throws JSONException {
+        final WalletFactory walletFactory = new WalletFactory();
+
+        final SamsungPayWallet samsungPayWallet =
+                (SamsungPayWallet) walletFactory.create(new JSONObject(SAMSUNG_PAY_WALLET_JSON));
+        assertNotNull(samsungPayWallet);
+        final Parcel samsungWalletParcel = Parcel.obtain();
+        samsungPayWallet.writeToParcel(samsungWalletParcel, samsungPayWallet.describeContents());
+        samsungWalletParcel.setDataPosition(0);
+        final SamsungPayWallet parcelSamsungWallet =
+                SamsungPayWallet.CREATOR.createFromParcel(samsungWalletParcel);
+        assertEquals(samsungPayWallet, parcelSamsungWallet);
+
+        final VisaCheckoutWallet visaWallet =
+                (VisaCheckoutWallet) walletFactory.create(new JSONObject(VISA_WALLET_JSON));
+        assertNotNull(visaWallet);
+        final Parcel visaParcel = Parcel.obtain();
+        visaWallet.writeToParcel(visaParcel, visaWallet.describeContents());
+        visaParcel.setDataPosition(0);
+        final VisaCheckoutWallet parcelVisaWallet =
+                VisaCheckoutWallet.CREATOR.createFromParcel(visaParcel);
+        assertEquals(visaWallet, parcelVisaWallet);
     }
 }

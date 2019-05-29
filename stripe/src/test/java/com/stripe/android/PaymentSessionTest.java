@@ -168,7 +168,7 @@ public class PaymentSessionTest {
         boolean handled = paymentSession.handlePaymentData(
                 PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK,
                 new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
-                        PaymentMethodTest.RAW_CARD_JSON));
+                        PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON)));
 
         assertTrue(handled);
 

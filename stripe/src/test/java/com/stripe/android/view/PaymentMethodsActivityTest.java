@@ -229,7 +229,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertTrue(intent.hasExtra(EXTRA_SELECTED_PAYMENT));
 
         final PaymentMethod selectedPaymentMethod =
-                PaymentMethod.fromString(intent.getStringExtra(EXTRA_SELECTED_PAYMENT));
+                intent.getParcelableExtra(EXTRA_SELECTED_PAYMENT);
         assertNotNull(selectedPaymentMethod);
         assertEquals(mPaymentMethods.get(0), selectedPaymentMethod);
     }

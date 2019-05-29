@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import org.json.JSONObject;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.wallets.Wallet.FIELD_DYANMIC_LAST4;
+import static com.stripe.android.model.wallets.Wallet.FIELD_DYNAMIC_LAST4;
 
 public class WalletFactory {
 
@@ -64,7 +64,7 @@ public class WalletFactory {
             }
         }
 
-        final String dynamicLast4 = optString(walletJson, FIELD_DYANMIC_LAST4);
+        final String dynamicLast4 = optString(walletJson, FIELD_DYNAMIC_LAST4);
         return walletBuilder
                 .setDynamicLast4(dynamicLast4)
                 .build();

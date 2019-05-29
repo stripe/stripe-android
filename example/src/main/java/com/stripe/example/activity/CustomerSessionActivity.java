@@ -63,9 +63,8 @@ public class CustomerSessionActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == RESULT_OK) {
-            final String selectedPaymentMethod =
-                    data.getStringExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
-            final PaymentMethod paymentMethod = PaymentMethod.fromString(selectedPaymentMethod);
+            final PaymentMethod paymentMethod =
+                    data.getParcelableExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
 
             if (paymentMethod != null && paymentMethod.card != null) {
                 mSelectedSourceTextView.setText(buildCardString(paymentMethod.card));

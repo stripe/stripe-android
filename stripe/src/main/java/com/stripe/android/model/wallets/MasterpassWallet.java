@@ -1,5 +1,7 @@
 package com.stripe.android.model.wallets;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -57,7 +59,8 @@ public final class MasterpassWallet extends Wallet {
             wallet.put(FIELD_NAME, name);
             wallet.put(FIELD_SHIPPING_ADDRESS,
                     shippingAddress != null ? shippingAddress.toJson() : null);
-        } catch (JSONException ignore) {}
+        } catch (JSONException ignore) {
+        }
         return wallet;
     }
 
@@ -123,4 +126,34 @@ public final class MasterpassWallet extends Wallet {
             return new MasterpassWallet(this);
         }
     }
+
+    private MasterpassWallet(@NonNull Parcel in) {
+        super(in);
+        billingAddress = in.readParcelable(Address.class.getClassLoader());
+        email = in.readString();
+        name = in.readString();
+        shippingAddress = in.readParcelable(Address.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeParcelable(billingAddress, flags);
+        dest.writeString(email);
+        dest.writeString(name);
+        dest.writeParcelable(shippingAddress, flags);
+    }
+
+    public static final Parcelable.Creator<MasterpassWallet> CREATOR =
+            new Parcelable.Creator<MasterpassWallet>() {
+                @Override
+                public MasterpassWallet createFromParcel(@NonNull Parcel in) {
+                    return new MasterpassWallet(in);
+                }
+
+                @Override
+                public MasterpassWallet[] newArray(int size) {
+                    return new MasterpassWallet[size];
+                }
+            };
 }

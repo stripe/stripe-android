@@ -1,5 +1,7 @@
 package com.stripe.android.model.wallets;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.json.JSONObject;
@@ -10,6 +12,10 @@ import java.util.Map;
 public final class SamsungPayWallet extends Wallet {
     private SamsungPayWallet(@NonNull Builder builder) {
         super(Type.SamsungPay, builder);
+    }
+
+    private SamsungPayWallet(@NonNull Parcel in) {
+        super(in);
     }
 
     @NonNull
@@ -36,4 +42,17 @@ public final class SamsungPayWallet extends Wallet {
             return new SamsungPayWallet(this);
         }
     }
+
+    public static final Parcelable.Creator<SamsungPayWallet> CREATOR =
+            new Parcelable.Creator<SamsungPayWallet>() {
+                @Override
+                public SamsungPayWallet createFromParcel(@NonNull Parcel in) {
+                    return new SamsungPayWallet(in);
+                }
+
+                @Override
+                public SamsungPayWallet[] newArray(int size) {
+                    return new SamsungPayWallet[size];
+                }
+            };
 }
