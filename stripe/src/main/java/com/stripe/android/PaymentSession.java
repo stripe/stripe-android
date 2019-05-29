@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
@@ -46,10 +47,21 @@ public class PaymentSession {
      *                     back to this session.
      */
     public PaymentSession(@NonNull Activity hostActivity) {
+        this(hostActivity,
+                CustomerSession.getInstance(),
+                new PaymentMethodsActivityStarter(hostActivity),
+                new PaymentSessionData());
+    }
+
+    @VisibleForTesting
+    PaymentSession(@NonNull Activity hostActivity,
+                   @NonNull CustomerSession customerSession,
+                   @NonNull PaymentMethodsActivityStarter paymentMethodsActivityStarter,
+                   @NonNull PaymentSessionData paymentSessionData) {
         mHostActivity = hostActivity;
-        mCustomerSession = CustomerSession.getInstance();
-        mPaymentMethodsActivityStarter = new PaymentMethodsActivityStarter(hostActivity);
-        mPaymentSessionData = new PaymentSessionData();
+        mCustomerSession = customerSession;
+        mPaymentMethodsActivityStarter = paymentMethodsActivityStarter;
+        mPaymentSessionData = paymentSessionData;
     }
 
     /**
@@ -83,6 +95,11 @@ public class PaymentSession {
      * otherwise {@code false}
      */
     public boolean handlePaymentData(int requestCode, int resultCode, @NonNull Intent data) {
+        if (requestCode != PAYMENT_METHOD_REQUEST &&
+                requestCode != PAYMENT_SHIPPING_DETAILS_REQUEST) {
+            return false;
+        }
+
         if (resultCode == Activity.RESULT_CANCELED) {
             fetchCustomer();
             return false;
