@@ -53,7 +53,7 @@ public final class Stripe3ds2AuthResult {
     }
 
     @NonNull
-    static Stripe3ds2AuthResult fromJson(@NonNull JSONObject authResultJson) throws JSONException {
+    public static Stripe3ds2AuthResult fromJson(@NonNull JSONObject authResultJson) throws JSONException {
         return new Stripe3ds2AuthResult.Builder()
                 .setId(authResultJson.getString(FIELD_ID))
                 .setObjectType(authResultJson.getString(FIELD_OBJECT))

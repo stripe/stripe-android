@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
+import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Token;
 
 import org.json.JSONArray;
@@ -660,7 +661,7 @@ class StripeApiHandler {
 
     @NonNull
     @VisibleForTesting
-    JSONObject start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+    Stripe3ds2AuthResult start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
                                        @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException, JSONException {
@@ -671,12 +672,12 @@ class StripeApiHandler {
                         RequestOptions.createForApi(publishableKey))
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
-        return new JSONObject(response.getResponseBody());
+        return Stripe3ds2AuthResult.fromJson(new JSONObject(response.getResponseBody()));
     }
 
     void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
                        @NonNull String publishableKey,
-                       @NonNull ApiResultCallback<JSONObject> callback) {
+                       @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
         new Start3ds2AuthTask(this, authParams, publishableKey, callback)
                 .execute();
     }
@@ -1065,7 +1066,7 @@ class StripeApiHandler {
                         RequestOptions.createForFingerprinting(guid)));
     }
 
-    private static final class Start3ds2AuthTask extends ApiOperation<JSONObject> {
+    private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Stripe3ds2AuthParams mParams;
         @NonNull private final String mPublishableKey;
@@ -1073,7 +1074,7 @@ class StripeApiHandler {
         private Start3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
                                   @NonNull Stripe3ds2AuthParams params,
                                   @NonNull String publishableKey,
-                                  @NonNull ApiResultCallback<JSONObject> callback) {
+                                  @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mParams = params;
@@ -1082,7 +1083,7 @@ class StripeApiHandler {
 
         @NonNull
         @Override
-        JSONObject getResult() throws StripeException, JSONException {
+        Stripe3ds2AuthResult getResult() throws StripeException, JSONException {
             return mApiHandler.start3ds2Auth(mParams, mPublishableKey);
         }
     }
