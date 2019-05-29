@@ -177,17 +177,18 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
         }
 
         @SuppressWarnings("unused")
-        public static final Parcelable.Creator<Address> CREATOR = new Parcelable.Creator<Address>() {
-            @Override
-            public Address createFromParcel(@NonNull Parcel in) {
-                return new Address(in);
-            }
+        public static final Parcelable.Creator<Address> CREATOR =
+                new Parcelable.Creator<Address>() {
+                    @Override
+                    public Address createFromParcel(@NonNull Parcel in) {
+                        return new Address(in);
+                    }
 
-            @Override
-            public Address[] newArray(int size) {
-                return new Address[size];
-            }
-        };
+                    @Override
+                    public Address[] newArray(int size) {
+                        return new Address[size];
+                    }
+                };
 
         @NonNull
         @Override

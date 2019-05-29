@@ -17,6 +17,7 @@ public final class SamsungPayWallet extends Wallet {
     private SamsungPayWallet(@NonNull Parcel in) {
         super(in);
     }
+
     @NonNull
     @Override
     Map<String, Object> getWalletTypeMap() {

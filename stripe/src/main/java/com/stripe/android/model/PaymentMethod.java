@@ -251,18 +251,19 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
     }
 
     @SuppressWarnings("unused")
-    public static final Parcelable.Creator<PaymentMethod> CREATOR = new Parcelable.Creator<PaymentMethod>() {
-        @NonNull
-        @Override
-        public PaymentMethod createFromParcel(@NonNull Parcel in) {
-            return new PaymentMethod(in);
-        }
+    public static final Parcelable.Creator<PaymentMethod> CREATOR =
+            new Parcelable.Creator<PaymentMethod>() {
+                @NonNull
+                @Override
+                public PaymentMethod createFromParcel(@NonNull Parcel in) {
+                    return new PaymentMethod(in);
+                }
 
-        @Override
-        public PaymentMethod[] newArray(int size) {
-            return new PaymentMethod[size];
-        }
-    };
+                @Override
+                public PaymentMethod[] newArray(int size) {
+                    return new PaymentMethod[size];
+                }
+            };
 
 
     public static final class Builder {
@@ -382,17 +383,18 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
 
         @SuppressWarnings("unused")
-        public static final Parcelable.Creator<BillingDetails> CREATOR = new Parcelable.Creator<BillingDetails>() {
-            @Override
-            public BillingDetails createFromParcel(@NonNull Parcel in) {
-                return new BillingDetails(in);
-            }
+        public static final Parcelable.Creator<BillingDetails> CREATOR =
+                new Parcelable.Creator<BillingDetails>() {
+                    @Override
+                    public BillingDetails createFromParcel(@NonNull Parcel in) {
+                        return new BillingDetails(in);
+                    }
 
-            @Override
-            public BillingDetails[] newArray(int size) {
-                return new BillingDetails[size];
-            }
-        };
+                    @Override
+                    public BillingDetails[] newArray(int size) {
+                        return new BillingDetails[size];
+                    }
+                };
 
         @NonNull
         @Override
@@ -795,17 +797,18 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
 
             @SuppressWarnings("unused")
-            public static final Parcelable.Creator<Checks> CREATOR = new Parcelable.Creator<Checks>() {
-                @Override
-                public Checks createFromParcel(@NonNull Parcel in) {
-                    return new Checks(in);
-                }
+            public static final Parcelable.Creator<Checks> CREATOR =
+                    new Parcelable.Creator<Checks>() {
+                        @Override
+                        public Checks createFromParcel(@NonNull Parcel in) {
+                            return new Checks(in);
+                        }
 
-                @Override
-                public Checks[] newArray(int size) {
-                    return new Checks[size];
-                }
-            };
+                        @Override
+                        public Checks[] newArray(int size) {
+                            return new Checks[size];
+                        }
+                    };
 
             @NonNull
             @Override
@@ -914,17 +917,18 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
 
             @SuppressWarnings("unused")
-            public static final Parcelable.Creator<ThreeDSecureUsage> CREATOR = new Parcelable.Creator<ThreeDSecureUsage>() {
-                @Override
-                public ThreeDSecureUsage createFromParcel(@NonNull Parcel in) {
-                    return new ThreeDSecureUsage(in);
-                }
+            public static final Parcelable.Creator<ThreeDSecureUsage> CREATOR =
+                    new Parcelable.Creator<ThreeDSecureUsage>() {
+                        @Override
+                        public ThreeDSecureUsage createFromParcel(@NonNull Parcel in) {
+                            return new ThreeDSecureUsage(in);
+                        }
 
-                @Override
-                public ThreeDSecureUsage[] newArray(int size) {
-                    return new ThreeDSecureUsage[size];
-                }
-            };
+                        @Override
+                        public ThreeDSecureUsage[] newArray(int size) {
+                            return new ThreeDSecureUsage[size];
+                        }
+                    };
 
             @NonNull
             @Override
@@ -1001,17 +1005,18 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
 
         @SuppressWarnings("unused")
-        public static final Parcelable.Creator<CardPresent> CREATOR = new Parcelable.Creator<CardPresent>() {
-            @Override
-            public CardPresent createFromParcel(@NonNull Parcel in) {
-                return new CardPresent(in);
-            }
+        public static final Parcelable.Creator<CardPresent> CREATOR =
+                new Parcelable.Creator<CardPresent>() {
+                    @Override
+                    public CardPresent createFromParcel(@NonNull Parcel in) {
+                        return new CardPresent(in);
+                    }
 
-            @Override
-            public CardPresent[] newArray(int size) {
-                return new CardPresent[size];
-            }
-        };
+                    @Override
+                    public CardPresent[] newArray(int size) {
+                        return new CardPresent[size];
+                    }
+                };
 
         @NonNull
         @Override
