@@ -14,8 +14,8 @@ import com.stripe.android.utils.ObjectUtils;
  * See <a href="https://stripe.com/docs/upgrades">https://stripe.com/docs/upgrades</a> for latest
  * API changes.
  */
-class ApiVersion {
-    static final String DEFAULT_API_VERSION = "2019-03-14";
+final class ApiVersion {
+    static final String DEFAULT_API_VERSION = "2019-05-16";
 
     @NonNull private static final ApiVersion DEFAULT_INSTANCE = new ApiVersion(DEFAULT_API_VERSION);
 
