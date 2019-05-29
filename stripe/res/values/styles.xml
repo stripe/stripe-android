@@ -12,6 +12,12 @@
     <style name="StripeToolBarStyle" parent="@style/ThemeOverlay.AppCompat">
         <item name="colorControlNormal">?attr/titleTextColor</item>
         <item name="actionMenuTextColor">?attr/titleTextColor</item>
+        <item name="android:actionButtonStyle">@style/StripeActionButtonStyle</item>
+    </style>
+
+    <style name="StripeActionButtonStyle" parent="Widget.AppCompat.ActionButton">
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
     </style>
 
     <style name="StripeErrorTextStyle">
