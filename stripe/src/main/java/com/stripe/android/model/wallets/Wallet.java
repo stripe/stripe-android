@@ -18,7 +18,7 @@ import java.util.Map;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 public abstract class Wallet extends StripeJsonModel implements Parcelable {
-    static final String FIELD_DYANMIC_LAST4 = "dynamic_last4";
+    static final String FIELD_DYNAMIC_LAST4 = "dynamic_last4";
     static final String FIELD_TYPE = "type";
 
     @Nullable private final String dynamicLast4;
@@ -50,7 +50,7 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
     public final Map<String, Object> toMap() {
         final AbstractMap<String, Object> wallet = new HashMap<>();
         wallet.put(FIELD_TYPE, walletType.code);
-        wallet.put(FIELD_DYANMIC_LAST4, dynamicLast4);
+        wallet.put(FIELD_DYNAMIC_LAST4, dynamicLast4);
         wallet.put(walletType.code, getWalletTypeMap());
         return wallet;
     }
@@ -61,7 +61,7 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
         final JSONObject wallet = new JSONObject();
         try {
             wallet.put(FIELD_TYPE, walletType.code);
-            wallet.put(FIELD_DYANMIC_LAST4, dynamicLast4);
+            wallet.put(FIELD_DYNAMIC_LAST4, dynamicLast4);
             wallet.put(walletType.code, getWalletTypeJson());
         } catch (JSONException ignore) {
         }
