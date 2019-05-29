@@ -352,8 +352,8 @@ public final class Stripe3ds2AuthResult {
         public final boolean criticalityIndicator;
 
         // A unique identifier for the extension.
-        // Note: Payment System Registered Application Provider Identifier (RID) is required as prefix
-        // of the ID.
+        // Note: Payment System Registered Application Provider Identifier (RID) is required as
+        // prefix of the ID.
         @NonNull public final String id;
 
         // The data carried in the extension.
