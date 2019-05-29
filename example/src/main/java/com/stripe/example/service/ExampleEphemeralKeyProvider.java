@@ -41,9 +41,9 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        response -> {
+                        responseBody -> {
                             try {
-                                final String rawKey = response.string();
+                                final String rawKey = responseBody.string();
                                 keyUpdateListener.onKeyUpdate(rawKey);
                                 mProgressListener.onStringResponse(rawKey);
                             } catch (IOException ignored) {
@@ -54,6 +54,6 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
     }
 
     public interface ProgressListener {
-        void onStringResponse(@NonNull String string);
+        void onStringResponse(@NonNull String response);
     }
 }
