@@ -34,14 +34,14 @@ public final class Stripe3ds2AuthResult {
     @NonNull public final Long created;
     @NonNull public final String source;
     @Nullable public final String state;
-    @NonNull public final Boolean liveMode;
+    public final boolean liveMode;
     @Nullable public final ThreeDS2Error error;
 
 
     private Stripe3ds2AuthResult(@NonNull String id, @NonNull String objectType,
                                  @Nullable Ares ares, @NonNull Long created,
                                  @NonNull String source, @Nullable String state,
-                                 @NonNull Boolean liveMode, @Nullable ThreeDS2Error error) {
+                                 boolean liveMode, @Nullable ThreeDS2Error error) {
         this.id = id;
         this.objectType = objectType;
         this.ares = ares;
@@ -86,7 +86,7 @@ public final class Stripe3ds2AuthResult {
                 && Objects.equals(created, obj.created)
                 && Objects.equals(source, obj.source)
                 && Objects.equals(state, obj.state)
-                && Objects.equals(liveMode, obj.liveMode)
+                && liveMode == obj.liveMode
                 && Objects.equals(error, obj.error);
     }
 
@@ -97,7 +97,7 @@ public final class Stripe3ds2AuthResult {
         private Long mCreated;
         private String mSource;
         @Nullable private String mState;
-        private Boolean mLiveMode;
+        private boolean mLiveMode;
         @Nullable private ThreeDS2Error mError;
 
         @NonNull
@@ -137,7 +137,7 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        Builder setLiveMode(@NonNull Boolean liveMode) {
+        Builder setLiveMode(boolean liveMode) {
             mLiveMode = liveMode;
             return this;
         }
