@@ -1,8 +1,12 @@
 package com.stripe.android.model;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(RobolectricTestRunner.class)
 public class PaymentMethodTest {
     public static final String RAW_CARD_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +
@@ -178,5 +183,35 @@ public class PaymentMethodTest {
         assertEquals(1, billingDetails.size());
         assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_ADDRESS));
         assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_NAME));
+    }
+
+    @Test
+    public void testParcelable_shouldBeEqualAfterParcel() {
+        final Map<String, String> metadata = new HashMap<>(2);
+        metadata.put("meta", "data");
+        metadata.put("meta2", "data2");
+        final PaymentMethod paymentMethod = new PaymentMethod.Builder()
+                .setBillingDetails(BILLING_DETAILS)
+                .setCard(CARD)
+                .setCardPresent(PaymentMethod.CardPresent.EMPTY)
+                .setCreated(1550757934255L)
+                .setCustomerId("cus_AQsHpvKfKwJDrF")
+                .setId("pm_123456789")
+                .setType("card")
+                .setLiveMode(true)
+                .setMetadata(metadata)
+                .setIdeal(new PaymentMethod.Ideal.Builder()
+                        .setBank("my bank")
+                        .setBankIdentifierCode("bank id")
+                        .build())
+                .build();
+
+        final Parcel parcel = Parcel.obtain();
+        paymentMethod.writeToParcel(parcel, paymentMethod.describeContents());
+        parcel.setDataPosition(0);
+
+        final PaymentMethod parcelPaymentMethod = PaymentMethod.CREATOR.createFromParcel(parcel);
+
+        assertEquals(paymentMethod, parcelPaymentMethod);
     }
 }

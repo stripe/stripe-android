@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
@@ -31,7 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */
-public class PaymentMethod extends StripeJsonModel {
+public class PaymentMethod extends StripeJsonModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";
@@ -197,6 +199,72 @@ public class PaymentMethod extends StripeJsonModel {
                 ideal, customerId);
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        if (created == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeLong(created);
+        }
+        dest.writeByte((byte) (liveMode ? 0x01 : 0x00));
+        dest.writeString(type);
+        dest.writeParcelable(billingDetails, flags);
+        dest.writeParcelable(card, flags);
+        dest.writeParcelable(cardPresent, flags);
+        dest.writeParcelable(ideal, flags);
+        dest.writeString(customerId);
+        dest.writeInt(metadata == null ? -1 : metadata.size());
+        if (metadata != null) {
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                dest.writeString(entry.getKey());
+                dest.writeString(entry.getValue());
+            }
+        }
+    }
+
+    private PaymentMethod(@NonNull Parcel in) {
+        id = in.readString();
+        created = in.readByte() == 0x00 ? null : in.readLong();
+        liveMode = in.readByte() != 0x00;
+        type = in.readString();
+        billingDetails = in.readParcelable(BillingDetails.class.getClassLoader());
+        card = in.readParcelable(Card.class.getClassLoader());
+        cardPresent = in.readParcelable(CardPresent.class.getClassLoader());
+        ideal = in.readParcelable(Ideal.class.getClassLoader());
+        customerId = in.readString();
+        final int mapSize = in.readInt();
+        if (mapSize >= 0) {
+            metadata = new HashMap<>(mapSize);
+            for (int x = 0; x < mapSize; x++) {
+                metadata.put(in.readString(), in.readString());
+            }
+        } else {
+            metadata = null;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<PaymentMethod> CREATOR = new Parcelable.Creator<PaymentMethod>() {
+        @NonNull
+        @Override
+        public PaymentMethod createFromParcel(@NonNull Parcel in) {
+            return new PaymentMethod(in);
+        }
+
+        @Override
+        public PaymentMethod[] newArray(int size) {
+            return new PaymentMethod[size];
+        }
+    };
+
+
     public static final class Builder {
         private String mId;
         private Long mCreated;
@@ -275,7 +343,7 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
-    public static final class BillingDetails extends StripeJsonModel {
+    public static final class BillingDetails extends StripeJsonModel implements Parcelable {
         static final String FIELD_ADDRESS = "address";
         static final String FIELD_EMAIL = "email";
         static final String FIELD_NAME = "name";
@@ -292,6 +360,39 @@ public class PaymentMethod extends StripeJsonModel {
             name = builder.mName;
             phone = builder.mPhone;
         }
+
+        private BillingDetails(@NonNull Parcel in) {
+            address = in.readParcelable(Address.class.getClassLoader());
+            email = in.readString();
+            name = in.readString();
+            phone = in.readString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeParcelable(address, flags);
+            dest.writeString(email);
+            dest.writeString(name);
+            dest.writeString(phone);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<BillingDetails> CREATOR = new Parcelable.Creator<BillingDetails>() {
+            @Override
+            public BillingDetails createFromParcel(@NonNull Parcel in) {
+                return new BillingDetails(in);
+            }
+
+            @Override
+            public BillingDetails[] newArray(int size) {
+                return new BillingDetails[size];
+            }
+        };
 
         @NonNull
         @Override
@@ -453,6 +554,61 @@ public class PaymentMethod extends StripeJsonModel {
             wallet = builder.mWallet;
         }
 
+        private Card(@NonNull Parcel in) {
+            super(in);
+            brand = in.readString();
+            checks = in.readParcelable(Checks.class.getClassLoader());
+            country = in.readString();
+            expiryMonth = in.readByte() == 0x00 ? null : in.readInt();
+            expiryYear = in.readByte() == 0x00 ? null : in.readInt();
+            funding = in.readString();
+            last4 = in.readString();
+            threeDSecureUsage = in.readParcelable(ThreeDSecureUsage.class.getClassLoader());
+            wallet = in.readParcelable(Wallet.class.getClassLoader());
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeString(brand);
+            dest.writeParcelable(checks, flags);
+            dest.writeString(country);
+            if (expiryMonth == null) {
+                dest.writeByte((byte) (0x00));
+            } else {
+                dest.writeByte((byte) (0x01));
+                dest.writeInt(expiryMonth);
+            }
+            if (expiryYear == null) {
+                dest.writeByte((byte) (0x00));
+            } else {
+                dest.writeByte((byte) (0x01));
+                dest.writeInt(expiryYear);
+            }
+            dest.writeString(funding);
+            dest.writeString(last4);
+            dest.writeParcelable(threeDSecureUsage, flags);
+            dest.writeParcelable(wallet, flags);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<Card> CREATOR = new Parcelable.Creator<Card>() {
+            @Override
+            public Card createFromParcel(@NonNull Parcel in) {
+                return new Card(in);
+            }
+
+            @Override
+            public Card[] newArray(int size) {
+                return new Card[size];
+            }
+        };
+
         @NonNull
         @Override
         public Map<String, Object> toMap() {
@@ -485,7 +641,8 @@ public class PaymentMethod extends StripeJsonModel {
                 json.put(FIELD_THREE_D_SECURE_USAGE, threeDSecureUsage != null ?
                         threeDSecureUsage.toJson() : null);
                 json.put(FIELD_WALLET, wallet);
-            } catch (JSONException ignore) {}
+            } catch (JSONException ignore) {
+            }
             return json;
         }
 
@@ -603,7 +760,7 @@ public class PaymentMethod extends StripeJsonModel {
             }
         }
 
-        public static final class Checks extends StripeJsonModel {
+        public static final class Checks extends StripeJsonModel implements Parcelable {
             private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
             private static final String FIELD_ADDRESS_POSTAL_CODE_CHECK =
                     "address_postal_code_check";
@@ -618,6 +775,37 @@ public class PaymentMethod extends StripeJsonModel {
                 this.addressPostalCodeCheck = builder.addressPostalCodeCheck;
                 this.cvcCheck = builder.cvcCheck;
             }
+
+            private Checks(@NonNull Parcel in) {
+                addressLine1Check = in.readString();
+                addressPostalCodeCheck = in.readString();
+                cvcCheck = in.readString();
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeString(addressLine1Check);
+                dest.writeString(addressPostalCodeCheck);
+                dest.writeString(cvcCheck);
+            }
+
+            @SuppressWarnings("unused")
+            public static final Parcelable.Creator<Checks> CREATOR = new Parcelable.Creator<Checks>() {
+                @Override
+                public Checks createFromParcel(@NonNull Parcel in) {
+                    return new Checks(in);
+                }
+
+                @Override
+                public Checks[] newArray(int size) {
+                    return new Checks[size];
+                }
+            };
 
             @NonNull
             @Override
@@ -637,7 +825,8 @@ public class PaymentMethod extends StripeJsonModel {
                     json.put(FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
                     json.put(FIELD_ADDRESS_POSTAL_CODE_CHECK, addressPostalCodeCheck);
                     json.put(FIELD_CVC_CHECK, cvcCheck);
-                } catch (JSONException ignore) {}
+                } catch (JSONException ignore) {
+                }
                 return json;
             }
 
@@ -670,7 +859,7 @@ public class PaymentMethod extends StripeJsonModel {
             public int hashCode() {
                 return ObjectUtils.hash(addressLine1Check, addressPostalCodeCheck, cvcCheck);
             }
-            
+
             public static final class Builder {
                 @Nullable private String addressLine1Check;
                 @Nullable private String addressPostalCodeCheck;
@@ -701,7 +890,7 @@ public class PaymentMethod extends StripeJsonModel {
             }
         }
 
-        public static final class ThreeDSecureUsage extends StripeJsonModel {
+        public static final class ThreeDSecureUsage extends StripeJsonModel implements Parcelable {
             private static final String FIELD_IS_SUPPORTED = "supported";
 
             public final boolean isSupported;
@@ -709,6 +898,33 @@ public class PaymentMethod extends StripeJsonModel {
             private ThreeDSecureUsage(@NonNull Builder builder) {
                 isSupported = builder.mIsSupported;
             }
+
+            private ThreeDSecureUsage(@NonNull Parcel in) {
+                isSupported = in.readByte() != 0x00;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeByte((byte) (isSupported ? 0x01 : 0x00));
+            }
+
+            @SuppressWarnings("unused")
+            public static final Parcelable.Creator<ThreeDSecureUsage> CREATOR = new Parcelable.Creator<ThreeDSecureUsage>() {
+                @Override
+                public ThreeDSecureUsage createFromParcel(@NonNull Parcel in) {
+                    return new ThreeDSecureUsage(in);
+                }
+
+                @Override
+                public ThreeDSecureUsage[] newArray(int size) {
+                    return new ThreeDSecureUsage[size];
+                }
+            };
 
             @NonNull
             @Override
@@ -724,7 +940,8 @@ public class PaymentMethod extends StripeJsonModel {
                 final JSONObject json = new JSONObject();
                 try {
                     json.put(FIELD_IS_SUPPORTED, isSupported);
-                } catch (JSONException ignore) {}
+                } catch (JSONException ignore) {
+                }
                 return json;
             }
 
@@ -779,6 +996,23 @@ public class PaymentMethod extends StripeJsonModel {
             super(Type.CardPresent);
         }
 
+        private CardPresent(@NonNull Parcel in) {
+            super(in);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<CardPresent> CREATOR = new Parcelable.Creator<CardPresent>() {
+            @Override
+            public CardPresent createFromParcel(@NonNull Parcel in) {
+                return new CardPresent(in);
+            }
+
+            @Override
+            public CardPresent[] newArray(int size) {
+                return new CardPresent[size];
+            }
+        };
+
         @NonNull
         @Override
         public Map<String, Object> toMap() {
@@ -789,6 +1023,20 @@ public class PaymentMethod extends StripeJsonModel {
         @Override
         public JSONObject toJson() {
             return new JSONObject();
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(type);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || obj instanceof CardPresent && typedEquals((CardPresent) obj);
+        }
+
+        private boolean typedEquals(@NonNull CardPresent obj) {
+            return ObjectUtils.equals(type, obj.type);
         }
     }
 
@@ -804,6 +1052,32 @@ public class PaymentMethod extends StripeJsonModel {
             bank = builder.mBank;
             bankIdentifierCode = builder.mBankIdentifierCode;
         }
+
+        private Ideal(@NonNull Parcel in) {
+            super(in);
+            bank = in.readString();
+            bankIdentifierCode = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeString(bank);
+            dest.writeString(bankIdentifierCode);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Parcelable.Creator<Ideal> CREATOR = new Parcelable.Creator<Ideal>() {
+            @Override
+            public Ideal createFromParcel(@NonNull Parcel in) {
+                return new Ideal(in);
+            }
+
+            @Override
+            public Ideal[] newArray(int size) {
+                return new Ideal[size];
+            }
+        };
 
         @NonNull
         @Override
@@ -877,11 +1151,28 @@ public class PaymentMethod extends StripeJsonModel {
         }
     }
 
-    private abstract static class PaymentMethodTypeImpl extends StripeJsonModel {
+    private abstract static class PaymentMethodTypeImpl extends StripeJsonModel
+            implements Parcelable {
         @NonNull public final Type type;
 
         private PaymentMethodTypeImpl(@NonNull Type type) {
             this.type = type;
         }
+
+        private PaymentMethodTypeImpl(@NonNull Parcel in) {
+            type = Type.valueOf(in.readString());
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(type.name());
+        }
     }
+
+
 }
