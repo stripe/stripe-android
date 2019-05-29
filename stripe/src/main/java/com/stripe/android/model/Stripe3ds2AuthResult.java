@@ -244,17 +244,17 @@ public final class Stripe3ds2AuthResult {
         }
 
         static class Builder {
-            @Nullable private String mThreeDSServerTransId;
-            @Nullable private String mAcsChallengeMandated;
-            @Nullable private String mAcsSignedContent;
-            @Nullable private String mAcsTransId;
-            @Nullable private String mAcsUrl;
-            @Nullable private String mAuthenticationType;
-            @Nullable private String mCardholderInfo;
-            @Nullable private List<Stripe3ds2AuthResult.MessageExtension> mMessageExtension;
-            @Nullable private String mMessageType;
-            @Nullable private String mMessageVersion;
-            @Nullable private String mSdkTransId;
+            private String mThreeDSServerTransId;
+            private String mAcsChallengeMandated;
+            private String mAcsSignedContent;
+            private String mAcsTransId;
+            private String mAcsUrl;
+            private String mAuthenticationType;
+            private String mCardholderInfo;
+            private List<Stripe3ds2AuthResult.MessageExtension> mMessageExtension;
+            private String mMessageType;
+            private String mMessageVersion;
+            private String mSdkTransId;
 
             @NonNull
             Builder setThreeDSServerTransId(@Nullable String threeDSServerTransId) {
@@ -420,10 +420,10 @@ public final class Stripe3ds2AuthResult {
         }
 
         static final class Builder {
-            @Nullable private String mName;
+            private String mName;
             private boolean mCriticalityIndicator;
-            @Nullable private String mId;
-            @Nullable private Map<String, String> mData;
+            private String mId;
+            private Map<String, String> mData;
 
             @NonNull
             Builder setName(@Nullable String name) {
@@ -470,23 +470,23 @@ public final class Stripe3ds2AuthResult {
         static final String FIELD_MESSAGE_VERSION = "messageVersion";
         static final String FIELD_SDK_TRANS_ID = "sdkTransID";
 
-        @Nullable public final String threeDSServerTransId;
+        @NonNull public final String threeDSServerTransId;
         @Nullable public final String acsTransId;
         @Nullable public final String dsTransId;
-        @Nullable public final String errorCode;
-        @Nullable public final String errorComponent;
-        @Nullable public final String errorDescription;
-        @Nullable public final String errorDetail;
+        @NonNull public final String errorCode;
+        @NonNull public final String errorComponent;
+        @NonNull public final String errorDescription;
+        @NonNull public final String errorDetail;
         @Nullable public final String errorMessageType;
-        @Nullable public final String messageType;
-        @Nullable public final String messageVersion;
+        @NonNull public final String messageType;
+        @NonNull public final String messageVersion;
         @Nullable public final String sdkTransId;
 
-        private ThreeDS2Error(@Nullable String threeDSServerTransId, @Nullable String acsTransId,
-                              @Nullable String dsTransId, @Nullable String errorCode,
-                              @Nullable String errorComponent, @Nullable String errorDescription,
-                              @Nullable String errorDetail, @Nullable String errorMessageType,
-                              @Nullable String messageType, @Nullable String messageVersion,
+        private ThreeDS2Error(@NonNull String threeDSServerTransId, @Nullable String acsTransId,
+                              @Nullable String dsTransId, @NonNull String errorCode,
+                              @NonNull String errorComponent, @NonNull String errorDescription,
+                              @NonNull String errorDetail, @Nullable String errorMessageType,
+                              @NonNull String messageType, @NonNull String messageVersion,
                               @Nullable String sdkTransId) {
             this.threeDSServerTransId = threeDSServerTransId;
             this.acsTransId = acsTransId;
@@ -546,17 +546,17 @@ public final class Stripe3ds2AuthResult {
         }
 
         static class Builder {
-            @Nullable private String mThreeDSServerTransId;
-            @Nullable private String mAcsTransId;
-            @Nullable private String mDsTransId;
-            @Nullable private String mErrorCode;
-            @Nullable private String mErrorComponent;
-            @Nullable private String mErrorDescription;
-            @Nullable private String mErrorDetail;
-            @Nullable private String mErrorMessageType;
-            @Nullable private String mMessageType;
-            @Nullable private String mMessageVersion;
-            @Nullable private String mSdkTransId;
+            private String mThreeDSServerTransId;
+            private String mAcsTransId;
+            private String mDsTransId;
+            private String mErrorCode;
+            private String mErrorComponent;
+            private String mErrorDescription;
+            private String mErrorDetail;
+            private String mErrorMessageType;
+            private String mMessageType;
+            private String mMessageVersion;
+            private String mSdkTransId;
 
             @NonNull
             Builder setThreeDSServerTransId(@Nullable String threeDSServerTransId) {
