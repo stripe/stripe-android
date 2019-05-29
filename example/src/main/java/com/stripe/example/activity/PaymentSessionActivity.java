@@ -29,6 +29,7 @@ import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.service.ExampleEphemeralKeyProvider;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Locale;
@@ -109,12 +110,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
     @NonNull
     private CustomerSession setupCustomerSession() {
         CustomerSession.initCustomerSession(this,
-                new ExampleEphemeralKeyProvider(
-                        string -> {
-                            if (string.startsWith("Error: ")) {
-                                mErrorDialogHandler.show(string);
-                            }
-                        }));
+                new ExampleEphemeralKeyProvider(new ProgressListenerImpl(this)));
         final CustomerSession customerSession = CustomerSession.getInstance();
         customerSession.retrieveCurrentCustomer(
                 new InitialCustomerRetrievalListener(this));
@@ -318,6 +314,23 @@ public class PaymentSessionActivity extends AppCompatActivity {
             }
 
             activity.mProgressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private static final class ProgressListenerImpl
+            implements ExampleEphemeralKeyProvider.ProgressListener {
+        @NonNull private final WeakReference<PaymentSessionActivity> mActivityRef;
+
+        private ProgressListenerImpl(@NonNull PaymentSessionActivity activity) {
+            mActivityRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void onStringResponse(@NonNull String response) {
+            final PaymentSessionActivity activity = mActivityRef.get();
+            if (activity != null && response.startsWith("Error: ")) {
+                activity.mErrorDialogHandler.show(response);
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONException;
 
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Map;
@@ -101,12 +100,11 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             @Nullable AbstractEphemeralKey key,
             long bufferInSeconds,
             @Nullable Calendar proxyCalendar) {
-
         if (key == null) {
             return true;
         }
 
-        Calendar now = proxyCalendar == null ? Calendar.getInstance() : proxyCalendar;
+        final Calendar now = proxyCalendar == null ? Calendar.getInstance() : proxyCalendar;
         long nowInSeconds = TimeUnit.MILLISECONDS.toSeconds(now.getTimeInMillis());
         long nowPlusBuffer = nowInSeconds + bufferInSeconds;
         return key.getExpires() < nowPlusBuffer;
@@ -121,17 +119,17 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
 
-        @Nullable private final String mActionString;
+        @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
         @NonNull private final String mOperationId;
+        @Nullable private final String mActionString;
         @Nullable private final Map<String, Object> mArguments;
-        @NonNull private final WeakReference<EphemeralKeyManager> mEphemeralKeyManagerRef;
 
         ClientKeyUpdateListener(
-                @NonNull EphemeralKeyManager keyManager,
+                @NonNull EphemeralKeyManager ephemeralKeyManager,
                 @NonNull String operationId,
                 @Nullable String actionString,
                 @Nullable Map<String, Object> arguments) {
-            mEphemeralKeyManagerRef = new WeakReference<>(keyManager);
+            mEphemeralKeyManager = ephemeralKeyManager;
             mOperationId = operationId;
             mActionString = actionString;
             mArguments = arguments;
@@ -139,18 +137,12 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
         @Override
         public void onKeyUpdate(@NonNull String rawKey) {
-            final EphemeralKeyManager keyManager = mEphemeralKeyManagerRef.get();
-            if (keyManager != null) {
-                keyManager.updateKey(mOperationId, rawKey, mActionString, mArguments);
-            }
+            mEphemeralKeyManager.updateKey(mOperationId, rawKey, mActionString, mArguments);
         }
 
         @Override
         public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
-            final EphemeralKeyManager keyManager = mEphemeralKeyManagerRef.get();
-            if (keyManager != null) {
-                keyManager.updateKeyError(mOperationId, responseCode, message);
-            }
+            mEphemeralKeyManager.updateKeyError(mOperationId, responseCode, message);
         }
     }
 }
