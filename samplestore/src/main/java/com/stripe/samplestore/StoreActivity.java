@@ -188,9 +188,9 @@ public class StoreActivity
 
     private static final class ProgressListenerImpl
             implements SampleStoreEphemeralKeyProvider.ProgressListener {
-        private final WeakReference<Activity> mActivityRef;
+        @NonNull private final WeakReference<Activity> mActivityRef;
 
-        private ProgressListenerImpl(Activity activity) {
+        private ProgressListenerImpl(@NonNull Activity activity) {
             mActivityRef = new WeakReference<>(activity);
         }
 

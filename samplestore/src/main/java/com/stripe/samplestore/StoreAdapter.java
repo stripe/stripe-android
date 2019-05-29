@@ -1,7 +1,6 @@
 package com.stripe.samplestore;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -103,7 +102,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     @NonNull private final Activity mActivity;
     @NonNull private final Currency mCurrency;
 
-    private int[] mQuantityOrdered;
+    @NonNull private final int[] mQuantityOrdered;
     private int mTotalOrdered;
     @NonNull private final TotalItemsChangedListener mTotalItemsChangedListener;
 
@@ -143,7 +142,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             holder.setQuantity(mQuantityOrdered[position]);
             holder.setPosition(position);
         }
-
     }
 
     @Override
@@ -154,14 +152,14 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View pollingView = LayoutInflater.from(parent.getContext())
+        final View pollingView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.store_item, parent, false);
 
         return new ViewHolder(pollingView, mCurrency, this);
     }
 
     void launchPurchaseActivityWithCart() {
-        StoreCart cart = new StoreCart(mCurrency);
+        final StoreCart cart = new StoreCart(mCurrency);
         for (int i = 0; i < mQuantityOrdered.length; i++) {
             if (mQuantityOrdered[i] > 0) {
                 cart.addStoreLineItem(
@@ -170,13 +168,15 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             }
         }
 
-        Intent paymentLaunchIntent = PaymentActivity.createIntent(mActivity, cart);
         mActivity.startActivityForResult(
-                paymentLaunchIntent, StoreActivity.PURCHASE_REQUEST);
+                PaymentActivity.createIntent(mActivity, cart),
+                StoreActivity.PURCHASE_REQUEST);
     }
 
     void clearItemSelections() {
-        mQuantityOrdered = new int[EMOJI_CLOTHES.length];
+        for (int i = 0; i < mQuantityOrdered.length; i++) {
+            mQuantityOrdered[i] = 0;
+        }
         notifyDataSetChanged();
         mTotalItemsChangedListener.onTotalItemsChanged(0);
     }
