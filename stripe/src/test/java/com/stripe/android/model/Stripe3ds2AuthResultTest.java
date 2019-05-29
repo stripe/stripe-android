@@ -14,7 +14,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2AuthResultTest {
     private static final String AUTH_RESULT_JSON = "{\n" +
             "\t\"id\": \"threeds2_1Ecwz3CRMbs6FrXfThtfogua\",\n" +
