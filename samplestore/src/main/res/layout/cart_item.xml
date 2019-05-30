@@ -8,8 +8,9 @@
         android:id="@+id/tv_cart_emoji"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/item_padding"
-        android:textSize="26sp"
+        android:layout_marginTop="@dimen/item_padding"
+        android:layout_marginBottom="@dimen/item_padding"
+        android:textSize="20sp"
         />
 
     <TextView
@@ -36,9 +37,8 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="end|center_vertical"
-        android:layout_marginEnd="@dimen/shopping_cart_margin"
-        android:textSize="22sp"
-        android:textAppearance="@android:style/TextAppearance.Holo.Widget.ActionMode.Title"
+        android:textSize="20sp"
+        android:textAppearance="@android:style/TextAppearance.Holo.Medium"
         />
 
 </LinearLayout>

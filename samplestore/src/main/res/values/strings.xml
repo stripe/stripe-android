@@ -2,11 +2,13 @@
     <string name="app_name">Emoji Apparel</string>
     <string name="confirm_purchase">Confirm Purchase</string>
     <string name="completing_purchase">Completing purchase&#8230;</string>
-    <string name="enter_details">Enter card details</string>
-    <string name="enter_shipping_details">Enter shipping details</string>
+    <string name="add_credit_card">Add credit card</string>
+    <string name="add_shipping_details">Add shipping address</string>
     <string name="purchase_successful">Your purchase was a success!</string>
     <string name="total">Total</string>
     <string name="increase_quantity">Increase quantity</string>
     <string name="decrease_quantity">Decrease quantity</string>
     <string name="default_quantity">0</string>
+    <string name="checkout_shipping_cost_label">Shipping</string>
+    <string name="checkout_total_cost_label">Total</string>
 </resources>

@@ -19,7 +19,7 @@ public class PayWithGoogleUtils {
      * @return a String that can be used as a Pay with Google price string
      */
     @NonNull
-    public static String getPriceString(@NonNull long price, @NonNull Currency currency) {
+    public static String getPriceString(long price, @NonNull Currency currency) {
         int fractionDigits = currency.getDefaultFractionDigits();
         int totalLength = String.valueOf(price).length();
         StringBuilder builder = new StringBuilder();

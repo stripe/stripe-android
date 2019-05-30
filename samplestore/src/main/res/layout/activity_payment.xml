@@ -14,44 +14,53 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/activity_padding">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/cart_list_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:orientation="vertical"
+                android:padding="@dimen/activity_padding" />
 
-            <TextView
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/payment_screen_spacing"
-                android:text="@string/enter_details"
-                android:textColor="@android:color/secondary_text_light"
-                android:textSize="14sp" />
+                android:layout_height="1dp"
+                android:background="@drawable/item_divider"/>
 
             <TextView
                 android:id="@+id/payment_source"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/enter_details"
-                android:textAppearance="@android:style/TextAppearance.Large" />
-
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/payment_screen_spacing"
-                android:text="@string/enter_shipping_details"
-                android:textColor="@android:color/secondary_text_light"
-                android:textSize="14sp" />
+                android:text="@string/add_credit_card"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_material_credit_card"
+                android:drawableTint="?android:textColorPrimary"
+                android:textAppearance="@android:style/TextAppearance"
+                android:padding="@dimen/activity_padding"
+                tools:targetApi="m" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/item_divider"/>
 
             <TextView
                 android:id="@+id/shipping_info"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/enter_shipping_details"
-                android:textAppearance="@android:style/TextAppearance.Large" />
+                android:text="@string/add_shipping_details"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_material_local_shipping"
+                android:drawableTint="?android:textColorPrimary"
+                android:textAppearance="@android:style/TextAppearance"
+                android:padding="@dimen/activity_padding"
+                tools:targetApi="m" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/item_divider"/>
 
             <Button
                 android:id="@+id/btn_purchase"
