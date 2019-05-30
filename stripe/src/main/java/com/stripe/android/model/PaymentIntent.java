@@ -31,6 +31,14 @@ import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putMapIfNotNull;
 import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
+/**
+ * A PaymentIntent tracks the process of collecting a payment from your customer.
+ *
+ * <ul>
+ * <li><a href="https://stripe.com/docs/payments/payment-intents">Payment Intents Overview</a></li>
+ * <li><a href="https://stripe.com/docs/api/payment_intents">PaymentIntents API</a></li>
+ * </ul>
+ */
 public class PaymentIntent extends StripeJsonModel {
     private static final String VALUE_PAYMENT_INTENT = "payment_intent";
 

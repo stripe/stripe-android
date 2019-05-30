@@ -72,13 +72,19 @@ class PaymentAuthenticationController {
     /**
      * Confirm the PaymentIntent and resolve any next actions
      */
-    void confirmAndAuth(@NonNull Stripe stripe,
-                        @NonNull Activity activity,
-                        @NonNull PaymentIntentParams paymentIntentParams,
-                        @NonNull String publishableKey) {
+    void startConfirmAndAuth(@NonNull Stripe stripe,
+                             @NonNull Activity activity,
+                             @NonNull PaymentIntentParams paymentIntentParams,
+                             @NonNull String publishableKey) {
         new ConfirmPaymentIntentTask(stripe, paymentIntentParams, publishableKey,
                 new ConfirmPaymentIntentCallback(activity, publishableKey, this))
                 .execute();
+    }
+
+    void startAuth(@NonNull Activity activity,
+                   @NonNull PaymentIntent paymentIntent,
+                   @NonNull String publishableKey) {
+        handleNextAction(activity, paymentIntent, publishableKey);
     }
 
     /**

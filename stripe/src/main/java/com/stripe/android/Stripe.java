@@ -105,6 +105,9 @@ public class Stripe {
     }
 
     /**
+     * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
+     * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
+     * automatic confirmation</a> flow.
      *
      * @param activity the {@link Activity} that is launching the payment authentication flow
      * @param confirmPaymentIntentParams {@link PaymentIntentParams} used to confirm the
@@ -113,13 +116,32 @@ public class Stripe {
     private void startPaymentAuth(@NonNull Activity activity,
                                   @NonNull PaymentIntentParams confirmPaymentIntentParams,
                                   @NonNull String publishableKey) {
-        mPaymentAuthenticationController.confirmAndAuth(this, activity,
+        mPaymentAuthenticationController.startConfirmAndAuth(this, activity,
                 confirmPaymentIntentParams, publishableKey);
     }
 
     public void startPaymentAuth(@NonNull Activity activity,
-                          @NonNull PaymentIntentParams paymentIntentParams) {
-        startPaymentAuth(activity, paymentIntentParams, mDefaultPublishableKey);
+                                 @NonNull PaymentIntentParams confirmPaymentIntentParams) {
+        startPaymentAuth(activity, confirmPaymentIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Authenticate a {@link PaymentIntent}. Used for <a href=
+     * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
+     * manual confirmation</a> flow.
+     *
+     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param paymentIntent a confirmed {@link PaymentIntent} object
+     */
+    private void startPaymentAuth(@NonNull Activity activity,
+                                  @NonNull PaymentIntent paymentIntent,
+                                  @NonNull String publishableKey) {
+        mPaymentAuthenticationController.startAuth(activity, paymentIntent, publishableKey);
+    }
+
+    void startPaymentAuth(@NonNull Activity activity,
+                          @NonNull PaymentIntent paymentIntent) {
+        startPaymentAuth(activity, paymentIntent, mDefaultPublishableKey);
     }
 
     private boolean onPaymentAuthResult(

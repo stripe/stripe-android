@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.PaymentIntentParams;
 
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class StripePaymentAuthTest {
     }
 
     @Test
-    public void startPaymentAuth_shouldCallControllerConfirmAndAuth() {
+    public void startPaymentAuth_withConfirmParams_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
         stripe.setDefaultPublishableKey("pk_test");
         final PaymentIntentParams paymentIntentParams =
@@ -45,7 +46,7 @@ public class StripePaymentAuthTest {
                         "client_secret",
                         "yourapp://post-authentication-return-url");
         stripe.startPaymentAuth(mActivity, paymentIntentParams);
-        verify(mPaymentAuthenticationController).confirmAndAuth(eq(stripe), eq(mActivity),
+        verify(mPaymentAuthenticationController).startConfirmAndAuth(eq(stripe), eq(mActivity),
                 eq(paymentIntentParams), eq("pk_test"));
     }
 
@@ -62,6 +63,15 @@ public class StripePaymentAuthTest {
 
         verify(mPaymentAuthenticationController).handleResult(stripe, data,
                 "pk_test", mCallback);
+    }
+
+    @Test
+    public void startPaymentAuth_withConfirmedPaymentIntent_shouldAuth() {
+        final Stripe stripe = createStripe();
+        stripe.setDefaultPublishableKey("pk_test");
+        stripe.startPaymentAuth(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2);
+        verify(mPaymentAuthenticationController).startAuth(eq(mActivity),
+                eq(PaymentIntentFixtures.PI_REQUIRES_3DS2), eq("pk_test"));
     }
 
     @NonNull
