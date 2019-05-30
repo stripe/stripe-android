@@ -12,7 +12,6 @@ import android.support.annotation.Size;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -39,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -56,8 +56,6 @@ import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_MET
 public class PaymentActivity extends AppCompatActivity {
 
     private static final String EXTRA_CART = "extra_cart";
-    private static final String TOTAL_LABEL = "Total:";
-    private static final String SHIPPING = "Shipping";
 
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
@@ -159,7 +157,6 @@ public class PaymentActivity extends AppCompatActivity {
         mPaymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
-
     private void updateConfirmPaymentButton() {
         long price = mStoreCart.getTotalPrice();
 
@@ -169,49 +166,47 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void addCartItems() {
         mCartItemLayout.removeAllViewsInLayout();
-        String currencySymbol = mStoreCart.getCurrency().getSymbol(Locale.US);
+        final String currencySymbol = mStoreCart.getCurrency().getSymbol(Locale.US);
 
         addLineItems(currencySymbol, mStoreCart.getLineItems()
                 .toArray(new StoreLineItem[mStoreCart.getSize()]));
 
         addLineItems(currencySymbol,
-                new StoreLineItem(SHIPPING, 1, mShippingCosts));
+                new StoreLineItem(getString(R.string.checkout_shipping_cost_label), 1,
+                        mShippingCosts));
 
-        View totalView = LayoutInflater.from(this).inflate(
-                R.layout.cart_item, mCartItemLayout, false);
-        boolean shouldDisplayTotal = fillOutTotalView(totalView, currencySymbol);
-        if (shouldDisplayTotal) {
-            mCartItemLayout.addView(totalView);
-        }
+        final View totalView = getLayoutInflater()
+                .inflate(R.layout.cart_item, mCartItemLayout, false);
+        setupTotalPriceView(totalView, currencySymbol);
+        mCartItemLayout.addView(totalView);
     }
 
-    private void addLineItems(String currencySymbol, StoreLineItem... items) {
+    private void addLineItems(@NonNull String currencySymbol, @NonNull StoreLineItem... items) {
         for (StoreLineItem item : items) {
-            View view = LayoutInflater.from(this).inflate(
+            final View view = getLayoutInflater().inflate(
                     R.layout.cart_item, mCartItemLayout, false);
             fillOutCartItemView(item, view, currencySymbol);
             mCartItemLayout.addView(view);
         }
     }
 
-    private boolean fillOutTotalView(View view, String currencySymbol) {
-        TextView[] itemViews = getItemViews(view);
-        long totalPrice = mStoreCart.getTotalPrice() + mShippingCosts;
-        itemViews[0].setText(TOTAL_LABEL);
-        String priceString = PayWithGoogleUtils.getPriceString(
-                totalPrice,
+    private void setupTotalPriceView(@NonNull View view, @NonNull String currencySymbol) {
+        final TextView[] itemViews = getItemViews(view);
+        final long totalPrice = mStoreCart.getTotalPrice() + mShippingCosts;
+        itemViews[0].setText(getString(R.string.checkout_total_cost_label));
+        final String price = PayWithGoogleUtils.getPriceString(totalPrice,
                 mStoreCart.getCurrency());
-        priceString = currencySymbol + priceString;
-        itemViews[3].setText(priceString);
-        return true;
+        final String displayPrice = currencySymbol + price;
+        itemViews[3].setText(displayPrice);
     }
 
-    private void fillOutCartItemView(StoreLineItem item, View view, String currencySymbol) {
-        TextView[] itemViews = getItemViews(view);
+    private void fillOutCartItemView(@NonNull StoreLineItem item, @NonNull View view,
+                                     @NonNull String currencySymbol) {
+        final TextView[] itemViews = getItemViews(view);
 
         itemViews[0].setText(item.getDescription());
 
-        if (!SHIPPING.equals(item.getDescription())) {
+        if (!getString(R.string.checkout_shipping_cost_label).equals(item.getDescription())) {
             String quantityPriceString = "X " + item.getQuantity() + " @";
             itemViews[1].setText(quantityPriceString);
 
@@ -229,16 +224,16 @@ public class PaymentActivity extends AppCompatActivity {
     @Size(value = 4)
     @NonNull
     private TextView[] getItemViews(@NonNull View view) {
-        TextView labelView = view.findViewById(R.id.tv_cart_emoji);
-        TextView quantityView = view.findViewById(R.id.tv_cart_quantity);
-        TextView unitPriceView = view.findViewById(R.id.tv_cart_unit_price);
-        TextView totalPriceView = view.findViewById(R.id.tv_cart_total_price);
+        final TextView labelView = view.findViewById(R.id.tv_cart_emoji);
+        final TextView quantityView = view.findViewById(R.id.tv_cart_quantity);
+        final TextView unitPriceView = view.findViewById(R.id.tv_cart_unit_price);
+        final TextView totalPriceView = view.findViewById(R.id.tv_cart_total_price);
         return new TextView[]{labelView, quantityView, unitPriceView, totalPriceView};
     }
 
     @NonNull
     private Map<String, Object> createParams(long price,
-                                             @Nullable String paymentMethodId,
+                                             @NonNull String paymentMethodId,
                                              @Nullable String customerId,
                                              @Nullable ShippingInformation shippingInformation) {
         final AbstractMap<String, Object> params = new HashMap<>();
@@ -267,7 +262,8 @@ public class PaymentActivity extends AppCompatActivity {
                 .getShippingInformation();
 
         final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
-                createParams(price, paymentMethod.id, customerId, shippingInformation));
+                createParams(price, Objects.requireNonNull(paymentMethod.id), customerId,
+                        shippingInformation));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -329,8 +325,7 @@ public class PaymentActivity extends AppCompatActivity {
     @Nullable
     private String formatSourceDescription(@NonNull PaymentMethod paymentMethod) {
         if (paymentMethod.card != null) {
-            return paymentMethod.card.brand + getString(R.string.ending_in) +
-                    paymentMethod.card.last4;
+            return paymentMethod.card.brand + "-" + paymentMethod.card.last4;
         }
         return null;
     }
