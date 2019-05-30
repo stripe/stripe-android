@@ -188,7 +188,7 @@ class PaymentAuthenticationController {
                 timeout
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
-                new Stripe3ds2AuthCallback(activity, transaction, timeout, paymentIntent, this));
+                new Stripe3ds2AuthCallback(activity, transaction, timeout, paymentIntent));
     }
 
     /**
@@ -284,25 +284,35 @@ class PaymentAuthenticationController {
         }
     }
 
-    private static final class Stripe3ds2AuthCallback
+    static final class Stripe3ds2AuthCallback
             implements ApiResultCallback<Stripe3ds2AuthResult> {
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final Transaction mTransaction;
         private final int mMaxTimeout;
         @NonNull private final PaymentIntent mPaymentIntent;
-        @NonNull private final PaymentAuthenticationController mPaymentAuthController;
+        @NonNull private final PaymentAuthRelayStarter mPaymentAuthRelayStarter;
 
         private Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
                 @NonNull Transaction transaction,
                 int maxTimeout,
+                @NonNull PaymentIntent paymentIntent) {
+            this(activity, transaction, maxTimeout, paymentIntent,
+                    new PaymentAuthRelayStarter(activity, REQUEST_CODE));
+        }
+
+        @VisibleForTesting
+        Stripe3ds2AuthCallback(
+                @NonNull Activity activity,
+                @NonNull Transaction transaction,
+                int maxTimeout,
                 @NonNull PaymentIntent paymentIntent,
-                @NonNull PaymentAuthenticationController paymentAuthController) {
+                @NonNull PaymentAuthRelayStarter paymentAuthRelayStarter) {
             mActivityRef = new WeakReference<>(activity);
             mTransaction = transaction;
             mMaxTimeout = maxTimeout;
             mPaymentIntent = paymentIntent;
-            mPaymentAuthController = paymentAuthController;
+            mPaymentAuthRelayStarter = paymentAuthRelayStarter;
         }
 
         @Override
@@ -312,22 +322,13 @@ class PaymentAuthenticationController {
                 return;
             }
 
-            if (result.ares != null) {
-                final StripeChallengeParameters challengeParameters =
-                        new StripeChallengeParameters();
-                challengeParameters.setAcsSignedContent(result.ares.acsSignedContent);
-                challengeParameters.set3DSServerTransactionID(result.ares.threeDSServerTransId);
-                challengeParameters.setAcsTransactionID(result.ares.acsTransId);
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTransaction.doChallenge(activity,
-                                challengeParameters,
-                                PaymentAuth3ds2ChallengeStatusReceiver
-                                        .create(activity, mPaymentIntent),
-                                mMaxTimeout);
-                    }
-                });
+            final Stripe3ds2AuthResult.Ares ares = result.ares;
+            if (ares != null) {
+                if (ares.shouldChallenge()) {
+                    startChallengeFlow(activity, ares);
+                } else {
+                    startFrictionlessFlow();
+                }
             }
         }
 
@@ -335,8 +336,31 @@ class PaymentAuthenticationController {
         public void onError(@NonNull Exception e) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                mPaymentAuthController.handleError(activity, e);
+                mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(e));
             }
+        }
+
+        private void startFrictionlessFlow() {
+            mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(mPaymentIntent));
+        }
+
+        private void startChallengeFlow(@NonNull final Activity activity,
+                                        @NonNull Stripe3ds2AuthResult.Ares ares) {
+            final StripeChallengeParameters challengeParameters =
+                    new StripeChallengeParameters();
+            challengeParameters.setAcsSignedContent(ares.acsSignedContent);
+            challengeParameters.set3DSServerTransactionID(ares.threeDSServerTransId);
+            challengeParameters.setAcsTransactionID(ares.acsTransId);
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mTransaction.doChallenge(activity,
+                            challengeParameters,
+                            PaymentAuth3ds2ChallengeStatusReceiver
+                                    .create(activity, mPaymentIntent),
+                            mMaxTimeout);
+                }
+            });
         }
     }
 

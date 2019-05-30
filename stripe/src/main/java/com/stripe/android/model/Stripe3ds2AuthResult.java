@@ -169,6 +169,8 @@ public final class Stripe3ds2AuthResult {
         static final String FIELD_SDK_TRANS_ID = "sdkTransID";
         static final String FIELD_THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID";
 
+        static final String VALUE_YES = "Y";
+
         @NonNull public final String threeDSServerTransId;
         @Nullable public final String acsChallengeMandated;
         @Nullable public final String acsSignedContent;
@@ -216,6 +218,10 @@ public final class Stripe3ds2AuthResult {
                     .setMessageExtension(MessageExtension.fromJson(
                             aresJson.optJSONArray(FIELD_MESSAGE_EXTENSION)))
                     .build();
+        }
+
+        public boolean shouldChallenge() {
+            return VALUE_YES.equals(acsChallengeMandated);
         }
 
         @Override
