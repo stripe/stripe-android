@@ -96,7 +96,7 @@
     <!--Error text indicating that phone number is required, used for all addresses-->
     <string name="address_phone_number_required">Digite seu número de telefone</string>
     <!--Used to display masked card numbers-->
-    <string name="ending_in">" terminado em "</string>
+    <string name="ending_in">%1$s terminado em %2$s</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Validade</string>
     <string name="invalid_card_number">O número do seu cartão é inválido.</string>
