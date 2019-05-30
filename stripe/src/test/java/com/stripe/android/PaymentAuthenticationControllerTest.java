@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -59,6 +60,7 @@ public class PaymentAuthenticationControllerTest {
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentAuthResult> mPaymentAuthResultCallback;
     @Mock private PaymentAuthRelayStarter mPaymentAuthRelayStarter;
+    @Mock private ProgressDialog mProgressDialog;
 
     @Captor private ArgumentCaptor<PaymentAuthRelayStarter.Data> mRelayStarterDataArgumentCaptor;
 
@@ -126,6 +128,7 @@ public class PaymentAuthenticationControllerTest {
 
     @Test
     public void authCallback_withChallengeFlow_shouldNotStartRelayActivity() {
+        when(mTransaction.getProgressView(mActivity)).thenReturn(mProgressDialog);
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
                         MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
@@ -133,6 +136,7 @@ public class PaymentAuthenticationControllerTest {
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW);
         verify(mPaymentAuthRelayStarter, never())
                 .start(ArgumentMatchers.<PaymentAuthRelayStarter.Data>any());
+        verify(mProgressDialog).show();
     }
 
     @Test
