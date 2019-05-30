@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +66,7 @@ public class PaymentActivity extends AppCompatActivity {
     private Button mConfirmPaymentButton;
     private TextView mEnterShippingInfo;
     private TextView mEnterPaymentInfo;
+    private ProgressBar mProgressBar;
 
     private PaymentSession mPaymentSession;
 
@@ -86,6 +87,7 @@ public class PaymentActivity extends AppCompatActivity {
         final Bundle extras = getIntent().getExtras();
         mStoreCart = extras != null ? extras.getParcelable(EXTRA_CART) : null;
 
+        mProgressBar = findViewById(R.id.progress_bar);
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
         addCartItems();
@@ -105,9 +107,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         setupPaymentSession();
 
-        if (!mPaymentSession.getPaymentSessionData().isPaymentReadyToCharge()) {
-            mConfirmPaymentButton.setEnabled(false);
-        }
+        mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
+                .isPaymentReadyToCharge());
 
         final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
@@ -265,25 +266,13 @@ public class PaymentActivity extends AppCompatActivity {
         final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
                 .getShippingInformation();
 
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-        final ProgressDialogFragment progressDialogFragment = ProgressDialogFragment
-                .newInstance(getString(R.string.completing_purchase));
-
         final Observable<ResponseBody> stripeResponse = stripeService.capturePayment(
                 createParams(price, paymentMethod.id, customerId, shippingInformation));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> {
-                    if (!progressDialogFragment.isAdded()) {
-                        progressDialogFragment.show(fragmentManager, "progress");
-                    }
-                })
-                .doOnComplete(() -> {
-                    if (progressDialogFragment.isVisible()) {
-                        progressDialogFragment.dismiss();
-                    }
-                })
+                .doOnSubscribe(disposable -> startLoading())
+                .doOnComplete(this::stopLoading)
                 .subscribe(
                         response -> handlePaymentIntentCapture(response.string()),
                         throwable -> displayError(throwable.getLocalizedMessage())));
@@ -321,6 +310,20 @@ public class PaymentActivity extends AppCompatActivity {
         mPaymentSession = new PaymentSession(this);
         mPaymentSession.init(new PaymentSessionListenerImpl(this),
                 new PaymentSessionConfig.Builder().build());
+    }
+
+    private void startLoading() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mEnterShippingInfo.setEnabled(false);
+        mConfirmPaymentButton.setTag(mConfirmPaymentButton.isEnabled());
+        mConfirmPaymentButton.setEnabled(false);
+    }
+
+    private void stopLoading() {
+        mProgressBar.setVisibility(View.INVISIBLE);
+        mEnterPaymentInfo.setEnabled(true);
+        mEnterShippingInfo.setEnabled(true);
+        mConfirmPaymentButton.setEnabled(Boolean.TRUE.equals(mConfirmPaymentButton.getTag()));
     }
 
     @Nullable
