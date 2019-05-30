@@ -20,11 +20,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
+import com.stripe.android.PaymentAuthResult;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
+import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
@@ -66,6 +70,7 @@ public class PaymentActivity extends AppCompatActivity {
     private TextView mEnterPaymentInfo;
     private ProgressBar mProgressBar;
 
+    private Stripe mStripe;
     private PaymentSession mPaymentSession;
 
     private StoreCart mStoreCart;
@@ -82,6 +87,7 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
         final Bundle extras = getIntent().getExtras();
         mStoreCart = extras != null ? extras.getParcelable(EXTRA_CART) : null;
 
@@ -154,7 +160,24 @@ public class PaymentActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mPaymentSession.handlePaymentData(requestCode, resultCode, data);
+
+        final boolean isPaymentAuthResult = mStripe.onPaymentAuthResult(
+                requestCode, resultCode, data,
+                new ApiResultCallback<PaymentAuthResult>() {
+                    @Override
+                    public void onSuccess(@NonNull PaymentAuthResult result) {
+                        finishPayment();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception e) {
+                        finishPayment();
+                    }
+                });
+
+        if (!isPaymentAuthResult) {
+            mPaymentSession.handlePaymentData(requestCode, resultCode, data);
+        }
     }
 
     private void updateConfirmPaymentButton() {
@@ -292,10 +315,14 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         if (paymentIntent.requiresAction()) {
-            startActivity(new Intent(Intent.ACTION_VIEW, paymentIntent.getRedirectUrl()));
+            mStripe.startPaymentAuth(this, paymentIntent);
             return;
         }
 
+        finishPayment();
+    }
+
+    private void finishPayment() {
         final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);

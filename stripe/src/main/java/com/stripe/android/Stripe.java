@@ -139,8 +139,8 @@ public class Stripe {
         mPaymentAuthenticationController.startAuth(activity, paymentIntent, publishableKey);
     }
 
-    void startPaymentAuth(@NonNull Activity activity,
-                          @NonNull PaymentIntent paymentIntent) {
+    public void startPaymentAuth(@NonNull Activity activity,
+                                 @NonNull PaymentIntent paymentIntent) {
         startPaymentAuth(activity, paymentIntent, mDefaultPublishableKey);
     }
 
