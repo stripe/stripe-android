@@ -11,6 +11,7 @@ import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,12 +43,14 @@ public class PaymentAuthenticationControllerTest {
 
     private PaymentAuthenticationController mController;
 
+    @Mock private Stripe mStripe;
     @Mock private Activity mActivity;
     @Mock private StripeThreeDs2Service mThreeDs2Service;
     @Mock private Transaction mTransaction;
     @Mock private StripeApiHandler mApiHandler;
     @Mock private MessageVersionRegistry mMessageVersionRegistry;
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
+    @Mock private ApiResultCallback<PaymentAuthResult> mPaymentAuthResultCallback;
 
     @Before
     public void setup() {
@@ -78,7 +82,7 @@ public class PaymentAuthenticationControllerTest {
     @Test
     public void handleNextAction_when3dsRedirect() {
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
-                "pk_test");
+                PUBLISHABLE_KEY);
         verify(mActivity).startActivityForResult(any(Intent.class),
                 eq(PaymentAuthenticationController.REQUEST_CODE));
     }
@@ -96,5 +100,17 @@ public class PaymentAuthenticationControllerTest {
         verify(m3ds2Starter).start(
                 new Stripe3ds2CompletionStarter.StartData(PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         Stripe3ds2CompletionStarter.Status.CANCEL));
+    }
+
+    @Test
+    public void handleResult_withAuthException_shouldCallCallbackOnError() {
+        final Exception exception = new RuntimeException();
+        final Intent intent = new Intent()
+                .putExtra(PaymentAuthenticationExtras.AUTH_EXCEPTION, exception);
+
+        mController.handleResult(mStripe, intent, PUBLISHABLE_KEY, mPaymentAuthResultCallback);
+        verify(mPaymentAuthResultCallback).onError(exception);
+        verify(mPaymentAuthResultCallback, never())
+                .onSuccess(ArgumentMatchers.<PaymentAuthResult>any());
     }
 }
