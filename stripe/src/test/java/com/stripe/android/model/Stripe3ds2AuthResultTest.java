@@ -3,8 +3,6 @@ package com.stripe.android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -12,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class Stripe3ds2AuthResultTest {
     private static final String AUTH_RESULT_JSON = "{\n" +

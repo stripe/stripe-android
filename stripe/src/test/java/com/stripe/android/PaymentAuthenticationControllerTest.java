@@ -17,11 +17,16 @@ import com.stripe.android.view.PaymentAuthenticationExtras;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Objects;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,6 +59,8 @@ public class PaymentAuthenticationControllerTest {
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentAuthResult> mPaymentAuthResultCallback;
     @Mock private PaymentAuthRelayStarter mPaymentAuthRelayStarter;
+
+    @Captor private ArgumentCaptor<PaymentAuthRelayStarter.Data> mRelayStarterDataArgumentCaptor;
 
     @Before
     public void setup() {
@@ -118,7 +125,7 @@ public class PaymentAuthenticationControllerTest {
     }
 
     @Test
-    public void authCallback_withChallengeFlow_shouldNotStart() {
+    public void authCallback_withChallengeFlow_shouldNotStartRelayActivity() {
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
                         MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
@@ -129,13 +136,32 @@ public class PaymentAuthenticationControllerTest {
     }
 
     @Test
-    public void authCallback_withFrictionlessFlow() {
+    public void authCallback_withFrictionlessFlow_shouldStartRelayActivityWithPaymentIntent() {
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
                         MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         mPaymentAuthRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW);
         verify(mPaymentAuthRelayStarter)
-                .start(ArgumentMatchers.<PaymentAuthRelayStarter.Data>any());
+                .start(mRelayStarterDataArgumentCaptor.capture());
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                mRelayStarterDataArgumentCaptor.getValue().paymentIntent);
+    }
+
+    @Test
+    public void authCallback_withError_shouldStartRelayActivityWithException() {
+        final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
+                new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
+                        MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                        mPaymentAuthRelayStarter);
+        authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);
+        verify(mPaymentAuthRelayStarter).start(mRelayStarterDataArgumentCaptor.capture());
+        final Exception exception = Objects.requireNonNull(
+                mRelayStarterDataArgumentCaptor.getValue().exception);
+        assertEquals("Error encountered during 3DS2 authentication request. " +
+                        "Code: 302, Detail: null, " +
+                        "Description: Data could not be decrypted by the receiving system due to technical or other reason., " +
+                        "Component: D",
+                exception.getMessage());
     }
 }

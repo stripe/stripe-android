@@ -466,8 +466,7 @@ public final class Stripe3ds2AuthResult {
         }
     }
 
-    public static class ThreeDS2Error {
-
+    public static final class ThreeDS2Error {
         static final String FIELD_THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID";
         static final String FIELD_ACS_TRANS_ID = "acsTransID";
         static final String FIELD_DS_TRANS_ID = "dsTransID";
