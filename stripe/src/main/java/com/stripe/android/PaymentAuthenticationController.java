@@ -335,6 +335,20 @@ class PaymentAuthenticationController {
                 } else {
                     startFrictionlessFlow();
                 }
+            } else {
+                final Stripe3ds2AuthResult.ThreeDS2Error error = result.error;
+                final String errorMessage;
+                if (error != null) {
+                    errorMessage = "Code: " + error.errorCode +
+                            ", Detail: " + error.errorDetail +
+                            ", Description: " + error.errorDescription +
+                            ", Component: " + error.errorComponent;
+                } else {
+                    errorMessage = "Invalid 3DS2 authentication response";
+                }
+
+                onError(new RuntimeException(
+                        "Error encountered during 3DS2 authentication request. " + errorMessage));
             }
         }
 
