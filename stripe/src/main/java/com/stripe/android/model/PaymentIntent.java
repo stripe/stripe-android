@@ -138,6 +138,10 @@ public class PaymentIntent extends StripeJsonModel {
         return mStatus == Status.RequiresAction;
     }
 
+    public boolean requiresConfirmation() {
+        return mStatus == Status.RequiresConfirmation;
+    }
+
     @Nullable
     public Map<String, Object> getNextAction() {
         return mNextAction;
