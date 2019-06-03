@@ -42,26 +42,12 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
 
-    @VisibleForTesting
-    TokenCreator mTokenCreator = new TokenCreator() {
-        @Override
-        public void create(
-                @NonNull final Map<String, Object> tokenParams,
-                @NonNull final String publishableKey,
-                @Nullable final String stripeAccount,
-                @NonNull @Token.TokenType final String tokenType,
-                @Nullable final Executor executor,
-                @NonNull final TokenCallback callback) {
-            executeTask(executor, new CreateTokenTask(mApiHandler, tokenParams,
-                    publishableKey, stripeAccount, tokenType, callback));
-        }
-    };
-
-    private String mDefaultPublishableKey;
-    private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
     @NonNull private final PaymentAuthenticationController mPaymentAuthenticationController;
+    @NonNull private final TokenCreator mTokenCreator;
+    private String mDefaultPublishableKey;
+    @Nullable private String mStripeAccount;
 
     /**
      * A constructor with only context, to set the key later.
@@ -83,21 +69,43 @@ public class Stripe {
                 validatedKey(publishableKey));
     }
 
-    private Stripe(@NonNull Context context, @NonNull StripeApiHandler apiHandler,
+    Stripe(@NonNull Context context, @NonNull final StripeApiHandler apiHandler,
                    @NonNull StripeNetworkUtils stripeNetworkUtils,
                    @Nullable String publishableKey) {
         this(apiHandler, stripeNetworkUtils,
                 new PaymentAuthenticationController(context, apiHandler), publishableKey);
     }
 
+    Stripe(@NonNull final StripeApiHandler apiHandler,
+           @NonNull StripeNetworkUtils stripeNetworkUtils,
+           @NonNull PaymentAuthenticationController paymentAuthenticationController,
+           @Nullable String publishableKey) {
+        this(apiHandler, stripeNetworkUtils, paymentAuthenticationController, publishableKey,
+                new TokenCreator() {
+                    @Override
+                    public void create(
+                            @NonNull final Map<String, Object> tokenParams,
+                            @NonNull final RequestOptions requestOptions,
+                            @NonNull @Token.TokenType final String tokenType,
+                            @Nullable final Executor executor,
+                            @NonNull final TokenCallback callback) {
+                        executeTask(executor,
+                                new CreateTokenTask(apiHandler, tokenParams, requestOptions,
+                                        tokenType, callback));
+                    }
+                });
+    }
+
     @VisibleForTesting
     Stripe(@NonNull StripeApiHandler apiHandler,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentAuthenticationController paymentAuthenticationController,
-           @Nullable String publishableKey) {
+           @Nullable String publishableKey,
+           @NonNull TokenCreator tokenCreator) {
         mApiHandler = apiHandler;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentAuthenticationController = paymentAuthenticationController;
+        mTokenCreator = tokenCreator;
         mDefaultPublishableKey = publishableKey != null ? validatedKey(publishableKey) : null;
     }
 
@@ -876,11 +884,9 @@ public class Stripe {
         validatedKey(publishableKey);
         mTokenCreator.create(
                 tokenParams,
-                publishableKey,
-                mStripeAccount,
+                RequestOptions.createForApi(publishableKey, mStripeAccount),
                 tokenType,
-                executor,
-                callback);
+                executor, callback);
     }
 
     @NonNull
@@ -900,7 +906,7 @@ public class Stripe {
         return publishableKey;
     }
 
-    private void executeTask(@Nullable Executor executor,
+    private static void executeTask(@Nullable Executor executor,
                              @NonNull AsyncTask<Void, Void, ?> task) {
         if (executor != null) {
             task.executeOnExecutor(executor);
@@ -912,8 +918,7 @@ public class Stripe {
     @VisibleForTesting
     interface TokenCreator {
         void create(@NonNull Map<String, Object> params,
-                    @NonNull String publishableKey,
-                    @Nullable String stripeAccount,
+                    @NonNull RequestOptions requestOptions,
                     @NonNull @Token.TokenType String tokenType,
                     @Nullable Executor executor,
                     @NonNull TokenCallback callback);
@@ -980,35 +985,26 @@ public class Stripe {
     private static class CreateTokenTask extends ApiOperation<Token> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
-        @NonNull private final String mPublishableKey;
-        @Nullable private final String mStripeAccount;
+        @NonNull private final RequestOptions mRequestOptions;
         @NonNull @Token.TokenType private final String mTokenType;
 
         CreateTokenTask(
-                @NonNull StripeApiHandler apiHandler,
+                @NonNull final StripeApiHandler apiHandler,
                 @NonNull final Map<String, Object> tokenParams,
-                @NonNull final String publishableKey,
-                @Nullable final String stripeAccount,
+                @NonNull final RequestOptions requestOptions,
                 @NonNull @Token.TokenType final String tokenType,
                 @NonNull final TokenCallback callback) {
             super(callback);
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
-            mPublishableKey = publishableKey;
-            mStripeAccount = stripeAccount;
             mTokenType = tokenType;
+            mRequestOptions = requestOptions;
         }
 
         @Nullable
         @Override
         Token getResult() throws StripeException {
-            final RequestOptions requestOptions = RequestOptions.createForApi(mPublishableKey,
-                    mStripeAccount);
-            return mApiHandler.createToken(
-                    mTokenParams,
-                    requestOptions,
-                    mTokenType
-            );
+            return mApiHandler.createToken(mTokenParams, mRequestOptions, mTokenType);
         }
     }
 }
