@@ -45,7 +45,7 @@ dependencies {
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
 
     /* Needed for Rx Bindings on views */
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
@@ -59,8 +59,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
-    /* Used to debug your Retrofit connections */
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+    // Used to debug your Retrofit connections
+    // Do not upgrade as it will require increasing minSdkVersion to 21
+    //noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
