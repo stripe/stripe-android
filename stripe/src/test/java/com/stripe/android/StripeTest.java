@@ -152,18 +152,17 @@ public class StripeTest {
     @Test
     public void createTokenShouldCallTokenCreator() {
         final boolean[] tokenCreatorCalled = { false };
-        Stripe stripe = createNonLoggingStripe();
-        stripe.mTokenCreator = new Stripe.TokenCreator() {
-            @Override
-            public void create(@NonNull Map<String, Object> tokenParams,
-                               @NonNull String publishableKey,
-                               @Nullable String stripeAccount,
-                               @NonNull @Token.TokenType String tokenType,
-                               @Nullable Executor executor,
-                               @NonNull TokenCallback callback) {
-                tokenCreatorCalled[0] = true;
-            }
-        };
+        final Stripe stripe = createNonLoggingStripe(
+                new Stripe.TokenCreator() {
+                    @Override
+                    public void create(@NonNull Map<String, Object> tokenParams,
+                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull @Token.TokenType String tokenType,
+                                       @Nullable Executor executor,
+                                       @NonNull TokenCallback callback) {
+                        tokenCreatorCalled[0] = true;
+                    }
+                });
         stripe.createToken(DEFAULT_CARD, DEFAULT_TOKEN_CALLBACK);
         assertTrue(tokenCreatorCalled[0]);
     }
@@ -175,41 +174,38 @@ public class StripeTest {
             public void execute(@NonNull Runnable command) {
             }
         };
-        final Stripe stripe = createNonLoggingStripe();
-        stripe.mTokenCreator = new Stripe.TokenCreator() {
-            @Override
-            public void create(@NonNull Map<String, Object> tokenParams,
-                               @NonNull String publishableKey,
-                               @Nullable String stripeAccount,
-                               @NonNull @Token.TokenType String tokenType,
-                               @Nullable Executor executor,
-                               @NonNull TokenCallback callback) {
-                assertEquals(expectedExecutor, executor);
-                assertEquals(NON_LOGGING_PK, publishableKey);
-                assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-            }
-        };
+        final Stripe stripe = createNonLoggingStripe(
+                new Stripe.TokenCreator() {
+                    @Override
+                    public void create(@NonNull Map<String, Object> tokenParams,
+                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull @Token.TokenType String tokenType,
+                                       @Nullable Executor executor,
+                                       @NonNull TokenCallback callback) {
+                        assertEquals(expectedExecutor, executor);
+                        assertEquals(NON_LOGGING_PK, requestOptions.getPublishableApiKey());
+                        assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
+                    }
+                });
         stripe.createToken(DEFAULT_CARD, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test
     public void createTokenShouldUseProvidedKey() {
-        final String expectedPublishableKey = "pk_this_one";
-        Stripe stripe = createNonLoggingStripe();
-        stripe.mTokenCreator = new Stripe.TokenCreator() {
-            @Override
-            public void create(@NonNull Map<String, Object> tokenParams,
-                               @NonNull String publishableKey,
-                               @Nullable String stripeAccount,
-                               @NonNull @Token.TokenType String tokenType,
-                               @Nullable Executor executor,
-                               @NonNull TokenCallback callback) {
-                assertEquals(expectedPublishableKey, publishableKey);
-                assertNull(executor);
-                assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-            }
-        };
-        stripe.createToken(DEFAULT_CARD, expectedPublishableKey, DEFAULT_TOKEN_CALLBACK);
+        final Stripe stripe = createNonLoggingStripe(
+                new Stripe.TokenCreator() {
+                    @Override
+                    public void create(@NonNull Map<String, Object> tokenParams,
+                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull @Token.TokenType String tokenType,
+                                       @Nullable Executor executor,
+                                       @NonNull TokenCallback callback) {
+                        assertEquals(NON_LOGGING_PK, requestOptions.getPublishableApiKey());
+                        assertNull(executor);
+                        assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
+                    }
+                });
+        stripe.createToken(DEFAULT_CARD, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test
@@ -1268,7 +1264,19 @@ public class StripeTest {
                 apiHandler,
                 new StripeNetworkUtils(mContext),
                 new PaymentAuthenticationController(mContext, apiHandler),
-                publishableKey
+                publishableKey);
+    }
+
+    @NonNull
+    private Stripe createNonLoggingStripe(@NonNull Stripe.TokenCreator tokenCreator) {
+        final StripeApiHandler apiHandler =
+                new StripeApiHandler(mContext, new RequestExecutor(), false);
+        return new Stripe(
+                apiHandler,
+                new StripeNetworkUtils(mContext),
+                new PaymentAuthenticationController(mContext, apiHandler),
+                NON_LOGGING_PK,
+                tokenCreator
         );
     }
 
