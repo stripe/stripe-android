@@ -40,6 +40,9 @@ public class PaymentAuthRelayStarterTest {
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),
                 intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
+        assertEquals(PaymentAuthResult.Status.SUCCEEDED,
+                intent.getIntExtra(PaymentAuthenticationExtras.AUTH_STATUS,
+                        PaymentAuthResult.Status.UNKNOWN));
         assertNull(intent.getSerializableExtra(PaymentAuthenticationExtras.AUTH_EXCEPTION));
     }
 
@@ -50,6 +53,9 @@ public class PaymentAuthRelayStarterTest {
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertNull(intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
+        assertEquals(PaymentAuthResult.Status.FAILED,
+                intent.getIntExtra(PaymentAuthenticationExtras.AUTH_STATUS,
+                        PaymentAuthResult.Status.UNKNOWN));
         assertEquals(exception,
                 intent.getSerializableExtra(PaymentAuthenticationExtras.AUTH_EXCEPTION));
     }

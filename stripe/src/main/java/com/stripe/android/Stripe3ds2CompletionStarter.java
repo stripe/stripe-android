@@ -35,14 +35,16 @@ class Stripe3ds2CompletionStarter
 
         final Intent intent = new Intent(activity, PaymentAuthRelayActivity.class)
                 .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
-                        data.mPaymentIntent.getClientSecret());
+                        data.mPaymentIntent.getClientSecret())
+                .putExtra(PaymentAuthenticationExtras.AUTH_STATUS,
+                        data.getAuthStatus());
         activity.startActivityForResult(intent, mRequestCode);
     }
 
-    @IntDef({Status.COMPLETE, Status.CANCEL, Status.TIMEOUT, Status.PROTOCOL_ERROR,
-            Status.RUNTIME_ERROR})
+    @IntDef({ChallengeFlowStatus.COMPLETE, ChallengeFlowStatus.CANCEL, ChallengeFlowStatus.TIMEOUT,
+            ChallengeFlowStatus.PROTOCOL_ERROR, ChallengeFlowStatus.RUNTIME_ERROR})
     @Retention(RetentionPolicy.SOURCE)
-    @interface Status {
+    @interface ChallengeFlowStatus {
         int COMPLETE = 0;
         int CANCEL = 1;
         int TIMEOUT = 2;
@@ -52,30 +54,44 @@ class Stripe3ds2CompletionStarter
 
     static class StartData {
         @NonNull private final PaymentIntent mPaymentIntent;
-        @Status private final int mStatus;
+        @ChallengeFlowStatus private final int mChallengeFlowStatus;
         @Nullable private final String mCompletionTransactionStatus;
 
         @NonNull
         static StartData createForComplete(@NonNull PaymentIntent paymentIntent,
                                            @NonNull String completionTransactionStatus) {
-            return new StartData(paymentIntent, Status.COMPLETE, completionTransactionStatus);
+            return new StartData(paymentIntent, ChallengeFlowStatus.COMPLETE,
+                    completionTransactionStatus);
         }
 
         StartData(@NonNull PaymentIntent paymentIntent,
-                  @Status int status) {
+                  @ChallengeFlowStatus int status) {
             this(paymentIntent, status, null);
         }
 
-        private StartData(@NonNull PaymentIntent paymentIntent, @Status int status,
+        private StartData(@NonNull PaymentIntent paymentIntent,
+                          @ChallengeFlowStatus int challengeFlowStatus,
                           @Nullable String completionTransactionStatus) {
             mPaymentIntent = paymentIntent;
-            mStatus = status;
+            mChallengeFlowStatus = challengeFlowStatus;
             mCompletionTransactionStatus = completionTransactionStatus;
+        }
+
+        @PaymentAuthResult.Status
+        private int getAuthStatus() {
+            if (mChallengeFlowStatus == ChallengeFlowStatus.COMPLETE) {
+                return PaymentAuthResult.Status.SUCCEEDED;
+            } else if (mChallengeFlowStatus == ChallengeFlowStatus.CANCEL) {
+                return PaymentAuthResult.Status.CANCELED;
+            } else {
+                return PaymentAuthResult.Status.FAILED;
+            }
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mPaymentIntent, mStatus, mCompletionTransactionStatus);
+            return ObjectUtils.hash(mPaymentIntent, mChallengeFlowStatus,
+                    mCompletionTransactionStatus);
         }
 
         @Override
@@ -85,7 +101,7 @@ class Stripe3ds2CompletionStarter
 
         private boolean typedEquals(@NonNull StartData startData) {
             return ObjectUtils.equals(mPaymentIntent, startData.mPaymentIntent) &&
-                    ObjectUtils.equals(mStatus, startData.mStatus) &&
+                    ObjectUtils.equals(mChallengeFlowStatus, startData.mChallengeFlowStatus) &&
                     ObjectUtils.equals(mCompletionTransactionStatus,
                             startData.mCompletionTransactionStatus);
         }

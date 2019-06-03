@@ -125,12 +125,15 @@ class PaymentAuthenticationController {
         final String clientSecret = data.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET);
         final PaymentIntentParams paymentIntentParams = PaymentIntentParams
                 .createRetrievePaymentIntentParams(clientSecret);
+        @PaymentAuthResult.Status final int authStatus = data.getIntExtra(
+                PaymentAuthenticationExtras.AUTH_STATUS, PaymentAuthResult.Status.UNKNOWN);
         new RetrievePaymentIntentTask(stripe, paymentIntentParams, publishableKey,
                 new ApiResultCallback<PaymentIntent>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntent paymentIntent) {
                         callback.onSuccess(new PaymentAuthResult.Builder()
                                 .setPaymentIntent(paymentIntent)
+                                .setStatus(authStatus)
                                 .build());
                     }
 
@@ -447,28 +450,28 @@ class PaymentAuthenticationController {
         public void cancelled() {
             super.cancelled();
             start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
-                    Stripe3ds2CompletionStarter.Status.CANCEL));
+                    Stripe3ds2CompletionStarter.ChallengeFlowStatus.CANCEL));
         }
 
         @Override
         public void timedout() {
             super.timedout();
             start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
-                    Stripe3ds2CompletionStarter.Status.TIMEOUT));
+                    Stripe3ds2CompletionStarter.ChallengeFlowStatus.TIMEOUT));
         }
 
         @Override
         public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
             super.protocolError(protocolErrorEvent);
             start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
-                    Stripe3ds2CompletionStarter.Status.PROTOCOL_ERROR));
+                    Stripe3ds2CompletionStarter.ChallengeFlowStatus.PROTOCOL_ERROR));
         }
 
         @Override
         public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent);
             start(new Stripe3ds2CompletionStarter.StartData(mPaymentIntent,
-                    Stripe3ds2CompletionStarter.Status.RUNTIME_ERROR));
+                    Stripe3ds2CompletionStarter.ChallengeFlowStatus.RUNTIME_ERROR));
         }
 
         private void start(@NonNull Stripe3ds2CompletionStarter.StartData startData) {

@@ -113,7 +113,7 @@ public class PaymentAuthenticationControllerTest {
                 .cancelled();
         verify(m3ds2Starter).start(
                 new Stripe3ds2CompletionStarter.StartData(PaymentIntentFixtures.PI_REQUIRES_3DS2,
-                        Stripe3ds2CompletionStarter.Status.CANCEL));
+                        Stripe3ds2CompletionStarter.ChallengeFlowStatus.CANCEL));
     }
 
     @Test
