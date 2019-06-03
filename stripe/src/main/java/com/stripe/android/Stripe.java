@@ -24,11 +24,10 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
-import com.stripe.android.model.StripePaymentSource;
 import com.stripe.android.model.Token;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import static com.stripe.android.StripeNetworkUtils.hashMapFromPersonalId;
@@ -40,6 +39,7 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
  * - {@link PaymentMethod} creation
  * - {@link PaymentIntent} retrieval and confirmation
  */
+@SuppressWarnings("WeakerAccess")
 public class Stripe {
 
     @VisibleForTesting
@@ -60,7 +60,6 @@ public class Stripe {
     private String mDefaultPublishableKey;
     private String mStripeAccount;
     @NonNull private final StripeApiHandler mApiHandler;
-    @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
     @NonNull private final PaymentAuthenticationController mPaymentAuthenticationController;
 
@@ -70,8 +69,7 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        this(context, new StripeApiHandler(context), new LoggingUtils(context),
-                new StripeNetworkUtils(context));
+        this(context, new StripeApiHandler(context), new StripeNetworkUtils(context), null);
     }
 
     /**
@@ -81,27 +79,26 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
-        this(context, new StripeApiHandler(context), new LoggingUtils(context),
-                new StripeNetworkUtils(context));
-        setDefaultPublishableKey(publishableKey);
+        this(context, new StripeApiHandler(context), new StripeNetworkUtils(context),
+                validatedKey(publishableKey));
+    }
+
+    private Stripe(@NonNull Context context, @NonNull StripeApiHandler apiHandler,
+                   @NonNull StripeNetworkUtils stripeNetworkUtils,
+                   @Nullable String publishableKey) {
+        this(apiHandler, stripeNetworkUtils,
+                new PaymentAuthenticationController(context, apiHandler), publishableKey);
     }
 
     @VisibleForTesting
-    Stripe(@NonNull Context context, @NonNull StripeApiHandler apiHandler,
-           @NonNull LoggingUtils loggingUtils,
-           @NonNull StripeNetworkUtils stripeNetworkUtils) {
-        this(apiHandler, loggingUtils, stripeNetworkUtils,
-                new PaymentAuthenticationController(context, apiHandler));
-    }
-
-    @VisibleForTesting
-    Stripe(@NonNull StripeApiHandler apiHandler, @NonNull LoggingUtils loggingUtils,
+    Stripe(@NonNull StripeApiHandler apiHandler,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
-           @NonNull PaymentAuthenticationController paymentAuthenticationController) {
+           @NonNull PaymentAuthenticationController paymentAuthenticationController,
+           @Nullable String publishableKey) {
         mApiHandler = apiHandler;
-        mLoggingUtils = loggingUtils;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentAuthenticationController = paymentAuthenticationController;
+        mDefaultPublishableKey = publishableKey != null ? validatedKey(publishableKey) : null;
     }
 
     /**
@@ -192,10 +189,9 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-        if (bankAccount == null) {
-            throw new RuntimeException(
+        Objects.requireNonNull(bankAccount,
+
                     "Required parameter: 'bankAccount' is requred to create a token");
-        }
 
         createTokenFromParams(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
@@ -257,7 +253,8 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers
      */
-    public Token createBankAccountTokenSynchronous(final BankAccount bankAccount)
+    @Nullable
+    public Token createBankAccountTokenSynchronous(@NonNull final BankAccount bankAccount)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -280,15 +277,15 @@ public class Stripe {
      *         possible given the underlying methods called
      * @throws APIException any other type of problem
      */
-    public Token createBankAccountTokenSynchronous(
-            final BankAccount bankAccount,
-            String publishableKey)
+    @Nullable
+    public Token createBankAccountTokenSynchronous(@NonNull final BankAccount bankAccount,
+                                                   @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             CardException,
             APIException {
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -340,7 +337,7 @@ public class Stripe {
      * @param callback a {@link SourceCallback} to receive a result or an error message
      */
     public void createSource(@NonNull SourceParams sourceParams, @NonNull SourceCallback callback) {
-        createSource(sourceParams, callback, null, null);
+        createSource(sourceParams, callback, mDefaultPublishableKey, null);
     }
 
     /**
@@ -354,12 +351,8 @@ public class Stripe {
     public void createSource(
             @NonNull SourceParams sourceParams,
             @NonNull SourceCallback callback,
-            @Nullable String publishableKey,
+            @NonNull String publishableKey,
             @Nullable Executor executor) {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return;
-        }
         executeTask(executor,
                 new CreateSourceTask(mApiHandler, sourceParams, publishableKey, mStripeAccount,
                         callback));
@@ -375,7 +368,7 @@ public class Stripe {
      */
     public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
                                     @NonNull ApiResultCallback<PaymentMethod> callback) {
-        createPaymentMethod(paymentMethodCreateParams, callback, null, null);
+        createPaymentMethod(paymentMethodCreateParams, callback, mDefaultPublishableKey, null);
     }
 
     /**
@@ -390,15 +383,10 @@ public class Stripe {
     public void createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull ApiResultCallback<PaymentMethod> callback,
-            @Nullable String publishableKey,
+            @NonNull String publishableKey,
             @Nullable Executor executor) {
-        final String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return;
-        }
-
         executeTask(executor, new CreatePaymentMethodTask(mApiHandler, paymentMethodCreateParams,
-                apiKey, mStripeAccount, callback));
+                publishableKey, mStripeAccount, callback));
     }
 
     /**
@@ -456,10 +444,8 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-        if (card == null) {
-            throw new RuntimeException(
-                    "Required Parameter: 'card' is required to create a token");
-        }
+        Objects.requireNonNull(card,
+                "Required Parameter: 'card' is required to create a token");
 
         createTokenFromParams(
                 mStripeNetworkUtils.hashMapFromCard(card),
@@ -489,7 +475,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return createSourceSynchronous(params, null);
+        return createSourceSynchronous(params, mDefaultPublishableKey);
     }
 
     /**
@@ -508,16 +494,12 @@ public class Stripe {
     @Nullable
     public Source createSourceSynchronous(
             @NonNull SourceParams params,
-            @Nullable String publishableKey)
+            @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return null;
-        }
-        return mApiHandler.createSource(params, apiKey, mStripeAccount);
+        return mApiHandler.createSource(params, publishableKey, mStripeAccount);
     }
 
     /**
@@ -527,11 +509,8 @@ public class Stripe {
      * @param paymentIntentParams a set of params with which to retrieve the Payment Intent
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws APIException
      */
+    @Nullable
     public PaymentIntent retrievePaymentIntentSynchronous(
             @NonNull PaymentIntentParams paymentIntentParams,
             @NonNull String publishableKey) throws AuthenticationException,
@@ -552,10 +531,6 @@ public class Stripe {
      * @param paymentIntentParams a set of params with which to confirm the Payment Intent
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws APIException
      */
     @Nullable
     public PaymentIntent confirmPaymentIntentSynchronous(
@@ -578,10 +553,6 @@ public class Stripe {
      * @param paymentMethodCreateParams params with which to create the PaymentMethod
      * @param publishableKey a publishable API key to use
      * @return a {@link PaymentMethod} or {@code null} if a problem occurred
-     * @throws AuthenticationException
-     * @throws InvalidRequestException
-     * @throws APIConnectionException
-     * @throws APIException
      */
     @Nullable
     public PaymentMethod createPaymentMethodSynchronous(
@@ -591,6 +562,17 @@ public class Stripe {
             APIException {
         return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
                 publishableKey, mStripeAccount);
+    }
+
+    /**
+     * See {@link #createPaymentMethodSynchronous(PaymentMethodCreateParams, String)}
+     */
+    @Nullable
+    public PaymentMethod createPaymentMethodSynchronous(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams)
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        return createPaymentMethodSynchronous(paymentMethodCreateParams, mDefaultPublishableKey);
     }
 
     /**
@@ -606,7 +588,8 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers
      */
-    public Token createTokenSynchronous(final Card card)
+    @Nullable
+    public Token createTokenSynchronous(@NonNull final Card card)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -628,13 +611,14 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers)
      */
-    public Token createTokenSynchronous(final Card card, String publishableKey)
+    @Nullable
+    public Token createTokenSynchronous(@NonNull final Card card, @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             CardException,
             APIException {
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
 
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromCard(card),
@@ -655,6 +639,7 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers)
      */
+    @Nullable
     public Token createPiiTokenSynchronous(@NonNull String personalId)
             throws AuthenticationException,
             InvalidRequestException,
@@ -677,13 +662,15 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers)
      */
-    public Token createPiiTokenSynchronous(@NonNull String personalId, String publishableKey)
+    @Nullable
+    public Token createPiiTokenSynchronous(@NonNull String personalId,
+                                           @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             CardException,
             APIException {
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 hashMapFromPersonalId(personalId),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -734,7 +721,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 mapFromCvc(cvc),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -781,16 +768,12 @@ public class Stripe {
     @Nullable
     public Token createAccountTokenSynchronous(
             @NonNull final AccountParams accountParams,
-            @Nullable String publishableKey)
+            @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return null;
-        }
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
         try {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
@@ -801,27 +784,6 @@ public class Stripe {
             // Should never occur. CardException is only for card related requests.
         }
         return null;
-    }
-
-    public void logEventSynchronous(
-            @NonNull List<String> productUsageTokens,
-            @NonNull StripePaymentSource paymentSource) {
-        final Map<String, Object> loggingMap;
-        if (paymentSource instanceof Token) {
-            Token token = (Token) paymentSource;
-            loggingMap = mLoggingUtils.getTokenCreationParams(
-                    productUsageTokens,
-                    mDefaultPublishableKey,
-                    token.getType());
-        } else {
-            Source source = (Source) paymentSource;
-            loggingMap = mLoggingUtils.getSourceCreationParams(
-                    productUsageTokens,
-                    mDefaultPublishableKey,
-                    source.getType());
-        }
-        mApiHandler.logApiCall(loggingMap,
-                RequestOptions.createForApi(mDefaultPublishableKey, mStripeAccount));
     }
 
     /**
@@ -839,6 +801,7 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers)
      */
+    @Nullable
     public Source retrieveSourceSynchronous(
             @NonNull @Size(min = 1) String sourceId,
             @NonNull @Size(min = 1) String clientSecret)
@@ -846,7 +809,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return retrieveSourceSynchronous(sourceId, clientSecret, null);
+        return retrieveSourceSynchronous(sourceId, clientSecret, mDefaultPublishableKey);
     }
 
     /**
@@ -865,29 +828,28 @@ public class Stripe {
      * @throws APIException any other type of problem (for instance, a temporary issue with
      *         Stripe's servers)
      */
+    @Nullable
     public Source retrieveSourceSynchronous(
             @NonNull @Size(min = 1) String sourceId,
             @NonNull @Size(min = 1) String clientSecret,
-            @Nullable String publishableKey)
+            @NonNull String publishableKey)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        String apiKey = publishableKey == null ? mDefaultPublishableKey : publishableKey;
-        if (apiKey == null) {
-            return null;
-        }
-        return mApiHandler.retrieveSource(sourceId, clientSecret, apiKey, mStripeAccount);
+        return mApiHandler.retrieveSource(sourceId, clientSecret, publishableKey, mStripeAccount);
     }
 
     /**
      * Set the default publishable key to use with this {@link Stripe} instance.
      *
      * @param publishableKey the key to be set
+     *
+     * @deprecated use {@link #Stripe(Context, String)}
      */
+    @Deprecated
     public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey) {
-        validateKey(publishableKey);
-        mDefaultPublishableKey = publishableKey;
+        mDefaultPublishableKey = validatedKey(publishableKey);
     }
 
     /**
@@ -907,13 +869,11 @@ public class Stripe {
             @NonNull @Token.TokenType final String tokenType,
             @Nullable final Executor executor,
             @NonNull final TokenCallback callback) {
-        if (callback == null) {
-            throw new RuntimeException(
+        Objects.requireNonNull(callback,
                     "Required Parameter: 'callback' is required to use the created " +
                             "token and handle errors");
-        }
 
-        validateKey(publishableKey);
+        validatedKey(publishableKey);
         mTokenCreator.create(
                 tokenParams,
                 publishableKey,
@@ -923,19 +883,21 @@ public class Stripe {
                 callback);
     }
 
-    private void validateKey(@NonNull @Size(min = 1) String publishableKey) {
+    @NonNull
+    private static String validatedKey(@Nullable @Size(min = 1) String publishableKey) {
         if (publishableKey == null || publishableKey.length() == 0) {
             throw new IllegalArgumentException("Invalid Publishable Key: " +
-                    "You must use a valid publishable key to create a token.  " +
-                    "For more info, see https://stripe.com/docs/stripe.js.");
+                    "You must use a valid publishable key to create a token. " +
+                    "For more info, see https://stripe.com/docs/keys");
         }
 
         if (publishableKey.startsWith("sk_")) {
             throw new IllegalArgumentException("Invalid Publishable Key: " +
-                    "You are using a secret key to create a token, " +
-                    "instead of the publishable one. For more info, " +
-                    "see https://stripe.com/docs/stripe.js");
+                    "You are using a secret key, instead of the publishable one. " +
+                    "For more info, see https://stripe.com/docs/keys");
         }
+
+        return publishableKey;
     }
 
     private void executeTask(@Nullable Executor executor,
