@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -59,6 +60,7 @@ public class PaymentAuthenticationControllerTest {
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentAuthResult> mPaymentAuthResultCallback;
     @Mock private PaymentAuthRelayStarter mPaymentAuthRelayStarter;
+    @Mock private ProgressDialog mProgressDialog;
 
     @Captor private ArgumentCaptor<PaymentAuthRelayStarter.Data> mRelayStarterDataArgumentCaptor;
 
@@ -81,12 +83,14 @@ public class PaymentAuthenticationControllerTest {
 
     @Test
     public void handleNextAction_with3ds2() {
+        when(mTransaction.getProgressView(mActivity)).thenReturn(mProgressDialog);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                 PUBLISHABLE_KEY);
         verify(mThreeDs2Service).createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false);
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
+        verify(mProgressDialog).show();
     }
 
     @Test
@@ -128,7 +132,7 @@ public class PaymentAuthenticationControllerTest {
     public void authCallback_withChallengeFlow_shouldNotStartRelayActivity() {
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
-                        MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                        mProgressDialog, MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         mPaymentAuthRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW);
         verify(mPaymentAuthRelayStarter, never())
@@ -139,7 +143,7 @@ public class PaymentAuthenticationControllerTest {
     public void authCallback_withFrictionlessFlow_shouldStartRelayActivityWithPaymentIntent() {
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
-                        MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                        mProgressDialog, MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         mPaymentAuthRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW);
         verify(mPaymentAuthRelayStarter)
@@ -152,7 +156,7 @@ public class PaymentAuthenticationControllerTest {
     public void authCallback_withError_shouldStartRelayActivityWithException() {
         final PaymentAuthenticationController.Stripe3ds2AuthCallback authCallback =
                 new PaymentAuthenticationController.Stripe3ds2AuthCallback(mActivity, mTransaction,
-                        MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                        mProgressDialog, MAX_TIMEOUT, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                         mPaymentAuthRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);
         verify(mPaymentAuthRelayStarter).start(mRelayStarterDataArgumentCaptor.capture());
