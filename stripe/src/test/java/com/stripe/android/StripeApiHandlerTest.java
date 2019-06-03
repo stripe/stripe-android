@@ -17,10 +17,10 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -178,9 +179,7 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException()
-            throws APIConnectionException, APIException, CardException,
-            AuthenticationException, JSONException {
+    public void start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
         final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(
                 "src_invalid",
                 "1.0.0",
@@ -191,13 +190,17 @@ public class StripeApiHandlerTest {
                 "2.1.0",
                 10);
 
-        try {
-            mApiHandler.start3ds2Auth(authParams, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
-            fail("Expected InvalidRequestException");
-        } catch (InvalidRequestException e) {
-            assertEquals("source", e.getParam());
-            assertEquals("resource_missing", e.getErrorCode());
-        }
+        final InvalidRequestException invalidRequestException = assertThrows(
+                InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        mApiHandler.start3ds2Auth(authParams,
+                                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
+                    }
+                });
+        assertEquals("source", invalidRequestException.getParam());
+        assertEquals("resource_missing", invalidRequestException.getErrorCode());
     }
 
     @Test
