@@ -304,7 +304,7 @@ class PaymentAuthenticationController {
         @NonNull private final PaymentIntent mPaymentIntent;
         @NonNull private final PaymentAuthRelayStarter mPaymentAuthRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
-        @NonNull private final ProgressDialog mProgressDialog;
+        @NonNull private final WeakReference<ProgressDialog> mProgressDialog;
 
         private Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
@@ -326,7 +326,7 @@ class PaymentAuthenticationController {
                 @NonNull PaymentAuthRelayStarter paymentAuthRelayStarter) {
             mActivityRef = new WeakReference<>(activity);
             mTransaction = transaction;
-            mProgressDialog = progressDialog;
+            mProgressDialog = new WeakReference<>(progressDialog);
             mMaxTimeout = maxTimeout;
             mPaymentIntent = paymentIntent;
             mPaymentAuthRelayStarter = paymentAuthRelayStarter;
@@ -379,7 +379,10 @@ class PaymentAuthenticationController {
 
         private void startFrictionlessFlow() {
             mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(mPaymentIntent));
-            mProgressDialog.dismiss();
+            final ProgressDialog progressDialog = mProgressDialog.get();
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
         }
 
         private void startChallengeFlow(@NonNull final Activity activity,
@@ -393,7 +396,10 @@ class PaymentAuthenticationController {
             mBackgroundHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mProgressDialog.dismiss();
+                    final ProgressDialog progressDialog = mProgressDialog.get();
+                    if (progressDialog != null) {
+                        progressDialog.dismiss();
+                    }
                     mTransaction.doChallenge(activity,
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver
