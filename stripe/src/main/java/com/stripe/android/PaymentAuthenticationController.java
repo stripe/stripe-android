@@ -183,6 +183,9 @@ class PaymentAuthenticationController {
         final Transaction transaction =
                 mThreeDs2Service.createTransaction(mDirectoryServerId,
                         mMessageVersionRegistry.getCurrent(), false);
+        final ProgressDialog dialog = transaction.getProgressView(activity);
+        dialog.show();
+
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
         final int timeout = mConfig.stripe3ds2Config.timeout;
@@ -197,7 +200,7 @@ class PaymentAuthenticationController {
                 timeout
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
-                new Stripe3ds2AuthCallback(activity, transaction, timeout, paymentIntent));
+                new Stripe3ds2AuthCallback(activity, transaction, dialog, timeout, paymentIntent));
     }
 
     /**
@@ -301,13 +304,15 @@ class PaymentAuthenticationController {
         @NonNull private final PaymentIntent mPaymentIntent;
         @NonNull private final PaymentAuthRelayStarter mPaymentAuthRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
+        @NonNull private final ProgressDialog mProgressDialog;
 
         private Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
                 @NonNull Transaction transaction,
+                @NonNull ProgressDialog progressDialog,
                 int maxTimeout,
                 @NonNull PaymentIntent paymentIntent) {
-            this(activity, transaction, maxTimeout, paymentIntent,
+            this(activity, transaction, progressDialog, maxTimeout, paymentIntent,
                     new PaymentAuthRelayStarter(activity, REQUEST_CODE));
         }
 
@@ -315,11 +320,13 @@ class PaymentAuthenticationController {
         Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
                 @NonNull Transaction transaction,
+                @NonNull ProgressDialog progressDialog,
                 int maxTimeout,
                 @NonNull PaymentIntent paymentIntent,
                 @NonNull PaymentAuthRelayStarter paymentAuthRelayStarter) {
             mActivityRef = new WeakReference<>(activity);
             mTransaction = transaction;
+            mProgressDialog = progressDialog;
             mMaxTimeout = maxTimeout;
             mPaymentIntent = paymentIntent;
             mPaymentAuthRelayStarter = paymentAuthRelayStarter;
@@ -372,6 +379,7 @@ class PaymentAuthenticationController {
 
         private void startFrictionlessFlow() {
             mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(mPaymentIntent));
+            mProgressDialog.dismiss();
         }
 
         private void startChallengeFlow(@NonNull final Activity activity,
@@ -382,13 +390,10 @@ class PaymentAuthenticationController {
             challengeParameters.set3DSServerTransactionID(ares.threeDSServerTransId);
             challengeParameters.setAcsTransactionID(ares.acsTransId);
 
-            final ProgressDialog dialog = mTransaction.getProgressView(activity);
-            dialog.show();
-
             mBackgroundHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    dialog.dismiss();
+                    mProgressDialog.dismiss();
                     mTransaction.doChallenge(activity,
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver
