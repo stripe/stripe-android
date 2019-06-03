@@ -80,7 +80,7 @@ public class PaymentSessionTest {
             APIConnectionException {
         MockitoAnnotations.initMocks(this);
 
-        PaymentConfiguration.init("pk_test_abc123");
+        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         mEphemeralKeyProvider = new TestEphemeralKeyProvider();
 
@@ -96,9 +96,8 @@ public class PaymentSessionTest {
         when(mApiHandler.retrieveCustomer(anyString(), anyString()))
                 .thenReturn(firstCustomer, secondCustomer);
         when(mApiHandler.createPaymentMethod(
-                any(PaymentMethodCreateParams.class),
-                anyString(),
-                anyString()
+                ArgumentMatchers.<PaymentMethodCreateParams>any(),
+                ArgumentMatchers.<RequestOptions>any()
         )).thenReturn(paymentMethod);
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),

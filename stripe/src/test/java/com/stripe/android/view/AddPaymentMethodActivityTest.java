@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.CustomerSessionTestHelper;
@@ -91,7 +92,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     public void setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
-        PaymentConfiguration.init("pk_test_abc123");
+        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
     }

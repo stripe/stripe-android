@@ -46,7 +46,7 @@ public class StripePaymentAuthTest {
                         "yourapp://post-authentication-return-url");
         stripe.startPaymentAuth(mActivity, paymentIntentParams);
         verify(mPaymentAuthenticationController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(paymentIntentParams), eq("pk_test"));
+                eq(paymentIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test
@@ -60,15 +60,18 @@ public class StripePaymentAuthTest {
                 data, mCallback);
 
         verify(mPaymentAuthenticationController).handleResult(stripe, data,
-                "pk_test", mCallback);
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mCallback);
     }
 
     @Test
     public void startPaymentAuth_withConfirmedPaymentIntent_shouldAuth() {
         final Stripe stripe = createStripe();
         stripe.startPaymentAuth(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2);
-        verify(mPaymentAuthenticationController).startAuth(eq(mActivity),
-                eq(PaymentIntentFixtures.PI_REQUIRES_3DS2), eq("pk_test"));
+        verify(mPaymentAuthenticationController).startAuth(
+                eq(mActivity),
+                eq(PaymentIntentFixtures.PI_REQUIRES_3DS2),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        );
     }
 
     @NonNull
@@ -80,7 +83,7 @@ public class StripePaymentAuthTest {
                         false),
                 new StripeNetworkUtils(mContext),
                 mPaymentAuthenticationController,
-                "pk_test"
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         );
     }
 }

@@ -210,7 +210,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     public void setup()
             throws StripeException {
         MockitoAnnotations.initMocks(this);
-        PaymentConfiguration.init("pk_test_abc123");
+        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .registerReceiver(mBroadcastReceiver,
@@ -358,7 +358,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).setCustomerShippingInfo(
                 eq(FIRST_CUSTOMER.getId()),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq(shippingInformation),
                 eq(firstKey.getSecret()));
@@ -506,7 +506,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).addCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.CARD),
@@ -611,7 +611,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).deleteCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(firstKey.getSecret()));
@@ -711,7 +711,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).setDefaultCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.CARD),
@@ -842,7 +842,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).attachPaymentMethod(
                 eq(FIRST_CUSTOMER.getId()),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("pm_abc123"),
                 eq(firstKey.getSecret())
@@ -944,7 +944,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
         verify(mApiHandler).detachPaymentMethod(
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("pm_abc123"),
                 eq(firstKey.getSecret()));
@@ -1042,7 +1042,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         verify(mApiHandler).getPaymentMethods(
                 eq(FIRST_CUSTOMER.getId()),
                 eq("card"),
-                eq("pk_test_abc123"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq(firstKey.getSecret())
         );

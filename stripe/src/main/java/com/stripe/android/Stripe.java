@@ -509,7 +509,8 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.createSource(params, publishableKey, mStripeAccount);
+        return mApiHandler.createSource(params,
+                RequestOptions.createForApi(publishableKey, mStripeAccount));
     }
 
     /**
@@ -529,8 +530,7 @@ public class Stripe {
             APIException {
         return mApiHandler.retrievePaymentIntent(
                 paymentIntentParams,
-                publishableKey,
-                mStripeAccount
+                RequestOptions.createForApi(publishableKey, mStripeAccount)
         );
     }
 
@@ -551,8 +551,7 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
-                publishableKey,
-                mStripeAccount
+                RequestOptions.createForApi(publishableKey, mStripeAccount)
         );
     }
 
@@ -571,7 +570,7 @@ public class Stripe {
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
         return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
-                publishableKey, mStripeAccount);
+                RequestOptions.createForApi(publishableKey, mStripeAccount));
     }
 
     /**
@@ -842,7 +841,8 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.retrieveSource(sourceId, clientSecret, publishableKey, mStripeAccount);
+        return mApiHandler.retrieveSource(sourceId, clientSecret,
+                RequestOptions.createForApi(publishableKey, mStripeAccount));
     }
 
     /**
@@ -905,8 +905,7 @@ public class Stripe {
     private static class CreateSourceTask extends ApiOperation<Source> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
-        @NonNull private final String mPublishableKey;
-        @Nullable private final String mStripeAccount;
+        @NonNull private final RequestOptions mRequestOptions;
 
         CreateSourceTask(@NonNull StripeApiHandler apiHandler,
                          @NonNull SourceParams sourceParams,
@@ -916,26 +915,20 @@ public class Stripe {
             super(callback);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
-            mPublishableKey = publishableKey;
-            mStripeAccount = stripeAccount;
+            mRequestOptions = RequestOptions.createForApi(publishableKey, stripeAccount);
         }
 
         @Nullable
         @Override
         Source getResult() throws StripeException {
-                return mApiHandler.createSource(
-                        mSourceParams,
-                        mPublishableKey,
-                        mStripeAccount
-                );
+                return mApiHandler.createSource(mSourceParams, mRequestOptions);
         }
     }
 
     private static class CreatePaymentMethodTask extends ApiOperation<PaymentMethod> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
-        @NonNull private final String mPublishableKey;
-        @Nullable private final String mStripeAccount;
+        @NonNull private final RequestOptions mRequestOptions;
 
         CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
                                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -945,18 +938,13 @@ public class Stripe {
             super(callback);
             mApiHandler = apiHandler;
             mPaymentMethodCreateParams = paymentMethodCreateParams;
-            mPublishableKey = publishableKey;
-            mStripeAccount = stripeAccount;
+            mRequestOptions = RequestOptions.createForApi(publishableKey, stripeAccount);
         }
 
         @Nullable
         @Override
         PaymentMethod getResult() throws StripeException {
-            return mApiHandler.createPaymentMethod(
-                    mPaymentMethodCreateParams,
-                    mPublishableKey,
-                    mStripeAccount
-            );
+            return mApiHandler.createPaymentMethod(mPaymentMethodCreateParams, mRequestOptions);
         }
     }
 

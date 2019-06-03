@@ -28,8 +28,8 @@ public class PaymentConfigurationTest {
 
     @Test
     public void getInstance_withPublicKey_returnsDefaultInstance() {
-        PaymentConfiguration.init("pk_test_key");
-        assertEquals("pk_test_key",
+        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 PaymentConfiguration.getInstance().getPublishableKey());
     }
 }
