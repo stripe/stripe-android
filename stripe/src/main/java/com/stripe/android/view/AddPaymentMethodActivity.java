@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Source;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
@@ -71,7 +72,8 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mStripe = new Stripe(getApplicationContext());
+        mStripe = new Stripe(getApplicationContext(),
+                PaymentConfiguration.getInstance().getPublishableKey());
         mViewStub.setLayoutResource(R.layout.activity_add_source);
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
@@ -115,12 +117,13 @@ public class AddPaymentMethodActivity extends StripeActivity {
             return;
         }
 
-        createPaymentMethod(mStripe);
+        createPaymentMethod(Objects.requireNonNull(mStripe));
     }
 
     @VisibleForTesting
     void createPaymentMethod(@NonNull Stripe stripe) {
-        final PaymentMethodCreateParams.Card card = mCardMultilineWidget.getPaymentMethodCard();
+        final PaymentMethodCreateParams.Card card =
+                Objects.requireNonNull(mCardMultilineWidget).getPaymentMethodCard();
         final PaymentMethod.BillingDetails billingDetails =
                 mCardMultilineWidget.getPaymentMethodBillingDetails();
 
@@ -132,7 +135,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(card, billingDetails);
 
-        stripe.setDefaultPublishableKey(PaymentConfiguration.getInstance().getPublishableKey());
         setCommunicatingProgress(true);
         stripe.createPaymentMethod(paymentMethodCreateParams,
                 new PaymentMethodCallbackImpl(this, mUpdatesCustomer));
@@ -142,7 +144,8 @@ public class AddPaymentMethodActivity extends StripeActivity {
         final CustomerSession.PaymentMethodRetrievalListener listener =
                 new PaymentMethodRetrievalListenerImpl(this);
 
-        CustomerSession.getInstance().attachPaymentMethod(paymentMethod.id, listener);
+        CustomerSession.getInstance()
+                .attachPaymentMethod(Objects.requireNonNull(paymentMethod.id), listener);
     }
 
     private void logToCustomerSessionIf(@NonNull String logToken, boolean condition) {
@@ -160,7 +163,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
     }
 
     boolean hasValidCard() {
-        return mCardMultilineWidget.getCard() != null;
+        return Objects.requireNonNull(mCardMultilineWidget).getCard() != null;
     }
 
     @Nullable

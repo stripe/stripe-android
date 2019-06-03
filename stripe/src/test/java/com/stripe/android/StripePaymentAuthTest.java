@@ -39,7 +39,6 @@ public class StripePaymentAuthTest {
     @Test
     public void startPaymentAuth_withConfirmParams_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
-        stripe.setDefaultPublishableKey("pk_test");
         final PaymentIntentParams paymentIntentParams =
                 PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
                         "pm_card_threeDSecure2Required",
@@ -57,7 +56,6 @@ public class StripePaymentAuthTest {
                 PaymentAuthenticationController.REQUEST_CODE, Activity.RESULT_OK, data))
                 .thenReturn(true);
         final Stripe stripe = createStripe();
-        stripe.setDefaultPublishableKey("pk_test");
         stripe.onPaymentAuthResult(PaymentAuthenticationController.REQUEST_CODE, Activity.RESULT_OK,
                 data, mCallback);
 
@@ -68,7 +66,6 @@ public class StripePaymentAuthTest {
     @Test
     public void startPaymentAuth_withConfirmedPaymentIntent_shouldAuth() {
         final Stripe stripe = createStripe();
-        stripe.setDefaultPublishableKey("pk_test");
         stripe.startPaymentAuth(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2);
         verify(mPaymentAuthenticationController).startAuth(eq(mActivity),
                 eq(PaymentIntentFixtures.PI_REQUIRES_3DS2), eq("pk_test"));
@@ -81,8 +78,9 @@ public class StripePaymentAuthTest {
                         mContext,
                         new RequestExecutor(),
                         false),
-                new LoggingUtils(mContext),
                 new StripeNetworkUtils(mContext),
-                mPaymentAuthenticationController);
+                mPaymentAuthenticationController,
+                "pk_test"
+        );
     }
 }

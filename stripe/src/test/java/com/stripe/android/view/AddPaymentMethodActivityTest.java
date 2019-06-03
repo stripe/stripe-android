@@ -91,6 +91,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     public void setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+        PaymentConfiguration.init("pk_test_abc123");
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
     }
@@ -157,7 +158,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.expiryDateEditText.append("50");
         mWidgetControlGroup.cvcEditText.append("12");
 
-        PaymentConfiguration.init("pk_test_abc123");
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
@@ -177,8 +177,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.expiryDateEditText.append("50");
         mWidgetControlGroup.cvcEditText.append("1234");
 
-        PaymentConfiguration.init("pk_test_abc123");
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
         mActivity.createPaymentMethod(mStripe);
@@ -195,8 +193,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.expiryDateEditText.append("50");
         mWidgetControlGroup.cvcEditText.append("1234");
         mWidgetControlGroup.postalCodeEditText.append("90210");
-
-        PaymentConfiguration.init("pk_test_abc123");
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
@@ -257,7 +253,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.expiryDateEditText.append("50");
         mWidgetControlGroup.cvcEditText.append("1234");
 
-        PaymentConfiguration.init("pk_test_abc123");
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
         mActivity.createPaymentMethod(mStripe);
@@ -295,8 +290,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mWidgetControlGroup.expiryDateEditText.append("50");
         mWidgetControlGroup.cvcEditText.append("1234");
         mWidgetControlGroup.postalCodeEditText.append("90210");
-
-        PaymentConfiguration.init("pk_test_abc123");
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
