@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Handler for calls to the Stripe API.
@@ -73,7 +74,7 @@ class StripeApiHandler {
             return false;
         }
 
-        final String apiKey = options.getPublishableApiKey();
+        final String apiKey = options.getApiKey();
         if (apiKey == null || apiKey.trim().isEmpty()) {
             // if there is no apiKey associated with the request, we don't need to react here.
             return false;
@@ -106,20 +107,16 @@ class StripeApiHandler {
         final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
-            final String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
             logTelemetryData();
             final SourceParams sourceParams = paymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
             logApiCall(
-                    mLoggingUtils.getPaymentIntentConfirmationParams(null, apiKey, sourceType),
+                    mLoggingUtils.getPaymentIntentConfirmationParams(null,
+                            Objects.requireNonNull(options.getApiKey()), sourceType),
                     RequestOptions.createForApi(publishableKey)
             );
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
-                    paymentIntentParams.getClientSecret());
+                    Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = requestData(StripeRequest.createPost(
                     getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options));
             return PaymentIntent.fromString(response.getResponseBody());
@@ -149,18 +146,14 @@ class StripeApiHandler {
         final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
-            final String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
             logTelemetryData();
             logApiCall(
-                    mLoggingUtils.getPaymentIntentRetrieveParams(null, apiKey),
+                    mLoggingUtils.getPaymentIntentRetrieveParams(null,
+                            Objects.requireNonNull(options.getApiKey())),
                     RequestOptions.createForApi(publishableKey)
             );
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
-                    paymentIntentParams.getClientSecret());
+                    Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = requestData(StripeRequest.createGet(
                     getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options));
             return PaymentIntent.fromString(response.getResponseBody());
@@ -198,14 +191,10 @@ class StripeApiHandler {
         final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
-            final String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
             logTelemetryData();
             logApiCall(
-                    mLoggingUtils.getSourceCreationParams(null, apiKey, sourceParams.getType()),
+                    mLoggingUtils.getSourceCreationParams(null,
+                            Objects.requireNonNull(options.getApiKey()), sourceParams.getType()),
                     RequestOptions.createForApi(publishableKey)
             );
             final StripeResponse response = requestData(
@@ -275,14 +264,10 @@ class StripeApiHandler {
 
         mNetworkUtils.addUidParams(params);
         final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
-        final String apiKey = options.getPublishableApiKey();
-        if (StripeTextUtils.isBlank(apiKey)) {
-            return null;
-        }
-
         logTelemetryData();
         logApiCall(
-                mLoggingUtils.getPaymentMethodCreationParams(null, apiKey),
+                mLoggingUtils.getPaymentMethodCreationParams(null,
+                        Objects.requireNonNull(options.getApiKey())),
                 RequestOptions.createForApi(publishableKey)
         );
 
@@ -324,11 +309,6 @@ class StripeApiHandler {
             APIException {
 
         try {
-            final String apiKey = options.getPublishableApiKey();
-            if (StripeTextUtils.isBlank(apiKey)) {
-                return null;
-            }
-
             final List<String> loggingTokens =
                     (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
@@ -336,7 +316,8 @@ class StripeApiHandler {
             logTelemetryData();
 
             logApiCall(
-                    mLoggingUtils.getTokenCreationParams(loggingTokens, apiKey, tokenType),
+                    mLoggingUtils.getTokenCreationParams(loggingTokens,
+                            Objects.requireNonNull(options.getApiKey()), tokenType),
                     options
             );
         } catch (ClassCastException classCastEx) {
@@ -1014,7 +995,7 @@ class StripeApiHandler {
             allowedToSetTTL = false;
         }
 
-        final String apiKey = request.options.getPublishableApiKey();
+        final String apiKey = request.options.getApiKey();
         if (StripeTextUtils.isBlank(apiKey)) {
             throw new AuthenticationException("No API key provided. (HINT: set your API key using" +
                     " 'Stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe" +

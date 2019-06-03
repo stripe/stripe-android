@@ -44,6 +44,7 @@ class PaymentAuthenticationController {
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final String mDirectoryServerId;
     @NonNull private final PaymentAuthConfig mConfig;
+    @NonNull private final ApiKeyValidator mApiKeyValidator;
 
     PaymentAuthenticationController(@NonNull Context context,
                                     @NonNull StripeApiHandler apiHandler) {
@@ -67,6 +68,7 @@ class PaymentAuthenticationController {
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
         mDirectoryServerId = directoryServerId;
+        mApiKeyValidator = new ApiKeyValidator();
     }
 
     /**
@@ -76,6 +78,7 @@ class PaymentAuthenticationController {
                              @NonNull Activity activity,
                              @NonNull PaymentIntentParams paymentIntentParams,
                              @NonNull String publishableKey) {
+        mApiKeyValidator.requireValid(publishableKey);
         new ConfirmPaymentIntentTask(stripe, paymentIntentParams, publishableKey,
                 new ConfirmPaymentIntentCallback(activity, publishableKey, this))
                 .execute();
@@ -84,7 +87,8 @@ class PaymentAuthenticationController {
     void startAuth(@NonNull Activity activity,
                    @NonNull PaymentIntent paymentIntent,
                    @NonNull String publishableKey) {
-        handleNextAction(activity, paymentIntent, publishableKey);
+        handleNextAction(activity, paymentIntent,
+                mApiKeyValidator.requireValid(publishableKey));
     }
 
     /**

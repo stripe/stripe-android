@@ -19,36 +19,47 @@ final class RequestOptions {
     }
 
     @Nullable private final String mGuid;
-    @Nullable private final String mPublishableApiKey;
+    @Nullable private final String mApiKey;
     @RequestType private final int mRequestType;
     @Nullable private final String mStripeAccount;
 
     @NonNull
     static RequestOptions createForFingerprinting(@NonNull String guid) {
-        return new RequestOptions(RequestType.FINGERPRINTING, null, null, guid);
+        return new RequestOptions(guid);
     }
 
     @NonNull
-    static RequestOptions createForApi(@NonNull String publishableApiKey) {
-        return new RequestOptions(RequestType.API, publishableApiKey, null, null);
+    static RequestOptions createForApi(@NonNull String apiKey) {
+        return new RequestOptions(apiKey, null);
     }
 
     @NonNull
     static RequestOptions createForApi(
-            @NonNull String publishableApiKey,
+            @NonNull String apiKey,
             @Nullable String stripeAccount) {
-        return new RequestOptions(RequestType.API, publishableApiKey, stripeAccount, null);
+        return new RequestOptions(apiKey, stripeAccount);
     }
 
+    /**
+     * Constructor for {@link RequestType#API}
+     */
     private RequestOptions(
-            @RequestType int requestType,
-            @Nullable String publishableApiKey,
-            @Nullable String stripeAccount,
-            @Nullable String guid) {
-        mGuid = guid;
-        mPublishableApiKey = publishableApiKey;
-        mRequestType = requestType;
+            @NonNull String apiKey,
+            @Nullable String stripeAccount) {
+        mRequestType = RequestType.API;
+        mApiKey = new ApiKeyValidator().requireValid(apiKey);
         mStripeAccount = stripeAccount;
+        mGuid = null;
+    }
+
+    /**
+     * Constructor for {@link RequestType#FINGERPRINTING}
+     */
+    private RequestOptions(@NonNull String guid) {
+        mRequestType = RequestType.FINGERPRINTING;
+        mGuid = guid;
+        mApiKey = null;
+        mStripeAccount = null;
     }
 
     /**
@@ -63,8 +74,8 @@ final class RequestOptions {
      * @return the publishable API key for this request
      */
     @Nullable
-    String getPublishableApiKey() {
-        return mPublishableApiKey;
+    String getApiKey() {
+        return mApiKey;
     }
 
     @RequestType
