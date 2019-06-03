@@ -26,7 +26,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13-beta-3'
     testImplementation "org.mockito:mockito-core:2.27.0"
-    testImplementation 'org.robolectric:robolectric:4.3-beta-1'
+    testImplementation 'org.robolectric:robolectric:4.3'
     testImplementation 'androidx.test:core:1.2.0-beta01'
     testImplementation 'org.json:json:20180813'
 
