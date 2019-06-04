@@ -60,7 +60,8 @@ public class RedirectActivity extends AppCompatActivity {
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mRedirectDialogController = new RedirectDialogController(this);
-        mStripe = new Stripe(getApplicationContext());
+        mStripe = new Stripe(getApplicationContext(),
+                PaymentConfiguration.getInstance().getPublishableKey());
 
         final Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
         threeDSecureButton.setOnClickListener(v -> beginSequence());
@@ -117,9 +118,7 @@ public class RedirectActivity extends AppCompatActivity {
     void createCardSource(@NonNull Card card) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
         final Observable<Source> cardSourceObservable = Observable.fromCallable(
-                        () -> mStripe.createSourceSynchronous(
-                                cardSourceParams,
-                                PaymentConfiguration.getInstance().getPublishableKey()));
+                        () -> mStripe.createSourceSynchronous(cardSourceParams));
 
         mCompositeDisposable.add(cardSourceObservable
                 .subscribeOn(Schedulers.io())

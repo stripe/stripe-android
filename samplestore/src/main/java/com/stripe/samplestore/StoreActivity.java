@@ -131,8 +131,7 @@ public class StoreActivity
                             .createRetrievePaymentIntentParams(paymentIntentClientSecret);
                     mCompositeDisposable.add(Observable
                             .fromCallable(() ->
-                                    stripe.retrievePaymentIntentSynchronous(paymentIntentParams,
-                                            PaymentConfiguration.getInstance().getPublishableKey()))
+                                    stripe.retrievePaymentIntentSynchronous(paymentIntentParams))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe((paymentIntent -> {
