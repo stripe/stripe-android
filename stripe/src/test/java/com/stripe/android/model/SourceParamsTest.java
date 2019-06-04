@@ -28,19 +28,17 @@ public class SourceParamsTest {
         metadata.put("color", "blue");
         metadata.put("animal", "dog");
 
-        FULL_FIELDS_VISA_CARD = new Card(VALID_VISA_NO_SPACES,
-                12,
-                2050,
-                "123",
-                "Captain Cardholder",
-                "1 ABC Street",
-                "Apt. 123",
-                "San Francisco",
-                "CA",
-                "94107",
-                "US",
-                "usd",
-                metadata);
+        FULL_FIELDS_VISA_CARD = new Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+                .name("Captain Cardholder")
+                .addressLine1("1 ABC Street")
+                .addressLine2("Apt. 123")
+                .addressCity("San Francisco")
+                .addressState("CA")
+                .addressZip("94107")
+                .addressCountry("US")
+                .currency("usd")
+                .metadata(metadata)
+                .build();
     }
 
     @Test

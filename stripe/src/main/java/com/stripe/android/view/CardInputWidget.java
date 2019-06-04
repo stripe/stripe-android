@@ -153,7 +153,7 @@ public class CardInputWidget extends LinearLayout {
             return null;
         }
 
-        return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue)
+        return Card.create(cardNumber, cardDate[0], cardDate[1], cvcValue)
                 .addLoggingToken(LOGGING_TOKEN);
     }
 

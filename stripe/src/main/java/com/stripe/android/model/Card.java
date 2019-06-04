@@ -134,36 +134,36 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
                 put(Card.UNKNOWN, R.drawable.ic_unknown);
             }};
 
-    @Nullable private String number;
-    @Nullable private String cvc;
-    @Nullable private Integer expMonth;
-    @Nullable private Integer expYear;
-    @Nullable private String name;
-    @Nullable private String addressLine1;
-    @Nullable private String addressLine1Check;
-    @Nullable private String addressLine2;
-    @Nullable private String addressCity;
-    @Nullable private String addressState;
-    @Nullable private String addressZip;
-    @Nullable private String addressZipCheck;
-    @Nullable private String addressCountry;
-    @Nullable @Size(4) private String last4;
-    @Nullable @CardBrand private String brand;
-    @Nullable @FundingType private String funding;
-    @Nullable private String fingerprint;
-    @Nullable private String country;
-    @Nullable private String currency;
-    @Nullable private String customerId;
-    @Nullable private String cvcCheck;
-    @Nullable private String id;
+    @Nullable private final String number;
+    @Nullable private final String cvc;
+    @Nullable private final Integer expMonth;
+    @Nullable private final Integer expYear;
+    @Nullable private final String name;
+    @Nullable private final String addressLine1;
+    @Nullable private final String addressLine1Check;
+    @Nullable private final String addressLine2;
+    @Nullable private final String addressCity;
+    @Nullable private final String addressState;
+    @Nullable private final String addressZip;
+    @Nullable private final String addressZipCheck;
+    @Nullable private final String addressCountry;
+    @Nullable @Size(4) private final String last4;
+    @Nullable @CardBrand private final String brand;
+    @Nullable @FundingType private final String funding;
+    @Nullable private final String fingerprint;
+    @Nullable private final String country;
+    @Nullable private final String currency;
+    @Nullable private final String customerId;
+    @Nullable private final String cvcCheck;
+    @Nullable private final String id;
     @NonNull private final List<String> loggingTokens = new ArrayList<>();
-    @Nullable private String tokenizationMethod;
-    @Nullable private Map<String, String> metadata;
+    @Nullable private final String tokenizationMethod;
+    @Nullable private final Map<String, String> metadata;
 
     /**
      * Builder class for a {@link Card} model.
      */
-    public static class Builder {
+    public static final class Builder {
         @Nullable private final String number;
         @Nullable private final String cvc;
         private final Integer expMonth;
@@ -199,8 +199,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
          */
         public Builder(
                 @Nullable String number,
-                @IntRange(from = 1, to = 12) Integer expMonth,
-                @IntRange(from = 0) Integer expYear,
+                @IntRange(from = 1, to = 12) @Nullable Integer expMonth,
+                @IntRange(from = 0) @Nullable Integer expYear,
                 @Nullable String cvc) {
             this.number = number;
             this.expMonth = expMonth;
@@ -464,120 +464,6 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * Card constructor with all available fields.
-     * @param number the credit card number
-     * @param expMonth the expiry month
-     * @param expYear the expiry year
-     * @param cvc the CVC number
-     * @param name the card name
-     * @param addressLine1 first line of the billing address
-     * @param addressLine2 second line of the billing address
-     * @param addressCity city of the billing address
-     * @param addressState state of the billing address
-     * @param addressZip zip code of the billing address
-     * @param addressCountry country for the billing address
-     * @param brand brand of this card
-     * @param last4 last 4 digits of the card
-     * @param fingerprint the card fingerprint
-     * @param funding the funding type of the card
-     * @param country ISO country code of the card itself
-     * @param currency currency used by the card
-     * @param id the cardId
-     * @param metadata metadata to associate with the Card model
-     */
-    public Card(
-            String number,
-            @Nullable Integer expMonth,
-            @Nullable Integer expYear,
-            String cvc,
-            String name,
-            String addressLine1,
-            String addressLine2,
-            String addressCity,
-            String addressState,
-            String addressZip,
-            String addressCountry,
-            String brand,
-            @Size(4) String last4,
-            String fingerprint,
-            String funding,
-            String country,
-            String currency,
-            String id,
-            @Nullable Map<String, String> metadata) {
-        this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(number));
-        this.expMonth = expMonth;
-        this.expYear = expYear;
-        this.cvc = StripeTextUtils.nullIfBlank(cvc);
-        this.name = StripeTextUtils.nullIfBlank(name);
-        this.addressLine1 = StripeTextUtils.nullIfBlank(addressLine1);
-        this.addressLine2 = StripeTextUtils.nullIfBlank(addressLine2);
-        this.addressCity = StripeTextUtils.nullIfBlank(addressCity);
-        this.addressState = StripeTextUtils.nullIfBlank(addressState);
-        this.addressZip = StripeTextUtils.nullIfBlank(addressZip);
-        this.addressCountry = StripeTextUtils.nullIfBlank(addressCountry);
-        this.brand = asCardBrand(brand) == null ? getBrand() : brand;
-        this.last4 = StripeTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
-        this.fingerprint = StripeTextUtils.nullIfBlank(fingerprint);
-        this.funding = asFundingType(funding);
-        this.country = StripeTextUtils.nullIfBlank(country);
-        this.currency = StripeTextUtils.nullIfBlank(currency);
-        this.id = StripeTextUtils.nullIfBlank(id);
-        this.metadata = metadata;
-    }
-
-    /**
-     * Convenience constructor with address and currency.
-     * @param number the card number
-     * @param expMonth the expiry month
-     * @param expYear the expiry year
-     * @param cvc the CVC code
-     * @param name the cardholder name
-     * @param addressLine1 the first line of the billing address
-     * @param addressLine2 the second line of the billing address
-     * @param addressCity the city of the billing address
-     * @param addressState the state of the billing address
-     * @param addressZip the zip code of the billing address
-     * @param addressCountry the country of the billing address
-     * @param currency the currency of the card
-     */
-    public Card(
-            String number,
-            Integer expMonth,
-            Integer expYear,
-            String cvc,
-            String name,
-            String addressLine1,
-            String addressLine2,
-            String addressCity,
-            String addressState,
-            String addressZip,
-            String addressCountry,
-            String currency,
-            @Nullable Map<String, String> metadata) {
-        this(
-                number,
-                expMonth,
-                expYear,
-                cvc,
-                name,
-                addressLine1,
-                addressLine2,
-                addressCity,
-                addressState,
-                addressZip,
-                addressCountry,
-                null,
-                null,
-                null,
-                null,
-                null,
-                currency,
-                null,
-                metadata);
-    }
-
-    /**
      * Convenience constructor for a Card object with a minimum number of inputs.
      *
      * @param number the card number
@@ -585,31 +471,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @param expYear the expiry year
      * @param cvc the CVC code
      */
-    public Card(
+    @NonNull
+    public static Card create(
             String number,
             Integer expMonth,
             Integer expYear,
             String cvc) {
-        this(
-                number,
-                expMonth,
-                expYear,
-                cvc,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        return new Builder(number, expMonth, expYear, cvc)
+                .build();
     }
 
     @NonNull
@@ -716,32 +585,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * Setter for the card number. Note that mutating the number of this card object
-     * invalidates the {@link #brand} and {@link #last4}.
-     *
-     * @param number the new {@link #number}
-     */
-    @Deprecated
-    public void setNumber(@Nullable String number) {
-        this.number = number;
-        this.brand = null;
-        this.last4 = null;
-    }
-
-    /**
      * @return the {@link #cvc} for this card
      */
     @Nullable
     public String getCVC() {
         return cvc;
-    }
-
-    /**
-     * @param cvc the new {@link #cvc} code for this card
-     */
-    @Deprecated
-    public void setCVC(@Nullable String cvc) {
-        this.cvc = cvc;
     }
 
     /**
@@ -754,27 +602,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param expMonth sets the {@link #expMonth} for this card
-     */
-    @Deprecated
-    public void setExpMonth(@Nullable @IntRange(from = 1, to = 12) Integer expMonth) {
-        this.expMonth = expMonth;
-    }
-
-    /**
      * @return the {@link #expYear} for this card
      */
     @Nullable
     public Integer getExpYear() {
         return expYear;
-    }
-
-    /**
-     * @param expYear sets the {@link #expYear} for this card
-     */
-    @Deprecated
-    public void setExpYear(@Nullable Integer expYear) {
-        this.expYear = expYear;
     }
 
     /**
@@ -786,25 +618,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param name sets the cardholder {@link #name} for this card
-     */
-    public void setName(@Nullable String name) {
-        this.name = name;
-    }
-
-    /**
      * @return the {@link #addressLine1} of this card
      */
     @Nullable
     public String getAddressLine1() {
         return addressLine1;
-    }
-
-    /**
-     * @param addressLine1 sets the {@link #addressLine1} for this card
-     */
-    public void setAddressLine1(@Nullable String addressLine1) {
-        this.addressLine1 = addressLine1;
     }
 
     /**
@@ -816,25 +634,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param addressLine2 sets the {@link #addressLine2} for this card
-     */
-    public void setAddressLine2(@Nullable String addressLine2) {
-        this.addressLine2 = addressLine2;
-    }
-
-    /**
      * @return the {@link #addressCity} for this card
      */
     @Nullable
     public String getAddressCity() {
         return addressCity;
-    }
-
-    /**
-     * @param addressCity sets the {@link #addressCity} for this card
-     */
-    public void setAddressCity(@Nullable String addressCity) {
-        this.addressCity = addressCity;
     }
 
     /**
@@ -846,25 +650,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param addressZip sets the {@link #addressZip} for this card
-     */
-    public void setAddressZip(@Nullable String addressZip) {
-        this.addressZip = addressZip;
-    }
-
-    /**
      * @return the {@link #addressState} of this card
      */
     @Nullable
     public String getAddressState() {
         return addressState;
-    }
-
-    /**
-     * @param addressState sets the {@link #addressState} for this card
-     */
-    public void setAddressState(@Nullable String addressState) {
-        this.addressState = addressState;
     }
 
     /**
@@ -876,25 +666,11 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param addressCountry sets the {@link #addressCountry} for this card
-     */
-    public void setAddressCountry(@Nullable String addressCountry) {
-        this.addressCountry = addressCountry;
-    }
-
-    /**
      * @return the {@link #currency} of this card. Only supported for Managed accounts.
      */
     @Nullable
     public String getCurrency() {
         return currency;
-    }
-
-    /**
-     * @param currency sets the {@link #currency} of this card. Only supported for Managed accounts.
-     */
-    public void setCurrency(@Nullable String currency) {
-        this.currency = currency;
     }
 
     /**
@@ -906,40 +682,22 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     /**
-     * @param metadata {@link #metadata} for this card
-     */
-    public void setMetadata(@Nullable Map<String, String> metadata) {
-        this.metadata = metadata;
-    }
-
-    /**
-     * @return the {@link #last4} digits of this card. Sets the value based on the {@link #number}
-     * if it has not already been set.
+     * @return the {@link #last4} digits of this card.
      */
     @Nullable
     public String getLast4() {
-        if (!StripeTextUtils.isBlank(last4)) {
-            return last4;
-        }
-
-        if (number != null && number.length() > 4) {
-            last4 = number.substring(number.length() - 4);
-            return last4;
-        }
-
-        return null;
+        return last4;
     }
 
-    /**
-     * Gets the {@link #brand} of this card, changed from the "type" field. Use {@link #getBrand()}
-     * instead.
-     *
-     * @return the {@link #brand} of this card
-     */
-    @Deprecated
-    @CardBrand
-    public String getType() {
-        return getBrand();
+    @Nullable
+    private String calculateLast4(@Nullable String number, @Nullable String last4) {
+        if (!StripeTextUtils.isBlank(last4)) {
+            return last4;
+        } else if (number != null && number.length() > 4) {
+            return number.substring(number.length() - 4);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -948,13 +706,19 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      *
      * @return the {@link #brand} of this card
      */
+    @Nullable
     @CardBrand
     public String getBrand() {
-        if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
-            brand = CardUtils.getPossibleCardType(number);
-        }
-
         return brand;
+    }
+
+    @Nullable
+    private String calculateBrand(@Nullable String brand) {
+        if (StripeTextUtils.isBlank(brand) && !StripeTextUtils.isBlank(number)) {
+            return CardUtils.getPossibleCardType(number);
+        } else {
+            return brand;
+        }
     }
 
     /**
@@ -1125,10 +889,10 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         this.addressZipCheck = StripeTextUtils.nullIfBlank(builder.addressZipCheck);
         this.addressCountry = StripeTextUtils.nullIfBlank(builder.addressCountry);
         this.last4 = StripeTextUtils.nullIfBlank(builder.last4) == null
-                ? getLast4()
+                ? calculateLast4(number, builder.last4)
                 : builder.last4;
         this.brand = asCardBrand(builder.brand) == null
-                ? getBrand()
+                ? calculateBrand(builder.brand)
                 : builder.brand;
         this.fingerprint = StripeTextUtils.nullIfBlank(builder.fingerprint);
         this.funding = asFundingType(builder.funding);

@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -164,14 +165,14 @@ public class CardMultilineWidget extends LinearLayout {
     @Nullable
     public Card getCard() {
         if (validateAllFields()) {
-            String cardNumber = mCardNumberEditText.getCardNumber();
-            int[] cardDate = mExpiryDateEditText.getValidDateFields();
-            String cvcValue = mCvcEditText.getText().toString();
+            final String cardNumber = mCardNumberEditText.getCardNumber();
+            final int[] cardDate = Objects.requireNonNull(mExpiryDateEditText.getValidDateFields());
+            final String cvcValue = mCvcEditText.getText().toString();
 
-            Card card = new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
-            if (mShouldShowPostalCode) {
-                card.setAddressZip(mPostalCodeEditText.getText().toString());
-            }
+            final Card card = new Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
+                    .addressZip(mShouldShowPostalCode ?
+                            mPostalCodeEditText.getText().toString() : null)
+                    .build();
             return card.addLoggingToken(CARD_MULTILINE_TOKEN);
         }
 

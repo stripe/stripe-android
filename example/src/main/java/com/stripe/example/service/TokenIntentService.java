@@ -57,7 +57,7 @@ public class TokenIntentService extends IntentService {
             final Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
             final String cvc = intent.getStringExtra(EXTRA_CVC);
 
-            final Card card = new Card(cardNumber, month, year, cvc);
+            final Card card = Card.create(cardNumber, month, year, cvc);
 
             final Stripe stripe = new Stripe(getApplicationContext());
             try {
