@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-class StripeRequest {
+final class StripeRequest {
     private static final String CHARSET = "UTF-8";
 
     @NonNull final Method method;
@@ -100,7 +100,7 @@ class StripeRequest {
                         BuildConfig.VERSION_NAME));
 
         headers.put("Authorization", String.format(Locale.ENGLISH,
-                "Bearer %s", options.getPublishableApiKey()));
+                "Bearer %s", options.getApiKey()));
 
         // debug headers
         final AbstractMap<String, String> propertyMap = new HashMap<>();

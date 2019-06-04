@@ -183,7 +183,7 @@ public class StripeTest {
                                        @Nullable Executor executor,
                                        @NonNull TokenCallback callback) {
                         assertEquals(expectedExecutor, executor);
-                        assertEquals(NON_LOGGING_PK, requestOptions.getPublishableApiKey());
+                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }
                 });
@@ -200,7 +200,7 @@ public class StripeTest {
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
                                        @NonNull TokenCallback callback) {
-                        assertEquals(NON_LOGGING_PK, requestOptions.getPublishableApiKey());
+                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
                         assertNull(executor);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }

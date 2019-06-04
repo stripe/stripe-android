@@ -46,6 +46,7 @@ public class Stripe {
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
     @NonNull private final PaymentAuthenticationController mPaymentAuthenticationController;
     @NonNull private final TokenCreator mTokenCreator;
+    @NonNull private final ApiKeyValidator mApiKeyValidator;
     private String mDefaultPublishableKey;
     @Nullable private String mStripeAccount;
 
@@ -66,7 +67,7 @@ public class Stripe {
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
         this(context, new StripeApiHandler(context), new StripeNetworkUtils(context),
-                validatedKey(publishableKey));
+                ApiKeyValidator.get().requireValid(publishableKey));
     }
 
     Stripe(@NonNull Context context, @NonNull final StripeApiHandler apiHandler,
@@ -102,11 +103,13 @@ public class Stripe {
            @NonNull PaymentAuthenticationController paymentAuthenticationController,
            @Nullable String publishableKey,
            @NonNull TokenCreator tokenCreator) {
+        mApiKeyValidator = new ApiKeyValidator();
         mApiHandler = apiHandler;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentAuthenticationController = paymentAuthenticationController;
         mTokenCreator = tokenCreator;
-        mDefaultPublishableKey = publishableKey != null ? validatedKey(publishableKey) : null;
+        mDefaultPublishableKey = publishableKey != null ?
+                mApiKeyValidator.requireValid(publishableKey) : null;
     }
 
     /**
@@ -293,7 +296,6 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -626,8 +628,6 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        validatedKey(publishableKey);
-
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromCard(card),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -678,7 +678,6 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 hashMapFromPersonalId(personalId),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -729,7 +728,6 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        validatedKey(publishableKey);
         return mApiHandler.createToken(
                 mapFromCvc(cvc),
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
@@ -781,7 +779,6 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        validatedKey(publishableKey);
         try {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
@@ -857,7 +854,7 @@ public class Stripe {
      */
     @Deprecated
     public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey) {
-        mDefaultPublishableKey = validatedKey(publishableKey);
+        mDefaultPublishableKey = mApiKeyValidator.requireValid(publishableKey);
     }
 
     /**
@@ -880,30 +877,11 @@ public class Stripe {
         Objects.requireNonNull(callback,
                     "Required Parameter: 'callback' is required to use the created " +
                             "token and handle errors");
-
-        validatedKey(publishableKey);
         mTokenCreator.create(
                 tokenParams,
                 RequestOptions.createForApi(publishableKey, mStripeAccount),
                 tokenType,
                 executor, callback);
-    }
-
-    @NonNull
-    private static String validatedKey(@Nullable @Size(min = 1) String publishableKey) {
-        if (publishableKey == null || publishableKey.length() == 0) {
-            throw new IllegalArgumentException("Invalid Publishable Key: " +
-                    "You must use a valid publishable key to create a token. " +
-                    "For more info, see https://stripe.com/docs/keys");
-        }
-
-        if (publishableKey.startsWith("sk_")) {
-            throw new IllegalArgumentException("Invalid Publishable Key: " +
-                    "You are using a secret key, instead of the publishable one. " +
-                    "For more info, see https://stripe.com/docs/keys");
-        }
-
-        return publishableKey;
     }
 
     private static void executeTask(@Nullable Executor executor,
