@@ -71,15 +71,14 @@ public class PaymentMultilineActivity extends AppCompatActivity {
             return;
         }
 
-        final Stripe stripe = new Stripe(getApplicationContext());
+        final Stripe stripe = new Stripe(getApplicationContext(),
+                PaymentConfiguration.getInstance().getPublishableKey());
         final PaymentMethodCreateParams cardSourceParams =
                 PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
-        final Observable<PaymentMethod> tokenObservable =
-                Observable.fromCallable(
-                        () -> stripe.createPaymentMethodSynchronous(cardSourceParams,
-                                PaymentConfiguration.getInstance().getPublishableKey()));
+        final Observable<PaymentMethod> tokenObservable = Observable.fromCallable(
+                () -> stripe.createPaymentMethodSynchronous(cardSourceParams));
 
         mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())

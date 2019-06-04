@@ -13,6 +13,8 @@ import com.stripe.android.model.Token;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 
+import java.util.Objects;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -61,19 +63,18 @@ public class RxTokenController {
     }
 
     private void saveCard() {
-        final Card cardToSave = mCardInputWidget.getCard();
+        final Card cardToSave = Objects.requireNonNull(mCardInputWidget).getCard();
         if (cardToSave == null) {
             mErrorDialogHandler.show("Invalid Card Data");
             return;
         }
-        final Stripe stripe = new Stripe(mContext);
+        final Stripe stripe = new Stripe(mContext,
+                PaymentConfiguration.getInstance().getPublishableKey());
 
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
         final Observable<Token> tokenObservable =
-                Observable.fromCallable(
-                        () -> stripe.createTokenSynchronous(cardToSave,
-                                PaymentConfiguration.getInstance().getPublishableKey()));
+                Observable.fromCallable(() -> stripe.createTokenSynchronous(cardToSave));
 
         mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())

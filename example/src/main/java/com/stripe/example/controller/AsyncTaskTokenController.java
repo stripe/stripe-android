@@ -33,7 +33,7 @@ public class AsyncTaskTokenController {
             @NonNull final ListViewController outputListController,
             @NonNull final ProgressDialogController progressDialogController) {
         mCardInputWidget = cardInputWidget;
-        mStripe = new Stripe(context);
+        mStripe = new Stripe(context, PaymentConfiguration.getInstance().getPublishableKey());
         mErrorDialogHandler = errorDialogHandler;
         mProgressDialogController = progressDialogController;
 
@@ -56,10 +56,7 @@ public class AsyncTaskTokenController {
         }
 
         mProgressDialogController.show(R.string.progressMessage);
-        mStripe.createToken(
-                cardToSave,
-                PaymentConfiguration.getInstance().getPublishableKey(),
-                tokenCallback);
+        mStripe.createToken(cardToSave, tokenCallback);
     }
 
     private static class TokenCallbackImpl implements TokenCallback {

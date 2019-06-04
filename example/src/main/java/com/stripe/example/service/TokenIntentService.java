@@ -59,10 +59,10 @@ public class TokenIntentService extends IntentService {
 
             final Card card = Card.create(cardNumber, month, year, cvc);
 
-            final Stripe stripe = new Stripe(getApplicationContext());
+            final Stripe stripe = new Stripe(getApplicationContext(),
+                    PaymentConfiguration.getInstance().getPublishableKey());
             try {
-                token = stripe.createTokenSynchronous(card,
-                        PaymentConfiguration.getInstance().getPublishableKey());
+                token = stripe.createTokenSynchronous(card);
             } catch (StripeException stripeEx) {
                 errorMessage = stripeEx.getLocalizedMessage();
             }

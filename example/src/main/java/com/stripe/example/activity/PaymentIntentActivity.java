@@ -69,7 +69,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mErrorDialogHandler = new ErrorDialogHandler(this);
-        mStripe = new Stripe(getApplicationContext());
+        mStripe = new Stripe(getApplicationContext(),
+                PaymentConfiguration.getInstance().getPublishableKey());
         Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
 
@@ -148,9 +149,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
     private void retrievePaymentIntent() {
         final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
                 () -> mStripe.retrievePaymentIntentSynchronous(
-                        PaymentIntentParams
-                                .createRetrievePaymentIntentParams(mClientSecret),
-                        PaymentConfiguration.getInstance().getPublishableKey()));
+                        PaymentIntentParams.createRetrievePaymentIntentParams(mClientSecret)));
         final Disposable disposable = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe((d) ->
