@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.1.2
+* [#1019](https://github.com/stripe/stripe-android/pull/1019) Upgrade pinned API version to `2019-05-16`
+
 ## 9.1.1 - 2019-05-28
 * [#1006](https://github.com/stripe/stripe-android/pull/1006) Remove null values in `PaymentMethod.BillingDetails#toMap()`
 
