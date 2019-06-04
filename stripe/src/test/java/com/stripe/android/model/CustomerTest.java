@@ -9,7 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static com.stripe.android.model.CardTest.JSON_CARD;
+import static com.stripe.android.model.CardTest.JSON_CARD_USD;
 import static com.stripe.android.model.CustomerSourceTest.JSON_APPLE_PAY_CARD;
 import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
@@ -108,10 +108,10 @@ public class CustomerTest {
             assertNotNull(applePayCard);
             sourcesArray.put(applePayCard.toJson());
 
-            Card testCard = Card.fromString(JSON_CARD);
+            Card testCard = Card.fromString(JSON_CARD_USD);
             assertNotNull(testCard);
 
-            JSONObject manipulatedCard = new JSONObject(JSON_CARD);
+            JSONObject manipulatedCard = new JSONObject(JSON_CARD_USD);
             manipulatedCard.put("id", "card_id55555");
             manipulatedCard.put("tokenization_method", "apple_pay");
             Card manipulatedApplePayCard = Card.fromJson(manipulatedCard);

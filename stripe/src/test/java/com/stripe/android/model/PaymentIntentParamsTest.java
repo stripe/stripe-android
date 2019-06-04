@@ -14,19 +14,16 @@ import static org.junit.Assert.assertTrue;
 
 public class PaymentIntentParamsTest {
     private static final Card FULL_FIELDS_VISA_CARD =
-            new Card(VALID_VISA_NO_SPACES,
-                    12,
-                    2050,
-                    "123",
-                    "Captain Cardholder",
-                    "1 ABC Street",
-                    "Apt. 123",
-                    "San Francisco",
-                    "CA",
-                    "94107",
-                    "US",
-                    "usd",
-                    null);
+            new Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+                    .name("Captain Cardholder")
+                    .addressLine1("1 ABC Street")
+                    .addressLine2("Apt. 123")
+                    .addressCity("San Francisco")
+                    .addressState("CA")
+                    .addressZip("94107")
+                    .addressState("US")
+                    .currency("usd")
+                    .build();
 
     private static final String TEST_CLIENT_SECRET =
             "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA";

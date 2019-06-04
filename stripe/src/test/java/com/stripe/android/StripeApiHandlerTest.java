@@ -53,8 +53,7 @@ public class StripeApiHandlerTest {
 
     private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account";
 
-    private static final Card CARD =
-            new Card("4242424242424242", 1, 2050, "123");
+    private static final Card CARD = Card.create("4242424242424242", 1, 2050, "123");
 
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext());

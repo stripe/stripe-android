@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static com.stripe.android.model.CardTest.JSON_CARD;
+import static com.stripe.android.model.CardTest.JSON_CARD_USD;
 import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ public class CustomerSourceTest {
     @Test
     public void fromJson_whenCard_createsCustomerSourceData() {
         try {
-            JSONObject jsonCard = new JSONObject(JSON_CARD);
+            JSONObject jsonCard = new JSONObject(JSON_CARD_USD);
             CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
             assertNotNull(sourceData);
             assertNotNull(sourceData.asCard());
@@ -96,7 +96,7 @@ public class CustomerSourceTest {
     @Test
     public void getSourceType_whenCard_returnsCard() {
         try {
-            JSONObject jsonCard = new JSONObject(JSON_CARD);
+            JSONObject jsonCard = new JSONObject(JSON_CARD_USD);
             CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
             assertNotNull(sourceData);
             assertEquals(Source.CARD, sourceData.getSourceType());

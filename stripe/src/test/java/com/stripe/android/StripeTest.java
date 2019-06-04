@@ -52,7 +52,7 @@ public class StripeTest {
     private static final String NON_LOGGING_PK = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
     private static final String DEFAULT_SECRET_KEY = "sk_default";
 
-    private static final Card DEFAULT_CARD = new Card(null, null, null, null);
+    private static final Card DEFAULT_CARD = Card.create(null, null, null, null);
     private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
         @Override
         public void onError(@NonNull Exception error) {
@@ -67,7 +67,7 @@ public class StripeTest {
     private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
 
     private static final int YEAR = Calendar.getInstance().get(Calendar.YEAR) + 1;
-    private static final Card CARD = new Card(TEST_CARD_NUMBER, 12, YEAR, "123");
+    private static final Card CARD = Card.create(TEST_CARD_NUMBER, 12, YEAR, "123");
     private static final BankAccount BANK_ACCOUNT = new BankAccount(
             TEST_BANK_ACCOUNT_NUMBER,
             "US",
@@ -456,14 +456,15 @@ public class StripeTest {
         final Stripe stripe = createNonLoggingStripe(CONNECT_ACCOUNT_PK);
         stripe.setStripeAccount("acct_28DT589O8KAxCGbLmxyZ");
 
-        final Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
-        card.setAddressCity("Sheboygan");
-        card.setAddressCountry("US");
-        card.setAddressLine1("123 Main St");
-        card.setAddressLine2("#456");
-        card.setAddressZip("53081");
-        card.setAddressState("WI");
-        card.setName("Winnie Hoop");
+        final Card card = new Card.Builder(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123")
+                .addressCity("Sheboygan")
+                .addressCountry("US")
+                .addressLine1("123 Main St")
+                .addressLine2("#456")
+                .addressZip("53081")
+                .addressState("WI")
+                .name("Winnie Hoop")
+                .build();
         final SourceParams params = SourceParams.createCardParams(card);
         final Map<String, String> metamap = new HashMap<String, String>() {{
             put("addons", "cream");
@@ -495,7 +496,7 @@ public class StripeTest {
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createNonLoggingStripe();
-        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
@@ -859,7 +860,7 @@ public class StripeTest {
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createNonLoggingStripe();
-        Card card = new Card(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
@@ -1049,7 +1050,7 @@ public class StripeTest {
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
         try {
             // This card is missing quite a few numbers.
-            Card card = new Card("42424242", 12, YEAR, "123");
+            Card card = Card.create("42424242", 12, YEAR, "123");
             Stripe stripe = createNonLoggingStripe();
             Token token = stripe.createTokenSynchronous(card);
             fail("Expecting an exception, but created a token instead: " + token.toString());
@@ -1066,7 +1067,7 @@ public class StripeTest {
     public void createTokenSynchronous_withExpiredCard_throwsCardException() {
         try {
             // This card is missing quite a few numbers.
-            Card card = new Card("4242424242424242", 11, 2015, "123");
+            Card card = Card.create("4242424242424242", 11, 2015, "123");
             Stripe stripe = createNonLoggingStripe();
             Token token = stripe.createTokenSynchronous(card);
             fail("Expecting an exception, but created a token instead: " + token.toString());

@@ -31,8 +31,8 @@ public class StripeJsonModelTest {
     public void equals_whenEquals_returnsTrue() {
         assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
 
-        Card firstCard = Card.fromString(CardTest.JSON_CARD);
-        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+        Card firstCard = Card.fromString(CardTest.JSON_CARD_USD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD_USD);
 
         assertEquals(firstCard, secondCard);
         // Just confirming for sanity
@@ -42,17 +42,8 @@ public class StripeJsonModelTest {
     @Test
     public void equals_whenNotEquals_returnsFalse() {
         assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
-
-        Card firstCard = Card.fromString(CardTest.JSON_CARD);
-        Card secondCard = Card.fromString(CardTest.JSON_CARD);
-
-        assertNotNull(firstCard);
-        assertNotNull(secondCard);
-
-        String firstName = firstCard.getName();
-        String secondName = firstName == null ? "a non-null value" : firstName + "a change";
-        secondCard.setName(secondName);
-
+        final Card firstCard = Card.create("4242", null, null, null);
+        final Card secondCard = Card.create("4343", null, null, null);
         assertNotEquals(firstCard, secondCard);
     }
 
@@ -60,8 +51,8 @@ public class StripeJsonModelTest {
     public void hashCode_whenEquals_returnsSameValue() {
         assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
 
-        Card firstCard = Card.fromString(CardTest.JSON_CARD);
-        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+        Card firstCard = Card.fromString(CardTest.JSON_CARD_USD);
+        Card secondCard = Card.fromString(CardTest.JSON_CARD_USD);
         assertNotNull(firstCard);
         assertNotNull(secondCard);
 
@@ -72,17 +63,13 @@ public class StripeJsonModelTest {
     public void hashCode_whenNotEquals_returnsDifferentValues() {
         assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
 
-        Card firstCard = Card.fromString(CardTest.JSON_CARD);
-        Card secondCard = Card.fromString(CardTest.JSON_CARD);
+        Card usdCard = Card.fromString(CardTest.JSON_CARD_USD);
+        Card eurCard = Card.fromString(CardTest.JSON_CARD_EUR);
 
-        assertNotNull(firstCard);
-        assertNotNull(secondCard);
+        assertNotNull(usdCard);
+        assertNotNull(eurCard);
 
-        String firstCurrency = firstCard.getCurrency();
-        String secondCurrency = "USD".equals(firstCurrency) ? "EUR" : "USD";
-        secondCard.setCurrency(secondCurrency);
-
-        assertNotEquals(firstCard.hashCode(), secondCard.hashCode());
+        assertNotEquals(usdCard.hashCode(), eurCard.hashCode());
     }
 
     @Test

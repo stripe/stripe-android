@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class StripeRequestTest {
     private static final Card CARD =
-            new Card("4242424242424242", 1, 2050, "123");
+            Card.create("4242424242424242", 1, 2050, "123");
 
     @Test
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
