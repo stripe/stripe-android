@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 9.2.0
+## 9.2.0 - 2019-06-04
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Upgrade pinned API version to `2019-05-16`
 * [#1036](https://github.com/stripe/stripe-android/pull/1036) Validate API key before every request
 * [#1046](https://github.com/stripe/stripe-android/pull/1046) Make `Card` model fields immutable
