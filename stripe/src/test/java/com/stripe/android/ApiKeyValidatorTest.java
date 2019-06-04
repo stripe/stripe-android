@@ -10,8 +10,8 @@ public class ApiKeyValidatorTest {
 
     @Test
     public void testPublishableKey() {
-        assertEquals("pk_test_123",
-                ApiKeyValidator.get().requireValid("pk_test_123"));
+        assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test

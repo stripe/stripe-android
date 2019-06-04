@@ -49,7 +49,7 @@ public class StripeTest {
     // publishable keys
     private static final String CONNECT_ACCOUNT_PK = "pk_test_dCyfhfyeO2CZkcvT5xyIDdJj";
     private static final String LOGGING_PK = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
-    private static final String NON_LOGGING_PK = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
+    private static final String NON_LOGGING_PK = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY;
     private static final String DEFAULT_SECRET_KEY = "sk_default";
 
     private static final Card DEFAULT_CARD = Card.create(null, null, null, null);
@@ -229,7 +229,8 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken()
             throws StripeException {
-        final Stripe stripe = new Stripe(mContext, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
+        final Stripe stripe = new Stripe(mContext,
+                ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY);
         stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
 
         final Token token = stripe.createTokenSynchronous(CARD);
@@ -1027,7 +1028,7 @@ public class StripeTest {
     public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
         try {
             // This key won't work for a real connection to the api.
-            Stripe stripe = createNonLoggingStripe("pk_test");
+            Stripe stripe = createNonLoggingStripe(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
             stripe.createTokenSynchronous(CARD);
             fail("Expecting an error, but did not get one.");
         } catch (AuthenticationException authEx) {

@@ -48,9 +48,6 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class StripeApiHandlerTest {
 
-    private static final String FUNCTIONAL_SOURCE_PUBLISHABLE_KEY =
-            "pk_test_vOo1umqsYxSrP5UXfOeL3ecm";
-
     private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account";
 
     private static final Card CARD = Card.create("4242424242424242", 1, 2050, "123");
@@ -161,11 +158,8 @@ public class StripeApiHandlerTest {
     public void createSource_shouldLogSourceCreation_andReturnSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final Source source = mApiHandler.createSource(
-                SourceParams.createCardParams(CARD),
-                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                null
-        );
+        final Source source = mApiHandler.createSource(SourceParams.createCardParams(CARD),
+                RequestOptions.createForApi(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source);
@@ -176,11 +170,8 @@ public class StripeApiHandlerTest {
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-        final Source source = mApiHandler.createSource(
-                SourceParams.createCardParams(CARD),
-                "pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                connectAccountId
-        );
+        final Source source = mApiHandler.createSource(SourceParams.createCardParams(CARD),
+                RequestOptions.createForApi(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId));
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source);
@@ -201,7 +192,7 @@ public class StripeApiHandlerTest {
                 10);
 
         try {
-            mApiHandler.start3ds2Auth(authParams, "pk_test_fdjfCYpGSwAX24KUEiuaAAWX");
+            mApiHandler.start3ds2Auth(authParams, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
             fail("Expected InvalidRequestException");
         } catch (InvalidRequestException e) {
             assertEquals("source", e.getParam());
@@ -213,10 +204,8 @@ public class StripeApiHandlerTest {
     public void logApiCall_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        final boolean isSuccessful = mApiHandler.logApiCall(
-                new HashMap<String, Object>(),
-                RequestOptions.createForApi("pk_test_fdjfCYpGSwAX24KUEiuaAAWX")
-        );
+        final boolean isSuccessful = mApiHandler.logApiCall(new HashMap<String, Object>(),
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
         assertTrue(isSuccessful);
     }
 
@@ -229,8 +218,10 @@ public class StripeApiHandlerTest {
                 StripeRequest.createPost(
                         StripeApiHandler.getSourcesUrl(),
                         SourceParams.createCardParams(CARD).toParamMap(),
-                        RequestOptions.createForApi("pk_test_fdjfCYpGSwAX24KUEiuaAAWX",
-                                connectAccountId))
+                        RequestOptions.createForApi(
+                                ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                                connectAccountId
+                        ))
         );
         assertNotNull(response);
 
@@ -261,7 +252,7 @@ public class StripeApiHandlerTest {
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         String clientSecret = "temporarily put a private key here simulate the backend";
-        String publicKey = "put a public key that matches the private key here";
+        String publishableKey = "put a public key that matches the private key here";
 
         final PaymentIntentParams paymentIntentParams =
                 PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
@@ -270,10 +261,7 @@ public class StripeApiHandlerTest {
                         "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
-                paymentIntentParams,
-                publicKey,
-                null
-        );
+                paymentIntentParams, RequestOptions.createForApi(publishableKey));
 
         assertNotNull(paymentIntent);
     }
@@ -283,7 +271,7 @@ public class StripeApiHandlerTest {
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         String clientSecret = "temporarily put a private key here simulate the backend";
-        String publicKey = "put a public key that matches the private key here";
+        String publishableKey = "put a public key that matches the private key here";
         String sourceId = "id of the source created on the backend";
 
         final PaymentIntentParams paymentIntentParams =
@@ -293,10 +281,7 @@ public class StripeApiHandlerTest {
                         "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
-                paymentIntentParams,
-                publicKey,
-                null
-        );
+                paymentIntentParams, RequestOptions.createForApi(publishableKey));
         assertNotNull(paymentIntent);
     }
 
@@ -305,12 +290,11 @@ public class StripeApiHandlerTest {
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         String clientSecret = "temporarily put a private key here simulate the backend";
-        String publicKey = "put a public key that matches the private key here";
+        String publishableKey = "put a public key that matches the private key here";
 
         final PaymentIntent paymentIntent = mApiHandler.retrievePaymentIntent(
                 PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
-                publicKey,
-                null
+                RequestOptions.createForApi(publishableKey)
         );
         assertNotNull(paymentIntent);
     }
@@ -324,11 +308,8 @@ public class StripeApiHandlerTest {
                 new RequestExecutor(),
                 false
         );
-        final Source source = apiHandler.createSource(
-                SourceParams.createCardParams(CARD),
-                FUNCTIONAL_SOURCE_PUBLISHABLE_KEY,
-                null
-        );
+        final Source source = apiHandler.createSource(SourceParams.createCardParams(CARD),
+                RequestOptions.createForApi(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source);
@@ -341,8 +322,7 @@ public class StripeApiHandlerTest {
                 mRequestExecutor,
                 false
         );
-        apiHandler.logApiCall(new HashMap<String, Object>(),
-                RequestOptions.createForApi("some_key"));
+        apiHandler.logApiCall(new HashMap<String, Object>(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
         verifyNoMoreInteractions(mRequestExecutor);
     }
 
@@ -505,7 +485,7 @@ public class StripeApiHandlerTest {
         );
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
                         "secret");
         assertEquals(3, paymentMethods.size());
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods.get(0).id);
@@ -549,7 +529,7 @@ public class StripeApiHandlerTest {
         );
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                        FUNCTIONAL_SOURCE_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
                         "secret");
         assertTrue(paymentMethods.isEmpty());
     }

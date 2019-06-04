@@ -50,7 +50,7 @@ class StripeApiHandler {
     private final boolean mShouldLogRequest;
 
     StripeApiHandler(@NonNull Context context) {
-        this(context, new RequestExecutor(), true);
+        this(context.getApplicationContext(), new RequestExecutor(), true);
     }
 
     @VisibleForTesting
@@ -69,56 +69,48 @@ class StripeApiHandler {
      */
     boolean logApiCall(
             @NonNull Map<String, Object> loggingMap,
-            @NonNull RequestOptions options) {
+            @NonNull String publishableKey) {
         if (!mShouldLogRequest) {
             return false;
         }
 
-        final String apiKey = options.getApiKey();
-        if (apiKey == null || apiKey.trim().isEmpty()) {
-            // if there is no apiKey associated with the request, we don't need to react here.
-            return false;
-        }
-
         return fireAndForgetApiCall(StripeRequest.createGet(RequestExecutor.ANALYTICS_HOST,
-                loggingMap, options));
+                loggingMap, RequestOptions.createForApi(publishableKey)));
     }
 
     /**
      * Confirm a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
      *
      * @param paymentIntentParams contains the confirmation params
-     * @param publishableKey an API key
-     * @param stripeAccount a connected Stripe Account ID
      * @return a {@link PaymentIntent} reflecting the updated state after applying the parameter
      * provided
      */
     @Nullable
     PaymentIntent confirmPaymentIntent(
             @NonNull PaymentIntentParams paymentIntentParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount)
+            @NonNull RequestOptions requestOptions)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
-        final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
             logTelemetryData();
             final SourceParams sourceParams = paymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
+
+            final String apiKey = Objects.requireNonNull(requestOptions.getApiKey());
             logApiCall(
                     mLoggingUtils.getPaymentIntentConfirmationParams(null,
-                            Objects.requireNonNull(options.getApiKey()), sourceType),
-                    RequestOptions.createForApi(publishableKey)
+                            Objects.requireNonNull(apiKey), sourceType),
+                    apiKey
             );
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = requestData(StripeRequest.createPost(
-                    getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options));
+                    getConfirmPaymentIntentUrl(paymentIntentId), paramMap, requestOptions));
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -129,33 +121,28 @@ class StripeApiHandler {
 
     /**
      * Retrieve a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
-     *  @param paymentIntentParams contains the retrieval params
-     * @param publishableKey an API key
-     * @param stripeAccount a connected Stripe Account ID
+     * @param paymentIntentParams contains the retrieval params
      */
     @Nullable
     PaymentIntent retrievePaymentIntent(
             @NonNull PaymentIntentParams paymentIntentParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount)
+            @NonNull RequestOptions requestOptions)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
-        final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
             logTelemetryData();
+            final String apiKey = Objects.requireNonNull(requestOptions.getApiKey());
             logApiCall(
-                    mLoggingUtils.getPaymentIntentRetrieveParams(null,
-                            Objects.requireNonNull(options.getApiKey())),
-                    RequestOptions.createForApi(publishableKey)
-            );
+                    mLoggingUtils.getPaymentIntentRetrieveParams(null, apiKey),
+                    apiKey);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = requestData(StripeRequest.createGet(
-                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options));
+                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, requestOptions));
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -168,8 +155,6 @@ class StripeApiHandler {
      * Create a {@link Source} using the input {@link SourceParams}.
      *
      * @param sourceParams a {@link SourceParams} object with {@link Source} creation params
-     * @param publishableKey an API key
-     * @param stripeAccount a connected Stripe Account ID
      * @return a {@link Source} if one could be created from the input params,
      * or {@code null} if not
      * @throws AuthenticationException if there is a problem authenticating to the Stripe API
@@ -180,25 +165,23 @@ class StripeApiHandler {
     @Nullable
     Source createSource(
             @NonNull SourceParams sourceParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount)
+            @NonNull RequestOptions requestOptions)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = sourceParams.toParamMap();
         mNetworkUtils.addUidParams(paramMap);
-        final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
 
         try {
             logTelemetryData();
+            final String apiKey = Objects.requireNonNull(requestOptions.getApiKey());
             logApiCall(
                     mLoggingUtils.getSourceCreationParams(null,
-                            Objects.requireNonNull(options.getApiKey()), sourceParams.getType()),
-                    RequestOptions.createForApi(publishableKey)
-            );
+                            Objects.requireNonNull(apiKey), sourceParams.getType()),
+                    apiKey);
             final StripeResponse response = requestData(
-                    StripeRequest.createPost(getSourcesUrl(), paramMap, options));
+                    StripeRequest.createPost(getSourcesUrl(), paramMap, requestOptions));
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -212,8 +195,6 @@ class StripeApiHandler {
      *
      * @param sourceId the {@link Source#getId()} field for the Source to query
      * @param clientSecret the {@link Source#getClientSecret()} field for the Source to query
-     * @param publishableKey an API key
-     * @param stripeAccount a connected Stripe Account ID
      * @return a {@link Source} if one could be retrieved for the input params, or {@code null} if
      * no such Source could be found.
      *
@@ -226,22 +207,16 @@ class StripeApiHandler {
     Source retrieveSource(
             @NonNull String sourceId,
             @NonNull String clientSecret,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount)
+            @NonNull RequestOptions requestOptions)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         final Map<String, String> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
-        final RequestOptions options;
-        if (stripeAccount == null) {
-            options = RequestOptions.createForApi(publishableKey);
-        } else {
-            options = RequestOptions.createForApi(publishableKey, stripeAccount);
-        }
         try {
             final StripeResponse response = requestData(
-                    StripeRequest.createGet(getRetrieveSourceApiUrl(sourceId), paramMap, options));
+                    StripeRequest.createGet(getRetrieveSourceApiUrl(sourceId), paramMap,
+                            requestOptions));
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -253,9 +228,7 @@ class StripeApiHandler {
     @Nullable
     PaymentMethod createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull String publishableKey,
-            @Nullable String stripeAccount)
-
+            @NonNull RequestOptions requestOptions)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
@@ -263,17 +236,16 @@ class StripeApiHandler {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
 
         mNetworkUtils.addUidParams(params);
-        final RequestOptions options = RequestOptions.createForApi(publishableKey, stripeAccount);
         logTelemetryData();
+
+        final String apiKey = Objects.requireNonNull(requestOptions.getApiKey());
         logApiCall(
-                mLoggingUtils.getPaymentMethodCreationParams(null,
-                        Objects.requireNonNull(options.getApiKey())),
-                RequestOptions.createForApi(publishableKey)
-        );
+                mLoggingUtils.getPaymentMethodCreationParams(null, apiKey),
+                apiKey);
 
         try {
             final StripeResponse response = requestData(
-                    StripeRequest.createPost(getPaymentMethodsUrl(), params, options));
+                    StripeRequest.createPost(getPaymentMethodsUrl(), params, requestOptions));
             return PaymentMethod.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
@@ -315,10 +287,11 @@ class StripeApiHandler {
 
             logTelemetryData();
 
+            final String apiKey = Objects.requireNonNull(options.getApiKey());
             logApiCall(
                     mLoggingUtils.getTokenCreationParams(loggingTokens,
-                            Objects.requireNonNull(options.getApiKey()), tokenType),
-                    options
+                            apiKey, tokenType),
+                    apiKey
             );
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
@@ -331,11 +304,11 @@ class StripeApiHandler {
     @Nullable
     Source addCustomerSource(
             @NonNull String customerId,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -345,16 +318,16 @@ class StripeApiHandler {
         params.put("source", sourceId);
 
         logApiCall(
-                mLoggingUtils.getAddSourceParams(productUsageTokens, publicKey, sourceType),
+                mLoggingUtils.getAddSourceParams(productUsageTokens, publishableKey, sourceType),
                 // We use the public key to log, so we need different RequestOptions.
-                RequestOptions.createForApi(publicKey)
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createPost(
                         getAddCustomerSourceUrl(customerId),
                         params,
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -364,25 +337,25 @@ class StripeApiHandler {
     @Nullable
     Source deleteCustomerSource(
             @NonNull String customerId,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
             AuthenticationException,
             CardException {
         logApiCall(
-                mLoggingUtils.getDeleteSourceParams(productUsageTokens, publicKey),
+                mLoggingUtils.getDeleteSourceParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different RequestOptions.
-                RequestOptions.createForApi(publicKey)
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createDelete(
                         getDeleteCustomerSourceUrl(customerId, sourceId),
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -393,10 +366,10 @@ class StripeApiHandler {
     @Nullable
     PaymentMethod attachPaymentMethod(
             @NonNull String customerId,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String paymentMethodId,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -406,16 +379,16 @@ class StripeApiHandler {
         params.put("customer", customerId);
 
         logApiCall(
-                mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publicKey),
+                mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different RequestOptions.
-                RequestOptions.createForApi(publicKey)
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createPost(
                         getAttachPaymentMethodUrl(paymentMethodId),
                         params,
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -424,25 +397,25 @@ class StripeApiHandler {
 
     @Nullable
     PaymentMethod detachPaymentMethod(
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String paymentMethodId,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
             AuthenticationException,
             CardException {
         logApiCall(
-                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey),
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different RequestOptions.
-                RequestOptions.createForApi(publicKey)
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createPost(
                         getDetachPaymentMethodUrl(paymentMethodId),
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -456,9 +429,9 @@ class StripeApiHandler {
     List<PaymentMethod> getPaymentMethods(
             @NonNull String customerId,
             @NonNull String paymentMethodType,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -469,16 +442,16 @@ class StripeApiHandler {
         queryParams.put("type", paymentMethodType);
 
         logApiCall(
-                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publicKey),
+                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different RequestOptions.
-                RequestOptions.createForApi(publicKey)
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createGet(
                         getPaymentMethodsUrl(),
                         queryParams,
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -500,11 +473,11 @@ class StripeApiHandler {
     @Nullable
     Customer setDefaultCustomerSource(
             @NonNull String customerId,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -515,15 +488,15 @@ class StripeApiHandler {
 
         logApiCall(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, sourceType, null,
-                        publicKey, LoggingUtils.EVENT_DEFAULT_SOURCE),
-                RequestOptions.createForApi(publicKey)
+                        publishableKey, LoggingUtils.EVENT_DEFAULT_SOURCE),
+                ephemeralKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -534,10 +507,10 @@ class StripeApiHandler {
     @Nullable
     Customer setCustomerShippingInfo(
             @NonNull String customerId,
-            @NonNull String publicKey,
+            @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
-            @NonNull String secret)
+            @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -548,15 +521,15 @@ class StripeApiHandler {
 
         logApiCall(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, null, null,
-                        publicKey, LoggingUtils.EVENT_SET_SHIPPING_INFO),
-                RequestOptions.createForApi(publicKey)
+                        publishableKey, LoggingUtils.EVENT_SET_SHIPPING_INFO),
+                publishableKey
         );
 
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -565,7 +538,7 @@ class StripeApiHandler {
 
 
     @Nullable
-    Customer retrieveCustomer(@NonNull String customerId, @NonNull String secret)
+    Customer retrieveCustomer(@NonNull String customerId, @NonNull String ephemeralKey)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -574,7 +547,7 @@ class StripeApiHandler {
         final StripeResponse response = getStripeResponse(
                 StripeRequest.createGet(
                         getRetrieveCustomerUrl(customerId),
-                        RequestOptions.createForApi(secret))
+                        RequestOptions.createForApi(ephemeralKey))
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());

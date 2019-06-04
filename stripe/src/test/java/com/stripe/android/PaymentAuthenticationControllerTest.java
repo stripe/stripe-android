@@ -40,7 +40,7 @@ public class PaymentAuthenticationControllerTest {
 
     private static final String DIRECTORY_SERVER_ID = "F000000000";
     private static final String MESSAGE_VERSION = "2.1.0";
-    private static final String PUBLISHABLE_KEY = "pk_test";
+    private static final String PUBLISHABLE_KEY = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY;
     private static final int MAX_TIMEOUT = 5;
 
     private static final PaymentAuthConfig CONFIG = new PaymentAuthConfig.Builder()
