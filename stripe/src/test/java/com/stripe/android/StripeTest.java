@@ -25,6 +25,7 @@ import com.stripe.android.view.CardInputTestActivity;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
@@ -37,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -1026,17 +1028,19 @@ public class StripeTest {
 
     @Test
     public void createTokenSynchronous_withValidDataAndBadKey_throwsAuthenticationException() {
-        try {
-            // This key won't work for a real connection to the api.
-            Stripe stripe = createNonLoggingStripe(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
-            stripe.createTokenSynchronous(CARD);
-            fail("Expecting an error, but did not get one.");
-        } catch (AuthenticationException authEx) {
-            String message = authEx.getMessage();
-            assertTrue(message.startsWith("Invalid API Key provided"));
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+        // This key won't work for a real connection to the api.
+        final Stripe stripe = createNonLoggingStripe(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        final AuthenticationException authenticationException = assertThrows(
+                AuthenticationException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createTokenSynchronous(CARD);
+                    }
+                }
+        );
+        assertEquals("Invalid API Key provided: " + ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                authenticationException.getMessage());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -1049,37 +1053,37 @@ public class StripeTest {
 
     @Test
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
-        try {
-            // This card is missing quite a few numbers.
-            Card card = Card.create("42424242", 12, YEAR, "123");
-            Stripe stripe = createNonLoggingStripe();
-            Token token = stripe.createTokenSynchronous(card);
-            fail("Expecting an exception, but created a token instead: " + token.toString());
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (CardException cardException) {
-            assertTrue(cardException.getMessage().startsWith("Your card number is incorrect."));
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+        // This card is missing quite a few numbers.
+        final Card card = Card.create("42424242", 12, YEAR, "123");
+        final Stripe stripe = createNonLoggingStripe();
+        final CardException cardException = assertThrows(
+                CardException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createTokenSynchronous(card);
+                    }
+                }
+        );
+        assertEquals("Your card number is incorrect.", cardException.getMessage());
     }
 
     @Test
     public void createTokenSynchronous_withExpiredCard_throwsCardException() {
-        try {
-            // This card is missing quite a few numbers.
-            Card card = Card.create("4242424242424242", 11, 2015, "123");
-            Stripe stripe = createNonLoggingStripe();
-            Token token = stripe.createTokenSynchronous(card);
-            fail("Expecting an exception, but created a token instead: " + token.toString());
-        } catch (AuthenticationException authEx) {
-            fail("Unexpected error: " + authEx.getLocalizedMessage());
-        } catch (CardException cardException) {
-            assertTrue(cardException.getMessage()
-                    .startsWith("Your card's expiration year is invalid."));
-        } catch (StripeException stripeEx) {
-            fail("Unexpected error: " + stripeEx.getLocalizedMessage());
-        }
+        // This card is missing quite a few numbers.
+        final Card card = Card.create("4242424242424242", 11, 2015, "123");
+        final Stripe stripe = createNonLoggingStripe();
+        final CardException cardException = assertThrows(
+                CardException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createTokenSynchronous(card);
+                    }
+                }
+        );
+        assertEquals("Your card's expiration year is invalid.",
+                cardException.getMessage());
     }
 
     @Test

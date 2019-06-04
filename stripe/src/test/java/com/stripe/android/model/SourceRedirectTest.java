@@ -39,13 +39,8 @@ public class SourceRedirectTest {
     }
 
     @Test
-    public void fromJsonString_backToJson_createsIdenticalElement() {
-        try {
-            JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_REDIRECT);
-            assertJsonEquals(rawConversion, mSourceRedirect.toJson());
-        } catch (JSONException jsonException) {
-            fail("Test Data failure: " + jsonException.getLocalizedMessage());
-        }
+    public void fromJsonString_backToJson_createsIdenticalElement() throws JSONException {
+        assertJsonEquals(new JSONObject(EXAMPLE_JSON_REDIRECT), mSourceRedirect.toJson());
     }
 
     @Test
