@@ -14,23 +14,29 @@ import com.stripe.android.view.PaymentAuthenticationExtras;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 
 class Stripe3ds2CompletionStarter
         implements ActivityStarter<Stripe3ds2CompletionStarter.StartData> {
-    @NonNull private final Activity mActivity;
+    @NonNull private final WeakReference<Activity> mActivityRef;
     private final int mRequestCode;
 
     Stripe3ds2CompletionStarter(@NonNull Activity activity, int requestCode) {
-        mActivity = activity;
+        mActivityRef = new WeakReference<>(activity);
         mRequestCode = requestCode;
     }
 
     @Override
     public void start(@NonNull StartData data) {
-        final Intent intent = new Intent(mActivity, PaymentAuthRelayActivity.class)
+        final Activity activity = mActivityRef.get();
+        if (activity == null) {
+            return;
+        }
+
+        final Intent intent = new Intent(activity, PaymentAuthRelayActivity.class)
                 .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
                         data.mPaymentIntent.getClientSecret());
-        mActivity.startActivityForResult(intent, mRequestCode);
+        activity.startActivityForResult(intent, mRequestCode);
     }
 
     @IntDef({Status.COMPLETE, Status.CANCEL, Status.TIMEOUT, Status.PROTOCOL_ERROR,
