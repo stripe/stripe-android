@@ -28,10 +28,6 @@ Please note that if enabling minification in your `build.gradle` file, you must 
 -keep class com.stripe.android.** { *; }
 ```
 
-### Eclipse
-
-Note - as Google has stopped supporting Eclipse for Android Development, we will no longer be actively testing the project's compatibility within Eclipse. You may still clone and include the library as you would any other Android library project.
-
 ## Usage
 
 ### Using `CardInputWidget`
@@ -99,21 +95,15 @@ If the returned `Card` is `null`, error states will show on the fields that need
 
 Once you have a non-null `Card` object from either widget, you can call [createToken](#using-createtoken).
 
-### Using `setDefaultPublishableKey`
+### Setting your Publishable Key
 
-A publishable key is required to identify your website when communicating with Stripe. Remember to replace the test key with your live key in production.
+A [publishable key](https://stripe.com/docs/keys) is required to identify your app when communicating with Stripe. Remember to replace the test key with your live key in production.
 
-You can get all your keys from [your account page](https://manage.stripe.com/#account/apikeys).
-This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
+You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
+The [Android Integration doc](https://stripe.com/docs/mobile/android) explains this flow in more detail.
 
 ```java
 new Stripe(context, "YOUR_PUBLISHABLE_KEY");
-```
-
-or
-
-```java
-new Stripe(context).setDefaultPublishableKey("YOUR_PUBLISHABLE_KEY");
 ```
 
 ### Using `createToken`
@@ -337,13 +327,13 @@ Note: Both example apps require an [Android SDK](https://developer.android.com/s
 ### Building the example project
 
 1. Clone the git repository.
-2. Be sure you've installed the Android SDK with API Level 17 and _android-support-v4_. This is only a requirement for development. Our bindings require the API Level 7 as a minimum at runtime which would work on almost any modern version of Android.
-3. Import the project.
-    * For Android Studio, choose _Import Project..._ from the "Welcome to Android Studio" screen. Select the `build.gradle` file at the top of the `stripe-android` repository.
-    * For Eclipse, [import](http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) the _example_ and _stripe_ folders into, by using `Import -> General -> Existing Projects into Workspace`, and browsing to the `stripe-android` folder.
+2. Be sure you've installed the Android SDK with API Level 19 and _android-support-v4_. This is only a requirement for development.
+3. Import the project in Android Studio
+    * Choose _Import Project..._ from the "Welcome to Android Studio" screen.
+    * Select `build.gradle` at the top of the `stripe-android` repository.
 4. Build and run the project on your device or in the Android emulator.
 
-The example application needs a public key from your Stripe account to interact with the Stripe API. To add this, [replace the value of PUBLISHABLE_KEY in LauncherActivity with your test key](example/src/main/java/com/stripe/example/activity/LauncherActivity.java#L25).
+The example application needs a public key from your Stripe account to interact with the Stripe API. To add this, [replace the value of PUBLISHABLE_KEY in LauncherActivity with your test key](example/src/main/java/com/stripe/example/activity/LauncherActivity.java#L28).
 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
@@ -352,12 +342,12 @@ Three different ways of creating tokens are shown, with all the Stripe-specific 
 
 Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
 
-1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to https://dashboard.stripe.com/account/apikeys.
-2. Replace the `PUBLISHABLE_KEY` constant in StoreActivity.java (where it says "put your publishable key here") with your Test Publishable Key.
-3. Head to https://github.com/stripe/example-ios-backend and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the STRIPE_TEST_SECRET_KEY field under 'Env'. Click "Deploy for Free".
-4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in the RetrofitFactory.java file with the app URL Heroku provides you with (e.g. "https://my-example-app.herokuapp.com")
+1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to [https://dashboard.stripe.com/apikeys](https://dashboard.stripe.com/apikeys).
+2. Replace the `PUBLISHABLE_KEY` constant in [StoreActivity.java](samplestore/src/main/java/com/stripe/samplestore/StoreActivity.java) (where it says "put your publishable key here") with your Test Publishable Key.
+3. Head to https://github.com/stripe/example-ios-backend and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the `STRIPE_TEST_SECRET_KEY` field under 'Env'. Click "Deploy for Free".
+4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in [RetrofitFactory.java](samplestore/src/main/java/com/stripe/samplestore/RetrofitFactory.java) with the app URL Heroku provides you with (e.g. "https://my-example-app.herokuapp.com")
 
-After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to https://stripe.com/docs/testing#cards for a list of test card numbers.
+After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to [https://stripe.com/docs/testing#cards](https://stripe.com/docs/testing#cards) for a list of test card numbers.
 
 ## Migrating from older versions
 
