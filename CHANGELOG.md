@@ -1,7 +1,9 @@
 # CHANGELOG
 
-## 9.1.2
+## 9.2.0
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Upgrade pinned API version to `2019-05-16`
+* [#1036](https://github.com/stripe/stripe-android/pull/1036) Validate API key before every request
+* [#1046](https://github.com/stripe/stripe-android/pull/1046) Make `Card` model fields immutable
 
 ## 9.1.1 - 2019-05-28
 * [#1006](https://github.com/stripe/stripe-android/pull/1006) Remove null values in `PaymentMethod.BillingDetails#toMap()`
