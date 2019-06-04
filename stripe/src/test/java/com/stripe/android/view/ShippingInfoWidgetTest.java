@@ -189,13 +189,13 @@ public class ShippingInfoWidgetTest extends BaseViewTest<ShippingInfoTestActivit
         assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_zip_code));
         assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_name));
         List<String> optionalFields = new ArrayList<>();
-        optionalFields.add(ShippingInfoWidget.POSTAL_CODE_FIELD);
+        optionalFields.add(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD);
         mShippingInfoWidget.setOptionalFields(optionalFields);
         assertEquals(mPostalCodeTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_zip_code_optional));
         assertEquals(mNameTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_name));
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());
         assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_province));
-        optionalFields.add(ShippingInfoWidget.STATE_FIELD);
+        optionalFields.add(ShippingInfoWidget.CustomizableShippingField.STATE_FIELD);
         mShippingInfoWidget.setOptionalFields(optionalFields);
         assertEquals(mStateTextInputLayout.getHint().toString(), mShippingInfoWidget.getResources().getString(R.string.address_label_province_optional));
     }
@@ -205,7 +205,7 @@ public class ShippingInfoWidgetTest extends BaseViewTest<ShippingInfoTestActivit
         assertEquals(mNameTextInputLayout.getVisibility(), View.VISIBLE);
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.VISIBLE);
         List<String> hiddenFields = new ArrayList<>();
-        hiddenFields.add(ShippingInfoWidget.POSTAL_CODE_FIELD);
+        hiddenFields.add(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD);
         mShippingInfoWidget.setHiddenFields(hiddenFields);
         assertEquals(mPostalCodeTextInputLayout.getVisibility(), View.GONE);
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.CANADA.getDisplayCountry());

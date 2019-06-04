@@ -18,6 +18,7 @@ public class PaymentSessionData implements Parcelable {
     private long mCartTotal = 0L;
     private boolean mIsPaymentReadyToCharge;
     private long mShippingTotal = 0L;
+
     @Nullable private ShippingInformation mShippingInformation;
     @Nullable private ShippingMethod mShippingMethod;
     @Nullable private PaymentMethod mPaymentMethod;

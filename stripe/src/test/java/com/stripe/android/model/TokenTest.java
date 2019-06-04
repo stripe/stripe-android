@@ -15,10 +15,10 @@ import static org.junit.Assert.assertNull;
 public class TokenTest {
     private static final Card CARD = new Card.Builder(null, 8, 2017, null)
             .id("card_189fi32eZvKYlo2CHK8NPRME")
-            .brand(Card.VISA)
+            .brand(Card.CardBrand.VISA)
             .country("US")
             .last4("4242")
-            .funding(Card.FUNDING_CREDIT)
+            .funding(Card.FundingType.CREDIT)
             .metadata(new HashMap<String, String>())
             .build();
 
@@ -167,7 +167,7 @@ public class TokenTest {
         assertEquals(expectedToken.getLivemode(), answerToken.getLivemode());
         assertEquals(expectedToken.getCreated(), answerToken.getCreated());
         assertEquals(expectedToken.getUsed(), answerToken.getUsed());
-        assertEquals(Token.TYPE_BANK_ACCOUNT, answerToken.getType());
+        assertEquals(Token.TokenType.BANK_ACCOUNT, answerToken.getType());
 
         assertNotNull(answerToken.getBankAccount());
         assertNull(answerToken.getCard());

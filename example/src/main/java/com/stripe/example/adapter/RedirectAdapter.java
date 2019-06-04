@@ -51,7 +51,7 @@ public class RedirectAdapter extends RecyclerView.Adapter<RedirectAdapter.ViewHo
 
         void setSourceType(@Nullable String sourceType) {
             final String viewableType;
-            if (Source.THREE_D_SECURE.equals(sourceType)) {
+            if (Source.SourceType.THREE_D_SECURE.equals(sourceType)) {
                 viewableType = "3DS";
             } else {
                 viewableType = sourceType;

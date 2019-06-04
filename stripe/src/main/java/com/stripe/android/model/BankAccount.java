@@ -22,10 +22,11 @@ import java.lang.annotation.RetentionPolicy;
 public final class BankAccount {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_COMPANY, TYPE_INDIVIDUAL})
-    public @interface BankAccountType {}
-    public static final String TYPE_COMPANY = "company";
-    public static final String TYPE_INDIVIDUAL = "individual";
+    @StringDef({BankAccountType.COMPANY, BankAccountType.INDIVIDUAL})
+    public @interface BankAccountType {
+        String COMPANY = "company";
+        String INDIVIDUAL = "individual";
+    }
 
     private static final String FIELD_ACCOUNT_HOLDER_NAME = "account_holder_name";
     private static final String FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type";
@@ -170,10 +171,10 @@ public final class BankAccount {
     @Nullable
     @BankAccountType
     public static String asBankAccountType(@Nullable String possibleAccountType) {
-        if (BankAccount.TYPE_COMPANY.equals(possibleAccountType)) {
-            return BankAccount.TYPE_COMPANY;
-        } else if (BankAccount.TYPE_INDIVIDUAL.equals(possibleAccountType)) {
-            return BankAccount.TYPE_INDIVIDUAL;
+        if (BankAccountType.COMPANY.equals(possibleAccountType)) {
+            return BankAccountType.COMPANY;
+        } else if (BankAccountType.INDIVIDUAL.equals(possibleAccountType)) {
+            return BankAccountType.INDIVIDUAL;
         }
 
         return null;

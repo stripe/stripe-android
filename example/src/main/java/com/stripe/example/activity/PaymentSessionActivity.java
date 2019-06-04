@@ -123,8 +123,10 @@ public class PaymentSessionActivity extends AppCompatActivity {
                 new PaymentSessionListenerImpl(this, customerSession),
                 new PaymentSessionConfig.Builder()
                         .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                        .setHiddenShippingInfoFields(ShippingInfoWidget.PHONE_FIELD,
-                                ShippingInfoWidget.CITY_FIELD)
+                        .setHiddenShippingInfoFields(
+                                ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
+                                ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
+                        )
                         .build());
         if (paymentSessionInitialized) {
             mPaymentSession.setCartTotal(2000L);

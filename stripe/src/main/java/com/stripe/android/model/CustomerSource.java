@@ -47,7 +47,7 @@ public final class CustomerSource extends StripeModel implements StripePaymentSo
     public String getTokenizationMethod() {
         final Source paymentAsSource = asSource();
         final Card paymentAsCard = asCard();
-        if (paymentAsSource != null && Source.CARD.equals(paymentAsSource.getType())) {
+        if (paymentAsSource != null && Source.SourceType.CARD.equals(paymentAsSource.getType())) {
             final SourceCardData cardData = (SourceCardData) paymentAsSource.getSourceTypeModel();
             if (cardData != null) {
                 return cardData.getTokenizationMethod();
@@ -70,11 +70,11 @@ public final class CustomerSource extends StripeModel implements StripePaymentSo
     @Source.SourceType
     public String getSourceType() {
         if (mStripePaymentSource instanceof Card) {
-            return Source.CARD;
+            return Source.SourceType.CARD;
         } else if (mStripePaymentSource instanceof Source) {
             return ((Source) mStripePaymentSource).getType();
         } else {
-            return Source.UNKNOWN;
+            return Source.SourceType.UNKNOWN;
         }
     }
 

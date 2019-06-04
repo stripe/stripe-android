@@ -142,8 +142,8 @@ public class RedirectActivity extends AppCompatActivity {
                                     source.getType());
                             // If we need to get 3DS verification for this card, we
                             // first create a 3DS Source.
-                            if (SourceCardData.REQUIRED.equals(threeDSecureStatus)) {
-
+                            if (SourceCardData.ThreeDSecureStatus.REQUIRED
+                                    .equals(threeDSecureStatus)) {
                                 // The card Source can be used to create a 3DS Source
                                 createThreeDSecureSource(source.getId());
                             } else {

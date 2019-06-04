@@ -92,7 +92,7 @@ public final class SourceParams {
             @NonNull String returnUrl) {
         final SourceParams params = new SourceParams()
                 .setAmount(amount)
-                .setType(Source.P24)
+                .setType(SourceType.P24)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
@@ -128,10 +128,10 @@ public final class SourceParams {
             @Nullable String email,
             @NonNull String returnUrl) {
         final SourceParams params = new SourceParams()
-                .setType(Source.ALIPAY)
+                .setType(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
-                .setUsage(Source.REUSABLE);
+                .setUsage(Source.Usage.REUSABLE);
 
         final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
@@ -168,7 +168,7 @@ public final class SourceParams {
             @Nullable String email,
             @NonNull String returnUrl) {
         final SourceParams params = new SourceParams()
-                .setType(Source.ALIPAY)
+                .setType(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -209,7 +209,7 @@ public final class SourceParams {
             @Nullable String statementDescriptor,
             @Nullable String preferredLanguage) {
         final SourceParams params = new SourceParams()
-                .setType(Source.BANCONTACT)
+                .setType(SourceType.BANCONTACT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -248,7 +248,7 @@ public final class SourceParams {
     @NonNull
     public static SourceParams createSourceFromTokenParams(@NonNull String tokenId) {
         SourceParams sourceParams = SourceParams.createCustomParams();
-        sourceParams.setType(Source.CARD);
+        sourceParams.setType(SourceType.CARD);
         sourceParams.setToken(tokenId);
         return sourceParams;
     }
@@ -263,7 +263,7 @@ public final class SourceParams {
      */
     @NonNull
     public static SourceParams createCardParams(@NonNull Card card) {
-        final SourceParams params = new SourceParams().setType(Source.CARD);
+        final SourceParams params = new SourceParams().setType(SourceType.CARD);
 
         // Not enforcing all fields to exist at this level.
         // Instead, the server will return an error for invalid data.
@@ -324,7 +324,7 @@ public final class SourceParams {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
         final SourceParams params = new SourceParams()
-                .setType(Source.EPS)
+                .setType(SourceType.EPS)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -359,7 +359,7 @@ public final class SourceParams {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
         final SourceParams params = new SourceParams()
-                .setType(Source.GIROPAY)
+                .setType(SourceType.GIROPAY)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -396,7 +396,7 @@ public final class SourceParams {
             @Nullable String statementDescriptor,
             @Nullable String bank) {
         final SourceParams params = new SourceParams()
-                .setType(Source.IDEAL)
+                .setType(SourceType.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -434,7 +434,7 @@ public final class SourceParams {
             @NonNull String returnUrl,
             @NonNull String email) {
         return new SourceParams()
-                .setType(Source.MULTIBANCO)
+                .setType(SourceType.MULTIBANCO)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
@@ -476,7 +476,7 @@ public final class SourceParams {
             @Nullable String postalCode,
             @Nullable @Size(2) String country) {
         final SourceParams params = new SourceParams()
-                .setType(Source.SEPA_DEBIT)
+                .setType(SourceType.SEPA_DEBIT)
                 .setCurrency(Source.EURO);
 
         final AbstractMap<String, Object> address = new HashMap<>();
@@ -515,7 +515,7 @@ public final class SourceParams {
             @NonNull @Size(2) String country,
             @Nullable String statementDescriptor) {
         final SourceParams params = new SourceParams()
-                .setType(Source.SOFORT)
+                .setType(SourceType.SOFORT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -548,7 +548,7 @@ public final class SourceParams {
             @NonNull String returnUrl,
             @NonNull String cardID) {
         return new SourceParams()
-                .setType(Source.THREE_D_SECURE)
+                .setType(SourceType.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
@@ -567,7 +567,7 @@ public final class SourceParams {
     @NonNull
     public static SourceParams createVisaCheckoutParams(@NonNull String callId) {
         return new SourceParams()
-                .setType(Source.CARD)
+                .setType(SourceType.CARD)
                 .setApiParameterMap(
                         createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId)));
     }
@@ -593,7 +593,7 @@ public final class SourceParams {
         map.put(CART_ID, cartID);
 
         return new SourceParams()
-                .setType(Source.CARD)
+                .setType(SourceType.CARD)
                 .setApiParameterMap(createSimpleMap(MASTERPASS, map));
     }
 
@@ -784,7 +784,7 @@ public final class SourceParams {
 
     /**
      * Sets a custom type for the source, and sets the {@link #mType type} for these parameters
-     * to be {@link Source#UNKNOWN}.
+     * to be {@link SourceType#UNKNOWN}.
      *
      * @param typeRaw the name of the source type
      * @return {@code this}, for chaining purposes

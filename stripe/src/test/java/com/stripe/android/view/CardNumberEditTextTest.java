@@ -51,7 +51,7 @@ public class CardNumberEditTextTest {
     @Test
     public void updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() {
         // Directly setting card brand as a testing hack (annotated in source)
-        mCardNumberEditText.mCardBrand = Card.VISA;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.VISA;
 
         // Adding 1 character, starting at position 4, with a final string length 6
         assertEquals(6, mCardNumberEditText.updateSelectionIndex(6, 4, 1));
@@ -62,14 +62,14 @@ public class CardNumberEditTextTest {
 
     @Test
     public void updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() {
-        mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.AMERICAN_EXPRESS;
         assertEquals(6, mCardNumberEditText.updateSelectionIndex(6, 4, 1));
         assertEquals(13, mCardNumberEditText.updateSelectionIndex(13, 11, 1));
     }
 
     @Test
     public void updateSelectionIndex_whenDinersClub_decreasesIndexWhenDeletingPastTheSpaces() {
-        mCardNumberEditText.mCardBrand = Card.DINERS_CLUB;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.DINERS_CLUB;
         assertEquals(4, mCardNumberEditText.updateSelectionIndex(6, 5, 0));
         assertEquals(9, mCardNumberEditText.updateSelectionIndex(13, 10, 0));
         assertEquals(14, mCardNumberEditText.updateSelectionIndex(17, 15, 0));
@@ -77,38 +77,38 @@ public class CardNumberEditTextTest {
 
     @Test
     public void updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() {
-        mCardNumberEditText.mCardBrand = Card.DINERS_CLUB;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.DINERS_CLUB;
         assertEquals(7, mCardNumberEditText.updateSelectionIndex(12, 7, 0));
     }
 
     @Test
     public void updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() {
-        mCardNumberEditText.mCardBrand = Card.AMERICAN_EXPRESS;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.AMERICAN_EXPRESS;
         assertEquals(4, mCardNumberEditText.updateSelectionIndex(10, 5, 0));
         assertEquals(11, mCardNumberEditText.updateSelectionIndex(13, 12, 0));
     }
 
     @Test
     public void updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
-        mCardNumberEditText.mCardBrand = Card.VISA;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.VISA;
         assertEquals(6, mCardNumberEditText.updateSelectionIndex(10, 4, 1));
     }
 
     @Test
     public void updateSelectionIndex_whenPastingIntoAGap_includesTheGapJump() {
-        mCardNumberEditText.mCardBrand = Card.UNKNOWN;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.UNKNOWN;
         assertEquals(11, mCardNumberEditText.updateSelectionIndex(12, 8, 2));
     }
 
     @Test
     public void updateSelectionIndex_whenPastingOverAGap_includesTheGapJump() {
-        mCardNumberEditText.mCardBrand = Card.UNKNOWN;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.UNKNOWN;
         assertEquals(9, mCardNumberEditText.updateSelectionIndex(12, 3, 5));
     }
 
     @Test
     public void updateSelectionIndex_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
-        mCardNumberEditText.mCardBrand = Card.VISA;
+        mCardNumberEditText.mCardBrand = Card.CardBrand.VISA;
         // This case could happen when you paste over 5 digits with only 2
         assertEquals(3, mCardNumberEditText.updateSelectionIndex(3, 3, 2));
     }
@@ -229,7 +229,7 @@ public class CardNumberEditTextTest {
 
     @Test
     public void setCardBrandChangeListener_callsSetCardBrand() {
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.UNKNOWN);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class CardNumberEditTextTest {
         clearInvocations(mCardBrandChangeListener);
         // There is only one Visa Prefix.
         mCardNumberEditText.append(Card.PREFIXES_VISA[0]);
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.VISA);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.VISA);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class CardNumberEditTextTest {
             // Reset inside the loop so we don't count each prefix
             clearInvocations(mCardBrandChangeListener);
             mCardNumberEditText.append(prefix);
-            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.AMERICAN_EXPRESS);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS);
             mCardNumberEditText.setText("");
         }
     }
@@ -257,7 +257,7 @@ public class CardNumberEditTextTest {
         for (String prefix : Card.PREFIXES_DINERS_CLUB) {
             clearInvocations(mCardBrandChangeListener);
             mCardNumberEditText.append(prefix);
-            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DINERS_CLUB);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.DINERS_CLUB);
             mCardNumberEditText.setText("");
         }
     }
@@ -267,7 +267,7 @@ public class CardNumberEditTextTest {
         for (String prefix : Card.PREFIXES_DISCOVER) {
             clearInvocations(mCardBrandChangeListener);
             mCardNumberEditText.append(prefix);
-            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DISCOVER);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.DISCOVER);
             mCardNumberEditText.setText("");
         }
     }
@@ -277,7 +277,7 @@ public class CardNumberEditTextTest {
         for (String prefix : Card.PREFIXES_MASTERCARD) {
             clearInvocations(mCardBrandChangeListener);
             mCardNumberEditText.append(prefix);
-            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.MASTERCARD);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.MASTERCARD);
             mCardNumberEditText.setText("");
         }
     }
@@ -287,7 +287,7 @@ public class CardNumberEditTextTest {
         for (String prefix : Card.PREFIXES_JCB) {
             clearInvocations(mCardBrandChangeListener);
             mCardNumberEditText.append(prefix);
-            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.JCB);
+            verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.JCB);
             mCardNumberEditText.setText("");
         }
     }
@@ -299,7 +299,7 @@ public class CardNumberEditTextTest {
         String suffix = VALID_AMEX_WITH_SPACES.substring(2);
         mCardNumberEditText.append(prefix);
         mCardNumberEditText.append(suffix);
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.AMERICAN_EXPRESS);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS);
     }
 
     @Test
@@ -312,10 +312,10 @@ public class CardNumberEditTextTest {
         assertTrue(dinersPrefix.length() > 1);
 
         mCardNumberEditText.append(dinersPrefix);
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.DINERS_CLUB);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.DINERS_CLUB);
 
         ViewTestUtils.sendDeleteKeyEvent(mCardNumberEditText);
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.UNKNOWN);
     }
 
     @Test
@@ -323,16 +323,16 @@ public class CardNumberEditTextTest {
         clearInvocations(mCardBrandChangeListener);
         String prefixVisa = Card.PREFIXES_VISA[0];
         mCardNumberEditText.append(prefixVisa);
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.VISA);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.VISA);
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
         mCardNumberEditText.append("123");
-        verify(mCardBrandChangeListener, times(0)).onCardBrandChanged(Card.UNKNOWN);
+        verify(mCardBrandChangeListener, times(0)).onCardBrandChanged(Card.CardBrand.UNKNOWN);
 
         // This simulates the user selecting all text and deleting it.
         mCardNumberEditText.setText("");
 
-        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.UNKNOWN);
+        verify(mCardBrandChangeListener, times(1)).onCardBrandChanged(Card.CardBrand.UNKNOWN);
     }
 
     @Test

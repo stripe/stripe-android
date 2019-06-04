@@ -68,7 +68,7 @@ public class StripeNetworkUtils {
         // sent to the API.
         tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
 
-        tokenParams.put(Token.TYPE_CARD, cardParams);
+        tokenParams.put(Token.TokenType.CARD, cardParams);
         tokenParams.putAll(createUidParams());
 
         return tokenParams;
@@ -79,7 +79,7 @@ public class StripeNetworkUtils {
         final Map<String, Object> tokenParams = new HashMap<>();
         tokenParams.put("personal_id_number", personalId);
         final Map<String, Object> piiParams = new HashMap<>();
-        piiParams.put(Token.TYPE_PII, tokenParams);
+        piiParams.put(Token.TokenType.PII, tokenParams);
         return piiParams;
     }
 
@@ -88,7 +88,7 @@ public class StripeNetworkUtils {
         final Map<String, Object> tokenParams = new HashMap<>();
         tokenParams.put("cvc", cvc);
         final Map<String, Object> cvcParams = new HashMap<>();
-        cvcParams.put(Token.TYPE_CVC_UPDATE, tokenParams);
+        cvcParams.put(Token.TokenType.CVC_UPDATE, tokenParams);
         return cvcParams;
     }
 
@@ -116,7 +116,7 @@ public class StripeNetworkUtils {
         // Remove all null values; they cause validation errors
         removeNullAndEmptyParams(accountParams);
 
-        tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
+        tokenParams.put(Token.TokenType.BANK_ACCOUNT, accountParams);
         tokenParams.putAll(createUidParams());
         return tokenParams;
     }

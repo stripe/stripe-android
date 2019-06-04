@@ -494,7 +494,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         customerSession.addCustomerSource(
                 "abc123",
-                Source.CARD,
+                Source.SourceType.CARD,
                 mockListener);
 
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
@@ -505,7 +505,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
-                eq(Source.CARD),
+                eq(Source.SourceType.CARD),
                 eq(firstKey.getSecret())
         );
         final List<String> productUsage = mListArgumentCaptor.getValue();
@@ -551,7 +551,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         setupErrorProxy();
         customerSession.addCustomerSource(
                 "abc123",
-                Source.CARD,
+                Source.SourceType.CARD,
                 mockListener);
 
         verify(mBroadcastReceiver).onReceive(any(Context.class), mIntentArgumentCaptor.capture());
@@ -699,7 +699,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         customerSession.setCustomerDefaultSource(
                 "abc123",
-                Source.CARD,
+                Source.SourceType.CARD,
                 mockListener);
 
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
@@ -710,7 +710,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
-                eq(Source.CARD),
+                eq(Source.SourceType.CARD),
                 eq(firstKey.getSecret()));
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
@@ -752,7 +752,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mock(CustomerSession.CustomerRetrievalListener.class);
 
         setupErrorProxy();
-        customerSession.setCustomerDefaultSource("abc123", Source.CARD,
+        customerSession.setCustomerDefaultSource("abc123", Source.SourceType.CARD,
                 mockListener);
 
         final ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);

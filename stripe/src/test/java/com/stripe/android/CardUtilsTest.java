@@ -15,62 +15,62 @@ public class CardUtilsTest {
 
     @Test
     public void getPossibleCardType_withEmptyCard_returnsUnknown() {
-        assertEquals(Card.UNKNOWN, CardUtils.getPossibleCardType("   "));
+        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("   "));
     }
 
     @Test
     public void getPossibleCardType_withNullCardNumber_returnsUnknown() {
-        assertEquals(Card.UNKNOWN, CardUtils.getPossibleCardType(null));
+        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType(null));
     }
 
     @Test
     public void getPossibleCardType_withVisaPrefix_returnsVisa() {
-        assertEquals(Card.VISA, CardUtils.getPossibleCardType("4899 99"));
-        assertEquals(Card.VISA, CardUtils.getPossibleCardType("4"));
+        assertEquals(Card.CardBrand.VISA, CardUtils.getPossibleCardType("4899 99"));
+        assertEquals(Card.CardBrand.VISA, CardUtils.getPossibleCardType("4"));
     }
 
     @Test
     public void getPossibleCardType_withAmexPrefix_returnsAmex() {
-        assertEquals(Card.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("345"));
-        assertEquals(Card.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("37999999999"));
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("345"));
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("37999999999"));
     }
 
     @Test
     public void getPossibleCardType_withJCBPrefix_returnsJCB() {
-        assertEquals(Card.JCB, CardUtils.getPossibleCardType("3535 3535"));
+        assertEquals(Card.CardBrand.JCB, CardUtils.getPossibleCardType("3535 3535"));
     }
 
     @Test
     public void getPossibleCardType_withMasterCardPrefix_returnsMasterCard() {
-        assertEquals(Card.MASTERCARD, CardUtils.getPossibleCardType("2222 452"));
-        assertEquals(Card.MASTERCARD, CardUtils.getPossibleCardType("5050"));
+        assertEquals(Card.CardBrand.MASTERCARD, CardUtils.getPossibleCardType("2222 452"));
+        assertEquals(Card.CardBrand.MASTERCARD, CardUtils.getPossibleCardType("5050"));
     }
 
     @Test
     public void getPossibleCardType_withDinersClubPrefix_returnsDinersClub() {
-        assertEquals(Card.DINERS_CLUB, CardUtils.getPossibleCardType("303922 2234"));
-        assertEquals(Card.DINERS_CLUB, CardUtils.getPossibleCardType("36778 9098"));
+        assertEquals(Card.CardBrand.DINERS_CLUB, CardUtils.getPossibleCardType("303922 2234"));
+        assertEquals(Card.CardBrand.DINERS_CLUB, CardUtils.getPossibleCardType("36778 9098"));
     }
 
     @Test
     public void getPossibleCardType_withDiscoverPrefix_returnsDiscover() {
-        assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("60355"));
-        assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("6433 8 90923"));
+        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("60355"));
+        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("6433 8 90923"));
         // This one has too many numbers on purpose. Checking for length is not part of the
         // function under test.
-        assertEquals(Card.DISCOVER, CardUtils.getPossibleCardType("6523452309209340293423"));
+        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("6523452309209340293423"));
     }
 
     @Test
     public void getPossibleCardType_withUnionPayPrefix_returnsUnionPay() {
-        assertEquals(Card.UNIONPAY, CardUtils.getPossibleCardType("62"));
+        assertEquals(Card.CardBrand.UNIONPAY, CardUtils.getPossibleCardType("62"));
     }
 
     @Test
     public void getPossibleCardType_withNonsenseNumber_returnsUnknown() {
-        assertEquals(Card.UNKNOWN, CardUtils.getPossibleCardType("1234567890123456"));
-        assertEquals(Card.UNKNOWN, CardUtils.getPossibleCardType("9999 9999 9999 9999"));
-        assertEquals(Card.UNKNOWN, CardUtils.getPossibleCardType("3"));
+        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("1234567890123456"));
+        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("9999 9999 9999 9999"));
+        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("3"));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class CardUtilsTest {
         String validVisa = "4242424242424242";
         // Adding this check to ensure the input number is correct
         assertTrue(CardUtils.isValidCardLength(validVisa));
-        assertFalse(CardUtils.isValidCardLength(validVisa, Card.UNKNOWN));
+        assertFalse(CardUtils.isValidCardLength(validVisa, Card.CardBrand.UNKNOWN));
     }
 
     @Test

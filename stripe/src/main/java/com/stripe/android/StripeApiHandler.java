@@ -561,7 +561,7 @@ class StripeApiHandler {
 
         logApiCall(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, sourceType, null,
-                        publishableKey, LoggingUtils.EVENT_DEFAULT_SOURCE),
+                        publishableKey, LoggingUtils.EventName.DEFAULT_SOURCE),
                 ephemeralKey
         );
 
@@ -594,7 +594,7 @@ class StripeApiHandler {
 
         logApiCall(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, null, null,
-                        publishableKey, LoggingUtils.EVENT_SET_SHIPPING_INFO),
+                        publishableKey, LoggingUtils.EventName.SET_SHIPPING_INFO),
                 publishableKey
         );
 

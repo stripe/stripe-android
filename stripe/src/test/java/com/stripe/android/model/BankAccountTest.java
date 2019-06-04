@@ -27,7 +27,7 @@ public class BankAccountTest {
     public void parseSampleAccount_returnsExpectedValue() {
         final BankAccount expectedAccount = new BankAccount(
                 "Jane Austen",
-                BankAccount.TYPE_INDIVIDUAL,
+                BankAccount.BankAccountType.INDIVIDUAL,
                 "STRIPE TEST BANK",
                 "US",
                 "usd",

@@ -17,12 +17,12 @@ public class CardUtils {
     private static final int LENGTH_DINERS_CLUB = 14;
 
     /**
-     * Returns a {@link Card.CardBrand} corresponding to a partial card number,
-     * or {@link Card#UNKNOWN} if the card brand can't be determined from the input value.
+     * Returns a {@link CardBrand} corresponding to a partial card number,
+     * or {@link Card.CardBrand#UNKNOWN} if the card brand can't be determined from the input value.
      *
      * @param cardNumber a credit card number or partial card number
      * @return the {@link Card.CardBrand} corresponding to that number,
-     * or {@link Card#UNKNOWN} if it can't be determined
+     * or {@link CardBrand#UNKNOWN} if it can't be determined
      */
     @NonNull
     @Card.CardBrand
@@ -96,21 +96,21 @@ public class CardUtils {
      * the card. This function does not perform a Luhn check.
      *
      * @param cardNumber the card number with no spaces or dashes
-     * @param cardBrand a {@link CardBrand} used to get the correct size
+     * @param cardBrand a {@link Card.CardBrand} used to get the correct size
      * @return {@code true} if the card number is the correct length for the assumed brand
      */
     static boolean isValidCardLength(
             @Nullable String cardNumber,
             @NonNull @CardBrand String cardBrand) {
-        if (cardNumber == null || Card.UNKNOWN.equals(cardBrand)) {
+        if (cardNumber == null || CardBrand.UNKNOWN.equals(cardBrand)) {
             return false;
         }
 
         int length = cardNumber.length();
         switch (cardBrand) {
-            case Card.AMERICAN_EXPRESS:
+            case Card.CardBrand.AMERICAN_EXPRESS:
                 return length == LENGTH_AMERICAN_EXPRESS;
-            case Card.DINERS_CLUB:
+            case CardBrand.DINERS_CLUB:
                 return length == LENGTH_DINERS_CLUB;
             default:
                 return length == LENGTH_COMMON_CARD;
@@ -118,11 +118,11 @@ public class CardUtils {
     }
 
     @NonNull
-    @Card.CardBrand
+    @CardBrand
     private static String getPossibleCardType(@Nullable String cardNumber,
                                               boolean shouldNormalize) {
         if (StripeTextUtils.isBlank(cardNumber)) {
-            return Card.UNKNOWN;
+            return Card.CardBrand.UNKNOWN;
         }
 
         String spacelessCardNumber = cardNumber;
@@ -131,21 +131,21 @@ public class CardUtils {
         }
 
         if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
-            return Card.AMERICAN_EXPRESS;
+            return CardBrand.AMERICAN_EXPRESS;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
-            return Card.DISCOVER;
+            return Card.CardBrand.DISCOVER;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_JCB)) {
-            return Card.JCB;
+            return Card.CardBrand.JCB;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
-            return Card.DINERS_CLUB;
+            return Card.CardBrand.DINERS_CLUB;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_VISA)) {
-            return Card.VISA;
+            return CardBrand.VISA;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
-            return Card.MASTERCARD;
+            return CardBrand.MASTERCARD;
         } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
-            return Card.UNIONPAY;
+            return Card.CardBrand.UNIONPAY;
         } else {
-            return Card.UNKNOWN;
+            return Card.CardBrand.UNKNOWN;
         }
     }
 }

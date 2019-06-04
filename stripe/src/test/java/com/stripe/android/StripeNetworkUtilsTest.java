@@ -77,7 +77,7 @@ public class StripeNetworkUtilsTest {
     @Test
     public void hashMapFromBankAccount_mapsCorrectFields() {
         final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER,
-                BANK_ACCOUNT_HOLDER_NAME, BankAccount.TYPE_INDIVIDUAL, null, "US",
+                BANK_ACCOUNT_HOLDER_NAME, BankAccount.BankAccountType.INDIVIDUAL, null, "US",
                 "usd", null, null, BANK_ROUTING_NUMBER);
         final Map<String, Object> bankAccountMap = getBankAccountTokenParamData(bankAccount);
         assertNotNull(bankAccountMap);
@@ -87,7 +87,7 @@ public class StripeNetworkUtilsTest {
         assertEquals("US", bankAccountMap.get("country"));
         assertEquals("usd", bankAccountMap.get("currency"));
         assertEquals(BANK_ACCOUNT_HOLDER_NAME, bankAccountMap.get("account_holder_name"));
-        assertEquals(BankAccount.TYPE_INDIVIDUAL, bankAccountMap.get("account_holder_type"));
+        assertEquals(BankAccount.BankAccountType.INDIVIDUAL, bankAccountMap.get("account_holder_type"));
     }
 
     @Test

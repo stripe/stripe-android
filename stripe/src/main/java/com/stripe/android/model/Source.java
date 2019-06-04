@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,76 +36,76 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            ALIPAY,
-            CARD,
-            THREE_D_SECURE,
-            GIROPAY,
-            SEPA_DEBIT,
-            IDEAL,
-            SOFORT,
-            BANCONTACT,
-            P24,
-            EPS,
-            MULTIBANCO,
-            UNKNOWN
+            SourceType.ALIPAY,
+            SourceType.CARD,
+            SourceType.THREE_D_SECURE,
+            SourceType.GIROPAY,
+            SourceType.SEPA_DEBIT,
+            SourceType.IDEAL,
+            SourceType.SOFORT,
+            SourceType.BANCONTACT,
+            SourceType.P24,
+            SourceType.EPS,
+            SourceType.MULTIBANCO,
+            SourceType.UNKNOWN
     })
-    public @interface SourceType { }
-    public static final String ALIPAY = "alipay";
-    public static final String CARD = "card";
-    public static final String THREE_D_SECURE = "three_d_secure";
-    public static final String GIROPAY = "giropay";
-    public static final String SEPA_DEBIT = "sepa_debit";
-    public static final String IDEAL = "ideal";
-    public static final String SOFORT = "sofort";
-    public static final String BANCONTACT = "bancontact";
-    public static final String P24 = "p24";
-    public static final String EPS = "eps";
-    public static final String MULTIBANCO = "multibanco";
-    public static final String UNKNOWN = "unknown";
+    public @interface SourceType {
+        String ALIPAY = "alipay";
+        String CARD = "card";
+        String THREE_D_SECURE = "three_d_secure";
+        String GIROPAY = "giropay";
+        String SEPA_DEBIT = "sepa_debit";
+        String IDEAL = "ideal";
+        String SOFORT = "sofort";
+        String BANCONTACT = "bancontact";
+        String P24 = "p24";
+        String EPS = "eps";
+        String MULTIBANCO = "multibanco";
+        String UNKNOWN = "unknown";
+    }
 
-    private static final Set<String> MODELED_TYPES = new HashSet<>();
+    private static final Set<String> MODELED_TYPES = new HashSet<>(
+            Arrays.asList(SourceType.CARD, SourceType.SEPA_DEBIT));
 
-    static {
-        MODELED_TYPES.add(CARD);
-        MODELED_TYPES.add(SEPA_DEBIT);
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            SourceStatus.PENDING,
+            SourceStatus.CHARGEABLE,
+            SourceStatus.CONSUMED,
+            SourceStatus.CANCELED,
+            SourceStatus.FAILED
+    })
+    public @interface SourceStatus {
+        String PENDING = "pending";
+        String CHARGEABLE = "chargeable";
+        String CONSUMED = "consumed";
+        String CANCELED = "canceled";
+        String FAILED = "failed";
     }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            PENDING,
-            CHARGEABLE,
-            CONSUMED,
-            CANCELED,
-            FAILED
+            Usage.REUSABLE,
+            Usage.SINGLE_USE
     })
-    public @interface SourceStatus { }
-    public static final String PENDING = "pending";
-    public static final String CHARGEABLE = "chargeable";
-    public static final String CONSUMED = "consumed";
-    public static final String CANCELED = "canceled";
-    public static final String FAILED = "failed";
+    public @interface Usage {
+        String REUSABLE = "reusable";
+        String SINGLE_USE = "single_use";
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            REUSABLE,
-            SINGLE_USE
+            SourceFlow.REDIRECT,
+            SourceFlow.RECEIVER,
+            SourceFlow.CODE_VERIFICATION,
+            SourceFlow.NONE
     })
-    public @interface Usage { }
-    public static final String REUSABLE = "reusable";
-    public static final String SINGLE_USE = "single_use";
-
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            REDIRECT,
-            RECEIVER,
-            CODE_VERIFICATION,
-            NONE
-    })
-    public @interface SourceFlow { }
-    public static final String REDIRECT = "redirect";
-    public static final String RECEIVER = "receiver";
-    public static final String CODE_VERIFICATION = "code_verification";
-    public static final String NONE = "none";
+    public @interface SourceFlow {
+        String REDIRECT = "redirect";
+        String RECEIVER = "receiver";
+        String CODE_VERIFICATION = "code_verification";
+        String NONE = "none";
+    }
 
     static final String EURO = "eur";
     static final String USD = "usd";
@@ -147,7 +148,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
     private Source(@Nullable String id, @Nullable SourceCardData sourceTypeModel) {
         mId = id;
-        mType = CARD;
+        mType = SourceType.CARD;
         mSourceTypeModel = sourceTypeModel;
     }
 
@@ -257,8 +258,8 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
     /**
      * Gets the {@link SourceType} of this Source, as one of the enumerated values.
-     * If a custom source type has been created, this returns {@link #UNKNOWN}. To get
-     * the raw value of an {@link #UNKNOWN} type, use {@link #getTypeRaw()}.
+     * If a custom source type has been created, this returns {@link SourceType#UNKNOWN}. To get
+     * the raw value of an {@link SourceType#UNKNOWN} type, use {@link #getTypeRaw()}.
      *
      * @return the {@link SourceType} of this Source
      */
@@ -341,7 +342,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
     public void setTypeRaw(@NonNull @Size(min = 1) String typeRaw) {
         mTypeRaw = typeRaw;
-        setType(UNKNOWN);
+        setType(SourceType.UNKNOWN);
     }
 
     public void setType(@SourceType String type) {
@@ -449,7 +450,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
         @SourceStatus final String status = asSourceStatus(optString(jsonObject, FIELD_STATUS));
 
         final String typeRawOpt = optString(jsonObject, FIELD_TYPE);
-        @SourceType final String typeRaw = typeRawOpt != null ? typeRawOpt : UNKNOWN;
+        @SourceType final String typeRaw = typeRawOpt != null ? typeRawOpt : SourceType.UNKNOWN;
         @SourceType final String type = asSourceType(typeRaw);
 
         // Until we have models for all types, keep the original hash and the
@@ -495,9 +496,8 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
         switch (key) {
             case FIELD_CODE_VERIFICATION:
-                return type.cast(
-                        SourceCodeVerification.fromJson(
-                                jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)));
+                return type.cast(SourceCodeVerification.fromJson(
+                        jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)));
             case FIELD_OWNER:
                 return type.cast(
                         SourceOwner.fromJson(jsonObject.optJSONObject(FIELD_OWNER)));
@@ -507,12 +507,12 @@ public final class Source extends StripeModel implements StripePaymentSource {
             case FIELD_REDIRECT:
                 return type.cast(
                         SourceRedirect.fromJson(jsonObject.optJSONObject(FIELD_REDIRECT)));
-            case CARD:
+            case SourceType.CARD:
                 return type.cast(
-                        SourceCardData.fromJson(jsonObject.optJSONObject(CARD)));
-            case SEPA_DEBIT:
-                return type.cast(
-                        SourceSepaDebitData.fromJson(jsonObject.optJSONObject(SEPA_DEBIT)));
+                        SourceCardData.fromJson(jsonObject.optJSONObject(SourceType.CARD)));
+            case SourceType.SEPA_DEBIT:
+                return type.cast(SourceSepaDebitData.fromJson(
+                        jsonObject.optJSONObject(SourceType.SEPA_DEBIT)));
             default:
                 return null;
         }
@@ -521,16 +521,16 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @Nullable
     @SourceStatus
     private static String asSourceStatus(@Nullable String sourceStatus) {
-        if (PENDING.equals(sourceStatus)) {
-            return PENDING;
-        } else if (CHARGEABLE.equals(sourceStatus)) {
-            return CHARGEABLE;
-        } else if (CONSUMED.equals(sourceStatus)) {
-            return CONSUMED;
-        } else if (CANCELED.equals(sourceStatus)) {
-            return CANCELED;
-        } else if (FAILED.equals(sourceStatus)) {
-            return FAILED;
+        if (SourceStatus.PENDING.equals(sourceStatus)) {
+            return SourceStatus.PENDING;
+        } else if (SourceStatus.CHARGEABLE.equals(sourceStatus)) {
+            return SourceStatus.CHARGEABLE;
+        } else if (SourceStatus.CONSUMED.equals(sourceStatus)) {
+            return SourceStatus.CONSUMED;
+        } else if (SourceStatus.CANCELED.equals(sourceStatus)) {
+            return SourceStatus.CANCELED;
+        } else if (SourceStatus.FAILED.equals(sourceStatus)) {
+            return SourceStatus.FAILED;
         }
         return null;
     }
@@ -538,38 +538,38 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @NonNull
     @SourceType
     static String asSourceType(@Nullable String sourceType) {
-        if (CARD.equals(sourceType)) {
-            return CARD;
-        } else if (THREE_D_SECURE.equals(sourceType)) {
-            return THREE_D_SECURE;
-        } else if (GIROPAY.equals(sourceType)) {
-            return GIROPAY;
-        } else if (SEPA_DEBIT.equals(sourceType)) {
-            return SEPA_DEBIT;
-        } else if (IDEAL.equals(sourceType)) {
-            return IDEAL;
-        } else if (SOFORT.equals(sourceType)) {
-            return SOFORT;
-        } else if (BANCONTACT.equals(sourceType)) {
-            return BANCONTACT;
-        } else if (ALIPAY.equals(sourceType)) {
-            return ALIPAY;
-        } else if (P24.equals(sourceType)) {
-            return P24;
-        } else if (UNKNOWN.equals(sourceType)) {
-            return UNKNOWN;
+        if (SourceType.CARD.equals(sourceType)) {
+            return SourceType.CARD;
+        } else if (SourceType.THREE_D_SECURE.equals(sourceType)) {
+            return SourceType.THREE_D_SECURE;
+        } else if (SourceType.GIROPAY.equals(sourceType)) {
+            return SourceType.GIROPAY;
+        } else if (SourceType.SEPA_DEBIT.equals(sourceType)) {
+            return SourceType.SEPA_DEBIT;
+        } else if (SourceType.IDEAL.equals(sourceType)) {
+            return SourceType.IDEAL;
+        } else if (SourceType.SOFORT.equals(sourceType)) {
+            return SourceType.SOFORT;
+        } else if (SourceType.BANCONTACT.equals(sourceType)) {
+            return SourceType.BANCONTACT;
+        } else if (SourceType.ALIPAY.equals(sourceType)) {
+            return SourceType.ALIPAY;
+        } else if (SourceType.P24.equals(sourceType)) {
+            return SourceType.P24;
+        } else if (SourceType.UNKNOWN.equals(sourceType)) {
+            return SourceType.UNKNOWN;
         } else {
-            return UNKNOWN;
+            return SourceType.UNKNOWN;
         }
     }
 
     @Nullable
     @Usage
     private static String asUsage(@Nullable String usage) {
-        if (REUSABLE.equals(usage)) {
-            return REUSABLE;
-        } else if (SINGLE_USE.equals(usage)) {
-            return SINGLE_USE;
+        if (Usage.REUSABLE.equals(usage)) {
+            return Usage.REUSABLE;
+        } else if (Usage.SINGLE_USE.equals(usage)) {
+            return Usage.SINGLE_USE;
         }
         return null;
     }
@@ -577,14 +577,14 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @Nullable
     @SourceFlow
     private static String asSourceFlow(@Nullable String sourceFlow) {
-        if (REDIRECT.equals(sourceFlow)) {
-            return REDIRECT;
-        } else if (RECEIVER.equals(sourceFlow)) {
-            return RECEIVER;
-        } else if (CODE_VERIFICATION.equals(sourceFlow)) {
-            return CODE_VERIFICATION;
-        } else if (NONE.equals(sourceFlow)) {
-            return NONE;
+        if (SourceFlow.REDIRECT.equals(sourceFlow)) {
+            return SourceFlow.REDIRECT;
+        } else if (SourceFlow.RECEIVER.equals(sourceFlow)) {
+            return SourceFlow.RECEIVER;
+        } else if (SourceFlow.CODE_VERIFICATION.equals(sourceFlow)) {
+            return SourceFlow.CODE_VERIFICATION;
+        } else if (SourceFlow.NONE.equals(sourceFlow)) {
+            return SourceFlow.NONE;
         }
         return null;
     }

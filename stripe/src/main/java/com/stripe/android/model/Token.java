@@ -22,18 +22,20 @@ import java.util.Date;
 public final class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII, TYPE_ACCOUNT, TYPE_CVC_UPDATE})
-    public @interface TokenType {}
-    public static final String TYPE_CARD = "card";
-    public static final String TYPE_BANK_ACCOUNT = "bank_account";
-    public static final String TYPE_PII = "pii";
-    public static final String TYPE_ACCOUNT = "account";
-    public static final String TYPE_CVC_UPDATE = "cvc_update";
+    @StringDef({TokenType.CARD, TokenType.BANK_ACCOUNT, TokenType.PII,
+            TokenType.ACCOUNT, TokenType.CVC_UPDATE})
+    public @interface TokenType {
+        String CARD = "card";
+        String BANK_ACCOUNT = "bank_account";
+        String PII = "pii";
+        String ACCOUNT = "account";
+        String CVC_UPDATE = "cvc_update";
+    }
 
     // The key for these object fields is identical to their retrieved values
     // from the Type field.
-    private static final String FIELD_BANK_ACCOUNT = Token.TYPE_BANK_ACCOUNT;
-    private static final String FIELD_CARD = Token.TYPE_CARD;
+    private static final String FIELD_BANK_ACCOUNT = TokenType.BANK_ACCOUNT;
+    private static final String FIELD_CARD = TokenType.CARD;
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_ID = "id";
     private static final String FIELD_LIVEMODE = "livemode";
@@ -60,7 +62,7 @@ public final class Token implements StripePaymentSource {
             @Nullable Boolean used,
             @Nullable Card card) {
         mId = id;
-        mType = TYPE_CARD;
+        mType = TokenType.CARD;
         mCreated = created;
         mLivemode = livemode;
         mCard = card;
@@ -79,7 +81,7 @@ public final class Token implements StripePaymentSource {
             @Nullable Boolean used,
             @NonNull BankAccount bankAccount) {
         mId = id;
-        mType = TYPE_BANK_ACCOUNT;
+        mType = TokenType.BANK_ACCOUNT;
         mCreated = created;
         mLivemode = livemode;
         mCard = null;
@@ -216,22 +218,22 @@ public final class Token implements StripePaymentSource {
         final Date date = new Date(createdTimeStamp * 1000);
 
         final Token token;
-        if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
+        if (TokenType.BANK_ACCOUNT.equals(tokenType)) {
             final JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
             if (bankAccountObject == null) {
                 return null;
             }
             token = new Token(tokenId, liveMode, date, used,
                     BankAccount.fromJson(bankAccountObject));
-        } else if (Token.TYPE_CARD.equals(tokenType)) {
+        } else if (TokenType.CARD.equals(tokenType)) {
             final JSONObject cardObject = jsonObject.optJSONObject(FIELD_CARD);
             if (cardObject == null) {
                 return null;
             }
             token = new Token(tokenId, liveMode, date, used, Card.fromJson(cardObject));
-        } else if (Token.TYPE_PII.equals(tokenType) ||
-                Token.TYPE_ACCOUNT.equals(tokenType) ||
-                Token.TYPE_CVC_UPDATE.equals(tokenType)) {
+        } else if (TokenType.PII.equals(tokenType) ||
+                TokenType.ACCOUNT.equals(tokenType) ||
+                TokenType.CVC_UPDATE.equals(tokenType)) {
             token = new Token(tokenId, tokenType, liveMode, date, used);
         } else {
             token = null;
@@ -253,16 +255,16 @@ public final class Token implements StripePaymentSource {
             return null;
         }
 
-        if (Token.TYPE_CARD.equals(possibleTokenType)) {
-            return Token.TYPE_CARD;
-        } else if (Token.TYPE_BANK_ACCOUNT.equals(possibleTokenType)) {
-            return Token.TYPE_BANK_ACCOUNT;
-        } else if (Token.TYPE_PII.equals(possibleTokenType)) {
-            return Token.TYPE_PII;
-        } else if (Token.TYPE_ACCOUNT.equals(possibleTokenType)) {
-            return Token.TYPE_ACCOUNT;
-        } else if (Token.TYPE_CVC_UPDATE.equals(possibleTokenType)) {
-            return Token.TYPE_CVC_UPDATE;
+        if (TokenType.CARD.equals(possibleTokenType)) {
+            return TokenType.CARD;
+        } else if (TokenType.BANK_ACCOUNT.equals(possibleTokenType)) {
+            return TokenType.BANK_ACCOUNT;
+        } else if (TokenType.PII.equals(possibleTokenType)) {
+            return TokenType.PII;
+        } else if (TokenType.ACCOUNT.equals(possibleTokenType)) {
+            return TokenType.ACCOUNT;
+        } else if (TokenType.CVC_UPDATE.equals(possibleTokenType)) {
+            return TokenType.CVC_UPDATE;
         }
 
         return null;
