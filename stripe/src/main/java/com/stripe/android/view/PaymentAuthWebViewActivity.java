@@ -28,13 +28,10 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
 
         final Toolbar toolbar = findViewById(R.id.payment_auth_web_view_toolbar);
         setSupportActionBar(toolbar);
-
         mToolbarCustomization =
                 getIntent().getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION);
+        customizeToolbar(toolbar);
 
-        if (mToolbarCustomization != null) {
-            customizeToolbar(toolbar);
-        }
 
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
