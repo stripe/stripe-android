@@ -4,6 +4,8 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeError;
 
+import java.net.HttpURLConnection;
+
 /**
  * A type of {@link AuthenticationException} resulting from incorrect permissions
  * to perform the requested action.
@@ -11,7 +13,7 @@ import com.stripe.android.StripeError;
 public class PermissionException extends AuthenticationException {
 
     public PermissionException(@Nullable String message, @Nullable String requestId,
-                               @Nullable Integer statusCode, @Nullable StripeError stripeError) {
-        super(message, requestId, statusCode, stripeError);
+                               @Nullable StripeError stripeError) {
+        super(message, requestId, HttpURLConnection.HTTP_FORBIDDEN, stripeError);
     }
 }

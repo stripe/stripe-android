@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.StripeError;
 
+import java.net.HttpURLConnection;
+
 /**
  * An {@link Exception} indicating that there is a problem with a Card used for a request.
  * Card errors are the most common type of error you should expect to handle.
@@ -20,8 +22,8 @@ public class CardException extends StripeException {
     public CardException(@Nullable String message, @Nullable String requestId,
                          @Nullable String code, @Nullable String param,
                          @Nullable String declineCode, @Nullable String charge,
-                         @Nullable Integer statusCode, @NonNull StripeError stripeError) {
-        super(stripeError, message, requestId, statusCode);
+                         @NonNull StripeError stripeError) {
+        super(stripeError, message, requestId, HttpURLConnection.HTTP_PAYMENT_REQUIRED);
         mCode = code;
         mParam = param;
         mDeclineCode = declineCode;
