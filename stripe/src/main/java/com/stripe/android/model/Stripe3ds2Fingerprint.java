@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class Stripe3ds2Fingerprint {
+public final class Stripe3ds2Fingerprint {
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source";
     private static final String FIELD_DIRECTORY_SERVER_NAME = "directory_server_name";
@@ -19,7 +19,7 @@ public class Stripe3ds2Fingerprint {
     private static final String TYPE = "stripe_3ds2_fingerprint";
 
     @NonNull public final String source;
-    @Nullable @DirectoryServerName public final String directoryServerName;
+    @NonNull @DirectoryServerName public final String directoryServerName;
     @NonNull public final String serverTransactionId;
 
     @NonNull
@@ -52,9 +52,10 @@ public class Stripe3ds2Fingerprint {
         return new Stripe3ds2Fingerprint(source, directoryServerName, serverTransactionId);
     }
 
-    @Nullable
+    @NonNull
     @DirectoryServerName
-    private static String toDirectoryServerName(@Nullable String code) {
+    private static String toDirectoryServerName(@Nullable String code)
+            throws IllegalArgumentException {
         if (DirectoryServerName.AMERICAN_EXPRESS.equals(code)) {
             return DirectoryServerName.AMERICAN_EXPRESS;
         } else if (DirectoryServerName.MASTERCARD.equals(code)) {
@@ -62,12 +63,12 @@ public class Stripe3ds2Fingerprint {
         } else if (DirectoryServerName.VISA.equals(code)) {
             return DirectoryServerName.VISA;
         } else {
-            return null;
+            throw new IllegalArgumentException("Invalid directory_server_name: " + code);
         }
     }
 
     private Stripe3ds2Fingerprint(@NonNull String source,
-                                  @Nullable @DirectoryServerName String directoryServerName,
+                                  @NonNull @DirectoryServerName String directoryServerName,
                                   @NonNull String serverTransactionId) {
         this.source = source;
         this.directoryServerName = directoryServerName;
