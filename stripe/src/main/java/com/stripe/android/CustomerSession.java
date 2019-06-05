@@ -694,10 +694,7 @@ public class CustomerSession {
                                       @NonNull StripeException exception) {
         final RetrievalListener listener = mCustomerListeners.remove(operationId);
         if (listener != null) {
-            final int errorCode = exception.getStatusCode() == null
-                    ? 400
-                    : exception.getStatusCode();
-            listener.onError(errorCode,
+            listener.onError(exception.getStatusCode(),
                     exception.getLocalizedMessage(),
                     exception.getStripeError());
         }

@@ -13,27 +13,21 @@ public abstract class StripeException extends Exception {
     protected static final long serialVersionUID = 1L;
 
     @Nullable private final String mRequestId;
-    @Nullable private final Integer mStatusCode;
+    private final int mStatusCode;
     @Nullable private final StripeError mStripeError;
 
-    public StripeException(@Nullable String message, @Nullable String requestId,
-                           @Nullable Integer statusCode) {
-        this(null, message, requestId, statusCode);
-    }
-
     public StripeException(@Nullable StripeError stripeError, @Nullable String message,
-                           @Nullable String requestId, @Nullable Integer statusCode) {
+                           @Nullable String requestId, int statusCode) {
         this(stripeError, message, requestId, statusCode, null);
     }
 
     public StripeException(@Nullable String message, @Nullable String requestId,
-                           @Nullable Integer statusCode, @Nullable Throwable e) {
+                           int statusCode, @Nullable Throwable e) {
         this(null, message, requestId, statusCode, e);
     }
 
     public StripeException(@Nullable StripeError stripeError, @Nullable String message,
-                           @Nullable String requestId, @Nullable Integer statusCode,
-                           @Nullable Throwable e) {
+                           @Nullable String requestId, int statusCode, @Nullable Throwable e) {
         super(message, e);
         mStripeError = stripeError;
         mStatusCode = statusCode;
@@ -45,8 +39,7 @@ public abstract class StripeException extends Exception {
         return mRequestId;
     }
 
-    @Nullable
-    public Integer getStatusCode() {
+    public int getStatusCode() {
         return mStatusCode;
     }
 

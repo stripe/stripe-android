@@ -9,9 +9,8 @@ import com.stripe.android.StripeError;
  */
 public class APIException extends StripeException {
 
-    public APIException(@Nullable String message, @Nullable String requestId,
-                        @Nullable Integer statusCode, @Nullable StripeError stripeError,
-                        @Nullable Throwable e) {
+    public APIException(@Nullable String message, @Nullable String requestId, int statusCode,
+                        @Nullable StripeError stripeError, @Nullable Throwable e) {
         super(stripeError, message, requestId, statusCode, e);
     }
 }

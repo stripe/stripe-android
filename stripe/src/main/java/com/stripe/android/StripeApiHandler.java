@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -905,11 +906,10 @@ class StripeApiHandler {
     private void handleAPIError(@Nullable String responseBody, int responseCode,
                                 @Nullable String requestId)
             throws InvalidRequestException, AuthenticationException, CardException, APIException {
-
         final StripeError stripeError = ErrorParser.parseError(responseBody);
         switch (responseCode) {
-            case 400:
-            case 404: {
+            case HttpURLConnection.HTTP_BAD_REQUEST:
+            case HttpURLConnection.HTTP_NOT_FOUND: {
                 throw new InvalidRequestException(
                         stripeError.message,
                         stripeError.param,
@@ -920,11 +920,10 @@ class StripeApiHandler {
                         stripeError,
                         null);
             }
-            case 401: {
-                throw new AuthenticationException(stripeError.message, requestId, responseCode,
-                        stripeError);
+            case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                throw new AuthenticationException(stripeError.message, requestId, stripeError);
             }
-            case 402: {
+            case HttpURLConnection.HTTP_PAYMENT_REQUIRED: {
                 throw new CardException(
                         stripeError.message,
                         requestId,
@@ -932,17 +931,15 @@ class StripeApiHandler {
                         stripeError.param,
                         stripeError.declineCode,
                         stripeError.charge,
-                        responseCode,
                         stripeError
                 );
             }
-            case 403: {
-                throw new PermissionException(stripeError.message, requestId, responseCode,
-                        stripeError);
+            case HttpURLConnection.HTTP_FORBIDDEN: {
+                throw new PermissionException(stripeError.message, requestId, stripeError);
             }
             case 429: {
                 throw new RateLimitException(stripeError.message, stripeError.param, requestId,
-                        responseCode, stripeError);
+                        stripeError);
             }
             default: {
                 throw new APIException(stripeError.message, requestId, responseCode, stripeError,
@@ -973,7 +970,7 @@ class StripeApiHandler {
             throw new AuthenticationException("No API key provided. (HINT: set your API key using" +
                     " 'Stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe" +
                     " web interface. See https://stripe.com/api for details or email " +
-                    "support@stripe.com if you have questions.", null, 0, null);
+                    "support@stripe.com if you have questions.", null, null);
         }
 
         final StripeResponse response = getStripeResponse(request);

@@ -15,7 +15,7 @@ public class InvalidRequestException extends StripeException {
     @Nullable private final String mErrorDeclineCode;
 
     public InvalidRequestException(@Nullable String message, @Nullable String param,
-                                   @Nullable String requestId, @Nullable Integer statusCode,
+                                   @Nullable String requestId, int statusCode,
                                    @Nullable String errorCode, @Nullable String errorDeclineCode,
                                    @Nullable StripeError stripeError, @Nullable Throwable e) {
         super(stripeError, message, requestId, statusCode, e);
