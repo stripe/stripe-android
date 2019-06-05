@@ -1,7 +1,6 @@
 package com.stripe.android.view;
 
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -81,9 +80,7 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
                         Color.parseColor(mToolbarCustomization.getBackgroundColor());
                 toolbar.setBackgroundColor(backgroundColor);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    getWindow().setStatusBarColor(CustomizeUtils.darken(backgroundColor));
-                }
+                CustomizeUtils.setStatusBarColor(this, backgroundColor);
             }
         }
     }
