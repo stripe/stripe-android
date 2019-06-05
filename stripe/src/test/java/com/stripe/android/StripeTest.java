@@ -158,7 +158,7 @@ public class StripeTest {
                 new Stripe.TokenCreator() {
                     @Override
                     public void create(@NonNull Map<String, Object> tokenParams,
-                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
                                        @NonNull TokenCallback callback) {
@@ -180,12 +180,12 @@ public class StripeTest {
                 new Stripe.TokenCreator() {
                     @Override
                     public void create(@NonNull Map<String, Object> tokenParams,
-                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
                                        @NonNull TokenCallback callback) {
                         assertEquals(expectedExecutor, executor);
-                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
+                        assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }
                 });
@@ -198,11 +198,11 @@ public class StripeTest {
                 new Stripe.TokenCreator() {
                     @Override
                     public void create(@NonNull Map<String, Object> tokenParams,
-                                       @NonNull RequestOptions requestOptions,
+                                       @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
                                        @NonNull TokenCallback callback) {
-                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
+                        assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
                         assertNull(executor);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }

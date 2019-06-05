@@ -69,9 +69,10 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                argThat(new StripeRequestMatcher(
+                argThat(new ApiRequestMatcher(
                         StripeRequest.Method.GET,
-                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456"
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456",
+                        ApiRequest.Options.create("ek_test_123")
                 ))))
                 .thenReturn(response);
 
@@ -97,9 +98,10 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                argThat(new StripeRequestMatcher(
+                argThat(new ApiRequestMatcher(
                         StripeRequest.Method.POST,
-                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin"
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
+                        ApiRequest.Options.create("ek_test_123")
                 ))))
                 .thenReturn(response);
 
@@ -127,9 +129,10 @@ public class IssuingCardPinServiceTest {
                         null);
 
         when(mRequestExecutor.execute(
-                argThat(new StripeRequestMatcher(
+                argThat(new ApiRequestMatcher(
                         StripeRequest.Method.GET,
-                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456"
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456",
+                        ApiRequest.Options.create("ek_test_123")
                 ))))
                 .thenReturn(response);
 

@@ -1,7 +1,9 @@
 package com.stripe.android.model;
 
-public class CardFixtures {
-    public static final Card CARD;
+public final class CardFixtures {
+    public static final Card MINIMUM_CARD =
+            Card.create("4242424242424242", 1, 2050, "123");
+
 
     private static final String CARD_ADDRESS_L1 = "123 Main Street";
     private static final String CARD_ADDRESS_L2 = "906";
@@ -14,8 +16,7 @@ public class CardFixtures {
     private static final String CARD_STATE = "CA";
     private static final String CARD_ZIP = "94107";
 
-    static {
-        CARD = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
+    public static final Card CARD = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
                 .addressCity(CARD_CITY)
                 .addressLine1(CARD_ADDRESS_L1)
                 .addressLine2(CARD_ADDRESS_L2)
@@ -25,7 +26,6 @@ public class CardFixtures {
                 .currency(CARD_CURRENCY)
                 .name(CARD_NAME)
                 .build();
-    }
 
     private CardFixtures() {}
 }

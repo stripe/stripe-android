@@ -16,8 +16,8 @@ public class ApiKeyValidatorTest {
 
     @Test
     public void testEphemeralKey() {
-        assertEquals("ek_test_123",
-                ApiKeyValidator.get().requireValid("ek_test_123"));
+        assertEquals(ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+                ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
     }
 
     @Test
@@ -26,7 +26,7 @@ public class ApiKeyValidatorTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() {
-                        ApiKeyValidator.get().requireValid("sk_test_123");
+                        ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_SECRET_KEY);
                     }
                 });
     }
