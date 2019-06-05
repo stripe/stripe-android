@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import android.support.annotation.Nullable;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,10 @@ class StripeResponse {
      */
     int getResponseCode() {
         return mResponseCode;
+    }
+
+    boolean isSuccessful() {
+        return mResponseCode == HttpURLConnection.HTTP_OK;
     }
 
     boolean hasErrorCode() {

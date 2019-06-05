@@ -204,6 +204,19 @@ public class StripeApiHandlerTest {
     }
 
     @Test
+    public void complete3ds2Auth_shouldThrowInvalidRequestException() {
+        assertThrows(
+                InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        mApiHandler.complete3ds2Auth("src_123",
+                                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
+                    }
+                });
+    }
+
+    @Test
     public void logApiCall_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
