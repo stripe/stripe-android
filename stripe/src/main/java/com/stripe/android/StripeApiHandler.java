@@ -652,7 +652,7 @@ class StripeApiHandler {
                         RequestOptions.createForApi(publishableKey))
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
-        return response.isSuccessful();
+        return response.isOk();
     }
 
     void complete3ds2Auth(@NonNull String sourceId,

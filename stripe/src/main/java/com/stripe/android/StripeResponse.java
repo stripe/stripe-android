@@ -38,7 +38,7 @@ class StripeResponse {
         return mResponseCode;
     }
 
-    boolean isSuccessful() {
+    boolean isOk() {
         return mResponseCode == HttpURLConnection.HTTP_OK;
     }
 
