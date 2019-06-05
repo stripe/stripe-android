@@ -417,7 +417,7 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int errorCode, @Nullable String errorMessage) {
+        public void onError(int errorCode, @NonNull String errorMessage) {
             final PaymentActivity activity = getListenerActivity();
             if (activity == null) {
                 return;
@@ -454,14 +454,14 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int httpCode, @Nullable String errorMessage,
+        public void onError(int httpCode, @NonNull String errorMessage,
                             @Nullable StripeError stripeError) {
             final PaymentActivity activity = getActivity();
             if (activity == null) {
                 return;
             }
 
-            activity.displayError("Error getting payment method");
+            activity.displayError("Error getting payment method:. " + errorMessage);
         }
     }
 }

@@ -231,7 +231,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int errorCode, @Nullable String errorMessage) {
+        public void onError(int errorCode, @NonNull String errorMessage) {
             final PaymentSessionActivity activity = getListenerActivity();
             if (activity == null) {
                 return;
@@ -268,7 +268,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int httpCode, @Nullable String errorMessage,
+        public void onError(int httpCode, @NonNull String errorMessage,
                             @Nullable StripeError stripeError) {
             final PaymentSessionActivity activity = getActivity();
             if (activity == null) {
@@ -306,7 +306,7 @@ public class PaymentSessionActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int httpCode, @Nullable String errorMessage,
+        public void onError(int httpCode, @NonNull String errorMessage,
                             @Nullable StripeError stripeError) {
             final PaymentSessionActivity activity = getActivity();
             if (activity == null) {

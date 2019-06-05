@@ -46,7 +46,8 @@ public class ExampleEphemeralKeyProvider implements EphemeralKeyProvider {
                                 final String rawKey = responseBody.string();
                                 keyUpdateListener.onKeyUpdate(rawKey);
                                 mProgressListener.onStringResponse(rawKey);
-                            } catch (IOException ignored) {
+                            } catch (IOException e) {
+                                keyUpdateListener.onKeyUpdateFailure(0, e.getMessage());
                             }
                         },
                         throwable ->

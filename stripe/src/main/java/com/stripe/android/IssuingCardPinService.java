@@ -153,7 +153,7 @@ public class IssuingCardPinService
             String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
             try {
-                String pin = mApiHandler.retrieveIssuingCardPin(
+                final String pin = mApiHandler.retrieveIssuingCardPin(
                         cardId,
                         verificationId,
                         userOneTimeCode,
@@ -274,10 +274,11 @@ public class IssuingCardPinService
     @Override
     public void onKeyError(@Nullable String operationId,
                            int errorCode,
-                           @Nullable String errorMessage) {
+                           @NonNull String errorMessage) {
 
-        IssuingCardPinUpdateListener updateListener = mUpdateListeners.remove(operationId);
-        IssuingCardPinRetrievalListener retrievalListener = mRetrievalListeners.remove(operationId);
+        final IssuingCardPinUpdateListener updateListener = mUpdateListeners.remove(operationId);
+        final IssuingCardPinRetrievalListener retrievalListener =
+                mRetrievalListeners.remove(operationId);
         if (retrievalListener != null) {
             retrievalListener.onError(
                     CardPinActionError.EPHEMERAL_KEY_ERROR,

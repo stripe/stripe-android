@@ -30,20 +30,20 @@ public class TranslatorManager {
     private static final ErrorMessageTranslator DEFAULT_ERROR_MESSAGE_TRANSLATOR =
             new ErrorMessageTranslator.Default();
 
-    @Nullable
-    private static ErrorMessageTranslator mErrorMessageTranslator;
+    @Nullable private static ErrorMessageTranslator sErrorMessageTranslator;
 
     private TranslatorManager() {
     }
 
     @NonNull
     public static ErrorMessageTranslator getErrorMessageTranslator() {
-        return mErrorMessageTranslator != null ?
-                mErrorMessageTranslator : DEFAULT_ERROR_MESSAGE_TRANSLATOR;
+        return sErrorMessageTranslator != null ?
+                sErrorMessageTranslator : DEFAULT_ERROR_MESSAGE_TRANSLATOR;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static void setErrorMessageTranslator(
             @Nullable ErrorMessageTranslator errorMessageTranslator) {
-        mErrorMessageTranslator = errorMessageTranslator;
+        sErrorMessageTranslator = errorMessageTranslator;
     }
 }

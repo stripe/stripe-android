@@ -14,8 +14,8 @@ public class TestEphemeralKeyProvider implements EphemeralKeyProvider {
 
     private static final int INVALID_ERROR_CODE = -1;
     private int mErrorCode = INVALID_ERROR_CODE;
-    private @Nullable String mErrorMessage;
-    private @Nullable String mRawEphemeralKey;
+    private String mErrorMessage;
+    @Nullable private String mRawEphemeralKey;
 
     public TestEphemeralKeyProvider() {}
 
@@ -36,7 +36,7 @@ public class TestEphemeralKeyProvider implements EphemeralKeyProvider {
     public void setNextRawEphemeralKey(@NonNull String rawEphemeralKey) {
         mRawEphemeralKey = rawEphemeralKey;
         mErrorCode = INVALID_ERROR_CODE;
-        mErrorMessage = null;
+        mErrorMessage = "";
     }
 
     public void setNextError(int errorCode, @NonNull String errorMessage) {
