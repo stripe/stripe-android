@@ -205,7 +205,7 @@ public class StripeApiHandlerTest {
 
     @Test
     public void complete3ds2Auth_shouldThrowInvalidRequestException() {
-        assertThrows(
+        final InvalidRequestException exception = assertThrows(
                 InvalidRequestException.class,
                 new ThrowingRunnable() {
                     @Override
@@ -214,6 +214,7 @@ public class StripeApiHandlerTest {
                                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
                     }
                 });
+        assertEquals(404, exception.getStatusCode());
     }
 
     @Test
