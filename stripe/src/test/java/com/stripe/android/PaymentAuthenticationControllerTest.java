@@ -69,7 +69,7 @@ public class PaymentAuthenticationControllerTest {
         MockitoAnnotations.initMocks(this);
         when(mTransaction.getAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS);
-        when(mThreeDs2Service.createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false))
+        when(mThreeDs2Service.createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false, "visa"))
                 .thenReturn(mTransaction);
         when(mMessageVersionRegistry.getCurrent()).thenReturn(MESSAGE_VERSION);
         mController = new PaymentAuthenticationController(
@@ -86,7 +86,8 @@ public class PaymentAuthenticationControllerTest {
         when(mTransaction.getProgressView(mActivity)).thenReturn(mProgressDialog);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                 PUBLISHABLE_KEY);
-        verify(mThreeDs2Service).createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false);
+        verify(mThreeDs2Service).createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false,
+                "visa");
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());

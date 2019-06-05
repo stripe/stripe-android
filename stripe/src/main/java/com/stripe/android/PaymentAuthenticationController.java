@@ -189,7 +189,8 @@ class PaymentAuthenticationController {
                                @NonNull String publishableKey) {
         final Transaction transaction =
                 mThreeDs2Service.createTransaction(mDirectoryServerId,
-                        mMessageVersionRegistry.getCurrent(), false);
+                        mMessageVersionRegistry.getCurrent(), false,
+                        stripe3ds2Fingerprint.directoryServerName);
         final ProgressDialog dialog = transaction.getProgressView(activity);
         dialog.show();
 
