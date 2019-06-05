@@ -81,7 +81,7 @@ public class EphemeralKeyTest {
         Map<String, Object> expectedMap = new HashMap<String, Object>() {{
             put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
             put(CustomerEphemeralKey.FIELD_OBJECT, "ephemeral_key");
-            put(CustomerEphemeralKey.FIELD_SECRET, "ek_test_123");
+            put(CustomerEphemeralKey.FIELD_SECRET, ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
             put(CustomerEphemeralKey.FIELD_LIVEMODE, false);
             put(CustomerEphemeralKey.FIELD_CREATED, 1483575790L);
             put(CustomerEphemeralKey.FIELD_EXPIRES, 1483579790L);

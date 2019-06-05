@@ -86,12 +86,12 @@ public class Stripe {
                     @Override
                     public void create(
                             @NonNull final Map<String, Object> tokenParams,
-                            @NonNull final RequestOptions requestOptions,
+                            @NonNull final ApiRequest.Options options,
                             @NonNull @Token.TokenType final String tokenType,
                             @Nullable final Executor executor,
                             @NonNull final TokenCallback callback) {
                         executeTask(executor,
-                                new CreateTokenTask(apiHandler, tokenParams, requestOptions,
+                                new CreateTokenTask(apiHandler, tokenParams, options,
                                         tokenType, callback));
                     }
                 });
@@ -298,7 +298,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromBankAccount(bankAccount),
-                RequestOptions.createForApi(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TYPE_BANK_ACCOUNT
         );
     }
@@ -510,7 +510,7 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.createSource(params,
-                RequestOptions.createForApi(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -530,7 +530,7 @@ public class Stripe {
             APIException {
         return mApiHandler.retrievePaymentIntent(
                 paymentIntentParams,
-                RequestOptions.createForApi(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }
 
@@ -562,7 +562,7 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
-                RequestOptions.createForApi(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }
 
@@ -581,7 +581,7 @@ public class Stripe {
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
         return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
-                RequestOptions.createForApi(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -640,7 +640,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.hashMapFromCard(card),
-                RequestOptions.createForApi(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TYPE_CARD
         );
     }
@@ -690,7 +690,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 hashMapFromPersonalId(personalId),
-                RequestOptions.createForApi(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TYPE_PII
         );
     }
@@ -740,7 +740,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 mapFromCvc(cvc),
-                RequestOptions.createForApi(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TYPE_CVC_UPDATE
         );
     }
@@ -792,7 +792,7 @@ public class Stripe {
         try {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
-                    RequestOptions.createForApi(publishableKey, mStripeAccount),
+                    ApiRequest.Options.create(publishableKey, mStripeAccount),
                     Token.TYPE_ACCOUNT
             );
         } catch (CardException exception) {
@@ -853,7 +853,7 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.retrieveSource(sourceId, clientSecret,
-                RequestOptions.createForApi(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -890,7 +890,7 @@ public class Stripe {
                             "token and handle errors");
         mTokenCreator.create(
                 tokenParams,
-                RequestOptions.createForApi(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccount),
                 tokenType,
                 executor, callback);
     }
@@ -907,7 +907,7 @@ public class Stripe {
     @VisibleForTesting
     interface TokenCreator {
         void create(@NonNull Map<String, Object> params,
-                    @NonNull RequestOptions requestOptions,
+                    @NonNull ApiRequest.Options options,
                     @NonNull @Token.TokenType String tokenType,
                     @Nullable Executor executor,
                     @NonNull TokenCallback callback);
@@ -916,7 +916,7 @@ public class Stripe {
     private static class CreateSourceTask extends ApiOperation<Source> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final SourceParams mSourceParams;
-        @NonNull private final RequestOptions mRequestOptions;
+        @NonNull private final ApiRequest.Options mOptions;
 
         CreateSourceTask(@NonNull StripeApiHandler apiHandler,
                          @NonNull SourceParams sourceParams,
@@ -926,20 +926,20 @@ public class Stripe {
             super(callback);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
-            mRequestOptions = RequestOptions.createForApi(publishableKey, stripeAccount);
+            mOptions = ApiRequest.Options.create(publishableKey, stripeAccount);
         }
 
         @Nullable
         @Override
         Source getResult() throws StripeException {
-                return mApiHandler.createSource(mSourceParams, mRequestOptions);
+                return mApiHandler.createSource(mSourceParams, mOptions);
         }
     }
 
     private static class CreatePaymentMethodTask extends ApiOperation<PaymentMethod> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
-        @NonNull private final RequestOptions mRequestOptions;
+        @NonNull private final ApiRequest.Options mOptions;
 
         CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
                                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -949,39 +949,39 @@ public class Stripe {
             super(callback);
             mApiHandler = apiHandler;
             mPaymentMethodCreateParams = paymentMethodCreateParams;
-            mRequestOptions = RequestOptions.createForApi(publishableKey, stripeAccount);
+            mOptions = ApiRequest.Options.create(publishableKey, stripeAccount);
         }
 
         @Nullable
         @Override
         PaymentMethod getResult() throws StripeException {
-            return mApiHandler.createPaymentMethod(mPaymentMethodCreateParams, mRequestOptions);
+            return mApiHandler.createPaymentMethod(mPaymentMethodCreateParams, mOptions);
         }
     }
 
     private static class CreateTokenTask extends ApiOperation<Token> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Map<String, Object> mTokenParams;
-        @NonNull private final RequestOptions mRequestOptions;
+        @NonNull private final ApiRequest.Options mOptions;
         @NonNull @Token.TokenType private final String mTokenType;
 
         CreateTokenTask(
                 @NonNull final StripeApiHandler apiHandler,
                 @NonNull final Map<String, Object> tokenParams,
-                @NonNull final RequestOptions requestOptions,
+                @NonNull final ApiRequest.Options options,
                 @NonNull @Token.TokenType final String tokenType,
                 @NonNull final TokenCallback callback) {
             super(callback);
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
             mTokenType = tokenType;
-            mRequestOptions = requestOptions;
+            mOptions = options;
         }
 
         @Nullable
         @Override
         Token getResult() throws StripeException {
-            return mApiHandler.createToken(mTokenParams, mRequestOptions, mTokenType);
+            return mApiHandler.createToken(mTokenParams, mOptions, mTokenType);
         }
     }
 }

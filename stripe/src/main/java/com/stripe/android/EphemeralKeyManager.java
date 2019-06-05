@@ -43,7 +43,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
                 mEphemeralKey,
                 mTimeBufferInSeconds,
                 mOverrideCalendar)) {
-            mEphemeralKeyProvider.createEphemeralKey(ApiVersion.DEFAULT_API_VERSION,
+            mEphemeralKeyProvider.createEphemeralKey(ApiVersion.getDefault().getCode(),
                     new ClientKeyUpdateListener(this, operationId, actionString, arguments));
         } else {
             mListener.onKeyUpdate(mEphemeralKey, operationId, actionString, arguments);

@@ -97,7 +97,7 @@ public class PaymentSessionTest {
                 .thenReturn(firstCustomer, secondCustomer);
         when(mApiHandler.createPaymentMethod(
                 ArgumentMatchers.<PaymentMethodCreateParams>any(),
-                ArgumentMatchers.<RequestOptions>any()
+                ArgumentMatchers.<ApiRequest.Options>any()
         )).thenReturn(paymentMethod);
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
