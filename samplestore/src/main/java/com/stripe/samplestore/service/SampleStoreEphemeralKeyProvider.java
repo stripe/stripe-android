@@ -34,21 +34,21 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
         final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
 
-        mCompositeDisposable.add(
-                mStripeService.createEphemeralKey(apiParamMap)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                response -> {
-                                    try {
-                                        String rawKey = response.string();
-                                        keyUpdateListener.onKeyUpdate(rawKey);
-                                        mProgressListener.onStringResponse(rawKey);
-                                    } catch (IOException ignored) {
-                                    }
-                                },
-                                throwable -> mProgressListener
-                                        .onStringResponse(throwable.getMessage())));
+        mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> {
+                            try {
+                                String rawKey = response.string();
+                                keyUpdateListener.onKeyUpdate(rawKey);
+                                mProgressListener.onStringResponse(rawKey);
+                            } catch (IOException e) {
+                                keyUpdateListener.onKeyUpdateFailure(0, e.getMessage());
+                            }
+                        },
+                        throwable -> mProgressListener
+                                .onStringResponse(throwable.getMessage())));
     }
 
     public void destroy() {

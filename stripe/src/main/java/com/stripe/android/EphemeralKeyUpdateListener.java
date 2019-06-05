@@ -21,6 +21,6 @@ public interface EphemeralKeyUpdateListener {
      * @param responseCode the error code returned from Stripe's servers
      * @param message the error message returned from Stripe's servers
      */
-    void onKeyUpdateFailure(int responseCode, @Nullable String message);
+    void onKeyUpdateFailure(int responseCode, @NonNull String message);
 
 }

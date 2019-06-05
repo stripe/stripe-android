@@ -91,7 +91,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
     }
 
     private void updateKeyError(@NonNull String operationId, int errorCode,
-                                @Nullable String errorMessage) {
+                                @NonNull String errorMessage) {
         mEphemeralKey = null;
         mListener.onKeyError(operationId, errorCode, errorMessage);
     }
@@ -114,7 +114,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         void onKeyUpdate(@NonNull TEphemeralKey ephemeralKey, @NonNull String operationId,
                          @Nullable String action, @Nullable Map<String, Object> arguments);
 
-        void onKeyError(@NonNull String operationId, int errorCode, @Nullable String errorMessage);
+        void onKeyError(@NonNull String operationId, int errorCode, @NonNull String errorMessage);
     }
 
     private static class ClientKeyUpdateListener implements EphemeralKeyUpdateListener {
@@ -141,7 +141,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         }
 
         @Override
-        public void onKeyUpdateFailure(int responseCode, @Nullable String message) {
+        public void onKeyUpdateFailure(int responseCode, @NonNull String message) {
             mEphemeralKeyManager.updateKeyError(mOperationId, responseCode, message);
         }
     }

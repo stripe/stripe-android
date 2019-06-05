@@ -265,7 +265,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int errorCode, @Nullable String errorMessage,
+        public void onError(int errorCode, @NonNull String errorMessage,
                             @Nullable StripeError stripeError) {
             final PaymentMethodsActivity activity = getActivity();
             if (activity == null) {

@@ -82,7 +82,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void onRetrieveError(@Nullable String errorMessage) {
+    private void onRetrieveError(@NonNull String errorMessage) {
         mSelectSourceButton.setEnabled(false);
         mErrorDialogHandler.show(errorMessage);
         mProgressBar.setVisibility(View.INVISIBLE);
@@ -103,7 +103,7 @@ public class CustomerSessionActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError(int httpCode, @Nullable String errorMessage,
+        public void onError(int httpCode, @NonNull String errorMessage,
                             @Nullable StripeError stripeError) {
             final CustomerSessionActivity activity = getActivity();
             if (activity != null) {

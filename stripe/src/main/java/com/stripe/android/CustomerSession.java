@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a logged-in session of a single Customer.
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class CustomerSession {
 
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
@@ -626,47 +628,48 @@ public class CustomerSession {
                         arguments.containsKey(KEY_SOURCE_TYPE)) {
                     runnable = createAddCustomerSourceRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_SOURCE),
-                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            (String) Objects.requireNonNull(arguments.get(KEY_SOURCE)),
+                            (String) Objects.requireNonNull(arguments.get(KEY_SOURCE_TYPE)),
                             operationId
                     );
                 } else if (ACTION_DELETE_SOURCE.equals(actionString) &&
                         arguments.containsKey(KEY_SOURCE)) {
                     runnable = createDeleteCustomerSourceRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_SOURCE),
+                            (String) Objects.requireNonNull(arguments.get(KEY_SOURCE)),
                             operationId);
                 } else if (ACTION_ATTACH_PAYMENT_METHOD.equals(actionString) &&
                         arguments.containsKey(KEY_PAYMENT_METHOD)) {
                     runnable = createAttachPaymentMethodRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_PAYMENT_METHOD),
+                            (String) Objects.requireNonNull(arguments.get(KEY_PAYMENT_METHOD)),
                             operationId
                     );
                 } else if (ACTION_DETACH_PAYMENT_METHOD.equals(actionString) &&
                         arguments.containsKey(KEY_PAYMENT_METHOD)) {
                     runnable = createDetachPaymentMethodRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_PAYMENT_METHOD),
+                            (String) Objects.requireNonNull(arguments.get(KEY_PAYMENT_METHOD)),
                             operationId);
                 } else if (ACTION_GET_PAYMENT_METHODS.equals(actionString)) {
                     runnable = createGetPaymentMethodsRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_PAYMENT_METHOD_TYPE),
+                            (String) Objects.requireNonNull(arguments.get(KEY_PAYMENT_METHOD_TYPE)),
                             operationId);
                 } else if (ACTION_SET_DEFAULT_SOURCE.equals(actionString) &&
                         arguments.containsKey(KEY_SOURCE) &&
                         arguments.containsKey(KEY_SOURCE_TYPE)) {
                     runnable = createSetCustomerSourceDefaultRunnable(
                             ephemeralKey,
-                            (String) arguments.get(KEY_SOURCE),
-                            (String) arguments.get(KEY_SOURCE_TYPE),
+                            (String) Objects.requireNonNull(arguments.get(KEY_SOURCE)),
+                            (String) Objects.requireNonNull(arguments.get(KEY_SOURCE_TYPE)),
                             operationId);
                 } else if (ACTION_SET_CUSTOMER_SHIPPING_INFO.equals(actionString) &&
                         arguments.containsKey(KEY_SHIPPING_INFO)) {
                     runnable = createSetCustomerShippingInformationRunnable(
                             ephemeralKey,
-                            (ShippingInformation) arguments.get(KEY_SHIPPING_INFO),
+                            (ShippingInformation) Objects.requireNonNull(
+                                    arguments.get(KEY_SHIPPING_INFO)),
                             operationId);
                 } else {
                     runnable = null;
@@ -680,7 +683,7 @@ public class CustomerSession {
 
             @Override
             public void onKeyError(@NonNull String operationId, int httpCode,
-                                   @Nullable String errorMessage) {
+                                   @NonNull String errorMessage) {
                 // Any error eliminates all listeners
                 final RetrievalListener retrievalListener = mCustomerListeners.remove(operationId);
                 if (retrievalListener != null) {
@@ -880,7 +883,7 @@ public class CustomerSession {
     }
 
     interface RetrievalListener {
-        void onError(int errorCode, @Nullable String errorMessage,
+        void onError(int errorCode, @NonNull String errorMessage,
                      @Nullable StripeError stripeError);
     }
 
@@ -1035,7 +1038,9 @@ public class CustomerSession {
                     break;
                 }
                 case MessageCode.PAYMENT_METHODS_RETRIEVED: {
-                    mListener.onPaymentMethodsRetrieved((List<PaymentMethod>) obj, operationId);
+                    //noinspection unchecked
+                    mListener.onPaymentMethodsRetrieved(
+                            Objects.requireNonNull((List<PaymentMethod>) obj), operationId);
                     break;
                 }
                 case MessageCode.ERROR: {

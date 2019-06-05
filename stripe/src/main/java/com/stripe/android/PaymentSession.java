@@ -284,7 +284,7 @@ public class PaymentSession {
                     }
 
                     @Override
-                    public void onError(int httpCode, @Nullable String errorMessage,
+                    public void onError(int httpCode, @NonNull String errorMessage,
                                         @Nullable StripeError stripeError) {
                         if (mPaymentSessionListener != null) {
                             mPaymentSessionListener.onError(httpCode, errorMessage);
@@ -313,7 +313,7 @@ public class PaymentSession {
          * @param errorCode a network code associated with the error
          * @param errorMessage a message associated with the error
          */
-        void onError(int errorCode, @Nullable String errorMessage);
+        void onError(int errorCode, @NonNull String errorMessage);
 
         /**
          * Notification method called when the {@link PaymentSessionData} for this
