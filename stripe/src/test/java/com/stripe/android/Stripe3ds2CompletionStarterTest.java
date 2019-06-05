@@ -51,7 +51,7 @@ public class Stripe3ds2CompletionStarterTest {
     public void start_withProtocolError_shouldAddClientSecretAndAuthStatusToIntent() {
         mStarter.start(new Stripe3ds2CompletionStarter.StartData(
                 PaymentIntentFixtures.PI_REQUIRES_3DS2,
-                Stripe3ds2CompletionStarter.ChallengeFlowStatus.PROTOCOL_ERROR));
+                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),

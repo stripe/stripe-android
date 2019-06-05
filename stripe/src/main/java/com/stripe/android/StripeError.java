@@ -2,12 +2,14 @@ package com.stripe.android;
 
 import android.support.annotation.Nullable;
 
+import java.io.Serializable;
+
 /**
  * A model for error objects sent from the Stripe API.
  *
  * https://stripe.com/docs/api/errors
  */
-public class StripeError {
+public final class StripeError implements Serializable {
 
     // https://stripe.com/docs/api/errors (e.g. "invalid_request_error")
     @Nullable public final String type;
