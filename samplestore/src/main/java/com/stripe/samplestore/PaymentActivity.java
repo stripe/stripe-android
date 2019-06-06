@@ -99,6 +99,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         addCartItems();
 
+        setupPaymentSession();
+
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
         mEnterShippingInfo = findViewById(R.id.shipping_info);
@@ -111,8 +113,6 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
                         new AttemptPurchaseCustomerRetrievalListener(
                                 PaymentActivity.this))));
-
-        setupPaymentSession();
 
         mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
                 .isPaymentReadyToCharge());
@@ -184,7 +184,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void updateConfirmPaymentButton() {
-        long price = mStoreCart.getTotalPrice();
+        final long price = mPaymentSession.getPaymentSessionData().getCartTotal();
 
         mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
                 "Pay %s", StoreUtils.getPriceString(price, null)));
@@ -218,7 +218,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void setupTotalPriceView(@NonNull View view, @NonNull String currencySymbol) {
         final TextView[] itemViews = getItemViews(view);
-        final long totalPrice = mStoreCart.getTotalPrice() + mShippingCosts;
+        final long totalPrice = mPaymentSession.getPaymentSessionData().getCartTotal();
         itemViews[0].setText(getString(R.string.checkout_total_cost_label));
         final String price = PayWithGoogleUtils.getPriceString(totalPrice,
                 mStoreCart.getCurrency());
@@ -348,7 +348,9 @@ public class PaymentActivity extends AppCompatActivity {
     private void setupPaymentSession() {
         mPaymentSession = new PaymentSession(this);
         mPaymentSession.init(new PaymentSessionListenerImpl(this),
-                new PaymentSessionConfig.Builder().build());
+                new PaymentSessionConfig.Builder()
+                        .setPrepopulatedShippingInfo(getExampleShippingInfo()).build());
+        mPaymentSession.setCartTotal(mStoreCart.getTotalPrice());
     }
 
     private void startLoading() {
@@ -393,6 +395,7 @@ public class PaymentActivity extends AppCompatActivity {
         if (data.getShippingMethod() != null) {
             mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
             mShippingCosts = data.getShippingMethod().getAmount();
+            mPaymentSession.setCartTotal(mStoreCart.getTotalPrice() + mShippingCosts);
             addCartItems();
             updateConfirmPaymentButton();
         }
