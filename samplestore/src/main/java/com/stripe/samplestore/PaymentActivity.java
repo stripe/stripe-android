@@ -29,6 +29,7 @@ import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
@@ -147,6 +148,19 @@ public class PaymentActivity extends AppCompatActivity {
     private boolean isShippingInfoValid(@NonNull ShippingInformation shippingInfo) {
         return shippingInfo.getAddress() != null &&
                 Locale.US.getCountry().equals(shippingInfo.getAddress().getCountry());
+    }
+
+    @NonNull
+    private ShippingInformation getExampleShippingInfo() {
+        final Address address = new Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .build();
+        return new ShippingInformation(address, "Fake Name", "(555) 555-5555");
     }
 
     /*
