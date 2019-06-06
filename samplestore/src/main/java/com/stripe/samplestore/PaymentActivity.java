@@ -258,16 +258,14 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createCapturePaymentParams(
-            long price,
-            @NonNull String paymentMethodId,
-            @NonNull String customerId,
-            @Nullable ShippingInformation shippingInformation) {
+    private Map<String, Object> createCapturePaymentParams(@NonNull PaymentSessionData data,
+                                                           @NonNull String customerId) {
         final AbstractMap<String, Object> params = new HashMap<>();
-        params.put("amount", Long.toString(price));
-        params.put("payment_method", paymentMethodId);
+        params.put("amount", Long.toString(data.getCartTotal()));
+        params.put("payment_method", Objects.requireNonNull(data.getPaymentMethod()).id);
         params.put("customer_id", customerId);
-        params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
+        params.put("shipping", data.getShippingInformation() != null ?
+                data.getShippingInformation().toMap() : null);
         params.put("return_url", "stripe://payment-auth-return");
         return params;
     }
