@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -204,8 +205,8 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void complete3ds2Auth_shouldThrowInvalidRequestException() {
-        final InvalidRequestException exception = assertThrows(
+    public void complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
+        final InvalidRequestException invalidRequestException = assertThrows(
                 InvalidRequestException.class,
                 new ThrowingRunnable() {
                     @Override
@@ -214,7 +215,9 @@ public class StripeApiHandlerTest {
                                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
                     }
                 });
-        assertEquals(404, exception.getStatusCode());
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.getStatusCode());
+        assertEquals("source", invalidRequestException.getParam());
+        assertEquals("resource_missing", invalidRequestException.getErrorCode());
     }
 
     @Test
