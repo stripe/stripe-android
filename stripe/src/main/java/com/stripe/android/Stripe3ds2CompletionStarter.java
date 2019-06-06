@@ -41,10 +41,11 @@ class Stripe3ds2CompletionStarter
         activity.startActivityForResult(intent, mRequestCode);
     }
 
-    @IntDef({ChallengeFlowStatus.COMPLETE, ChallengeFlowStatus.CANCEL, ChallengeFlowStatus.TIMEOUT,
-            ChallengeFlowStatus.PROTOCOL_ERROR, ChallengeFlowStatus.RUNTIME_ERROR})
+    @IntDef({ChallengeFlowOutcome.COMPLETE, ChallengeFlowOutcome.CANCEL,
+            ChallengeFlowOutcome.TIMEOUT, ChallengeFlowOutcome.PROTOCOL_ERROR,
+            ChallengeFlowOutcome.RUNTIME_ERROR})
     @Retention(RetentionPolicy.SOURCE)
-    @interface ChallengeFlowStatus {
+    @interface ChallengeFlowOutcome {
         int COMPLETE = 0;
         int CANCEL = 1;
         int TIMEOUT = 2;
@@ -54,23 +55,23 @@ class Stripe3ds2CompletionStarter
 
     static class StartData {
         @NonNull private final PaymentIntent mPaymentIntent;
-        @ChallengeFlowStatus private final int mChallengeFlowStatus;
+        @ChallengeFlowOutcome private final int mChallengeFlowStatus;
         @Nullable private final String mCompletionTransactionStatus;
 
         @NonNull
         static StartData createForComplete(@NonNull PaymentIntent paymentIntent,
                                            @NonNull String completionTransactionStatus) {
-            return new StartData(paymentIntent, ChallengeFlowStatus.COMPLETE,
+            return new StartData(paymentIntent, ChallengeFlowOutcome.COMPLETE,
                     completionTransactionStatus);
         }
 
         StartData(@NonNull PaymentIntent paymentIntent,
-                  @ChallengeFlowStatus int status) {
+                  @ChallengeFlowOutcome int status) {
             this(paymentIntent, status, null);
         }
 
         private StartData(@NonNull PaymentIntent paymentIntent,
-                          @ChallengeFlowStatus int challengeFlowStatus,
+                          @ChallengeFlowOutcome int challengeFlowStatus,
                           @Nullable String completionTransactionStatus) {
             mPaymentIntent = paymentIntent;
             mChallengeFlowStatus = challengeFlowStatus;
@@ -79,9 +80,9 @@ class Stripe3ds2CompletionStarter
 
         @PaymentAuthResult.Status
         private int getAuthStatus() {
-            if (mChallengeFlowStatus == ChallengeFlowStatus.COMPLETE) {
+            if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE) {
                 return PaymentAuthResult.Status.SUCCEEDED;
-            } else if (mChallengeFlowStatus == ChallengeFlowStatus.CANCEL) {
+            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
                 return PaymentAuthResult.Status.CANCELED;
             } else {
                 return PaymentAuthResult.Status.FAILED;
