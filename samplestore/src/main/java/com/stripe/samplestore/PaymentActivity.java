@@ -188,7 +188,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(@NonNull Exception e) {
-                        finishPayment();
+                        displayError(e.getMessage());
                     }
                 });
 
