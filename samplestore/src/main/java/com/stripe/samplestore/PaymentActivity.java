@@ -98,9 +98,9 @@ public class PaymentActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.progress_bar);
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
-        addCartItems();
-
         setupPaymentSession();
+
+        addCartItems();
 
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
