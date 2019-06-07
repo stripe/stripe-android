@@ -18,8 +18,6 @@ public class PaymentSessionData implements Parcelable {
     private long mCartTotal = 0L;
     private boolean mIsPaymentReadyToCharge;
     private long mShippingTotal = 0L;
-    @NonNull @PaymentResultListener.PaymentResult private String mPaymentResult =
-            PaymentResultListener.INCOMPLETE;
     @Nullable private ShippingInformation mShippingInformation;
     @Nullable private ShippingMethod mShippingMethod;
     @Nullable private PaymentMethod mPaymentMethod;
@@ -41,17 +39,6 @@ public class PaymentSessionData implements Parcelable {
      */
     public long getCartTotal() {
         return mCartTotal;
-    }
-
-    /**
-     * Get the payment result for this PaymentSession.
-     *
-     * @return the current payment result for this session, or INCOMPLETE if not yet finished
-     */
-    @NonNull
-    @PaymentResultListener.PaymentResult
-    public String getPaymentResult() {
-        return mPaymentResult;
     }
 
     /**
@@ -127,10 +114,6 @@ public class PaymentSessionData implements Parcelable {
         mCartTotal = cartTotal;
     }
 
-    void setPaymentResult(@NonNull @PaymentResultListener.PaymentResult String result) {
-        mPaymentResult = result;
-    }
-
     void setPaymentMethod(@Nullable PaymentMethod paymentMethod) {
         mPaymentMethod = paymentMethod;
     }
@@ -169,14 +152,13 @@ public class PaymentSessionData implements Parcelable {
                 && ObjectUtils.equals(mShippingTotal, data.mShippingTotal)
                 && ObjectUtils.equals(mShippingInformation, data.mShippingInformation)
                 && ObjectUtils.equals(mShippingMethod, data.mShippingMethod)
-                && ObjectUtils.equals(mPaymentMethod, data.mPaymentMethod)
-                && ObjectUtils.equals(mPaymentResult, data.mPaymentResult);
+                && ObjectUtils.equals(mPaymentMethod, data.mPaymentMethod);
     }
 
     @Override
     public int hashCode() {
         return ObjectUtils.hash(mCartTotal, mIsPaymentReadyToCharge, mPaymentMethod,
-                mShippingTotal, mPaymentResult, mShippingInformation, mShippingMethod);
+                mShippingTotal, mShippingInformation, mShippingMethod);
     }
 
     /************** Parcelable *********************/
@@ -189,7 +171,6 @@ public class PaymentSessionData implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(mCartTotal);
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
-        parcel.writeString(mPaymentResult);
         parcel.writeString(mPaymentMethod != null ? mPaymentMethod.toJson().toString() : null);
         parcel.writeParcelable(mShippingInformation, i);
         parcel.writeParcelable(mShippingMethod, i);
@@ -211,7 +192,6 @@ public class PaymentSessionData implements Parcelable {
     private PaymentSessionData(@NonNull Parcel in) {
         mCartTotal = in.readLong();
         mIsPaymentReadyToCharge = in.readInt() == 1;
-        mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
         mPaymentMethod = PaymentMethod.fromString(in.readString());
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());

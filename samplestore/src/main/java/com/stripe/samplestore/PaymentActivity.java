@@ -318,7 +318,7 @@ public class PaymentActivity extends AppCompatActivity {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
             return;
         }
-
+        mPaymentSession.onCompleted();
         finishPayment();
     }
 
