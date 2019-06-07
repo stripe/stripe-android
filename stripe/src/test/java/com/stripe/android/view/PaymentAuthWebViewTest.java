@@ -42,6 +42,6 @@ public class PaymentAuthWebViewTest {
 
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals("pi_123_secret_456",
-                intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
+                intent.getStringExtra(PaymentResultExtras.CLIENT_SECRET));
     }
 }

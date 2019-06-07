@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.stripe.android.model.PaymentIntentFixtures;
-import com.stripe.android.view.PaymentAuthenticationExtras;
+import com.stripe.android.view.PaymentResultExtras;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +41,10 @@ public class Stripe3ds2CompletionStarterTest {
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),
-                intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
-        assertEquals(PaymentAuthResult.Status.SUCCEEDED,
-                intent.getIntExtra(PaymentAuthenticationExtras.AUTH_STATUS,
-                        PaymentAuthResult.Status.UNKNOWN));
+                intent.getStringExtra(PaymentResultExtras.CLIENT_SECRET));
+        assertEquals(PaymentIntentResult.Status.SUCCEEDED,
+                intent.getIntExtra(PaymentResultExtras.AUTH_STATUS,
+                        PaymentIntentResult.Status.UNKNOWN));
     }
 
     @Test
@@ -55,9 +55,9 @@ public class Stripe3ds2CompletionStarterTest {
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),
-                intent.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET));
-        assertEquals(PaymentAuthResult.Status.FAILED,
-                intent.getIntExtra(PaymentAuthenticationExtras.AUTH_STATUS,
-                        PaymentAuthResult.Status.UNKNOWN));
+                intent.getStringExtra(PaymentResultExtras.CLIENT_SECRET));
+        assertEquals(PaymentIntentResult.Status.FAILED,
+                intent.getIntExtra(PaymentResultExtras.AUTH_STATUS,
+                        PaymentIntentResult.Status.UNKNOWN));
     }
 }

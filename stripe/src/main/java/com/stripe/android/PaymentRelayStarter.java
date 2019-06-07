@@ -8,43 +8,43 @@ import android.support.annotation.Nullable;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.PaymentAuthRelayActivity;
-import com.stripe.android.view.PaymentAuthenticationExtras;
+import com.stripe.android.view.PaymentRelayActivity;
+import com.stripe.android.view.PaymentResultExtras;
 
 /**
- * Starts an instance of {@link PaymentAuthRelayStarter}.
- * Should only be called from {@link com.stripe.android.PaymentAuthenticationController}.
+ * Starts an instance of {@link PaymentRelayStarter}.
+ * Should only be called from {@link PaymentController}.
  */
-class PaymentAuthRelayStarter implements ActivityStarter<PaymentAuthRelayStarter.Data> {
+class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
     @NonNull private final Activity mActivity;
     private final int mRequestCode;
 
-    PaymentAuthRelayStarter(@NonNull Activity activity, int requestCode) {
+    PaymentRelayStarter(@NonNull Activity activity, int requestCode) {
         mActivity = activity;
         mRequestCode = requestCode;
     }
 
     @Override
     public void start(@NonNull Data data) {
-        final Intent intent = new Intent(mActivity, PaymentAuthRelayActivity.class)
-                .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
+        final Intent intent = new Intent(mActivity, PaymentRelayActivity.class)
+                .putExtra(PaymentResultExtras.CLIENT_SECRET,
                         data.paymentIntent != null ? data.paymentIntent.getClientSecret() : null)
-                .putExtra(PaymentAuthenticationExtras.AUTH_EXCEPTION, data.exception)
-                .putExtra(PaymentAuthenticationExtras.AUTH_STATUS, data.authStatus);
+                .putExtra(PaymentResultExtras.AUTH_EXCEPTION, data.exception)
+                .putExtra(PaymentResultExtras.AUTH_STATUS, data.status);
         mActivity.startActivityForResult(intent, mRequestCode);
     }
 
     public static final class Data {
         @Nullable final PaymentIntent paymentIntent;
         @Nullable final Exception exception;
-        @PaymentAuthResult.Status final int authStatus;
+        @PaymentIntentResult.Status final int status;
 
         /**
          * Use when payment authentication completed or can be bypassed.
          */
         Data(@NonNull PaymentIntent paymentIntent) {
             this.paymentIntent = paymentIntent;
-            this.authStatus = PaymentAuthResult.Status.SUCCEEDED;
+            this.status = PaymentIntentResult.Status.SUCCEEDED;
             this.exception = null;
         }
 
@@ -53,13 +53,13 @@ class PaymentAuthRelayStarter implements ActivityStarter<PaymentAuthRelayStarter
          */
         Data(@NonNull Exception exception) {
             this.paymentIntent = null;
-            this.authStatus = PaymentAuthResult.Status.FAILED;
+            this.status = PaymentIntentResult.Status.FAILED;
             this.exception = exception;
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(paymentIntent, exception, authStatus);
+            return ObjectUtils.hash(paymentIntent, exception, status);
         }
 
         @Override
@@ -70,7 +70,7 @@ class PaymentAuthRelayStarter implements ActivityStarter<PaymentAuthRelayStarter
         private boolean typedEquals(@NonNull Data data) {
             return ObjectUtils.equals(paymentIntent, data.paymentIntent) &&
                     ObjectUtils.equals(exception, data.exception) &&
-                    ObjectUtils.equals(authStatus, data.authStatus);
+                    ObjectUtils.equals(status, data.status);
         }
     }
 }
