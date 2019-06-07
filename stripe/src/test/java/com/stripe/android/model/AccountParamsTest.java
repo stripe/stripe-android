@@ -19,6 +19,7 @@ public class AccountParamsTest {
                         AccountParams.BusinessType.Company, businessData)
                         .toParamMap();
 
+        //noinspection unchecked
         final Map<String, ?> accountData = (Map<String, ?>) params.get("account");
         assertNotNull(accountData);
         assertEquals(3, accountData.size());
@@ -35,6 +36,7 @@ public class AccountParamsTest {
                 AccountParams.createAccountParams(true, null, null)
                         .toParamMap();
 
+        //noinspection unchecked
         final Map<String, ?> accountData = (Map<String, ?>) params.get("account");
         assertNotNull(accountData);
         assertEquals(1, accountData.size());

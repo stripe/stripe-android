@@ -34,6 +34,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestUtil 'androidx.test:orchestrator:1.2.0'
+
+    testAnnotationProcessor 'com.google.auto.service:auto-service:1.0-rc4'
 }
 
 android {
