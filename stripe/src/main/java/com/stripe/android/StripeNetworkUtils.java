@@ -20,8 +20,8 @@ import java.util.Map;
  */
 public class StripeNetworkUtils {
 
-    private static final String MUID = "muid";
-    private static final String GUID = "guid";
+    private static final String FIELD_MUID = "muid";
+    private static final String FIELD_GUID = "guid";
 
     @NonNull private final String mPackageName;
     @NonNull private final UidProvider mUidProvider;
@@ -44,7 +44,7 @@ public class StripeNetworkUtils {
      * @return a {@link Map} containing the appropriate values read from the card
      */
     @NonNull
-    Map<String, Object> hashMapFromCard(@NonNull Card card) {
+    Map<String, Object> createCardTokenParams(@NonNull Card card) {
         final Map<String, Object> tokenParams = new HashMap<>();
 
         final AbstractMap<String, Object> cardParams = new HashMap<>();
@@ -69,13 +69,13 @@ public class StripeNetworkUtils {
         tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
 
         tokenParams.put(Token.TYPE_CARD, cardParams);
+        tokenParams.putAll(createUidParams());
 
-        addUidParams(tokenParams);
         return tokenParams;
     }
 
     @NonNull
-    static Map<String, Object> hashMapFromPersonalId(@NonNull String personalId) {
+    static Map<String, Object> createPersonalIdTokenParams(@NonNull String personalId) {
         final Map<String, Object> tokenParams = new HashMap<>();
         tokenParams.put("personal_id_number", personalId);
         final Map<String, Object> piiParams = new HashMap<>();
@@ -84,7 +84,7 @@ public class StripeNetworkUtils {
     }
 
     @NonNull
-    static Map<String, Object> mapFromCvc(@NonNull String cvc) {
+    static Map<String, Object> createUpdateCvcTokenParams(@NonNull String cvc) {
         final Map<String, Object> tokenParams = new HashMap<>();
         tokenParams.put("cvc", cvc);
         final Map<String, Object> cvcParams = new HashMap<>();
@@ -99,7 +99,7 @@ public class StripeNetworkUtils {
      * @return a map that can be used as parameters to create a bank account object
      */
     @NonNull
-    Map<String, Object> hashMapFromBankAccount(@NonNull BankAccount bankAccount) {
+    Map<String, Object> createBankAccountTokenParams(@NonNull BankAccount bankAccount) {
         Map<String, Object> tokenParams = new HashMap<>();
         AbstractMap<String, Object> accountParams = new HashMap<>();
 
@@ -117,7 +117,7 @@ public class StripeNetworkUtils {
         removeNullAndEmptyParams(accountParams);
 
         tokenParams.put(Token.TYPE_BANK_ACCOUNT, accountParams);
-        addUidParams(tokenParams);
+        tokenParams.putAll(createUidParams());
         return tokenParams;
     }
 
@@ -152,35 +152,39 @@ public class StripeNetworkUtils {
     }
 
     void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
-        final Object sourceData = params
-                .get(PaymentIntentParams.API_PARAM_SOURCE_DATA);
+        final Object sourceData = params.get(PaymentIntentParams.API_PARAM_SOURCE_DATA);
         if (sourceData instanceof Map) {
-            addUidParams((Map) sourceData);
-            return;
-        }
-
-        final Object paymentMethodData = params
-                .get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
-        if (paymentMethodData instanceof Map) {
-            addUidParams((Map) paymentMethodData);
+            //noinspection unchecked
+            ((Map<String, Object>) sourceData).putAll(createUidParams());
+        } else {
+            final Object paymentMethodData = params
+                    .get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
+            if (paymentMethodData instanceof Map) {
+                //noinspection unchecked
+                ((Map) paymentMethodData).putAll(createUidParams());
+            }
         }
     }
 
-    void addUidParams(@NonNull Map<String, Object> params) {
+    @NonNull
+    Map<String, String> createUidParams() {
         final String guid = mUidProvider.get();
         if (StripeTextUtils.isBlank(guid)) {
-            return;
+            return new HashMap<>();
         }
 
+        final Map<String, String> uidParams = new HashMap<>(2);
         final String hashGuid = StripeTextUtils.shaHashInput(guid);
         if (!StripeTextUtils.isBlank(hashGuid)) {
-            params.put(GUID, hashGuid);
+            uidParams.put(FIELD_GUID, hashGuid);
         }
 
         final String muid = mPackageName + guid;
         final String hashMuid = StripeTextUtils.shaHashInput(muid);
         if (!StripeTextUtils.isBlank(hashMuid)) {
-            params.put(MUID, hashMuid);
+            uidParams.put(FIELD_MUID, hashMuid);
         }
+
+        return uidParams;
     }
 }
