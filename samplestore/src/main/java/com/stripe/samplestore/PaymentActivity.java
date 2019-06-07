@@ -285,22 +285,13 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void capturePayment(@NonNull String customerId) {
-        final long price = mStoreCart.getTotalPrice() + mShippingCosts;
-
-        final PaymentMethod paymentMethod =
-                mPaymentSession.getPaymentSessionData().getPaymentMethod();
-
-        if (paymentMethod == null) {
+        if (mPaymentSession.getPaymentSessionData().getPaymentMethod() == null) {
             displayError("No payment method selected");
             return;
         }
 
-        final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
-                .getShippingInformation();
-
         final Observable<ResponseBody> stripeResponse = mService.capturePayment(
-                createCapturePaymentParams(price, Objects.requireNonNull(paymentMethod.id),
-                        customerId, shippingInformation));
+                createCapturePaymentParams(mPaymentSession.getPaymentSessionData(), customerId));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
