@@ -190,7 +190,7 @@ public class PaymentSessionData implements Parcelable {
         parcel.writeLong(mCartTotal);
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeString(mPaymentResult);
-        parcel.writeString(mPaymentMethod != null ? mPaymentMethod.toJson().toString() : null);
+        parcel.writeParcelable(mPaymentMethod, i);
         parcel.writeParcelable(mShippingInformation, i);
         parcel.writeParcelable(mShippingMethod, i);
         parcel.writeLong(mShippingTotal);
@@ -212,7 +212,7 @@ public class PaymentSessionData implements Parcelable {
         mCartTotal = in.readLong();
         mIsPaymentReadyToCharge = in.readInt() == 1;
         mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
-        mPaymentMethod = PaymentMethod.fromString(in.readString());
+        mPaymentMethod = in.readParcelable(PaymentMethod.class.getClassLoader());
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());
         mShippingTotal = in.readLong();

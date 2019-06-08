@@ -156,8 +156,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {
         setCommunicatingProgress(false);
-        final Intent intent = new Intent().putExtra(EXTRA_NEW_PAYMENT_METHOD,
-                paymentMethod.toJson().toString());
+        final Intent intent = new Intent().putExtra(EXTRA_NEW_PAYMENT_METHOD, paymentMethod);
         setResult(RESULT_OK, intent);
         finish();
     }

@@ -121,7 +121,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
             if (data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
                 final PaymentMethod paymentMethod =
-                        PaymentMethod.fromString(data.getStringExtra(EXTRA_NEW_PAYMENT_METHOD));
+                        data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD);
                 getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
             } else {
                 getCustomerPaymentMethods(null);
