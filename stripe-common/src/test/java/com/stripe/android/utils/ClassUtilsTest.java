@@ -26,7 +26,7 @@ public class ClassUtilsTest {
 
     @Test
     public void testfindField_withEmptyWhitelist_shouldReturnNull() {
-        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<String>());
+        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<>());
         assertNull(nameField);
     }
 
@@ -50,6 +50,7 @@ public class ClassUtilsTest {
     }
 
     private static class OuterFakeClass {
+        @SuppressWarnings("unused")
         private final FakeClass mFakeClass;
 
         OuterFakeClass(FakeClass fakeClass) {
@@ -58,6 +59,7 @@ public class ClassUtilsTest {
     }
 
     private static class FakeClass {
+        @SuppressWarnings("unused")
         private String mName;
 
         public void run() {
