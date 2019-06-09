@@ -9,13 +9,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link StripeJsonUtils}.
@@ -87,68 +87,25 @@ public class StripeJsonUtilsTest {
     }
 
     @Test
-    public void getString_whenFieldPresent_findsAndReturnsField() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("key", "value");
-            assertEquals("value", StripeJsonUtils.getString(jsonObject, "key"));
-        } catch (JSONException jex) {
-            fail("No exception expected");
-        }
-    }
-
-    @Test
-    public void getString_whenFieldContainsRawNull_returnsNull() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("key", "null");
-            assertNull(StripeJsonUtils.getString(jsonObject, "key"));
-        } catch (JSONException jex) {
-            fail("No exception expected");
-        }
-    }
-
-    @Test(expected = JSONException.class)
-    public void getString_whenFieldNotPresent_throwsJsonException() throws JSONException {
+    public void optString_whenFieldPresent_findsAndReturnsField() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("key", "value");
-
-        StripeJsonUtils.getString(jsonObject, "differentKey");
-        fail("Expected an exception.");
+        assertEquals("value", StripeJsonUtils.optString(jsonObject, "key"));
     }
 
     @Test
-    public void optString_whenFieldPresent_findsAndReturnsField() {
+    public void optString_whenFieldContainsRawNull_returnsNull() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("key", "value");
-            assertEquals("value", StripeJsonUtils.optString(jsonObject, "key"));
-        } catch (JSONException jex) {
-            fail("No exception expected");
-        }
+        jsonObject.put("key", "null");
+        assertNull(StripeJsonUtils.optString(jsonObject, "key"));
     }
 
     @Test
-    public void optString_whenFieldContainsRawNull_returnsNull() {
+    public void optString_whenFieldNotPresent_returnsNull() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("key", "null");
-            assertNull(StripeJsonUtils.optString(jsonObject, "key"));
-        } catch (JSONException jex) {
-            fail("No exception expected");
-        }
-    }
-
-    @Test
-    public void optString_whenFieldNotPresent_returnsNull() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("key", "value");
-            Object ob  = StripeJsonUtils.optString(jsonObject, "nokeyshere");
-            assertNull(ob);
-        } catch (JSONException jex) {
-            fail("No exception expected");
-        }
+        jsonObject.put("key", "value");
+        Object ob = StripeJsonUtils.optString(jsonObject, "nokeyshere");
+        assertNull(ob);
     }
 
     @Test
@@ -172,24 +129,20 @@ public class StripeJsonUtilsTest {
     }
 
     @Test
-    public void mapToJsonObject_forSimpleObjects_returnsExpectedObject() {
+    public void mapToJsonObject_forSimpleObjects_returnsExpectedObject() throws JSONException {
         Map<String, Object> testMap = new HashMap<>();
         testMap.put("akey", "avalue");
         testMap.put("bkey", "bvalue");
         testMap.put("boolkey", true);
         testMap.put("numkey", 123);
 
-        try {
-            JSONObject expectedJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
-            JSONObject testObject = StripeJsonUtils.mapToJsonObject(testMap);
-            JsonTestUtils.assertJsonEquals(expectedJsonObject, testObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject expectedJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
+        JSONObject testObject = StripeJsonUtils.mapToJsonObject(testMap);
+        JsonTestUtils.assertJsonEquals(expectedJsonObject, testObject);
     }
 
     @Test
-    public void mapToJsonObject_forNestedMaps_returnsExpectedObject() {
+    public void mapToJsonObject_forNestedMaps_returnsExpectedObject() throws JSONException {
         Map<String, Object> testMap = new HashMap<>();
         testMap.put("top_key",
                 new HashMap<String, Object>() {{
@@ -205,17 +158,13 @@ public class StripeJsonUtilsTest {
                     put("another_inner_key", false);
                 }});
 
-        try {
-            JSONObject expectedJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
-            JSONObject testJsonObject = StripeJsonUtils.mapToJsonObject(testMap);
-            JsonTestUtils.assertJsonEquals(expectedJsonObject, testJsonObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject expectedJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
+        JSONObject testJsonObject = StripeJsonUtils.mapToJsonObject(testMap);
+        JsonTestUtils.assertJsonEquals(expectedJsonObject, testJsonObject);
     }
 
     @Test
-    public void mapToJsonObject_withNestedMapAndLists_returnsExpectedObject() {
+    public void mapToJsonObject_withNestedMapAndLists_returnsExpectedObject() throws JSONException {
         Map<String, Object> testMap = new HashMap<>();
         testMap.put("other_outer_key", false);
 
@@ -227,7 +176,7 @@ public class StripeJsonUtilsTest {
         itemsList.add("a string item");
         itemsList.add(256);
         itemsList.add(Arrays.asList(1, 2, "C", 4));
-        itemsList.add(Arrays.asList(new HashMap<String, Object>() {{
+        itemsList.add(Collections.singletonList(new HashMap<String, Object>() {{
             put("deep", "deepValue");
         }}));
         testMap.put("outer_key",
@@ -236,17 +185,13 @@ public class StripeJsonUtilsTest {
                     put("another_key", "a simple value this time");
                 }});
 
-        try {
-            JSONObject expectedJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
-            JSONObject testJsonObject = StripeJsonUtils.mapToJsonObject(testMap);
-            JsonTestUtils.assertJsonEquals(expectedJsonObject, testJsonObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject expectedJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
+        JSONObject testJsonObject = StripeJsonUtils.mapToJsonObject(testMap);
+        JsonTestUtils.assertJsonEquals(expectedJsonObject, testJsonObject);
     }
 
     @Test
-    public void listToJsonArray_forSimpleList_returnsExpectedArray() {
+    public void listToJsonArray_forSimpleList_returnsExpectedArray() throws JSONException {
         List<Object> testList = new ArrayList<>();
         testList.add(1);
         testList.add(2);
@@ -255,52 +200,40 @@ public class StripeJsonUtilsTest {
         testList.add(true);
         testList.add("cde");
 
-        try {
-            JSONArray expectedJsonArray = new JSONArray(SIMPLE_JSON_TEST_ARRAY);
-            JSONArray testJsonArray = StripeJsonUtils.listToJsonArray(testList);
-            JsonTestUtils.assertJsonArrayEquals(expectedJsonArray, testJsonArray);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONArray expectedJsonArray = new JSONArray(SIMPLE_JSON_TEST_ARRAY);
+        JSONArray testJsonArray = StripeJsonUtils.listToJsonArray(testList);
+        JsonTestUtils.assertJsonArrayEquals(expectedJsonArray, testJsonArray);
     }
 
     @Test
-    public void jsonObjectToMap_forSimpleObjects_returnsExpectedMap() {
+    public void jsonObjectToMap_forSimpleObjects_returnsExpectedMap() throws JSONException {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("akey", "avalue");
         expectedMap.put("bkey", "bvalue");
         expectedMap.put("boolkey", true);
         expectedMap.put("numkey", 123);
 
-        try {
-            JSONObject testJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
-            Map<String, Object> mappedObject = StripeJsonUtils.jsonObjectToMap(testJsonObject);
-            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject testJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
+        Map<String, Object> mappedObject = StripeJsonUtils.jsonObjectToMap(testJsonObject);
+        JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
     }
 
     @Test
-    public void jsonObjectToStringMap_forSimpleObjects_returnsExpectedMap() {
+    public void jsonObjectToStringMap_forSimpleObjects_returnsExpectedMap() throws JSONException {
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("akey", "avalue");
         expectedMap.put("bkey", "bvalue");
         expectedMap.put("boolkey", "true");
         expectedMap.put("numkey", "123");
 
-        try {
-            JSONObject testJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
-            Map<String, String> mappedObject =
-                    StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
-            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject testJsonObject = new JSONObject(SIMPLE_JSON_TEST_OBJECT);
+        Map<String, String> mappedObject =
+                StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
+        JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
     }
 
     @Test
-    public void jsonObjectToMap_forNestedObjects_returnsExpectedMap() {
+    public void jsonObjectToMap_forNestedObjects_returnsExpectedMap() throws JSONException {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("top_key",
                 new HashMap<String, Object>() {{
@@ -316,35 +249,29 @@ public class StripeJsonUtilsTest {
                     put("another_inner_key", false);
                 }});
 
-        try {
-            JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
-            Map<String, Object> mappedObject = StripeJsonUtils.jsonObjectToMap(testJsonObject);
-            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
+        Map<String, Object> mappedObject = StripeJsonUtils.jsonObjectToMap(testJsonObject);
+        JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
     }
 
     @Test
-    public void jsonObjectToStringMap_forNestedObjects_returnsExpectedFlatMap() {
+    public void jsonObjectToStringMap_forNestedObjects_returnsExpectedFlatMap()
+            throws JSONException {
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("top_key", "{\"first_inner_key\":{\"innermost_key\":1000," +
                 "\"second_innermost_key\":\"second_inner_value\"}," +
                 "\"second_inner_key\":\"just a value\"}");
         expectedMap.put("second_outer_key", "{\"another_inner_key\":false}");
 
-        try {
-            JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
-            Map<String, String> mappedObject =
-                    StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
-            JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject testJsonObject = new JSONObject(NESTED_JSON_TEST_OBJECT);
+        Map<String, String> mappedObject =
+                StripeJsonUtils.jsonObjectToStringMap(testJsonObject);
+        JsonTestUtils.assertMapEquals(expectedMap, mappedObject);
     }
 
     @Test
-    public void jsonObjectToMap_withNestedObjectAndArrays_returnsExpectedMap() {
+    public void jsonObjectToMap_withNestedObjectAndArrays_returnsExpectedMap()
+            throws JSONException {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("other_outer_key", false);
 
@@ -356,7 +283,7 @@ public class StripeJsonUtilsTest {
         itemsList.add("a string item");
         itemsList.add(256);
         itemsList.add(Arrays.asList(1, 2, "C", 4));
-        itemsList.add(Arrays.asList(new HashMap<String, Object>() {{
+        itemsList.add(Collections.singletonList(new HashMap<String, Object>() {{
             put("deep", "deepValue");
         }}));
         expectedMap.put("outer_key",
@@ -365,17 +292,13 @@ public class StripeJsonUtilsTest {
                     put("another_key", "a simple value this time");
                 }});
 
-        try {
-            JSONObject testJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
-            Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
-            JsonTestUtils.assertMapEquals(expectedMap, convertedMap);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject testJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
+        Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
+        JsonTestUtils.assertMapEquals(expectedMap, convertedMap);
     }
 
     @Test
-    public void jsonArrayToList_forSimpleList_returnsExpectedList() {
+    public void jsonArrayToList_forSimpleList_returnsExpectedList() throws JSONException {
         List<Object> expectedList = new ArrayList<>();
         expectedList.add(1);
         expectedList.add(2);
@@ -384,41 +307,29 @@ public class StripeJsonUtilsTest {
         expectedList.add(true);
         expectedList.add("cde");
 
-        try {
-            JSONArray testJsonArray = new JSONArray(SIMPLE_JSON_TEST_ARRAY);
-            List<Object> convertedJsonArray = StripeJsonUtils.jsonArrayToList(testJsonArray);
-            JsonTestUtils.assertListEquals(expectedList, convertedJsonArray);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONArray testJsonArray = new JSONArray(SIMPLE_JSON_TEST_ARRAY);
+        List<Object> convertedJsonArray = StripeJsonUtils.jsonArrayToList(testJsonArray);
+        JsonTestUtils.assertListEquals(expectedList, convertedJsonArray);
     }
 
     @Test
-    public void mapToJsonObjectAndBackToMap_forComplicatedObject_isNoOp() {
-        try {
-            JSONObject testJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
-            Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
-            JSONObject cycledObject = StripeJsonUtils.mapToJsonObject(convertedMap);
-            JsonTestUtils.assertJsonEquals(cycledObject, testJsonObject);
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+    public void mapToJsonObjectAndBackToMap_forComplicatedObject_isNoOp() throws JSONException {
+        JSONObject testJsonObject = new JSONObject(NESTED_MIXED_ARRAY_OBJECT);
+        Map<String, Object> convertedMap = StripeJsonUtils.jsonObjectToMap(testJsonObject);
+        JSONObject cycledObject = StripeJsonUtils.mapToJsonObject(convertedMap);
+        JsonTestUtils.assertJsonEquals(cycledObject, testJsonObject);
     }
 
     @Test
-    public void stringHashToJsonObject_returnsExpectedObject() {
+    public void stringHashToJsonObject_returnsExpectedObject() throws JSONException {
         Map<String, String> stringHash = new HashMap<>();
         stringHash.put("akey", "avalue");
         stringHash.put("bkey", "bvalue");
         stringHash.put("ckey", "cvalue");
         stringHash.put("dkey", "dvalue");
 
-        try {
-            JSONObject expectedObject = new JSONObject(SIMPLE_JSON_HASH_OBJECT);
-            JsonTestUtils.assertJsonEquals(expectedObject,
-                    StripeJsonUtils.stringHashToJsonObject(stringHash));
-        } catch (JSONException jsonException) {
-            fail("Test data failure " + jsonException.getLocalizedMessage());
-        }
+        JSONObject expectedObject = new JSONObject(SIMPLE_JSON_HASH_OBJECT);
+        JsonTestUtils.assertJsonEquals(expectedObject,
+                StripeJsonUtils.stringHashToJsonObject(stringHash));
     }
 }

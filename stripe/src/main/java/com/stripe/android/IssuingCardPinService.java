@@ -16,6 +16,7 @@ import org.json.JSONException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card
@@ -149,16 +150,16 @@ public class IssuingCardPinService
                         null);
                 return;
             }
-            String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
-            String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
-            String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
+            final String cardId =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_CARD_ID));
+            final String verificationId =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_VERIFICATION_ID));
+            final String userOneTimeCode =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_ONE_TIME_CODE));
             try {
-                final String pin = mApiHandler.retrieveIssuingCardPin(
-                        cardId,
-                        verificationId,
-                        userOneTimeCode,
-                        ephemeralKey.getSecret());
+                final String pin = mApiHandler.retrieveIssuingCardPin(cardId, verificationId,
+                        userOneTimeCode, ephemeralKey.getSecret());
                 listener.onIssuingCardPinRetrieved(pin);
 
             } catch (InvalidRequestException e) {
@@ -218,17 +219,17 @@ public class IssuingCardPinService
                         null);
                 return;
             }
-            String cardId = (String) arguments.get(ARGUMENT_CARD_ID);
-            String newPin = (String) arguments.get(ARGUMENT_NEW_PIN);
-            String verificationId = (String) arguments.get(ARGUMENT_VERIFICATION_ID);
-            String userOneTimeCode = (String) arguments.get(ARGUMENT_ONE_TIME_CODE);
 
+            final String cardId =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_CARD_ID));
+            final String newPin =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_NEW_PIN));
+            final String verificationId =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_VERIFICATION_ID));
+            final String userOneTimeCode =
+                    (String) Objects.requireNonNull(arguments.get(ARGUMENT_ONE_TIME_CODE));
             try {
-                mApiHandler.updateIssuingCardPin(
-                        cardId,
-                        newPin,
-                        verificationId,
-                        userOneTimeCode,
+                mApiHandler.updateIssuingCardPin(cardId, newPin, verificationId, userOneTimeCode,
                         ephemeralKey.getSecret());
                 listener.onIssuingCardPinUpdated();
             } catch (InvalidRequestException e) {

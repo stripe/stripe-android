@@ -25,12 +25,6 @@ public final class ApplePayWallet extends Wallet {
     }
 
     @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        return new JSONObject();
-    }
-
-    @NonNull
     static ApplePayWallet.Builder fromJson(@NonNull JSONObject walletJson) {
         return new Builder();
     }

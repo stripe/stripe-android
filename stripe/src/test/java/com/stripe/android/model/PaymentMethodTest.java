@@ -2,8 +2,6 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -13,6 +11,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -130,32 +129,6 @@ public class PaymentMethodTest {
     }
 
     @Test
-    public void toJson_withIdeal_shouldReturnExpectedJson() throws JSONException {
-        final JSONObject paymentMethod = new PaymentMethod.Builder()
-                .setId("pm_123456789")
-                .setCreated(1550757934255L)
-                .setLiveMode(true)
-                .setType("ideal")
-                .setCustomerId("cus_AQsHpvKfKwJDrF")
-                .setBillingDetails(BILLING_DETAILS)
-                .setIdeal(new PaymentMethod.Ideal.Builder()
-                        .setBank("my bank")
-                        .setBankIdentifierCode("bank id")
-                        .build())
-                .build()
-                .toJson();
-
-        assertEquals(new JSONObject(RAW_IDEAL_JSON).toString(), paymentMethod.toString());
-    }
-
-    @Test
-    public void toJson_withCard_shouldReturnExpectedJson() throws JSONException {
-        assertEquals(new JSONObject(RAW_CARD_JSON).toString(),
-                CARD_PAYMENT_METHOD.toJson().toString());
-    }
-
-
-    @Test
     public void equals_withEqualPaymentMethods_shouldReturnTrue() {
         assertEquals(CARD_PAYMENT_METHOD, new PaymentMethod.Builder()
                 .setId("pm_123456789")
@@ -171,6 +144,13 @@ public class PaymentMethodTest {
     @Test
     public void fromString_shouldReturnExpectedPaymentMethod() {
         assertEquals(CARD_PAYMENT_METHOD, PaymentMethod.fromString(RAW_CARD_JSON));
+    }
+
+    @Test
+    public void fromString_withIdeal_returnsExpectedObject() {
+        final PaymentMethod paymentMethod = PaymentMethod.fromString(RAW_IDEAL_JSON);
+        assertNotNull(paymentMethod);
+        assertEquals("ideal", paymentMethod.type);
     }
 
     @Test

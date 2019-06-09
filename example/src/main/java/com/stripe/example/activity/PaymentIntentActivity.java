@@ -158,7 +158,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         paymentIntent -> mPaymentIntentValue.setText(paymentIntent != null ?
-                                paymentIntent.toJson().toString() :
+                                new JSONObject(paymentIntent.toMap()).toString() :
                                 getString(R.string.error_while_retrieving_payment_intent)),
                         throwable -> Log.e(TAG, throwable.toString())
                 );
@@ -188,7 +188,8 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .subscribe(
                         paymentIntent -> {
                             if (paymentIntent != null) {
-                                mPaymentIntentValue.setText(paymentIntent.toJson().toString());
+                                mPaymentIntentValue.setText(
+                                        new JSONObject(paymentIntent.toMap()).toString());
 
                                 if (paymentIntent.requiresAction()) {
                                     Toast.makeText(PaymentIntentActivity.this,

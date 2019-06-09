@@ -16,7 +16,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model of the "data" object inside a {@link Customer} "source" object.
  */
-public final class CustomerSource extends StripeJsonModel implements StripePaymentSource {
+public final class CustomerSource extends StripeModel implements StripePaymentSource {
 
     @NonNull private final StripePaymentSource mStripePaymentSource;
 
@@ -119,17 +119,6 @@ public final class CustomerSource extends StripeJsonModel implements StripePayme
             return ((Card) mStripePaymentSource).toMap();
         }
         return new HashMap<>();
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        if (mStripePaymentSource instanceof Source) {
-            return ((Source) mStripePaymentSource).toJson();
-        } else if (mStripePaymentSource instanceof Card) {
-            return ((Card) mStripePaymentSource).toJson();
-        }
-        return new JSONObject();
     }
 
     @Override

@@ -25,12 +25,6 @@ public final class SamsungPayWallet extends Wallet {
     }
 
     @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        return new JSONObject();
-    }
-
-    @NonNull
     static SamsungPayWallet.Builder fromJson(@NonNull JSONObject walletJson) {
         return new Builder();
     }

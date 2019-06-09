@@ -25,12 +25,6 @@ public final class GooglePayWallet extends Wallet {
     }
 
     @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        return new JSONObject();
-    }
-
-    @NonNull
     static GooglePayWallet.Builder fromJson(@NonNull JSONObject walletJson) {
         return new Builder();
     }

@@ -17,7 +17,6 @@ import static com.stripe.android.model.Card.asCardBrand;
 import static com.stripe.android.model.Card.asFundingType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -85,11 +84,11 @@ public class CardTest {
             "  }";
 
     private static final String BAD_JSON = "{ \"id\": ";
-    private Calendar calendar;
+
+    private final Calendar calendar = Calendar.getInstance();
 
     @Before
     public void setup() {
-        calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1997);
         calendar.set(Calendar.MONTH, Calendar.AUGUST);
         calendar.set(Calendar.DAY_OF_MONTH, 29);
@@ -663,20 +662,6 @@ public class CardTest {
         final Card expectedCard = buildEquivalentJsonCard();
         final Card actualCard = Card.fromString(JSON_CARD_USD);
         assertEquals(expectedCard, actualCard);
-    }
-
-    @Test
-    public void fromString_toJson_yieldsSameObject() {
-        Card cardFromJson = Card.fromString(JSON_CARD_USD);
-        assertNotNull(cardFromJson);
-
-        JSONObject cycledCardObject = cardFromJson.toJson();
-        try {
-            JSONObject rawJsonObject = new JSONObject(JSON_CARD_USD);
-            JsonTestUtils.assertJsonEquals(cycledCardObject, rawJsonObject);
-        } catch (JSONException unexpected) {
-            fail();
-        }
     }
 
     @Test

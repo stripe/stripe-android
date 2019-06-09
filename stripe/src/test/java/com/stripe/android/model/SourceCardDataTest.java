@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +29,6 @@ public class SourceCardDataTest {
     public void fromExampleJsonCard_createsExpectedObject() {
         assertNotNull(CARD_DATA);
         assertEquals(Card.VISA, CARD_DATA.getBrand());
-        assertEquals(0, CARD_DATA.getAdditionalFields().size());
         assertEquals(Card.FUNDING_CREDIT, CARD_DATA.getFunding());
         assertEquals("4242", CARD_DATA.getLast4());
         assertNotNull(CARD_DATA.getExpiryMonth());
@@ -66,7 +66,9 @@ public class SourceCardDataTest {
     public void testHashCode() {
         assertNotNull(CARD_DATA);
         assertEquals(CARD_DATA.hashCode(),
-                SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY).hashCode());
+                Objects.requireNonNull(
+                        SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY))
+                        .hashCode());
     }
 
     @Test
