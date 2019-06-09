@@ -23,7 +23,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model for the SourceTypeData contained in a SEPA Debit Source object.
  */
-public class SourceSepaDebitData extends StripeSourceTypeModel {
+public final class SourceSepaDebitData extends StripeSourceTypeModel {
 
     private static final String FIELD_BANK_CODE = "bank_code";
     private static final String FIELD_BRANCH_CODE = "branch_code";

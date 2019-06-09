@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 import static com.stripe.android.model.wallets.Wallet.FIELD_DYNAMIC_LAST4;
 
-public class WalletFactory {
+public final class WalletFactory {
 
     @Nullable
     public Wallet create(@Nullable JSONObject walletJson) {

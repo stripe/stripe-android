@@ -19,7 +19,7 @@ import java.util.Date;
  * account details or personally identifiable information (PII), directly from your customers in a
  * secure manner. A Token representing this information is returned to you to use.
  */
-public class Token implements StripePaymentSource {
+public final class Token implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({TYPE_CARD, TYPE_BANK_ACCOUNT, TYPE_PII, TYPE_ACCOUNT, TYPE_CVC_UPDATE})

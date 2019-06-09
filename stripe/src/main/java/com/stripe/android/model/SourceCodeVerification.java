@@ -21,7 +21,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * https://stripe.com/docs/api/sources/object#source_object-code_verification
  * object in the source api, <em>not</em> source code verification
  */
-public class SourceCodeVerification extends StripeJsonModel {
+public final class SourceCodeVerification extends StripeJsonModel {
 
     // Note: these are the same as the values for the @Redirect.Status StringDef.
     // They don't have to stay the same forever, so they are redefined here.

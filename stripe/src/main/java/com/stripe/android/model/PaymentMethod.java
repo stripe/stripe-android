@@ -33,7 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */
-public class PaymentMethod extends StripeJsonModel implements Parcelable {
+public final class PaymentMethod extends StripeJsonModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";

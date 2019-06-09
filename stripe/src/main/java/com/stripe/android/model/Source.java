@@ -29,7 +29,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
  * https://stripe.com/docs/api/sources/object?lang=java</a>.
  */
-public class Source extends StripeJsonModel implements StripePaymentSource {
+public final class Source extends StripeJsonModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
     private static final String VALUE_CARD = "card";

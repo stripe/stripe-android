@@ -19,7 +19,7 @@ import java.lang.annotation.RetentionPolicy;
  * <a href="https://stripe.com/docs/api/java#create_bank_account_token">the Stripe
  * documentation.</a>
  */
-public class BankAccount {
+public final class BankAccount {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({TYPE_COMPANY, TYPE_INDIVIDUAL})

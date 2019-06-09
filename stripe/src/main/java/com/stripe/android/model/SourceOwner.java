@@ -20,7 +20,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
  * in the Source api.
  */
-public class SourceOwner extends StripeJsonModel {
+public final class SourceOwner extends StripeJsonModel {
 
     private static final String VERIFIED = "verified_";
     private static final String FIELD_ADDRESS = "address";
@@ -32,14 +32,14 @@ public class SourceOwner extends StripeJsonModel {
     private static final String FIELD_VERIFIED_NAME = VERIFIED + FIELD_NAME;
     private static final String FIELD_VERIFIED_PHONE = VERIFIED + FIELD_PHONE;
 
-    @Nullable private Address mAddress;
-    @Nullable private String mEmail;
-    @Nullable private String mName;
-    @Nullable private String mPhone;
-    @Nullable private Address mVerifiedAddress;
-    @Nullable private String mVerifiedEmail;
-    @Nullable private String mVerifiedName;
-    @Nullable private String mVerifiedPhone;
+    @Nullable private final Address mAddress;
+    @Nullable private final String mEmail;
+    @Nullable private final String mName;
+    @Nullable private final String mPhone;
+    @Nullable private final Address mVerifiedAddress;
+    @Nullable private final String mVerifiedEmail;
+    @Nullable private final String mVerifiedName;
+    @Nullable private final String mVerifiedPhone;
 
     private SourceOwner(
             @Nullable Address address,
@@ -98,38 +98,6 @@ public class SourceOwner extends StripeJsonModel {
     @Nullable
     public String getVerifiedPhone() {
         return mVerifiedPhone;
-    }
-
-    void setAddress(Address address) {
-        mAddress = address;
-    }
-
-    void setEmail(String email) {
-        mEmail = email;
-    }
-
-    void setName(String name) {
-        mName = name;
-    }
-
-    void setPhone(String phone) {
-        mPhone = phone;
-    }
-
-    void setVerifiedAddress(Address verifiedAddress) {
-        mVerifiedAddress = verifiedAddress;
-    }
-
-    void setVerifiedEmail(String verifiedEmail) {
-        mVerifiedEmail = verifiedEmail;
-    }
-
-    void setVerifiedName(String verifiedName) {
-        mVerifiedName = verifiedName;
-    }
-
-    void setVerifiedPhone(String verifiedPhone) {
-        mVerifiedPhone = verifiedPhone;
     }
 
     @NonNull

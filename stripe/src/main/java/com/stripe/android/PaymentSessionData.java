@@ -10,6 +10,8 @@ import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.utils.ObjectUtils;
 
+import java.util.Objects;
+
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
  */
@@ -211,7 +213,8 @@ public class PaymentSessionData implements Parcelable {
     private PaymentSessionData(@NonNull Parcel in) {
         mCartTotal = in.readLong();
         mIsPaymentReadyToCharge = in.readInt() == 1;
-        mPaymentResult = PaymentSessionUtils.paymentResultFromString(in.readString());
+        mPaymentResult = PaymentSessionUtils.paymentResultFromString(
+                Objects.requireNonNull(in.readString()));
         mPaymentMethod = in.readParcelable(PaymentMethod.class.getClassLoader());
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingMethod = in.readParcelable(ShippingMethod.class.getClassLoader());
