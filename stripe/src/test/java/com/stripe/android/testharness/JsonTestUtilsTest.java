@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.fail;
-
-/**
- * Test class for the test utils class {@link JsonTestUtils}.
- */
 public class JsonTestUtilsTest {
 
     @Test
@@ -35,70 +30,49 @@ public class JsonTestUtilsTest {
     }
 
     @Test
-    public void assertJsonEquals_forSimpleObjects_passes() {
-        String simpleJson = "{\"key\": \"value\"}";
-        try {
-            JSONObject first = new JSONObject(simpleJson);
-            JSONObject second = new JSONObject(simpleJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+    public void assertJsonEquals_forSimpleObjects_passes() throws JSONException {
+        JSONObject first = new JSONObject("{\"key\": \"value\"}");
+        JSONObject second = new JSONObject("{\"key\": \"value\"}");
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test
-    public void assertJsonEquals_forSimpleObjectsWithNumbers_passes() {
+    public void assertJsonEquals_forSimpleObjectsWithNumbers_passes() throws JSONException {
         String simpleJson = "{\"key\": \"value\", \"key2\": 100}";
-        try {
-            JSONObject first = new JSONObject(simpleJson);
-            JSONObject second = new JSONObject(simpleJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(simpleJson);
+        JSONObject second = new JSONObject(simpleJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test(expected = AssertionError.class)
-    public void assertJsonEquals_forSimpleUnequalObjects_fails() {
+    public void assertJsonEquals_forSimpleUnequalObjects_fails() throws JSONException {
         String simpleJson = "{\"key\": \"value\"}";
         String differentJson = "{\"key2\": \"value2\"}";
-        try {
-            JSONObject first = new JSONObject(simpleJson);
-            JSONObject second = new JSONObject(differentJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(simpleJson);
+        JSONObject second = new JSONObject(differentJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test(expected = AssertionError.class)
-    public void assertJsonEquals_forSimpleObjectsOfDifferentSize_fails() {
+    public void assertJsonEquals_forSimpleObjectsOfDifferentSize_fails() throws JSONException {
         String simpleJson = "{\"key\": \"value\"}";
         String differentJson = "{\"key\": \"value\", \"key2\": \"value2\"}";
-        try {
-            JSONObject first = new JSONObject(simpleJson);
-            JSONObject second = new JSONObject(differentJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(simpleJson);
+        JSONObject second = new JSONObject(differentJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test(expected = AssertionError.class)
-    public void assertJsonEquals_forSimpleUnequalObjectsWithSameKey_fails() {
+    public void assertJsonEquals_forSimpleUnequalObjectsWithSameKey_fails() throws JSONException {
         String simpleJson = "{\"key\": \"value\"}";
         String differentJson = "{\"key\": \"value2\"}";
-        try {
-            JSONObject first = new JSONObject(simpleJson);
-            JSONObject second = new JSONObject(differentJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(simpleJson);
+        JSONObject second = new JSONObject(differentJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test
-    public void assertJsonEquals_withNestedEqualObjects_passes() {
+    public void assertJsonEquals_withNestedEqualObjects_passes() throws JSONException {
         String nestedJson = "{\n" +
                 "    \"top_key\": {\n" +
                 "        \"first_inner_key\": {\n" +
@@ -111,17 +85,13 @@ public class JsonTestUtilsTest {
                 "        \"another_inner_key\": \"a value\"\n" +
                 "    }\n" +
                 "}";
-        try {
-            JSONObject first = new JSONObject(nestedJson);
-            JSONObject second = new JSONObject(nestedJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(nestedJson);
+        JSONObject second = new JSONObject(nestedJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test(expected = AssertionError.class)
-    public void assertJsonEquals_withNestedUnequalObjects_fails() {
+    public void assertJsonEquals_withNestedUnequalObjects_fails() throws JSONException {
         String nestedJson = "{\n" +
                 "    \"top_key\": {\n" +
                 "        \"first_inner_key\": {\n" +
@@ -146,17 +116,13 @@ public class JsonTestUtilsTest {
                 "        \"another_inner_key\": \"a value\"\n" +
                 "    }\n" +
                 "}";
-        try {
-            JSONObject first = new JSONObject(nestedJson);
-            JSONObject second = new JSONObject(alteredNestedJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(nestedJson);
+        JSONObject second = new JSONObject(alteredNestedJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test
-    public void assertJsonEquals_forNestedEqualObjectsWithArrays_passes() {
+    public void assertJsonEquals_forNestedEqualObjectsWithArrays_passes() throws JSONException {
         String complicatedJson = "{\n" +
                 "    \"top_key\": {\n" +
                 "        \"first_inner_key\": {\n" +
@@ -177,17 +143,13 @@ public class JsonTestUtilsTest {
                 "        \"anotherkey\": \"a simple value this time\"\n" +
                 "    }\n" +
                 "}";
-        try {
-            JSONObject first = new JSONObject(complicatedJson);
-            JSONObject second = new JSONObject(complicatedJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(complicatedJson);
+        JSONObject second = new JSONObject(complicatedJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     @Test(expected = AssertionError.class)
-    public void assertJsonEquals_forNestedUnEqualObjectsWithArrays_fails() {
+    public void assertJsonEquals_forNestedUnEqualObjectsWithArrays_fails() throws JSONException {
         String complicatedJson = "{\n" +
                 "    \"top_key\": {\n" +
                 "        \"first_inner_key\": {\n" +
@@ -229,13 +191,9 @@ public class JsonTestUtilsTest {
                 "        \"anotherkey\": \"a simple value this time\"\n" +
                 "    }\n" +
                 "}";
-        try {
-            JSONObject first = new JSONObject(complicatedJson);
-            JSONObject second = new JSONObject(alteredComplicatedJson);
-            JsonTestUtils.assertJsonEquals(first, second);
-        } catch (JSONException dataException) {
-            fail("Test data failure: " + dataException.getLocalizedMessage());
-        }
+        JSONObject first = new JSONObject(complicatedJson);
+        JSONObject second = new JSONObject(alteredComplicatedJson);
+        JsonTestUtils.assertJsonEquals(first, second);
     }
 
     // Note: more complicated list and array functions are tested in the JsonObject and Map

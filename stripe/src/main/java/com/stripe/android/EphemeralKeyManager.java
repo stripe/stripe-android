@@ -5,30 +5,33 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
+class EphemeralKeyManager<EphemeralKey extends AbstractEphemeralKey> {
 
-    @NonNull private final Class<TEphemeralKey> mEphemeralKeyClass;
+    @NonNull private final AbstractEphemeralKey
+            .BuilderFactory<AbstractEphemeralKey.Builder<EphemeralKey>> mEphemeralkeyBuilderFactory;
     @NonNull private final EphemeralKeyProvider mEphemeralKeyProvider;
     @Nullable private final Calendar mOverrideCalendar;
-    @NonNull private final KeyManagerListener<TEphemeralKey> mListener;
+    @NonNull private final KeyManagerListener<EphemeralKey> mListener;
     private final long mTimeBufferInSeconds;
 
-    @Nullable private TEphemeralKey mEphemeralKey;
+    @Nullable private EphemeralKey mEphemeralKey;
 
     EphemeralKeyManager(
             @NonNull EphemeralKeyProvider ephemeralKeyProvider,
-            @NonNull KeyManagerListener<TEphemeralKey> keyManagerListener,
+            @NonNull KeyManagerListener<EphemeralKey> keyManagerListener,
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
             @NonNull OperationIdFactory operationIdFactory,
-            @NonNull Class<TEphemeralKey> ephemeralKeyClass) {
-        mEphemeralKeyClass = ephemeralKeyClass;
+            @NonNull AbstractEphemeralKey.BuilderFactory<AbstractEphemeralKey.Builder<EphemeralKey>>
+                    ephemeralKeyBuilderFactory) {
+        mEphemeralkeyBuilderFactory = ephemeralKeyBuilderFactory;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
@@ -52,7 +55,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
 
     @Nullable
     @VisibleForTesting
-    TEphemeralKey getEphemeralKey() {
+    EphemeralKey getEphemeralKey() {
         return mEphemeralKey;
     }
 
@@ -71,7 +74,8 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             return;
         }
         try {
-            mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
+            mEphemeralKey = AbstractEphemeralKey.fromJson(new JSONObject(key),
+                    mEphemeralkeyBuilderFactory.create());
             mListener.onKeyUpdate(mEphemeralKey, operationId, actionString, arguments);
         } catch (JSONException e) {
             mListener.onKeyError(operationId,

@@ -19,12 +19,11 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class EphemeralKeyTest {
 
-    private static final String SAMPLE_KEY_RAW = "{\n" +
+    private static final String KEY_JSON = "{\n" +
             "    \"id\": \"ephkey_123\",\n" +
             "    \"object\": \"ephemeral_key\",\n" +
             "    \"secret\": \"ek_test_123\",\n" +
@@ -40,17 +39,13 @@ public class EphemeralKeyTest {
             "}";
 
     @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
-        try {
-            return CustomerEphemeralKey.fromString(key);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+    private CustomerEphemeralKey getCustomerEphemeralKey() throws JSONException {
+        return CustomerEphemeralKey.fromJson(new JSONObject(KEY_JSON));
     }
     
     @Test
-    public void fromJson_createsKeyWithExpectedValues() {
-        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
+    public void fromJson_createsKeyWithExpectedValues() throws JSONException {
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
         assertNotNull(ephemeralKey);
         assertEquals("ephkey_123", ephemeralKey.getId());
         assertEquals("ephemeral_key", ephemeralKey.getObject());
@@ -63,20 +58,13 @@ public class EphemeralKeyTest {
     }
 
     @Test
-    public void fromJson_toJson_createsEqualObject() {
-        try {
-            JSONObject originalObject = new JSONObject(SAMPLE_KEY_RAW);
-            CustomerEphemeralKey key = CustomerEphemeralKey.fromJson(originalObject);
-            assertNotNull(key);
-            JsonTestUtils.assertJsonEquals(originalObject, key.toJson());
-        } catch (JSONException unexpected) {
-            fail("Failure to parse test JSON");
-        }
+    public void fromJson_createsNotNullObject() throws JSONException {
+        assertNotNull(CustomerEphemeralKey.fromJson(new JSONObject(KEY_JSON)));
     }
 
     @Test
-    public void toMap_createsMapWithExpectedValues() {
-        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
+    public void toMap_createsMapWithExpectedValues() throws JSONException {
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
         assertNotNull(ephemeralKey);
         Map<String, Object> expectedMap = new HashMap<String, Object>() {{
             put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
@@ -98,8 +86,8 @@ public class EphemeralKeyTest {
     }
 
     @Test
-    public void toParcel_fromParcel_createsExpectedObject() {
-        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey(SAMPLE_KEY_RAW);
+    public void toParcel_fromParcel_createsExpectedObject() throws JSONException {
+        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
         assertNotNull(ephemeralKey);
         Parcel parcel = Parcel.obtain();
         ephemeralKey.writeToParcel(parcel, 0);

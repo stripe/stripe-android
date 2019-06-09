@@ -1,8 +1,5 @@
 package com.stripe.android.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -14,13 +11,11 @@ import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_JSON_OWNER_WITHOU
 import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_MAP_OWNER;
 import static com.stripe.android.model.SourceReceiverTest.EXAMPLE_MAP_RECEIVER;
 import static com.stripe.android.model.SourceRedirectTest.EXAMPLE_JSON_REDIRECT;
-import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link Source} model.
@@ -124,6 +119,7 @@ public class SourceTest {
 
     private static final Map<String, Object> EXAMPLE_SOURCE_MAP = new HashMap<String, Object>() {{
         put("id", "src_19t3xKBZqEXluyI4uz2dxAfQ");
+        put("object", "source");
         put("amount", 1000L);
         put("client_secret", "src_client_secret_of43INi1HteJwXVe3djAUosN");
         put("created", 1488499654L);
@@ -203,24 +199,9 @@ public class SourceTest {
             "  \"tokenization_method\": null\n" +
             "}\n";
 
-    private Source mSource;
-
-    @Before
-    public void setup() {
-        mSource = Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
-        assertNotNull(mSource);
-    }
-
     @Test
-    public void fromJsonString_backToJson_createsIdenticalElement() {
-        try {
-            JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
-            JSONObject actualObject = mSource.toJson();
-            assertJsonEquals(rawConversion, actualObject);
-            assertEquals(mSource, Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
-        } catch (JSONException jsonException) {
-            fail("Test Data failure: " + jsonException.getLocalizedMessage());
-        }
+    public void fromJsonStringWithoutNulls_isNotNull() {
+        assertNotNull(Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
     }
 
     @Test

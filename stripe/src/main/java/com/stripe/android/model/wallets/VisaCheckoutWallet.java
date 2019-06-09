@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.AbstractMap;
@@ -45,22 +44,6 @@ public final class VisaCheckoutWallet extends Wallet {
         wallet.put(FIELD_NAME, name);
         wallet.put(FIELD_SHIPPING_ADDRESS,
                 shippingAddress != null ? shippingAddress.toMap() : null);
-        return wallet;
-    }
-
-    @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        final JSONObject wallet = new JSONObject();
-        try {
-            wallet.put(FIELD_BILLING_ADDRESS,
-                    billingAddress != null ? billingAddress.toJson() : null);
-            wallet.put(FIELD_EMAIL, email);
-            wallet.put(FIELD_NAME, name);
-            wallet.put(FIELD_SHIPPING_ADDRESS,
-                    shippingAddress != null ? shippingAddress.toJson() : null);
-        } catch (JSONException ignore) {
-        }
         return wallet;
     }
 

@@ -29,6 +29,7 @@ import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +99,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
             "            }]\n" +
             "}";
 
-    public static final String FIRST_TEST_CUSTOMER_OBJECT =
+    static final String FIRST_TEST_CUSTOMER_OBJECT =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
@@ -200,7 +201,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @NonNull
     private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
         try {
-            return CustomerEphemeralKey.fromString(key);
+            return CustomerEphemeralKey.fromJson(new JSONObject(key));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

@@ -615,8 +615,8 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
     public void validateCardNumber_whenValid_doesNotShowError() {
         mCardMultilineWidget.setCardNumber(VALID_VISA_WITH_SPACES);
 
-        Boolean isValid = mCardMultilineWidget.validateCardNumber();
-        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+        boolean isValid = mCardMultilineWidget.validateCardNumber();
+        boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
 
         assertTrue(isValid);
         assertFalse(shouldShowError);
@@ -627,13 +627,12 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         String invalidNumber = "1234 1234 1234 1234";
         mCardMultilineWidget.setCardNumber(invalidNumber);
 
-        Boolean isValid = mCardMultilineWidget.validateCardNumber();
-        Boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
+        boolean isValid = mCardMultilineWidget.validateCardNumber();
+        boolean shouldShowError = mFullGroup.cardNumberEditText.getShouldShowError();
 
         assertFalse(isValid);
         assertTrue(shouldShowError);
     }
-
 
     @Test
     public void setEnabled_setsEnabledPropertyOnAllChildWidgets() {

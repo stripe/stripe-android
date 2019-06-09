@@ -33,7 +33,8 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */
-public class PaymentMethod extends StripeJsonModel implements Parcelable {
+@SuppressWarnings("WeakerAccess")
+public class PaymentMethod extends StripeModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";
@@ -107,31 +108,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         paymentMethod.put(FIELD_IDEAL,
                 ideal != null ? ideal.toMap() : null);
         paymentMethod.put(FIELD_METADATA, metadata);
-        return paymentMethod;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject paymentMethod = new JSONObject();
-        try {
-            paymentMethod.put(FIELD_ID, id);
-            paymentMethod.put(FIELD_CREATED, created);
-            paymentMethod.put(FIELD_CUSTOMER, customerId);
-            paymentMethod.put(FIELD_LIVEMODE, liveMode);
-            paymentMethod.put(FIELD_METADATA, metadata != null ? new JSONObject(metadata) : null);
-            paymentMethod.put(FIELD_TYPE, type);
-            paymentMethod.put(FIELD_BILLING_DETAILS,
-                    billingDetails != null ? billingDetails.toJson() : null);
-            paymentMethod.put(FIELD_CARD,
-                    card != null ? card.toJson() : null);
-            paymentMethod.put(FIELD_CARD_PRESENT,
-                    cardPresent != null ? cardPresent.toJson() : null);
-            paymentMethod.put(FIELD_IDEAL,
-                    ideal != null ? ideal.toJson() : null);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
         return paymentMethod;
     }
 
@@ -241,12 +217,13 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         customerId = in.readString();
         final int mapSize = in.readInt();
         if (mapSize >= 0) {
-            metadata = new HashMap<>(mapSize);
-            for (int x = 0; x < mapSize; x++) {
+            final AbstractMap<String, String> metadata = new HashMap<>(mapSize);
+            for (int i = 0; i < mapSize; i++) {
                 metadata.put(in.readString(), in.readString());
             }
+            this.metadata = metadata;
         } else {
-            metadata = null;
+            this.metadata = null;
         }
     }
 
@@ -343,7 +320,7 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
     }
 
-    public static final class BillingDetails extends StripeJsonModel implements Parcelable {
+    public static final class BillingDetails extends StripeModel implements Parcelable {
         static final String FIELD_ADDRESS = "address";
         static final String FIELD_EMAIL = "email";
         static final String FIELD_NAME = "name";
@@ -411,21 +388,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
                 billingDetails.put(FIELD_PHONE, phone);
             }
             StripeNetworkUtils.removeNullAndEmptyParams(billingDetails);
-            return billingDetails;
-        }
-
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject billingDetails = new JSONObject();
-            try {
-                billingDetails.put(FIELD_ADDRESS, address != null ? address.toJson() : null);
-                billingDetails.put(FIELD_EMAIL, email);
-                billingDetails.put(FIELD_NAME, name);
-                billingDetails.put(FIELD_PHONE, phone);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
             return billingDetails;
         }
 
@@ -625,26 +587,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             return map;
         }
 
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject json = new JSONObject();
-            try {
-                json.put(FIELD_BRAND, brand);
-                json.put(FIELD_CHECKS, checks != null ? checks.toJson() : null);
-                json.put(FIELD_COUNTRY, country);
-                json.put(FIELD_EXP_MONTH, expiryMonth);
-                json.put(FIELD_EXP_YEAR, expiryYear);
-                json.put(FIELD_FUNDING, funding);
-                json.put(FIELD_LAST4, last4);
-                json.put(FIELD_THREE_D_SECURE_USAGE, threeDSecureUsage != null ?
-                        threeDSecureUsage.toJson() : null);
-                json.put(FIELD_WALLET, wallet);
-            } catch (JSONException ignore) {
-            }
-            return json;
-        }
-
         @Nullable
         public static Card fromJson(@Nullable JSONObject cardJson) {
             if (cardJson == null) {
@@ -759,7 +701,7 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
         }
 
-        public static final class Checks extends StripeJsonModel implements Parcelable {
+        public static final class Checks extends StripeModel implements Parcelable {
             private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
             private static final String FIELD_ADDRESS_POSTAL_CODE_CHECK =
                     "address_postal_code_check";
@@ -814,19 +756,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
                 map.put(FIELD_ADDRESS_POSTAL_CODE_CHECK, addressPostalCodeCheck);
                 map.put(FIELD_CVC_CHECK, cvcCheck);
                 return map;
-            }
-
-            @NonNull
-            @Override
-            public JSONObject toJson() {
-                final JSONObject json = new JSONObject();
-                try {
-                    json.put(FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
-                    json.put(FIELD_ADDRESS_POSTAL_CODE_CHECK, addressPostalCodeCheck);
-                    json.put(FIELD_CVC_CHECK, cvcCheck);
-                } catch (JSONException ignore) {
-                }
-                return json;
             }
 
             @Nullable
@@ -889,7 +818,7 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
         }
 
-        public static final class ThreeDSecureUsage extends StripeJsonModel implements Parcelable {
+        public static final class ThreeDSecureUsage extends StripeModel implements Parcelable {
             private static final String FIELD_IS_SUPPORTED = "supported";
 
             public final boolean isSupported;
@@ -931,17 +860,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
                 final Map<String, Object> map = new HashMap<>();
                 map.put(FIELD_IS_SUPPORTED, isSupported);
                 return map;
-            }
-
-            @NonNull
-            @Override
-            public JSONObject toJson() {
-                final JSONObject json = new JSONObject();
-                try {
-                    json.put(FIELD_IS_SUPPORTED, isSupported);
-                } catch (JSONException ignore) {
-                }
-                return json;
             }
 
             @Nullable
@@ -1018,12 +936,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             return new HashMap<>();
         }
 
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            return new JSONObject();
-        }
-
         @Override
         public int hashCode() {
             return ObjectUtils.hash(type);
@@ -1086,19 +998,6 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
             return ideal;
         }
 
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject ideal = new JSONObject();
-            try {
-                ideal.put(FIELD_BANK, bank);
-                ideal.put(FIELD_BIC, bankIdentifierCode);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-            return ideal;
-        }
-
         @Nullable
         public static Ideal fromJson(@Nullable JSONObject ideal) {
             if (ideal == null) {
@@ -1149,7 +1048,7 @@ public class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
     }
 
-    private abstract static class PaymentMethodTypeImpl extends StripeJsonModel
+    private abstract static class PaymentMethodTypeImpl extends StripeModel
             implements Parcelable {
         @NonNull public final Type type;
 

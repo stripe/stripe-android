@@ -20,13 +20,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public class Address extends StripeJsonModel implements Parcelable {
+public class Address extends StripeModel implements Parcelable {
 
     @IntDef({
             RequiredBillingAddressFields.NONE,
@@ -139,19 +138,6 @@ public class Address extends StripeJsonModel implements Parcelable {
         }
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_CITY, mCity);
-        putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
-        putStringIfNotNull(jsonObject, FIELD_LINE_1, mLine1);
-        putStringIfNotNull(jsonObject, FIELD_LINE_2, mLine2);
-        putStringIfNotNull(jsonObject, FIELD_POSTAL_CODE, mPostalCode);
-        putStringIfNotNull(jsonObject, FIELD_STATE, mState);
-        return jsonObject;
     }
 
     @Nullable

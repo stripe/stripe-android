@@ -25,16 +25,16 @@ import static org.mockito.Mockito.when;
 public class IssuingCardPinServiceTest {
 
     private static final String EPHEMERAL_KEY = "{\n" +
-            "  \"id\": \"ephkey_123\",\n" +
-            "  \"object\": \"ephemeral_key\",\n" +
-            "  \"secret\": \"ek_test_123\",\n" +
-            "  \"created\": 1501179335,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"expires\": 1501199335,\n" +
-            "  \"associated_objects\": [{\n" +
-            "            \"type\": \"issuing.card\",\n" +
-            "            \"id\": \"ic_abcd\"\n" +
-            "            }]\n" +
+            "\t\"id\": \"ephkey_123\",\n" +
+            "\t\"object\": \"ephemeral_key\",\n" +
+            "\t\"secret\": \"ek_test_123\",\n" +
+            "\t\"created\": 1501179335,\n" +
+            "\t\"livemode\": false,\n" +
+            "\t\"expires\": 1501199335,\n" +
+            "\t\"associated_objects\": [{\n" +
+            "\t\t\"type\": \"issuing.card\",\n" +
+            "\t\t\"id\": \"ic_abcd\"\n" +
+            "\t}]\n" +
             "}";
 
     @Mock private RequestExecutor mRequestExecutor;

@@ -1,18 +1,13 @@
 package com.stripe.android.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.AddressTest.JSON_ADDRESS;
-import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link SourceOwner} model.
@@ -47,22 +42,9 @@ public class SourceOwnerTest {
         put("phone", "4158675309");
     }};
 
-    private SourceOwner mSourceOwner;
-
-    @Before
-    public void setup() {
-        mSourceOwner = SourceOwner.fromString(EXAMPLE_JSON_OWNER_WITHOUT_NULLS);
-        assertNotNull(mSourceOwner);
-    }
-
     @Test
-    public void fromJsonStringWithoutNulls_backToJson_createsIdenticalElement() {
-        try {
-            JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_OWNER_WITHOUT_NULLS);
-            assertJsonEquals(rawConversion, mSourceOwner.toJson());
-        } catch (JSONException jsonException) {
-            fail("Test Data failure: " + jsonException.getLocalizedMessage());
-        }
+    public void fromJsonStringWithoutNulls_isNotNull() {
+        assertNotNull(SourceOwner.fromString(EXAMPLE_JSON_OWNER_WITHOUT_NULLS));
     }
 
     @Test

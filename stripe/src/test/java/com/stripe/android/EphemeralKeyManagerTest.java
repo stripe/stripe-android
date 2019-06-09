@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +68,7 @@ public class EphemeralKeyManagerTest {
     @Before
     public void setup() throws JSONException {
         MockitoAnnotations.initMocks(this);
-        mCustomerEphemeralKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        mCustomerEphemeralKey = CustomerEphemeralKey.fromJson(new JSONObject(FIRST_SAMPLE_KEY_RAW));
         mTestEphemeralKeyProvider = new TestEphemeralKeyProvider();
     }
 
@@ -147,7 +148,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         verify(mKeyManagerListener).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>any(),
@@ -169,7 +170,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 fixedCalendar,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         final String operationId = mOperationIdFactory.create();
         final String actionString = "action";
@@ -214,7 +215,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 proxyCalendar,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         // Make sure we're in a good state
         verify(mKeyManagerListener).onKeyUpdate(
@@ -250,7 +251,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -279,7 +280,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -288,10 +289,9 @@ public class EphemeralKeyManagerTest {
                 ArgumentMatchers.<Map<String, Object>>isNull());
         verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a JSON String " +
-                        "that was invalid: [Improperly formatted JSON for ephemeral " +
-                        "key CustomerEphemeralKey - No value for created]. The raw body " +
-                        "from Stripe's response should be passed");
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                        "could not be JSON parsed: [No value for associated_objects]. The raw " +
+                        "body from Stripe's response should be passed");
         assertNull(keyManager.getEphemeralKey());
     }
 
@@ -308,7 +308,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.BuilderFactory());
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -323,7 +323,15 @@ public class EphemeralKeyManagerTest {
 
     @NonNull
     private CustomerEphemeralKey createEphemeralKey(long expires) {
-        return new CustomerEphemeralKey(1501199335L, "cus_AQsHpvKfKwJDrF",
-                expires, "ephkey_123", false, "customer", "", "");
+        return new CustomerEphemeralKey.Builder()
+                .setObject("ephemeral_key")
+                .setCreated(1501199335L)
+                .setObjectId("cus_AQsHpvKfKwJDrF")
+                .setExpires(expires)
+                .setId("ephkey_123")
+                .setLiveMode(false)
+                .setType("customer")
+                .setSecret("ek_test_123")
+                .build();
     }
 }

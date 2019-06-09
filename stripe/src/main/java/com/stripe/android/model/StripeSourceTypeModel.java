@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class StripeSourceTypeModel extends StripeJsonModel {
+public abstract class StripeSourceTypeModel extends StripeModel {
     @NonNull private final Map<String, Object> mAdditionalFields;
     private static final String NULL = "null";
 
@@ -33,14 +33,6 @@ public abstract class StripeSourceTypeModel extends StripeJsonModel {
     @Override
     public Map<String, Object> toMap() {
         return new HashMap<>(mAdditionalFields);
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putAdditionalFieldsIntoJsonObject(jsonObject, mAdditionalFields);
-        return jsonObject;
     }
 
     /**

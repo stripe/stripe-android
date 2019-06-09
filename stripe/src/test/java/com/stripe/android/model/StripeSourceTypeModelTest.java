@@ -16,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link StripeSourceTypeModel}.
@@ -24,16 +23,13 @@ import static org.junit.Assert.fail;
 public class StripeSourceTypeModelTest {
 
     @Test
-    public void jsonObjectToMapWithoutKeys_whenHasKeyInput_returnsMapOmittingKeys() {
+    public void jsonObjectToMapWithoutKeys_whenHasKeyInput_returnsMapOmittingKeys()
+            throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("a_key", "a_value");
-            jsonObject.put("b_key", "b_value");
-            jsonObject.put("c_key", "c_value");
-            jsonObject.put("d_key", "d_value");
-        } catch (JSONException unexpected) {
-            fail("Unexpected error: " + unexpected.getLocalizedMessage());
-        }
+        jsonObject.put("a_key", "a_value");
+        jsonObject.put("b_key", "b_value");
+        jsonObject.put("c_key", "c_value");
+        jsonObject.put("d_key", "d_value");
 
         Set<String> omitKeys = new HashSet<String>() {{
             add("a_key");
@@ -49,14 +45,10 @@ public class StripeSourceTypeModelTest {
     }
 
     @Test
-    public void jsonObjectToMapWithoutKeys_whenAllKeysGiven_returnsNull() {
+    public void jsonObjectToMapWithoutKeys_whenAllKeysGiven_returnsNull() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("a_key", "a_value");
-            jsonObject.put("b_key", "b_value");
-        } catch (JSONException unexpected) {
-            fail("Unexpected error: " + unexpected.getLocalizedMessage());
-        }
+        jsonObject.put("a_key", "a_value");
+        jsonObject.put("b_key", "b_value");
 
         Set<String> omitKeys = new HashSet<String>() {{
             add("a_key");
@@ -67,14 +59,10 @@ public class StripeSourceTypeModelTest {
     }
 
     @Test
-    public void jsonObjectToMapWithoutKeys_whenOtherKeysGiven_returnsFullMap() {
+    public void jsonObjectToMapWithoutKeys_whenOtherKeysGiven_returnsFullMap() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("a_key", "a_value");
-            jsonObject.put("b_key", "b_value");
-        } catch (JSONException unexpected) {
-            fail("Unexpected error: " + unexpected.getLocalizedMessage());
-        }
+        jsonObject.put("a_key", "a_value");
+        jsonObject.put("b_key", "b_value");
 
         Set<String> omitKeys = new HashSet<String>() {{
             add("c_key");
@@ -100,13 +88,10 @@ public class StripeSourceTypeModelTest {
     }
 
     @Test
-    public void putAdditionalFieldsIntoJsonObject_whenHasDuplicateFields_putsThemIntoObject() {
+    public void putAdditionalFieldsIntoJsonObject_whenHasDuplicateFields_putsThemIntoObject()
+            throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("a_key", "original");
-        } catch (JSONException unexpected) {
-            fail("Unexpected exception: " + unexpected);
-        }
+        jsonObject.put("a_key", "original");
 
         Map<String, Object> additionalFields = new HashMap<>();
         additionalFields.put("a_key", "a_value");
@@ -119,13 +104,11 @@ public class StripeSourceTypeModelTest {
     }
 
     @Test
-    public void putAdditionalFieldsIntoJsonObject_whenNoFieldsArePassed_doesNothing() {
+    public void putAdditionalFieldsIntoJsonObject_whenNoFieldsArePassed_doesNothing()
+            throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("a", "a_value");
-        } catch (JSONException unexpected) {
-            fail("Unexpected error: " + unexpected.getLocalizedMessage());
-        }
+        jsonObject.put("a", "a_value");
+
         Map<String, Object> emptyMap = new HashMap<>();
         putAdditionalFieldsIntoJsonObject(jsonObject, emptyMap);
 

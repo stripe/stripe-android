@@ -25,12 +25,6 @@ public final class AmexExpressCheckoutWallet extends Wallet {
     }
 
     @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        return new JSONObject();
-    }
-
-    @NonNull
     static AmexExpressCheckoutWallet.Builder fromJson(@NonNull JSONObject walletJson) {
         return new Builder();
     }

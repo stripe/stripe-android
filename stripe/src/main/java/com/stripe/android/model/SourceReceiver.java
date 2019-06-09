@@ -16,7 +16,7 @@ import java.util.Map;
  * Model for a <a href="https://stripe.com/docs/api#source_object-receiver">receiver</a> object in
  * the source api. Present if the {@link Source} is a receiver.
  */
-public class SourceReceiver extends StripeJsonModel {
+public class SourceReceiver extends StripeModel {
 
     private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_AMOUNT_CHARGED = "amount_charged";
@@ -84,21 +84,6 @@ public class SourceReceiver extends StripeJsonModel {
         map.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
         map.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        StripeJsonUtils.putStringIfNotNull(jsonObject, FIELD_ADDRESS, mAddress);
-        try {
-            jsonObject.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
-            jsonObject.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
-            jsonObject.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
-        } catch (JSONException jsonException) {
-            return jsonObject;
-        }
-        return jsonObject;
     }
 
     @Nullable
