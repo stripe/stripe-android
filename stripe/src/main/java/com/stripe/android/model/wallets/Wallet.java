@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
@@ -31,7 +32,7 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
 
     Wallet(@NonNull Parcel in) {
         dynamicLast4 = in.readString();
-        walletType = Type.fromCode(in.readString());
+        walletType = Objects.requireNonNull(Type.fromCode(in.readString()));
     }
 
     @Override
@@ -40,7 +41,7 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(dynamicLast4);
         dest.writeString(walletType.code);
     }
