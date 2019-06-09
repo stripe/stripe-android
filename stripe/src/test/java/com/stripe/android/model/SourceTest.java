@@ -200,7 +200,7 @@ public class SourceTest {
             "}\n";
 
     @Test
-    public void fromStringWithoutNulls() {
+    public void fromJsonStringWithoutNulls_isNotNull() {
         assertNotNull(Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
     }
 

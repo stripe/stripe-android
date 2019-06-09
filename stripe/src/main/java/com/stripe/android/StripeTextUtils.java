@@ -3,7 +3,7 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -103,12 +103,10 @@ public class StripeTextUtils {
 
         try {
             final MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            final byte[] bytes = toHash.getBytes("UTF-8");
+            final byte[] bytes = toHash.getBytes(StandardCharsets.UTF_8);
             digest.update(bytes, 0, bytes.length);
             return bytesToHex(digest.digest());
         } catch (NoSuchAlgorithmException noSuchAlgorithm) {
-            return null;
-        } catch (UnsupportedEncodingException unsupportedCoding) {
             return null;
         }
     }

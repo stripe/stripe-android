@@ -19,7 +19,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class EphemeralKeyTest {
@@ -59,12 +58,8 @@ public class EphemeralKeyTest {
     }
 
     @Test
-    public void fromJson_toJson_createsEqualObject() {
-        try {
-            assertNotNull(CustomerEphemeralKey.fromJson(new JSONObject(SAMPLE_KEY_RAW)));
-        } catch (JSONException unexpected) {
-            fail("Failure to parse test JSON");
-        }
+    public void fromJson_createsObject() throws JSONException {
+        assertNotNull(CustomerEphemeralKey.fromJson(new JSONObject(SAMPLE_KEY_RAW)));
     }
 
     @Test

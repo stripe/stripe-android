@@ -43,7 +43,7 @@ public class SourceOwnerTest {
     }};
 
     @Test
-    public void fromJsonStringWithoutNulls() {
+    public void fromJsonStringWithoutNulls_isNotNull() {
         assertNotNull(SourceOwner.fromString(EXAMPLE_JSON_OWNER_WITHOUT_NULLS));
     }
 

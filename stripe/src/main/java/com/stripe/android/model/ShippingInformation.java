@@ -90,7 +90,9 @@ public final class ShippingInformation extends StripeModel implements Parcelable
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_NAME, mName);
         map.put(FIELD_PHONE, mPhone);
-        putStripeJsonModelMapIfNotNull(map, FIELD_ADDRESS, mAddress);
+        if (mAddress != null) {
+            map.put(FIELD_ADDRESS, mAddress.toMap());
+        }
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
     }

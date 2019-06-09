@@ -65,22 +65,22 @@ public class StripeTextUtilsTest {
 
     @Test
     public void testNullIfBlankEmptyShouldBeNull() {
-        assertEquals(null, StripeTextUtils.nullIfBlank(""));
+        assertNull(StripeTextUtils.nullIfBlank(""));
     }
 
     @Test
     public void testNullIfBlankSpaceShouldBeNull() {
-        assertEquals(null, StripeTextUtils.nullIfBlank(" "));
+        assertNull(StripeTextUtils.nullIfBlank(" "));
     }
 
     @Test
     public void testNullIfBlankSpacesShouldBeNull() {
-        assertEquals(null, StripeTextUtils.nullIfBlank("     "));
+        assertNull(StripeTextUtils.nullIfBlank("     "));
     }
 
     @Test
     public void testNullIfBlankTabShouldBeNull() {
-        assertEquals(null, StripeTextUtils.nullIfBlank("	"));
+        assertNull(StripeTextUtils.nullIfBlank("	"));
     }
 
     @Test

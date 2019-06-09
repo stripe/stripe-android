@@ -2,6 +2,8 @@ package com.stripe.android.model;
 
 import org.junit.Test;
 
+import java.util.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -46,8 +48,10 @@ public class SourceSepaDebitDataTest {
     @Test
     public void testHashCode() {
         assertEquals(
-                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA).hashCode(),
-                SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA).hashCode()
+                Objects.requireNonNull(SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA))
+                        .hashCode(),
+                Objects.requireNonNull(SourceSepaDebitData.fromString(EXAMPLE_SEPA_JSON_DATA))
+                        .hashCode()
         );
     }
 }

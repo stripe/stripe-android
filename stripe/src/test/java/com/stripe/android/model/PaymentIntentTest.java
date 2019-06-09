@@ -1,6 +1,7 @@
 package com.stripe.android.model;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
@@ -177,8 +179,8 @@ public class PaymentIntentTest {
                 put(PaymentIntent.FIELD_STATUS, PaymentIntent.Status.Succeeded.code);
             }};
 
-    private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE = PaymentIntent
-            .fromString(PAYMENT_INTENT_WITH_SOURCE_JSON);
+    @NonNull private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE =
+            Objects.requireNonNull(PaymentIntent.fromString(PAYMENT_INTENT_WITH_SOURCE_JSON));
 
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {

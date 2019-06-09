@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -164,6 +165,13 @@ public class PaymentMethodTest {
     @Test
     public void fromString_shouldReturnExpectedPaymentMethod() {
         assertEquals(CARD_PAYMENT_METHOD, PaymentMethod.fromString(RAW_CARD_JSON));
+    }
+
+    @Test
+    public void fromString_withIdeal_returnsExpectedObject() {
+        final PaymentMethod paymentMethod = PaymentMethod.fromString(RAW_IDEAL_JSON);
+        assertNotNull(paymentMethod);
+        assertEquals("ideal", paymentMethod.type);
     }
 
     @Test

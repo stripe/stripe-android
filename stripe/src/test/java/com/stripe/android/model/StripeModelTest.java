@@ -1,18 +1,8 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-
-import com.stripe.android.testharness.JsonTestUtils;
-
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -66,60 +56,5 @@ public class StripeModelTest {
         assertNotNull(eurCard);
 
         assertNotEquals(usdCard.hashCode(), eurCard.hashCode());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void putStripeJsonModelListIfNotNull_forMapsWhenNotNull_addsExpectedList() {
-        List<ExampleModel> exampleJsonModels = new ArrayList<>();
-        exampleJsonModels.add(new ExampleModel());
-        exampleJsonModels.add(new ExampleModel());
-
-        Map<String, Object> originalMap = new HashMap<>();
-        StripeModel.putStripeJsonModelListIfNotNull(originalMap, "mapkey", exampleJsonModels);
-
-        assertFalse(originalMap.isEmpty());
-        assertTrue(originalMap.get("mapkey") instanceof List);
-
-        List<Map<String, Object>> modelList = (List) originalMap.get("mapkey");
-        List<Map<String, Object>> expectedList = new ArrayList<>();
-        expectedList.add(new ExampleModel().toMap());
-        expectedList.add(new ExampleModel().toMap());
-
-        JsonTestUtils.assertListEquals(expectedList, modelList);
-    }
-
-    private static class ExampleModel extends StripeModel {
-
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            Map<String, Object> map = new HashMap<>();
-            map.put("akey", "avalue");
-            map.put("bkey", "bvalue");
-            return map;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ExampleModel)) {
-                return false;
-            }
-
-            ExampleModel other = (ExampleModel) obj;
-            Map<String, Object> myMap = this.toMap();
-            Map<String, Object> otherMap = other.toMap();
-            for (String key : myMap.keySet()) {
-                if (!otherMap.containsKey(key) || myMap.get(key).equals(otherMap.get(key))) {
-                    return false;
-                }
-            }
-            return myMap.size() == otherMap.size();
-        }
     }
 }

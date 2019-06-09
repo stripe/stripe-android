@@ -27,6 +27,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
  * https://stripe.com/docs/api/sources/object?lang=java</a>.
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class Source extends StripeModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
@@ -359,8 +360,9 @@ public final class Source extends StripeModel implements StripePaymentSource {
         map.put(FIELD_OBJECT, VALUE_SOURCE);
         map.put(FIELD_AMOUNT, mAmount);
         map.put(FIELD_CLIENT_SECRET, mClientSecret);
-
-        putStripeJsonModelMapIfNotNull(map, FIELD_CODE_VERIFICATION, mCodeVerification);
+        if (mCodeVerification != null) {
+            map.put(FIELD_CODE_VERIFICATION, mCodeVerification.toMap());
+        }
 
         map.put(FIELD_CREATED, mCreated);
         map.put(FIELD_CURRENCY, mCurrency);
@@ -368,9 +370,15 @@ public final class Source extends StripeModel implements StripePaymentSource {
         map.put(FIELD_LIVEMODE, mLiveMode);
         map.put(FIELD_METADATA, mMetaData);
 
-        putStripeJsonModelMapIfNotNull(map, FIELD_OWNER, mOwner);
-        putStripeJsonModelMapIfNotNull(map, FIELD_RECEIVER, mReceiver);
-        putStripeJsonModelMapIfNotNull(map, FIELD_REDIRECT, mRedirect);
+        if (mOwner != null) {
+            map.put(FIELD_OWNER, mOwner.toMap());
+        }
+        if (mReceiver != null) {
+            map.put(FIELD_RECEIVER, mReceiver.toMap());
+        }
+        if (mRedirect != null) {
+            map.put(FIELD_REDIRECT, mRedirect.toMap());
+        }
 
         map.put(mTypeRaw, mSourceTypeData);
 
