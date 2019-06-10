@@ -391,7 +391,7 @@ public class CustomerSession {
      * @param listener        a {@link PaymentMethodRetrievalListener} to be notified when the
      *                        api call is complete. The api call will return the removed source.
      */
-    void detachPaymentMethod(
+    public void detachPaymentMethod(
             @NonNull String paymentMethodId,
             @Nullable PaymentMethodRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
