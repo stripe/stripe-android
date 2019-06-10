@@ -1,5 +1,8 @@
 package com.stripe.android;
 
+import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
+import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,5 +32,18 @@ public class PaymentAuthConfigTest {
                         .build())
                 .build());
         assertEquals(20, PaymentAuthConfig.get().stripe3ds2Config.timeout);
+    }
+
+    @Test
+    public void testStripe3ds2ConfigBuilder() {
+        final UiCustomization uiCustomization = new StripeUiCustomization();
+        PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
+                .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(20)
+                        .setUiCustomization(uiCustomization)
+                        .build())
+                .build());
+        assertEquals(uiCustomization,
+                PaymentAuthConfig.get().stripe3ds2Config.uiCustomization);
     }
 }

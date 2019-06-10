@@ -27,18 +27,18 @@ import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.PaymentAuthenticationExtras;
+import com.stripe.android.view.PaymentResultExtras;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A controller responsible for authenticating payment (typically through resolving any required
- * customer action). The payment authentication mechanism (e.g. 3DS) will be determined by the
- * {@link PaymentIntent} object.
+ * A controller responsible for confirming and authenticating payment (typically through resolving
+ * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
+ * by the {@link PaymentIntent} object.
  */
-class PaymentAuthenticationController {
+class PaymentController {
     static final int REQUEST_CODE = 50000;
     private static final String DIRECTORY_SERVER_ID = "F000000000";
 
@@ -49,20 +49,20 @@ class PaymentAuthenticationController {
     @NonNull private final PaymentAuthConfig mConfig;
     @NonNull private final ApiKeyValidator mApiKeyValidator;
 
-    PaymentAuthenticationController(@NonNull Context context,
-                                    @NonNull StripeApiHandler apiHandler) {
+    PaymentController(@NonNull Context context,
+                      @NonNull StripeApiHandler apiHandler) {
         this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
                 new MessageVersionRegistry(), DIRECTORY_SERVER_ID,
                 PaymentAuthConfig.get());
     }
 
     @VisibleForTesting
-    PaymentAuthenticationController(@NonNull Context context,
-                                    @NonNull StripeThreeDs2Service threeDs2Service,
-                                    @NonNull StripeApiHandler apiHandler,
-                                    @NonNull MessageVersionRegistry messageVersionRegistry,
-                                    @NonNull String directoryServerId,
-                                    @NonNull PaymentAuthConfig config) {
+    PaymentController(@NonNull Context context,
+                      @NonNull StripeThreeDs2Service threeDs2Service,
+                      @NonNull StripeApiHandler apiHandler,
+                      @NonNull MessageVersionRegistry messageVersionRegistry,
+                      @NonNull String directoryServerId,
+                      @NonNull PaymentAuthConfig config) {
 
         mConfig = config;
         mThreeDs2Service = threeDs2Service;
@@ -114,24 +114,24 @@ class PaymentAuthenticationController {
      * @param data the result Intent
      */
     void handleResult(@NonNull Stripe stripe, @NonNull Intent data, @NonNull String publishableKey,
-                      @NonNull final ApiResultCallback<PaymentAuthResult> callback) {
+                      @NonNull final ApiResultCallback<PaymentIntentResult> callback) {
         final Exception authException = (Exception) data.getSerializableExtra(
-                PaymentAuthenticationExtras.AUTH_EXCEPTION);
+                PaymentResultExtras.AUTH_EXCEPTION);
         if (authException != null) {
             callback.onError(authException);
             return;
         }
 
-        final String clientSecret = data.getStringExtra(PaymentAuthenticationExtras.CLIENT_SECRET);
+        final String clientSecret = data.getStringExtra(PaymentResultExtras.CLIENT_SECRET);
         final PaymentIntentParams paymentIntentParams = PaymentIntentParams
                 .createRetrievePaymentIntentParams(clientSecret);
-        @PaymentAuthResult.Status final int authStatus = data.getIntExtra(
-                PaymentAuthenticationExtras.AUTH_STATUS, PaymentAuthResult.Status.UNKNOWN);
+        @PaymentIntentResult.Status final int authStatus = data.getIntExtra(
+                PaymentResultExtras.AUTH_STATUS, PaymentIntentResult.Status.UNKNOWN);
         new RetrievePaymentIntentTask(stripe, paymentIntentParams, publishableKey,
                 new ApiResultCallback<PaymentIntent>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntent paymentIntent) {
-                        callback.onSuccess(new PaymentAuthResult.Builder()
+                        callback.onSuccess(new PaymentIntentResult.Builder()
                                 .setPaymentIntent(paymentIntent)
                                 .setStatus(authStatus)
                                 .build());
@@ -179,8 +179,8 @@ class PaymentAuthenticationController {
     }
 
     private void bypassAuth(@NonNull Activity activity, @NonNull PaymentIntent paymentIntent) {
-        new PaymentAuthRelayStarter(activity, REQUEST_CODE)
-                .start(new PaymentAuthRelayStarter.Data(paymentIntent));
+        new PaymentRelayStarter(activity, REQUEST_CODE)
+                .start(new PaymentRelayStarter.Data(paymentIntent));
     }
 
     private void begin3ds2Auth(@NonNull Activity activity,
@@ -225,8 +225,8 @@ class PaymentAuthenticationController {
 
     private static void handleError(@NonNull Activity activity,
                              @NonNull Exception exception) {
-        new PaymentAuthRelayStarter(activity, REQUEST_CODE)
-                .start(new PaymentAuthRelayStarter.Data(exception));
+        new PaymentRelayStarter(activity, REQUEST_CODE)
+                .start(new PaymentRelayStarter.Data(exception));
     }
 
     private static final class RetrievePaymentIntentTask extends ApiOperation<PaymentIntent> {
@@ -277,22 +277,22 @@ class PaymentAuthenticationController {
             implements ApiResultCallback<PaymentIntent> {
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final String mPublishableKey;
-        @NonNull private final PaymentAuthenticationController mPaymentAuthController;
+        @NonNull private final PaymentController mPaymentController;
 
         private ConfirmPaymentIntentCallback(
                 @NonNull Activity activity,
                 @NonNull String publishableKey,
-                @NonNull PaymentAuthenticationController paymentAuthController) {
+                @NonNull PaymentController paymentController) {
             mActivityRef = new WeakReference<>(activity);
             mPublishableKey = publishableKey;
-            mPaymentAuthController = paymentAuthController;
+            mPaymentController = paymentController;
         }
 
         @Override
         public void onSuccess(@NonNull PaymentIntent paymentIntent) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                mPaymentAuthController.handleNextAction(activity, paymentIntent, mPublishableKey);
+                mPaymentController.handleNextAction(activity, paymentIntent, mPublishableKey);
             }
         }
 
@@ -314,7 +314,7 @@ class PaymentAuthenticationController {
         @NonNull private final PaymentIntent mPaymentIntent;
         @NonNull private final String mSourceId;
         @NonNull private final String mPublishableKey;
-        @NonNull private final PaymentAuthRelayStarter mPaymentAuthRelayStarter;
+        @NonNull private final PaymentRelayStarter mPaymentRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
         @NonNull private final WeakReference<ProgressDialog> mProgressDialog;
 
@@ -328,7 +328,7 @@ class PaymentAuthenticationController {
                 @NonNull String sourceId,
                 @NonNull String publishableKey) {
             this(activity, apiHandler, transaction, progressDialog, maxTimeout, paymentIntent,
-                    sourceId, publishableKey, new PaymentAuthRelayStarter(activity, REQUEST_CODE));
+                    sourceId, publishableKey, new PaymentRelayStarter(activity, REQUEST_CODE));
         }
 
         @VisibleForTesting
@@ -341,7 +341,7 @@ class PaymentAuthenticationController {
                 @NonNull PaymentIntent paymentIntent,
                 @NonNull String sourceId,
                 @NonNull String publishableKey,
-                @NonNull PaymentAuthRelayStarter paymentAuthRelayStarter) {
+                @NonNull PaymentRelayStarter paymentRelayStarter) {
             mActivityRef = new WeakReference<>(activity);
             mApiHandler = apiHandler;
             mTransaction = transaction;
@@ -350,7 +350,7 @@ class PaymentAuthenticationController {
             mPaymentIntent = paymentIntent;
             mSourceId = sourceId;
             mPublishableKey = publishableKey;
-            mPaymentAuthRelayStarter = paymentAuthRelayStarter;
+            mPaymentRelayStarter = paymentRelayStarter;
 
             // create Handler to notifyCompletion challenge flow on background thread
             final HandlerThread handlerThread =
@@ -394,12 +394,12 @@ class PaymentAuthenticationController {
         public void onError(@NonNull Exception e) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(e));
+                mPaymentRelayStarter.start(new PaymentRelayStarter.Data(e));
             }
         }
 
         private void startFrictionlessFlow() {
-            mPaymentAuthRelayStarter.start(new PaymentAuthRelayStarter.Data(mPaymentIntent));
+            mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mPaymentIntent));
             final ProgressDialog progressDialog = mProgressDialog.get();
             if (progressDialog != null) {
                 progressDialog.dismiss();

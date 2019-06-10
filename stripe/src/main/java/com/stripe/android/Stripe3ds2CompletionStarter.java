@@ -9,8 +9,8 @@ import android.support.annotation.Nullable;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.PaymentAuthRelayActivity;
-import com.stripe.android.view.PaymentAuthenticationExtras;
+import com.stripe.android.view.PaymentRelayActivity;
+import com.stripe.android.view.PaymentResultExtras;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,10 +33,10 @@ class Stripe3ds2CompletionStarter
             return;
         }
 
-        final Intent intent = new Intent(activity, PaymentAuthRelayActivity.class)
-                .putExtra(PaymentAuthenticationExtras.CLIENT_SECRET,
+        final Intent intent = new Intent(activity, PaymentRelayActivity.class)
+                .putExtra(PaymentResultExtras.CLIENT_SECRET,
                         data.mPaymentIntent.getClientSecret())
-                .putExtra(PaymentAuthenticationExtras.AUTH_STATUS,
+                .putExtra(PaymentResultExtras.AUTH_STATUS,
                         data.getAuthStatus());
         activity.startActivityForResult(intent, mRequestCode);
     }
@@ -78,14 +78,14 @@ class Stripe3ds2CompletionStarter
             mCompletionTransactionStatus = completionTransactionStatus;
         }
 
-        @PaymentAuthResult.Status
+        @PaymentIntentResult.Status
         private int getAuthStatus() {
             if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE) {
-                return PaymentAuthResult.Status.SUCCEEDED;
+                return PaymentIntentResult.Status.SUCCEEDED;
             } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
-                return PaymentAuthResult.Status.CANCELED;
+                return PaymentIntentResult.Status.CANCELED;
             } else {
-                return PaymentAuthResult.Status.FAILED;
+                return PaymentIntentResult.Status.FAILED;
             }
         }
 

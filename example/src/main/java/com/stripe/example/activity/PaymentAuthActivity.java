@@ -1,5 +1,6 @@
 package com.stripe.example.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,8 +12,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.stripe.android.ApiResultCallback;
-import com.stripe.android.PaymentAuthResult;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
@@ -34,7 +35,8 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 
 /**
- * An example of creating a PaymentIntent, then confirming it with PaymentAuthenticationController.
+ * An example of creating a PaymentIntent, then confirming it with
+ * {@link Stripe#confirmPayment(Activity, PaymentIntentParams)}}
  */
 public class PaymentAuthActivity extends AppCompatActivity {
 
@@ -78,7 +80,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
 
     private void confirmPaymentIntent(@NonNull String paymentIntentClientSecret) {
         mStatusTextView.append("\n\nStarting payment authentication");
-        mStripe.startPaymentAuth(this,
+        mStripe.confirmPayment(this,
                 PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
                         PAYMENT_METHOD_3DS2_REQUIRED,
                         paymentIntentClientSecret,
@@ -91,7 +93,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
 
         mProgressBar.setVisibility(View.VISIBLE);
         mStatusTextView.append("\n\nPayment authentication completed, getting result");
-        mStripe.onPaymentAuthResult(requestCode, resultCode, data,
+        mStripe.onPaymentResult(requestCode, resultCode, data,
                 new AuthResultListener(this));
     }
 
@@ -153,7 +155,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
         return params;
     }
 
-    private static class AuthResultListener implements ApiResultCallback<PaymentAuthResult> {
+    private static class AuthResultListener implements ApiResultCallback<PaymentIntentResult> {
         @NonNull private final WeakReference<PaymentAuthActivity> mActivityRef;
 
         private AuthResultListener(@NonNull PaymentAuthActivity activity) {
@@ -161,13 +163,13 @@ public class PaymentAuthActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSuccess(@NonNull PaymentAuthResult paymentAuthResult) {
+        public void onSuccess(@NonNull PaymentIntentResult paymentIntentResult) {
             final PaymentAuthActivity activity = mActivityRef.get();
             if (activity == null) {
                 return;
             }
 
-            final PaymentIntent paymentIntent = paymentAuthResult.paymentIntent;
+            final PaymentIntent paymentIntent = paymentIntentResult.paymentIntent;
             activity.mStatusTextView.append("\n\n" +
                     activity.getString(R.string.payment_intent_status, paymentIntent.getStatus()));
             activity.onAuthComplete();
