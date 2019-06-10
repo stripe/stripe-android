@@ -7,8 +7,10 @@ import android.support.annotation.VisibleForTesting;
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
 
+import java.util.Objects;
+
 /**
- * Configuration for {@link PaymentAuthenticationController}
+ * Configuration for authentication mechanisms via {@link PaymentController}
  */
 class PaymentAuthConfig {
 
@@ -64,7 +66,7 @@ class PaymentAuthConfig {
 
         private Stripe3ds2Config(@NonNull Builder builder) {
             timeout = builder.mTimeout;
-            uiCustomization = builder.mUiCustomization;
+            uiCustomization = Objects.requireNonNull(builder.mUiCustomization);
         }
 
         static final class Builder {

@@ -22,8 +22,8 @@ import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
-import com.stripe.android.PaymentAuthResult;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
@@ -178,11 +178,11 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        final boolean isPaymentAuthResult = mStripe.onPaymentAuthResult(
+        final boolean isHandled = mStripe.onPaymentResult(
                 requestCode, resultCode, data,
-                new ApiResultCallback<PaymentAuthResult>() {
+                new ApiResultCallback<PaymentIntentResult>() {
                     @Override
-                    public void onSuccess(@NonNull PaymentAuthResult result) {
+                    public void onSuccess(@NonNull PaymentIntentResult result) {
                         processPaymentIntent(result.paymentIntent);
                     }
 
@@ -192,7 +192,7 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 });
 
-        if (!isPaymentAuthResult) {
+        if (!isHandled) {
             mPaymentSession.handlePaymentData(requestCode, resultCode, data);
         }
     }
@@ -312,7 +312,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
-            mStripe.startPaymentAuth(this, paymentIntent);
+            mStripe.authenticatePayment(this, paymentIntent);
             return;
         } else if (paymentIntent.requiresConfirmation()) {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));

@@ -11,13 +11,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A model representing the result of a payment authentication attempt via
- * {@link Stripe#startPaymentAuth(Activity, PaymentIntentParams)}.
+ * A model representing the result of a payment confirmation or authentication attempt via
+ * {@link Stripe#confirmPayment(Activity, PaymentIntentParams)} or
+ * {@link Stripe#authenticatePayment(Activity, PaymentIntent)}}
  *
- * {@link #paymentIntent} represents a {@link PaymentIntent} retrieved after payment authentication
- * succeeded or failed.
+ * {@link #paymentIntent} represents a {@link PaymentIntent} retrieved after payment
+ * confirmation/authentication succeeded or failed.
  */
-public final class PaymentAuthResult {
+public final class PaymentIntentResult {
     @NonNull public final PaymentIntent paymentIntent;
     @Status public final int status;
 
@@ -30,7 +31,7 @@ public final class PaymentAuthResult {
         int CANCELED = 3;
     }
 
-    private PaymentAuthResult(@NonNull Builder builder) {
+    private PaymentIntentResult(@NonNull Builder builder) {
         this.paymentIntent = builder.mPaymentIntent;
         this.status = builder.mStatus;
     }
@@ -52,8 +53,8 @@ public final class PaymentAuthResult {
         }
 
         @NonNull
-        public PaymentAuthResult build() {
-            return new PaymentAuthResult(this);
+        public PaymentIntentResult build() {
+            return new PaymentIntentResult(this);
         }
     }
 }

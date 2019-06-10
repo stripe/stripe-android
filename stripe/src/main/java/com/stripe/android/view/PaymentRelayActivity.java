@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 /**
  * An {@link Activity} that relays the intent extras that it received as a result and finishes.
  */
-public class PaymentAuthRelayActivity extends AppCompatActivity {
+public class PaymentRelayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

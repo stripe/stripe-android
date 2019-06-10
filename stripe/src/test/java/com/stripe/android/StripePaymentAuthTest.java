@@ -27,8 +27,8 @@ public class StripePaymentAuthTest {
     private Context mContext;
 
     @Mock private Activity mActivity;
-    @Mock private PaymentAuthenticationController mPaymentAuthenticationController;
-    @Mock private ApiResultCallback<PaymentAuthResult> mCallback;
+    @Mock private PaymentController mPaymentController;
+    @Mock private ApiResultCallback<PaymentIntentResult> mCallback;
 
     @Before
     public void setup() {
@@ -37,41 +37,41 @@ public class StripePaymentAuthTest {
     }
 
     @Test
-    public void startPaymentAuth_withConfirmParams_shouldConfirmAndAuth() {
+    public void confirmPayment_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
         final PaymentIntentParams paymentIntentParams =
                 PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
                         "pm_card_threeDSecure2Required",
                         "client_secret",
                         "yourapp://post-authentication-return-url");
-        stripe.startPaymentAuth(mActivity, paymentIntentParams);
-        verify(mPaymentAuthenticationController).startConfirmAndAuth(eq(stripe), eq(mActivity),
+        stripe.confirmPayment(mActivity, paymentIntentParams);
+        verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
                 eq(paymentIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test
-    public void onPaymentAuthResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
-        final Intent data = new Intent();
-        when(mPaymentAuthenticationController.shouldHandleResult(
-                PaymentAuthenticationController.REQUEST_CODE, Activity.RESULT_OK, data))
-                .thenReturn(true);
+    public void authenticatePayment_shouldAuth() {
         final Stripe stripe = createStripe();
-        stripe.onPaymentAuthResult(PaymentAuthenticationController.REQUEST_CODE, Activity.RESULT_OK,
-                data, mCallback);
-
-        verify(mPaymentAuthenticationController).handleResult(stripe, data,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mCallback);
-    }
-
-    @Test
-    public void startPaymentAuth_withConfirmedPaymentIntent_shouldAuth() {
-        final Stripe stripe = createStripe();
-        stripe.startPaymentAuth(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2);
-        verify(mPaymentAuthenticationController).startAuth(
+        stripe.authenticatePayment(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2);
+        verify(mPaymentController).startAuth(
                 eq(mActivity),
                 eq(PaymentIntentFixtures.PI_REQUIRES_3DS2),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         );
+    }
+
+    @Test
+    public void onPaymentResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
+        final Intent data = new Intent();
+        when(mPaymentController.shouldHandleResult(
+                PaymentController.REQUEST_CODE, Activity.RESULT_OK, data))
+                .thenReturn(true);
+        final Stripe stripe = createStripe();
+        stripe.onPaymentResult(PaymentController.REQUEST_CODE, Activity.RESULT_OK,
+                data, mCallback);
+
+        verify(mPaymentController).handleResult(stripe, data,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mCallback);
     }
 
     @NonNull
@@ -82,7 +82,7 @@ public class StripePaymentAuthTest {
                         new RequestExecutor(),
                         false),
                 new StripeNetworkUtils(mContext),
-                mPaymentAuthenticationController,
+                mPaymentController,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         );
     }

@@ -1269,7 +1269,7 @@ public class StripeTest {
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
-                new PaymentAuthenticationController(mContext, apiHandler),
+                new PaymentController(mContext, apiHandler),
                 publishableKey);
     }
 
@@ -1280,7 +1280,7 @@ public class StripeTest {
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
-                new PaymentAuthenticationController(mContext, apiHandler),
+                new PaymentController(mContext, apiHandler),
                 NON_LOGGING_PK,
                 tokenCreator
         );

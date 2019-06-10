@@ -9,12 +9,12 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
-public class PaymentAuthResultTest {
+public class PaymentIntentResultTest {
 
     @Test
     public void testBuilder() {
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2,
-                new PaymentAuthResult.Builder()
+                new PaymentIntentResult.Builder()
                         .setPaymentIntent(PaymentIntentFixtures.PI_REQUIRES_3DS2)
                         .build()
                         .paymentIntent);

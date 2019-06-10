@@ -44,7 +44,7 @@ public class Stripe {
 
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
-    @NonNull private final PaymentAuthenticationController mPaymentAuthenticationController;
+    @NonNull private final PaymentController mPaymentController;
     @NonNull private final TokenCreator mTokenCreator;
     @NonNull private final ApiKeyValidator mApiKeyValidator;
     private String mDefaultPublishableKey;
@@ -74,14 +74,14 @@ public class Stripe {
                    @NonNull StripeNetworkUtils stripeNetworkUtils,
                    @Nullable String publishableKey) {
         this(apiHandler, stripeNetworkUtils,
-                new PaymentAuthenticationController(context, apiHandler), publishableKey);
+                new PaymentController(context, apiHandler), publishableKey);
     }
 
     Stripe(@NonNull final StripeApiHandler apiHandler,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
-           @NonNull PaymentAuthenticationController paymentAuthenticationController,
+           @NonNull PaymentController paymentController,
            @Nullable String publishableKey) {
-        this(apiHandler, stripeNetworkUtils, paymentAuthenticationController, publishableKey,
+        this(apiHandler, stripeNetworkUtils, paymentController, publishableKey,
                 new TokenCreator() {
                     @Override
                     public void create(
@@ -100,13 +100,13 @@ public class Stripe {
     @VisibleForTesting
     Stripe(@NonNull StripeApiHandler apiHandler,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
-           @NonNull PaymentAuthenticationController paymentAuthenticationController,
+           @NonNull PaymentController paymentController,
            @Nullable String publishableKey,
            @NonNull TokenCreator tokenCreator) {
         mApiKeyValidator = new ApiKeyValidator();
         mApiHandler = apiHandler;
         mStripeNetworkUtils = stripeNetworkUtils;
-        mPaymentAuthenticationController = paymentAuthenticationController;
+        mPaymentController = paymentController;
         mTokenCreator = tokenCreator;
         mDefaultPublishableKey = publishableKey != null ?
                 mApiKeyValidator.requireValid(publishableKey) : null;
@@ -121,16 +121,19 @@ public class Stripe {
      * @param confirmPaymentIntentParams {@link PaymentIntentParams} used to confirm the
      *                                   {@link PaymentIntent}
      */
-    private void startPaymentAuth(@NonNull Activity activity,
-                                  @NonNull PaymentIntentParams confirmPaymentIntentParams,
-                                  @NonNull String publishableKey) {
-        mPaymentAuthenticationController.startConfirmAndAuth(this, activity,
+    private void confirmPayment(@NonNull Activity activity,
+                                @NonNull PaymentIntentParams confirmPaymentIntentParams,
+                                @NonNull String publishableKey) {
+        mPaymentController.startConfirmAndAuth(this, activity,
                 confirmPaymentIntentParams, publishableKey);
     }
 
-    public void startPaymentAuth(@NonNull Activity activity,
-                                 @NonNull PaymentIntentParams confirmPaymentIntentParams) {
-        startPaymentAuth(activity, confirmPaymentIntentParams, mDefaultPublishableKey);
+    /**
+     * See {@link #confirmPayment(Activity, PaymentIntentParams, String)}}
+     */
+    public void confirmPayment(@NonNull Activity activity,
+                               @NonNull PaymentIntentParams confirmPaymentIntentParams) {
+        confirmPayment(activity, confirmPaymentIntentParams, mDefaultPublishableKey);
     }
 
     /**
@@ -141,35 +144,45 @@ public class Stripe {
      * @param activity the {@link Activity} that is launching the payment authentication flow
      * @param paymentIntent a confirmed {@link PaymentIntent} object
      */
-    private void startPaymentAuth(@NonNull Activity activity,
-                                  @NonNull PaymentIntent paymentIntent,
-                                  @NonNull String publishableKey) {
-        mPaymentAuthenticationController.startAuth(activity, paymentIntent, publishableKey);
+    private void authenticatePayment(@NonNull Activity activity,
+                                     @NonNull PaymentIntent paymentIntent,
+                                     @NonNull String publishableKey) {
+        mPaymentController.startAuth(activity, paymentIntent, publishableKey);
     }
 
-    public void startPaymentAuth(@NonNull Activity activity,
-                                 @NonNull PaymentIntent paymentIntent) {
-        startPaymentAuth(activity, paymentIntent, mDefaultPublishableKey);
+    /**
+     * See {@link #authenticatePayment(Activity, PaymentIntent, String)}}
+     */
+    public void authenticatePayment(@NonNull Activity activity,
+                                    @NonNull PaymentIntent paymentIntent) {
+        authenticatePayment(activity, paymentIntent, mDefaultPublishableKey);
     }
 
-    private boolean onPaymentAuthResult(
+    /**
+     * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
+     * result of a PaymentIntent automatic confirmation
+     * (see {@link #confirmPayment(Activity, PaymentIntentParams, String)}) or manual confirmation
+     * (see {@link #authenticatePayment(Activity, PaymentIntent, String)}})
+     */
+    private boolean onPaymentResult(
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull String publishableKey,
-            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
-        if (data != null && mPaymentAuthenticationController
-                .shouldHandleResult(requestCode, resultCode, data)) {
-            mPaymentAuthenticationController.handleResult(this, data,
-                    publishableKey, callback);
+            @NonNull ApiResultCallback<PaymentIntentResult> callback) {
+        if (data != null && mPaymentController.shouldHandleResult(requestCode, resultCode, data)) {
+            mPaymentController.handleResult(this, data, publishableKey, callback);
             return true;
         }
 
         return false;
     }
 
-    public boolean onPaymentAuthResult(
+    /**
+     * See {@link #onPaymentResult(int, int, Intent, String, ApiResultCallback)}
+     */
+    public boolean onPaymentResult(
             int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<PaymentAuthResult> callback) {
-        return onPaymentAuthResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
+            @NonNull ApiResultCallback<PaymentIntentResult> callback) {
+        return onPaymentResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
     /**
