@@ -5,8 +5,10 @@
   - `Card#getType()` is now `Card#getBrand()`
 
 ### Migration from versions < 9.1.0
-- `CustomerSession#getPaymentMethods()` and `CustomerSession#attachPaymentMethod()` have been added
-- `PaymentSessionData#getSelectedPaymentMethodId()` is now `PaymentSessionData#getPaymentMethod()` and returns a `PaymentMethod`. See usage in the samplestore app's [PaymentActivity.java](https://github.com/stripe/stripe-android/blob/194fef4c1c1981b8423125f26abf4b23f12631f8/samplestore/src/main/java/com/stripe/samplestore/PaymentActivity.java).
+- [Standard UI components](https://stripe.com/docs/mobile/android/standard) now use `PaymentMethod` instead of `Source`
+    - Setting a customer's default payment method is not available for PaymentMethod objects
+    - `CustomerSession#getPaymentMethods()` and `CustomerSession#attachPaymentMethod()` have been added
+    - `PaymentSessionData#getSelectedPaymentMethodId()` is now `PaymentSessionData#getPaymentMethod()` and returns a `PaymentMethod`. See usage in the samplestore app's [PaymentActivity.java](https://github.com/stripe/stripe-android/blob/194fef4c1c1981b8423125f26abf4b23f12631f8/samplestore/src/main/java/com/stripe/samplestore/PaymentActivity.java).
 - Remove the following unused methods from `PaymentConfiguration`
   - `getRequiredBillingAddressFields()`
   - `setRequiredBillingAddressFields()`
