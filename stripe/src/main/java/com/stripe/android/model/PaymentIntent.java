@@ -33,7 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * <li><a href="https://stripe.com/docs/api/payment_intents">PaymentIntents API</a></li>
  * </ul>
  */
-public final class PaymentIntent extends StripeJsonModel {
+public final class PaymentIntent extends StripeModel {
     private static final String VALUE_PAYMENT_INTENT = "payment_intent";
 
     static final String FIELD_ID = "id";

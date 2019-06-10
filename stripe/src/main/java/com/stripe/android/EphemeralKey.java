@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.StripeJsonModel;
+import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
@@ -26,7 +26,7 @@ import java.util.Objects;
  * See <a href="https://stripe.com/docs/mobile/android/standard#prepare-your-api">
  * Using Android Standard UI Components - Prepare your API</a> for more details on ephemeral keys.
  */
-abstract class EphemeralKey extends StripeJsonModel implements Parcelable {
+abstract class EphemeralKey extends StripeModel implements Parcelable {
 
     static final String FIELD_CREATED = "created";
     static final String FIELD_EXPIRES = "expires";

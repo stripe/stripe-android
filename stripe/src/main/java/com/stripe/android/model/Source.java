@@ -27,7 +27,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
  * https://stripe.com/docs/api/sources/object?lang=java</a>.
  */
-public final class Source extends StripeJsonModel implements StripePaymentSource {
+public final class Source extends StripeModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
     private static final String VALUE_CARD = "card";
@@ -477,7 +477,7 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
     }
 
     @Nullable
-    private static <T extends StripeJsonModel> T optStripeJsonModel(
+    private static <T extends StripeModel> T optStripeJsonModel(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String key,
             Class<T> type) {

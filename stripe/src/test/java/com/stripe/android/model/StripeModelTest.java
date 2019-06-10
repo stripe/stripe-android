@@ -19,13 +19,13 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test class for {@link StripeJsonModel}.
+ * Test class for {@link StripeModel}.
  */
-public class StripeJsonModelTest {
+public class StripeModelTest {
 
     @Test
     public void equals_whenEquals_returnsTrue() {
-        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+        assertTrue(StripeModel.class.isAssignableFrom(Card.class));
 
         Card firstCard = Card.fromString(CardTest.JSON_CARD_USD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD_USD);
@@ -37,7 +37,7 @@ public class StripeJsonModelTest {
 
     @Test
     public void equals_whenNotEquals_returnsFalse() {
-        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+        assertTrue(StripeModel.class.isAssignableFrom(Card.class));
         final Card firstCard = Card.create("4242", null, null, null);
         final Card secondCard = Card.create("4343", null, null, null);
         assertNotEquals(firstCard, secondCard);
@@ -45,7 +45,7 @@ public class StripeJsonModelTest {
 
     @Test
     public void hashCode_whenEquals_returnsSameValue() {
-        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+        assertTrue(StripeModel.class.isAssignableFrom(Card.class));
 
         Card firstCard = Card.fromString(CardTest.JSON_CARD_USD);
         Card secondCard = Card.fromString(CardTest.JSON_CARD_USD);
@@ -57,7 +57,7 @@ public class StripeJsonModelTest {
 
     @Test
     public void hashCode_whenNotEquals_returnsDifferentValues() {
-        assertTrue(StripeJsonModel.class.isAssignableFrom(Card.class));
+        assertTrue(StripeModel.class.isAssignableFrom(Card.class));
 
         Card usdCard = Card.fromString(CardTest.JSON_CARD_USD);
         Card eurCard = Card.fromString(CardTest.JSON_CARD_EUR);
@@ -71,25 +71,25 @@ public class StripeJsonModelTest {
     @Test
     @SuppressWarnings("unchecked")
     public void putStripeJsonModelListIfNotNull_forMapsWhenNotNull_addsExpectedList() {
-        List<ExampleJsonModel> exampleJsonModels = new ArrayList<>();
-        exampleJsonModels.add(new ExampleJsonModel());
-        exampleJsonModels.add(new ExampleJsonModel());
+        List<ExampleModel> exampleJsonModels = new ArrayList<>();
+        exampleJsonModels.add(new ExampleModel());
+        exampleJsonModels.add(new ExampleModel());
 
         Map<String, Object> originalMap = new HashMap<>();
-        StripeJsonModel.putStripeJsonModelListIfNotNull(originalMap, "mapkey", exampleJsonModels);
+        StripeModel.putStripeJsonModelListIfNotNull(originalMap, "mapkey", exampleJsonModels);
 
         assertFalse(originalMap.isEmpty());
         assertTrue(originalMap.get("mapkey") instanceof List);
 
         List<Map<String, Object>> modelList = (List) originalMap.get("mapkey");
         List<Map<String, Object>> expectedList = new ArrayList<>();
-        expectedList.add(new ExampleJsonModel().toMap());
-        expectedList.add(new ExampleJsonModel().toMap());
+        expectedList.add(new ExampleModel().toMap());
+        expectedList.add(new ExampleModel().toMap());
 
         JsonTestUtils.assertListEquals(expectedList, modelList);
     }
 
-    private static class ExampleJsonModel extends StripeJsonModel {
+    private static class ExampleModel extends StripeModel {
 
         @NonNull
         @Override
@@ -107,11 +107,11 @@ public class StripeJsonModelTest {
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof ExampleJsonModel)) {
+            if (!(obj instanceof ExampleModel)) {
                 return false;
             }
 
-            ExampleJsonModel other = (ExampleJsonModel) obj;
+            ExampleModel other = (ExampleModel) obj;
             Map<String, Object> myMap = this.toMap();
             Map<String, Object> otherMap = other.toMap();
             for (String key : myMap.keySet()) {

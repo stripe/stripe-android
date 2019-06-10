@@ -18,7 +18,7 @@ import java.util.Map;
  * <a href="https://stripe.com/docs/api/sources/object#source_object-receiver">receiver</a> object
  * in the Sources API. Present if the {@link Source} is a receiver.
  */
-public final class SourceReceiver extends StripeJsonModel {
+public final class SourceReceiver extends StripeModel {
 
     private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_AMOUNT_CHARGED = "amount_charged";

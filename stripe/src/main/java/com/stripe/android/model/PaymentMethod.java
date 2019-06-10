@@ -33,7 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */
-public final class PaymentMethod extends StripeJsonModel implements Parcelable {
+public final class PaymentMethod extends StripeModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";
@@ -318,7 +318,7 @@ public final class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
     }
 
-    public static final class BillingDetails extends StripeJsonModel implements Parcelable {
+    public static final class BillingDetails extends StripeModel implements Parcelable {
         static final String FIELD_ADDRESS = "address";
         static final String FIELD_EMAIL = "email";
         static final String FIELD_NAME = "name";
@@ -699,7 +699,7 @@ public final class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
         }
 
-        public static final class Checks extends StripeJsonModel implements Parcelable {
+        public static final class Checks extends StripeModel implements Parcelable {
             private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
             private static final String FIELD_ADDRESS_POSTAL_CODE_CHECK =
                     "address_postal_code_check";
@@ -816,7 +816,7 @@ public final class PaymentMethod extends StripeJsonModel implements Parcelable {
             }
         }
 
-        public static final class ThreeDSecureUsage extends StripeJsonModel implements Parcelable {
+        public static final class ThreeDSecureUsage extends StripeModel implements Parcelable {
             private static final String FIELD_IS_SUPPORTED = "supported";
 
             public final boolean isSupported;
@@ -1046,7 +1046,7 @@ public final class PaymentMethod extends StripeJsonModel implements Parcelable {
         }
     }
 
-    private abstract static class PaymentMethodTypeImpl extends StripeJsonModel
+    private abstract static class PaymentMethodTypeImpl extends StripeModel
             implements Parcelable {
         @NonNull public final Type type;
 
