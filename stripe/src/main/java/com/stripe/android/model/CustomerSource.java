@@ -16,7 +16,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model of the "data" object inside a {@link Customer} "source" object.
  */
-public final class CustomerSource extends StripeJsonModel implements StripePaymentSource {
+public final class CustomerSource extends StripeModel implements StripePaymentSource {
 
     @NonNull private final StripePaymentSource mStripePaymentSource;
 

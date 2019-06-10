@@ -19,7 +19,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
  * in the Source api.
  */
-public final class SourceOwner extends StripeJsonModel {
+public final class SourceOwner extends StripeModel {
 
     private static final String VERIFIED = "verified_";
     private static final String FIELD_ADDRESS = "address";

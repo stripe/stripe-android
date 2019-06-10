@@ -23,7 +23,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-redirect">
  *     redirect</a> object in the source api.
  */
-public final class SourceRedirect extends StripeJsonModel {
+public final class SourceRedirect extends StripeModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

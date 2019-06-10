@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Model representing a shipping method in the Android SDK.
  */
-public final class ShippingMethod extends StripeJsonModel implements Parcelable {
+public final class ShippingMethod extends StripeModel implements Parcelable {
 
     public static final Parcelable.Creator<ShippingMethod> CREATOR
             = new Parcelable.Creator<ShippingMethod>() {

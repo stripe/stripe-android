@@ -25,7 +25,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public final class Address extends StripeJsonModel implements Parcelable {
+public final class Address extends StripeModel implements Parcelable {
 
     @IntDef({
             RequiredBillingAddressFields.NONE,

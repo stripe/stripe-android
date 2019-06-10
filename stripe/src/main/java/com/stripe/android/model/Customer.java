@@ -23,7 +23,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model for a Stripe Customer object
  */
-public final class Customer extends StripeJsonModel {
+public final class Customer extends StripeModel {
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_OBJECT = "object";
@@ -109,7 +109,7 @@ public final class Customer extends StripeJsonModel {
         map.put(FIELD_OBJECT, VALUE_CUSTOMER);
         map.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
 
-        StripeJsonModel.putStripeJsonModelMapIfNotNull(
+        StripeModel.putStripeJsonModelMapIfNotNull(
                 map,
                 FIELD_SHIPPING,
                 mShippingInformation);
@@ -119,7 +119,7 @@ public final class Customer extends StripeJsonModel {
         sourcesObject.put(FIELD_TOTAL_COUNT, mTotalCount);
         sourcesObject.put(FIELD_OBJECT, VALUE_LIST);
         sourcesObject.put(FIELD_URL, mUrl);
-        StripeJsonModel.putStripeJsonModelListIfNotNull(
+        StripeModel.putStripeJsonModelListIfNotNull(
                 sourcesObject,
                 FIELD_DATA,
                 mSources);

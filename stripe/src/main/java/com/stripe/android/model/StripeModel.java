@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Represents a JSON model used in the Stripe Api.
  */
-public abstract class StripeJsonModel {
+public abstract class StripeModel {
 
     @NonNull
     public abstract Map<String, Object> toMap();
@@ -25,7 +25,7 @@ public abstract class StripeJsonModel {
     static void putStripeJsonModelMapIfNotNull(
             @NonNull Map<String, Object> upperLevelMap,
             @NonNull @Size(min = 1) String key,
-            @Nullable StripeJsonModel jsonModel) {
+            @Nullable StripeModel jsonModel) {
         if (jsonModel == null) {
             return;
         }
@@ -35,7 +35,7 @@ public abstract class StripeJsonModel {
     static void putStripeJsonModelListIfNotNull(
             @NonNull Map<String, Object> upperLevelMap,
             @NonNull @Size(min = 1) String key,
-            @NonNull List<? extends StripeJsonModel> models) {
+            @NonNull List<? extends StripeModel> models) {
         final List<Map<String, Object>> mapList = new ArrayList<>();
         for (int i = 0; i < models.size(); i++) {
             mapList.add(models.get(i).toMap());

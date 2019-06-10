@@ -34,7 +34,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * A model object representing a Card in the Android SDK.
  */
-public final class Card extends StripeJsonModel implements StripePaymentSource {
+public final class Card extends StripeModel implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

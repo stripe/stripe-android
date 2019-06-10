@@ -19,7 +19,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model representing a shipping address object
  */
-public final class ShippingInformation extends StripeJsonModel implements Parcelable {
+public final class ShippingInformation extends StripeModel implements Parcelable {
     public static final Creator<ShippingInformation> CREATOR = new Creator<ShippingInformation>() {
         @Override
         public ShippingInformation createFromParcel(Parcel source) {

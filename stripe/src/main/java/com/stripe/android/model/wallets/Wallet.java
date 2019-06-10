@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.StripeJsonModel;
+import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONObject;
@@ -17,7 +17,7 @@ import java.util.Objects;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
-public abstract class Wallet extends StripeJsonModel implements Parcelable {
+public abstract class Wallet extends StripeModel implements Parcelable {
     static final String FIELD_DYNAMIC_LAST4 = "dynamic_last4";
     static final String FIELD_TYPE = "type";
 
@@ -112,7 +112,7 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
         }
     }
 
-    public static class Address extends StripeJsonModel implements Parcelable {
+    public static class Address extends StripeModel implements Parcelable {
         static final String FIELD_CITY = "city";
         static final String FIELD_COUNTRY = "country";
         static final String FIELD_LINE1 = "line1";
