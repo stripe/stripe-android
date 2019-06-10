@@ -89,8 +89,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(VISA_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof VisaCheckoutWallet);
-        final VisaCheckoutWallet visaCheckoutWallet = (VisaCheckoutWallet) wallet;
-        assertEquals(visaCheckoutWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test
@@ -98,8 +96,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(MASTERPASS_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof MasterpassWallet);
-        final MasterpassWallet masterpassWallet = (MasterpassWallet) wallet;
-        assertEquals(masterpassWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test
@@ -107,8 +103,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(AMEX_EXPRESS_CHECKOUT_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof AmexExpressCheckoutWallet);
-        final AmexExpressCheckoutWallet amexCheckoutWallet = (AmexExpressCheckoutWallet) wallet;
-        assertEquals(amexCheckoutWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test
@@ -116,8 +110,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(APPLE_PAY_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof ApplePayWallet);
-        final ApplePayWallet applePayWallet = (ApplePayWallet) wallet;
-        assertEquals(applePayWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test
@@ -125,8 +117,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(GOOGLE_PAY_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof GooglePayWallet);
-        final GooglePayWallet googlePayWallet = (GooglePayWallet) wallet;
-        assertEquals(googlePayWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test
@@ -134,8 +124,6 @@ public class WalletFactoryTest {
         final JSONObject walletJson = new JSONObject(SAMSUNG_PAY_WALLET_JSON);
         final Wallet wallet = new WalletFactory().create(walletJson);
         assertTrue(wallet instanceof SamsungPayWallet);
-        final SamsungPayWallet samsungPayWallet = (SamsungPayWallet) wallet;
-        assertEquals(samsungPayWallet.toJson().toString(), walletJson.toString());
     }
 
     @Test

@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for the SourceTypeData contained in a SEPA Debit Source object.
@@ -117,20 +116,6 @@ public final class SourceSepaDebitData extends StripeSourceTypeModel {
     @Nullable
     public String getMandateUrl() {
         return mMandateUrl;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = super.toJson();
-        putStringIfNotNull(jsonObject, FIELD_BANK_CODE, mBankCode);
-        putStringIfNotNull(jsonObject, FIELD_BRANCH_CODE, mBranchCode);
-        putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
-        putStringIfNotNull(jsonObject, FIELD_FINGERPRINT, mFingerPrint);
-        putStringIfNotNull(jsonObject, FIELD_LAST4, mLast4);
-        putStringIfNotNull(jsonObject, FIELD_MANDATE_REFERENCE, mMandateReference);
-        putStringIfNotNull(jsonObject, FIELD_MANDATE_URL, mMandateUrl);
-        return jsonObject;
     }
 
     @NonNull

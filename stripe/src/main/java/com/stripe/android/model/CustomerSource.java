@@ -121,17 +121,6 @@ public final class CustomerSource extends StripeJsonModel implements StripePayme
         return new HashMap<>();
     }
 
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        if (mStripePaymentSource instanceof Source) {
-            return ((Source) mStripePaymentSource).toJson();
-        } else if (mStripePaymentSource instanceof Card) {
-            return ((Card) mStripePaymentSource).toJson();
-        }
-        return new JSONObject();
-    }
-
     @Override
     public boolean equals(@Nullable Object obj) {
         return this == obj || (obj instanceof CustomerSource && typedEquals((CustomerSource) obj));

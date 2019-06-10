@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +228,7 @@ public class StripeJsonUtilsTest {
         itemsList.add("a string item");
         itemsList.add(256);
         itemsList.add(Arrays.asList(1, 2, "C", 4));
-        itemsList.add(Arrays.asList(new HashMap<String, Object>() {{
+        itemsList.add(Collections.singletonList(new HashMap<String, Object>() {{
             put("deep", "deepValue");
         }}));
         testMap.put("outer_key",
@@ -356,7 +357,7 @@ public class StripeJsonUtilsTest {
         itemsList.add("a string item");
         itemsList.add(256);
         itemsList.add(Arrays.asList(1, 2, "C", 4));
-        itemsList.add(Arrays.asList(new HashMap<String, Object>() {{
+        itemsList.add(Collections.singletonList(new HashMap<String, Object>() {{
             put("deep", "deepValue");
         }}));
         expectedMap.put("outer_key",

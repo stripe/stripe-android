@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model representing a shipping address object
@@ -83,16 +82,6 @@ public final class ShippingInformation extends StripeJsonModel implements Parcel
                 Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS)),
                 optString(jsonObject, FIELD_NAME),
                 optString(jsonObject, FIELD_PHONE));
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_NAME, mName);
-        putStringIfNotNull(jsonObject, FIELD_PHONE, mPhone);
-        putStripeJsonModelIfNotNull(jsonObject, FIELD_ADDRESS, mAddress);
-        return jsonObject;
     }
 
     @NonNull

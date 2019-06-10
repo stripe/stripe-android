@@ -35,14 +35,6 @@ public abstract class StripeSourceTypeModel extends StripeJsonModel {
         return new HashMap<>(mAdditionalFields);
     }
 
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putAdditionalFieldsIntoJsonObject(jsonObject, mAdditionalFields);
-        return jsonObject;
-    }
-
     /**
      * Convert a {@link JSONObject} to a flat, string-keyed map.
      *

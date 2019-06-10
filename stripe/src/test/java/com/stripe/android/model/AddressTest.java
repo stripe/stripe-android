@@ -1,13 +1,10 @@
 package com.stripe.android.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.testharness.JsonTestUtils.assertJsonEquals;
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,13 +33,6 @@ public class AddressTest {
     }};
 
     private static final Address ADDRESS = Address.fromString(JSON_ADDRESS);
-
-    @Test
-    public void fromJsonString_backToJson_createsIdenticalElement() throws JSONException {
-        assertNotNull(ADDRESS);
-        JSONObject rawConversion = new JSONObject(JSON_ADDRESS);
-        assertJsonEquals(rawConversion, ADDRESS.toJson());
-    }
 
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {

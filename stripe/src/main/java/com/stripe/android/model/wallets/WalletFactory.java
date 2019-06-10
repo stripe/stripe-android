@@ -36,15 +36,15 @@ public final class WalletFactory {
 
         switch (walletType) {
             case AmexExpressCheckout: {
-                walletBuilder = AmexExpressCheckoutWallet.fromJson(walletTypeJson);
+                walletBuilder = AmexExpressCheckoutWallet.fromJson();
                 break;
             }
             case ApplePay: {
-                walletBuilder = ApplePayWallet.fromJson(walletTypeJson);
+                walletBuilder = ApplePayWallet.fromJson();
                 break;
             }
             case GooglePay: {
-                walletBuilder = GooglePayWallet.fromJson(walletTypeJson);
+                walletBuilder = GooglePayWallet.fromJson();
                 break;
             }
             case Masterpass: {
@@ -52,7 +52,7 @@ public final class WalletFactory {
                 break;
             }
             case SamsungPay: {
-                walletBuilder = SamsungPayWallet.fromJson(walletTypeJson);
+                walletBuilder = SamsungPayWallet.fromJson();
                 break;
             }
             case VisaCheckout: {

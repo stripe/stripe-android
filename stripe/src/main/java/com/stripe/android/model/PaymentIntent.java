@@ -19,17 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.stripe.android.model.StripeJsonUtils.listToJsonArray;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
 import static com.stripe.android.model.StripeJsonUtils.optCurrency;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optMap;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putArrayIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putBooleanIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putMapIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * A PaymentIntent tracks the process of collecting a payment from your customer.
@@ -326,30 +320,6 @@ public final class PaymentIntent extends StripeJsonModel {
         }
 
         return list;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_ID, mId);
-        putStringIfNotNull(jsonObject, FIELD_OBJECT, mObjectType);
-        putArrayIfNotNull(jsonObject, FIELD_PAYMENT_METHOD_TYPES,
-                listToJsonArray(mPaymentMethodTypes));
-        putLongIfNotNull(jsonObject, FIELD_AMOUNT, mAmount);
-        putLongIfNotNull(jsonObject, FIELD_CANCELED, mCanceledAt);
-        putStringIfNotNull(jsonObject, FIELD_CAPTURE_METHOD, mCaptureMethod);
-        putStringIfNotNull(jsonObject, FIELD_CLIENT_SECRET, mClientSecret);
-        putStringIfNotNull(jsonObject, FIELD_CONFIRMATION_METHOD, mConfirmationMethod);
-        putLongIfNotNull(jsonObject, FIELD_CREATED, mCreated);
-        putStringIfNotNull(jsonObject, FIELD_CURRENCY, mCurrency);
-        putStringIfNotNull(jsonObject, FIELD_DESCRIPTION, mDescription);
-        putBooleanIfNotNull(jsonObject, FIELD_LIVEMODE, mLiveMode);
-        putMapIfNotNull(jsonObject, FIELD_NEXT_ACTION, mNextAction);
-        putStringIfNotNull(jsonObject, FIELD_RECEIPT_EMAIL, mReceiptEmail);
-        putStringIfNotNull(jsonObject, FIELD_SOURCE, mSource);
-        putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus != null ? mStatus.code : null);
-        return jsonObject;
     }
 
     @NonNull

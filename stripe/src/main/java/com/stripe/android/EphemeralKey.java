@@ -86,35 +86,6 @@ abstract class EphemeralKey extends StripeJsonModel implements Parcelable {
 
     @NonNull
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        JSONArray associatedObjectsArray = new JSONArray();
-        JSONObject associatedObject = new JSONObject();
-
-        try {
-            jsonObject.put(FIELD_CREATED, mCreated);
-            jsonObject.put(FIELD_EXPIRES, mExpires);
-            jsonObject.put(FIELD_OBJECT, mObject);
-            jsonObject.put(FIELD_ID, mId);
-            jsonObject.put(FIELD_SECRET, mSecret);
-            jsonObject.put(FIELD_LIVEMODE, mLiveMode);
-
-            associatedObject.put(FIELD_TYPE, mType);
-            associatedObject.put(FIELD_ID, mObjectId);
-            associatedObjectsArray.put(associatedObject);
-
-            jsonObject.put(FIELD_ASSOCIATED_OBJECTS, associatedObjectsArray);
-        } catch (JSONException impossible) {
-            // An exception can only be thrown from put operations if the key is null
-            // or the value is a non-finite number.
-            throw new IllegalArgumentException("JSONObject creation exception thrown.");
-        }
-
-        return jsonObject;
-    }
-
-    @NonNull
-    @Override
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_CREATED, mCreated);

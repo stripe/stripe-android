@@ -8,15 +8,10 @@ import android.support.annotation.Size;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONObject;
-
 import java.util.AbstractMap;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.stripe.android.model.StripeJsonUtils.putLongIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model representing a shipping method in the Android SDK.
@@ -114,18 +109,6 @@ public final class ShippingMethod extends StripeJsonModel implements Parcelable 
     @NonNull
     public String getIdentifier() {
         return mIdentifier;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putLongIfNotNull(jsonObject, FIELD_AMOUNT, mAmount);
-        putStringIfNotNull(jsonObject, FIELD_CURRENCY_CODE, mCurrencyCode);
-        putStringIfNotNull(jsonObject, FIELD_DETAIL, mDetail);
-        putStringIfNotNull(jsonObject, FIELD_IDENTIFIER, mIdentifier);
-        putStringIfNotNull(jsonObject, FIELD_LABEL, mLabel);
-        return jsonObject;
     }
 
     @NonNull

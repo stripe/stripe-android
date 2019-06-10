@@ -22,8 +22,6 @@ import java.util.Set;
 
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for data contained in the SourceTypeData of a Card Source.
@@ -163,24 +161,6 @@ public final class SourceCardData extends StripeSourceTypeModel {
     @Nullable
     public String getTokenizationMethod() {
         return mTokenizationMethod;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = super.toJson();
-        putStringIfNotNull(jsonObject, FIELD_ADDRESS_LINE1_CHECK, mAddressLine1Check);
-        putStringIfNotNull(jsonObject, FIELD_ADDRESS_ZIP_CHECK, mAddressZipCheck);
-        putStringIfNotNull(jsonObject, FIELD_BRAND, mBrand);
-        putStringIfNotNull(jsonObject, FIELD_COUNTRY, mCountry);
-        putStringIfNotNull(jsonObject, FIELD_DYNAMIC_LAST4, mDynamicLast4);
-        putIntegerIfNotNull(jsonObject, FIELD_EXP_MONTH, mExpiryMonth);
-        putIntegerIfNotNull(jsonObject, FIELD_EXP_YEAR, mExpiryYear);
-        putStringIfNotNull(jsonObject, FIELD_FUNDING, mFunding);
-        putStringIfNotNull(jsonObject, FIELD_LAST4, mLast4);
-        putStringIfNotNull(jsonObject, FIELD_THREE_D_SECURE, mThreeDSecureStatus);
-        putStringIfNotNull(jsonObject, FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
-        return jsonObject;
     }
 
     @NonNull

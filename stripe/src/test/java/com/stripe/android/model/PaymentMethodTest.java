@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -130,8 +129,8 @@ public class PaymentMethodTest {
     }
 
     @Test
-    public void toJson_withIdeal_shouldReturnExpectedJson() throws JSONException {
-        final JSONObject paymentMethod = new PaymentMethod.Builder()
+    public void toJson_withIdeal_shouldReturnExpectedJson() {
+        final JSONObject paymentMethod = new JSONObject(new PaymentMethod.Builder()
                 .setId("pm_123456789")
                 .setCreated(1550757934255L)
                 .setLiveMode(true)
@@ -143,17 +142,11 @@ public class PaymentMethodTest {
                         .setBankIdentifierCode("bank id")
                         .build())
                 .build()
-                .toJson();
+                .toMap());
 
-        assertEquals(new JSONObject(RAW_IDEAL_JSON).toString(), paymentMethod.toString());
+        assertEquals(PaymentMethod.fromJson(paymentMethod),
+                PaymentMethod.fromString(RAW_IDEAL_JSON));
     }
-
-    @Test
-    public void toJson_withCard_shouldReturnExpectedJson() throws JSONException {
-        assertEquals(new JSONObject(RAW_CARD_JSON).toString(),
-                CARD_PAYMENT_METHOD.toJson().toString());
-    }
-
 
     @Test
     public void equals_withEqualPaymentMethods_shouldReturnTrue() {

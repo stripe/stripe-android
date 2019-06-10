@@ -19,10 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
-import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information and interaction
@@ -358,6 +356,7 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_ID, mId);
+        map.put(FIELD_OBJECT, VALUE_SOURCE);
         map.put(FIELD_AMOUNT, mAmount);
         map.put(FIELD_CLIENT_SECRET, mClientSecret);
 
@@ -380,43 +379,6 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
         map.put(FIELD_USAGE, mUsage);
         removeNullAndEmptyParams(map);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        try {
-            putStringIfNotNull(jsonObject, FIELD_ID, mId);
-            jsonObject.put(FIELD_OBJECT, VALUE_SOURCE);
-            jsonObject.put(FIELD_AMOUNT, mAmount);
-            putStringIfNotNull(jsonObject, FIELD_CLIENT_SECRET, mClientSecret);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_CODE_VERIFICATION, mCodeVerification);
-            jsonObject.put(FIELD_CREATED, mCreated);
-            putStringIfNotNull(jsonObject, FIELD_CURRENCY, mCurrency);
-            putStringIfNotNull(jsonObject, FIELD_FLOW, mFlow);
-            jsonObject.put(FIELD_LIVEMODE, mLiveMode);
-
-            JSONObject metaDataObject = mapToJsonObject(mMetaData);
-            if (metaDataObject != null) {
-                jsonObject.put(FIELD_METADATA, metaDataObject);
-            }
-
-            JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
-
-            if (sourceTypeJsonObject != null) {
-                jsonObject.put(mTypeRaw, sourceTypeJsonObject);
-            }
-
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
-            putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-            putStringIfNotNull(jsonObject, FIELD_TYPE, mTypeRaw);
-            putStringIfNotNull(jsonObject, FIELD_USAGE, mUsage);
-
-        } catch (JSONException ignored) { }
-        return jsonObject;
     }
 
     @Nullable

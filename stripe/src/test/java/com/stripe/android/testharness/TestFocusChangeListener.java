@@ -26,12 +26,4 @@ public class TestFocusChangeListener implements ViewTreeObserver.OnGlobalFocusCh
     public int getNewFocusId() {
         return mNewFocus.getId();
     }
-
-    public boolean hasOldFocus() {
-        return mOldFocus != null;
-    }
-
-    public boolean hasNewFocus() {
-        return mNewFocus != null;
-    }
 }

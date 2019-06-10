@@ -19,10 +19,6 @@ import java.util.Map;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putBooleanIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putObjectIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for a Stripe Customer object
@@ -103,28 +99,6 @@ public final class Customer extends StripeJsonModel {
             }
         }
         return null;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_ID, mId);
-        putStringIfNotNull(jsonObject, FIELD_OBJECT, VALUE_CUSTOMER);
-        putStringIfNotNull(jsonObject, FIELD_DEFAULT_SOURCE, mDefaultSource);
-        StripeJsonModel.putStripeJsonModelIfNotNull(jsonObject,
-                FIELD_SHIPPING,
-                mShippingInformation);
-        JSONObject sourcesObject = new JSONObject();
-        putStringIfNotNull(sourcesObject, FIELD_OBJECT, VALUE_LIST);
-        putBooleanIfNotNull(sourcesObject, FIELD_HAS_MORE, mHasMore);
-        putIntegerIfNotNull(sourcesObject, FIELD_TOTAL_COUNT, mTotalCount);
-        putStripeJsonModelListIfNotNull(sourcesObject, FIELD_DATA, mSources);
-        putStringIfNotNull(sourcesObject, FIELD_URL, mUrl);
-
-        putObjectIfNotNull(jsonObject, FIELD_SOURCES, sourcesObject);
-
-        return jsonObject;
     }
 
     @NonNull

@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import com.stripe.android.model.StripeJsonModel;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.AbstractMap;
@@ -56,19 +55,6 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
         return wallet;
     }
 
-    @NonNull
-    @Override
-    public final JSONObject toJson() {
-        final JSONObject wallet = new JSONObject();
-        try {
-            wallet.put(FIELD_TYPE, walletType.code);
-            wallet.put(FIELD_DYNAMIC_LAST4, dynamicLast4);
-            wallet.put(walletType.code, getWalletTypeJson());
-        } catch (JSONException ignore) {
-        }
-        return wallet;
-    }
-
     @Override
     public int hashCode() {
         return ObjectUtils.hash(dynamicLast4, walletType);
@@ -86,9 +72,6 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
 
     @NonNull
     abstract Map<String, Object> getWalletTypeMap();
-
-    @NonNull
-    abstract JSONObject getWalletTypeJson();
 
     abstract static class Builder<W extends Wallet> {
         @Nullable private String mDynamicLast4;
@@ -200,22 +183,6 @@ public abstract class Wallet extends StripeJsonModel implements Parcelable {
             address.put(FIELD_LINE2, line2);
             address.put(FIELD_POSTAL_CODE, postalCode);
             address.put(FIELD_STATE, state);
-            return address;
-        }
-
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            final JSONObject address = new JSONObject();
-            try {
-                address.put(FIELD_CITY, city);
-                address.put(FIELD_COUNTRY, country);
-                address.put(FIELD_LINE1, line1);
-                address.put(FIELD_LINE2, line2);
-                address.put(FIELD_POSTAL_CODE, postalCode);
-                address.put(FIELD_STATE, state);
-            } catch (JSONException ignore) {
-            }
             return address;
         }
 
