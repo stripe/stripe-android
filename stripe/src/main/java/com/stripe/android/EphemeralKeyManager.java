@@ -2,7 +2,6 @@ package com.stripe.android;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONException;
 
@@ -48,12 +47,6 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         } else {
             mListener.onKeyUpdate(mEphemeralKey, operationId, actionString, arguments);
         }
-    }
-
-    @Nullable
-    @VisibleForTesting
-    TEphemeralKey getEphemeralKey() {
-        return mEphemeralKey;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
