@@ -3,12 +3,8 @@ package com.stripe.android;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-class IssuingCardEphemeralKey extends AbstractEphemeralKey {
+final class IssuingCardEphemeralKey extends EphemeralKey {
     public static final Parcelable.Creator<IssuingCardEphemeralKey> CREATOR
             = new Parcelable.Creator<IssuingCardEphemeralKey>() {
 
@@ -27,30 +23,10 @@ class IssuingCardEphemeralKey extends AbstractEphemeralKey {
         super(in);
     }
 
-    protected IssuingCardEphemeralKey(
-            long created,
-            @NonNull String customerId,
-            long expires,
-            @NonNull String id,
-            boolean liveMode,
-            @NonNull String object,
-            @NonNull String secret,
-            @NonNull String type
-    ) {
-        super(created,
-                customerId,
-                expires,
-                id,
-                liveMode,
-                object,
-                secret,
-                type);
-
-    }
-
-    @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
-    public IssuingCardEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
-        super(jsonObject);
+    private IssuingCardEphemeralKey(long created, @NonNull String customerId, long expires,
+                                    @NonNull String id, boolean liveMode, @NonNull String object,
+                                    @NonNull String secret, @NonNull String type) {
+        super(created, customerId, expires, id, liveMode, object, secret, type);
     }
 
     @NonNull
@@ -58,15 +34,14 @@ class IssuingCardEphemeralKey extends AbstractEphemeralKey {
         return mObjectId;
     }
 
-    @NonNull
-    static IssuingCardEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
-        return AbstractEphemeralKey
-                .fromString(rawJson, IssuingCardEphemeralKey.class);
-    }
-
-    @NonNull
-    static IssuingCardEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
-        return AbstractEphemeralKey
-                .fromJson(jsonObject, IssuingCardEphemeralKey.class);
+    static final class Factory extends EphemeralKey.Factory<IssuingCardEphemeralKey> {
+        @NonNull
+        @Override
+        IssuingCardEphemeralKey create(long created, @NonNull String objectId, long expires,
+                                       @NonNull String id, boolean liveMode, @NonNull String object,
+                                       @NonNull String secret, @NonNull String type) {
+            return new IssuingCardEphemeralKey(created, objectId, expires, id, liveMode, object,
+                    secret, type);
+        }
     }
 }

@@ -3,12 +3,11 @@ package com.stripe.android;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class CustomerEphemeralKey extends AbstractEphemeralKey {
+final class CustomerEphemeralKey extends EphemeralKey {
     public static final Parcelable.Creator<CustomerEphemeralKey> CREATOR
             = new Parcelable.Creator<CustomerEphemeralKey>() {
 
@@ -27,30 +26,10 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
         super(in);
     }
 
-    protected CustomerEphemeralKey(
-            long created,
-            @NonNull String customerId,
-            long expires,
-            @NonNull String id,
-            boolean liveMode,
-            @NonNull String object,
-            @NonNull String secret,
-            @NonNull String type
-    ) {
-        super(created,
-                customerId,
-                expires,
-                id,
-                liveMode,
-                object,
-                secret,
-                type);
-
-    }
-
-    @SuppressWarnings("checkstyle:RedundantModifier") // Not actually redundant :|
-    public CustomerEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
-        super(jsonObject);
+    private CustomerEphemeralKey(long created, @NonNull String customerId, long expires,
+                                 @NonNull String id, boolean liveMode, @NonNull String object,
+                                 @NonNull String secret, @NonNull String type) {
+        super(created, customerId, expires, id, liveMode, object, secret, type);
     }
 
     @NonNull
@@ -59,14 +38,18 @@ class CustomerEphemeralKey extends AbstractEphemeralKey {
     }
 
     @NonNull
-    static CustomerEphemeralKey fromString(@Nullable String rawJson) throws JSONException {
-        return AbstractEphemeralKey
-                .fromString(rawJson, CustomerEphemeralKey.class);
+    static CustomerEphemeralKey fromJson(@NonNull JSONObject jsonObject) throws JSONException {
+        return EphemeralKey.fromJson(jsonObject, new Factory());
     }
 
-    @NonNull
-    static CustomerEphemeralKey fromJson(@Nullable JSONObject jsonObject) {
-        return AbstractEphemeralKey
-                .fromJson(jsonObject, CustomerEphemeralKey.class);
+    static final class Factory extends EphemeralKey.Factory<CustomerEphemeralKey> {
+        @NonNull
+        @Override
+        CustomerEphemeralKey create(long created, @NonNull String objectId, long expires,
+                                       @NonNull String id, boolean liveMode, @NonNull String object,
+                                       @NonNull String secret, @NonNull String type) {
+            return new CustomerEphemeralKey(created, objectId, expires, id, liveMode, object,
+                    secret, type);
+        }
     }
 }

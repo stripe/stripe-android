@@ -262,7 +262,7 @@ public class CustomerSession {
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.Factory());
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
