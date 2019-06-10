@@ -27,7 +27,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model for a Stripe Customer object
  */
-public class Customer extends StripeJsonModel {
+public final class Customer extends StripeJsonModel {
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_OBJECT = "object";

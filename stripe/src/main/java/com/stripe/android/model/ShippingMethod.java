@@ -21,7 +21,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model representing a shipping method in the Android SDK.
  */
-public class ShippingMethod extends StripeJsonModel implements Parcelable {
+public final class ShippingMethod extends StripeJsonModel implements Parcelable {
 
     public static final Parcelable.Creator<ShippingMethod> CREATOR
             = new Parcelable.Creator<ShippingMethod>() {
@@ -50,8 +50,7 @@ public class ShippingMethod extends StripeJsonModel implements Parcelable {
     public ShippingMethod(@NonNull String label,
                           @NonNull String identifier,
                           long amount,
-                          @NonNull @Size(min = 0, max = 3) String
-                                  currencyCode) {
+                          @NonNull @Size(min = 0, max = 3) String currencyCode) {
         this(label, identifier, null, amount, currencyCode);
     }
 

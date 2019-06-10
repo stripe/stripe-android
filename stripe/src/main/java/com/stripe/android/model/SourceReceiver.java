@@ -9,14 +9,16 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Model for a <a href="https://stripe.com/docs/api#source_object-receiver">receiver</a> object in
- * the source api. Present if the {@link Source} is a receiver.
+ * Model for a
+ * <a href="https://stripe.com/docs/api/sources/object#source_object-receiver">receiver</a> object
+ * in the Sources API. Present if the {@link Source} is a receiver.
  */
-public class SourceReceiver extends StripeJsonModel {
+public final class SourceReceiver extends StripeJsonModel {
 
     private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_AMOUNT_CHARGED = "amount_charged";
@@ -24,10 +26,10 @@ public class SourceReceiver extends StripeJsonModel {
     private static final String FIELD_AMOUNT_RETURNED = "amount_returned";
 
     // This is not to be confused with the Address object
-    @Nullable private String mAddress;
-    private long mAmountCharged;
-    private long mAmountReceived;
-    private long mAmountReturned;
+    @Nullable private final String mAddress;
+    private final long mAmountCharged;
+    private final long mAmountReceived;
+    private final long mAmountReturned;
 
     private SourceReceiver(@Nullable String address,
                            long amountCharged,
@@ -44,38 +46,22 @@ public class SourceReceiver extends StripeJsonModel {
         return mAddress;
     }
 
-    public void setAddress(@Nullable String address) {
-        mAddress = address;
-    }
-
     public long getAmountCharged() {
         return mAmountCharged;
-    }
-
-    public void setAmountCharged(long amountCharged) {
-        mAmountCharged = amountCharged;
     }
 
     public long getAmountReceived() {
         return mAmountReceived;
     }
 
-    public void setAmountReceived(long amountReceived) {
-        mAmountReceived = amountReceived;
-    }
-
     public long getAmountReturned() {
         return mAmountReturned;
-    }
-
-    public void setAmountReturned(long amountReturned) {
-        mAmountReturned = amountReturned;
     }
 
     @NonNull
     @Override
     public Map<String, Object> toMap() {
-        final Map<String, Object> map = new HashMap<>();
+        final AbstractMap<String, Object> map = new HashMap<>();
         if (!StripeTextUtils.isBlank(mAddress)) {
             map.put(FIELD_ADDRESS, mAddress);
         }

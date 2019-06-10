@@ -57,7 +57,7 @@ public class PaymentSessionDataTest {
         assertFalse(data.updateIsPaymentReadyToCharge(config));
         assertFalse(data.isPaymentReadyToCharge());
 
-        data.setShippingMethod(Mockito.mock(ShippingMethod.class));
+        data.setShippingMethod(new ShippingMethod("label", "id", 0, "USD"));
         assertTrue(data.updateIsPaymentReadyToCharge(config));
         assertTrue(data.isPaymentReadyToCharge());
     }
