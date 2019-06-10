@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * Configuration for authentication mechanisms via {@link PaymentController}
  */
-class PaymentAuthConfig {
+public final class PaymentAuthConfig {
 
     @Nullable
     private static PaymentAuthConfig sInstance;
@@ -22,12 +22,12 @@ class PaymentAuthConfig {
             .set3ds2Config(new Stripe3ds2Config.Builder().build())
             .build();
 
-    static void init(@NonNull PaymentAuthConfig config) {
+    public static void init(@NonNull PaymentAuthConfig config) {
         sInstance = config;
     }
 
     @NonNull
-    static PaymentAuthConfig get() {
+    public static PaymentAuthConfig get() {
         return sInstance != null ? sInstance : DEFAULT;
     }
 
@@ -43,23 +43,23 @@ class PaymentAuthConfig {
         stripe3ds2Config = builder.mStripe3ds2Config;
     }
 
-    static final class Builder {
+    public static final class Builder {
         private Stripe3ds2Config mStripe3ds2Config;
 
         @NonNull
-        Builder set3ds2Config(@NonNull Stripe3ds2Config stripe3ds2Config) {
+        public Builder set3ds2Config(@NonNull Stripe3ds2Config stripe3ds2Config) {
             this.mStripe3ds2Config = stripe3ds2Config;
             return this;
         }
 
         @NonNull
-        PaymentAuthConfig build() {
+        public PaymentAuthConfig build() {
             return new PaymentAuthConfig(this);
         }
     }
 
-    static final class Stripe3ds2Config {
-        static final int TIMEOUT = 5;
+    public static final class Stripe3ds2Config {
+        static final int DEFAULT_TIMEOUT = 5;
 
         final int timeout;
         @NonNull final UiCustomization uiCustomization;
@@ -69,24 +69,24 @@ class PaymentAuthConfig {
             uiCustomization = Objects.requireNonNull(builder.mUiCustomization);
         }
 
-        static final class Builder {
-            private int mTimeout = TIMEOUT;
+        public static final class Builder {
+            private int mTimeout = DEFAULT_TIMEOUT;
             private UiCustomization mUiCustomization = new StripeUiCustomization();
 
             @NonNull
-            Builder setTimeout(int timeout) {
+            public Builder setTimeout(int timeout) {
                 this.mTimeout = timeout;
                 return this;
             }
 
             @NonNull
-            Builder setUiCustomization(@NonNull UiCustomization uiCustomization) {
+            public Builder setUiCustomization(@NonNull UiCustomization uiCustomization) {
                 this.mUiCustomization = uiCustomization;
                 return this;
             }
 
             @NonNull
-            Stripe3ds2Config build() {
+            public Stripe3ds2Config build() {
                 return new Stripe3ds2Config(this);
             }
         }

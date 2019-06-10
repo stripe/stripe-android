@@ -12,11 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.stripe.android.ApiResultCallback;
+import com.stripe.android.PaymentAuthConfig;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
 import com.stripe.example.R;
 import com.stripe.example.module.RetrofitFactory;
 import com.stripe.example.service.StripeService;
@@ -63,6 +65,14 @@ public class PaymentAuthActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_auth);
+
+        final StripeUiCustomization uiCustomization = new StripeUiCustomization();
+        PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
+                .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(6)
+                        .setUiCustomization(uiCustomization)
+                        .build())
+                .build());
 
         mStatusTextView = findViewById(R.id.status);
         if (savedInstanceState != null) {

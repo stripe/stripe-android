@@ -19,7 +19,7 @@ public class PaymentAuthConfigTest {
     @Test
     public void get_whenNotInited_returnsDefault() {
         final PaymentAuthConfig paymentAuthConfig = PaymentAuthConfig.get();
-        assertEquals(PaymentAuthConfig.Stripe3ds2Config.TIMEOUT,
+        assertEquals(PaymentAuthConfig.Stripe3ds2Config.DEFAULT_TIMEOUT,
                 paymentAuthConfig.stripe3ds2Config.timeout);
         assertNotNull(paymentAuthConfig.stripe3ds2Config.uiCustomization);
     }
