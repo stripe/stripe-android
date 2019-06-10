@@ -72,21 +72,6 @@ public final class SourceReceiver extends StripeJsonModel {
         return map;
     }
 
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        StripeJsonUtils.putStringIfNotNull(jsonObject, FIELD_ADDRESS, mAddress);
-        try {
-            jsonObject.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
-            jsonObject.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
-            jsonObject.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
-        } catch (JSONException jsonException) {
-            return jsonObject;
-        }
-        return jsonObject;
-    }
-
     @Nullable
     public static SourceReceiver fromString(@Nullable String jsonString) {
         try {

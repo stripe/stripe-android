@@ -1,7 +1,5 @@
 package com.stripe.android.model;
 
-import com.stripe.android.testharness.JsonTestUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -83,14 +81,7 @@ public class CustomerSourceTest {
 
     @Test
     public void fromExampleJsonSource_toJson_createsSameObject() {
-        try {
-            JSONObject original = new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
-            CustomerSource sourceData = CustomerSource.fromJson(original);
-            assertNotNull(sourceData);
-            JsonTestUtils.assertJsonEquals(original, sourceData.toJson());
-        } catch (JSONException exception) {
-            fail("Test data failure: " + exception.getMessage());
-        }
+        assertNotNull(CustomerSource.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
     }
 
     @Test

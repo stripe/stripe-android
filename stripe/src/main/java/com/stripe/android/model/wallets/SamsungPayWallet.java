@@ -4,8 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,13 +23,7 @@ public final class SamsungPayWallet extends Wallet {
     }
 
     @NonNull
-    @Override
-    JSONObject getWalletTypeJson() {
-        return new JSONObject();
-    }
-
-    @NonNull
-    static SamsungPayWallet.Builder fromJson(@NonNull JSONObject walletJson) {
+    static SamsungPayWallet.Builder fromJson() {
         return new Builder();
     }
 

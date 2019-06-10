@@ -1,5 +1,6 @@
 package com.stripe.android.testharness;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -52,42 +53,6 @@ public class JsonTestUtils {
         }
     }
 
-    /**
-     * Assert that two {@link JSONObject JSONObjects} are equal, comparing key by key recursively.
-     * Ignores nulls.
-     *
-     * @param first the first object
-     * @param second the second object
-     */
-    public static void assertJsonEqualsExcludingNulls(JSONObject first, JSONObject second) {
-        if (assertSameNullity(first, second)) {
-            return;
-        }
-
-        Iterator<String> keyIterator = first.keys();
-        while(keyIterator.hasNext()) {
-            String key = keyIterator.next();
-            String errorMessage = getKeyErrorMessage(key);
-            if (first.opt(key) != JSONObject.NULL) {
-                assertTrue(errorMessage, second.has(key));
-            }
-            if (first.opt(key) instanceof JSONObject) {
-                assertTrue(errorMessage, second.opt(key) instanceof JSONObject);
-                assertJsonEqualsExcludingNulls(first.optJSONObject(key), second.optJSONObject(key));
-            } else if (first.opt(key) instanceof JSONArray) {
-                assertTrue(errorMessage, second.opt(key) instanceof JSONArray);
-                assertJsonArrayEquals(first.optJSONArray(key), second.optJSONArray(key));
-            } else if (first.opt(key) instanceof Number) {
-                assertTrue(errorMessage, second.opt(key) instanceof Number);
-                assertEquals(errorMessage,
-                        ((Number) first.opt(key)).longValue(),
-                        ((Number) second.opt(key)).longValue());
-            } else {
-                assertEquals(errorMessage, first.opt(key), second.opt(key));
-            }
-        }
-    }
-
 
     /**
      * Assert that two {@link JSONArray JSONArrays} are equal, comparing index by index recursively.
@@ -123,8 +88,7 @@ public class JsonTestUtils {
      * @param first the first map
      * @param second the second map
      */
-    public static void assertMapEquals(Map<String, ? extends Object> first,
-                                       Map<String, ? extends Object> second) {
+    public static void assertMapEquals(Map<String, ?> first, Map<String, ?> second) {
         if (assertSameNullity(first, second)) {
             return;
         }
@@ -164,8 +128,7 @@ public class JsonTestUtils {
                     castMapWithGenerics((Map) secondObject));
         } else if (firstObject instanceof List) {
             assertTrue(secondObject instanceof List);
-            assertListEquals((List) firstObject,
-                    (List) secondObject);
+            assertListEquals((List) firstObject, (List) secondObject);
         } else {
             assertEquals(firstObject, secondObject);
         }
@@ -191,13 +154,12 @@ public class JsonTestUtils {
      * @return {@code false} if both objects are non-null, {@code true} if they are {@code null}
      */
     private static boolean assertSameNullity(@Nullable Object first, @Nullable Object second) {
-        boolean sameNullity = first == null
-                ? second == null
-                : second != null;
+        boolean sameNullity = (first == null) == (second == null);
         assertTrue(sameNullity);
         return first == null;
     }
 
+    @NonNull
     private static String getKeyErrorMessage(String key) {
         return String.format(Locale.ENGLISH, "Matching error at key %s", key);
     }

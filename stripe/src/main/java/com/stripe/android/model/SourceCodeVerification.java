@@ -69,19 +69,6 @@ public final class SourceCodeVerification extends StripeJsonModel {
         return map;
     }
 
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-
-        try {
-            jsonObject.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
-            StripeJsonUtils.putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-        } catch (JSONException ignored) { }
-
-        return jsonObject;
-    }
-
     @Nullable
     public static SourceCodeVerification fromString(@Nullable String jsonString) {
         try {

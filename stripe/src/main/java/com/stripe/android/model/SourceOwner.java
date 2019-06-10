@@ -14,7 +14,6 @@ import java.util.Map;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
@@ -118,32 +117,6 @@ public final class SourceOwner extends StripeJsonModel {
         map.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
         removeNullAndEmptyParams(map);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        final JSONObject jsonAddressObject = mAddress == null ? null : mAddress.toJson();
-        final JSONObject jsonVerifiedAddressObject = mVerifiedAddress == null
-                ? null
-                : mVerifiedAddress.toJson();
-        try {
-            if (jsonAddressObject != null && jsonAddressObject.length() > 0) {
-                jsonObject.put(FIELD_ADDRESS, jsonAddressObject);
-            }
-            putStringIfNotNull(jsonObject, FIELD_EMAIL, mEmail);
-            putStringIfNotNull(jsonObject, FIELD_NAME, mName);
-            putStringIfNotNull(jsonObject, FIELD_PHONE, mPhone);
-            if (jsonVerifiedAddressObject != null && jsonVerifiedAddressObject.length() > 0) {
-                jsonObject.put(FIELD_VERIFIED_ADDRESS, jsonVerifiedAddressObject);
-            }
-            putStringIfNotNull(jsonObject, FIELD_VERIFIED_EMAIL, mVerifiedEmail);
-            putStringIfNotNull(jsonObject, FIELD_VERIFIED_NAME, mVerifiedName);
-            putStringIfNotNull(jsonObject, FIELD_VERIFIED_PHONE, mVerifiedPhone);
-        } catch (JSONException ignored) { }
-
-        return jsonObject;
     }
 
     @Nullable

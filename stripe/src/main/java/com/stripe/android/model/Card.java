@@ -30,9 +30,6 @@ import static com.stripe.android.model.StripeJsonUtils.optCurrency;
 import static com.stripe.android.model.StripeJsonUtils.optHash;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringHashIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * A model object representing a Card in the Android SDK.
@@ -788,36 +785,6 @@ public final class Card extends StripeJsonModel implements StripePaymentSource {
     @Nullable
     public String getCvcCheck() {
         return cvcCheck;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject object = new JSONObject();
-        putStringIfNotNull(object, FIELD_NAME, name);
-        putStringIfNotNull(object, FIELD_ADDRESS_CITY, addressCity);
-        putStringIfNotNull(object, FIELD_ADDRESS_COUNTRY, addressCountry);
-        putStringIfNotNull(object, FIELD_ADDRESS_LINE1, addressLine1);
-        putStringIfNotNull(object, FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
-        putStringIfNotNull(object, FIELD_ADDRESS_LINE2, addressLine2);
-        putStringIfNotNull(object, FIELD_ADDRESS_STATE, addressState);
-        putStringIfNotNull(object, FIELD_ADDRESS_ZIP, addressZip);
-        putStringIfNotNull(object, FIELD_ADDRESS_ZIP_CHECK, addressZipCheck);
-        putStringIfNotNull(object, FIELD_BRAND, brand);
-        putStringIfNotNull(object, FIELD_CURRENCY, currency);
-        putStringIfNotNull(object, FIELD_COUNTRY, country);
-        putStringIfNotNull(object, FIELD_CUSTOMER, customerId);
-        putIntegerIfNotNull(object, FIELD_EXP_MONTH, expMonth);
-        putIntegerIfNotNull(object, FIELD_EXP_YEAR, expYear);
-        putStringIfNotNull(object, FIELD_FINGERPRINT, fingerprint);
-        putStringIfNotNull(object, FIELD_FUNDING, funding);
-        putStringIfNotNull(object, FIELD_CVC_CHECK, cvcCheck);
-        putStringIfNotNull(object, FIELD_LAST4, last4);
-        putStringIfNotNull(object, FIELD_ID, id);
-        putStringIfNotNull(object, FIELD_TOKENIZATION_METHOD, tokenizationMethod);
-        putStringHashIfNotNull(object, FIELD_METADATA, metadata);
-        putStringIfNotNull(object, FIELD_OBJECT, VALUE_CARD);
-        return object;
     }
 
     @NonNull

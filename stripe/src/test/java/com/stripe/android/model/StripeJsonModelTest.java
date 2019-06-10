@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.testharness.JsonTestUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,7 +17,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link StripeJsonModel}.
@@ -73,22 +69,6 @@ public class StripeJsonModelTest {
     }
 
     @Test
-    public void putStripeJsonModelListIfNotNull_forMapsWhenNull_doesNothing() {
-        Map<String, Object> sampleMap = new HashMap<>();
-        StripeJsonModel.putStripeJsonModelListIfNotNull(sampleMap, "mapkey", null);
-
-        assertTrue(sampleMap.isEmpty());
-    }
-
-    @Test
-    public void putStripeJsonModelListIfNotNull_forJsonWhenNull_doesNothing() {
-        JSONObject jsonObject = new JSONObject();
-        StripeJsonModel.putStripeJsonModelListIfNotNull(jsonObject, "jsonkey", null);
-
-        assertFalse(jsonObject.has("jsonkey"));
-    }
-
-    @Test
     @SuppressWarnings("unchecked")
     public void putStripeJsonModelListIfNotNull_forMapsWhenNotNull_addsExpectedList() {
         List<ExampleJsonModel> exampleJsonModels = new ArrayList<>();
@@ -109,27 +89,6 @@ public class StripeJsonModelTest {
         JsonTestUtils.assertListEquals(expectedList, modelList);
     }
 
-    @Test
-    public void putStripeJsonModelListIfNotNull_forJsonWhenNotNull_addsExpectedList() {
-        List<ExampleJsonModel> exampleJsonModels = new ArrayList<>();
-        exampleJsonModels.add(new ExampleJsonModel());
-        exampleJsonModels.add(new ExampleJsonModel());
-
-        JSONObject jsonObject = new JSONObject();
-        StripeJsonModel.putStripeJsonModelListIfNotNull(jsonObject, "listkey", exampleJsonModels);
-
-        assertEquals(1, jsonObject.length());
-        JSONArray jsonArray = jsonObject.optJSONArray("listkey");
-        assertNotNull(jsonArray);
-        assertEquals(2, jsonArray.length());
-
-        JSONArray expectedArray = new JSONArray();
-        expectedArray.put(new ExampleJsonModel().toJson());
-        expectedArray.put(new ExampleJsonModel().toJson());
-
-        JsonTestUtils.assertJsonArrayEquals(expectedArray, jsonArray);
-    }
-
     private static class ExampleJsonModel extends StripeJsonModel {
 
         @NonNull
@@ -139,19 +98,6 @@ public class StripeJsonModelTest {
             map.put("akey", "avalue");
             map.put("bkey", "bvalue");
             return map;
-        }
-
-        @NonNull
-        @Override
-        public JSONObject toJson() {
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("akey", "avalue");
-                jsonObject.put("bkey", "bvalue");
-            } catch (JSONException unexpected) {
-                fail("Test data failure: " + unexpected.getMessage());
-            }
-            return jsonObject;
         }
 
         @Override

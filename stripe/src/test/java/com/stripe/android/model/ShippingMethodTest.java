@@ -41,7 +41,7 @@ public class ShippingMethodTest {
     public void testJSONConversion() {
         try {
             JSONObject rawConversion = new JSONObject(EXAMPLE_JSON_SHIPPING_ADDRESS);
-            assertJsonEquals(SHIPPING_METHOD.toJson(), rawConversion);
+            assertJsonEquals(new JSONObject(SHIPPING_METHOD.toMap()), rawConversion);
         } catch (JSONException jsonException) {
             fail("Test Data failure: " + jsonException.getLocalizedMessage());
         }

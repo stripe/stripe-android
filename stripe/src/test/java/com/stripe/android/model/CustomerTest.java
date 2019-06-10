@@ -2,8 +2,6 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 
-import com.stripe.android.testharness.JsonTestUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,16 +82,10 @@ public class CustomerTest {
 
     @Test
     public void fromJson_toJson_createsSameObject() {
-        try {
-            JSONObject rawJsonCustomer = new JSONObject(TEST_CUSTOMER_OBJECT);
-            Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
-            assertNotNull(customer);
-            JsonTestUtils.assertJsonEquals(rawJsonCustomer, customer.toJson());
-            assertEquals(Customer.fromString(TEST_CUSTOMER_OBJECT),
-                    Customer.fromString(TEST_CUSTOMER_OBJECT));
-        } catch (JSONException testDataException) {
-            fail("Test data failure: " + testDataException.getMessage());
-        }
+        Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
+        assertNotNull(customer);
+        assertEquals(Customer.fromString(TEST_CUSTOMER_OBJECT),
+                Customer.fromString(TEST_CUSTOMER_OBJECT));
     }
 
     @NonNull
@@ -106,7 +98,7 @@ public class CustomerTest {
             sourcesObject.put("total_count", 5);
             CustomerSource applePayCard = CustomerSource.fromString(JSON_APPLE_PAY_CARD);
             assertNotNull(applePayCard);
-            sourcesArray.put(applePayCard.toJson());
+            sourcesArray.put(new JSONObject(applePayCard.toMap()));
 
             Card testCard = Card.fromString(JSON_CARD_USD);
             assertNotNull(testCard);
@@ -123,11 +115,11 @@ public class CustomerTest {
             Source alipaySource = Source.fromString(EXAMPLE_ALIPAY_SOURCE);
             assertNotNull(sourceCardWithApplePay);
             assertNotNull(alipaySource);
-            sourcesArray.put(sourceCardWithApplePay.toJson());
-            sourcesArray.put(alipaySource.toJson());
+            sourcesArray.put(new JSONObject(sourceCardWithApplePay.toMap()));
+            sourcesArray.put(new JSONObject(alipaySource.toMap()));
 
-            sourcesArray.put(testCard.toJson());
-            sourcesArray.put(manipulatedApplePayCard.toJson());
+            sourcesArray.put(new JSONObject(testCard.toMap()));
+            sourcesArray.put(new JSONObject(manipulatedApplePayCard.toMap()));
             sourcesObject.put("data", sourcesArray);
 
             rawJsonCustomer.put("sources", sourcesObject);

@@ -17,7 +17,6 @@ import static com.stripe.android.model.Card.asCardBrand;
 import static com.stripe.android.model.Card.asFundingType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -663,20 +662,6 @@ public class CardTest {
         final Card expectedCard = buildEquivalentJsonCard();
         final Card actualCard = Card.fromString(JSON_CARD_USD);
         assertEquals(expectedCard, actualCard);
-    }
-
-    @Test
-    public void fromString_toJson_yieldsSameObject() {
-        Card cardFromJson = Card.fromString(JSON_CARD_USD);
-        assertNotNull(cardFromJson);
-
-        JSONObject cycledCardObject = cardFromJson.toJson();
-        try {
-            JSONObject rawJsonObject = new JSONObject(JSON_CARD_USD);
-            JsonTestUtils.assertJsonEquals(cycledCardObject, rawJsonObject);
-        } catch (JSONException unexpected) {
-            fail();
-        }
     }
 
     @Test
