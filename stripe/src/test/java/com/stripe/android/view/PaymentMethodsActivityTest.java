@@ -169,9 +169,8 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
         assertNotNull(paymentMethod);
 
-        final Intent resultIntent =
-                new Intent().putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD,
-                        paymentMethod.toJson().toString());
+        final Intent resultIntent = new Intent()
+                .putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD, paymentMethod);
 
         mPaymentMethodsActivity.onActivityResult(REQUEST_CODE_ADD_CARD, RESULT_OK, resultIntent);
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());

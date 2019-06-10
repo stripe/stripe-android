@@ -234,8 +234,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertTrue(mActivity.isFinishing());
         assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(
-                        intent.getStringExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
+                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
         assertNotNull(paymentMethod);
         assertEquals(expectedPaymentMethod, paymentMethod);
     }
@@ -363,8 +362,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertTrue(mActivity.isFinishing());
         assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
         final PaymentMethod newPaymentMethod =
-                PaymentMethod.fromString(
-                        intent.getStringExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
+                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
         assertNotNull(newPaymentMethod);
         assertEquals(expectedPaymentMethod, newPaymentMethod);
     }
