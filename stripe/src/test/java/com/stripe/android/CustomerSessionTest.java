@@ -29,6 +29,7 @@ import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +99,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
             "            }]\n" +
             "}";
 
-    public static final String FIRST_TEST_CUSTOMER_OBJECT =
+    static final String FIRST_TEST_CUSTOMER_OBJECT =
             "{\n" +
                     "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
                     "  \"object\": \"customer\",\n" +
@@ -198,17 +199,12 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     }
 
     @NonNull
-    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) {
-        try {
-            return CustomerEphemeralKey.fromString(key);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+    private CustomerEphemeralKey getCustomerEphemeralKey(@NonNull String key) throws JSONException {
+        return CustomerEphemeralKey.fromJson(new JSONObject(key));
     }
 
     @Before
-    public void setup()
-            throws StripeException {
+    public void setup() throws StripeException {
         MockitoAnnotations.initMocks(this);
         PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
@@ -325,7 +321,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void create_withoutInvokingFunctions_fetchesKeyAndCustomer()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         final CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -341,7 +337,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         final CustomerEphemeralKey firstKey = Objects.requireNonNull(
                 getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW));
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
@@ -368,7 +364,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void retrieveCustomer_withExpiredCache_updatesCustomer()
             throws CardException, APIException, InvalidRequestException,
-            AuthenticationException, APIConnectionException {
+            AuthenticationException, APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -419,7 +415,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         final CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -469,7 +465,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -525,7 +521,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -575,7 +571,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSourceAndEmptiesLogs()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -628,7 +624,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -675,7 +671,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -730,7 +726,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -808,7 +804,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -861,7 +857,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void attachPaymentMethodToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -909,7 +905,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Test
     public void detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethodAndEmptiesLogs()
             throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+            APIConnectionException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -961,7 +957,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void detachPaymentMethodFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 
@@ -1007,7 +1003,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs()
-            throws StripeException {
+            throws StripeException, JSONException {
         CustomerEphemeralKey firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         assertNotNull(firstKey);
 

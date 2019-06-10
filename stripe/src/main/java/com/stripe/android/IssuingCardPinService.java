@@ -20,6 +20,7 @@ import java.util.Map;
 /**
  * Methods for retrieval / update of a Stripe Issuing card
  */
+@SuppressWarnings("WeakerAccess")
 public class IssuingCardPinService
         implements EphemeralKeyManager.KeyManagerListener<IssuingCardEphemeralKey> {
 
@@ -71,7 +72,7 @@ public class IssuingCardPinService
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 null,
                 operationIdFactory,
-                IssuingCardEphemeralKey.class);
+                new IssuingCardEphemeralKey.Factory());
         mApiHandler = apiHandler;
     }
 

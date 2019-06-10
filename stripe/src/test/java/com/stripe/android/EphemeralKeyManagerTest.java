@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,9 @@ public class EphemeralKeyManagerTest {
     @Captor private ArgumentCaptor<CustomerEphemeralKey> mEphemeralKeyArgumentCaptor;
     @Captor private ArgumentCaptor<String> mActionArgumentCaptor;
 
-    private final OperationIdFactory mOperationIdFactory = new OperationIdFactory();
+    @NonNull private final OperationIdFactory mOperationIdFactory = new OperationIdFactory();
+    @NonNull private final CustomerEphemeralKey.Factory mEphemeralKeyFactory =
+            new CustomerEphemeralKey.Factory();
 
     private CustomerEphemeralKey mCustomerEphemeralKey;
     private TestEphemeralKeyProvider mTestEphemeralKeyProvider;
@@ -68,7 +71,7 @@ public class EphemeralKeyManagerTest {
     @Before
     public void setup() throws JSONException {
         MockitoAnnotations.initMocks(this);
-        mCustomerEphemeralKey = CustomerEphemeralKey.fromString(FIRST_SAMPLE_KEY_RAW);
+        mCustomerEphemeralKey = CustomerEphemeralKey.fromJson(new JSONObject(FIRST_SAMPLE_KEY_RAW));
         mTestEphemeralKeyProvider = new TestEphemeralKeyProvider();
     }
 
@@ -148,7 +151,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                mEphemeralKeyFactory);
 
         verify(mKeyManagerListener).onKeyUpdate(
                 mEphemeralKeyArgumentCaptor.capture(),
@@ -171,7 +174,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 fixedCalendar,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                new CustomerEphemeralKey.Factory());
 
         final String operationId = mOperationIdFactory.create();
         final String actionString = "action";
@@ -211,7 +214,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 proxyCalendar,
                 mOperationIdFactory,
-                CustomerEphemeralKey.class);
+                mEphemeralKeyFactory);
 
         // Make sure we're in a good state
         verify(mKeyManagerListener).onKeyUpdate(
@@ -246,7 +249,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                mEphemeralKeyFactory);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -258,7 +261,7 @@ public class EphemeralKeyManagerTest {
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
                         "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
                         "cannot be converted to JSONObject]. The raw body from Stripe's " +
-                        "response should be passed");
+                        "response should be passed.");
     }
 
     @Test
@@ -274,7 +277,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                mEphemeralKeyFactory);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -283,10 +286,10 @@ public class EphemeralKeyManagerTest {
                 ArgumentMatchers.<Map<String, Object>>isNull());
         verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a JSON String " +
-                        "that was invalid: [Improperly formatted JSON for ephemeral " +
-                        "key CustomerEphemeralKey - No value for created]. The raw body " +
-                        "from Stripe's response should be passed");
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                        "could not be JSON parsed: [No value for created]. The raw body from " +
+                        "Stripe's response should be passed."
+        );
     }
 
     @Test
@@ -303,7 +306,7 @@ public class EphemeralKeyManagerTest {
                 TEST_SECONDS_BUFFER,
                 null,
                 operationIdFactory,
-                CustomerEphemeralKey.class);
+                mEphemeralKeyFactory);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -317,7 +320,7 @@ public class EphemeralKeyManagerTest {
 
     @NonNull
     private CustomerEphemeralKey createEphemeralKey(long expires) {
-        return new CustomerEphemeralKey(1501199335L, "cus_AQsHpvKfKwJDrF",
+        return mEphemeralKeyFactory.create(1501199335L, "cus_AQsHpvKfKwJDrF",
                 expires, "ephkey_123", false, "customer", "", "");
     }
 }
