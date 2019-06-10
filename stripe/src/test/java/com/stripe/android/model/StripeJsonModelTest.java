@@ -155,6 +155,11 @@ public class StripeJsonModelTest {
         }
 
         @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof ExampleJsonModel)) {
                 return false;

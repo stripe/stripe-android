@@ -136,7 +136,7 @@ public final class VisaCheckoutWallet extends Wallet {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeParcelable(billingAddress, flags);
         dest.writeString(email);
