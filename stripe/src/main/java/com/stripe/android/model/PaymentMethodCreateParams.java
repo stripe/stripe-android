@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * See {@link PaymentMethod} for API object
  */
-public class PaymentMethodCreateParams {
+public final class PaymentMethodCreateParams {
 
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";

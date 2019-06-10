@@ -2,22 +2,22 @@ package com.stripe.android;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
+class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
 
-    @NonNull private final Class<TEphemeralKey> mEphemeralKeyClass;
     @NonNull private final EphemeralKeyProvider mEphemeralKeyProvider;
     @Nullable private final Calendar mOverrideCalendar;
     @NonNull private final KeyManagerListener<TEphemeralKey> mListener;
     private final long mTimeBufferInSeconds;
+    @NonNull private final EphemeralKey.Factory<TEphemeralKey> mFactory;
 
     @Nullable private TEphemeralKey mEphemeralKey;
 
@@ -27,8 +27,8 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
             @NonNull OperationIdFactory operationIdFactory,
-            @NonNull Class<TEphemeralKey> ephemeralKeyClass) {
-        mEphemeralKeyClass = ephemeralKeyClass;
+            @NonNull EphemeralKey.Factory<TEphemeralKey> factory) {
+        mFactory = factory;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
@@ -50,12 +50,6 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         }
     }
 
-    @Nullable
-    @VisibleForTesting
-    TEphemeralKey getEphemeralKey() {
-        return mEphemeralKey;
-    }
-
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void updateKey(
             @NonNull String operationId,
@@ -71,7 +65,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
             return;
         }
         try {
-            mEphemeralKey = AbstractEphemeralKey.fromString(key, mEphemeralKeyClass);
+            mEphemeralKey = EphemeralKey.fromJson(new JSONObject(key), mFactory);
             mListener.onKeyUpdate(mEphemeralKey, operationId, actionString, arguments);
         } catch (JSONException e) {
             mListener.onKeyError(operationId,
@@ -79,14 +73,14 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
                     "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
                             "a value that could not be JSON parsed: ["
                             + e.getLocalizedMessage() + "]. The raw body from Stripe's response" +
-                            " should be passed");
+                            " should be passed.");
         } catch (Exception e) {
             mListener.onKeyError(operationId,
                     HttpURLConnection.HTTP_INTERNAL_ERROR,
                     "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
                             "a JSON String that was invalid: ["
                             + e.getLocalizedMessage() + "]. The raw body from Stripe's response" +
-                            " should be passed");
+                            " should be passed.");
         }
     }
 
@@ -97,7 +91,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
     }
 
     static boolean shouldRefreshKey(
-            @Nullable AbstractEphemeralKey key,
+            @Nullable EphemeralKey key,
             long bufferInSeconds,
             @Nullable Calendar proxyCalendar) {
         if (key == null) {
@@ -110,7 +104,7 @@ class EphemeralKeyManager<TEphemeralKey extends AbstractEphemeralKey> {
         return key.getExpires() < nowPlusBuffer;
     }
 
-    interface KeyManagerListener<TEphemeralKey extends AbstractEphemeralKey> {
+    interface KeyManagerListener<TEphemeralKey extends EphemeralKey> {
         void onKeyUpdate(@NonNull TEphemeralKey ephemeralKey, @NonNull String operationId,
                          @Nullable String action, @Nullable Map<String, Object> arguments);
 

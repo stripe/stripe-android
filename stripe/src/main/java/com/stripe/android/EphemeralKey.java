@@ -12,17 +12,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * Represents an Ephemeral Key that can be used temporarily for certain operations.
+ * Represents an Ephemeral Key that can be used temporarily for API operations that typically
+ * require a secret key.
+ *
+ * See <a href="https://stripe.com/docs/mobile/android/standard#prepare-your-api">
+ * Using Android Standard UI Components - Prepare your API</a> for more details on ephemeral keys.
  */
-abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelable {
+abstract class EphemeralKey extends StripeJsonModel implements Parcelable {
 
     static final String FIELD_CREATED = "created";
     static final String FIELD_EXPIRES = "expires";
@@ -32,7 +36,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     static final String FIELD_ID = "id";
     static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     static final String FIELD_TYPE = "type";
-    static final String NULL = "null";
 
     @NonNull final String mObjectId;
     private final long mCreated;
@@ -51,18 +54,18 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
      *
      * @param in the {@link Parcel} in which this Ephemeral Key has been stored.
      */
-    AbstractEphemeralKey(@NonNull Parcel in) {
+    EphemeralKey(@NonNull Parcel in) {
         mCreated = in.readLong();
-        mObjectId = in.readString();
+        mObjectId = Objects.requireNonNull(in.readString());
         mExpires = in.readLong();
-        mId = in.readString();
+        mId = Objects.requireNonNull(in.readString());
         mLiveMode = in.readInt() == 1;
-        mObject = in.readString();
-        mSecret = in.readString();
-        mType = in.readString();
+        mObject = Objects.requireNonNull(in.readString());
+        mSecret = Objects.requireNonNull(in.readString());
+        mType = Objects.requireNonNull(in.readString());
     }
 
-    AbstractEphemeralKey(
+    EphemeralKey(
             long created,
             @NonNull String objectId,
             long expires,
@@ -70,8 +73,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
             boolean liveMode,
             @NonNull String object,
             @NonNull String secret,
-            @NonNull String type
-    ) {
+            @NonNull String type) {
         mCreated = created;
         mObjectId = objectId;
         mExpires = expires;
@@ -80,21 +82,6 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
         mObject = object;
         mSecret = secret;
         mType = type;
-    }
-
-    AbstractEphemeralKey(@Nullable JSONObject jsonObject) throws JSONException {
-        mCreated = jsonObject.getLong(FIELD_CREATED);
-        mExpires = jsonObject.getLong(FIELD_EXPIRES);
-        mId = jsonObject.getString(FIELD_ID);
-        mLiveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
-        mObject = jsonObject.getString(FIELD_OBJECT);
-        mSecret = jsonObject.getString(FIELD_SECRET);
-
-        // Get the values from the associated objects array first element
-        JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
-        JSONObject typeObject = associatedObjectArray.getJSONObject(0);
-        mType = typeObject.getString(FIELD_TYPE);
-        mObjectId = typeObject.getString(FIELD_ID);
     }
 
     @NonNull
@@ -155,7 +142,7 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     /**
      * Write the object into a {@link Parcel}. Note that if the order of these
      * write operations is changed, an identical change must be made to
-     * {@link #AbstractEphemeralKey(Parcel)} constructor above.
+     * {@link #EphemeralKey(Parcel)} constructor above.
      *
      * @param out   a {@link Parcel} into which to write this object
      * @param flags any flags (unused) for writing this object
@@ -206,57 +193,32 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     }
 
     @NonNull
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromString(
-            @Nullable String rawJson, Class ephemeralKeyClass) throws JSONException {
-        if (rawJson == null) {
-            throw new IllegalArgumentException("Attempted to instantiate " +
-                    ephemeralKeyClass.getSimpleName() + " with null raw key");
-        }
-        JSONObject object = new JSONObject(rawJson);
-        return fromJson(object, ephemeralKeyClass);
-    }
+    protected static <TEphemeralKey extends EphemeralKey> TEphemeralKey fromJson(
+            @NonNull JSONObject jsonObject, @NonNull Factory<TEphemeralKey> factory)
+            throws JSONException {
+        final long created = jsonObject.getLong(FIELD_CREATED);
+        final long expires = jsonObject.getLong(FIELD_EXPIRES);
+        final String id = jsonObject.getString(FIELD_ID);
+        final boolean liveMode = jsonObject.getBoolean(FIELD_LIVEMODE);
+        final String object = jsonObject.getString(FIELD_OBJECT);
+        final String secret = jsonObject.getString(FIELD_SECRET);
 
-    @NonNull
-    protected static <TEphemeralKey extends AbstractEphemeralKey> TEphemeralKey fromJson(
-            @Nullable JSONObject jsonObject, Class ephemeralKeyClass) {
-        if (jsonObject == null) {
-            throw new IllegalArgumentException("Exception instantiating " +
-                    ephemeralKeyClass.getSimpleName() +
-                    " null JSON");
-        }
+        // Get the values from the associated objects array first element
+        final JSONArray associatedObjectArray = jsonObject.getJSONArray(FIELD_ASSOCIATED_OBJECTS);
+        final JSONObject typeObject = associatedObjectArray.getJSONObject(0);
+        final String type = typeObject.getString(FIELD_TYPE);
+        final String objectId = typeObject.getString(FIELD_ID);
 
-        try {
-            return (TEphemeralKey)
-                    ephemeralKeyClass.getConstructor(JSONObject.class).newInstance(jsonObject);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Exception instantiating " +
-                    ephemeralKeyClass.getSimpleName(), e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Exception instantiating " +
-                    ephemeralKeyClass.getSimpleName(), e);
-        } catch (InvocationTargetException e) {
-            if (e.getTargetException() != null) {
-                throw new IllegalArgumentException("Improperly formatted JSON for ephemeral key " +
-                        ephemeralKeyClass.getSimpleName() +
-                        " - " + e.getTargetException().getMessage(),
-                        e.getTargetException());
-            }
-            throw new IllegalArgumentException("Improperly formatted JSON for ephemeral key " +
-                    ephemeralKeyClass.getSimpleName(), e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " +
-                    ephemeralKeyClass.getSimpleName() +
-                    " does not have an accessible (JSONObject) constructor", e);
-        }
+        return factory.create(created, objectId, expires, id, liveMode, object, secret, type);
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
         return this == obj
-                || (obj instanceof AbstractEphemeralKey && typedEquals((AbstractEphemeralKey) obj));
+                || (obj instanceof EphemeralKey && typedEquals((EphemeralKey) obj));
     }
 
-    private boolean typedEquals(@NonNull AbstractEphemeralKey ephemeralKey) {
+    private boolean typedEquals(@NonNull EphemeralKey ephemeralKey) {
         return ObjectUtils.equals(mObjectId, ephemeralKey.mObjectId)
                 && mCreated == ephemeralKey.mCreated
                 && mExpires == ephemeralKey.mExpires
@@ -271,5 +233,12 @@ abstract class AbstractEphemeralKey extends StripeJsonModel implements Parcelabl
     public int hashCode() {
         return ObjectUtils.hash(mObjectId, mCreated, mExpires, mId, mLiveMode, mObject, mSecret,
                 mType);
+    }
+
+    abstract static class Factory<TEphemeralKey extends EphemeralKey> {
+        @NonNull
+        abstract TEphemeralKey create(long created, @NonNull String objectId, long expires,
+                                      @NonNull String id, boolean liveMode, @NonNull String object,
+                                      @NonNull String secret, @NonNull String type);
     }
 }

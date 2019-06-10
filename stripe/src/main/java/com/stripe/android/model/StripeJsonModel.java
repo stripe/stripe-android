@@ -23,6 +23,12 @@ public abstract class StripeJsonModel {
     @NonNull
     public abstract JSONObject toJson();
 
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(@Nullable Object obj);
+
     static void putStripeJsonModelMapIfNotNull(
             @NonNull Map<String, Object> upperLevelMap,
             @NonNull @Size(min = 1) String key,
@@ -62,7 +68,6 @@ public abstract class StripeJsonModel {
         }
         upperLevelMap.put(key, mapList);
     }
-
 
     static void putStripeJsonModelListIfNotNull(
             @NonNull JSONObject jsonObject,

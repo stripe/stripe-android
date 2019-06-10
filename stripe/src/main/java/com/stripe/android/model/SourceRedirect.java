@@ -24,7 +24,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
  * Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-redirect">
  *     redirect</a> object in the source api.
  */
-public class SourceRedirect extends StripeJsonModel {
+public final class SourceRedirect extends StripeJsonModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -43,9 +43,9 @@ public class SourceRedirect extends StripeJsonModel {
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_URL = "url";
 
-    @Nullable private String mReturnUrl;
-    @Nullable @Status private String mStatus;
-    @Nullable private String mUrl;
+    @Nullable private final String mReturnUrl;
+    @Nullable @Status private final String mStatus;
+    @Nullable private final String mUrl;
 
     private SourceRedirect(@Nullable String returnUrl, @Status @Nullable String status,
                            @Nullable String url) {
@@ -59,27 +59,15 @@ public class SourceRedirect extends StripeJsonModel {
         return mReturnUrl;
     }
 
-    public void setReturnUrl(@Nullable String returnUrl) {
-        mReturnUrl = returnUrl;
-    }
-
     @Nullable
     @Status
     public String getStatus() {
         return mStatus;
     }
 
-    public void setStatus(@Nullable @Status String status) {
-        mStatus = status;
-    }
-
     @Nullable
     public String getUrl() {
         return mUrl;
-    }
-
-    public void setUrl(@Nullable String url) {
-        mUrl = url;
     }
 
     @NonNull

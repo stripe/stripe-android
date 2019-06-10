@@ -28,7 +28,7 @@ import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 /**
  * Model for data contained in the SourceTypeData of a Card Source.
  */
-public class SourceCardData extends StripeSourceTypeModel {
+public final class SourceCardData extends StripeSourceTypeModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

@@ -15,7 +15,7 @@ import static com.stripe.android.model.Source.SourceType;
 /**
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.
  */
-public class SourceParams {
+public final class SourceParams {
 
     private static final String API_PARAM_AMOUNT = "amount";
     private static final String API_PARAM_CURRENCY = "currency";
@@ -246,7 +246,7 @@ public class SourceParams {
      * @return a {@link SourceParams} object that can be used to create a source.
      */
     @NonNull
-    public static SourceParams createSourceFromTokenParams(String tokenId) {
+    public static SourceParams createSourceFromTokenParams(@NonNull String tokenId) {
         SourceParams sourceParams = SourceParams.createCustomParams();
         sourceParams.setType(Source.CARD);
         sourceParams.setToken(tokenId);
