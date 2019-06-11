@@ -29,6 +29,7 @@ import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
@@ -97,6 +98,8 @@ public class PaymentActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.progress_bar);
         mCartItemLayout = findViewById(R.id.cart_list_items);
 
+        setupPaymentSession();
+
         addCartItems();
 
         mConfirmPaymentButton = findViewById(R.id.btn_purchase);
@@ -111,8 +114,6 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
                         new AttemptPurchaseCustomerRetrievalListener(
                                 PaymentActivity.this))));
-
-        setupPaymentSession();
 
         mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
                 .isPaymentReadyToCharge());
@@ -149,6 +150,19 @@ public class PaymentActivity extends AppCompatActivity {
                 Locale.US.getCountry().equals(shippingInfo.getAddress().getCountry());
     }
 
+    @NonNull
+    private ShippingInformation getExampleShippingInfo() {
+        final Address address = new Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .build();
+        return new ShippingInformation(address, "Fake Name", "(555) 555-5555");
+    }
+
     /*
      * Cleaning up all Rx subscriptions in onDestroy.
      */
@@ -174,7 +188,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(@NonNull Exception e) {
-                        finishPayment();
+                        displayError(e.getMessage());
                     }
                 });
 
@@ -184,7 +198,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void updateConfirmPaymentButton() {
-        long price = mStoreCart.getTotalPrice();
+        final long price = mPaymentSession.getPaymentSessionData().getCartTotal();
 
         mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
                 "Pay %s", StoreUtils.getPriceString(price, null)));
@@ -218,7 +232,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void setupTotalPriceView(@NonNull View view, @NonNull String currencySymbol) {
         final TextView[] itemViews = getItemViews(view);
-        final long totalPrice = mStoreCart.getTotalPrice() + mShippingCosts;
+        final long totalPrice = mPaymentSession.getPaymentSessionData().getCartTotal();
         itemViews[0].setText(getString(R.string.checkout_total_cost_label));
         final String price = PayWithGoogleUtils.getPriceString(totalPrice,
                 mStoreCart.getCurrency());
@@ -258,37 +272,26 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createCapturePaymentParams(
-            long price,
-            @NonNull String paymentMethodId,
-            @NonNull String customerId,
-            @Nullable ShippingInformation shippingInformation) {
+    private Map<String, Object> createCapturePaymentParams(@NonNull PaymentSessionData data,
+                                                           @NonNull String customerId) {
         final AbstractMap<String, Object> params = new HashMap<>();
-        params.put("amount", Long.toString(price));
-        params.put("payment_method", paymentMethodId);
+        params.put("amount", Long.toString(data.getCartTotal()));
+        params.put("payment_method", Objects.requireNonNull(data.getPaymentMethod()).id);
         params.put("customer_id", customerId);
-        params.put("shipping", shippingInformation != null ? shippingInformation.toMap() : null);
+        params.put("shipping", data.getShippingInformation() != null ?
+                data.getShippingInformation().toMap() : null);
         params.put("return_url", "stripe://payment-auth-return");
         return params;
     }
 
     private void capturePayment(@NonNull String customerId) {
-        final long price = mStoreCart.getTotalPrice() + mShippingCosts;
-
-        final PaymentMethod paymentMethod =
-                mPaymentSession.getPaymentSessionData().getPaymentMethod();
-
-        if (paymentMethod == null) {
+        if (mPaymentSession.getPaymentSessionData().getPaymentMethod() == null) {
             displayError("No payment method selected");
             return;
         }
 
-        final ShippingInformation shippingInformation = mPaymentSession.getPaymentSessionData()
-                .getShippingInformation();
-
         final Observable<ResponseBody> stripeResponse = mService.capturePayment(
-                createCapturePaymentParams(price, Objects.requireNonNull(paymentMethod.id),
-                        customerId, shippingInformation));
+                createCapturePaymentParams(mPaymentSession.getPaymentSessionData(), customerId));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -310,13 +313,14 @@ public class PaymentActivity extends AppCompatActivity {
     private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
             mStripe.authenticatePayment(this, paymentIntent);
-            return;
         } else if (paymentIntent.requiresConfirmation()) {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
-            return;
+        } else if (paymentIntent.getStatus() == PaymentIntent.Status.Succeeded) {
+            finishPayment();
+        } else {
+            displayError(
+                    "Unhandled Payment Intent Status: " + paymentIntent.getStatus().toString());
         }
-
-        finishPayment();
     }
 
     private void confirmPaymentIntent(@NonNull String paymentIntentId) {
@@ -339,6 +343,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void finishPayment() {
+        mPaymentSession.onCompleted();
         final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
@@ -348,7 +353,9 @@ public class PaymentActivity extends AppCompatActivity {
     private void setupPaymentSession() {
         mPaymentSession = new PaymentSession(this);
         mPaymentSession.init(new PaymentSessionListenerImpl(this),
-                new PaymentSessionConfig.Builder().build());
+                new PaymentSessionConfig.Builder()
+                        .setPrepopulatedShippingInfo(getExampleShippingInfo()).build());
+        mPaymentSession.setCartTotal(mStoreCart.getTotalPrice());
     }
 
     private void startLoading() {
@@ -393,6 +400,7 @@ public class PaymentActivity extends AppCompatActivity {
         if (data.getShippingMethod() != null) {
             mEnterShippingInfo.setText(data.getShippingMethod().getLabel());
             mShippingCosts = data.getShippingMethod().getAmount();
+            mPaymentSession.setCartTotal(mStoreCart.getTotalPrice() + mShippingCosts);
             addCartItems();
             updateConfirmPaymentButton();
         }

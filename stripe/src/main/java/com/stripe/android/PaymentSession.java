@@ -65,23 +65,10 @@ public class PaymentSession {
     }
 
     /**
-     * Complete a payment using the given provider.
-     * @param provider a {@link PaymentCompletionProvider} that connects to a server and completes
-     *                 a charge on a background thread.
+     * Notify this payment session that it is complete
      */
-    public void completePayment(@NonNull PaymentCompletionProvider provider) {
-        provider.completePayment(mPaymentSessionData,
-                new PaymentResultListener() {
-                    @Override
-                    public void onPaymentResult(@NonNull @PaymentResult String paymentResult) {
-                        mPaymentSessionData.setPaymentResult(paymentResult);
-                        mCustomerSession.resetUsageTokens();
-                        if (mPaymentSessionListener != null) {
-                            mPaymentSessionListener
-                                    .onPaymentSessionDataChanged(mPaymentSessionData);
-                        }
-                    }
-                });
+    public void onCompleted() {
+        mCustomerSession.resetUsageTokens();
     }
 
     /**

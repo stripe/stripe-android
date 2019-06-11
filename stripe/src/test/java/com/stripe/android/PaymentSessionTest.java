@@ -277,20 +277,8 @@ public class PaymentSessionTest {
         assertEquals(2, loggingTokens.size());
 
         reset(mPaymentSessionListener);
-        paymentSession.completePayment(new PaymentCompletionProvider() {
-            @Override
-            public void completePayment(@NonNull PaymentSessionData data,
-                                        @NonNull PaymentResultListener listener) {
-                listener.onPaymentResult(PaymentResultListener.SUCCESS);
-            }
-        });
 
-        ArgumentCaptor<PaymentSessionData> dataArgumentCaptor =
-                ArgumentCaptor.forClass(PaymentSessionData.class);
-        verify(mPaymentSessionListener).onPaymentSessionDataChanged(dataArgumentCaptor.capture());
-        PaymentSessionData capturedData = dataArgumentCaptor.getValue();
-        assertNotNull(capturedData);
-        assertEquals(PaymentResultListener.SUCCESS, capturedData.getPaymentResult());
+        paymentSession.onCompleted();
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
     }
 
