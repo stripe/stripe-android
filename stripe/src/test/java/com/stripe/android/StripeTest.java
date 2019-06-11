@@ -1265,7 +1265,7 @@ public class StripeTest {
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull String publishableKey) {
         final StripeApiHandler apiHandler =
-                new StripeApiHandler(mContext, new RequestExecutor(), false);
+                new StripeApiHandler(mContext, new RequestExecutor(), false, null);
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1276,7 +1276,7 @@ public class StripeTest {
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull Stripe.TokenCreator tokenCreator) {
         final StripeApiHandler apiHandler =
-                new StripeApiHandler(mContext, new RequestExecutor(), false);
+                new StripeApiHandler(mContext, new RequestExecutor(), false, null);
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),

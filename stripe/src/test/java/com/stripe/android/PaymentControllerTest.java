@@ -46,7 +46,7 @@ public class PaymentControllerTest {
 
     private static final PaymentAuthConfig CONFIG = new PaymentAuthConfig.Builder()
             .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
-                    .setTimeout(10)
+                    .setTimeout(5)
                     .build())
             .build();
 

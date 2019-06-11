@@ -149,8 +149,7 @@ public class TokenTest {
 
     @Test
     public void parseToken_whenNullString_returnsNull() {
-        Token parsedToken = Token.fromString(null);
-        assertNull(parsedToken);
+        assertNull(Token.fromString(null));
     }
 
     @Test
@@ -161,7 +160,7 @@ public class TokenTest {
                 false,
                 createdDate,
                 false,
-                (BankAccount) null);
+                new BankAccount("11", "US", "usd", "22"));
         Token answerToken = Token.fromString(RAW_BANK_TOKEN);
         assertNotNull(answerToken);
         assertEquals(expectedToken.getId(), answerToken.getId());

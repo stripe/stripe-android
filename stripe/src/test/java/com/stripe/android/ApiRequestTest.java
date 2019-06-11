@@ -32,7 +32,7 @@ public class ApiRequestTest {
         final Map<String, String> headerMap =
                 ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
                         ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                                stripeAccount))
+                                stripeAccount), null)
                         .getHeaders();
 
         assertNotNull(headerMap);
@@ -46,7 +46,7 @@ public class ApiRequestTest {
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         final Map<String, String> headerMap =
                 ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
         assertTrue(headerMap.containsKey("Stripe-Version"));
@@ -58,7 +58,7 @@ public class ApiRequestTest {
     public void getHeaders_containsPropertyMapValues() throws JSONException {
         final Map<String, String> headers =
                 ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
         final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
@@ -75,7 +75,7 @@ public class ApiRequestTest {
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
         final Map<String, String> headerMap =
                 ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
         final String expectedUserAgent =
@@ -95,7 +95,7 @@ public class ApiRequestTest {
         final String expectedValue = "product_usage=&card%5Bnumber%5D=4242424242424242&card%5B" +
                 "cvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
         final String query = ApiRequest.createGet(StripeApiHandler.getSourcesUrl(), cardMap,
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .createQuery();
         assertEquals(expectedValue, query);
     }
@@ -103,7 +103,7 @@ public class ApiRequestTest {
     @Test
     public void getContentType() {
         final String contentType = ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getContentType();
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType);
     }
@@ -112,7 +112,7 @@ public class ApiRequestTest {
     public void getOutputBytes_withEmptyBody_shouldHaveZeroLength()
             throws UnsupportedEncodingException, InvalidRequestException {
         final byte[] output = ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getOutputBytes();
         assertEquals(0, output.length);
     }
@@ -125,7 +125,7 @@ public class ApiRequestTest {
 
         final byte[] output = ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
                 params,
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getOutputBytes();
         assertEquals(16, output.length);
     }
@@ -137,20 +137,41 @@ public class ApiRequestTest {
         assertEquals(
                 ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
                         params,
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)),
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
                 ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
                         params,
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
         );
 
         assertNotEquals(
                 ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
                         params,
-                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)),
+                        ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
                 ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
                         params,
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                                "acct"))
+                                "acct"), null)
         );
+    }
+
+    @Test
+    public void getHeaders_withAppInfo() throws JSONException {
+        final ApiRequest apiRequest = new ApiRequest(StripeRequest.Method.GET,
+                StripeApiHandler.getPaymentMethodsUrl(), null,
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                AppInfoTest.APP_INFO);
+        final Map<String, String> headers = apiRequest.getHeaders();
+        assertEquals(
+                "Stripe/v1 AndroidBindings/9.2.0 " +
+                        "MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+                headers.get("User-Agent"));
+
+        final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
+        assertEquals(
+                "{\"name\":\"MyAwesomePlugin\"," +
+                        "\"partnerId\":\"pp_partner_1234\"," +
+                        "\"version\":\"1.2.34\"," +
+                        "\"url\":\"https:\\/\\/myawesomeplugin.info\"}",
+                userAgentData.getString("application"));
     }
 }

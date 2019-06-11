@@ -49,20 +49,27 @@ class StripeApiHandler {
     @NonNull private final StripeNetworkUtils mNetworkUtils;
     @NonNull private final RequestExecutor mRequestExecutor;
     private final boolean mShouldLogRequest;
+    @Nullable private final AppInfo mAppInfo;
 
     StripeApiHandler(@NonNull Context context) {
-        this(context.getApplicationContext(), new RequestExecutor(), true);
+        this(context, null);
+    }
+
+    StripeApiHandler(@NonNull Context context, @Nullable AppInfo appInfo) {
+        this(context.getApplicationContext(), new RequestExecutor(), true, appInfo);
     }
 
     @VisibleForTesting
     StripeApiHandler(@NonNull Context context,
                      @NonNull RequestExecutor requestExecutor,
-                     boolean shouldLogRequest) {
+                     boolean shouldLogRequest,
+                     @Nullable AppInfo appInfo) {
         mRequestExecutor = requestExecutor;
         mShouldLogRequest = shouldLogRequest;
         mLoggingUtils = new LoggingUtils(context);
         mTelemetryClientUtil = new TelemetryClientUtil(context);
         mNetworkUtils = new StripeNetworkUtils(context);
+        mAppInfo = appInfo;
     }
 
     /**
@@ -77,7 +84,7 @@ class StripeApiHandler {
 
         return makeFireAndForgetRequest(
                 ApiRequest.createAnalyticsRequest(loggingMap,
-                        ApiRequest.Options.create(publishableKey)));
+                        ApiRequest.Options.create(publishableKey), mAppInfo));
     }
 
     /**
@@ -111,7 +118,7 @@ class StripeApiHandler {
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = makeApiRequest(ApiRequest.createPost(
-                    getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options));
+                    getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options, mAppInfo));
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -142,7 +149,7 @@ class StripeApiHandler {
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(paymentIntentParams.getClientSecret()));
             final StripeResponse response = makeApiRequest(ApiRequest.createGet(
-                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options));
+                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options, mAppInfo));
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -180,7 +187,7 @@ class StripeApiHandler {
                             sourceParams.getType()),
                     options.apiKey);
             final StripeResponse response = makeApiRequest(
-                    ApiRequest.createPost(getSourcesUrl(), paramMap, options));
+                    ApiRequest.createPost(getSourcesUrl(), paramMap, options, mAppInfo));
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -214,8 +221,8 @@ class StripeApiHandler {
         final Map<String, String> paramMap = SourceParams.createRetrieveSourceParams(clientSecret);
         try {
             final StripeResponse response = makeApiRequest(
-                    ApiRequest.createGet(getRetrieveSourceApiUrl(sourceId), paramMap,
-                            options));
+                    ApiRequest.createGet(getRetrieveSourceApiUrl(sourceId), paramMap, options,
+                            mAppInfo));
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -243,7 +250,7 @@ class StripeApiHandler {
 
         try {
             final StripeResponse response = makeApiRequest(
-                    ApiRequest.createPost(getPaymentMethodsUrl(), params, options));
+                    ApiRequest.createPost(getPaymentMethodsUrl(), params, options, mAppInfo));
             return PaymentMethod.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
@@ -323,7 +330,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getAddCustomerSourceUrl(customerId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -351,7 +358,7 @@ class StripeApiHandler {
         final StripeResponse response = getStripeResponse(
                 ApiRequest.createDelete(
                         getDeleteCustomerSourceUrl(customerId, sourceId),
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -384,7 +391,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getAttachPaymentMethodUrl(paymentMethodId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -411,7 +418,7 @@ class StripeApiHandler {
         final StripeResponse response = getStripeResponse(
                 ApiRequest.createPost(
                         getDetachPaymentMethodUrl(paymentMethodId),
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -447,7 +454,7 @@ class StripeApiHandler {
                 ApiRequest.createGet(
                         getPaymentMethodsUrl(),
                         queryParams,
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -492,7 +499,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -525,7 +532,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey))
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -541,9 +548,8 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         final StripeResponse response = getStripeResponse(
-                ApiRequest.createGet(
-                        getRetrieveCustomerUrl(customerId),
-                        ApiRequest.Options.create(ephemeralKey))
+                ApiRequest.createGet(getRetrieveCustomerUrl(customerId),
+                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
@@ -573,10 +579,8 @@ class StripeApiHandler {
         params.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
         StripeResponse response = getStripeResponse(
-                ApiRequest.createGet(
-                        getIssuingCardPinUrl(cardId),
-                        params,
-                        ApiRequest.Options.create(ephemeralKeySecret))
+                ApiRequest.createGet(getIssuingCardPinUrl(cardId), params,
+                        ApiRequest.Options.create(ephemeralKeySecret), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -603,7 +607,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                 getIssuingCardPinUrl(cardId),
                 params,
-                ApiRequest.Options.create(ephemeralKeySecret))
+                ApiRequest.Options.create(ephemeralKeySecret), mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -619,7 +623,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getApiUrl("3ds2/authenticate"),
                         authParams.toParamMap(),
-                        ApiRequest.Options.create(publishableKey))
+                        ApiRequest.Options.create(publishableKey), mAppInfo)
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Stripe3ds2AuthResult.fromJson(new JSONObject(response.getResponseBody()));
@@ -644,7 +648,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getApiUrl("3ds2/challenge_complete"),
                         params,
-                        ApiRequest.Options.create(publishableKey))
+                        ApiRequest.Options.create(publishableKey), mAppInfo)
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return response.isOk();
@@ -1012,7 +1016,8 @@ class StripeApiHandler {
             @NonNull ApiRequest.Options options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-        final StripeResponse response = makeApiRequest(ApiRequest.createPost(url, params, options));
+        final StripeResponse response = makeApiRequest(ApiRequest.createPost(url, params, options,
+                mAppInfo));
         return Token.fromString(response.getResponseBody());
     }
 

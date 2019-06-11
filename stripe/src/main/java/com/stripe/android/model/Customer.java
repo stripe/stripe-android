@@ -19,15 +19,11 @@ import java.util.Map;
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putBooleanIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putIntegerIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putObjectIfNotNull;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for a Stripe Customer object
  */
-public final class Customer extends StripeJsonModel {
+public final class Customer extends StripeModel {
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_OBJECT = "object";
@@ -83,6 +79,7 @@ public final class Customer extends StripeJsonModel {
         return mSources;
     }
 
+    @Nullable
     public Boolean getHasMore() {
         return mHasMore;
     }
@@ -107,48 +104,25 @@ public final class Customer extends StripeJsonModel {
 
     @NonNull
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_ID, mId);
-        putStringIfNotNull(jsonObject, FIELD_OBJECT, VALUE_CUSTOMER);
-        putStringIfNotNull(jsonObject, FIELD_DEFAULT_SOURCE, mDefaultSource);
-        StripeJsonModel.putStripeJsonModelIfNotNull(jsonObject,
-                FIELD_SHIPPING,
-                mShippingInformation);
-        JSONObject sourcesObject = new JSONObject();
-        putStringIfNotNull(sourcesObject, FIELD_OBJECT, VALUE_LIST);
-        putBooleanIfNotNull(sourcesObject, FIELD_HAS_MORE, mHasMore);
-        putIntegerIfNotNull(sourcesObject, FIELD_TOTAL_COUNT, mTotalCount);
-        putStripeJsonModelListIfNotNull(sourcesObject, FIELD_DATA, mSources);
-        putStringIfNotNull(sourcesObject, FIELD_URL, mUrl);
-
-        putObjectIfNotNull(jsonObject, FIELD_SOURCES, sourcesObject);
-
-        return jsonObject;
-    }
-
-    @NonNull
-    @Override
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_ID, mId);
         map.put(FIELD_OBJECT, VALUE_CUSTOMER);
         map.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
-
-        StripeJsonModel.putStripeJsonModelMapIfNotNull(
-                map,
-                FIELD_SHIPPING,
-                mShippingInformation);
+        if (mShippingInformation != null) {
+            map.put(FIELD_SHIPPING, mShippingInformation.toMap());
+        }
 
         final AbstractMap<String, Object> sourcesObject = new HashMap<>();
         sourcesObject.put(FIELD_HAS_MORE, mHasMore);
         sourcesObject.put(FIELD_TOTAL_COUNT, mTotalCount);
         sourcesObject.put(FIELD_OBJECT, VALUE_LIST);
         sourcesObject.put(FIELD_URL, mUrl);
-        StripeJsonModel.putStripeJsonModelListIfNotNull(
-                sourcesObject,
-                FIELD_DATA,
-                mSources);
+        final List<Map<String, Object>> sourcesMaps = new ArrayList<>(mSources.size());
+        for (int i = 0; i < mSources.size(); i++) {
+            sourcesMaps.add(mSources.get(i).toMap());
+        }
+        sourcesObject.put(FIELD_DATA, sourcesMaps);
         StripeNetworkUtils.removeNullAndEmptyParams(sourcesObject);
 
         map.put(FIELD_SOURCES, sourcesObject);

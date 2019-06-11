@@ -3,6 +3,7 @@ package com.stripe.android;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.utils.ObjectUtils;
@@ -24,52 +25,66 @@ final class ApiRequest extends StripeRequest {
 
     private static final String ANALYTICS_HOST = "https://q.stripe.com";
 
-    @NonNull final Options options;
+    private static final String DEFAULT_USER_AGENT =
+            String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
+                    BuildConfig.VERSION_NAME);
 
-    private ApiRequest(@NonNull Method method,
-                       @NonNull String url,
-                       @Nullable Map<String, ?> params,
-                       @NonNull Options options) {
+    @NonNull final Options options;
+    @Nullable private final AppInfo mAppInfo;
+
+    @VisibleForTesting
+    ApiRequest(@NonNull Method method,
+               @NonNull String url,
+               @Nullable Map<String, ?> params,
+               @NonNull Options options,
+               @Nullable AppInfo appInfo) {
         super(method, url, params, MIME_TYPE);
         this.options = options;
+        mAppInfo = appInfo;
     }
 
     @NonNull
     static ApiRequest createGet(@NonNull String url,
-                                @NonNull Options options) {
-        return new ApiRequest(Method.GET, url, null, options);
+                                @NonNull Options options,
+                                @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createGet(@NonNull String url,
                                 @NonNull Map<String, ?> params,
-                                @NonNull Options options) {
-        return new ApiRequest(Method.GET, url, params, options);
+                                @NonNull Options options,
+                                @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, url, params, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createPost(@NonNull String url,
-                                 @NonNull Options options) {
-        return new ApiRequest(Method.POST, url, null, options);
+                                 @NonNull Options options,
+                                 @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.POST, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createPost(@NonNull String url,
                                  @NonNull Map<String, ?> params,
-                                 @NonNull Options options) {
-        return new ApiRequest(Method.POST, url, params, options);
+                                 @NonNull Options options,
+                                 @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.POST, url, params, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createDelete(@NonNull String url,
-                                   @NonNull Options options) {
-        return new ApiRequest(Method.DELETE, url, null, options);
+                                   @NonNull Options options,
+                                   @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.DELETE, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createAnalyticsRequest(@NonNull Map<String, ?> params,
-                                             @NonNull Options options) {
-        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, options);
+                                             @NonNull Options options,
+                                             @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, options, appInfo);
     }
 
     @NonNull
@@ -78,9 +93,14 @@ final class ApiRequest extends StripeRequest {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
-        headers.put("User-Agent",
-                String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                        BuildConfig.VERSION_NAME));
+
+        final StringBuilder userAgent = new StringBuilder(DEFAULT_USER_AGENT);
+        if (mAppInfo != null) {
+            userAgent
+                    .append(" ")
+                    .append(mAppInfo.toUserAgent());
+        }
+        headers.put("User-Agent", userAgent.toString());
 
         // debug headers
         final AbstractMap<String, String> propertyMap = new HashMap<>();
@@ -90,6 +110,9 @@ final class ApiRequest extends StripeRequest {
         propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);
         propertyMap.put("lang", "Java");
         propertyMap.put("publisher", "Stripe");
+        if (mAppInfo != null) {
+            propertyMap.putAll(mAppInfo.createClientHeaders());
+        }
 
         headers.put("X-Stripe-Client-User-Agent", new JSONObject(propertyMap).toString());
         headers.put("Stripe-Version", ApiVersion.getDefault().getCode());
@@ -110,7 +133,7 @@ final class ApiRequest extends StripeRequest {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(getBaseHashCode(), options);
+        return ObjectUtils.hash(getBaseHashCode(), options, mAppInfo);
     }
 
     @Override
@@ -120,7 +143,9 @@ final class ApiRequest extends StripeRequest {
     }
 
     private boolean typedEquals(@NonNull ApiRequest obj) {
-        return super.typedEquals(obj) && ObjectUtils.equals(options, obj.options);
+        return super.typedEquals(obj) &&
+                ObjectUtils.equals(options, obj.options) &&
+                ObjectUtils.equals(mAppInfo, obj.mAppInfo);
     }
 
     /**

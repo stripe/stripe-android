@@ -15,12 +15,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model representing a shipping address object
  */
-public final class ShippingInformation extends StripeJsonModel implements Parcelable {
+public final class ShippingInformation extends StripeModel implements Parcelable {
     public static final Creator<ShippingInformation> CREATOR = new Creator<ShippingInformation>() {
         @Override
         public ShippingInformation createFromParcel(Parcel source) {
@@ -87,21 +86,13 @@ public final class ShippingInformation extends StripeJsonModel implements Parcel
 
     @NonNull
     @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_NAME, mName);
-        putStringIfNotNull(jsonObject, FIELD_PHONE, mPhone);
-        putStripeJsonModelIfNotNull(jsonObject, FIELD_ADDRESS, mAddress);
-        return jsonObject;
-    }
-
-    @NonNull
-    @Override
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_NAME, mName);
         map.put(FIELD_PHONE, mPhone);
-        putStripeJsonModelMapIfNotNull(map, FIELD_ADDRESS, mAddress);
+        if (mAddress != null) {
+            map.put(FIELD_ADDRESS, mAddress.toMap());
+        }
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
     }

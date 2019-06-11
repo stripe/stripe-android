@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.StripeJsonModel;
+import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
@@ -26,7 +26,7 @@ import java.util.Objects;
  * See <a href="https://stripe.com/docs/mobile/android/standard#prepare-your-api">
  * Using Android Standard UI Components - Prepare your API</a> for more details on ephemeral keys.
  */
-abstract class EphemeralKey extends StripeJsonModel implements Parcelable {
+abstract class EphemeralKey extends StripeModel implements Parcelable {
 
     static final String FIELD_CREATED = "created";
     static final String FIELD_EXPIRES = "expires";
@@ -82,35 +82,6 @@ abstract class EphemeralKey extends StripeJsonModel implements Parcelable {
         mObject = object;
         mSecret = secret;
         mType = type;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        JSONArray associatedObjectsArray = new JSONArray();
-        JSONObject associatedObject = new JSONObject();
-
-        try {
-            jsonObject.put(FIELD_CREATED, mCreated);
-            jsonObject.put(FIELD_EXPIRES, mExpires);
-            jsonObject.put(FIELD_OBJECT, mObject);
-            jsonObject.put(FIELD_ID, mId);
-            jsonObject.put(FIELD_SECRET, mSecret);
-            jsonObject.put(FIELD_LIVEMODE, mLiveMode);
-
-            associatedObject.put(FIELD_TYPE, mType);
-            associatedObject.put(FIELD_ID, mObjectId);
-            associatedObjectsArray.put(associatedObject);
-
-            jsonObject.put(FIELD_ASSOCIATED_OBJECTS, associatedObjectsArray);
-        } catch (JSONException impossible) {
-            // An exception can only be thrown from put operations if the key is null
-            // or the value is a non-finite number.
-            throw new IllegalArgumentException("JSONObject creation exception thrown.");
-        }
-
-        return jsonObject;
     }
 
     @NonNull

@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'checkstyle'
+
+check.dependsOn('checkstyle')
+
+dependencies {
+    implementation 'org.jetbrains:annotations:17.0.0'
+    testImplementation 'junit:junit:4.13-beta-3'
+}

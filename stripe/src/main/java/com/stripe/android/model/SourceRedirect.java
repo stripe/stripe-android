@@ -18,13 +18,12 @@ import java.util.Map;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-redirect">
  *     redirect</a> object in the source api.
  */
-public final class SourceRedirect extends StripeJsonModel {
+public final class SourceRedirect extends StripeModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -79,16 +78,6 @@ public final class SourceRedirect extends StripeJsonModel {
         map.put(FIELD_URL, mUrl);
         removeNullAndEmptyParams(map);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        putStringIfNotNull(jsonObject, FIELD_RETURN_URL, mReturnUrl);
-        putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-        putStringIfNotNull(jsonObject, FIELD_URL, mUrl);
-        return jsonObject;
     }
 
     @Nullable

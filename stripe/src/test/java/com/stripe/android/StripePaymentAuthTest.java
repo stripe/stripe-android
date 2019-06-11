@@ -80,7 +80,8 @@ public class StripePaymentAuthTest {
                 new StripeApiHandler(
                         mContext,
                         new RequestExecutor(),
-                        false),
+                        false,
+                        null),
                 new StripeNetworkUtils(mContext),
                 mPaymentController,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY

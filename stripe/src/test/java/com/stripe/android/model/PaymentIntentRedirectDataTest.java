@@ -24,7 +24,8 @@ public class PaymentIntentRedirectDataTest {
         redirectMap.put(PaymentIntent.RedirectData.FIELD_URL, url);
         redirectMap.put(PaymentIntent.RedirectData.FIELD_RETURN_URL, returnUrl);
 
-        final PaymentIntent.RedirectData redirectData = PaymentIntent.RedirectData.create(redirectMap);
+        final PaymentIntent.RedirectData redirectData =
+                PaymentIntent.RedirectData.create(redirectMap);
         assertNotNull(redirectData);
         assertEquals(Uri.parse(url), redirectData.url);
         assertEquals(Uri.parse(returnUrl), redirectData.returnUrl);

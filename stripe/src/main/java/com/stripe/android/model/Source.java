@@ -19,17 +19,16 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
-import static com.stripe.android.model.StripeJsonUtils.mapToJsonObject;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
-import static com.stripe.android.model.StripeJsonUtils.putStringIfNotNull;
 
 /**
  * A model class representing a source in the Android SDK. More detailed information and interaction
  * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
  * https://stripe.com/docs/api/sources/object?lang=java</a>.
  */
-public final class Source extends StripeJsonModel implements StripePaymentSource {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public final class Source extends StripeModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
     private static final String VALUE_CARD = "card";
@@ -358,10 +357,12 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_ID, mId);
+        map.put(FIELD_OBJECT, VALUE_SOURCE);
         map.put(FIELD_AMOUNT, mAmount);
         map.put(FIELD_CLIENT_SECRET, mClientSecret);
-
-        putStripeJsonModelMapIfNotNull(map, FIELD_CODE_VERIFICATION, mCodeVerification);
+        if (mCodeVerification != null) {
+            map.put(FIELD_CODE_VERIFICATION, mCodeVerification.toMap());
+        }
 
         map.put(FIELD_CREATED, mCreated);
         map.put(FIELD_CURRENCY, mCurrency);
@@ -369,9 +370,15 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
         map.put(FIELD_LIVEMODE, mLiveMode);
         map.put(FIELD_METADATA, mMetaData);
 
-        putStripeJsonModelMapIfNotNull(map, FIELD_OWNER, mOwner);
-        putStripeJsonModelMapIfNotNull(map, FIELD_RECEIVER, mReceiver);
-        putStripeJsonModelMapIfNotNull(map, FIELD_REDIRECT, mRedirect);
+        if (mOwner != null) {
+            map.put(FIELD_OWNER, mOwner.toMap());
+        }
+        if (mReceiver != null) {
+            map.put(FIELD_RECEIVER, mReceiver.toMap());
+        }
+        if (mRedirect != null) {
+            map.put(FIELD_REDIRECT, mRedirect.toMap());
+        }
 
         map.put(mTypeRaw, mSourceTypeData);
 
@@ -380,43 +387,6 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
         map.put(FIELD_USAGE, mUsage);
         removeNullAndEmptyParams(map);
         return map;
-    }
-
-    @NonNull
-    @Override
-    public JSONObject toJson() {
-        final JSONObject jsonObject = new JSONObject();
-        try {
-            putStringIfNotNull(jsonObject, FIELD_ID, mId);
-            jsonObject.put(FIELD_OBJECT, VALUE_SOURCE);
-            jsonObject.put(FIELD_AMOUNT, mAmount);
-            putStringIfNotNull(jsonObject, FIELD_CLIENT_SECRET, mClientSecret);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_CODE_VERIFICATION, mCodeVerification);
-            jsonObject.put(FIELD_CREATED, mCreated);
-            putStringIfNotNull(jsonObject, FIELD_CURRENCY, mCurrency);
-            putStringIfNotNull(jsonObject, FIELD_FLOW, mFlow);
-            jsonObject.put(FIELD_LIVEMODE, mLiveMode);
-
-            JSONObject metaDataObject = mapToJsonObject(mMetaData);
-            if (metaDataObject != null) {
-                jsonObject.put(FIELD_METADATA, metaDataObject);
-            }
-
-            JSONObject sourceTypeJsonObject = mapToJsonObject(mSourceTypeData);
-
-            if (sourceTypeJsonObject != null) {
-                jsonObject.put(mTypeRaw, sourceTypeJsonObject);
-            }
-
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_OWNER, mOwner);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_RECEIVER, mReceiver);
-            putStripeJsonModelIfNotNull(jsonObject, FIELD_REDIRECT, mRedirect);
-            putStringIfNotNull(jsonObject, FIELD_STATUS, mStatus);
-            putStringIfNotNull(jsonObject, FIELD_TYPE, mTypeRaw);
-            putStringIfNotNull(jsonObject, FIELD_USAGE, mUsage);
-
-        } catch (JSONException ignored) { }
-        return jsonObject;
     }
 
     @Nullable
@@ -515,7 +485,7 @@ public final class Source extends StripeJsonModel implements StripePaymentSource
     }
 
     @Nullable
-    private static <T extends StripeJsonModel> T optStripeJsonModel(
+    private static <T extends StripeModel> T optStripeJsonModel(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String key,
             Class<T> type) {
