@@ -79,6 +79,7 @@ public final class Customer extends StripeModel {
         return mSources;
     }
 
+    @Nullable
     public Boolean getHasMore() {
         return mHasMore;
     }
@@ -108,21 +109,20 @@ public final class Customer extends StripeModel {
         map.put(FIELD_ID, mId);
         map.put(FIELD_OBJECT, VALUE_CUSTOMER);
         map.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
-
-        StripeModel.putStripeJsonModelMapIfNotNull(
-                map,
-                FIELD_SHIPPING,
-                mShippingInformation);
+        if (mShippingInformation != null) {
+            map.put(FIELD_SHIPPING, mShippingInformation.toMap());
+        }
 
         final AbstractMap<String, Object> sourcesObject = new HashMap<>();
         sourcesObject.put(FIELD_HAS_MORE, mHasMore);
         sourcesObject.put(FIELD_TOTAL_COUNT, mTotalCount);
         sourcesObject.put(FIELD_OBJECT, VALUE_LIST);
         sourcesObject.put(FIELD_URL, mUrl);
-        StripeModel.putStripeJsonModelListIfNotNull(
-                sourcesObject,
-                FIELD_DATA,
-                mSources);
+        final List<Map<String, Object>> sourcesMaps = new ArrayList<>(mSources.size());
+        for (int i = 0; i < mSources.size(); i++) {
+            sourcesMaps.add(mSources.get(i).toMap());
+        }
+        sourcesObject.put(FIELD_DATA, sourcesMaps);
         StripeNetworkUtils.removeNullAndEmptyParams(sourcesObject);
 
         map.put(FIELD_SOURCES, sourcesObject);

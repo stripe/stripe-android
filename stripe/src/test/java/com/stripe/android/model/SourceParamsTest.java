@@ -8,13 +8,13 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link SourceParams}.
@@ -227,7 +227,7 @@ public class SourceParamsTest {
         assertEquals("Captain Cardholder", params.getOwner().get("name"));
         assertEquals(2, params.getOwner().size());
 
-        final Map<String, Object> addressMap = getMapFromOwner(params, "address");
+        final Map<String, Object> addressMap = getOwnerAddress(params);
         assertEquals("1 ABC Street", addressMap.get("line1"));
         assertEquals("Apt. 123", addressMap.get("line2"));
         assertEquals("San Francisco", addressMap.get("city"));
@@ -286,10 +286,11 @@ public class SourceParamsTest {
 
         assertEquals(Source.EPS, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals("Stripe", params.getOwner().get("name"));
-        assertEquals("stripe://return", params.getRedirect().get("return_url"));
+        assertEquals("Stripe", Objects.requireNonNull(params.getOwner()).get("name"));
+        assertEquals("stripe://return",
+                Objects.requireNonNull(params.getRedirect()).get("return_url"));
 
-        Map<String, Object> apiMap = params.getApiParameterMap();
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals("stripe descriptor", apiMap.get("statement_descriptor"));
     }
 
@@ -352,7 +353,7 @@ public class SourceParamsTest {
         assertNotNull(params.getRedirect());
         assertEquals("stripe://return", params.getRedirect().get("return_url"));
 
-        Map<String, Object> apiMap = params.getApiParameterMap();
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals("stripe descriptor", apiMap.get("statement_descriptor"));
     }
 
@@ -414,7 +415,9 @@ public class SourceParamsTest {
         assertEquals("Default Name", params.getOwner().get("name"));
         assertNotNull(params.getRedirect());
         assertEquals("stripe://anotherurl", params.getRedirect().get("return_url"));
-        Map<String, Object> apiMap = params.getApiParameterMap();
+
+
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals("something you bought", apiMap.get("statement_descriptor"));
         assertEquals("SVB", apiMap.get("bank"));
     }
@@ -494,9 +497,11 @@ public class SourceParamsTest {
 
         assertEquals(Source.MULTIBANCO, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
-        assertEquals(150L, params.getAmount().longValue());
-        assertEquals("stripe://testactivity", params.getRedirect().get("return_url"));
-        assertEquals("multibancoholder@stripe.com", params.getOwner().get("email"));
+        assertEquals(150L, Objects.requireNonNull(params.getAmount()).longValue());
+        assertEquals("stripe://testactivity",
+                Objects.requireNonNull(params.getRedirect()).get("return_url"));
+        assertEquals("multibancoholder@stripe.com",
+                Objects.requireNonNull(params.getOwner()).get("email"));
     }
 
     @Test
@@ -533,13 +538,13 @@ public class SourceParamsTest {
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getOwner());
         assertEquals("Jai Testa", params.getOwner().get("name"));
-        Map<String, Object> addressMap = getMapFromOwner(params, "address");
+        Map<String, Object> addressMap = getOwnerAddress(params);
         assertEquals("44 Fourth Street", addressMap.get("line1"));
         assertEquals("Test City", addressMap.get("city"));
         assertEquals("90210", addressMap.get("postal_code"));
         assertEquals("EI", addressMap.get("country"));
 
-        Map<String, Object> apiMap = params.getApiParameterMap();
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals("ibaniban", apiMap.get("iban"));
     }
 
@@ -593,7 +598,9 @@ public class SourceParamsTest {
         assertEquals(50000L, params.getAmount().longValue());
         assertNotNull(params.getRedirect());
         assertEquals("example://return", params.getRedirect().get("return_url"));
-        Map<String, Object> apiMap = params.getApiParameterMap();
+
+
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals("UK", apiMap.get("country"));
         assertEquals("a thing you bought", apiMap.get("statement_descriptor"));
     }
@@ -637,8 +644,8 @@ public class SourceParamsTest {
         assertNotNull(params.getRedirect());
         assertEquals("stripe://returnaddress", params.getRedirect().get("return_url"));
 
-        Map<String, Object> apiMap = params.getApiParameterMap();
-        assertNotNull(apiMap);
+
+        final Map<String, Object> apiMap = Objects.requireNonNull(params.getApiParameterMap());
         assertEquals(1, apiMap.size());
         assertEquals("card_id_123", apiMap.get("card"));
     }
@@ -711,11 +718,8 @@ public class SourceParamsTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getMapFromOwner(
-            @NonNull SourceParams params,
-            @NonNull String mapName) {
+    private Map<String, Object> getOwnerAddress(@NonNull SourceParams params) {
         assertNotNull(params.getOwner());
-        assertTrue(params.getOwner() instanceof Map);
-        return (Map<String, Object>) params.getOwner().get(mapName);
+        return (Map<String, Object>) params.getOwner().get("address");
     }
 }

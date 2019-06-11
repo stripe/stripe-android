@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -22,11 +21,6 @@ public abstract class StripeSourceTypeModel extends StripeModel {
     StripeSourceTypeModel(@NonNull BaseBuilder builder) {
         mAdditionalFields = builder.mAdditionalFields != null ?
                 builder.mAdditionalFields : new HashMap<String, Object>();
-    }
-
-    @NonNull
-    public Map<String, Object> getAdditionalFields() {
-        return mAdditionalFields;
     }
 
     @NonNull
@@ -69,48 +63,6 @@ public abstract class StripeSourceTypeModel extends StripeModel {
         } else {
             return map;
         }
-    }
-
-    /**
-     * Put the key-value pairs from the map into the JSON Object. Note: this does
-     * not protect against overwriting original values in the JSON. This method assumes
-     * a 1-level map.
-     *
-     * @param jsonObject a {@link JSONObject} into which new values are being written
-     * @param additionalFields a {@link Map} of key-value pairs to add to the object.
-     */
-    static void putAdditionalFieldsIntoJsonObject(
-            @Nullable JSONObject jsonObject,
-            @Nullable Map<String, Object> additionalFields) {
-        if (jsonObject == null || additionalFields == null || additionalFields.isEmpty()) {
-            return;
-        }
-
-        for (String key : additionalFields.keySet()) {
-            try {
-                if (additionalFields.get(key) != null) {
-                    jsonObject.put(key, additionalFields.get(key));
-                }
-            } catch (JSONException ignored) { }
-        }
-    }
-
-    /**
-     * Put the key-value pairs from the second map into the first map. Note: this does
-     * not protect against overwriting original values. This method assumes
-     * a 1-level map.
-     *
-     * @param map a {@link Map} into which new values are being written
-     * @param additionalFields a {@link Map} of key-value pairs to add to the object.
-     */
-    static void putAdditionalFieldsIntoMap(
-            @Nullable Map<String, Object> map,
-            @Nullable Map<String, Object> additionalFields) {
-        if (map == null || additionalFields == null || additionalFields.isEmpty()) {
-            return;
-        }
-
-        map.putAll(additionalFields);
     }
 
     @Override

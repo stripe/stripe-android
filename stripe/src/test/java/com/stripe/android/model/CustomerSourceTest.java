@@ -10,7 +10,6 @@ import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NU
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link CustomerSource} model class.
@@ -43,36 +42,29 @@ public class CustomerSourceTest {
             "  }";
 
     @Test
-    public void fromJson_whenCard_createsCustomerSourceData() {
-        try {
-            JSONObject jsonCard = new JSONObject(JSON_CARD_USD);
-            CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
-            assertNotNull(sourceData);
-            assertNotNull(sourceData.asCard());
-            assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.getId());
-            assertNull(sourceData.getTokenizationMethod());
-        } catch (JSONException jsonException) {
-            fail("Test data failure: " + jsonException.getMessage());
-        }
+    public void fromJson_whenCard_createsCustomerSourceData() throws JSONException {
+        final JSONObject jsonCard = new JSONObject(JSON_CARD_USD);
+        final CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
+        assertNotNull(sourceData);
+        assertNotNull(sourceData.asCard());
+        assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.getId());
+        assertNull(sourceData.getTokenizationMethod());
     }
 
     @Test
-    public void fromJson_whenCardWithTokenization_createsSourceDataWithTokenization() {
-        try {
-            JSONObject jsonCard = new JSONObject(JSON_APPLE_PAY_CARD);
-            CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
-            assertNotNull(sourceData);
-            assertNotNull(sourceData.asCard());
-            assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.getId());
-            assertEquals("apple_pay", sourceData.getTokenizationMethod());
-        } catch (JSONException jsonException) {
-            fail("Test data failure: " + jsonException.getMessage());
-        }
+    public void fromJson_whenCardWithTokenization_createsSourceDataWithTokenization()
+            throws JSONException {
+        final JSONObject jsonCard = new JSONObject(JSON_APPLE_PAY_CARD);
+        final CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
+        assertNotNull(sourceData);
+        assertNotNull(sourceData.asCard());
+        assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.getId());
+        assertEquals("apple_pay", sourceData.getTokenizationMethod());
     }
 
     @Test
     public void fromJson_whenSource_createsCustomerSourceData() {
-        CustomerSource sourceData =
+        final CustomerSource sourceData =
                 CustomerSource.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
         assertNotNull(sourceData);
         assertNotNull(sourceData.asSource());
@@ -85,20 +77,15 @@ public class CustomerSourceTest {
     }
 
     @Test
-    public void getSourceType_whenCard_returnsCard() {
-        try {
-            JSONObject jsonCard = new JSONObject(JSON_CARD_USD);
-            CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
-            assertNotNull(sourceData);
-            assertEquals(Source.CARD, sourceData.getSourceType());
-        } catch (JSONException jsonException) {
-            fail("Test data failure: " + jsonException.getMessage());
-        }
+    public void getSourceType_whenCard_returnsCard() throws JSONException {
+        final CustomerSource sourceData = CustomerSource.fromJson(new JSONObject(JSON_CARD_USD));
+        assertNotNull(sourceData);
+        assertEquals(Source.CARD, sourceData.getSourceType());
     }
 
     @Test
     public void getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
-        CustomerSource alipaySource = CustomerSource.fromString(EXAMPLE_ALIPAY_SOURCE);
+        final CustomerSource alipaySource = CustomerSource.fromString(EXAMPLE_ALIPAY_SOURCE);
         assertNotNull(alipaySource);
         assertEquals(Source.ALIPAY, alipaySource.getSourceType());
     }

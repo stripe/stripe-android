@@ -33,6 +33,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */
+@SuppressWarnings("WeakerAccess")
 public final class PaymentMethod extends StripeModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
@@ -216,12 +217,13 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         customerId = in.readString();
         final int mapSize = in.readInt();
         if (mapSize >= 0) {
-            metadata = new HashMap<>(mapSize);
-            for (int x = 0; x < mapSize; x++) {
+            final AbstractMap<String, String> metadata = new HashMap<>(mapSize);
+            for (int i = 0; i < mapSize; i++) {
                 metadata.put(in.readString(), in.readString());
             }
+            this.metadata = metadata;
         } else {
-            metadata = null;
+            this.metadata = null;
         }
     }
 

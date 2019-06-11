@@ -1,6 +1,5 @@
 package com.stripe.android.model;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -25,16 +24,11 @@ public class SourceCodeVerificationTest {
                 put("status", "pending");
             }};
 
-    private SourceCodeVerification mCodeVerification;
-
-    @Before
-    public void setup() {
-        mCodeVerification = SourceCodeVerification.fromString(EXAMPLE_JSON_CODE_VERIFICATION);
-        assertNotNull(mCodeVerification);
-    }
-
     @Test
     public void fromJsonString_toMap_createsExpectedMap() {
-        assertMapEquals(EXAMPLE_MAP_CODE_VERIFICATION, mCodeVerification.toMap());
+        final SourceCodeVerification codeVerification =
+                SourceCodeVerification.fromString(EXAMPLE_JSON_CODE_VERIFICATION);
+        assertNotNull(codeVerification);
+        assertMapEquals(EXAMPLE_MAP_CODE_VERIFICATION, codeVerification.toMap());
     }
 }

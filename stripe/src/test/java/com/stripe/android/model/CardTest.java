@@ -84,11 +84,11 @@ public class CardTest {
             "  }";
 
     private static final String BAD_JSON = "{ \"id\": ";
-    private Calendar calendar;
+
+    private final Calendar calendar = Calendar.getInstance();
 
     @Before
     public void setup() {
-        calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1997);
         calendar.set(Calendar.MONTH, Calendar.AUGUST);
         calendar.set(Calendar.DAY_OF_MONTH, 29);

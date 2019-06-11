@@ -12,6 +12,7 @@ import java.util.AbstractMap;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Model representing a shipping method in the Android SDK.
@@ -63,10 +64,10 @@ public final class ShippingMethod extends StripeModel implements Parcelable {
 
     private ShippingMethod(@NonNull Parcel in) {
         mAmount = in.readLong();
-        mCurrencyCode = in.readString();
+        mCurrencyCode = Objects.requireNonNull(in.readString());
         mDetail = in.readString();
-        mIdentifier = in.readString();
-        mLabel = in.readString();
+        mIdentifier = Objects.requireNonNull(in.readString());
+        mLabel = Objects.requireNonNull(in.readString());
     }
 
     /**

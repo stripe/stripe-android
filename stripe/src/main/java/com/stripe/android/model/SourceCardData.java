@@ -26,6 +26,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model for data contained in the SourceTypeData of a Card Source.
  */
+@SuppressWarnings("WeakerAccess")
 public final class SourceCardData extends StripeSourceTypeModel {
 
     @Retention(RetentionPolicy.SOURCE)
