@@ -41,6 +41,7 @@ import static com.stripe.android.StripeNetworkUtils.mapFromCvc;
  */
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
+    @Nullable private static AppInfo sAppInfo;
 
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
@@ -56,7 +57,8 @@ public class Stripe {
      * @param context {@link Context} for resolving resources
      */
     public Stripe(@NonNull Context context) {
-        this(context, new StripeApiHandler(context), new StripeNetworkUtils(context), null);
+        this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
+                null);
     }
 
     /**
@@ -66,7 +68,7 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
-        this(context, new StripeApiHandler(context), new StripeNetworkUtils(context),
+        this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
                 ApiKeyValidator.get().requireValid(publishableKey));
     }
 
@@ -110,6 +112,21 @@ public class Stripe {
         mTokenCreator = tokenCreator;
         mDefaultPublishableKey = publishableKey != null ?
                 mApiKeyValidator.requireValid(publishableKey) : null;
+    }
+
+    /**
+     * Setter for identifying your plug-in or library.
+     *
+     * See <a href="https://stripe.com/docs/building-plugins#setappinfo">
+     *     https://stripe.com/docs/building-plugins#setappinfo</a>
+     */
+    public static void setAppInfo(@Nullable AppInfo appInfo) {
+        sAppInfo = appInfo;
+    }
+
+    @Nullable
+    static AppInfo getAppInfo() {
+        return sAppInfo;
     }
 
     /**

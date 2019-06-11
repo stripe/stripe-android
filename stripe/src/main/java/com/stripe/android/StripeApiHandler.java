@@ -51,10 +51,6 @@ class StripeApiHandler {
     private final boolean mShouldLogRequest;
     @Nullable private final AppInfo mAppInfo;
 
-    StripeApiHandler(@NonNull Context context) {
-        this(context, null);
-    }
-
     StripeApiHandler(@NonNull Context context, @Nullable AppInfo appInfo) {
         this(context.getApplicationContext(), new RequestExecutor(), true, appInfo);
     }
