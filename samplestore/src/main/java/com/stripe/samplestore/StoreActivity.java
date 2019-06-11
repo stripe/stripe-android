@@ -40,7 +40,7 @@ public class StoreActivity
      * You can get your key here: https://dashboard.stripe.com/account/apikeys
      */
     private static final String PUBLISHABLE_KEY =
-            "put your publishable key here";
+            "pk_test_pWjWlOKXD13QQ1o31awb0IM000u9Xq3Hxd";
 
     static final int PURCHASE_REQUEST = 37;
 

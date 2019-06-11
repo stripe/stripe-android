@@ -18,6 +18,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenLocal()
     }
 
     task checkstyle(type: Checkstyle) {
