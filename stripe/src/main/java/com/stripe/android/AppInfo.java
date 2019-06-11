@@ -72,7 +72,7 @@ final class AppInfo {
     }
 
     @NonNull
-    Map<String, String> createAppHeader() {
+    Map<String, String> createClientHeaders() {
         final AbstractMap<String, String> appInfo = new HashMap<>(3);
         appInfo.put("name", mName);
         appInfo.put("version", mVersion);
