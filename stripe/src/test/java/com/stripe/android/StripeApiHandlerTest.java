@@ -241,7 +241,8 @@ public class StripeApiHandlerTest {
                         ApiRequest.Options.create(
                                 ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                                 connectAccountId
-                        ))
+                        ),
+                        null)
         );
         assertNotNull(response);
 
@@ -326,8 +327,8 @@ public class StripeApiHandlerTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 new RequestExecutor(),
-                false
-        );
+                false,
+                null);
         final Source source = apiHandler.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
@@ -340,8 +341,8 @@ public class StripeApiHandlerTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false
-        );
+                false,
+                null);
         apiHandler.logApiCall(new HashMap<String, Object>(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
         verifyNoMoreInteractions(mRequestExecutor);
     }
@@ -488,10 +489,8 @@ public class StripeApiHandlerTest {
 
         final ApiRequest.Options options = ApiRequest.Options
                 .create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
-        final String url = ApiRequest.createGet(
-                StripeApiHandler.getPaymentMethodsUrl(),
-                queryParams,
-                options)
+        final String url = ApiRequest.createGet(StripeApiHandler.getPaymentMethodsUrl(),
+                queryParams, options, null)
                 .getUrl();
 
         when(mRequestExecutor.execute(argThat(
@@ -504,8 +503,8 @@ public class StripeApiHandlerTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false
-        );
+                false,
+                null);
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
@@ -538,7 +537,8 @@ public class StripeApiHandlerTest {
         final String url = ApiRequest.createGet(
                 StripeApiHandler.getPaymentMethodsUrl(),
                 queryParams,
-                options)
+                options,
+                null)
                 .getUrl();
 
         when(mRequestExecutor.execute(argThat(
@@ -551,8 +551,8 @@ public class StripeApiHandlerTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false
-        );
+                false,
+                null);
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
