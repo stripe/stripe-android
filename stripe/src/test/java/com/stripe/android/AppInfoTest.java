@@ -8,7 +8,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class AppInfoTest {
-    private static final AppInfo APP_INFO = AppInfo.create(
+    static final AppInfo APP_INFO = AppInfo.create(
             "MyAwesomePlugin",
             "1.2.34",
             "https://myawesomeplugin.info",
@@ -22,12 +22,12 @@ public class AppInfoTest {
     }
 
     @Test
-    public void createAppHeader() {
+    public void createClientHeaders() {
         final Map<String, String> header = new HashMap<>();
         header.put("application",
                 "{\"name\":\"MyAwesomePlugin\",\"partnerId\":\"pp_partner_1234\"," +
                         "\"version\":\"1.2.34\",\"url\":\"https://myawesomeplugin.info\"}");
-        assertEquals(header, APP_INFO.createAppHeader());
+        assertEquals(header, APP_INFO.createClientHeaders());
     }
 
     @Test

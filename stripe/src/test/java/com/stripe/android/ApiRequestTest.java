@@ -153,4 +153,25 @@ public class ApiRequestTest {
                                 "acct"))
         );
     }
+
+    @Test
+    public void getHeaders_withAppInfo() throws JSONException {
+        final ApiRequest apiRequest = new ApiRequest(StripeRequest.Method.GET,
+                StripeApiHandler.getPaymentMethodsUrl(), null,
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                AppInfoTest.APP_INFO);
+        final Map<String, String> headers = apiRequest.getHeaders();
+        assertEquals(
+                "Stripe/v1 AndroidBindings/9.2.0 " +
+                        "MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+                headers.get("User-Agent"));
+
+        final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
+        assertEquals(
+                "{\"name\":\"MyAwesomePlugin\"," +
+                        "\"partnerId\":\"pp_partner_1234\"," +
+                        "\"version\":\"1.2.34\"," +
+                        "\"url\":\"https:\\/\\/myawesomeplugin.info\"}",
+                userAgentData.getString("application"));
+    }
 }
