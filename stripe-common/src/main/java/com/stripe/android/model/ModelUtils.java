@@ -1,7 +1,7 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -24,7 +24,7 @@ class ModelUtils {
     /**
      * Returns whether the given CharSequence contains only digits.
      */
-    private static boolean isDigitsOnly(@NonNull CharSequence str) {
+    private static boolean isDigitsOnly(@NotNull CharSequence str) {
         final int len = str.length();
         for (int cp, i = 0; i < len; i += Character.charCount(cp)) {
             cp = Character.codePointAt(str, i);
@@ -44,7 +44,7 @@ class ModelUtils {
      * @return {@code true} if the input time has passed the specified current time,
      *  {@code false} otherwise.
      */
-    static boolean hasMonthPassed(int year, int month, @NonNull Calendar now) {
+    static boolean hasMonthPassed(int year, int month, @NotNull Calendar now) {
         if (hasYearPassed(year, now)) {
             return true;
         }
@@ -62,12 +62,12 @@ class ModelUtils {
      * @return {@code true} if the input year has passed the year of the specified current time
      *  {@code false} otherwise.
      */
-    static boolean hasYearPassed(int year, @NonNull Calendar now) {
+    static boolean hasYearPassed(int year, @NotNull Calendar now) {
         int normalized = normalizeYear(year, now);
         return normalized < now.get(Calendar.YEAR);
     }
 
-    static int normalizeYear(int year, @NonNull Calendar now)  {
+    static int normalizeYear(int year, @NotNull Calendar now)  {
         if (year < 100 && year >= 0) {
             String currentYear = String.valueOf(now.get(Calendar.YEAR));
             String prefix = currentYear.substring(0, currentYear.length() - 2);
