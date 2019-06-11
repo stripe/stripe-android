@@ -318,7 +318,7 @@ public class PaymentActivity extends AppCompatActivity {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
             return;
         }
-
+        mPaymentSession.onCompleted();
         finishPayment();
     }
 
@@ -342,7 +342,6 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void finishPayment() {
-        mPaymentSession.onCompleted();
         final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
