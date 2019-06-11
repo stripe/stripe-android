@@ -313,13 +313,14 @@ public class PaymentActivity extends AppCompatActivity {
     private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
             mStripe.authenticatePayment(this, paymentIntent);
-            return;
         } else if (paymentIntent.requiresConfirmation()) {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
-            return;
+        } else if (paymentIntent.getStatus() == PaymentIntent.Status.Succeeded) {
+            finishPayment();
+        } else {
+            displayError(
+                    "Unhandled Payment Intent Status: " + paymentIntent.getStatus().toString());
         }
-        mPaymentSession.onCompleted();
-        finishPayment();
     }
 
     private void confirmPaymentIntent(@NonNull String paymentIntentId) {
@@ -342,6 +343,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void finishPayment() {
+        mPaymentSession.onCompleted();
         final Intent data = StoreActivity.createPurchaseCompleteIntent(
                 mStoreCart.getTotalPrice() + mShippingCosts);
         setResult(RESULT_OK, data);
