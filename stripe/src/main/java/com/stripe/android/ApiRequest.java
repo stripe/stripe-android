@@ -43,49 +43,48 @@ final class ApiRequest extends StripeRequest {
         mAppInfo = appInfo;
     }
 
-    private ApiRequest(@NonNull Method method,
-                       @NonNull String url,
-                       @Nullable Map<String, ?> params,
-                       @NonNull Options options) {
-        this(method, url, params, options, null);
-    }
-
     @NonNull
     static ApiRequest createGet(@NonNull String url,
-                                @NonNull Options options) {
-        return new ApiRequest(Method.GET, url, null, options);
+                                @NonNull Options options,
+                                @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createGet(@NonNull String url,
                                 @NonNull Map<String, ?> params,
-                                @NonNull Options options) {
-        return new ApiRequest(Method.GET, url, params, options);
+                                @NonNull Options options,
+                                @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, url, params, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createPost(@NonNull String url,
-                                 @NonNull Options options) {
-        return new ApiRequest(Method.POST, url, null, options);
+                                 @NonNull Options options,
+                                 @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.POST, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createPost(@NonNull String url,
                                  @NonNull Map<String, ?> params,
-                                 @NonNull Options options) {
-        return new ApiRequest(Method.POST, url, params, options);
+                                 @NonNull Options options,
+                                 @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.POST, url, params, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createDelete(@NonNull String url,
-                                   @NonNull Options options) {
-        return new ApiRequest(Method.DELETE, url, null, options);
+                                   @NonNull Options options,
+                                   @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.DELETE, url, null, options, appInfo);
     }
 
     @NonNull
     static ApiRequest createAnalyticsRequest(@NonNull Map<String, ?> params,
-                                             @NonNull Options options) {
-        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, options);
+                                             @NonNull Options options,
+                                             @Nullable AppInfo appInfo) {
+        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, options, appInfo);
     }
 
     @NonNull
@@ -134,7 +133,7 @@ final class ApiRequest extends StripeRequest {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(getBaseHashCode(), options);
+        return ObjectUtils.hash(getBaseHashCode(), options, mAppInfo);
     }
 
     @Override
@@ -144,7 +143,9 @@ final class ApiRequest extends StripeRequest {
     }
 
     private boolean typedEquals(@NonNull ApiRequest obj) {
-        return super.typedEquals(obj) && ObjectUtils.equals(options, obj.options);
+        return super.typedEquals(obj) &&
+                ObjectUtils.equals(options, obj.options) &&
+                ObjectUtils.equals(mAppInfo, obj.mAppInfo);
     }
 
     /**

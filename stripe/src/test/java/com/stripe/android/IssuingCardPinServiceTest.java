@@ -53,7 +53,8 @@ public class IssuingCardPinServiceTest {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mRequestExecutor,
-                false);
+                false,
+                null);
 
         mService = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
                 new OperationIdFactory());
