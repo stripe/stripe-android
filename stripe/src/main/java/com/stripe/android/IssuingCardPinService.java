@@ -57,8 +57,14 @@ public class IssuingCardPinService
     public static IssuingCardPinService create(
             @NonNull Context context,
             @NonNull EphemeralKeyProvider keyProvider) {
-        return new IssuingCardPinService(keyProvider, new StripeApiHandler(context),
-                new OperationIdFactory());
+        return new IssuingCardPinService(context, keyProvider, Stripe.getAppInfo());
+    }
+
+    private IssuingCardPinService(
+            @NonNull Context context,
+            @NonNull EphemeralKeyProvider keyProvider,
+            @Nullable AppInfo appInfo) {
+        this(keyProvider, new StripeApiHandler(context, appInfo), new OperationIdFactory());
     }
 
     @VisibleForTesting

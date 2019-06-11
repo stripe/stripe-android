@@ -125,7 +125,7 @@ public class CustomerSession {
      */
     public static void initCustomerSession(@NonNull Context context,
                                            @NonNull EphemeralKeyProvider keyProvider) {
-        setInstance(new CustomerSession(context, keyProvider));
+        setInstance(new CustomerSession(context, keyProvider, Stripe.getAppInfo()));
     }
 
     /**
@@ -183,9 +183,10 @@ public class CustomerSession {
         mInstance.mThreadPoolExecutor.shutdownNow();
     }
 
-    private CustomerSession(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider) {
+    private CustomerSession(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider,
+                            @Nullable AppInfo appInfo) {
         this(context, keyProvider, null, createThreadPoolExecutor(),
-                new StripeApiHandler(context));
+                new StripeApiHandler(context, appInfo));
     }
 
     @VisibleForTesting

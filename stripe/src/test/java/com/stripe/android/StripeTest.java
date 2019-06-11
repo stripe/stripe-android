@@ -1257,6 +1257,15 @@ public class StripeTest {
                 createdPaymentMethod.ideal);
     }
 
+    @Test
+    public void setAppInfo() {
+        assertNull(Stripe.getAppInfo());
+
+        final AppInfo appInfo = AppInfo.create("myapp");
+        Stripe.setAppInfo(appInfo);
+        assertEquals(appInfo, Stripe.getAppInfo());
+    }
+
     @NonNull
     private Stripe createNonLoggingStripe() {
         return createNonLoggingStripe(NON_LOGGING_PK);
