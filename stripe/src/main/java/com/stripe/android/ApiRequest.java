@@ -23,11 +23,10 @@ final class ApiRequest extends StripeRequest {
     static final String MIME_TYPE = "application/x-www-form-urlencoded";
     static final String API_HOST = "https://api.stripe.com";
 
-    private static final String ANALYTICS_HOST = "https://q.stripe.com";
+    static final String DEFAULT_USER_AGENT = String.format(
+            Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
 
-    private static final String DEFAULT_USER_AGENT =
-            String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-                    BuildConfig.VERSION_NAME);
+    private static final String ANALYTICS_HOST = "https://q.stripe.com";
 
     @NonNull final Options options;
     @Nullable private final AppInfo mAppInfo;

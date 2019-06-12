@@ -171,9 +171,8 @@ public class ApiRequestTest {
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
                 AppInfoTest.APP_INFO);
         final Map<String, String> headers = apiRequest.getHeaders();
-        assertEquals(
-                "Stripe/v1 AndroidBindings/9.2.0 " +
-                        "MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+        assertEquals(ApiRequest.DEFAULT_USER_AGENT +
+                        " MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
                 headers.get("User-Agent"));
 
         final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
