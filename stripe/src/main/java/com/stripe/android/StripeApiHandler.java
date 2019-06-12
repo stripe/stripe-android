@@ -45,7 +45,7 @@ class StripeApiHandler {
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
 
     @NonNull private final LoggingUtils mLoggingUtils;
-    @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
+    @NonNull private final FingerprintRequestFactory mFingerprintRequestFactory;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
     @NonNull private final RequestExecutor mRequestExecutor;
     private final boolean mShouldLogRequest;
@@ -60,7 +60,8 @@ class StripeApiHandler {
                      @NonNull RequestExecutor requestExecutor,
                      boolean shouldLogRequest,
                      @Nullable AppInfo appInfo) {
-        this(context, requestExecutor, shouldLogRequest, appInfo, new TelemetryClientUtil(context));
+        this(context, requestExecutor, shouldLogRequest, appInfo,
+                new FingerprintRequestFactory(context));
     }
 
     @VisibleForTesting
@@ -68,11 +69,11 @@ class StripeApiHandler {
                      @NonNull RequestExecutor requestExecutor,
                      boolean shouldLogRequest,
                      @Nullable AppInfo appInfo,
-                     @NonNull TelemetryClientUtil telemetryClientUtil) {
+                     @NonNull FingerprintRequestFactory fingerprintRequestFactory) {
         mRequestExecutor = requestExecutor;
         mShouldLogRequest = shouldLogRequest;
         mLoggingUtils = new LoggingUtils(context);
-        mTelemetryClientUtil = telemetryClientUtil;
+        mFingerprintRequestFactory = fingerprintRequestFactory;
         mNetworkUtils = new StripeNetworkUtils(context);
         mAppInfo = appInfo;
     }
@@ -1026,14 +1027,9 @@ class StripeApiHandler {
     }
 
     private void logTelemetryData() {
-        final Map<String, Object> params = mTelemetryClientUtil.createTelemetryMap();
-        StripeNetworkUtils.removeNullAndEmptyParams(params);
-        if (!mShouldLogRequest) {
-            return;
+        if (mShouldLogRequest) {
+            makeFireAndForgetRequest(mFingerprintRequestFactory.create());
         }
-
-        final String guid = mTelemetryClientUtil.getHashedId();
-        makeFireAndForgetRequest(new FingerprintRequest(params, guid));
     }
 
     private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {
