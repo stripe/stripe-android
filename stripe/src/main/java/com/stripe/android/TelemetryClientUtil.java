@@ -17,11 +17,15 @@ import java.util.concurrent.TimeUnit;
 class TelemetryClientUtil {
 
     @NonNull private final Context mContext;
-    @NonNull private final UidProvider mUidProvider;
+    @NonNull private final Supplier<StripeUid> mUidSupplier;
 
     TelemetryClientUtil(@NonNull Context context) {
+        this(context, new UidSupplier(context));
+    }
+
+    TelemetryClientUtil(@NonNull Context context, @NonNull Supplier<StripeUid> uidSupplier) {
         mContext = context.getApplicationContext();
-        mUidProvider = new UidProvider(context);
+        mUidSupplier = uidSupplier;
     }
 
     @NonNull
@@ -111,7 +115,7 @@ class TelemetryClientUtil {
 
     @NonNull
     String getHashedId() {
-        final String id = mUidProvider.get();
+        final String id = mUidSupplier.get().value;
         if (StripeTextUtils.isBlank(id)) {
             return "";
         }

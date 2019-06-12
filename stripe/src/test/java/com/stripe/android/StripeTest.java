@@ -1273,8 +1273,7 @@ public class StripeTest {
 
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull String publishableKey) {
-        final StripeApiHandler apiHandler =
-                new StripeApiHandler(mContext, new RequestExecutor(), false, null);
+        final StripeApiHandler apiHandler = createApiHandler(false);
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1284,8 +1283,7 @@ public class StripeTest {
 
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull Stripe.TokenCreator tokenCreator) {
-        final StripeApiHandler apiHandler =
-                new StripeApiHandler(mContext, new RequestExecutor(), false, null);
+        final StripeApiHandler apiHandler = createApiHandler(false);
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1297,6 +1295,18 @@ public class StripeTest {
 
     @NonNull
     private Stripe createLoggingStripe() {
-        return new Stripe(mContext, LOGGING_PK);
+        final StripeApiHandler apiHandler = createApiHandler(true);
+        return new Stripe(
+                apiHandler,
+                new StripeNetworkUtils(mContext),
+                new PaymentController(mContext, apiHandler),
+                LOGGING_PK
+        );
+    }
+
+    @NonNull
+    private StripeApiHandler createApiHandler(boolean shouldLogRequest) {
+        return new StripeApiHandler(mContext, new RequestExecutor(), shouldLogRequest,
+                null, new TelemetryClientUtil(mContext, new FakeUidSupplier()));
     }
 }

@@ -60,10 +60,19 @@ class StripeApiHandler {
                      @NonNull RequestExecutor requestExecutor,
                      boolean shouldLogRequest,
                      @Nullable AppInfo appInfo) {
+        this(context, requestExecutor, shouldLogRequest, appInfo, new TelemetryClientUtil(context));
+    }
+
+    @VisibleForTesting
+    StripeApiHandler(@NonNull Context context,
+                     @NonNull RequestExecutor requestExecutor,
+                     boolean shouldLogRequest,
+                     @Nullable AppInfo appInfo,
+                     @NonNull TelemetryClientUtil telemetryClientUtil) {
         mRequestExecutor = requestExecutor;
         mShouldLogRequest = shouldLogRequest;
         mLoggingUtils = new LoggingUtils(context);
-        mTelemetryClientUtil = new TelemetryClientUtil(context);
+        mTelemetryClientUtil = telemetryClientUtil;
         mNetworkUtils = new StripeNetworkUtils(context);
         mAppInfo = appInfo;
     }

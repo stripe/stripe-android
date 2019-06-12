@@ -24,16 +24,16 @@ public class StripeNetworkUtils {
     private static final String FIELD_GUID = "guid";
 
     @NonNull private final String mPackageName;
-    @NonNull private final UidProvider mUidProvider;
+    @NonNull private final Supplier<StripeUid> mUidSupplier;
 
     StripeNetworkUtils(@NonNull Context context) {
-        this(context.getPackageName(), new UidProvider(context));
+        this(context.getPackageName(), new UidSupplier(context));
     }
 
     @VisibleForTesting
-    StripeNetworkUtils(@NonNull String packageName, @NonNull UidProvider uidProvider) {
+    StripeNetworkUtils(@NonNull String packageName, @NonNull Supplier<StripeUid> uidSupplier) {
         mPackageName = packageName;
-        mUidProvider = uidProvider;
+        mUidSupplier = uidSupplier;
     }
 
     /**
@@ -168,7 +168,7 @@ public class StripeNetworkUtils {
 
     @NonNull
     Map<String, String> createUidParams() {
-        final String guid = mUidProvider.get();
+        final String guid = mUidSupplier.get().value;
         if (StripeTextUtils.isBlank(guid)) {
             return new HashMap<>();
         }
