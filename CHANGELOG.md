@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.2 - 2019-06-12
+* [#1104](https://github.com/stripe/stripe-android/pull/1104) Handle null response body
+
 ## 9.3.1 - 2019-06-12
 * [#1099](https://github.com/stripe/stripe-android/pull/1099) Fix Gradle module issue
 
