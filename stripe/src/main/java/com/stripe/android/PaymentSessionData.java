@@ -10,8 +10,6 @@ import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.android.utils.ObjectUtils;
 
-import java.util.Objects;
-
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
  */

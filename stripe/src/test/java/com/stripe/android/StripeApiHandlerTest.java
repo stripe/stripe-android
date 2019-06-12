@@ -224,9 +224,8 @@ public class StripeApiHandlerTest {
     public void logApiCall_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        final boolean isSuccessful = mApiHandler.logApiCall(new HashMap<String, Object>(),
+        mApiHandler.logApiCall(new HashMap<String, Object>(),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
-        assertTrue(isSuccessful);
     }
 
     @Test

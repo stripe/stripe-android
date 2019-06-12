@@ -1,5 +1,6 @@
 package com.stripe.android.utils;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.Arrays;
@@ -12,5 +13,10 @@ public final class ObjectUtils {
 
     public static int hash(@Nullable Object... values) {
         return Arrays.hashCode(values);
+    }
+
+    @NonNull
+    public static <T> T getOrDefault(@Nullable T obj, @NonNull T defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 }
