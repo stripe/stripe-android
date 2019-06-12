@@ -296,7 +296,7 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
-                .doOnComplete(this::stopLoading)
+                .doFinally(this::stopLoading)
                 .subscribe(this::onPaymentIntentResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
@@ -330,7 +330,7 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
-                .doOnComplete(this::stopLoading)
+                .doFinally(this::stopLoading)
                 .subscribe(
                         this::onPaymentIntentResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
@@ -360,6 +360,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void startLoading() {
         mProgressBar.setVisibility(View.VISIBLE);
+        mEnterPaymentInfo.setEnabled(false);
         mEnterShippingInfo.setEnabled(false);
         mConfirmPaymentButton.setTag(mConfirmPaymentButton.isEnabled());
         mConfirmPaymentButton.setEnabled(false);
