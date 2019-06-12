@@ -1,7 +1,6 @@
 # CHANGELOG
 
-## 9.3.0
-_Upcoming release_
+## 9.3.0 - 2019-06-12
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Introduce `CustomerSession#detachPaymentMethod()`
 * [#1067](https://github.com/stripe/stripe-android/pull/1067) Remove `PaymentResultListener`. Replace `PaymentSession#completePayment()` with `PaymentSession#onCompleted()`.
 * [#1075](https://github.com/stripe/stripe-android/pull/1075) Make model classes final

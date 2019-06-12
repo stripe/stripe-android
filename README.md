@@ -17,7 +17,7 @@ stripe-android supports Android 4.4 (API level 19) and above.
 No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
 
 ```
-implementation 'com.stripe:stripe-android:9.2.0'
+implementation 'com.stripe:stripe-android:9.3.0'
 ```
 
 Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
