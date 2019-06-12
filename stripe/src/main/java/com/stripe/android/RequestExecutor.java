@@ -65,8 +65,12 @@ class RequestExecutor {
     }
 
     @Nullable
-    private String getResponseBody(@NonNull InputStream responseStream)
+    private String getResponseBody(@Nullable InputStream responseStream)
             throws IOException {
+        if (responseStream == null) {
+            return null;
+        }
+
         //\A is the beginning of
         // the stream boundary
         final Scanner scanner = new Scanner(responseStream, CHARSET).useDelimiter("\\A");

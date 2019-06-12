@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.CardFixtures;
@@ -10,7 +11,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
@@ -24,16 +24,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class ApiRequestTest {
-    @Mock private UidProvider mUidProvider;
+
+    @NonNull
+    private final StripeNetworkUtils mNetworkUtils = new StripeNetworkUtils(
+            "com.example.app",
+            new FakeUidSupplier("abc123")
+    );
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mUidProvider.get()).thenReturn("abc-def-123-456");
     }
 
     @Test
@@ -100,13 +103,12 @@ public class ApiRequestTest {
     public void createQuery_withCardData_createsProperQueryString()
             throws UnsupportedEncodingException, InvalidRequestException {
         final Map<String, Object> cardMap =
-                new StripeNetworkUtils("com.example.app", mUidProvider)
-                        .createCardTokenParams(CardFixtures.MINIMUM_CARD);
+                mNetworkUtils.createCardTokenParams(CardFixtures.MINIMUM_CARD);
         final String query = ApiRequest.createGet(StripeApiHandler.getSourcesUrl(), cardMap,
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .createQuery();
 
-        final String expectedValue = "muid=E8B53128C63018F96179F2AC10643BF32B8F707D&product_usage=&guid=A9709C2E70D28D99D345DC09B1F5EBD817DDCDAE&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
+        final String expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
         assertEquals(expectedValue, query);
     }
 

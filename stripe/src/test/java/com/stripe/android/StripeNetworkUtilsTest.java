@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethod;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
@@ -26,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link StripeNetworkUtils}
@@ -49,7 +47,8 @@ public class StripeNetworkUtilsTest {
     private static final String BANK_ROUTING_NUMBER = "110000000";
     private static final String BANK_ACCOUNT_HOLDER_NAME = "Lily Thomas";
 
-    @Mock private UidProvider mUidProvider;
+    @NonNull private final StripeNetworkUtils mNetworkUtils =
+            new StripeNetworkUtils("com.example.app", new FakeUidSupplier());
 
     @Before
     public void setup() {
@@ -178,10 +177,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void addUidParams_addsParams() {
-        when(mUidProvider.get()).thenReturn("abc123");
-        final Map<String, String> uidParams =
-                new StripeNetworkUtils("com.example.main", mUidProvider)
-                        .createUidParams();
+        final Map<String, String> uidParams = mNetworkUtils.createUidParams();
         assertEquals(2, uidParams.size());
         assertTrue(uidParams.containsKey("muid"));
         assertTrue(uidParams.containsKey("guid"));
@@ -193,9 +189,7 @@ public class StripeNetworkUtilsTest {
         final Map<String, Object> sourceDataMap = new HashMap<>();
         existingMap.put(PaymentIntentParams.API_PARAM_SOURCE_DATA, sourceDataMap);
 
-        when(mUidProvider.get()).thenReturn("abc123");
-        new StripeNetworkUtils("abc123", mUidProvider)
-                .addUidParamsToPaymentIntent(existingMap);
+        mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
         assertEquals(1, existingMap.size());
         assertTrue(sourceDataMap.containsKey("muid"));
         assertTrue(sourceDataMap.containsKey("guid"));
@@ -210,9 +204,7 @@ public class StripeNetworkUtilsTest {
                 .toMap();
         existingMap.put(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA, paymentMethodData);
 
-        when(mUidProvider.get()).thenReturn("abc123");
-        new StripeNetworkUtils("abc123", mUidProvider)
-                .addUidParamsToPaymentIntent(existingMap);
+        mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
         assertEquals(1, existingMap.size());
         assertTrue(paymentMethodData.containsKey("muid"));
         assertTrue(paymentMethodData.containsKey("guid"));
@@ -237,4 +229,5 @@ public class StripeNetworkUtilsTest {
         assertNotNull(bankAccountTokenParams);
         return (Map<String, Object>) bankAccountTokenParams.get("bank_account");
     }
+
 }
