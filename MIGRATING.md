@@ -1,5 +1,30 @@
 ## Migration Guides
 
+### Migration from versions < 9.3.0
+- `PaymentResultListener` has been removed
+- `PaymentSession#completePayment()` has been replaced with `PaymentSession#onCompleted()`
+    ```java
+    // before
+    private void chargePaymentMethod() {
+        mPaymentSession.completePayment(new PaymentCompletionProvider() {
+            @Override
+            public void completePayment(@NonNull PaymentSessionData data,
+                                        @NonNull PaymentResultListener listener) {
+                // Make async request to your backend to charge the payment method.
+                // Upon success, call:
+                listener.onPaymentResult(PaymentResultListener.SUCCESS);
+            }
+        });
+    }
+
+    // after
+    private void chargePaymentMethod() {
+        // Make async request to your backend to charge the payment method.
+        // Upon success, call:
+        mPaymentSession.onCompleted();
+    }
+    ```
+
 ### Migration from versions < 9.2.0
 - `Card` model is now immutable
   - `Card#getType()` is now `Card#getBrand()`

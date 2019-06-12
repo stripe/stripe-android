@@ -1,11 +1,14 @@
 # CHANGELOG
 
 ## 9.3.0
+_Upcoming release_
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Introduce `CustomerSession#detachPaymentMethod()`
+* [#1067](https://github.com/stripe/stripe-android/pull/1067) Remove `PaymentResultListener`. Replace `PaymentSession#completePayment()` with `PaymentSession#onCompleted()`.
 * [#1075](https://github.com/stripe/stripe-android/pull/1075) Make model classes final
 * [#1080](https://github.com/stripe/stripe-android/pull/1080) Update Build Tools to 29.0.0
 * [#1082](https://github.com/stripe/stripe-android/pull/1082) Remove `StripeJsonModel#toJson()`
 * [#1084](https://github.com/stripe/stripe-android/pull/1084) Rename `StripeJsonModel` to `StripeModel`
+* [#1093](https://github.com/stripe/stripe-android/pull/1093) Add `Stripe#setAppInfo()`. See [Identifying your plug-in or library](https://stripe.com/docs/building-plugins#setappinfo) for more details.
 
 ## 9.2.0 - 2019-06-04
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Upgrade pinned API version to `2019-05-16`
