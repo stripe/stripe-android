@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.1 - 2019-06-12
+* [#1099](https://github.com/stripe/stripe-android/pull/1099) Fix Gradle module issue
+
 ## 9.3.0 - 2019-06-12
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Introduce `CustomerSession#detachPaymentMethod()`
 * [#1067](https://github.com/stripe/stripe-android/pull/1067) Remove `PaymentResultListener`. Replace `PaymentSession#completePayment()` with `PaymentSession#onCompleted()`.
