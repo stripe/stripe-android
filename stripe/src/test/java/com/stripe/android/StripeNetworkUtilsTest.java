@@ -58,7 +58,7 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void hashMapFromCard_mapsCorrectFields() {
-        final Map<String, Object> cardMap = getCardMapFromHashMappedCard(CardFixtures.CARD);
+        final Map<String, Object> cardMap = getCardTokenParamData(CardFixtures.CARD);
         assertNotNull(cardMap);
 
         assertEquals(CARD_NUMBER, cardMap.get("number"));
@@ -80,7 +80,7 @@ public class StripeNetworkUtilsTest {
         final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER,
                 BANK_ACCOUNT_HOLDER_NAME, BankAccount.TYPE_INDIVIDUAL, null, "US",
                 "usd", null, null, BANK_ROUTING_NUMBER);
-        final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        final Map<String, Object> bankAccountMap = getBankAccountTokenParamData(bankAccount);
         assertNotNull(bankAccountMap);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
@@ -96,7 +96,7 @@ public class StripeNetworkUtilsTest {
         final Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
                 .build();
 
-        final Map<String, Object> cardMap = getCardMapFromHashMappedCard(card);
+        final Map<String, Object> cardMap = getCardTokenParamData(card);
         assertNotNull(cardMap);
 
         assertEquals(CARD_NUMBER, cardMap.get("number"));
@@ -117,7 +117,7 @@ public class StripeNetworkUtilsTest {
     public void hashMapFromBankAccount_omitsEmptyFields() {
         final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER, "US",
                 "usd", BANK_ROUTING_NUMBER);
-        final Map<String, Object> bankAccountMap = getMapFromHashMappedBankAccount(bankAccount);
+        final Map<String, Object> bankAccountMap = getBankAccountTokenParamData(bankAccount);
         assertNotNull(bankAccountMap);
 
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
@@ -178,13 +178,13 @@ public class StripeNetworkUtilsTest {
 
     @Test
     public void addUidParams_addsParams() {
-        final Map<String, Object> existingMap = new HashMap<>();
         when(mUidProvider.get()).thenReturn("abc123");
-        new StripeNetworkUtils("com.example.main", mUidProvider)
-                .addUidParams(existingMap);
-        assertEquals(2, existingMap.size());
-        assertTrue(existingMap.containsKey("muid"));
-        assertTrue(existingMap.containsKey("guid"));
+        final Map<String, String> uidParams =
+                new StripeNetworkUtils("com.example.main", mUidProvider)
+                        .createUidParams();
+        assertEquals(2, uidParams.size());
+        assertTrue(uidParams.containsKey("muid"));
+        assertTrue(uidParams.containsKey("guid"));
     }
 
     @Test
@@ -220,21 +220,21 @@ public class StripeNetworkUtilsTest {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    private Map<String, Object> getCardMapFromHashMappedCard(@NonNull Card card) {
-        final Map<String, Object> tokenMap =
+    private Map<String, Object> getCardTokenParamData(@NonNull Card card) {
+        final Map<String, Object> cardTokenParams =
                 new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                .hashMapFromCard(card);
-        assertNotNull(tokenMap);
-        return (Map<String, Object>) tokenMap.get("card");
+                .createCardTokenParams(card);
+        assertNotNull(cardTokenParams);
+        return (Map<String, Object>) cardTokenParams.get("card");
     }
 
     @SuppressWarnings("unchecked")
     @Nullable
-    private Map<String, Object> getMapFromHashMappedBankAccount(@NonNull BankAccount bankAccount) {
-        final Map<String, Object> tokenMap =
+    private Map<String, Object> getBankAccountTokenParamData(@NonNull BankAccount bankAccount) {
+        final Map<String, Object> bankAccountTokenParams =
                 new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                .hashMapFromBankAccount(bankAccount);
-        assertNotNull(tokenMap);
-        return (Map<String, Object>) tokenMap.get("bank_account");
+                .createBankAccountTokenParams(bankAccount);
+        assertNotNull(bankAccountTokenParams);
+        return (Map<String, Object>) bankAccountTokenParams.get("bank_account");
     }
 }

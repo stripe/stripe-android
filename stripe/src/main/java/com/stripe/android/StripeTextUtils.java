@@ -14,7 +14,7 @@ public class StripeTextUtils {
 
     /**
      * Util Array for converting bytes to a hex string.
-     * {@url http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java}
+     * {@see http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java}
      */
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 

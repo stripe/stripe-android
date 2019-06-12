@@ -173,8 +173,8 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = sourceParams.toParamMap();
-        mNetworkUtils.addUidParams(paramMap);
+        final Map<String, Object> requestParams = sourceParams.toParamMap();
+        requestParams.putAll(mNetworkUtils.createUidParams());
 
         try {
             logTelemetryData();
@@ -183,7 +183,7 @@ class StripeApiHandler {
                             sourceParams.getType()),
                     options.apiKey);
             final StripeResponse response = makeApiRequest(
-                    ApiRequest.createPost(getSourcesUrl(), paramMap, options, mAppInfo));
+                    ApiRequest.createPost(getSourcesUrl(), requestParams, options, mAppInfo));
             return Source.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -236,8 +236,7 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
-
-        mNetworkUtils.addUidParams(params);
+        params.putAll(mNetworkUtils.createUidParams());
         logTelemetryData();
 
         logApiCall(
