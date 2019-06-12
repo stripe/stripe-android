@@ -1,6 +1,27 @@
 ## Migration Guides
 
 ### Migration from versions < 9.3.0
+- `CustomerSession`'s Listener interfaces's `onError()` method now have a `@NonNull` `errorMessage` argument
+    ```java
+    // before
+    new CustomerSession.CustomerRetrievalListener() {
+        @Override
+        public void onError(int errorCode, @Nullable String errorMessage,
+                            @Nullable StripeError stripeError) {
+
+        }
+    }
+
+    // after
+    new CustomerSession.CustomerRetrievalListener() {
+        @Override
+        public void onError(int errorCode, @NonNull String errorMessage,
+                            @Nullable StripeError stripeError) {
+
+        }
+    }
+    ```
+
 - `PaymentResultListener` has been removed
 - `PaymentSession#completePayment()` has been replaced with `PaymentSession#onCompleted()`
     ```java
