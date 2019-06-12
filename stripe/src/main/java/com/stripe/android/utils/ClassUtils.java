@@ -1,7 +1,7 @@
 package com.stripe.android.utils;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -18,8 +18,8 @@ public class ClassUtils {
      * @return  the value of the found field, if exists, on the target object, or null
      */
     @Nullable
-    public static Object getInternalObject(@NotNull Class clazz, @NotNull Set<String> whitelist,
-                                           @NotNull Object obj) {
+    public static Object getInternalObject(@NonNull Class clazz, @NonNull Set<String> whitelist,
+                                           @NonNull Object obj) {
         final Field field = findField(clazz, whitelist);
         if (field == null) {
             return null;
@@ -41,7 +41,7 @@ public class ClassUtils {
      */
     @SuppressWarnings("WeakerAccess")
     @Nullable
-    public static Field findField(@NotNull Class clazz, @NotNull Collection<String> whitelist) {
+    public static Field findField(@NonNull Class clazz, @NonNull Collection<String> whitelist) {
         final Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (whitelist.contains(field.getName())) {
@@ -58,7 +58,7 @@ public class ClassUtils {
      * @return the {@link Method} if one is found, otherwise null
      */
     @Nullable
-    public static Method findMethod(@NotNull Class clazz, @NotNull Collection<String> whitelist) {
+    public static Method findMethod(@NonNull Class clazz, @NonNull Collection<String> whitelist) {
         final Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             if (whitelist.contains(method.getName())) {

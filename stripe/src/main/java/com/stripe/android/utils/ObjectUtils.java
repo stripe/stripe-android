@@ -1,6 +1,6 @@
 package com.stripe.android.utils;
 
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.Arrays;
 
