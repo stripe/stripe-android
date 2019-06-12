@@ -26,7 +26,7 @@ public class ClassUtilsTest {
 
     @Test
     public void testfindField_withEmptyWhitelist_shouldReturnNull() {
-        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<>());
+        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<String>());
         assertNull(nameField);
     }
 

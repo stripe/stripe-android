@@ -1,4 +1,3 @@
-include ':stripe-common'
 include ':stripe'
 include ':example'
 include ':samplestore'
