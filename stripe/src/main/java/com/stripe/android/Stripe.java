@@ -138,9 +138,9 @@ public class Stripe {
      * @param confirmPaymentIntentParams {@link PaymentIntentParams} used to confirm the
      *                                   {@link PaymentIntent}
      */
-    private void confirmPayment(@NonNull Activity activity,
-                                @NonNull PaymentIntentParams confirmPaymentIntentParams,
-                                @NonNull String publishableKey) {
+    public void confirmPayment(@NonNull Activity activity,
+                               @NonNull PaymentIntentParams confirmPaymentIntentParams,
+                               @NonNull String publishableKey) {
         mPaymentController.startConfirmAndAuth(this, activity,
                 confirmPaymentIntentParams, publishableKey);
     }
@@ -161,9 +161,9 @@ public class Stripe {
      * @param activity the {@link Activity} that is launching the payment authentication flow
      * @param paymentIntent a confirmed {@link PaymentIntent} object
      */
-    private void authenticatePayment(@NonNull Activity activity,
-                                     @NonNull PaymentIntent paymentIntent,
-                                     @NonNull String publishableKey) {
+    public void authenticatePayment(@NonNull Activity activity,
+                                    @NonNull PaymentIntent paymentIntent,
+                                    @NonNull String publishableKey) {
         mPaymentController.startAuth(activity, paymentIntent, publishableKey);
     }
 
@@ -181,10 +181,9 @@ public class Stripe {
      * (see {@link #confirmPayment(Activity, PaymentIntentParams, String)}) or manual confirmation
      * (see {@link #authenticatePayment(Activity, PaymentIntent, String)}})
      */
-    private boolean onPaymentResult(
-            int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull String publishableKey,
-            @NonNull ApiResultCallback<PaymentIntentResult> callback) {
+    public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
+                                   @NonNull String publishableKey,
+                                   @NonNull ApiResultCallback<PaymentIntentResult> callback) {
         if (data != null && mPaymentController.shouldHandleResult(requestCode, resultCode, data)) {
             mPaymentController.handleResult(this, data, publishableKey, callback);
             return true;
