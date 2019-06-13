@@ -1307,6 +1307,8 @@ public class StripeTest {
     @NonNull
     private StripeApiHandler createApiHandler(boolean shouldLogRequest) {
         return new StripeApiHandler(mContext, new RequestExecutor(), shouldLogRequest,
-                null, new TelemetryClientUtil(mContext, new FakeUidSupplier()));
+                null,
+                new FingerprintRequestFactory(
+                        new TelemetryClientUtil(mContext, new FakeUidSupplier())));
     }
 }
