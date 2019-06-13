@@ -4,13 +4,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-public class PaymentConfiguration {
+public final class PaymentConfiguration {
 
     @Nullable private static PaymentConfiguration mInstance;
     @NonNull private final String mPublishableKey;
 
     private PaymentConfiguration(@NonNull String publishableKey) {
-        mPublishableKey = publishableKey;
+        mPublishableKey = ApiKeyValidator.get().requireValid(publishableKey);
     }
 
     @NonNull
@@ -22,6 +22,9 @@ public class PaymentConfiguration {
         return mInstance;
     }
 
+    /**
+     * A publishable key from https://dashboard.stripe.com/apikeys
+     */
     public static void init(@NonNull String publishableKey) {
         mInstance = new PaymentConfiguration(publishableKey);
     }
