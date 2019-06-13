@@ -158,185 +158,6 @@ public final class Card extends StripeModel implements StripePaymentSource {
     @Nullable private final Map<String, String> metadata;
 
     /**
-     * Builder class for a {@link Card} model.
-     */
-    public static final class Builder {
-        @Nullable private final String number;
-        @Nullable private final String cvc;
-        private final Integer expMonth;
-        private final Integer expYear;
-        private String name;
-        private String addressLine1;
-        private String addressLine1Check;
-        private String addressLine2;
-        private String addressCity;
-        private String addressState;
-        private String addressZip;
-        private String addressZipCheck;
-        private String addressCountry;
-        private @CardBrand String brand;
-        private @FundingType String funding;
-        private @Size(4) String last4;
-        private String fingerprint;
-        private String country;
-        private String currency;
-        private String customer;
-        private String cvcCheck;
-        private String id;
-        private String tokenizationMethod;
-        private Map<String, String> metadata;
-
-        /**
-         * Constructor with most common {@link Card} fields.
-         *
-         * @param number the credit card number
-         * @param expMonth the expiry month, as an integer value between 1 and 12
-         * @param expYear the expiry year
-         * @param cvc the card CVC number
-         */
-        public Builder(
-                @Nullable String number,
-                @IntRange(from = 1, to = 12) @Nullable Integer expMonth,
-                @IntRange(from = 0) @Nullable Integer expYear,
-                @Nullable String cvc) {
-            this.number = number;
-            this.expMonth = expMonth;
-            this.expYear = expYear;
-            this.cvc = cvc;
-        }
-
-        @NonNull
-        public Builder name(@Nullable String name) {
-            this.name = name;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressLine1(@Nullable String address) {
-            this.addressLine1 = address;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressLine1Check(@Nullable String addressLine1Check) {
-            this.addressLine1Check = addressLine1Check;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressLine2(@Nullable String address) {
-            this.addressLine2 = address;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressCity(@Nullable String city) {
-            this.addressCity = city;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressState(@Nullable String state) {
-            this.addressState = state;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressZip(@Nullable String zip) {
-            this.addressZip = zip;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressZipCheck(@Nullable String zipCheck) {
-            this.addressZipCheck = zipCheck;
-            return this;
-        }
-
-        @NonNull
-        public Builder addressCountry(@Nullable String country) {
-            this.addressCountry = country;
-            return this;
-        }
-
-        @NonNull
-        public Builder brand(@Nullable @CardBrand String brand) {
-            this.brand = brand;
-            return this;
-        }
-
-        @NonNull
-        public Builder fingerprint(@Nullable String fingerprint) {
-            this.fingerprint = fingerprint;
-            return this;
-        }
-
-        @NonNull
-        public Builder funding(@Nullable @FundingType String funding) {
-            this.funding = funding;
-            return this;
-        }
-
-        @NonNull
-        public Builder country(@Nullable String country) {
-            this.country = country;
-            return this;
-        }
-
-        @NonNull
-        public Builder currency(@Nullable String currency) {
-            this.currency = currency;
-            return this;
-        }
-
-        @NonNull
-        public Builder customer(@Nullable String customer) {
-            this.customer = customer;
-            return this;
-        }
-
-        @NonNull
-        public Builder cvcCheck(@Nullable String cvcCheck) {
-            this.cvcCheck = cvcCheck;
-            return this;
-        }
-
-        @NonNull
-        public Builder last4(@Nullable String last4) {
-            this.last4 = last4;
-            return this;
-        }
-
-        @NonNull
-        public Builder id(@Nullable String id) {
-            this.id = id;
-            return this;
-        }
-
-        @NonNull
-        public Builder tokenizationMethod(@Nullable String tokenizationMethod) {
-            this.tokenizationMethod = tokenizationMethod;
-            return this;
-        }
-
-        @NonNull
-        public Builder metadata(@Nullable Map<String, String> metadata) {
-            this.metadata = metadata;
-            return this;
-        }
-
-        /**
-         * Generate a new {@link Card} object based on the arguments held by this Builder.
-         *
-         * @return the newly created {@link Card} object
-         */
-        @NonNull
-        public Card build() {
-            return new Card(this);
-        }
-    }
-
-    /**
      * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
      *
      * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
@@ -486,6 +307,35 @@ public final class Card extends StripeModel implements StripePaymentSource {
                 .setExpiryMonth(expMonth)
                 .setExpiryYear(expYear)
                 .build();
+    }
+
+    /**
+     * @return a {@link Card.Builder} populated with the fields of this {@link Card} instance
+     */
+    @NonNull
+    public Builder toBuilder() {
+        return new Builder(number, expMonth, expYear, cvc)
+                .name(name)
+                .addressLine1(addressLine1)
+                .addressLine1Check(addressLine1Check)
+                .addressLine2(addressLine2)
+                .addressCity(addressCity)
+                .addressState(addressState)
+                .addressZip(addressZip)
+                .addressZipCheck(addressZipCheck)
+                .addressCountry(addressCountry)
+                .brand(brand)
+                .fingerprint(fingerprint)
+                .funding(funding)
+                .country(country)
+                .currency(currency)
+                .customer(customerId)
+                .cvcCheck(cvcCheck)
+                .last4(last4)
+                .id(id)
+                .tokenizationMethod(tokenizationMethod)
+                .metadata(metadata)
+                .loggingTokens(loggingTokens);
     }
 
     /**
@@ -865,11 +715,15 @@ public final class Card extends StripeModel implements StripePaymentSource {
         this.funding = asFundingType(builder.funding);
         this.country = StripeTextUtils.nullIfBlank(builder.country);
         this.currency = StripeTextUtils.nullIfBlank(builder.currency);
-        this.customerId = StripeTextUtils.nullIfBlank(builder.customer);
+        this.customerId = StripeTextUtils.nullIfBlank(builder.customerId);
         this.cvcCheck = StripeTextUtils.nullIfBlank(builder.cvcCheck);
         this.id = StripeTextUtils.nullIfBlank(builder.id);
         this.tokenizationMethod = StripeTextUtils.nullIfBlank(builder.tokenizationMethod);
         this.metadata = builder.metadata;
+
+        if (builder.loggingTokens != null) {
+            this.loggingTokens.addAll(builder.loggingTokens);
+        }
     }
 
     @Nullable
@@ -920,5 +774,191 @@ public final class Card extends StripeModel implements StripePaymentSource {
                 addressZipCheck, addressCountry, last4, brand, funding, fingerprint,
                 country, currency, customerId, cvcCheck, id, loggingTokens, tokenizationMethod,
                 metadata);
+    }
+
+    /**
+     * Builder class for a {@link Card} model.
+     */
+    public static final class Builder {
+        @Nullable private final String number;
+        @Nullable private final String cvc;
+        private final Integer expMonth;
+        private final Integer expYear;
+        private String name;
+        private String addressLine1;
+        private String addressLine1Check;
+        private String addressLine2;
+        private String addressCity;
+        private String addressState;
+        private String addressZip;
+        private String addressZipCheck;
+        private String addressCountry;
+        private @CardBrand String brand;
+        private @FundingType String funding;
+        private @Size(4) String last4;
+        private String fingerprint;
+        private String country;
+        private String currency;
+        private String customerId;
+        private String cvcCheck;
+        private String id;
+        private String tokenizationMethod;
+        private Map<String, String> metadata;
+        private List<String> loggingTokens;
+
+        /**
+         * Constructor with most common {@link Card} fields.
+         *
+         * @param number the credit card number
+         * @param expMonth the expiry month, as an integer value between 1 and 12
+         * @param expYear the expiry year
+         * @param cvc the card CVC number
+         */
+        public Builder(
+                @Nullable String number,
+                @IntRange(from = 1, to = 12) @Nullable Integer expMonth,
+                @IntRange(from = 0) @Nullable Integer expYear,
+                @Nullable String cvc) {
+            this.number = number;
+            this.expMonth = expMonth;
+            this.expYear = expYear;
+            this.cvc = cvc;
+        }
+
+        @NonNull
+        public Builder name(@Nullable String name) {
+            this.name = name;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressLine1(@Nullable String address) {
+            this.addressLine1 = address;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressLine1Check(@Nullable String addressLine1Check) {
+            this.addressLine1Check = addressLine1Check;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressLine2(@Nullable String address) {
+            this.addressLine2 = address;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressCity(@Nullable String city) {
+            this.addressCity = city;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressState(@Nullable String state) {
+            this.addressState = state;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressZip(@Nullable String zip) {
+            this.addressZip = zip;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressZipCheck(@Nullable String zipCheck) {
+            this.addressZipCheck = zipCheck;
+            return this;
+        }
+
+        @NonNull
+        public Builder addressCountry(@Nullable String country) {
+            this.addressCountry = country;
+            return this;
+        }
+
+        @NonNull
+        public Builder brand(@Nullable @CardBrand String brand) {
+            this.brand = brand;
+            return this;
+        }
+
+        @NonNull
+        public Builder fingerprint(@Nullable String fingerprint) {
+            this.fingerprint = fingerprint;
+            return this;
+        }
+
+        @NonNull
+        public Builder funding(@Nullable @FundingType String funding) {
+            this.funding = funding;
+            return this;
+        }
+
+        @NonNull
+        public Builder country(@Nullable String country) {
+            this.country = country;
+            return this;
+        }
+
+        @NonNull
+        public Builder currency(@Nullable String currency) {
+            this.currency = currency;
+            return this;
+        }
+
+        @NonNull
+        public Builder customer(@Nullable String customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
+        @NonNull
+        public Builder cvcCheck(@Nullable String cvcCheck) {
+            this.cvcCheck = cvcCheck;
+            return this;
+        }
+
+        @NonNull
+        public Builder last4(@Nullable String last4) {
+            this.last4 = last4;
+            return this;
+        }
+
+        @NonNull
+        public Builder id(@Nullable String id) {
+            this.id = id;
+            return this;
+        }
+
+        @NonNull
+        public Builder tokenizationMethod(@Nullable String tokenizationMethod) {
+            this.tokenizationMethod = tokenizationMethod;
+            return this;
+        }
+
+        @NonNull
+        public Builder metadata(@Nullable Map<String, String> metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
+        @NonNull
+        private Builder loggingTokens(@NonNull List<String> loggingTokens) {
+            this.loggingTokens = loggingTokens;
+            return this;
+        }
+
+        /**
+         * Generate a new {@link Card} object based on the arguments held by this Builder.
+         *
+         * @return the newly created {@link Card} object
+         */
+        @NonNull
+        public Card build() {
+            return new Card(this);
+        }
     }
 }

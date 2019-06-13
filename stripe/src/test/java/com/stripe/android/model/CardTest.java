@@ -12,14 +12,15 @@ import org.junit.Test;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.model.Card.asCardBrand;
 import static com.stripe.android.model.Card.asFundingType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link Card}.
@@ -659,21 +660,17 @@ public class CardTest {
 
     @Test
     public void fromString_whenStringIsValidJson_returnsExpectedCard() {
-        final Card expectedCard = buildEquivalentJsonCard();
+        final Card expectedCard = createUsdCard();
         final Card actualCard = Card.fromString(JSON_CARD_USD);
         assertEquals(expectedCard, actualCard);
     }
 
     @Test
-    public void toMap_catchesAllFields_fromRawJson() {
-        try {
-            final JSONObject rawJsonObject = new JSONObject(JSON_CARD_USD);
-            final Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
-            final Card expectedCard = buildEquivalentJsonCard();
-            JsonTestUtils.assertMapEquals(rawMap, expectedCard.toMap());
-        } catch (JSONException unexpected) {
-            fail();
-        }
+    public void toMap_catchesAllFields_fromRawJson() throws JSONException {
+        final JSONObject rawJsonObject = new JSONObject(JSON_CARD_USD);
+        final Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
+        final Card expectedCard = createUsdCard();
+        JsonTestUtils.assertMapEquals(rawMap, expectedCard.toMap());
     }
 
     @Test
@@ -681,8 +678,28 @@ public class CardTest {
         assertNull(Card.fromString(BAD_JSON));
     }
 
+    @Test
+    public void toBuilder_whenChanged_isNotEquals() {
+        assertNotEquals(CardFixtures.CARD, CardFixtures.CARD.toBuilder()
+                .name("some other name")
+                .build());
+    }
+
+    @Test
+    public void toBuilder_whenUnchanged_isEquals() {
+        assertEquals(CardFixtures.CARD, CardFixtures.CARD.toBuilder().build());
+    }
+
+    @Test
+    public void toBuilder_withLoggingToken_whenUnchanged_isEquals() {
+        final Card card = Objects.requireNonNull(Card.fromString(JSON_CARD_USD));
+        card.addLoggingToken("hello");
+
+        assertEquals(card, card.toBuilder().build());
+    }
+
     @NonNull
-    private static Card buildEquivalentJsonCard() {
+    private static Card createUsdCard() {
         final Map<String, String> metadata = new HashMap<>(2);
         metadata.put("color", "blue");
         metadata.put("animal", "dog");
