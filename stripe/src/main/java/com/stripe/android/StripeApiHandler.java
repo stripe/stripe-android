@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.util.Pair;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -23,6 +24,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Token;
+import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,19 +80,14 @@ class StripeApiHandler {
         mAppInfo = appInfo;
     }
 
-    /**
-     * @return true if a request was made and it was successful
-     */
-    boolean logApiCall(
+    void logApiCall(
             @NonNull Map<String, Object> loggingMap,
             @NonNull String publishableKey) {
-        if (!mShouldLogRequest) {
-            return false;
+        if (mShouldLogRequest) {
+            makeFireAndForgetRequest(
+                    ApiRequest.createAnalyticsRequest(loggingMap,
+                            ApiRequest.Options.create(publishableKey), mAppInfo));
         }
-
-        return makeFireAndForgetRequest(
-                ApiRequest.createAnalyticsRequest(loggingMap,
-                        ApiRequest.Options.create(publishableKey), mAppInfo));
     }
 
     /**
@@ -889,43 +886,6 @@ class StripeApiHandler {
         return jsonArray;
     }
 
-    /**
-     * @return true if a request was made and it was successful
-     */
-    private boolean makeFireAndForgetRequest(@NonNull StripeRequest request) {
-        String originalDNSCacheTTL = null;
-        boolean allowedToSetTTL = true;
-
-        try {
-            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
-            // disable DNS cache
-            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
-        } catch (SecurityException se) {
-            allowedToSetTTL = false;
-        }
-
-        boolean isSuccessful = false;
-        try {
-            final StripeResponse response = getStripeResponse(request);
-            isSuccessful = response.getResponseCode() == 200;
-        } catch (StripeException ignore) {
-            // We're just logging. No need to crash here or attempt to re-log things.
-        } finally {
-            if (allowedToSetTTL) {
-                if (originalDNSCacheTTL == null) {
-                    // value unspecified by implementation
-                    // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
-                } else {
-                    Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
-                            originalDNSCacheTTL);
-                }
-            }
-        }
-
-        return isSuccessful;
-    }
-
     @NonNull
     private StripeResponse getStripeResponse(@NonNull StripeRequest request)
             throws InvalidRequestException, APIConnectionException {
@@ -982,17 +942,7 @@ class StripeApiHandler {
     StripeResponse makeApiRequest(@NonNull ApiRequest request)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {
-
-        String originalDNSCacheTTL = null;
-        boolean allowedToSetTTL = true;
-
-        try {
-            originalDNSCacheTTL = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
-            // disable DNS cache
-            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
-        } catch (SecurityException se) {
-            allowedToSetTTL = false;
-        }
+        final Pair<Boolean, String> dnsCacheData = disableDnsCache();
 
         final StripeResponse response = getStripeResponse(request);
         if (response.hasErrorCode()) {
@@ -1000,18 +950,46 @@ class StripeApiHandler {
                     response.getRequestId());
         }
 
-        if (allowedToSetTTL) {
-            if (originalDNSCacheTTL == null) {
-                // value unspecified by implementation
-                // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
-                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "-1");
-            } else {
-                Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
-                        originalDNSCacheTTL);
-            }
-        }
+        resetDnsCacheTtl(dnsCacheData);
 
         return response;
+    }
+
+    private void makeFireAndForgetRequest(@NonNull StripeRequest request) {
+        final Pair<Boolean, String> dnsCacheData = disableDnsCache();
+
+        try {
+            mRequestExecutor.executeAndForget(request);
+        } catch (StripeException ignore) {
+            // We're just logging. No need to crash here or attempt to re-log things.
+        } finally {
+            resetDnsCacheTtl(dnsCacheData);
+        }
+    }
+
+    @NonNull
+    private Pair<Boolean, String> disableDnsCache() {
+        try {
+            final String originalDNSCacheTtl = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME);
+            // disable DNS cache
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0");
+            return Pair.create(true, originalDNSCacheTtl);
+        } catch (SecurityException se) {
+            return Pair.create(false, null);
+        }
+    }
+
+    /**
+     * @param dnsCacheData first object - flag to reset {@link #DNS_CACHE_TTL_PROPERTY_NAME}
+     *                     second object - the original DNS cache TTL value
+     */
+    private void resetDnsCacheTtl(@NonNull Pair<Boolean, String> dnsCacheData) {
+        if (dnsCacheData.first) {
+            // value unspecified by implementation
+            // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
+            Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
+                    ObjectUtils.getOrDefault(dnsCacheData.second, "-1"));
+        }
     }
 
     @Nullable

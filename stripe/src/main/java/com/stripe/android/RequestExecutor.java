@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
@@ -24,7 +25,7 @@ import javax.net.ssl.SSLSocketFactory;
  */
 class RequestExecutor {
 
-    private static final String CHARSET = "UTF-8";
+    private static final String CHARSET = StandardCharsets.UTF_8.name();
 
     @NonNull private final ConnectionFactory mConnectionFactory;
 
@@ -32,6 +33,9 @@ class RequestExecutor {
         mConnectionFactory = new ConnectionFactory();
     }
 
+    /**
+     * Make the request and return the response as a {@link StripeResponse}
+     */
     @NonNull
     StripeResponse execute(@NonNull StripeRequest request)
             throws APIConnectionException, InvalidRequestException {
@@ -40,23 +44,38 @@ class RequestExecutor {
         try {
             conn = mConnectionFactory.create(request);
             // trigger the request
-            final int rCode = conn.getResponseCode();
-            final String rBody;
-            if (rCode >= 200 && rCode < 300) {
-                rBody = getResponseBody(conn.getInputStream());
+            final int responseCode = conn.getResponseCode();
+            final String responseBody;
+            if (responseCode >= 200 && responseCode < 300) {
+                responseBody = getResponseBody(conn.getInputStream());
             } else {
-                rBody = getResponseBody(conn.getErrorStream());
+                responseBody = getResponseBody(conn.getErrorStream());
             }
-            return new StripeResponse(rCode, rBody, conn.getHeaderFields());
+            return new StripeResponse(responseCode, responseBody, conn.getHeaderFields());
         } catch (IOException e) {
-            throw new APIConnectionException(
-                    String.format(Locale.ENGLISH,
-                            "IOException during API request to Stripe (%s): %s "
-                                    + "Please check your internet connection and try again. "
-                                    + "If this problem persists, you should check Stripe's "
-                                    + "service status at https://twitter.com/stripestatus, "
-                                    + "or let us know at support@stripe.com.",
-                            StripeApiHandler.getTokensUrl(), e.getMessage()), e);
+            throw createApiConnectionException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    /**
+     * Make the request and ignore the response
+     *
+     * @return the response status code. Used for testing purposes.
+     */
+    int executeAndForget(@NonNull StripeRequest request)
+            throws APIConnectionException, InvalidRequestException {
+        // HttpURLConnection verifies SSL cert by default
+        HttpURLConnection conn = null;
+        try {
+            conn = mConnectionFactory.create(request);
+            // required to trigger the request
+            return conn.getResponseCode();
+        } catch (IOException e) {
+            throw createApiConnectionException(e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -77,6 +96,18 @@ class RequestExecutor {
         final String rBody = scanner.hasNext() ? scanner.next() : null;
         responseStream.close();
         return rBody;
+    }
+
+    @NonNull
+    private APIConnectionException createApiConnectionException(@NonNull Exception e) {
+        return new APIConnectionException(
+                String.format(Locale.ENGLISH,
+                        "IOException during API request to Stripe (%s): %s "
+                                + "Please check your internet connection and try again. "
+                                + "If this problem persists, you should check Stripe's "
+                                + "service status at https://twitter.com/stripestatus, "
+                                + "or let us know at support@stripe.com.",
+                        StripeApiHandler.getTokensUrl(), e.getMessage()), e);
     }
 
     static class ConnectionFactory {
