@@ -324,90 +324,88 @@ public class CustomerSession {
     }
 
     /**
-     * Add the input source to the current customer object.
+     * Add the Source to the current customer.
      *
      * @param sourceId the ID of the source to be added
-     * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
-     *                 complete
+     * @param listener a {@link SourceRetrievalListener} called when the API call completes
+     *                 with the added {@link Source}.
      */
     public void addCustomerSource(
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @Nullable SourceRetrievalListener listener) {
+            @NonNull SourceRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
 
         final String operationId = mOperationIdFactory.create();
-        if (listener != null) {
-            mCustomerListeners.put(operationId, listener);
-        }
+        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_ADD_SOURCE, arguments);
     }
 
     /**
-     * Delete the source from the current customer object.
+     * Delete the Source from the current customer.
+     *
      * @param sourceId the ID of the source to be deleted
-     * @param listener a {@link SourceRetrievalListener} to be notified when the api call is
-     *                 complete. The api call will return the removed source.
+     * @param listener a {@link SourceRetrievalListener} called when the API call completes
+     *                 with the added {@link Source}.
      */
     public void deleteCustomerSource(
             @NonNull String sourceId,
-            @Nullable SourceRetrievalListener listener) {
+            @NonNull SourceRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
 
         final String operationId = mOperationIdFactory.create();
-        if (listener != null) {
-            mCustomerListeners.put(operationId, listener);
-        }
+        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
     }
 
     /**
-     * Attaches a PaymentMethod to a Customer.
+     * Attaches a PaymentMethod to a customer.
      *
      * @param paymentMethodId the ID of the payment method to be attached
-     * @param listener        a {@link PaymentMethodRetrievalListener} to be notified when the
-     *                        api call is complete
+     * @param listener        a {@link PaymentMethodRetrievalListener} called when the API call
+     *                        completes with the attached {@link PaymentMethod}.
      */
     public void attachPaymentMethod(
             @NonNull String paymentMethodId,
-            @Nullable PaymentMethodRetrievalListener listener) {
+            @NonNull PaymentMethodRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
 
         final String operationId = mOperationIdFactory.create();
-        if (listener != null) {
-            mCustomerListeners.put(operationId, listener);
-        }
+        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
         mEphemeralKeyManager
                 .retrieveEphemeralKey(operationId, ACTION_ATTACH_PAYMENT_METHOD, arguments);
     }
 
     /**
-     * Detaches a PaymentMethod from a Customer.
+     * Detaches a PaymentMethod from a customer.
      *
      * @param paymentMethodId the ID of the payment method to be detached
-     * @param listener        a {@link PaymentMethodRetrievalListener} to be notified when the
-     *                        api call is complete. The api call will return the removed source.
+     * @param listener        a {@link PaymentMethodRetrievalListener} called when the API call
+     *                        completes with the detached {@link PaymentMethod}.
      */
     public void detachPaymentMethod(
             @NonNull String paymentMethodId,
-            @Nullable PaymentMethodRetrievalListener listener) {
+            @NonNull PaymentMethodRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
 
         final String operationId = mOperationIdFactory.create();
-        if (listener != null) {
-            mCustomerListeners.put(operationId, listener);
-        }
+        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
         mEphemeralKeyManager
                 .retrieveEphemeralKey(operationId, ACTION_DETACH_PAYMENT_METHOD, arguments);
     }
 
     /**
-     * Gets a Customer's PaymentMethods
+     * Retrieves all of the customer's PaymentMethod objects,
+     * filtered by a {@link PaymentMethod.Type}.
+     *
+     * @param paymentMethodType the {@link PaymentMethod.Type} to filter by
+     * @param listener          a {@link PaymentMethodRetrievalListener} called when the API call
+     *                          completes with a list of {@link PaymentMethod} objects
      */
     public void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
                                   @NonNull PaymentMethodsRetrievalListener listener) {
@@ -421,7 +419,7 @@ public class CustomerSession {
     }
 
     /**
-     * Set the shipping information on the current customer object.
+     * Set the shipping information on the current customer.
      *
      * @param shippingInformation the data to be set
      */
@@ -434,24 +432,22 @@ public class CustomerSession {
     }
 
     /**
-     * Set the default source of the current customer object.
+     * Set the default Source of the current customer.
      *
      * @param sourceId the ID of the source to be set
-     * @param listener a {@link CustomerRetrievalListener} to be notified about an update to the
-     *                 customer
+     * @param listener a {@link CustomerRetrievalListener} called when the API call
+     *                 completes with the updated customer
      */
     public void setCustomerDefaultSource(
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @Nullable CustomerRetrievalListener listener) {
+            @NonNull CustomerRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SOURCE, sourceId);
         arguments.put(KEY_SOURCE_TYPE, sourceType);
 
         final String operationId = mOperationIdFactory.create();
-        if (listener != null) {
-            mCustomerListeners.put(operationId, listener);
-        }
+        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_SET_DEFAULT_SOURCE,
                 arguments);
     }
