@@ -22,12 +22,27 @@ public final class PaymentIntentResult {
     @NonNull public final PaymentIntent paymentIntent;
     @Status public final int status;
 
+    /**
+     * Values that indicate the outcome of confirmation and payment authentication.
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({Status.UNKNOWN, Status.SUCCEEDED, Status.FAILED, Status.CANCELED})
     public @interface Status {
         int UNKNOWN = 0;
+
+        /**
+         * Confirmation or payment authentication succeeded
+         */
         int SUCCEEDED = 1;
+
+        /**
+         * Confirm or payment authentication failed
+         */
         int FAILED = 2;
+
+        /**
+         * Payment authentication was canceled by the user
+         */
         int CANCELED = 3;
     }
 
