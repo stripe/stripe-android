@@ -36,6 +36,8 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
+
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
  * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
@@ -44,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 class PaymentController {
     static final int REQUEST_CODE = 50000;
     private static final String DIRECTORY_SERVER_ID = "F000000000";
-    private static final String ACTION_DISMISS_DIALOG = "com.ul.sdk.HANDLE_CHALLENGE_ACTION";
 
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
@@ -200,15 +201,8 @@ class PaymentController {
 
         final LocalBroadcastManager localBroadcastManager =
                 LocalBroadcastManager.getInstance(activity);
-        final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-                dialog.dismiss();
-                localBroadcastManager.unregisterReceiver(this);
-            }
-        };
-        localBroadcastManager.registerReceiver(broadcastReceiver,
-                new IntentFilter(ACTION_DISMISS_DIALOG));
+        localBroadcastManager.registerReceiver(new DialogBroadcastReceiver(localBroadcastManager,
+                        dialog), new IntentFilter(UL_HANDLE_CHALLENGE_ACTION));
 
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
@@ -240,7 +234,7 @@ class PaymentController {
     }
 
     private static void handleError(@NonNull Activity activity,
-                             @NonNull Exception exception) {
+                                    @NonNull Exception exception) {
         new PaymentRelayStarter(activity, REQUEST_CODE)
                 .start(new PaymentRelayStarter.Data(exception));
     }
@@ -415,7 +409,7 @@ class PaymentController {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
                 LocalBroadcastManager.getInstance(activity)
-                        .sendBroadcast(new Intent().setAction(ACTION_DISMISS_DIALOG));
+                        .sendBroadcast(new Intent().setAction(UL_HANDLE_CHALLENGE_ACTION));
             }
         }
 
@@ -532,6 +526,27 @@ class PaymentController {
                             }
                         }
                     });
+        }
+    }
+
+    private static class DialogBroadcastReceiver extends BroadcastReceiver {
+
+        @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
+        @NonNull private final WeakReference<ProgressDialog> mProgressDialogRef;
+
+        public DialogBroadcastReceiver(@NonNull LocalBroadcastManager localBroadcastManager,
+                                       @NonNull ProgressDialog progressDialog) {
+            mProgressDialogRef = new WeakReference<>(progressDialog);
+            mLocalBroadcastManager = localBroadcastManager;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final ProgressDialog dialog = mProgressDialogRef.get();
+            if (dialog != null) {
+                dialog.dismiss();
+            }
+            mLocalBroadcastManager.unregisterReceiver(this);
         }
     }
 }
