@@ -406,11 +406,6 @@ class PaymentController {
 
         private void startFrictionlessFlow() {
             mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mPaymentIntent));
-            final Activity activity = mActivityRef.get();
-            if (activity != null) {
-                LocalBroadcastManager.getInstance(activity)
-                        .sendBroadcast(new Intent().setAction(UL_HANDLE_CHALLENGE_ACTION));
-            }
         }
 
         private void startChallengeFlow(@NonNull final Activity activity,
