@@ -17,7 +17,12 @@ import java.util.Map;
  * A class representing a request to a Stripe-owned service.
  */
 abstract class StripeRequest {
+    static final String HEADER_USER_AGENT = "User-Agent";
+
     static final String CHARSET = "UTF-8";
+
+    static final String DEFAULT_USER_AGENT = String.format(
+            Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
 
     @NonNull final Method method;
     @Nullable final Map<String, ?> params;
@@ -51,7 +56,17 @@ abstract class StripeRequest {
     }
 
     @NonNull
-    abstract Map<String, String> getHeaders();
+    final Map<String, String> getHeaders() {
+        final Map<String, String> headers = createHeaders();
+        headers.put(StripeRequest.HEADER_USER_AGENT, getUserAgent());
+        return headers;
+    }
+
+    @NonNull
+    abstract Map<String, String> createHeaders();
+
+    @NonNull
+    abstract String getUserAgent();
 
     @NonNull
     abstract byte[] getOutputBytes() throws UnsupportedEncodingException, InvalidRequestException;

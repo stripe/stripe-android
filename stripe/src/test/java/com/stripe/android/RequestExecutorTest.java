@@ -43,8 +43,14 @@ public class RequestExecutorTest {
                 ApiRequest.MIME_TYPE) {
             @NonNull
             @Override
-            Map<String, String> getHeaders() {
+            Map<String, String> createHeaders() {
                 return new HashMap<>();
+            }
+
+            @NonNull
+            @Override
+            String getUserAgent() {
+                return StripeRequest.DEFAULT_USER_AGENT;
             }
 
             @NonNull
