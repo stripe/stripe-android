@@ -2,13 +2,16 @@ package com.stripe.android;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
@@ -32,6 +35,8 @@ import com.stripe.android.view.PaymentResultExtras;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -194,6 +199,11 @@ class PaymentController {
         final ProgressDialog dialog = transaction.getProgressView(activity);
         dialog.show();
 
+        final LocalBroadcastManager localBroadcastManager =
+                LocalBroadcastManager.getInstance(activity);
+        localBroadcastManager.registerReceiver(new DialogBroadcastReceiver(localBroadcastManager,
+                        dialog), new IntentFilter(UL_HANDLE_CHALLENGE_ACTION));
+
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
         final int timeout = mConfig.stripe3ds2Config.timeout;
@@ -208,7 +218,7 @@ class PaymentController {
                 timeout
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
-                new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, dialog, timeout,
+                new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
                         paymentIntent, stripe3ds2Fingerprint.source, publishableKey));
     }
 
@@ -224,7 +234,7 @@ class PaymentController {
     }
 
     private static void handleError(@NonNull Activity activity,
-                             @NonNull Exception exception) {
+                                    @NonNull Exception exception) {
         new PaymentRelayStarter(activity, REQUEST_CODE)
                 .start(new PaymentRelayStarter.Data(exception));
     }
@@ -316,18 +326,16 @@ class PaymentController {
         @NonNull private final String mPublishableKey;
         @NonNull private final PaymentRelayStarter mPaymentRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
-        @NonNull private final WeakReference<ProgressDialog> mProgressDialog;
 
         private Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull Transaction transaction,
-                @NonNull ProgressDialog progressDialog,
                 int maxTimeout,
                 @NonNull PaymentIntent paymentIntent,
                 @NonNull String sourceId,
                 @NonNull String publishableKey) {
-            this(activity, apiHandler, transaction, progressDialog, maxTimeout, paymentIntent,
+            this(activity, apiHandler, transaction, maxTimeout, paymentIntent,
                     sourceId, publishableKey, new PaymentRelayStarter(activity, REQUEST_CODE));
         }
 
@@ -336,7 +344,6 @@ class PaymentController {
                 @NonNull Activity activity,
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull Transaction transaction,
-                @NonNull ProgressDialog progressDialog,
                 int maxTimeout,
                 @NonNull PaymentIntent paymentIntent,
                 @NonNull String sourceId,
@@ -345,7 +352,6 @@ class PaymentController {
             mActivityRef = new WeakReference<>(activity);
             mApiHandler = apiHandler;
             mTransaction = transaction;
-            mProgressDialog = new WeakReference<>(progressDialog);
             mMaxTimeout = maxTimeout;
             mPaymentIntent = paymentIntent;
             mSourceId = sourceId;
@@ -400,10 +406,6 @@ class PaymentController {
 
         private void startFrictionlessFlow() {
             mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mPaymentIntent));
-            final ProgressDialog progressDialog = mProgressDialog.get();
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-            }
         }
 
         private void startChallengeFlow(@NonNull final Activity activity,
@@ -417,10 +419,6 @@ class PaymentController {
             mBackgroundHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    final ProgressDialog progressDialog = mProgressDialog.get();
-                    if (progressDialog != null) {
-                        progressDialog.dismiss();
-                    }
                     mTransaction.doChallenge(activity,
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mApiHandler,
@@ -523,6 +521,27 @@ class PaymentController {
                             }
                         }
                     });
+        }
+    }
+
+    private static class DialogBroadcastReceiver extends BroadcastReceiver {
+
+        @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
+        @NonNull private final WeakReference<ProgressDialog> mProgressDialogRef;
+
+        DialogBroadcastReceiver(@NonNull LocalBroadcastManager localBroadcastManager,
+                                       @NonNull ProgressDialog progressDialog) {
+            mProgressDialogRef = new WeakReference<>(progressDialog);
+            mLocalBroadcastManager = localBroadcastManager;
+        }
+
+        @Override
+        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            final ProgressDialog dialog = mProgressDialogRef.get();
+            if (dialog != null) {
+                dialog.dismiss();
+            }
+            mLocalBroadcastManager.unregisterReceiver(this);
         }
     }
 }
