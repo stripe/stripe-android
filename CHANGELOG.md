@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 9.3.3
+* [#1108](https://github.com/stripe/stripe-android/pull/1108) Create `Card#toBuilder()`
+* [#1114](https://github.com/stripe/stripe-android/pull/1114) Update `CustomerSession` methods to require listener argument
+
 ## 9.3.2 - 2019-06-12
 * [#1104](https://github.com/stripe/stripe-android/pull/1104) Handle null response body
 
