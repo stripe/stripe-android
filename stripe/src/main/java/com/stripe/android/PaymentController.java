@@ -529,14 +529,14 @@ class PaymentController {
         @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
         @NonNull private final WeakReference<ProgressDialog> mProgressDialogRef;
 
-        public DialogBroadcastReceiver(@NonNull LocalBroadcastManager localBroadcastManager,
+        DialogBroadcastReceiver(@NonNull LocalBroadcastManager localBroadcastManager,
                                        @NonNull ProgressDialog progressDialog) {
             mProgressDialogRef = new WeakReference<>(progressDialog);
             mLocalBroadcastManager = localBroadcastManager;
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
             final ProgressDialog dialog = mProgressDialogRef.get();
             if (dialog != null) {
                 dialog.dismiss();
