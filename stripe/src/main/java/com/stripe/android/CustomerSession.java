@@ -339,7 +339,7 @@ public class CustomerSession {
         arguments.put(KEY_SOURCE_TYPE, sourceType);
 
         final String operationId = mOperationIdFactory.create();
-        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
+        mCustomerListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_ADD_SOURCE, arguments);
     }
 
@@ -357,7 +357,7 @@ public class CustomerSession {
         arguments.put(KEY_SOURCE, sourceId);
 
         final String operationId = mOperationIdFactory.create();
-        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
+        mCustomerListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_DELETE_SOURCE, arguments);
     }
 
@@ -375,7 +375,7 @@ public class CustomerSession {
         arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
 
         final String operationId = mOperationIdFactory.create();
-        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
+        mCustomerListeners.put(operationId, listener);
         mEphemeralKeyManager
                 .retrieveEphemeralKey(operationId, ACTION_ATTACH_PAYMENT_METHOD, arguments);
     }
@@ -394,7 +394,7 @@ public class CustomerSession {
         arguments.put(KEY_PAYMENT_METHOD, paymentMethodId);
 
         final String operationId = mOperationIdFactory.create();
-        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
+        mCustomerListeners.put(operationId, listener);
         mEphemeralKeyManager
                 .retrieveEphemeralKey(operationId, ACTION_DETACH_PAYMENT_METHOD, arguments);
     }
@@ -447,7 +447,7 @@ public class CustomerSession {
         arguments.put(KEY_SOURCE_TYPE, sourceType);
 
         final String operationId = mOperationIdFactory.create();
-        mCustomerListeners.put(operationId, Objects.requireNonNull(listener));
+        mCustomerListeners.put(operationId, listener);
         mEphemeralKeyManager.retrieveEphemeralKey(operationId, ACTION_SET_DEFAULT_SOURCE,
                 arguments);
     }
