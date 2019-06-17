@@ -71,7 +71,7 @@ public final class PaymentAuthConfig {
         static final int DEFAULT_TIMEOUT = 5;
 
         final int timeout;
-        @NonNull final ThreeDS2UiCustomization uiCustomization;
+        @NonNull final Stripe3ds2UiCustomization uiCustomization;
 
         private Stripe3ds2Config(@NonNull Builder builder) {
             timeout = builder.mTimeout;
@@ -80,7 +80,7 @@ public final class PaymentAuthConfig {
 
         public static final class Builder {
             private int mTimeout = DEFAULT_TIMEOUT;
-            private ThreeDS2UiCustomization mUiCustomization = new ThreeDS2UiCustomization();
+            private Stripe3ds2UiCustomization mUiCustomization = new Stripe3ds2UiCustomization();
 
             @NonNull
             public Builder setTimeout(int timeout) {
@@ -89,7 +89,7 @@ public final class PaymentAuthConfig {
             }
 
             @NonNull
-            public Builder setUiCustomization(@NonNull ThreeDS2UiCustomization uiCustomization) {
+            public Builder setUiCustomization(@NonNull Stripe3ds2UiCustomization uiCustomization) {
                 this.mUiCustomization = uiCustomization;
                 return this;
             }
@@ -104,15 +104,15 @@ public final class PaymentAuthConfig {
     /**
      * Customization for 3DS2 buttons
      */
-    public static final class ThreeDS2ButtonCustomization {
+    public static final class Stripe3ds2ButtonCustomization {
 
         @NonNull final ButtonCustomization mButtonCustomization;
 
-        public ThreeDS2ButtonCustomization() {
+        public Stripe3ds2ButtonCustomization() {
             mButtonCustomization = new StripeButtonCustomization();
         }
 
-        ThreeDS2ButtonCustomization(@NonNull ButtonCustomization buttonCustomization) {
+        Stripe3ds2ButtonCustomization(@NonNull ButtonCustomization buttonCustomization) {
             mButtonCustomization = buttonCustomization;
         }
 
@@ -217,11 +217,11 @@ public final class PaymentAuthConfig {
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof ThreeDS2ButtonCustomization &&
-                    typedEquals((ThreeDS2ButtonCustomization) obj));
+            return this == obj || (obj instanceof Stripe3ds2ButtonCustomization &&
+                    typedEquals((Stripe3ds2ButtonCustomization) obj));
         }
 
-        private boolean typedEquals(@NonNull ThreeDS2ButtonCustomization uiCustomization) {
+        private boolean typedEquals(@NonNull Stripe3ds2ButtonCustomization uiCustomization) {
             return ObjectUtils.equals(mButtonCustomization, uiCustomization.mButtonCustomization);
         }
 
@@ -234,15 +234,15 @@ public final class PaymentAuthConfig {
     /**
      * Customization for 3DS2 labels
      */
-    public static final class ThreeDS2LabelCustomization {
+    public static final class Stripe3ds2LabelCustomization {
 
         @NonNull final LabelCustomization mLabelCustomization;
 
-        public ThreeDS2LabelCustomization() {
+        public Stripe3ds2LabelCustomization() {
             mLabelCustomization = new StripeLabelCustomization();
         }
 
-        ThreeDS2LabelCustomization(@NonNull LabelCustomization labelCustomization) {
+        Stripe3ds2LabelCustomization(@NonNull LabelCustomization labelCustomization) {
             mLabelCustomization = labelCustomization;
         }
 
@@ -259,7 +259,7 @@ public final class PaymentAuthConfig {
         /**
          * Set the heading label's font
          *
-         * @param fontName The name of the font for heading labels. Defaults to system font if not found
+         * @param fontName The name of the font. Defaults to system font if not found
          * @throws InvalidInputException If the font name is null or empty
          */
         public void setHeadingTextFontName(@NonNull String fontName) throws InvalidInputException {
@@ -366,11 +366,11 @@ public final class PaymentAuthConfig {
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof ThreeDS2LabelCustomization &&
-                    typedEquals((ThreeDS2LabelCustomization) obj));
+            return this == obj || (obj instanceof Stripe3ds2LabelCustomization &&
+                    typedEquals((Stripe3ds2LabelCustomization) obj));
         }
 
-        private boolean typedEquals(@NonNull ThreeDS2LabelCustomization uiCustomization) {
+        private boolean typedEquals(@NonNull Stripe3ds2LabelCustomization uiCustomization) {
             return ObjectUtils.equals(mLabelCustomization, uiCustomization.mLabelCustomization);
         }
 
@@ -383,15 +383,15 @@ public final class PaymentAuthConfig {
     /**
      * Customization for 3DS2 text entry
      */
-    public static final class ThreeDS2TextBoxCustomization {
+    public static final class Stripe3ds2TextBoxCustomization {
 
         @NonNull final TextBoxCustomization mTextBoxCustomization;
 
-        public ThreeDS2TextBoxCustomization() {
+        public Stripe3ds2TextBoxCustomization() {
             mTextBoxCustomization = new StripeTextBoxCustomization();
         }
 
-        ThreeDS2TextBoxCustomization(@NonNull TextBoxCustomization textBoxCustomization) {
+        Stripe3ds2TextBoxCustomization(@NonNull TextBoxCustomization textBoxCustomization) {
             mTextBoxCustomization = textBoxCustomization;
         }
 
@@ -514,11 +514,11 @@ public final class PaymentAuthConfig {
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof ThreeDS2TextBoxCustomization &&
-                    typedEquals((ThreeDS2TextBoxCustomization) obj));
+            return this == obj || (obj instanceof Stripe3ds2TextBoxCustomization &&
+                    typedEquals((Stripe3ds2TextBoxCustomization) obj));
         }
 
-        private boolean typedEquals(@NonNull ThreeDS2TextBoxCustomization uiCustomization) {
+        private boolean typedEquals(@NonNull Stripe3ds2TextBoxCustomization uiCustomization) {
             return ObjectUtils.equals(mTextBoxCustomization, uiCustomization.mTextBoxCustomization);
         }
 
@@ -531,15 +531,15 @@ public final class PaymentAuthConfig {
     /**
      * Customization for the 3DS2 toolbar
      */
-    public static final class ThreeDS2ToolbarCustomization {
+    public static final class Stripe3ds2ToolbarCustomization {
 
         @NonNull final ToolbarCustomization mToolbarCustomization;
 
-        public ThreeDS2ToolbarCustomization() {
+        public Stripe3ds2ToolbarCustomization() {
             mToolbarCustomization = new StripeToolbarCustomization();
         }
 
-        ThreeDS2ToolbarCustomization(@NonNull ToolbarCustomization toolbarCustomization) {
+        Stripe3ds2ToolbarCustomization(@NonNull ToolbarCustomization toolbarCustomization) {
             mToolbarCustomization = toolbarCustomization;
         }
 
@@ -664,11 +664,11 @@ public final class PaymentAuthConfig {
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof ThreeDS2ToolbarCustomization &&
-                    typedEquals((ThreeDS2ToolbarCustomization) obj));
+            return this == obj || (obj instanceof Stripe3ds2ToolbarCustomization &&
+                    typedEquals((Stripe3ds2ToolbarCustomization) obj));
         }
 
-        private boolean typedEquals(@NonNull ThreeDS2ToolbarCustomization uiCustomization) {
+        private boolean typedEquals(@NonNull Stripe3ds2ToolbarCustomization uiCustomization) {
             return ObjectUtils.equals(mToolbarCustomization, uiCustomization.mToolbarCustomization);
         }
 
@@ -681,11 +681,11 @@ public final class PaymentAuthConfig {
     /**
      * Customizations for the 3DS2 UI
      */
-    public static final class ThreeDS2UiCustomization {
+    public static final class Stripe3ds2UiCustomization {
 
         @NonNull private final UiCustomization mUiCustomization;
 
-        public ThreeDS2UiCustomization() {
+        public Stripe3ds2UiCustomization() {
             mUiCustomization = new StripeUiCustomization();
         }
 
@@ -724,8 +724,9 @@ public final class PaymentAuthConfig {
          * @param buttonType The type of button to customize
          * @throws InvalidInputException If any customization data is invalid
          */
-        public void setButtonCustomization(@NonNull ThreeDS2ButtonCustomization buttonCustomization,
-                                           @NonNull ButtonType buttonType)
+        public void setButtonCustomization(
+                @NonNull Stripe3ds2ButtonCustomization buttonCustomization,
+                @NonNull ButtonType buttonType)
                 throws InvalidInputException {
             mUiCustomization.setButtonCustomization(buttonCustomization.mButtonCustomization,
                     getUiButtonType(buttonType));
@@ -737,7 +738,8 @@ public final class PaymentAuthConfig {
          * @param toolbarCustomization Toolbar customization data
          * @throws InvalidInputException If any customization data is invalid
          */
-        public void setToolbarCustomization(@NonNull ThreeDS2ToolbarCustomization toolbarCustomization)
+        public void setToolbarCustomization(
+                @NonNull Stripe3ds2ToolbarCustomization toolbarCustomization)
                 throws InvalidInputException {
             mUiCustomization.setToolbarCustomization(toolbarCustomization.mToolbarCustomization);
         }
@@ -748,7 +750,7 @@ public final class PaymentAuthConfig {
          * @param labelCustomization Label customization data
          * @throws InvalidInputException If any customization data is invalid
          */
-        public void setLabelCustomization(@NonNull ThreeDS2LabelCustomization labelCustomization)
+        public void setLabelCustomization(@NonNull Stripe3ds2LabelCustomization labelCustomization)
                 throws InvalidInputException {
             mUiCustomization.setLabelCustomization(labelCustomization.mLabelCustomization);
         }
@@ -759,7 +761,8 @@ public final class PaymentAuthConfig {
          * @param textBoxCustomization Text box customization data
          * @throws InvalidInputException If any customization data is invalid
          */
-        public void setTextBoxCustomization(@NonNull ThreeDS2TextBoxCustomization textBoxCustomization)
+        public void setTextBoxCustomization(
+                @NonNull Stripe3ds2TextBoxCustomization textBoxCustomization)
                 throws InvalidInputException {
             mUiCustomization.setTextBoxCustomization(textBoxCustomization.mTextBoxCustomization);
         }
@@ -772,14 +775,14 @@ public final class PaymentAuthConfig {
          * @throws InvalidInputException If buttonType is invalid
          */
         @Nullable
-        public ThreeDS2ButtonCustomization getButtonCustomization(@NonNull ButtonType buttonType)
+        public Stripe3ds2ButtonCustomization getButtonCustomization(@NonNull ButtonType buttonType)
                 throws InvalidInputException {
             final ButtonCustomization buttonCustomization =
                     mUiCustomization.getButtonCustomization(getUiButtonType(buttonType));
             if (buttonCustomization == null) {
                 return null;
             } else {
-                return new ThreeDS2ButtonCustomization(buttonCustomization);
+                return new Stripe3ds2ButtonCustomization(buttonCustomization);
             }
         }
 
@@ -789,13 +792,13 @@ public final class PaymentAuthConfig {
          * @return The toolbar customization if set or null
          */
         @Nullable
-        public ThreeDS2ToolbarCustomization getToolbarCustomization() {
+        public Stripe3ds2ToolbarCustomization getToolbarCustomization() {
             final ToolbarCustomization toolbarCustomization =
                     mUiCustomization.getToolbarCustomization();
             if (toolbarCustomization == null) {
                 return null;
             } else {
-                return new ThreeDS2ToolbarCustomization(toolbarCustomization);
+                return new Stripe3ds2ToolbarCustomization(toolbarCustomization);
             }
         }
 
@@ -805,12 +808,12 @@ public final class PaymentAuthConfig {
          * @return The label customization if set or null
          */
         @Nullable
-        public ThreeDS2LabelCustomization getLabelCustomization() {
+        public Stripe3ds2LabelCustomization getLabelCustomization() {
             final LabelCustomization labelCustomization = mUiCustomization.getLabelCustomization();
             if (labelCustomization == null) {
                 return null;
             } else {
-                return new ThreeDS2LabelCustomization(labelCustomization);
+                return new Stripe3ds2LabelCustomization(labelCustomization);
             }
         }
 
@@ -820,23 +823,23 @@ public final class PaymentAuthConfig {
          * @return The text box customization if set or null
          */
         @Nullable
-        public ThreeDS2TextBoxCustomization getTextBoxCustomization() {
+        public Stripe3ds2TextBoxCustomization getTextBoxCustomization() {
             final TextBoxCustomization textBoxCustomization =
                     mUiCustomization.getTextBoxCustomization();
             if (textBoxCustomization == null) {
                 return null;
             } else {
-                return new ThreeDS2TextBoxCustomization(textBoxCustomization);
+                return new Stripe3ds2TextBoxCustomization(textBoxCustomization);
             }
         }
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof ThreeDS2UiCustomization &&
-                    typedEquals((ThreeDS2UiCustomization) obj));
+            return this == obj || (obj instanceof Stripe3ds2UiCustomization &&
+                    typedEquals((Stripe3ds2UiCustomization) obj));
         }
 
-        private boolean typedEquals(@NonNull ThreeDS2UiCustomization uiCustomization) {
+        private boolean typedEquals(@NonNull Stripe3ds2UiCustomization uiCustomization) {
             return ObjectUtils.equals(mUiCustomization, uiCustomization.mUiCustomization);
         }
 
