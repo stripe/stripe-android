@@ -48,7 +48,7 @@ public class PaymentAuthConfigTest {
     @Test
     public void testStripe3ds2ConfigBuilder() {
         final PaymentAuthConfig.Stripe3ds2UiCustomization uiCustomization =
-                new PaymentAuthConfig.Stripe3ds2UiCustomization();
+                new PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build();
         PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
                 .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
                         .setTimeout(20)
@@ -83,13 +83,14 @@ public class PaymentAuthConfigTest {
     @Test
     public void testLabelCustomizationWrapper() {
         final PaymentAuthConfig.Stripe3ds2LabelCustomization labelCustomization =
-                new PaymentAuthConfig.Stripe3ds2LabelCustomization();
-        labelCustomization.setHeadingTextFontName("Header Font Name");
-        labelCustomization.setHeadingTextColor("#FFFFFF");
-        labelCustomization.setHeadingTextFontSize(32);
-        labelCustomization.setTextColor("#000000");
-        labelCustomization.setTextFontName("Font Name");
-        labelCustomization.setTextFontSize(24);
+                new PaymentAuthConfig.Stripe3ds2LabelCustomization.Builder()
+                        .setHeadingTextFontName("Header Font Name")
+                        .setHeadingTextColor("#FFFFFF")
+                        .setHeadingTextFontSize(32)
+                        .setTextColor("#000000")
+                        .setTextFontName("Font Name")
+                        .setTextFontSize(24)
+                        .build();
 
         final LabelCustomization expectedLabelCustomization = new StripeLabelCustomization();
         expectedLabelCustomization.setHeadingTextFontName("Header Font Name");
@@ -105,13 +106,14 @@ public class PaymentAuthConfigTest {
     @Test
     public void testTextBoxCustomizationWrapper() {
         final PaymentAuthConfig.Stripe3ds2TextBoxCustomization textBoxCustomization =
-                new PaymentAuthConfig.Stripe3ds2TextBoxCustomization();
-        textBoxCustomization.setBorderColor("#000000");
-        textBoxCustomization.setBorderWidth(8);
-        textBoxCustomization.setCornerRadius(16);
-        textBoxCustomization.setTextColor("#FFFFFF");
-        textBoxCustomization.setTextFontName("Font Name");
-        textBoxCustomization.setTextFontSize(24);
+                new PaymentAuthConfig.Stripe3ds2TextBoxCustomization.Builder()
+                        .setBorderColor("#000000")
+                        .setBorderWidth(8)
+                        .setCornerRadius(16)
+                        .setTextColor("#FFFFFF")
+                        .setTextFontName("Font Name")
+                        .setTextFontSize(24)
+                        .build();
 
         final TextBoxCustomization expectedTextBoxCustomization = new StripeTextBoxCustomization();
         expectedTextBoxCustomization.setBorderColor("#000000");
@@ -127,13 +129,14 @@ public class PaymentAuthConfigTest {
     @Test
     public void testToolbarCustomizationWrapper() {
         final PaymentAuthConfig.Stripe3ds2ToolbarCustomization toolbarCustomization =
-                new PaymentAuthConfig.Stripe3ds2ToolbarCustomization();
-        toolbarCustomization.setBackgroundColor("#000000");
-        toolbarCustomization.setButtonText("Button Text");
-        toolbarCustomization.setHeaderText("Header Text");
-        toolbarCustomization.setTextColor("#FFFFFF");
-        toolbarCustomization.setTextFontName("Font Name");
-        toolbarCustomization.setTextFontSize(16);
+                new PaymentAuthConfig.Stripe3ds2ToolbarCustomization.Builder()
+                        .setBackgroundColor("#000000")
+                        .setButtonText("Button Text")
+                        .setHeaderText("Header Text")
+                        .setTextColor("#FFFFFF")
+                        .setTextFontName("Font Name")
+                        .setTextFontSize(16)
+                        .build();
 
         final ToolbarCustomization expectedCustomization = new StripeToolbarCustomization();
         expectedCustomization.setBackgroundColor("#000000");
@@ -157,26 +160,27 @@ public class PaymentAuthConfigTest {
                         .setTextColor("#000011").build();
 
         final PaymentAuthConfig.Stripe3ds2LabelCustomization stripe3ds2LabelCustomization =
-                new PaymentAuthConfig.Stripe3ds2LabelCustomization();
-        stripe3ds2LabelCustomization.setTextColor("#000002");
+                new PaymentAuthConfig.Stripe3ds2LabelCustomization.Builder()
+                        .setTextColor("#000002").build();
 
         final PaymentAuthConfig.Stripe3ds2TextBoxCustomization stripe3ds2TextBoxCustomization =
-                new PaymentAuthConfig.Stripe3ds2TextBoxCustomization();
-        stripe3ds2TextBoxCustomization.setTextColor("#000003");
+                new PaymentAuthConfig.Stripe3ds2TextBoxCustomization.Builder()
+                        .setTextColor("#000003").build();
 
         final PaymentAuthConfig.Stripe3ds2ToolbarCustomization stripe3ds2ToolbarCustomization =
-                new PaymentAuthConfig.Stripe3ds2ToolbarCustomization();
-        stripe3ds2ToolbarCustomization.setTextColor("#000004");
+                new PaymentAuthConfig.Stripe3ds2ToolbarCustomization.Builder()
+                        .setTextColor("#000004").build();
 
         final PaymentAuthConfig.Stripe3ds2UiCustomization uiCustomization =
-                new PaymentAuthConfig.Stripe3ds2UiCustomization();
-        uiCustomization.setButtonCustomization(nextStripe3ds2ButtonCustomization,
-                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.NEXT);
-        uiCustomization.setButtonCustomization(cancelStripe3ds2ButtonCustomization,
-                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.CANCEL);
-        uiCustomization.setLabelCustomization(stripe3ds2LabelCustomization);
-        uiCustomization.setTextBoxCustomization(stripe3ds2TextBoxCustomization);
-        uiCustomization.setToolbarCustomization(stripe3ds2ToolbarCustomization);
+                new PaymentAuthConfig.Stripe3ds2UiCustomization.Builder()
+                        .setButtonCustomization(nextStripe3ds2ButtonCustomization,
+                                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.NEXT)
+                        .setButtonCustomization(cancelStripe3ds2ButtonCustomization,
+                                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.CANCEL)
+                        .setLabelCustomization(stripe3ds2LabelCustomization)
+                        .setTextBoxCustomization(stripe3ds2TextBoxCustomization)
+                        .setToolbarCustomization(stripe3ds2ToolbarCustomization)
+                        .build();
 
         final ButtonCustomization nextButtonCustomization = new StripeButtonCustomization();
         nextButtonCustomization.setTextColor("#000001");

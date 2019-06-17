@@ -80,7 +80,8 @@ public final class PaymentAuthConfig {
 
         public static final class Builder {
             private int mTimeout = DEFAULT_TIMEOUT;
-            private Stripe3ds2UiCustomization mUiCustomization = new Stripe3ds2UiCustomization();
+            private Stripe3ds2UiCustomization mUiCustomization =
+                    new Stripe3ds2UiCustomization.Builder().build();
 
             @NonNull
             public Builder setTimeout(int timeout) {
@@ -203,72 +204,89 @@ public final class PaymentAuthConfig {
 
         @NonNull final LabelCustomization mLabelCustomization;
 
-        public Stripe3ds2LabelCustomization() {
-            mLabelCustomization = new StripeLabelCustomization();
-        }
-
         Stripe3ds2LabelCustomization(@NonNull LabelCustomization labelCustomization) {
             mLabelCustomization = labelCustomization;
         }
 
-        /**
-         * Set the text color for heading labels
-         *
-         * @param hexColor The heading labels's text color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setHeadingTextColor(@NonNull String hexColor) throws InvalidInputException {
-            mLabelCustomization.setHeadingTextColor(hexColor);
-        }
+        public static final class Builder {
 
-        /**
-         * Set the heading label's font
-         *
-         * @param fontName The name of the font. Defaults to system font if not found
-         * @throws InvalidInputException If the font name is null or empty
-         */
-        public void setHeadingTextFontName(@NonNull String fontName) throws InvalidInputException {
-            mLabelCustomization.setHeadingTextFontName(fontName);
-        }
+            @NonNull final LabelCustomization mLabelCustomization;
 
-        /**
-         * Set the heading label's text size
-         *
-         * @param fontSize The size of the heading label in scaled-pixels (sp).
-         * @throws InvalidInputException If the font size is 0 or less
-         */
-        public void setHeadingTextFontSize(int fontSize) throws InvalidInputException {
-            mLabelCustomization.setHeadingTextFontSize(fontSize);
-        }
+            public Builder() {
+                mLabelCustomization = new StripeLabelCustomization();
+            }
 
-        /**
-         * Set the label's font
-         *
-         * @param fontName The name of the font. Defaults to system font if not found
-         * @throws InvalidInputException If the font name is null or empty
-         */
-        public void setTextFontName(@NonNull String fontName) throws InvalidInputException {
-            mLabelCustomization.setTextFontName(fontName);
-        }
+            /**
+             * Set the text color for heading labels
+             *
+             * @param hexColor The heading labels's text color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setHeadingTextColor(@NonNull String hexColor)
+                    throws InvalidInputException {
+                mLabelCustomization.setHeadingTextColor(hexColor);
+                return this;
+            }
 
-        /**
-         * Set the label's text color
-         *
-         * @param hexColor The labels's text color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setTextColor(@NonNull String hexColor) throws InvalidInputException {
-            mLabelCustomization.setTextColor(hexColor);
-        }
+            /**
+             * Set the heading label's font
+             *
+             * @param fontName The name of the font. Defaults to system font if not found
+             * @throws InvalidInputException If the font name is null or empty
+             */
+            public Builder setHeadingTextFontName(@NonNull String fontName)
+                    throws InvalidInputException {
+                mLabelCustomization.setHeadingTextFontName(fontName);
+                return this;
+            }
 
-        /**
-         * Set the label's text size
-         *
-         * @param fontSize The label's font size in scaled-pixels (sp)
-         * @throws InvalidInputException If the font size is 0 or less
-         */
-        public void setTextFontSize(int fontSize) throws InvalidInputException {
-            mLabelCustomization.setTextFontSize(fontSize);
+            /**
+             * Set the heading label's text size
+             *
+             * @param fontSize The size of the heading label in scaled-pixels (sp).
+             * @throws InvalidInputException If the font size is 0 or less
+             */
+            public Builder setHeadingTextFontSize(int fontSize) throws InvalidInputException {
+                mLabelCustomization.setHeadingTextFontSize(fontSize);
+                return this;
+            }
+
+            /**
+             * Set the label's font
+             *
+             * @param fontName The name of the font. Defaults to system font if not found
+             * @throws InvalidInputException If the font name is null or empty
+             */
+            public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
+                mLabelCustomization.setTextFontName(fontName);
+                return this;
+            }
+
+            /**
+             * Set the label's text color
+             *
+             * @param hexColor The labels's text color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
+                mLabelCustomization.setTextColor(hexColor);
+                return this;
+            }
+
+            /**
+             * Set the label's text size
+             *
+             * @param fontSize The label's font size in scaled-pixels (sp)
+             * @throws InvalidInputException If the font size is 0 or less
+             */
+            public Builder setTextFontSize(int fontSize) throws InvalidInputException {
+                mLabelCustomization.setTextFontSize(fontSize);
+                return this;
+            }
+
+            public Stripe3ds2LabelCustomization build() {
+                return new Stripe3ds2LabelCustomization(mLabelCustomization);
+            }
         }
 
         @Override
@@ -294,72 +312,91 @@ public final class PaymentAuthConfig {
 
         @NonNull final TextBoxCustomization mTextBoxCustomization;
 
-        public Stripe3ds2TextBoxCustomization() {
-            mTextBoxCustomization = new StripeTextBoxCustomization();
-        }
-
         Stripe3ds2TextBoxCustomization(@NonNull TextBoxCustomization textBoxCustomization) {
             mTextBoxCustomization = textBoxCustomization;
         }
 
-        /**
-         * Set the width of the border around the text entry box
-         *
-         * @param borderWidth Width of the border in pixels
-         * @throws InvalidInputException If the border width is less than 0
-         */
-        public void setBorderWidth(int borderWidth) throws InvalidInputException {
-            mTextBoxCustomization.setBorderWidth(borderWidth);
-        }
+        public static final class Builder {
+            @NonNull final TextBoxCustomization mTextBoxCustomization;
 
-        /**
-         * Set the color of the border around the text entry box
-         *
-         * @param hexColor The border's color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setBorderColor(@NonNull String hexColor) throws InvalidInputException {
-            mTextBoxCustomization.setBorderColor(hexColor);
-        }
+            public Builder() {
+                mTextBoxCustomization = new StripeTextBoxCustomization();
+            }
 
-        /**
-         * Set the corner radius of the text entry box
-         *
-         * @param cornerRadius The corner radius in pixels
-         * @throws InvalidInputException If the corner radius is less than 0
-         */
-        public void setCornerRadius(int cornerRadius) throws InvalidInputException {
-            mTextBoxCustomization.setCornerRadius(cornerRadius);
-        }
+            /**
+             * Set the width of the border around the text entry box
+             *
+             * @param borderWidth Width of the border in pixels
+             * @throws InvalidInputException If the border width is less than 0
+             */
+            public Builder setBorderWidth(int borderWidth) throws InvalidInputException {
+                mTextBoxCustomization.setBorderWidth(borderWidth);
+                return this;
+            }
 
-        /**
-         * Set the font for text entry
-         *
-         * @param fontName The name of the font. The system default is used if not found.
-         * @throws InvalidInputException If the font name is null or empty.
-         */
-        public void setTextFontName(@NonNull String fontName) throws InvalidInputException {
-            mTextBoxCustomization.setTextFontName(fontName);
-        }
+            /**
+             * Set the color of the border around the text entry box
+             *
+             * @param hexColor The border's color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setBorderColor(@NonNull String hexColor) throws InvalidInputException {
+                mTextBoxCustomization.setBorderColor(hexColor);
+                return this;
+            }
 
-        /**
-         * Set the text color for text entry
-         *
-         * @param hexColor The text color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setTextColor(@NonNull String hexColor) throws InvalidInputException {
-            mTextBoxCustomization.setTextColor(hexColor);
-        }
+            /**
+             * Set the corner radius of the text entry box
+             *
+             * @param cornerRadius The corner radius in pixels
+             * @throws InvalidInputException If the corner radius is less than 0
+             */
+            public Builder setCornerRadius(int cornerRadius) throws InvalidInputException {
+                mTextBoxCustomization.setCornerRadius(cornerRadius);
+                return this;
+            }
 
-        /**
-         * Set the text entry font size
-         *
-         * @param fontSize The font size in scaled-pixels (sp)
-         * @throws InvalidInputException If the font size is 0 or less
-         */
-        public void setTextFontSize(int fontSize) throws InvalidInputException {
-            mTextBoxCustomization.setTextFontSize(fontSize);
+            /**
+             * Set the font for text entry
+             *
+             * @param fontName The name of the font. The system default is used if not found.
+             * @throws InvalidInputException If the font name is null or empty.
+             */
+            public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
+                mTextBoxCustomization.setTextFontName(fontName);
+                return this;
+            }
+
+            /**
+             * Set the text color for text entry
+             *
+             * @param hexColor The text color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
+                mTextBoxCustomization.setTextColor(hexColor);
+                return this;
+            }
+
+            /**
+             * Set the text entry font size
+             *
+             * @param fontSize The font size in scaled-pixels (sp)
+             * @throws InvalidInputException If the font size is 0 or less
+             */
+            public Builder setTextFontSize(int fontSize) throws InvalidInputException {
+                mTextBoxCustomization.setTextFontSize(fontSize);
+                return this;
+            }
+
+            /**
+             * Build the text box customization
+             *
+             * @return The text box customization
+             */
+            public Stripe3ds2TextBoxCustomization build() {
+                return new Stripe3ds2TextBoxCustomization(mTextBoxCustomization);
+            }
         }
 
         @Override
@@ -385,72 +422,87 @@ public final class PaymentAuthConfig {
 
         @NonNull final ToolbarCustomization mToolbarCustomization;
 
-        public Stripe3ds2ToolbarCustomization() {
-            mToolbarCustomization = new StripeToolbarCustomization();
-        }
-
         Stripe3ds2ToolbarCustomization(@NonNull ToolbarCustomization toolbarCustomization) {
             mToolbarCustomization = toolbarCustomization;
         }
 
-        /**
-         * Set the toolbar's background color
-         *
-         * @param hexColor The background color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setBackgroundColor(@NonNull String hexColor) throws InvalidInputException {
-            mToolbarCustomization.setBackgroundColor(hexColor);
-        }
+        public static final class Builder {
+            @NonNull final ToolbarCustomization mToolbarCustomization;
 
-        /**
-         * Set the toolbar's title
-         *
-         * @param headerText The toolbar's title text
-         * @throws InvalidInputException if the title is null or empty
-         */
-        public void setHeaderText(@NonNull String headerText) throws InvalidInputException {
-            mToolbarCustomization.setHeaderText(headerText);
-        }
+            public Builder() {
+                mToolbarCustomization = new StripeToolbarCustomization();
+            }
 
-        /**
-         * Set the toolbar's cancel button text
-         *
-         * @param buttonText The cancel button's text
-         * @throws InvalidInputException If the button text is null or empty
-         */
-        public void setButtonText(@NonNull String buttonText) throws InvalidInputException {
-            mToolbarCustomization.setButtonText(buttonText);
-        }
+            /**
+             * Set the toolbar's background color
+             *
+             * @param hexColor The background color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setBackgroundColor(@NonNull String hexColor)
+                    throws InvalidInputException {
+                mToolbarCustomization.setBackgroundColor(hexColor);
+                return this;
+            }
 
-        /**
-         * Set the font for the title text
-         *
-         * @param fontName The name of the font. System default is used if not found
-         * @throws InvalidInputException If the font name is null or empty
-         */
-        public void setTextFontName(@NonNull String fontName) throws InvalidInputException {
-            mToolbarCustomization.setTextFontName(fontName);
-        }
+            /**
+             * Set the toolbar's title
+             *
+             * @param headerText The toolbar's title text
+             * @throws InvalidInputException if the title is null or empty
+             */
+            public Builder setHeaderText(@NonNull String headerText) throws InvalidInputException {
+                mToolbarCustomization.setHeaderText(headerText);
+                return this;
+            }
 
-        /**
-         * Set the color of the title text
-         *
-         * @param hexColor The title's text color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setTextColor(@NonNull String hexColor) throws InvalidInputException {
-            mToolbarCustomization.setTextColor(hexColor);
-        }
+            /**
+             * Set the toolbar's cancel button text
+             *
+             * @param buttonText The cancel button's text
+             * @throws InvalidInputException If the button text is null or empty
+             */
+            public Builder setButtonText(@NonNull String buttonText) throws InvalidInputException {
+                mToolbarCustomization.setButtonText(buttonText);
+                return this;
+            }
 
-        /**
-         * Set the title text's font size
-         *
-         * @param fontSize The size of the title text in scaled-pixels (sp)
-         * @throws InvalidInputException If the font size is 0 or less
-         */
-        public void setTextFontSize(int fontSize) throws InvalidInputException {
-            mToolbarCustomization.setTextFontSize(fontSize);
+            /**
+             * Set the font for the title text
+             *
+             * @param fontName The name of the font. System default is used if not found
+             * @throws InvalidInputException If the font name is null or empty
+             */
+            public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
+                mToolbarCustomization.setTextFontName(fontName);
+                return this;
+            }
+
+            /**
+             * Set the color of the title text
+             *
+             * @param hexColor The title's text color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
+                mToolbarCustomization.setTextColor(hexColor);
+                return this;
+            }
+
+            /**
+             * Set the title text's font size
+             *
+             * @param fontSize The size of the title text in scaled-pixels (sp)
+             * @throws InvalidInputException If the font size is 0 or less
+             */
+            public Builder setTextFontSize(int fontSize) throws InvalidInputException {
+                mToolbarCustomization.setTextFontSize(fontSize);
+                return this;
+            }
+
+            public Stripe3ds2ToolbarCustomization build() {
+                return new Stripe3ds2ToolbarCustomization(mToolbarCustomization);
+            }
         }
 
         @Override
@@ -476,8 +528,13 @@ public final class PaymentAuthConfig {
 
         @NonNull private final UiCustomization mUiCustomization;
 
-        public Stripe3ds2UiCustomization() {
-            mUiCustomization = new StripeUiCustomization();
+        /**
+         * The type of button for which customization can be set
+         */
+        public enum ButtonType {SUBMIT, CONTINUE, NEXT, CANCEL, RESEND}
+
+        private Stripe3ds2UiCustomization(@NonNull UiCustomization uiCustomization) {
+            mUiCustomization = uiCustomization;
         }
 
         @NonNull
@@ -485,77 +542,91 @@ public final class PaymentAuthConfig {
             return mUiCustomization;
         }
 
-        /**
-         * The type of button for which customization can be set
-         */
-        public enum ButtonType {SUBMIT, CONTINUE, NEXT, CANCEL, RESEND}
+        public static final class Builder {
+            @NonNull private final UiCustomization mUiCustomization;
 
-        @NonNull
-        private UiCustomization.ButtonType getUiButtonType(@NonNull ButtonType buttonType)
-                throws InvalidInputException {
-            if (buttonType == ButtonType.NEXT) {
-                return UiCustomization.ButtonType.NEXT;
-            } else if (buttonType == ButtonType.CANCEL) {
-                return UiCustomization.ButtonType.CANCEL;
-            } else if (buttonType == ButtonType.SUBMIT) {
-                return UiCustomization.ButtonType.SUBMIT;
-            } else if (buttonType == ButtonType.RESEND) {
-                return UiCustomization.ButtonType.RESEND;
-            } else if (buttonType == ButtonType.CONTINUE) {
-                return UiCustomization.ButtonType.CONTINUE;
-            } else {
-                throw new InvalidInputException(new RuntimeException("Invalid Button Type"));
+            public Builder() {
+                mUiCustomization = new StripeUiCustomization();
             }
-        }
 
-        /**
-         * Set the customization for a particular button
-         *
-         * @param buttonCustomization The button customization data
-         * @param buttonType The type of button to customize
-         * @throws InvalidInputException If any customization data is invalid
-         */
-        public void setButtonCustomization(
-                @NonNull Stripe3ds2ButtonCustomization buttonCustomization,
-                @NonNull ButtonType buttonType)
-                throws InvalidInputException {
-            mUiCustomization.setButtonCustomization(buttonCustomization.mButtonCustomization,
-                    getUiButtonType(buttonType));
-        }
+            @NonNull
+            private UiCustomization.ButtonType getUiButtonType(@NonNull ButtonType buttonType)
+                    throws InvalidInputException {
+                if (buttonType == ButtonType.NEXT) {
+                    return UiCustomization.ButtonType.NEXT;
+                } else if (buttonType == ButtonType.CANCEL) {
+                    return UiCustomization.ButtonType.CANCEL;
+                } else if (buttonType == ButtonType.SUBMIT) {
+                    return UiCustomization.ButtonType.SUBMIT;
+                } else if (buttonType == ButtonType.RESEND) {
+                    return UiCustomization.ButtonType.RESEND;
+                } else if (buttonType == ButtonType.CONTINUE) {
+                    return UiCustomization.ButtonType.CONTINUE;
+                } else {
+                    throw new InvalidInputException(new RuntimeException("Invalid Button Type"));
+                }
+            }
 
-        /**
-         * Set the customization data for the 3DS2 toolbar
-         *
-         * @param toolbarCustomization Toolbar customization data
-         * @throws InvalidInputException If any customization data is invalid
-         */
-        public void setToolbarCustomization(
-                @NonNull Stripe3ds2ToolbarCustomization toolbarCustomization)
-                throws InvalidInputException {
-            mUiCustomization.setToolbarCustomization(toolbarCustomization.mToolbarCustomization);
-        }
+            /**
+             * Set the customization for a particular button
+             *
+             * @param buttonCustomization The button customization data
+             * @param buttonType The type of button to customize
+             * @throws InvalidInputException If any customization data is invalid
+             */
+            public Builder setButtonCustomization(
+                    @NonNull Stripe3ds2ButtonCustomization buttonCustomization,
+                    @NonNull ButtonType buttonType)
+                    throws InvalidInputException {
+                mUiCustomization.setButtonCustomization(buttonCustomization.mButtonCustomization,
+                        getUiButtonType(buttonType));
+                return this;
+            }
 
-        /**
-         * Set the 3DS2 label customization
-         *
-         * @param labelCustomization Label customization data
-         * @throws InvalidInputException If any customization data is invalid
-         */
-        public void setLabelCustomization(@NonNull Stripe3ds2LabelCustomization labelCustomization)
-                throws InvalidInputException {
-            mUiCustomization.setLabelCustomization(labelCustomization.mLabelCustomization);
-        }
+            /**
+             * Set the customization data for the 3DS2 toolbar
+             *
+             * @param toolbarCustomization Toolbar customization data
+             * @throws InvalidInputException If any customization data is invalid
+             */
+            public Builder setToolbarCustomization(
+                    @NonNull Stripe3ds2ToolbarCustomization toolbarCustomization)
+                    throws InvalidInputException {
+                mUiCustomization
+                        .setToolbarCustomization(toolbarCustomization.mToolbarCustomization);
+                return this;
+            }
 
-        /**
-         * Set the 3DS2 text box customization
-         *
-         * @param textBoxCustomization Text box customization data
-         * @throws InvalidInputException If any customization data is invalid
-         */
-        public void setTextBoxCustomization(
-                @NonNull Stripe3ds2TextBoxCustomization textBoxCustomization)
-                throws InvalidInputException {
-            mUiCustomization.setTextBoxCustomization(textBoxCustomization.mTextBoxCustomization);
+            /**
+             * Set the 3DS2 label customization
+             *
+             * @param labelCustomization Label customization data
+             * @throws InvalidInputException If any customization data is invalid
+             */
+            public Builder setLabelCustomization(
+                    @NonNull Stripe3ds2LabelCustomization labelCustomization)
+                    throws InvalidInputException {
+                mUiCustomization.setLabelCustomization(labelCustomization.mLabelCustomization);
+                return this;
+            }
+
+            /**
+             * Set the 3DS2 text box customization
+             *
+             * @param textBoxCustomization Text box customization data
+             * @throws InvalidInputException If any customization data is invalid
+             */
+            public Builder setTextBoxCustomization(
+                    @NonNull Stripe3ds2TextBoxCustomization textBoxCustomization)
+                    throws InvalidInputException {
+                mUiCustomization
+                        .setTextBoxCustomization(textBoxCustomization.mTextBoxCustomization);
+                return this;
+            }
+
+            public Stripe3ds2UiCustomization build() {
+                return new Stripe3ds2UiCustomization(mUiCustomization);
+            }
         }
 
         @Override
