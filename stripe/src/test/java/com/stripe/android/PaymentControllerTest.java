@@ -14,7 +14,7 @@ import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.PaymentResultExtras;
+import com.stripe.android.view.StripeIntentResultExtras;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -131,7 +131,7 @@ public class PaymentControllerTest {
     public void handleResult_withAuthException_shouldCallCallbackOnError() {
         final Exception exception = new RuntimeException();
         final Intent intent = new Intent()
-                .putExtra(PaymentResultExtras.AUTH_EXCEPTION, exception);
+                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, exception);
 
         mController.handleResult(mStripe, intent, PUBLISHABLE_KEY, mPaymentAuthResultCallback);
         verify(mPaymentAuthResultCallback).onError(exception);
@@ -163,7 +163,7 @@ public class PaymentControllerTest {
         verify(mPaymentRelayStarter)
                 .start(mRelayStarterDataArgumentCaptor.capture());
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2,
-                mRelayStarterDataArgumentCaptor.getValue().paymentIntent);
+                mRelayStarterDataArgumentCaptor.getValue().stripeIntent);
     }
 
     @Test

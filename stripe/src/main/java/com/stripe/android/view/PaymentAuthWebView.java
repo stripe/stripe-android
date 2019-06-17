@@ -79,7 +79,7 @@ class PaymentAuthWebView extends WebView {
                         .getQueryParameter(PARAM_CLIENT_SECRET);
                 mActivity.setResult(Activity.RESULT_OK,
                         new Intent()
-                                .putExtra(PaymentResultExtras.CLIENT_SECRET, clientSecret));
+                                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
                 mActivity.finish();
                 return true;
             }
