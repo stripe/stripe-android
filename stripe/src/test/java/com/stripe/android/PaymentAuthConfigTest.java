@@ -62,12 +62,13 @@ public class PaymentAuthConfigTest {
     @Test
     public void testButtonCustomizationWrapper() {
         final PaymentAuthConfig.Stripe3ds2ButtonCustomization buttonCustomization =
-                new PaymentAuthConfig.Stripe3ds2ButtonCustomization();
-        buttonCustomization.setBackgroundColor("#000000");
-        buttonCustomization.setCornerRadius(16);
-        buttonCustomization.setTextColor("#FFFFFF");
-        buttonCustomization.setTextFontName("Font Name");
-        buttonCustomization.setTextFontSize(24);
+                new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
+                        .setBackgroundColor("#000000")
+                        .setCornerRadius(16)
+                        .setTextColor("#FFFFFF")
+                        .setTextFontName("Font Name")
+                        .setTextFontSize(24)
+                        .build();
 
         final ButtonCustomization expectedButtonCustomization = new StripeButtonCustomization();
         expectedButtonCustomization.setBackgroundColor("#000000");
@@ -148,12 +149,12 @@ public class PaymentAuthConfigTest {
     @Test
     public void testUiCustomizationWrapper() {
         final PaymentAuthConfig.Stripe3ds2ButtonCustomization nextStripe3ds2ButtonCustomization =
-                new PaymentAuthConfig.Stripe3ds2ButtonCustomization();
-        nextStripe3ds2ButtonCustomization.setTextColor("#000001");
+                new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
+                        .setTextColor("#000001").build();
 
         final PaymentAuthConfig.Stripe3ds2ButtonCustomization cancelStripe3ds2ButtonCustomization =
-                new PaymentAuthConfig.Stripe3ds2ButtonCustomization();
-        cancelStripe3ds2ButtonCustomization.setTextColor("#000011");
+                new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
+                        .setTextColor("#000011").build();
 
         final PaymentAuthConfig.Stripe3ds2LabelCustomization stripe3ds2LabelCustomization =
                 new PaymentAuthConfig.Stripe3ds2LabelCustomization();

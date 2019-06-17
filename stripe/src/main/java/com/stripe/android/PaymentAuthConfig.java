@@ -108,111 +108,76 @@ public final class PaymentAuthConfig {
 
         @NonNull final ButtonCustomization mButtonCustomization;
 
-        public Stripe3ds2ButtonCustomization() {
-            mButtonCustomization = new StripeButtonCustomization();
-        }
-
         Stripe3ds2ButtonCustomization(@NonNull ButtonCustomization buttonCustomization) {
             mButtonCustomization = buttonCustomization;
         }
 
-        /**
-         * Set the button's background color
-         *
-         * @param hexColor The button's background color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setBackgroundColor(@NonNull String hexColor) throws InvalidInputException {
-            mButtonCustomization.setBackgroundColor(hexColor);
-        }
+        public static final class Builder {
+            @NonNull final ButtonCustomization mButtonCustomization;
 
-        /**
-         * Set the corner radius of the button
-         *
-         * @param cornerRadius The radius of the button in pixels
-         * @throws InvalidInputException If the corner radius is less than 0
-         */
-        public void setCornerRadius(int cornerRadius) throws InvalidInputException {
-            mButtonCustomization.setCornerRadius(cornerRadius);
-        }
+            public Builder() {
+                mButtonCustomization = new StripeButtonCustomization();
+            }
 
-        /**
-         * Get the button's background color
-         *
-         * @return The set background color or null if not set
-         */
-        @Nullable
-        public String getBackgroundColor() {
-            return mButtonCustomization.getBackgroundColor();
-        }
+            /**
+             * Set the button's background color
+             *
+             * @param hexColor The button's background color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setBackgroundColor(@NonNull String hexColor)
+                    throws InvalidInputException {
+                mButtonCustomization.setBackgroundColor(hexColor);
+                return this;
+            }
 
-        /**
-         * Get the button's set corner radius
-         *
-         * @return The set corner radius in pixels
-         */
-        public int getCornerRadius() {
-            return mButtonCustomization.getCornerRadius();
-        }
+            /**
+             * Set the corner radius of the button
+             *
+             * @param cornerRadius The radius of the button in pixels
+             * @throws InvalidInputException If the corner radius is less than 0
+             */
+            public Builder setCornerRadius(int cornerRadius) throws InvalidInputException {
+                mButtonCustomization.setCornerRadius(cornerRadius);
+                return this;
+            }
 
-        /**
-         * Set the button's text font
-         *
-         * @param fontName The name of the font for the button's text. If not found, default system
-         *         font used
-         * @throws InvalidInputException If font name is null or empty
-         */
-        public void setTextFontName(@NonNull String fontName) throws InvalidInputException {
-            mButtonCustomization.setTextFontName(fontName);
-        }
+            /**
+             * Set the button's text font
+             *
+             * @param fontName The name of the font. If not found, default system font used
+             * @throws InvalidInputException If font name is null or empty
+             */
+            public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
+                mButtonCustomization.setTextFontName(fontName);
+                return this;
+            }
 
-        /**
-         * Set the button's text color
-         *
-         * @param hexColor The button's text color in the format #RRGGBB or #AARRGGBB
-         * @throws InvalidInputException If the color cannot be parsed
-         */
-        public void setTextColor(@NonNull String hexColor) throws InvalidInputException {
-            mButtonCustomization.setTextColor(hexColor);
-        }
+            /**
+             * Set the button's text color
+             *
+             * @param hexColor The button's text color in the format #RRGGBB or #AARRGGBB
+             * @throws InvalidInputException If the color cannot be parsed
+             */
+            public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
+                mButtonCustomization.setTextColor(hexColor);
+                return this;
+            }
 
-        /**
-         * Set the button's text size
-         *
-         * @param fontSize The size of the font in scaled-pixels (sp)
-         * @throws InvalidInputException If the font size is 0 or less
-         */
-        public void setTextFontSize(int fontSize) throws InvalidInputException {
-            mButtonCustomization.setTextFontSize(fontSize);
-        }
+            /**
+             * Set the button's text size
+             *
+             * @param fontSize The size of the font in scaled-pixels (sp)
+             * @throws InvalidInputException If the font size is 0 or less
+             */
+            public Builder setTextFontSize(int fontSize) throws InvalidInputException {
+                mButtonCustomization.setTextFontSize(fontSize);
+                return this;
+            }
 
-        /**
-         * Get the set button's text font name
-         *
-         * @return The the font name or null if not set
-         */
-        @Nullable
-        public String getTextFontName() {
-            return mButtonCustomization.getTextFontName();
-        }
-
-        /**
-         * Get the button's text color
-         *
-         * @return The button's text color or null if not set
-         */
-        @Nullable
-        public String getTextColor() {
-            return mButtonCustomization.getTextColor();
-        }
-
-        /**
-         * Get the button's font size
-         *
-         * @return The button's font size in scaled-pixels (sp)
-         */
-        public int getTextFontSize() {
-            return mButtonCustomization.getTextFontSize();
+            public Stripe3ds2ButtonCustomization build() {
+                return new Stripe3ds2ButtonCustomization(mButtonCustomization);
+            }
         }
 
         @Override
@@ -277,35 +242,6 @@ public final class PaymentAuthConfig {
         }
 
         /**
-         * Get the heading label's text color
-         *
-         * @return the heading label's text color if set or null
-         */
-        @Nullable
-        public String getHeadingTextColor() {
-            return mLabelCustomization.getHeadingTextColor();
-        }
-
-        /**
-         * Get the heading label's font name
-         *
-         * @return The headling label's font name if set or null
-         */
-        @Nullable
-        public String getHeadingTextFontName() {
-            return mLabelCustomization.getHeadingTextFontName();
-        }
-
-        /**
-         * Get the heading label's font size
-         *
-         * @return The heading label's font size in scaled-pixels (sp)
-         */
-        public int getHeadingTextFontSize() {
-            return mLabelCustomization.getHeadingTextFontSize();
-        }
-
-        /**
          * Set the label's font
          *
          * @param fontName The name of the font. Defaults to system font if not found
@@ -333,35 +269,6 @@ public final class PaymentAuthConfig {
          */
         public void setTextFontSize(int fontSize) throws InvalidInputException {
             mLabelCustomization.setTextFontSize(fontSize);
-        }
-
-        /**
-         * Get the label's font name
-         *
-         * @return The label's font name if set or null
-         */
-        @Nullable
-        public String getTextFontName() {
-            return mLabelCustomization.getTextFontName();
-        }
-
-        /**
-         * Get the label's text color
-         *
-         * @return The label's text color if set or null
-         */
-        @Nullable
-        public String getTextColor() {
-            return mLabelCustomization.getTextColor();
-        }
-
-        /**
-         * Get the label's text size
-         *
-         * @return The font size of the label in scaled-pixels (sp)
-         */
-        public int getTextFontSize() {
-            return mLabelCustomization.getTextFontSize();
         }
 
         @Override
@@ -406,15 +313,6 @@ public final class PaymentAuthConfig {
         }
 
         /**
-         * Get the set border width
-         *
-         * @return The border width in pixels
-         */
-        public int getBorderWidth() {
-            return mTextBoxCustomization.getBorderWidth();
-        }
-
-        /**
          * Set the color of the border around the text entry box
          *
          * @param hexColor The border's color in the format #RRGGBB or #AARRGGBB
@@ -425,16 +323,6 @@ public final class PaymentAuthConfig {
         }
 
         /**
-         * Get the border's color
-         *
-         * @return The border's color if set or null
-         */
-        @Nullable
-        public String getBorderColor() {
-            return mTextBoxCustomization.getBorderColor();
-        }
-
-        /**
          * Set the corner radius of the text entry box
          *
          * @param cornerRadius The corner radius in pixels
@@ -442,15 +330,6 @@ public final class PaymentAuthConfig {
          */
         public void setCornerRadius(int cornerRadius) throws InvalidInputException {
             mTextBoxCustomization.setCornerRadius(cornerRadius);
-        }
-
-        /**
-         * Get the text entry box's corner radius
-         *
-         * @return The corner radius in pixels
-         */
-        public int getCornerRadius() {
-            return mTextBoxCustomization.getCornerRadius();
         }
 
         /**
@@ -481,35 +360,6 @@ public final class PaymentAuthConfig {
          */
         public void setTextFontSize(int fontSize) throws InvalidInputException {
             mTextBoxCustomization.setTextFontSize(fontSize);
-        }
-
-        /**
-         * Get the text entry box's font name
-         *
-         * @return The name of the font if set or null
-         */
-        @Nullable
-        public String getTextFontName() {
-            return mTextBoxCustomization.getTextFontName();
-        }
-
-        /**
-         * Get the text entry box's text color
-         *
-         * @return The color of the text if set or null
-         */
-        @Nullable
-        public String getTextColor() {
-            return mTextBoxCustomization.getTextColor();
-        }
-
-        /**
-         * Get the text entry box's font size
-         *
-         * @return The font size in scaled-pixels (sp)
-         */
-        public int getTextFontSize() {
-            return mTextBoxCustomization.getTextFontSize();
         }
 
         @Override
@@ -574,36 +424,6 @@ public final class PaymentAuthConfig {
         }
 
         /**
-         * Get the toolbar's background color
-         *
-         * @return The background color if set or null
-         */
-        @Nullable
-        public String getBackgroundColor() {
-            return mToolbarCustomization.getBackgroundColor();
-        }
-
-        /**
-         * Get the toolbar's title text
-         *
-         * @return The title text if set or null
-         */
-        @Nullable
-        public String getHeaderText() {
-            return mToolbarCustomization.getHeaderText();
-        }
-
-        /**
-         * Get the toolbar's cancel button text
-         *
-         * @return The cancel button's text if set or null
-         */
-        @Nullable
-        public String getButtonText() {
-            return mToolbarCustomization.getButtonText();
-        }
-
-        /**
          * Set the font for the title text
          *
          * @param fontName The name of the font. System default is used if not found
@@ -631,35 +451,6 @@ public final class PaymentAuthConfig {
          */
         public void setTextFontSize(int fontSize) throws InvalidInputException {
             mToolbarCustomization.setTextFontSize(fontSize);
-        }
-
-        /**
-         * Get the title text font name
-         *
-         * @return The font name if set or null
-         */
-        @Nullable
-        public String getTextFontName() {
-            return mToolbarCustomization.getTextFontName();
-        }
-
-        /**
-         * Get the title text color
-         *
-         * @return The title text color if set or null
-         */
-        @Nullable
-        public String getTextColor() {
-            return mToolbarCustomization.getTextColor();
-        }
-
-        /**
-         * Get the title text font size
-         *
-         * @return The font size in scaled-pixels (sp)
-         */
-        public int getTextFontSize() {
-            return mToolbarCustomization.getTextFontSize();
         }
 
         @Override
@@ -765,72 +556,6 @@ public final class PaymentAuthConfig {
                 @NonNull Stripe3ds2TextBoxCustomization textBoxCustomization)
                 throws InvalidInputException {
             mUiCustomization.setTextBoxCustomization(textBoxCustomization.mTextBoxCustomization);
-        }
-
-        /**
-         * Get the customization set for a given button type
-         *
-         * @param buttonType The button type to get the set customization for
-         * @return The customization for the given button type if any or null
-         * @throws InvalidInputException If buttonType is invalid
-         */
-        @Nullable
-        public Stripe3ds2ButtonCustomization getButtonCustomization(@NonNull ButtonType buttonType)
-                throws InvalidInputException {
-            final ButtonCustomization buttonCustomization =
-                    mUiCustomization.getButtonCustomization(getUiButtonType(buttonType));
-            if (buttonCustomization == null) {
-                return null;
-            } else {
-                return new Stripe3ds2ButtonCustomization(buttonCustomization);
-            }
-        }
-
-        /**
-         * Get the set 3DS2 toolbar customization
-         *
-         * @return The toolbar customization if set or null
-         */
-        @Nullable
-        public Stripe3ds2ToolbarCustomization getToolbarCustomization() {
-            final ToolbarCustomization toolbarCustomization =
-                    mUiCustomization.getToolbarCustomization();
-            if (toolbarCustomization == null) {
-                return null;
-            } else {
-                return new Stripe3ds2ToolbarCustomization(toolbarCustomization);
-            }
-        }
-
-        /**
-         * Get the set 3DS2 label customization
-         *
-         * @return The label customization if set or null
-         */
-        @Nullable
-        public Stripe3ds2LabelCustomization getLabelCustomization() {
-            final LabelCustomization labelCustomization = mUiCustomization.getLabelCustomization();
-            if (labelCustomization == null) {
-                return null;
-            } else {
-                return new Stripe3ds2LabelCustomization(labelCustomization);
-            }
-        }
-
-        /**
-         * Get the set 3DS2 text box customization
-         *
-         * @return The text box customization if set or null
-         */
-        @Nullable
-        public Stripe3ds2TextBoxCustomization getTextBoxCustomization() {
-            final TextBoxCustomization textBoxCustomization =
-                    mUiCustomization.getTextBoxCustomization();
-            if (textBoxCustomization == null) {
-                return null;
-            } else {
-                return new Stripe3ds2TextBoxCustomization(textBoxCustomization);
-            }
         }
 
         @Override
