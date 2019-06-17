@@ -72,7 +72,7 @@ class PaymentController {
         mConfig = config;
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
-                config.stripe3ds2Config.uiCustomization);
+                config.stripe3ds2Config.uiCustomization.getUiCustomization());
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
         mDirectoryServerId = directoryServerId;
