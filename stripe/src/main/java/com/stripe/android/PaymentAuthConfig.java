@@ -126,6 +126,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The button's background color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setBackgroundColor(@NonNull String hexColor)
                     throws InvalidInputException {
                 mButtonCustomization.setBackgroundColor(hexColor);
@@ -138,6 +139,7 @@ public final class PaymentAuthConfig {
              * @param cornerRadius The radius of the button in pixels
              * @throws InvalidInputException If the corner radius is less than 0
              */
+            @NonNull
             public Builder setCornerRadius(int cornerRadius) throws InvalidInputException {
                 mButtonCustomization.setCornerRadius(cornerRadius);
                 return this;
@@ -149,6 +151,7 @@ public final class PaymentAuthConfig {
              * @param fontName The name of the font. If not found, default system font used
              * @throws InvalidInputException If font name is null or empty
              */
+            @NonNull
             public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
                 mButtonCustomization.setTextFontName(fontName);
                 return this;
@@ -160,6 +163,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The button's text color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
                 mButtonCustomization.setTextColor(hexColor);
                 return this;
@@ -171,11 +175,18 @@ public final class PaymentAuthConfig {
              * @param fontSize The size of the font in scaled-pixels (sp)
              * @throws InvalidInputException If the font size is 0 or less
              */
+            @NonNull
             public Builder setTextFontSize(int fontSize) throws InvalidInputException {
                 mButtonCustomization.setTextFontSize(fontSize);
                 return this;
             }
 
+            /**
+             * Build the button customization
+             *
+             * @return The built button customization
+             */
+            @NonNull
             public Stripe3ds2ButtonCustomization build() {
                 return new Stripe3ds2ButtonCustomization(mButtonCustomization);
             }
@@ -222,6 +233,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The heading labels's text color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setHeadingTextColor(@NonNull String hexColor)
                     throws InvalidInputException {
                 mLabelCustomization.setHeadingTextColor(hexColor);
@@ -234,6 +246,7 @@ public final class PaymentAuthConfig {
              * @param fontName The name of the font. Defaults to system font if not found
              * @throws InvalidInputException If the font name is null or empty
              */
+            @NonNull
             public Builder setHeadingTextFontName(@NonNull String fontName)
                     throws InvalidInputException {
                 mLabelCustomization.setHeadingTextFontName(fontName);
@@ -246,6 +259,7 @@ public final class PaymentAuthConfig {
              * @param fontSize The size of the heading label in scaled-pixels (sp).
              * @throws InvalidInputException If the font size is 0 or less
              */
+            @NonNull
             public Builder setHeadingTextFontSize(int fontSize) throws InvalidInputException {
                 mLabelCustomization.setHeadingTextFontSize(fontSize);
                 return this;
@@ -257,6 +271,7 @@ public final class PaymentAuthConfig {
              * @param fontName The name of the font. Defaults to system font if not found
              * @throws InvalidInputException If the font name is null or empty
              */
+            @NonNull
             public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
                 mLabelCustomization.setTextFontName(fontName);
                 return this;
@@ -268,6 +283,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The labels's text color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
                 mLabelCustomization.setTextColor(hexColor);
                 return this;
@@ -279,11 +295,18 @@ public final class PaymentAuthConfig {
              * @param fontSize The label's font size in scaled-pixels (sp)
              * @throws InvalidInputException If the font size is 0 or less
              */
+            @NonNull
             public Builder setTextFontSize(int fontSize) throws InvalidInputException {
                 mLabelCustomization.setTextFontSize(fontSize);
                 return this;
             }
 
+            /**
+             * Build the configured label customization
+             *
+             * @return The built label customization
+             */
+            @NonNull
             public Stripe3ds2LabelCustomization build() {
                 return new Stripe3ds2LabelCustomization(mLabelCustomization);
             }
@@ -329,6 +352,7 @@ public final class PaymentAuthConfig {
              * @param borderWidth Width of the border in pixels
              * @throws InvalidInputException If the border width is less than 0
              */
+            @NonNull
             public Builder setBorderWidth(int borderWidth) throws InvalidInputException {
                 mTextBoxCustomization.setBorderWidth(borderWidth);
                 return this;
@@ -340,6 +364,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The border's color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setBorderColor(@NonNull String hexColor) throws InvalidInputException {
                 mTextBoxCustomization.setBorderColor(hexColor);
                 return this;
@@ -351,6 +376,7 @@ public final class PaymentAuthConfig {
              * @param cornerRadius The corner radius in pixels
              * @throws InvalidInputException If the corner radius is less than 0
              */
+            @NonNull
             public Builder setCornerRadius(int cornerRadius) throws InvalidInputException {
                 mTextBoxCustomization.setCornerRadius(cornerRadius);
                 return this;
@@ -362,6 +388,7 @@ public final class PaymentAuthConfig {
              * @param fontName The name of the font. The system default is used if not found.
              * @throws InvalidInputException If the font name is null or empty.
              */
+            @NonNull
             public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
                 mTextBoxCustomization.setTextFontName(fontName);
                 return this;
@@ -373,6 +400,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The text color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
                 mTextBoxCustomization.setTextColor(hexColor);
                 return this;
@@ -384,6 +412,7 @@ public final class PaymentAuthConfig {
              * @param fontSize The font size in scaled-pixels (sp)
              * @throws InvalidInputException If the font size is 0 or less
              */
+            @NonNull
             public Builder setTextFontSize(int fontSize) throws InvalidInputException {
                 mTextBoxCustomization.setTextFontSize(fontSize);
                 return this;
@@ -394,6 +423,7 @@ public final class PaymentAuthConfig {
              *
              * @return The text box customization
              */
+            @NonNull
             public Stripe3ds2TextBoxCustomization build() {
                 return new Stripe3ds2TextBoxCustomization(mTextBoxCustomization);
             }
@@ -439,6 +469,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The background color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setBackgroundColor(@NonNull String hexColor)
                     throws InvalidInputException {
                 mToolbarCustomization.setBackgroundColor(hexColor);
@@ -451,6 +482,7 @@ public final class PaymentAuthConfig {
              * @param headerText The toolbar's title text
              * @throws InvalidInputException if the title is null or empty
              */
+            @NonNull
             public Builder setHeaderText(@NonNull String headerText) throws InvalidInputException {
                 mToolbarCustomization.setHeaderText(headerText);
                 return this;
@@ -462,6 +494,7 @@ public final class PaymentAuthConfig {
              * @param buttonText The cancel button's text
              * @throws InvalidInputException If the button text is null or empty
              */
+            @NonNull
             public Builder setButtonText(@NonNull String buttonText) throws InvalidInputException {
                 mToolbarCustomization.setButtonText(buttonText);
                 return this;
@@ -473,6 +506,7 @@ public final class PaymentAuthConfig {
              * @param fontName The name of the font. System default is used if not found
              * @throws InvalidInputException If the font name is null or empty
              */
+            @NonNull
             public Builder setTextFontName(@NonNull String fontName) throws InvalidInputException {
                 mToolbarCustomization.setTextFontName(fontName);
                 return this;
@@ -484,6 +518,7 @@ public final class PaymentAuthConfig {
              * @param hexColor The title's text color in the format #RRGGBB or #AARRGGBB
              * @throws InvalidInputException If the color cannot be parsed
              */
+            @NonNull
             public Builder setTextColor(@NonNull String hexColor) throws InvalidInputException {
                 mToolbarCustomization.setTextColor(hexColor);
                 return this;
@@ -495,11 +530,18 @@ public final class PaymentAuthConfig {
              * @param fontSize The size of the title text in scaled-pixels (sp)
              * @throws InvalidInputException If the font size is 0 or less
              */
+            @NonNull
             public Builder setTextFontSize(int fontSize) throws InvalidInputException {
                 mToolbarCustomization.setTextFontSize(fontSize);
                 return this;
             }
 
+            /**
+             * Build the toolbar customization
+             *
+             * @return The built toolbar customization
+             */
+            @NonNull
             public Stripe3ds2ToolbarCustomization build() {
                 return new Stripe3ds2ToolbarCustomization(mToolbarCustomization);
             }
@@ -574,6 +616,7 @@ public final class PaymentAuthConfig {
              * @param buttonType The type of button to customize
              * @throws InvalidInputException If any customization data is invalid
              */
+            @NonNull
             public Builder setButtonCustomization(
                     @NonNull Stripe3ds2ButtonCustomization buttonCustomization,
                     @NonNull ButtonType buttonType)
@@ -589,6 +632,7 @@ public final class PaymentAuthConfig {
              * @param toolbarCustomization Toolbar customization data
              * @throws InvalidInputException If any customization data is invalid
              */
+            @NonNull
             public Builder setToolbarCustomization(
                     @NonNull Stripe3ds2ToolbarCustomization toolbarCustomization)
                     throws InvalidInputException {
@@ -603,6 +647,7 @@ public final class PaymentAuthConfig {
              * @param labelCustomization Label customization data
              * @throws InvalidInputException If any customization data is invalid
              */
+            @NonNull
             public Builder setLabelCustomization(
                     @NonNull Stripe3ds2LabelCustomization labelCustomization)
                     throws InvalidInputException {
@@ -616,6 +661,7 @@ public final class PaymentAuthConfig {
              * @param textBoxCustomization Text box customization data
              * @throws InvalidInputException If any customization data is invalid
              */
+            @NonNull
             public Builder setTextBoxCustomization(
                     @NonNull Stripe3ds2TextBoxCustomization textBoxCustomization)
                     throws InvalidInputException {
@@ -624,6 +670,12 @@ public final class PaymentAuthConfig {
                 return this;
             }
 
+            /**
+             * Build the UI customization
+             *
+             * @return the built UI customization
+             */
+            @NonNull
             public Stripe3ds2UiCustomization build() {
                 return new Stripe3ds2UiCustomization(mUiCustomization);
             }
