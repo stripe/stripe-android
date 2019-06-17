@@ -4,8 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
-import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
+import com.stripe.android.view.threeds2.ThreeDS2UiCustomization;
 
 import java.util.Objects;
 
@@ -36,8 +35,7 @@ public final class PaymentAuthConfig {
         sInstance = null;
     }
 
-    @NonNull
-    final Stripe3ds2Config stripe3ds2Config;
+    @NonNull final Stripe3ds2Config stripe3ds2Config;
 
     private PaymentAuthConfig(@NonNull Builder builder) {
         stripe3ds2Config = builder.mStripe3ds2Config;
@@ -62,7 +60,7 @@ public final class PaymentAuthConfig {
         static final int DEFAULT_TIMEOUT = 5;
 
         final int timeout;
-        @NonNull final UiCustomization uiCustomization;
+        @NonNull final ThreeDS2UiCustomization uiCustomization;
 
         private Stripe3ds2Config(@NonNull Builder builder) {
             timeout = builder.mTimeout;
@@ -71,7 +69,7 @@ public final class PaymentAuthConfig {
 
         public static final class Builder {
             private int mTimeout = DEFAULT_TIMEOUT;
-            private UiCustomization mUiCustomization = new StripeUiCustomization();
+            private ThreeDS2UiCustomization mUiCustomization = new ThreeDS2UiCustomization();
 
             @NonNull
             public Builder setTimeout(int timeout) {
@@ -80,7 +78,7 @@ public final class PaymentAuthConfig {
             }
 
             @NonNull
-            public Builder setUiCustomization(@NonNull UiCustomization uiCustomization) {
+            public Builder setUiCustomization(@NonNull ThreeDS2UiCustomization uiCustomization) {
                 this.mUiCustomization = uiCustomization;
                 return this;
             }

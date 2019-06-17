@@ -2,6 +2,7 @@ package com.stripe.android;
 
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
+import com.stripe.android.view.threeds2.ThreeDS2UiCustomization;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class PaymentAuthConfigTest {
 
     @Test
     public void testStripe3ds2ConfigBuilder() {
-        final UiCustomization uiCustomization = new StripeUiCustomization();
+        final ThreeDS2UiCustomization uiCustomization = new ThreeDS2UiCustomization();
         PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
                 .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
                         .setTimeout(20)
