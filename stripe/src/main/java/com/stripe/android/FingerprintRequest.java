@@ -31,10 +31,16 @@ final class FingerprintRequest extends StripeRequest {
 
     @NonNull
     @Override
-    Map<String, String> getHeaders() {
+    Map<String, String> createHeaders() {
         final Map<String, String> props = new HashMap<>();
         props.put("Cookie", "m=" + guid);
         return props;
+    }
+
+    @NonNull
+    @Override
+    String getUserAgent() {
+        return DEFAULT_USER_AGENT;
     }
 
     @NonNull

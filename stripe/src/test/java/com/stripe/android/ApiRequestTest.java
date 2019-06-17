@@ -94,7 +94,7 @@ public class ApiRequestTest {
         final String expectedUserAgent =
                 String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
                         BuildConfig.VERSION_NAME);
-        assertEquals(expectedUserAgent, headerMap.get("User-Agent"));
+        assertEquals(expectedUserAgent, headerMap.get(StripeRequest.HEADER_USER_AGENT));
         assertEquals("application/json", headerMap.get("Accept"));
         assertEquals("UTF-8", headerMap.get("Accept-Charset"));
     }
@@ -173,9 +173,9 @@ public class ApiRequestTest {
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
                 AppInfoTest.APP_INFO);
         final Map<String, String> headers = apiRequest.getHeaders();
-        assertEquals(ApiRequest.DEFAULT_USER_AGENT +
+        assertEquals(StripeRequest.DEFAULT_USER_AGENT +
                         " MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
-                headers.get("User-Agent"));
+                headers.get(StripeRequest.HEADER_USER_AGENT));
 
         final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
         assertEquals(

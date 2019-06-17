@@ -29,6 +29,8 @@ public class FingerprintRequestTest {
         final Map<String, String> headers =
                 new FingerprintRequest(new HashMap<String, Object>(), "guid")
                     .getHeaders();
+        assertEquals(StripeRequest.DEFAULT_USER_AGENT,
+                headers.get(StripeRequest.HEADER_USER_AGENT));
         assertEquals("m=guid", headers.get("Cookie"));
     }
 

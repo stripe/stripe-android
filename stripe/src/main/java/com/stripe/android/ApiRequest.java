@@ -23,9 +23,6 @@ final class ApiRequest extends StripeRequest {
     static final String MIME_TYPE = "application/x-www-form-urlencoded";
     static final String API_HOST = "https://api.stripe.com";
 
-    static final String DEFAULT_USER_AGENT = String.format(
-            Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
-
     private static final String ANALYTICS_HOST = "https://q.stripe.com";
 
     @NonNull final Options options;
@@ -88,20 +85,22 @@ final class ApiRequest extends StripeRequest {
 
     @NonNull
     @Override
-    Map<String, String> getHeaders() {
+    Map<String, String> createHeaders() {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
-
-        final StringBuilder userAgent = new StringBuilder(DEFAULT_USER_AGENT);
-        if (mAppInfo != null) {
-            userAgent
-                    .append(" ")
-                    .append(mAppInfo.toUserAgent());
+        headers.put("X-Stripe-Client-User-Agent", createStripeClientUserAgent());
+        headers.put("Stripe-Version", ApiVersion.getDefault().getCode());
+        headers.put("Authorization",
+                String.format(Locale.ENGLISH, "Bearer %s", options.apiKey));
+        if (options.stripeAccount != null) {
+            headers.put("Stripe-Account", options.stripeAccount);
         }
-        headers.put("User-Agent", userAgent.toString());
+        return headers;
+    }
 
-        // debug headers
+    @NonNull
+    private String createStripeClientUserAgent() {
         final AbstractMap<String, String> propertyMap = new HashMap<>();
         propertyMap.put("java.version", System.getProperty("java.version"));
         propertyMap.put("os.name", "android");
@@ -113,15 +112,19 @@ final class ApiRequest extends StripeRequest {
             propertyMap.putAll(mAppInfo.createClientHeaders());
         }
 
-        headers.put("X-Stripe-Client-User-Agent", new JSONObject(propertyMap).toString());
-        headers.put("Stripe-Version", ApiVersion.getDefault().getCode());
+        return new JSONObject(propertyMap).toString();
+    }
 
-        headers.put("Authorization", String.format(Locale.ENGLISH,
-                "Bearer %s", options.apiKey));
-        if (options.stripeAccount != null) {
-            headers.put("Stripe-Account", options.stripeAccount);
+    @NonNull
+    @Override
+    String getUserAgent() {
+        final StringBuilder userAgent = new StringBuilder(DEFAULT_USER_AGENT);
+        if (mAppInfo != null) {
+            userAgent
+                    .append(" ")
+                    .append(mAppInfo.toUserAgent());
         }
-        return headers;
+        return userAgent.toString();
     }
 
     @NonNull
