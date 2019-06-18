@@ -45,19 +45,17 @@ import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTIO
  */
 class PaymentController {
     static final int REQUEST_CODE = 50000;
-    private static final String DIRECTORY_SERVER_ID = "F000000000";
 
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
-    @NonNull private final String mDirectoryServerId;
     @NonNull private final PaymentAuthConfig mConfig;
     @NonNull private final ApiKeyValidator mApiKeyValidator;
 
     PaymentController(@NonNull Context context,
                       @NonNull StripeApiHandler apiHandler) {
         this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
-                new MessageVersionRegistry(), DIRECTORY_SERVER_ID,
+                new MessageVersionRegistry(),
                 PaymentAuthConfig.get());
     }
 
@@ -66,16 +64,13 @@ class PaymentController {
                       @NonNull StripeThreeDs2Service threeDs2Service,
                       @NonNull StripeApiHandler apiHandler,
                       @NonNull MessageVersionRegistry messageVersionRegistry,
-                      @NonNull String directoryServerId,
                       @NonNull PaymentAuthConfig config) {
-
         mConfig = config;
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
                 config.stripe3ds2Config.uiCustomization.getUiCustomization());
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
-        mDirectoryServerId = directoryServerId;
         mApiKeyValidator = new ApiKeyValidator();
     }
 
@@ -193,9 +188,9 @@ class PaymentController {
                                @NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
                                @NonNull String publishableKey) {
         final Transaction transaction =
-                mThreeDs2Service.createTransaction(mDirectoryServerId,
+                mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
                         mMessageVersionRegistry.getCurrent(), false,
-                        stripe3ds2Fingerprint.directoryServerName);
+                        stripe3ds2Fingerprint.directoryServer.name);
         final ProgressDialog dialog = transaction.getProgressView(activity);
         dialog.show();
 
