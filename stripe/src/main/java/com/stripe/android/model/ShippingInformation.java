@@ -40,10 +40,6 @@ public final class ShippingInformation extends StripeModel implements Parcelable
     @Nullable private final String mName;
     @Nullable private final String mPhone;
 
-    public ShippingInformation() {
-        this(null, null, null);
-    }
-
     public ShippingInformation(@Nullable Address address, @Nullable String name,
                                @Nullable String phone) {
         mAddress = address;

@@ -52,7 +52,7 @@ public class PaymentSessionDataTest {
         assertFalse(data.updateIsPaymentReadyToCharge(config));
         assertFalse(data.isPaymentReadyToCharge());
 
-        data.setShippingInformation(new ShippingInformation());
+        data.setShippingInformation(new ShippingInformation(null, null, null));
         assertFalse(data.updateIsPaymentReadyToCharge(config));
         assertFalse(data.isPaymentReadyToCharge());
 
@@ -85,7 +85,7 @@ public class PaymentSessionDataTest {
         data.setShippingTotal(150L);
         data.setPaymentMethod(PAYMENT_METHOD);
         data.setPaymentReadyToCharge(false);
-        data.setShippingInformation(new ShippingInformation());
+        data.setShippingInformation(new ShippingInformation(null, null, null));
         data.setShippingMethod(new ShippingMethod("UPS", "SuperFast", 10000L, "usd"));
 
         final Parcel parcel = Parcel.obtain();

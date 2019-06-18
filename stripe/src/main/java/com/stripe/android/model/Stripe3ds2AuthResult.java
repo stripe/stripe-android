@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
@@ -91,7 +92,7 @@ public final class Stripe3ds2AuthResult {
                 && Objects.equals(error, obj.error);
     }
 
-    static class Builder {
+    static class Builder implements ObjectBuilder<Stripe3ds2AuthResult> {
         private String mId;
         private String mObjectType;
         @Nullable private Stripe3ds2AuthResult.Ares mAres;
@@ -150,7 +151,7 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
-        Stripe3ds2AuthResult build() {
+        public Stripe3ds2AuthResult build() {
             return new Stripe3ds2AuthResult(mId, mObjectType, mAres, mCreated, mSource, mState,
                     mLiveMode, mError);
         }
@@ -251,7 +252,7 @@ public final class Stripe3ds2AuthResult {
                     && Objects.equals(sdkTransId, obj.sdkTransId);
         }
 
-        static class Builder {
+        static class Builder implements ObjectBuilder<Ares> {
             private String mThreeDSServerTransId;
             private String mAcsChallengeMandated;
             private String mAcsSignedContent;
@@ -331,7 +332,7 @@ public final class Stripe3ds2AuthResult {
             }
 
             @NonNull
-            Ares build() {
+            public Ares build() {
                 return new Stripe3ds2AuthResult.Ares(mThreeDSServerTransId, mAcsChallengeMandated,
                         mAcsSignedContent, mAcsTransId, mAcsUrl, mAuthenticationType,
                         mCardholderInfo, mMessageExtension, mMessageType, mMessageVersion,
@@ -429,7 +430,7 @@ public final class Stripe3ds2AuthResult {
                     && Objects.equals(data, obj.data);
         }
 
-        static final class Builder {
+        static final class Builder implements ObjectBuilder<MessageExtension> {
             private String mName;
             private boolean mCriticalityIndicator;
             private String mId;
@@ -460,7 +461,7 @@ public final class Stripe3ds2AuthResult {
             }
 
             @NonNull
-            MessageExtension build() {
+            public MessageExtension build() {
                 return new MessageExtension(mName, mCriticalityIndicator, mId, mData);
             }
         }
@@ -554,7 +555,7 @@ public final class Stripe3ds2AuthResult {
                     && Objects.equals(sdkTransId, obj.sdkTransId);
         }
 
-        static class Builder {
+        static class Builder implements ObjectBuilder<Stripe3ds2AuthResult.ThreeDS2Error> {
             private String mThreeDSServerTransId;
             private String mAcsTransId;
             private String mDsTransId;
@@ -634,7 +635,7 @@ public final class Stripe3ds2AuthResult {
             }
 
             @NonNull
-            Stripe3ds2AuthResult.ThreeDS2Error build() {
+            public Stripe3ds2AuthResult.ThreeDS2Error build() {
                 return new Stripe3ds2AuthResult.ThreeDS2Error(mThreeDSServerTransId, mAcsTransId,
                         mDsTransId, mErrorCode, mErrorComponent, mErrorDescription, mErrorDetail,
                         mErrorMessageType, mMessageType, mMessageVersion, mSdkTransId);

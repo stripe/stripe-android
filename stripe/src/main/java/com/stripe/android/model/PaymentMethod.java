@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
@@ -242,7 +243,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             };
 
 
-    public static final class Builder {
+    public static final class Builder implements ObjectBuilder<PaymentMethod> {
         private String mId;
         private Long mCreated;
         private boolean mLiveMode;
@@ -423,7 +424,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     && ObjectUtils.equals(phone, obj.phone);
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<BillingDetails> {
             private Address mAddress;
             private String mEmail;
             private String mName;
@@ -630,7 +631,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     last4, threeDSecureUsage, wallet);
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Card> {
             private String mBrand;
             private Checks checks;
             private String mCountry;
@@ -788,7 +789,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 return ObjectUtils.hash(addressLine1Check, addressPostalCodeCheck, cvcCheck);
             }
 
-            public static final class Builder {
+            public static final class Builder implements ObjectBuilder<Checks> {
                 @Nullable private String addressLine1Check;
                 @Nullable private String addressPostalCodeCheck;
                 @Nullable private String cvcCheck;
@@ -889,7 +890,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 return isSupported == threeDSecureUsage.isSupported;
             }
 
-            public static final class Builder {
+            public static final class Builder implements ObjectBuilder<ThreeDSecureUsage> {
                 private boolean mIsSupported;
 
                 @NonNull
@@ -1025,7 +1026,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     && ObjectUtils.equals(bankIdentifierCode, obj.bankIdentifierCode);
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Ideal> {
             private String mBank;
             private String mBankIdentifierCode;
 

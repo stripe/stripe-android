@@ -6,6 +6,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -213,7 +214,7 @@ public final class Address extends StripeModel implements Parcelable {
         return 0;
     }
 
-    public static class Builder {
+    public static class Builder implements ObjectBuilder<Address> {
         private String mCity;
         private String mCountry;
         private String mLine1;
