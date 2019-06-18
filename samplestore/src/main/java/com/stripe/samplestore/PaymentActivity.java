@@ -97,12 +97,12 @@ public class PaymentActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.progress_bar);
         mCartItemLayout = findViewById(R.id.cart_list_items);
+        mConfirmPaymentButton = findViewById(R.id.btn_purchase);
 
         setupPaymentSession();
 
         addCartItems();
 
-        mConfirmPaymentButton = findViewById(R.id.btn_purchase);
         updateConfirmPaymentButton();
         mEnterShippingInfo = findViewById(R.id.shipping_info);
         mEnterPaymentInfo = findViewById(R.id.payment_source);
@@ -114,9 +114,6 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
                         new AttemptPurchaseCustomerRetrievalListener(
                                 PaymentActivity.this))));
-
-        mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
-                .isPaymentReadyToCharge());
 
         final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
@@ -183,16 +180,20 @@ public class PaymentActivity extends AppCompatActivity {
                 new ApiResultCallback<PaymentIntentResult>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntentResult result) {
+                        stopLoading();
                         processPaymentIntent(result.paymentIntent);
                     }
 
                     @Override
                     public void onError(@NonNull Exception e) {
+                        stopLoading();
                         displayError(e.getMessage());
                     }
                 });
 
-        if (!isHandled) {
+        if (isHandled) {
+            startLoading();
+        } else {
             mPaymentSession.handlePaymentData(requestCode, resultCode, data);
         }
     }
@@ -317,6 +318,11 @@ public class PaymentActivity extends AppCompatActivity {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
         } else if (paymentIntent.getStatus() == PaymentIntent.Status.Succeeded) {
             finishPayment();
+        } else if (paymentIntent.getStatus() == PaymentIntent.Status.RequiresPaymentMethod) {
+            // reset payment method and shipping if authentication fails
+            setupPaymentSession();
+            mEnterPaymentInfo.setText(getString(R.string.add_credit_card));
+            mEnterShippingInfo.setText(getString(R.string.add_shipping_details));
         } else {
             displayError(
                     "Unhandled Payment Intent Status: " + paymentIntent.getStatus().toString());
@@ -356,6 +362,8 @@ public class PaymentActivity extends AppCompatActivity {
                 new PaymentSessionConfig.Builder()
                         .setPrepopulatedShippingInfo(getExampleShippingInfo()).build());
         mPaymentSession.setCartTotal(mStoreCart.getTotalPrice());
+        mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
+                .isPaymentReadyToCharge());
     }
 
     private void startLoading() {
