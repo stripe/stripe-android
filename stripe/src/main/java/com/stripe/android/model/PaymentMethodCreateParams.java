@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.Stripe;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -197,7 +198,7 @@ public final class PaymentMethodCreateParams {
          * Used to create a {@link Card} object with the user's card details. To create a
          * {@link Card} with a Stripe token (e.g. for Google Pay), use {@link Card#create(String)}.
          */
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Card> {
             @Nullable private String mNumber;
             @Nullable private Integer mExpiryMonth;
             @Nullable private Integer mExpiryYear;
@@ -264,7 +265,7 @@ public final class PaymentMethodCreateParams {
             return ObjectUtils.equals(mBank, ideal.mBank);
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Ideal> {
             @Nullable private String mBank;
 
             @NonNull

@@ -52,7 +52,7 @@ public final class PaymentAuthConfig {
         stripe3ds2Config = builder.mStripe3ds2Config;
     }
 
-    public static final class Builder {
+    public static final class Builder implements ObjectBuilder<PaymentAuthConfig> {
         private Stripe3ds2Config mStripe3ds2Config;
 
         @NonNull
@@ -78,7 +78,7 @@ public final class PaymentAuthConfig {
             uiCustomization = Objects.requireNonNull(builder.mUiCustomization);
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2Config> {
             private int mTimeout = DEFAULT_TIMEOUT;
             private Stripe3ds2UiCustomization mUiCustomization =
                     new Stripe3ds2UiCustomization.Builder().build();
@@ -113,7 +113,7 @@ public final class PaymentAuthConfig {
             mButtonCustomization = buttonCustomization;
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2ButtonCustomization> {
             @NonNull final ButtonCustomization mButtonCustomization;
 
             public Builder() {
@@ -219,7 +219,7 @@ public final class PaymentAuthConfig {
             mLabelCustomization = labelCustomization;
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2LabelCustomization> {
 
             @NonNull final LabelCustomization mLabelCustomization;
 
@@ -339,7 +339,7 @@ public final class PaymentAuthConfig {
             mTextBoxCustomization = textBoxCustomization;
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2TextBoxCustomization> {
             @NonNull final TextBoxCustomization mTextBoxCustomization;
 
             public Builder() {
@@ -456,7 +456,7 @@ public final class PaymentAuthConfig {
             mToolbarCustomization = toolbarCustomization;
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2ToolbarCustomization> {
             @NonNull final ToolbarCustomization mToolbarCustomization;
 
             public Builder() {
@@ -584,7 +584,7 @@ public final class PaymentAuthConfig {
             return mUiCustomization;
         }
 
-        public static final class Builder {
+        public static final class Builder implements ObjectBuilder<Stripe3ds2UiCustomization> {
             @NonNull private final UiCustomization mUiCustomization;
 
             public Builder() {

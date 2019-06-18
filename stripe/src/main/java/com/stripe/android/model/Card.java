@@ -8,6 +8,7 @@ import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.CardUtils;
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.R;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
@@ -779,7 +780,7 @@ public final class Card extends StripeModel implements StripePaymentSource {
     /**
      * Builder class for a {@link Card} model.
      */
-    public static final class Builder {
+    public static final class Builder implements ObjectBuilder<Card> {
         @Nullable private final String number;
         @Nullable private final String cvc;
         private final Integer expMonth;

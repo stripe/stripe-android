@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -221,7 +222,7 @@ public abstract class Wallet extends StripeModel implements Parcelable {
                     && ObjectUtils.equals(state, address.state);
         }
 
-        static final class Builder {
+        static final class Builder implements ObjectBuilder<Address> {
             @Nullable private String mCity;
             @Nullable private String mCountry;
             @Nullable private String mLine1;

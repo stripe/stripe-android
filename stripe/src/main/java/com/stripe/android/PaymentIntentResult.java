@@ -51,7 +51,7 @@ public final class PaymentIntentResult {
         this.status = builder.mStatus;
     }
 
-    static final class Builder {
+    static final class Builder implements ObjectBuilder<PaymentIntentResult> {
         private PaymentIntent mPaymentIntent;
         @Status private int mStatus;
 
