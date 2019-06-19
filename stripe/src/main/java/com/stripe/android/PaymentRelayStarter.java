@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.StripeIntent;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentRelayActivity;
-import com.stripe.android.view.PaymentResultExtras;
+import com.stripe.android.view.StripeIntentResultExtras;
 
 /**
  * Starts an instance of {@link PaymentRelayStarter}.
@@ -27,24 +27,24 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
     @Override
     public void start(@NonNull Data data) {
         final Intent intent = new Intent(mActivity, PaymentRelayActivity.class)
-                .putExtra(PaymentResultExtras.CLIENT_SECRET,
-                        data.paymentIntent != null ? data.paymentIntent.getClientSecret() : null)
-                .putExtra(PaymentResultExtras.AUTH_EXCEPTION, data.exception)
-                .putExtra(PaymentResultExtras.AUTH_STATUS, data.status);
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        data.stripeIntent != null ? data.stripeIntent.getClientSecret() : null)
+                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception)
+                .putExtra(StripeIntentResultExtras.AUTH_STATUS, data.status);
         mActivity.startActivityForResult(intent, mRequestCode);
     }
 
     public static final class Data {
-        @Nullable final PaymentIntent paymentIntent;
+        @Nullable final StripeIntent stripeIntent;
         @Nullable final Exception exception;
-        @PaymentIntentResult.Status final int status;
+        @StripeIntentResult.Status final int status;
 
         /**
          * Use when payment authentication completed or can be bypassed.
          */
-        Data(@NonNull PaymentIntent paymentIntent) {
-            this.paymentIntent = paymentIntent;
-            this.status = PaymentIntentResult.Status.SUCCEEDED;
+        Data(@NonNull StripeIntent stripeIntent) {
+            this.stripeIntent = stripeIntent;
+            this.status = StripeIntentResult.Status.SUCCEEDED;
             this.exception = null;
         }
 
@@ -52,14 +52,14 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
          * Use when payment authentication resulted in an error.
          */
         Data(@NonNull Exception exception) {
-            this.paymentIntent = null;
-            this.status = PaymentIntentResult.Status.FAILED;
+            this.stripeIntent = null;
+            this.status = StripeIntentResult.Status.FAILED;
             this.exception = exception;
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(paymentIntent, exception, status);
+            return ObjectUtils.hash(stripeIntent, exception, status);
         }
 
         @Override
@@ -68,7 +68,7 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
         }
 
         private boolean typedEquals(@NonNull Data data) {
-            return ObjectUtils.equals(paymentIntent, data.paymentIntent) &&
+            return ObjectUtils.equals(stripeIntent, data.stripeIntent) &&
                     ObjectUtils.equals(exception, data.exception) &&
                     ObjectUtils.equals(status, data.status);
         }

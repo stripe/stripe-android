@@ -17,6 +17,6 @@ public class PaymentIntentResultTest {
                 new PaymentIntentResult.Builder()
                         .setPaymentIntent(PaymentIntentFixtures.PI_REQUIRES_3DS2)
                         .build()
-                        .paymentIntent);
+                        .getIntent());
     }
 }

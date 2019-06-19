@@ -181,7 +181,7 @@ public class PaymentActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(@NonNull PaymentIntentResult result) {
                         stopLoading();
-                        processPaymentIntent(result.paymentIntent);
+                        processPaymentIntent(result.getIntent());
                     }
 
                     @Override
