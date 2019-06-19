@@ -1,18 +1,13 @@
 package com.stripe.android;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
@@ -31,7 +26,6 @@ import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
-import com.stripe.android.stripe3ds2.views.ChallengeActivity;
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
@@ -39,8 +33,6 @@ import com.stripe.android.view.StripeIntentResultExtras;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
