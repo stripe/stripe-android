@@ -55,10 +55,11 @@ public final class Stripe3ds2Fingerprint {
         this.serverTransactionId = serverTransactionId;
     }
 
-    // TODO(mshafrir): update ids
     public enum DirectoryServer {
-        Visa("visa", "F000000000"),
-        Mastercard("mastercard", "F000000000"),
+        Visa("visa", "A000000003"),
+        Mastercard("mastercard", "A000000004"),
+
+        // TODO(mshafrir): update id
         Amex("american_express", "F000000000");
 
         @NonNull public final String name;
