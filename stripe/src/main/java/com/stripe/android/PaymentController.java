@@ -1,17 +1,13 @@
 package com.stripe.android;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
@@ -30,14 +26,13 @@ import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
+import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -196,13 +191,8 @@ class PaymentController {
                 mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
                         mMessageVersionRegistry.getCurrent(), false,
                         stripe3ds2Fingerprint.directoryServer.name);
-        final ProgressDialog dialog = transaction.getProgressView(activity);
-        dialog.show();
 
-        final LocalBroadcastManager localBroadcastManager =
-                LocalBroadcastManager.getInstance(activity);
-        localBroadcastManager.registerReceiver(new DialogBroadcastReceiver(localBroadcastManager,
-                        dialog), new IntentFilter(UL_HANDLE_CHALLENGE_ACTION));
+        ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
 
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
@@ -521,27 +511,6 @@ class PaymentController {
                             }
                         }
                     });
-        }
-    }
-
-    private static class DialogBroadcastReceiver extends BroadcastReceiver {
-
-        @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
-        @NonNull private final WeakReference<ProgressDialog> mProgressDialogRef;
-
-        DialogBroadcastReceiver(@NonNull LocalBroadcastManager localBroadcastManager,
-                                       @NonNull ProgressDialog progressDialog) {
-            mProgressDialogRef = new WeakReference<>(progressDialog);
-            mLocalBroadcastManager = localBroadcastManager;
-        }
-
-        @Override
-        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-            final ProgressDialog dialog = mProgressDialogRef.get();
-            if (dialog != null) {
-                dialog.dismiss();
-            }
-            mLocalBroadcastManager.unregisterReceiver(this);
         }
     }
 }
