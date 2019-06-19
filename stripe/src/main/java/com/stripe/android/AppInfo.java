@@ -18,29 +18,29 @@ import java.util.Objects;
  * See <a href="https://stripe.com/docs/building-plugins#setappinfo">
  *     https://stripe.com/docs/building-plugins#setappinfo</a>.
  */
-final class AppInfo {
+public final class AppInfo {
     @NonNull private final String mName;
     @Nullable private final String mVersion;
     @Nullable private final String mUrl;
     @Nullable private final String mPartnerId;
 
     @NonNull
-    static AppInfo create(@NonNull String name) {
+    public static AppInfo create(@NonNull String name) {
         return new AppInfo(name, null, null, null);
     }
 
     @NonNull
-    static AppInfo create(@NonNull String name, @NonNull String version) {
+    public static AppInfo create(@NonNull String name, @NonNull String version) {
         return new AppInfo(name, version, null, null);
     }
 
     @NonNull
-    static AppInfo create(@NonNull String name, @NonNull String version, @NonNull String url) {
+    public static AppInfo create(@NonNull String name, @NonNull String version, @NonNull String url) {
         return new AppInfo(name, version, url, null);
     }
 
     @NonNull
-    static AppInfo create(@NonNull String name, @NonNull String version, @NonNull String url,
+    public static AppInfo create(@NonNull String name, @NonNull String version, @NonNull String url,
                           @NonNull String partnerId) {
         return new AppInfo(name, version, url, partnerId);
     }
