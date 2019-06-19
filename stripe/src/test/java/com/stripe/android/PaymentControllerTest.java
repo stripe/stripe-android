@@ -1,7 +1,6 @@
 package com.stripe.android;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -13,8 +12,11 @@ import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
+import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
+
+import java.util.Objects;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +27,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,7 +61,6 @@ public class PaymentControllerTest {
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentIntentResult> mPaymentAuthResultCallback;
     @Mock private PaymentRelayStarter mPaymentRelayStarter;
-    @Mock private ProgressDialog mProgressDialog;
 
     @Captor private ArgumentCaptor<PaymentRelayStarter.Data> mRelayStarterDataArgumentCaptor;
 
@@ -89,7 +88,6 @@ public class PaymentControllerTest {
 
     @Test
     public void handleNextAction_with3ds2() {
-        when(mTransaction.getProgressView(mActivity)).thenReturn(mProgressDialog);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                 PUBLISHABLE_KEY);
         verify(mThreeDs2Service).createTransaction(
@@ -100,7 +98,11 @@ public class PaymentControllerTest {
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
-        verify(mProgressDialog).show();
+
+        verify(mActivity).startActivity(eq(
+                new Intent(mActivity, ChallengeProgressDialogActivity.class)
+                        .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
+                                Stripe3ds2Fingerprint.DirectoryServer.Visa.name)));
     }
 
     @Test
