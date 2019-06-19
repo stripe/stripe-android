@@ -1,0 +1,1 @@
+App icon from [Twemoji](https://github.com/twitter/twemoji)
