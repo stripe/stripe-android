@@ -176,7 +176,7 @@ public class PaymentIntentTest {
                 put(PaymentIntent.FIELD_LIVEMODE, false);
                 put(PaymentIntent.FIELD_SOURCE, "src_1CkiC3LENEVhOs7YMSa4yx4G");
                 put(PaymentIntent.FIELD_CAPTURE_METHOD, "automatic");
-                put(PaymentIntent.FIELD_STATUS, PaymentIntent.Status.Succeeded.code);
+                put(PaymentIntent.FIELD_STATUS, StripeIntent.Status.Succeeded.code);
             }};
 
     @NonNull private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE =
@@ -206,7 +206,7 @@ public class PaymentIntentTest {
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON);
         assertNotNull(paymentIntent);
         assertTrue(paymentIntent.requiresAction());
-        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
+        assertEquals(StripeIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -217,7 +217,7 @@ public class PaymentIntentTest {
         final PaymentIntent paymentIntent = PaymentIntent
                 .fromString(PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON);
         assertNotNull(paymentIntent);
-        assertEquals(PaymentIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
+        assertEquals(StripeIntent.NextActionType.RedirectToUrl, paymentIntent.getNextActionType());
         final Uri redirectUrl = paymentIntent.getRedirectUrl();
         assertNotNull(redirectUrl);
         assertEquals("https://example.com/redirect", redirectUrl.toString());
@@ -241,7 +241,7 @@ public class PaymentIntentTest {
 
     @Test
     public void getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds2() {
-        assertEquals(PaymentIntent.NextActionType.UseStripeSdk,
+        assertEquals(StripeIntent.NextActionType.UseStripeSdk,
                 PaymentIntentFixtures.PI_REQUIRES_3DS2.getNextActionType());
         final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2.getStripeSdkData();
         assertNotNull(sdkData);
@@ -252,7 +252,7 @@ public class PaymentIntentTest {
     @Test
     public void getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds1() {
         final PaymentIntent paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1;
-        assertEquals(PaymentIntent.NextActionType.UseStripeSdk, paymentIntent.getNextActionType());
+        assertEquals(StripeIntent.NextActionType.UseStripeSdk, paymentIntent.getNextActionType());
         final PaymentIntent.SdkData sdkData = paymentIntent.getStripeSdkData();
         assertNotNull(sdkData);
         assertTrue(sdkData.is3ds1());
@@ -261,7 +261,7 @@ public class PaymentIntentTest {
 
     @Test
     public void getNextActionTypeAndStripeSdkData_whenRedirectToUrl() {
-        assertEquals(PaymentIntent.NextActionType.RedirectToUrl,
+        assertEquals(StripeIntent.NextActionType.RedirectToUrl,
                 PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getNextActionType());
         assertNull(PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getStripeSdkData());
     }

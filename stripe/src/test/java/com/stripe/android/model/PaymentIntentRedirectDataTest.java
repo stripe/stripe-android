@@ -21,11 +21,11 @@ public class PaymentIntentRedirectDataTest {
         final String url = "https://example.com";
         final String returnUrl = "yourapp://post-authentication-return-url";
         final Map<String, String> redirectMap = new HashMap<>();
-        redirectMap.put(PaymentIntent.RedirectData.FIELD_URL, url);
-        redirectMap.put(PaymentIntent.RedirectData.FIELD_RETURN_URL, returnUrl);
+        redirectMap.put(StripeIntent.RedirectData.FIELD_URL, url);
+        redirectMap.put(StripeIntent.RedirectData.FIELD_RETURN_URL, returnUrl);
 
         final PaymentIntent.RedirectData redirectData =
-                PaymentIntent.RedirectData.create(redirectMap);
+                StripeIntent.RedirectData.create(redirectMap);
         assertNotNull(redirectData);
         assertEquals(Uri.parse(url), redirectData.url);
         assertEquals(Uri.parse(returnUrl), redirectData.returnUrl);
@@ -35,10 +35,10 @@ public class PaymentIntentRedirectDataTest {
     public void create_withOnlyUrlFieldPopulated_shouldReturnCorrectObject() {
         final String url = "https://example.com";
         final Map<String, String> redirectMap = new HashMap<>();
-        redirectMap.put(PaymentIntent.RedirectData.FIELD_URL, url);
+        redirectMap.put(StripeIntent.RedirectData.FIELD_URL, url);
 
         final PaymentIntent.RedirectData redirectData =
-                PaymentIntent.RedirectData.create(redirectMap);
+                StripeIntent.RedirectData.create(redirectMap);
         assertNotNull(redirectData);
         assertEquals(Uri.parse(url), redirectData.url);
         assertNull(redirectData.returnUrl);
@@ -46,6 +46,6 @@ public class PaymentIntentRedirectDataTest {
 
     @Test
     public void create_withInvalidData_shouldReturnNull() {
-        assertNull(PaymentIntent.RedirectData.create(new HashMap<>()));
+        assertNull(StripeIntent.RedirectData.create(new HashMap<>()));
     }
 }

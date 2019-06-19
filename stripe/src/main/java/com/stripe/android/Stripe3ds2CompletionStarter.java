@@ -6,11 +6,11 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.StripeIntent;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentRelayActivity;
-import com.stripe.android.view.PaymentResultExtras;
+import com.stripe.android.view.StripeIntentResultExtras;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,9 +34,9 @@ class Stripe3ds2CompletionStarter
         }
 
         final Intent intent = new Intent(activity, PaymentRelayActivity.class)
-                .putExtra(PaymentResultExtras.CLIENT_SECRET,
-                        data.mPaymentIntent.getClientSecret())
-                .putExtra(PaymentResultExtras.AUTH_STATUS,
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        data.mStripeIntent.getClientSecret())
+                .putExtra(StripeIntentResultExtras.AUTH_STATUS,
                         data.getAuthStatus());
         activity.startActivityForResult(intent, mRequestCode);
     }
@@ -54,44 +54,44 @@ class Stripe3ds2CompletionStarter
     }
 
     static class StartData {
-        @NonNull private final PaymentIntent mPaymentIntent;
+        @NonNull private final StripeIntent mStripeIntent;
         @ChallengeFlowOutcome private final int mChallengeFlowStatus;
         @Nullable private final String mCompletionTransactionStatus;
 
         @NonNull
-        static StartData createForComplete(@NonNull PaymentIntent paymentIntent,
+        static StartData createForComplete(@NonNull StripeIntent stripeIntent,
                                            @NonNull String completionTransactionStatus) {
-            return new StartData(paymentIntent, ChallengeFlowOutcome.COMPLETE,
+            return new StartData(stripeIntent, ChallengeFlowOutcome.COMPLETE,
                     completionTransactionStatus);
         }
 
-        StartData(@NonNull PaymentIntent paymentIntent,
+        StartData(@NonNull StripeIntent stripeIntent,
                   @ChallengeFlowOutcome int status) {
-            this(paymentIntent, status, null);
+            this(stripeIntent, status, null);
         }
 
-        private StartData(@NonNull PaymentIntent paymentIntent,
+        private StartData(@NonNull StripeIntent stripeIntent,
                           @ChallengeFlowOutcome int challengeFlowStatus,
                           @Nullable String completionTransactionStatus) {
-            mPaymentIntent = paymentIntent;
+            mStripeIntent = stripeIntent;
             mChallengeFlowStatus = challengeFlowStatus;
             mCompletionTransactionStatus = completionTransactionStatus;
         }
 
-        @PaymentIntentResult.Status
+        @StripeIntentResult.Status
         private int getAuthStatus() {
             if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE) {
-                return PaymentIntentResult.Status.SUCCEEDED;
+                return StripeIntentResult.Status.SUCCEEDED;
             } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
-                return PaymentIntentResult.Status.CANCELED;
+                return StripeIntentResult.Status.CANCELED;
             } else {
-                return PaymentIntentResult.Status.FAILED;
+                return StripeIntentResult.Status.FAILED;
             }
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mPaymentIntent, mChallengeFlowStatus,
+            return ObjectUtils.hash(mStripeIntent, mChallengeFlowStatus,
                     mCompletionTransactionStatus);
         }
 
@@ -101,7 +101,7 @@ class Stripe3ds2CompletionStarter
         }
 
         private boolean typedEquals(@NonNull StartData startData) {
-            return ObjectUtils.equals(mPaymentIntent, startData.mPaymentIntent) &&
+            return ObjectUtils.equals(mStripeIntent, startData.mStripeIntent) &&
                     ObjectUtils.equals(mChallengeFlowStatus, startData.mChallengeFlowStatus) &&
                     ObjectUtils.equals(mCompletionTransactionStatus,
                             startData.mCompletionTransactionStatus);
