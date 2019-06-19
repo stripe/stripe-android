@@ -9,13 +9,12 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures;
+import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.PaymentResultExtras;
-
-import java.util.Objects;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +25,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +39,6 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class PaymentControllerTest {
 
-    private static final String DIRECTORY_SERVER_ID = "F000000000";
     private static final String MESSAGE_VERSION = "2.1.0";
     private static final String PUBLISHABLE_KEY = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY;
     private static final int MAX_TIMEOUT = 5;
@@ -70,8 +70,11 @@ public class PaymentControllerTest {
         MockitoAnnotations.initMocks(this);
         when(mTransaction.getAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS);
-        when(mThreeDs2Service
-                .createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false, "visa"))
+        when(mThreeDs2Service.createTransaction(
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
+                MESSAGE_VERSION,
+                false,
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.name))
                 .thenReturn(mTransaction);
         when(mMessageVersionRegistry.getCurrent()).thenReturn(MESSAGE_VERSION);
         when(mActivity.getApplicationContext())
@@ -81,7 +84,6 @@ public class PaymentControllerTest {
                 mThreeDs2Service,
                 mApiHandler,
                 mMessageVersionRegistry,
-                DIRECTORY_SERVER_ID,
                 CONFIG);
     }
 
@@ -90,8 +92,11 @@ public class PaymentControllerTest {
         when(mTransaction.getProgressView(mActivity)).thenReturn(mProgressDialog);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2,
                 PUBLISHABLE_KEY);
-        verify(mThreeDs2Service).createTransaction(DIRECTORY_SERVER_ID, MESSAGE_VERSION, false,
-                "visa");
+        verify(mThreeDs2Service).createTransaction(
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
+                MESSAGE_VERSION,
+                false,
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.name);
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
