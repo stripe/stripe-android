@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.utils.ObjectUtils;
 import com.stripe.android.view.ShippingInfoWidget;

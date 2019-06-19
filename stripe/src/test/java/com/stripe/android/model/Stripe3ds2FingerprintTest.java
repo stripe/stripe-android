@@ -36,8 +36,8 @@ public class Stripe3ds2FingerprintTest {
         final Stripe3ds2Fingerprint stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData);
         assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5",
                 stripe3ds2Fingerprint.source);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServerName.VISA,
-                stripe3ds2Fingerprint.directoryServerName);
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Visa,
+                stripe3ds2Fingerprint.directoryServer);
         assertEquals("e64bb72f-60ac-4845-b8b6-47cfdb0f73aa",
                 stripe3ds2Fingerprint.serverTransactionId);
     }
@@ -56,8 +56,8 @@ public class Stripe3ds2FingerprintTest {
                 Stripe3ds2Fingerprint.create(new JSONObject(VISA_DS_JSON));
         assertEquals("src_1EZl3YCRMbs6FrXfYgJXF46w",
                 stripe3ds2Fingerprint.source);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServerName.VISA,
-                stripe3ds2Fingerprint.directoryServerName);
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Visa,
+                stripe3ds2Fingerprint.directoryServer);
         assertEquals("b31807ca-e7d6-4685-a7e3-53fbd2962135",
                 stripe3ds2Fingerprint.serverTransactionId);
     }

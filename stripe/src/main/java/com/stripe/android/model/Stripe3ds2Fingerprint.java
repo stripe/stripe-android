@@ -1,14 +1,9 @@
 package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 public final class Stripe3ds2Fingerprint {
     private static final String FIELD_TYPE = "type";
@@ -19,19 +14,19 @@ public final class Stripe3ds2Fingerprint {
     private static final String TYPE = "stripe_3ds2_fingerprint";
 
     @NonNull public final String source;
-    @NonNull @DirectoryServerName public final String directoryServerName;
+    @NonNull public final DirectoryServer directoryServer;
     @NonNull public final String serverTransactionId;
 
     @NonNull
-    public static Stripe3ds2Fingerprint create(@NonNull PaymentIntent.SdkData sdkData) {
+    public static Stripe3ds2Fingerprint create(@NonNull StripeIntent.SdkData sdkData) {
         if (!sdkData.is3ds2()) {
             throw new IllegalArgumentException(
-                    "Expected PaymentIntent.SdkData with type='stripe_3ds2_fingerprint'.");
+                    "Expected SdkData with type='stripe_3ds2_fingerprint'.");
         }
 
         return new Stripe3ds2Fingerprint(
                 (String) sdkData.data.get(FIELD_THREE_D_SECURE_2_SOURCE),
-                toDirectoryServerName((String) sdkData.data.get(FIELD_DIRECTORY_SERVER_NAME)),
+                DirectoryServer.lookup((String) sdkData.data.get(FIELD_DIRECTORY_SERVER_NAME)),
                 (String) sdkData.data.get(FIELD_SERVER_TRANSACTION_ID)
         );
     }
@@ -46,44 +41,44 @@ public final class Stripe3ds2Fingerprint {
         }
 
         final String source = json.getString(FIELD_THREE_D_SECURE_2_SOURCE);
-        @DirectoryServerName final String directoryServerName =
-                toDirectoryServerName(json.getString(FIELD_DIRECTORY_SERVER_NAME));
+        final DirectoryServer directoryServer =
+                DirectoryServer.lookup(json.getString(FIELD_DIRECTORY_SERVER_NAME));
         final String serverTransactionId = json.getString(FIELD_SERVER_TRANSACTION_ID);
-        return new Stripe3ds2Fingerprint(source, directoryServerName, serverTransactionId);
-    }
-
-    @NonNull
-    @DirectoryServerName
-    private static String toDirectoryServerName(@Nullable String code)
-            throws IllegalArgumentException {
-        if (DirectoryServerName.AMERICAN_EXPRESS.equals(code)) {
-            return DirectoryServerName.AMERICAN_EXPRESS;
-        } else if (DirectoryServerName.MASTERCARD.equals(code)) {
-            return DirectoryServerName.MASTERCARD;
-        } else if (DirectoryServerName.VISA.equals(code)) {
-            return DirectoryServerName.VISA;
-        } else {
-            throw new IllegalArgumentException("Invalid directory_server_name: " + code);
-        }
+        return new Stripe3ds2Fingerprint(source, directoryServer, serverTransactionId);
     }
 
     private Stripe3ds2Fingerprint(@NonNull String source,
-                                  @NonNull @DirectoryServerName String directoryServerName,
+                                  @NonNull DirectoryServer directoryServer,
                                   @NonNull String serverTransactionId) {
         this.source = source;
-        this.directoryServerName = directoryServerName;
+        this.directoryServer = directoryServer;
         this.serverTransactionId = serverTransactionId;
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            DirectoryServerName.AMERICAN_EXPRESS,
-            DirectoryServerName.MASTERCARD,
-            DirectoryServerName.VISA
-    })
-    @interface DirectoryServerName {
-        String AMERICAN_EXPRESS = "american_express";
-        String MASTERCARD = "mastercard";
-        String VISA = "visa";
+    public enum DirectoryServer {
+        Visa("visa", "A000000003"),
+        Mastercard("mastercard", "A000000004"),
+
+        // TODO(mshafrir): update id
+        Amex("american_express", "F000000000");
+
+        @NonNull public final String name;
+        @NonNull public final String id;
+
+        DirectoryServer(@NonNull String name, @NonNull String id) {
+            this.name = name;
+            this.id = id;
+        }
+
+        @NonNull
+        static DirectoryServer lookup(@NonNull String name) {
+            for (DirectoryServer directoryServer : values()) {
+                if (directoryServer.name.equals(name)) {
+                    return directoryServer;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid directory server name: '" + name + "'");
+        }
     }
 }
