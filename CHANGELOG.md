@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.5 - 2019-06-20
+* [#1138](https://github.com/stripe/stripe-android/pull/1138) Fix `AppInfo` param name
+
 ## 9.3.4 - 2019-06-19
 * [#1133](https://github.com/stripe/stripe-android/pull/1133) Make `AppInfo` public
 
