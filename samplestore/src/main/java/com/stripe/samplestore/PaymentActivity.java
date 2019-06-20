@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.ApiResultCallback;
+import com.stripe.android.AppInfo;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentConfiguration;
@@ -89,6 +90,8 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        Stripe.setAppInfo(AppInfo.create("MyAwesomePlugin", "1.2.34",
+                "https://myawesomeplugin.info", "pp_partner_1234"));
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
         mService = RetrofitFactory.getInstance().create(StripeService.class);
 
@@ -324,8 +327,8 @@ public class PaymentActivity extends AppCompatActivity {
             mEnterPaymentInfo.setText(getString(R.string.add_credit_card));
             mEnterShippingInfo.setText(getString(R.string.add_shipping_details));
         } else {
-            displayError(
-                    "Unhandled Payment Intent Status: " + paymentIntent.getStatus().toString());
+            displayError("Unhandled Payment Intent Status: " +
+                    Objects.requireNonNull(paymentIntent.getStatus()).toString());
         }
     }
 
