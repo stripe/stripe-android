@@ -78,7 +78,7 @@ public final class AppInfo {
         appInfo.put("name", mName);
         appInfo.put("version", mVersion);
         appInfo.put("url", mUrl);
-        appInfo.put("partnerId", mPartnerId);
+        appInfo.put("partner_id", mPartnerId);
 
         final Map<String, String> header = new HashMap<>(1);
         header.put("application", new JSONObject(appInfo).toString());

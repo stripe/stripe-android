@@ -25,7 +25,7 @@ public class AppInfoTest {
     public void createClientHeaders() {
         final Map<String, String> header = new HashMap<>();
         header.put("application",
-                "{\"name\":\"MyAwesomePlugin\",\"partnerId\":\"pp_partner_1234\"," +
+                "{\"name\":\"MyAwesomePlugin\",\"partner_id\":\"pp_partner_1234\"," +
                         "\"version\":\"1.2.34\",\"url\":\"https://myawesomeplugin.info\"}");
         assertEquals(header, APP_INFO.createClientHeaders());
     }
