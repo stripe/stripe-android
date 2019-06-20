@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.4 - 2019-06-19
+* [#1133](https://github.com/stripe/stripe-android/pull/1133) Make AppInfo public
+
 ## 9.3.3 - 2019-06-19
 * [#1108](https://github.com/stripe/stripe-android/pull/1108) Create `Card#toBuilder()`
 * [#1114](https://github.com/stripe/stripe-android/pull/1114) Update `CustomerSession` methods to take `@NonNull` listener argument
