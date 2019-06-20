@@ -180,7 +180,7 @@ public class ApiRequestTest {
         final JSONObject userAgentData = new JSONObject(headers.get("X-Stripe-Client-User-Agent"));
         assertEquals(
                 "{\"name\":\"MyAwesomePlugin\"," +
-                        "\"partnerId\":\"pp_partner_1234\"," +
+                        "\"partner_id\":\"pp_partner_1234\"," +
                         "\"version\":\"1.2.34\"," +
                         "\"url\":\"https:\\/\\/myawesomeplugin.info\"}",
                 userAgentData.getString("application"));
