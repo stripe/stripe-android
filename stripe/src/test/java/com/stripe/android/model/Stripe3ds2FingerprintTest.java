@@ -30,7 +30,7 @@ public class Stripe3ds2FingerprintTest {
 
     @Test
     public void create_with3ds2SdkData_shouldCreateObject() {
-        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2
+        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2
                 .getStripeSdkData();
         assertNotNull(sdkData);
         final Stripe3ds2Fingerprint stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData);

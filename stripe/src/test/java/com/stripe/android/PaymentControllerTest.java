@@ -69,12 +69,6 @@ public class PaymentControllerTest {
         MockitoAnnotations.initMocks(this);
         when(mTransaction.getAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS);
-        when(mThreeDs2Service.createTransaction(
-                Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
-                MESSAGE_VERSION,
-                false,
-                Stripe3ds2Fingerprint.DirectoryServer.Visa.name))
-                .thenReturn(mTransaction);
         when(mMessageVersionRegistry.getCurrent()).thenReturn(MESSAGE_VERSION);
         when(mActivity.getApplicationContext())
                 .thenReturn(ApplicationProvider.getApplicationContext());
@@ -87,8 +81,14 @@ public class PaymentControllerTest {
     }
 
     @Test
-    public void handleNextAction_with3ds2() {
-        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+    public void handleNextAction_withVisaAnd3ds2() {
+        when(mThreeDs2Service.createTransaction(
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
+                MESSAGE_VERSION,
+                false,
+                Stripe3ds2Fingerprint.DirectoryServer.Visa.name))
+                .thenReturn(mTransaction);
+        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 PUBLISHABLE_KEY);
         verify(mThreeDs2Service).createTransaction(
                 Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
@@ -103,6 +103,31 @@ public class PaymentControllerTest {
                 new Intent(mActivity, ChallengeProgressDialogActivity.class)
                         .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
                                 Stripe3ds2Fingerprint.DirectoryServer.Visa.name)));
+    }
+
+    @Test
+    public void handleNextAction_withAmexAnd3ds2() {
+        when(mThreeDs2Service.createTransaction(
+                Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
+                MESSAGE_VERSION,
+                false,
+                Stripe3ds2Fingerprint.DirectoryServer.Amex.name))
+                .thenReturn(mTransaction);
+        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
+                PUBLISHABLE_KEY);
+        verify(mThreeDs2Service).createTransaction(
+                Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
+                MESSAGE_VERSION,
+                false,
+                Stripe3ds2Fingerprint.DirectoryServer.Amex.name);
+        verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
+                eq(PUBLISHABLE_KEY),
+                ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
+
+        verify(mActivity).startActivity(eq(
+                new Intent(mActivity, ChallengeProgressDialogActivity.class)
+                        .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
+                                Stripe3ds2Fingerprint.DirectoryServer.Amex.name)));
     }
 
     @Test
@@ -121,7 +146,7 @@ public class PaymentControllerTest {
     @Test
     public void test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
-                m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .cancelled();
         verify(mApiHandler).complete3ds2Auth(eq("src_123"),
@@ -146,7 +171,7 @@ public class PaymentControllerTest {
         final PaymentController.Stripe3ds2AuthCallback authCallback =
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
-                        PaymentIntentFixtures.PI_REQUIRES_3DS2, SOURCE_ID,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
                         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW);
         verify(mPaymentRelayStarter, never())
@@ -158,13 +183,13 @@ public class PaymentControllerTest {
         final PaymentController.Stripe3ds2AuthCallback authCallback =
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
-                        PaymentIntentFixtures.PI_REQUIRES_3DS2, SOURCE_ID,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
                         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         mPaymentRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW);
         verify(mPaymentRelayStarter)
                 .start(mRelayStarterDataArgumentCaptor.capture());
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2,
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 mRelayStarterDataArgumentCaptor.getValue().stripeIntent);
     }
 
@@ -173,7 +198,7 @@ public class PaymentControllerTest {
         final PaymentController.Stripe3ds2AuthCallback authCallback =
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
-                        PaymentIntentFixtures.PI_REQUIRES_3DS2, SOURCE_ID,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
                         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);
         verify(mPaymentRelayStarter).start(mRelayStarterDataArgumentCaptor.capture());

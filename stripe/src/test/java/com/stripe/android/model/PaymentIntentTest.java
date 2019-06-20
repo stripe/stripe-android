@@ -242,8 +242,8 @@ public class PaymentIntentTest {
     @Test
     public void getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds2() {
         assertEquals(StripeIntent.NextActionType.UseStripeSdk,
-                PaymentIntentFixtures.PI_REQUIRES_3DS2.getNextActionType());
-        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS2.getStripeSdkData();
+                PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getNextActionType());
+        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getStripeSdkData();
         assertNotNull(sdkData);
         assertTrue(sdkData.is3ds2());
         assertEquals("visa", sdkData.data.get("directory_server_name"));
