@@ -37,10 +37,10 @@ public class Stripe3ds2CompletionStarterTest {
     @Test
     public void start_withCompletion_shouldAddClientSecretAndAuthStatusToIntent() {
         mStarter.start(Stripe3ds2CompletionStarter.StartData.createForComplete(
-                PaymentIntentFixtures.PI_REQUIRES_3DS2, "Y"));
+                PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, "Y"));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
         assertEquals(StripeIntentResult.Status.SUCCEEDED,
                 intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
@@ -50,11 +50,11 @@ public class Stripe3ds2CompletionStarterTest {
     @Test
     public void start_withProtocolError_shouldAddClientSecretAndAuthStatusToIntent() {
         mStarter.start(new Stripe3ds2CompletionStarter.StartData(
-                PaymentIntentFixtures.PI_REQUIRES_3DS2,
+                PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_3DS2.getClientSecret(),
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
         assertEquals(StripeIntentResult.Status.FAILED,
                 intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
