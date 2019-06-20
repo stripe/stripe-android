@@ -1,5 +1,19 @@
 ## Migration Guides
 
+### Migration from versions < 9.3.3
+- The enum `PaymentIntent.Status` is now `StripeIntent.Status`
+- The enum `PaymentIntent.NextActionType` is now `StripeIntent.NextActionType`
+
+These changes should not impact Java integrations. For Kotlin integrations, please change your reference as shown in the example below.
+
+```kotlin
+// before
+PaymentIntent.Status.Succeeded
+
+// after
+StripeIntent.Status.Succeeded
+```
+
 ### Migration from versions < 9.3.0
 - `CustomerSession`'s Listener interfaces's `onError()` method now have a `@NonNull` `errorMessage` argument
     ```java
