@@ -1,38 +1,40 @@
 package com.stripe.android.model;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(RobolectricTestRunner.class)
 public class SetupIntentTest {
 
     private static final String SETUP_INTENT_NEXT_ACTION_REDIRECT = "{\n" +
-            "  \"id\": \"seti_1Eq6tqGMT9dGPIDGhdilBKsu\",\n" +
+            "  \"id\": \"seti_1EqTSZGMT9dGPIDGVzCUs6dV\",\n" +
             "  \"object\": \"setup_intent\",\n" +
             "  \"cancellation_reason\": null,\n" +
-            "  \"client_secret\": \"seti_1Eq6tqGMT9dGPIDGhdilBKsu_secret_FKmSUxflgdu2gMlMLNzj89t90SRIZTn\",\n" +
+            "  \"client_secret\": \"seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y\",\n" +
             "  \"created\": 1561677666,\n" +
             "  \"description\": \"a description\",\n" +
             "  \"last_setup_error\": null,\n" +
             "  \"livemode\": false,\n" +
             "  \"next_action\": {\n" +
-            "    \"type\": \"use_stripe_sdk\",\n" +
-            "    \"use_stripe_sdk\": {\n" +
-            "      \"type\": \"three_d_secure_redirect\",\n" +
-            "      \"stripe_js\": \"https://hooks.stripe.com/redirect/authenticate/src_1Eq6tzGMT9dGPIDGL26pAgjJ?client_secret=src_client_secret_FKmSF6ewY3iTFmfdIT5784LI\"\n" +
-            "    }\n" +
+            "    \"redirect_to_url\": {\n" +
+            "      \"return_url\": \"stripe://setup_intent_return\",\n" +
+            "      \"url\": \"https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02\"\n" +
+            "    },\n" +
+            "    \"type\": \"redirect_to_url\"\n" +
             "  },\n" +
-            "  \"payment_method\": \"pm_1Eq6tlGMT9dGPIDGFkaLeB0v\",\n" +
+            "  \"payment_method\": \"pm_1EqTSoGMT9dGPIDG7dgafX1H\",\n" +
             "  \"payment_method_types\": [\n" +
             "    \"card\"\n" +
             "  ],\n" +
             "  \"status\": \"requires_action\",\n" +
             "  \"usage\": \"off_session\"\n" +
             "}";
-
 
     @Test
     public void parseIdFromClientSecret_correctIdParsed() {
@@ -45,19 +47,25 @@ public class SetupIntentTest {
     public void fromJsonStringWithNextAction_createsSetupIntentWithNextAction() {
         final SetupIntent setupIntent = SetupIntent.fromString(SETUP_INTENT_NEXT_ACTION_REDIRECT);
         assertNotNull(setupIntent);
-        assertEquals("seti_1Eq6tqGMT9dGPIDGhdilBKsu", setupIntent.getId());
-        assertEquals("seti_1Eq6tqGMT9dGPIDGhdilBKsu_secret_FKmSUxflgdu2gMlMLNzj89t90SRIZTn",
+        assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV", setupIntent.getId());
+        assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
                 setupIntent.getClientSecret());
         assertEquals(1561677666, (long)setupIntent.getCreated());
         assertEquals("a description", setupIntent.getDescription());
+        assertEquals("pm_1EqTSoGMT9dGPIDG7dgafX1H", setupIntent.getPaymentMethodId());
         assertFalse(setupIntent.getLiveMode());
         assertTrue(setupIntent.requiresAction());
         assertEquals(StripeIntent.Status.RequiresAction, setupIntent.getStatus());
         assertEquals(StripeIntent.Usage.OffSession, setupIntent.getUsage());
 
-        final StripeIntent.SdkData sdkData = setupIntent.getStripeSdkData();
-        assertNotNull(sdkData);
-        assertTrue(sdkData.is3ds1());
+        final StripeIntent.RedirectData redirectData = setupIntent.getRedirectData();
+        assertNotNull(redirectData);
+        assertEquals("stripe://setup_intent_return", redirectData.returnUrl.toString());
+        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" +
+                "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString());
+        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" +
+                "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02",
+                setupIntent.getRedirectUrl().toString());
     }
 
 }
