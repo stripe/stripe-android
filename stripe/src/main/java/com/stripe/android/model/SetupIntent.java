@@ -84,6 +84,46 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return clientSecret.split("_secret")[0];
     }
 
+    @Nullable
+    public String getId() {
+        return mId;
+    }
+
+    @Nullable
+    public Long getCreated() {
+        return mCreated;
+    }
+
+    @Nullable
+    public String getCustomerId() {
+        return mCustomerId;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return mDescription;
+    }
+
+    @Nullable
+    public Boolean getLiveMode() {
+        return mLiveMode;
+    }
+
+    @Nullable
+    public String getPaymentMethodId() {
+        return mPaymentMethodId;
+    }
+
+    @NonNull
+    public List<String> getPaymentMethodTypes() {
+        return mPaymentMethodTypes;
+    }
+
+    @Nullable
+    public Usage getUsage() {
+        return mUsage;
+    }
+
     @Override
     public boolean requiresAction() {
         return mStatus == Status.RequiresAction;
