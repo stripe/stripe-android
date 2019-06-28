@@ -26,10 +26,10 @@ public final class SetupIntentParams implements StripeIntentParams {
      * PaymentMethod that already exits.
      *
      * @param paymentMethodId the ID of the PaymentMethod that is being attached to the
-     *                        PaymentIntent being confirmed
+     *         PaymentIntent being confirmed
      * @param clientSecret client secret from the PaymentIntent being confirmed
      * @param returnUrl the URL the customer should be redirected to after the authorization
-     *                  process
+     *         process
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
@@ -44,7 +44,20 @@ public final class SetupIntentParams implements StripeIntentParams {
     }
 
     /**
+     * Create the parameters necessary for retrieving the details of SetupIntent
+     *
+     * @param clientSecret client secret from the SetupIntent that is being retrieved
+     * @return params that can be used to retrieve a SetupIntent
+     */
+    @NonNull
+    public static SetupIntentParams createRetrieveSetupIntentParams(
+            @NonNull String clientSecret) {
+        return new SetupIntentParams().setClientSecret(clientSecret);
+    }
+
+    /**
      * Sets the client secret that is used to authenticate actions on this SetupIntent
+     *
      * @param clientSecret client secret associated with this SetupIntent
      * @return {@code this}, for chaining purposes
      */
@@ -55,7 +68,7 @@ public final class SetupIntentParams implements StripeIntentParams {
 
     /**
      * @return client secret associated with the SetupIntent, used to identify the SetupIntent
-     * and authenticate actions.
+     *         and authenticate actions.
      */
     @Nullable
     public String getClientSecret() {
@@ -66,7 +79,7 @@ public final class SetupIntentParams implements StripeIntentParams {
      * Sets a pre-existing PaymentMethod that will be attached to this SetupIntent
      *
      * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
-     *                        SetupIntent.
+     *         SetupIntent.
      * @return {@code this}, for chaining purposes
      */
     @NonNull
@@ -85,7 +98,7 @@ public final class SetupIntentParams implements StripeIntentParams {
 
     /**
      * @param returnUrl the URL the customer should be redirected to after the authorization
-     *                  process
+     *         process
      * @return {@code this}, for chaining purposes
      */
     @NonNull
@@ -95,7 +108,7 @@ public final class SetupIntentParams implements StripeIntentParams {
     }
 
     /**
-     * @return  the URL the customer should be redirected to after the authorization process
+     * @return the URL the customer should be redirected to after the authorization process
      */
     @Nullable
     public String getReturnUrl() {
