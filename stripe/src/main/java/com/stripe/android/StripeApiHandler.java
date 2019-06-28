@@ -19,6 +19,8 @@ import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.SetupIntent;
+import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -154,6 +156,72 @@ class StripeApiHandler {
             final StripeResponse response = makeApiRequest(ApiRequest.createGet(
                     getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options, mAppInfo));
             return PaymentIntent.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
+        }
+    }
+
+    /**
+     * Confirm a {@link SetupIntent} using the provided {@link SetupIntentParams}
+     *
+     * @param setupIntentParams contains the confirmation params
+     * @return a {@link SetupIntent} reflecting the updated state after applying the parameter
+     * provided
+     */
+    @Nullable
+    SetupIntent confirmSetupIntent(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull ApiRequest.Options options)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
+        mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
+
+        try {
+            logTelemetryData();
+            logApiCall(
+                    mLoggingUtils.getSetupIntentConfirmationParams(null, options.apiKey),
+                    options.apiKey
+            );
+            final String setupIntentId = SetupIntent.parseIdFromClientSecret(
+                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
+            final StripeResponse response = makeApiRequest(ApiRequest.createPost(
+                    getConfirmSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
+            return SetupIntent.fromString(response.getResponseBody());
+        } catch (CardException unexpected) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
+                    unexpected.getStatusCode(), null, unexpected);
+        }
+    }
+
+    /**
+     * Retrieve a {@link SetupIntent} using the provided {@link SetupIntentParams}
+     * @param setupIntentParams contains the retrieval params
+     */
+    @Nullable
+    SetupIntent retrieveSetupIntent(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull ApiRequest.Options options)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
+
+        try {
+            logTelemetryData();
+            logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(null, options.apiKey),
+                    options.apiKey);
+            final String setupIntentId = SetupIntent.parseIdFromClientSecret(
+                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
+            final StripeResponse response = makeApiRequest(ApiRequest.createGet(
+                    getRetrieveSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
+            return SetupIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
@@ -705,6 +773,24 @@ class StripeApiHandler {
     @NonNull
     static String getConfirmPaymentIntentUrl(@NonNull String paymentIntentId) {
         return getApiUrl("payment_intents/%s/confirm", paymentIntentId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_intents/:id
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getRetrieveSetupIntentUrl(@NonNull String setupIntentId) {
+        return getApiUrl("setup_intents/%s", setupIntentId);
+    }
+
+    /**
+     * @return https://api.stripe.com/v1/payment_intents/:id/confirm
+     */
+    @VisibleForTesting
+    @NonNull
+    static String getConfirmSetupIntentUrl(@NonNull String setupIntentId) {
+        return getApiUrl("setup_intents/%s/confirm", setupIntentId);
     }
 
     /**

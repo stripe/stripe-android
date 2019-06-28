@@ -22,6 +22,8 @@ import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.SetupIntent;
+import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
@@ -591,6 +593,59 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * Blocking method to retrieve a {@link SetupIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param setupIntentParams a set of params with which to retrieve the Setup Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link SetupIntent} or {@code null} if a problem occurred
+     */
+    @Nullable
+    public SetupIntent retrieveSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mApiHandler.retrieveSetupIntent(
+                setupIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #retrieveSetupIntentSynchronous(SetupIntentParams, String)}
+     */
+    @Nullable
+    public SetupIntent retrieveSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams)
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        return retrieveSetupIntentSynchronous(setupIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to confirm a {@link SetupIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param setupIntentParams a set of params with which to confirm the Setup Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link SetupIntent} or {@code null} if a problem occurred
+     */
+    @Nullable
+    public SetupIntent confirmSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mApiHandler.confirmSetupIntent(
+                setupIntentParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }
