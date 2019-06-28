@@ -7,7 +7,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class PaymentIntentParams {
+public final class PaymentIntentParams implements StripeIntentParams {
 
     public static final String API_PARAM_SOURCE_DATA = "source_data";
     public static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";

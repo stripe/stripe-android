@@ -7,7 +7,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class SetupIntentParams {
+public final class SetupIntentParams implements StripeIntentParams {
 
     static final String API_PARAM_CLIENT_SECRET = "client_secret";
     static final String API_PARAM_RETURN_URL = "return_url";
