@@ -51,6 +51,7 @@
     <string name="label_source_id">ID Last 6</string>
 
     <string name="sample_card_requiring_3ds">4000 0000 0000 3063</string>
+    <string name="sample_card_requiring_auth">4000 0025 0000 3155</string>
 
     <string name="pay_with_google_content_description">Pay with Google</string>
 
@@ -71,6 +72,19 @@
     <string name="retrieve_payment_intent">Retrieve PaymentIntent</string>
     <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the PaymentIntent</string>
 
+    <string name="launch_setup_intent_example">Launch SetupIntent Example</string>
+    <string name="creating_setup_intent">Creating SetupIntent&#8230;</string>
+    <string name="creating_payment_method">Creating Payment Method&#8230;</string>
+    <string name="confirming_setup_intent">Confirming SetupIntent&#8230;</string>
+    <string name="retrieving_setup_intent">Retrieving SetupIntent&#8230;</string>
+    <string name="create_setup_intent_backend">First, create a SetupIntent on your backend.</string>
+    <string name="create_setup_intent">Create SetupIntent</string>
+    <string name="create_payment_method_and_confirm_setup_intent">Second, create a payment method and confirm the SetupIntent</string>
+    <string name="create_payment_method">Create Payment Method</string>
+    <string name="confirm_setup_intent">Confirm SetupIntent</string>
+    <string name="retrieve_setup_intent">Retrieve SetupIntent</string>
+    <string name="error_while_retrieving_setup_intent">An error occurred while retrieving the SetupIntent</string>
+
     <string name="authentication_dialog_title">Authentication required</string>
     <string name="authentication_dialog_message">Authenticate %1$s ending in %2$s?</string>
     <string name="pay_with_google">Pay with Google</string>
@@ -78,6 +92,9 @@
     <!-- Payment Auth example -->
     <string name="launch_payment_auth_example">Launch Payment Auth Example</string>
     <string name="buy">Buy!</string>
+    <string name="setup">Buy in the Future!</string>
     <string name="payment_intent_status">PaymentIntent status: %s</string>
+    <string name="setup_intent_status">SetupIntent status: %s</string>
     <string name="payment_auth_intro">Tapping the button below will create a PaymentIntent then attempt to confirm it.</string>
+    <string name="setup_auth_intro">Tapping the button below will create a SetupIntent then attempt to confirm it.</string>
 </resources>

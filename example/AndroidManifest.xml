@@ -39,6 +39,22 @@
                     android:scheme="stripe" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activity.SetupIntentActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="setup_intent_return"
+                    android:scheme="stripe" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".service.TokenIntentService"
             android:exported="false"/>

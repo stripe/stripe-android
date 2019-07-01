@@ -17,6 +17,18 @@
         android:layout_marginBottom="40dp"
         android:text="@string/buy" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/setup_auth_intro" />
+
+    <Button
+        android:id="@+id/setup_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:text="@string/setup" />
+
     <ProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="match_parent"
