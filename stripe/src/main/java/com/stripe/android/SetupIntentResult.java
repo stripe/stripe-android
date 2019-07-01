@@ -1,9 +1,11 @@
 package com.stripe.android;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.StripeIntent;
+import com.stripe.android.utils.ObjectUtils;
 
 public class SetupIntentResult implements StripeIntentResult<SetupIntent> {
     @NonNull private final SetupIntent mSetupIntent;
@@ -46,5 +48,22 @@ public class SetupIntentResult implements StripeIntentResult<SetupIntent> {
         public SetupIntentResult build() {
             return new SetupIntentResult(this);
         }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SetupIntentResult &&
+                typedEquals((SetupIntentResult) obj));
+    }
+
+    private boolean typedEquals(@NonNull SetupIntentResult setupIntentResult) {
+        return ObjectUtils.equals(mSetupIntent, setupIntentResult.mSetupIntent)
+                && ObjectUtils.equals(mStatus, setupIntentResult.mStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mSetupIntent, mStatus);
+
     }
 }

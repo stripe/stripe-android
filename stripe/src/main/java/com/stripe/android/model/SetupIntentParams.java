@@ -3,6 +3,8 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,5 +138,22 @@ public final class SetupIntentParams implements StripeIntentParams {
         networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
 
         return networkReadyMap;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SetupIntentParams &&
+                typedEquals((SetupIntentParams) obj));
+    }
+
+    private boolean typedEquals(@NonNull SetupIntentParams setupIntentParams) {
+        return ObjectUtils.equals(mReturnUrl, setupIntentParams.mReturnUrl)
+                && ObjectUtils.equals(mClientSecret, setupIntentParams.mClientSecret)
+                && ObjectUtils.equals(mPaymentMethodId, setupIntentParams.mPaymentMethodId);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId);
     }
 }
