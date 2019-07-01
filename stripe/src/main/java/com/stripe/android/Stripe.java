@@ -132,6 +132,27 @@ public class Stripe {
     }
 
     /**
+     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
+     *
+     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param setupIntentParams {@link SetupIntentParams} used to confirm the {@link SetupIntent}
+     */
+    public void confirmSetupIntent(@NonNull Activity activity,
+                                   @NonNull SetupIntentParams setupIntentParams,
+                                   @NonNull String publishableKey) {
+        mPaymentController.startConfirmAndAuth(this, activity,
+                setupIntentParams, publishableKey);
+    }
+
+    /**
+     * See {@link #confirmSetupIntent(Activity, SetupIntentParams, String)}}
+     */
+    public void confirmSetupIntent(@NonNull Activity activity,
+                                   @NonNull SetupIntentParams setupIntentParams) {
+        confirmSetupIntent(activity, setupIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
      * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
      * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
      * automatic confirmation</a> flow.
@@ -186,8 +207,8 @@ public class Stripe {
     public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
-        if (data != null && mPaymentController.shouldHandleResult(requestCode, resultCode, data)) {
-            mPaymentController.handleResult(this, data, publishableKey, callback);
+        if (mPaymentController.shouldHandlePaymentResult(requestCode, resultCode, data)) {
+            mPaymentController.handlePaymentResult(this, data, publishableKey, callback);
             return true;
         }
 
@@ -201,6 +222,30 @@ public class Stripe {
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull ApiResultCallback<PaymentIntentResult> callback) {
         return onPaymentResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
+    }
+
+    /**
+     * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
+     * result of a SetupIntent confirmation
+     * (see {@link #confirmSetupIntent(Activity, SetupIntentParams)})
+     */
+    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
+                                   @NonNull String publishableKey,
+                                   @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        if (mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
+            mPaymentController.handleSetupResult(this, data, publishableKey, callback);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * See {@link #onSetupResult(int, int, Intent, String, ApiResultCallback)}
+     */
+    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
+            @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        return onSetupResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
     /**
