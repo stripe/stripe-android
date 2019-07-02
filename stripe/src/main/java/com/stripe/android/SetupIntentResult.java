@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.StripeIntent;
 import com.stripe.android.utils.ObjectUtils;
 
 public class SetupIntentResult implements StripeIntentResult<SetupIntent> {
@@ -27,8 +26,7 @@ public class SetupIntentResult implements StripeIntentResult<SetupIntent> {
         return mStatus;
     }
 
-    static final class Builder<T extends StripeIntent>
-            implements ObjectBuilder<SetupIntentResult> {
+    static final class Builder implements ObjectBuilder<SetupIntentResult> {
         private SetupIntent mSetupIntent;
         @Status private int mStatus;
 

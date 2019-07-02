@@ -141,7 +141,7 @@ class PaymentController {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
                         if (stripeIntent instanceof PaymentIntent) {
-                            callback.onSuccess(new PaymentIntentResult.Builder<>()
+                            callback.onSuccess(new PaymentIntentResult.Builder()
                                     .setPaymentIntent((PaymentIntent) stripeIntent)
                                     .setStatus(authStatus)
                                     .build());
@@ -183,7 +183,7 @@ class PaymentController {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
                         if (stripeIntent instanceof SetupIntent) {
-                            callback.onSuccess(new SetupIntentResult.Builder<>()
+                            callback.onSuccess(new SetupIntentResult.Builder()
                                     .setSetupIntent((SetupIntent) stripeIntent)
                                     .setStatus(authStatus)
                                     .build());
