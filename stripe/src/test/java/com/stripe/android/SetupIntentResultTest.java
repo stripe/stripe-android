@@ -1,6 +1,5 @@
 package com.stripe.android;
 
-import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.SetupIntentFixtures;
 
 import org.junit.Test;
