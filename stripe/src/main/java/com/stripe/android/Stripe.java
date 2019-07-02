@@ -207,7 +207,8 @@ public class Stripe {
     public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
-        if (mPaymentController.shouldHandlePaymentResult(requestCode, resultCode, data)) {
+        if (data != null &&
+                mPaymentController.shouldHandlePaymentResult(requestCode, resultCode, data)) {
             mPaymentController.handlePaymentResult(this, data, publishableKey, callback);
             return true;
         }
@@ -232,7 +233,8 @@ public class Stripe {
     public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<SetupIntentResult> callback) {
-        if (mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
+        if (data!= null &&
+                mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
             mPaymentController.handleSetupResult(this, data, publishableKey, callback);
             return true;
         }
