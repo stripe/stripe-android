@@ -198,14 +198,16 @@ class PaymentController {
                 .execute();
     }
 
+    @VisibleForTesting
     @NonNull
-    private PaymentIntentParams createPaymentIntentParams(@NonNull Intent data) {
+    PaymentIntentParams createPaymentIntentParams(@NonNull Intent data) {
         final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
         return PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
     }
 
+    @VisibleForTesting
     @NonNull
-    private SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
+    SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
         final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
         return SetupIntentParams.createRetrieveSetupIntentParams(clientSecret);
     }

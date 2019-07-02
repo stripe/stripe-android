@@ -37,6 +37,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -186,6 +187,32 @@ public class PaymentControllerTest {
         verify(mApiHandler).complete3ds2Auth(eq("src_123"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Boolean>>any());
+    }
+
+    @Test
+    public void createPaymentIntentParams_shouldCreateParams() {
+        final Intent data = new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+
+        assertNotNull(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+        final PaymentIntentParams expectedPaymentParams = PaymentIntentParams.createCustomParams()
+                .setClientSecret(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+
+        assertEquals(expectedPaymentParams, mController.createPaymentIntentParams(data));
+    }
+
+    @Test
+    public void createSetupIntentParams_shouldCreateParams() {
+        final Intent data = new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+
+        assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+        final SetupIntentParams expectedSetupParams = SetupIntentParams.createCustomParams()
+                .setClientSecret(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+
+        assertEquals(expectedSetupParams, mController.createSetupIntentParams(data));
     }
 
     @Test

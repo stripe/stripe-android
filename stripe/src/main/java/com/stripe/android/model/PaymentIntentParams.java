@@ -3,6 +3,8 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -399,5 +401,28 @@ public final class PaymentIntentParams implements StripeIntentParams {
 
     public boolean shouldSavePaymentMethod() {
         return mSavePaymentMethod;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof PaymentIntentParams &&
+                typedEquals((PaymentIntentParams) obj));
+    }
+
+    private boolean typedEquals(@NonNull PaymentIntentParams paymentIntentParams) {
+        return ObjectUtils.equals(mReturnUrl, paymentIntentParams.mReturnUrl)
+                && ObjectUtils.equals(mPaymentMethodCreateParams,
+                paymentIntentParams.mPaymentMethodCreateParams)
+                && ObjectUtils.equals(mSourceParams, paymentIntentParams.mSourceParams)
+                && ObjectUtils.equals(mSourceId, paymentIntentParams.mSourceId)
+                && ObjectUtils.equals(mExtraParams, paymentIntentParams.mExtraParams)
+                && ObjectUtils.equals(mSavePaymentMethod, paymentIntentParams.mSavePaymentMethod)
+                && ObjectUtils.equals(mPaymentMethodId, paymentIntentParams.mPaymentMethodId);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mPaymentMethodCreateParams, mSourceParams, mSourceId,
+                mExtraParams, mReturnUrl, mClientSecret, mPaymentMethodId, mSavePaymentMethod);
     }
 }

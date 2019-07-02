@@ -24,6 +24,18 @@ public final class SetupIntentParams implements StripeIntentParams {
     }
 
     /**
+     * Create a custom {@link SetupIntentParams}. Incorrect attributes may result in errors
+     * when connecting to Stripe's API.
+     *
+     * @return an empty Params object. Call the setter methods on this class to specific values on
+     *         the params
+     */
+    @NonNull
+    public static SetupIntentParams createCustomParams() {
+        return new SetupIntentParams();
+    }
+
+    /**
      * Create the parameters necessary for confirming a PaymentIntent while attaching a
      * PaymentMethod that already exits.
      *
