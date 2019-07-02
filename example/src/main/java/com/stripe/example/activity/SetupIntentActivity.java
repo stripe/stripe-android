@@ -195,7 +195,7 @@ public class SetupIntentActivity extends AppCompatActivity {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> {
                     final SetupIntentParams setupIntentParams = SetupIntentParams
-                            .createConfirmSetupIntenParamsWithPaymentMethodId(
+                            .createConfirmSetupIntentParamsWithPaymentMethodId(
                                     mPaymentMethod.id, mClientSecret, RETURN_URL);
                     return mStripe.confirmSetupIntentSynchronous(setupIntentParams,
                             PaymentConfiguration.getInstance().getPublishableKey());

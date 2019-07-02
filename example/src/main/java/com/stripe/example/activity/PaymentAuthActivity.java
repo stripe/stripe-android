@@ -109,7 +109,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
     private void confirmSetupIntent(@NonNull String setupIntentClientSecret) {
         mStatusTextView.append("\n\nStarting setup intent authentication");
         mStripe.confirmSetupIntent(this,
-                SetupIntentParams.createConfirmSetupIntenParamsWithPaymentMethodId(
+                SetupIntentParams.createConfirmSetupIntentParamsWithPaymentMethodId(
                         PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP,
                         setupIntentClientSecret,
                         RETURN_URL));

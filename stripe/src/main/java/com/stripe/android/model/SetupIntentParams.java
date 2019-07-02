@@ -47,7 +47,7 @@ public final class SetupIntentParams implements StripeIntentParams {
      * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
-    public static SetupIntentParams createConfirmSetupIntenParamsWithPaymentMethodId(
+    public static SetupIntentParams createConfirmSetupIntentParamsWithPaymentMethodId(
             @Nullable String paymentMethodId,
             @NonNull String clientSecret,
             @NonNull String returnUrl) {

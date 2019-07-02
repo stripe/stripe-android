@@ -55,7 +55,7 @@ public class StripePaymentAuthTest {
     public void confirmSetupIntent_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
         final SetupIntentParams setupIntentParams =
-                SetupIntentParams.createConfirmSetupIntenParamsWithPaymentMethodId(
+                SetupIntentParams.createConfirmSetupIntentParamsWithPaymentMethodId(
                         "pm_card_threeDSecure2Required",
                         "client_secret",
                         "yourapp://post-authentication-return-url");
