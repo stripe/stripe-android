@@ -41,7 +41,9 @@ class LoggingUtils {
             EVENT_DELETE_SOURCE,
             EVENT_SET_SHIPPING_INFO,
             EVENT_CONFIRM_PAYMENT_INTENT,
-            EVENT_RETRIEVE_PAYMENT_INTENT})
+            EVENT_RETRIEVE_PAYMENT_INTENT,
+            EVENT_CONFIRM_SETUP_INTENT,
+            EVENT_RETRIEVE_SETUP_INTENT})
     @interface LoggingEventName {
     }
 
