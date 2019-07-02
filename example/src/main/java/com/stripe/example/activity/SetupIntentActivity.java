@@ -85,9 +85,7 @@ public class SetupIntentActivity extends AppCompatActivity {
             }
         });
         mRetrieveSetupIntent.setOnClickListener(v -> retrieveSetupIntent());
-        mConfirmSetupIntent.setOnClickListener(v -> {
-            confirmSetupIntent();
-        });
+        mConfirmSetupIntent.setOnClickListener(v -> confirmSetupIntent());
     }
 
     @Override
@@ -111,7 +109,7 @@ public class SetupIntentActivity extends AppCompatActivity {
         }
     }
 
-    void createSetupIntent() {
+    private void createSetupIntent() {
         final Disposable disposable = mStripeService.createSetupIntent(new HashMap<>())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
