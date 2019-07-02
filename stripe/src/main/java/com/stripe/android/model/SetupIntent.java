@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -45,39 +46,36 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
     @Nullable private final String mId;
     @Nullable private final String mObjectType;
-    @Nullable private final Long mCreated;
+    private final long mCreated;
     @Nullable private final String mClientSecret;
     @Nullable private final String mCustomerId;
     @Nullable private final String mDescription;
-    @Nullable private final Boolean mLiveMode;
+    private final boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
     @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mPaymentMethodId;
-    @NonNull private final List<String> mPaymentMethodTypes;
+    @Nullable private final List<String> mPaymentMethodTypes;
     @Nullable private final Status mStatus;
     @Nullable private final Usage mUsage;
 
-    private SetupIntent(@Nullable String id, @Nullable String objectType,
-                        @Nullable Long created, @Nullable String clientSecret,
-                        @Nullable String customerId, @Nullable String description,
-                        @Nullable Boolean liveMode, @Nullable Map<String, Object> nextAction,
-                        @Nullable String paymentMethodId, @NonNull List<String> paymentMethodTypes,
-                        @Nullable Status status, @Nullable Usage usage) {
-        mId = id;
-        mObjectType = objectType;
-        mCreated = created;
-        mClientSecret = clientSecret;
-        mCustomerId = customerId;
-        mDescription = description;
-        mLiveMode = liveMode;
-        mNextAction = nextAction;
+    private SetupIntent(@NonNull Builder builder) {
+        mId = builder.mId;
+        mObjectType = builder.mObjectType;
+        mCreated = builder.mCreated;
+        mClientSecret = builder.mClientSecret;
+        mCustomerId = builder.mCustomerId;
+        mDescription = builder.mDescription;
+        mLiveMode = builder.mLiveMode;
+        mNextAction = builder.mNextAction;
         mNextActionType = mNextAction != null ?
                 NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
-        mPaymentMethodId = paymentMethodId;
-        mPaymentMethodTypes = paymentMethodTypes;
-        mStatus = status;
-        mUsage = usage;
+        mPaymentMethodId = builder.mPaymentMethodId;
+        mPaymentMethodTypes = builder.mPaymentMethodTypes;
+        mStatus = builder.mStatus;
+        mUsage = builder.mUsage;
     }
+
+
 
     @NonNull
     public static String parseIdFromClientSecret(@NonNull String clientSecret) {
@@ -89,8 +87,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return mId;
     }
 
-    @Nullable
-    public Long getCreated() {
+    public long getCreated() {
         return mCreated;
     }
 
@@ -104,8 +101,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return mDescription;
     }
 
-    @Nullable
-    public Boolean getLiveMode() {
+    public boolean getLiveMode() {
         return mLiveMode;
     }
 
@@ -220,21 +216,21 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
             return null;
         }
 
-        final String id = optString(jsonObject, FIELD_ID);
-        final String objectType = optString(jsonObject, FIELD_OBJECT);
-        final Long created = optLong(jsonObject, FIELD_CREATED);
-        final String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
-        final String customerId = optString(jsonObject, FIELD_CUSTOMER);
-        final String description = optString(jsonObject, FIELD_DESCRIPTION);
-        final Boolean livemode = optBoolean(jsonObject, FIELD_LIVEMODE);
-        final String paymentMethodId = optString(jsonObject, FIELD_PAYMENT_METHOD);
-        final List<String> paymentMethodTypes = jsonArrayToList(
-                jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES));
-        final Status status = Status.fromCode(optString(jsonObject, FIELD_STATUS));
-        final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
-        final Usage usage = Usage.fromCode(optString(jsonObject, FIELD_USAGE));
-        return new SetupIntent(id, objectType, created, clientSecret, customerId, description,
-                livemode, nextAction, paymentMethodId, paymentMethodTypes, status, usage);
+        return new Builder()
+                .setId(optString(jsonObject, FIELD_ID))
+                .setObjectType(optString(jsonObject, FIELD_OBJECT))
+                .setCreated(jsonObject.optLong(FIELD_CREATED))
+                .setClientSecret(optString(jsonObject, FIELD_CLIENT_SECRET))
+                .setCustomerId(optString(jsonObject, FIELD_CUSTOMER))
+                .setDescription(optString(jsonObject, FIELD_DESCRIPTION))
+                .setLiveMode(jsonObject.optBoolean(FIELD_LIVEMODE))
+                .setPaymentMethodId(optString(jsonObject, FIELD_PAYMENT_METHOD))
+                .setPaymentMethodTypes(jsonArrayToList(
+                        jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)))
+                .setStatus(Status.fromCode(optString(jsonObject, FIELD_STATUS)))
+                .setUsage(Usage.fromCode(optString(jsonObject, FIELD_USAGE)))
+                .setNextAction(optMap(jsonObject, FIELD_NEXT_ACTION))
+                .build();
     }
 
     @NonNull
@@ -283,5 +279,98 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return ObjectUtils.hash(mId, mObjectType, mCustomerId, mClientSecret, mCreated,
                 mDescription, mLiveMode, mStatus, mPaymentMethodId, mPaymentMethodTypes,
                 mNextAction, mNextActionType, mUsage);
+    }
+
+    static final class Builder implements ObjectBuilder<SetupIntent> {
+        @Nullable String mId;
+        @Nullable String mObjectType;
+        long mCreated;
+        @Nullable String mClientSecret;
+        @Nullable String mCustomerId;
+        @Nullable String mDescription;
+        boolean mLiveMode;
+        @Nullable Map<String, Object> mNextAction;
+        @Nullable String mPaymentMethodId;
+        @Nullable List<String> mPaymentMethodTypes;
+        @Nullable Status mStatus;
+        @Nullable Usage mUsage;
+
+        @NonNull
+        Builder setId(@Nullable String id) {
+            mId = id;
+            return this;
+        }
+
+        @NonNull
+        Builder setObjectType(@Nullable String objectType) {
+            mObjectType = objectType;
+            return this;
+        }
+
+        @NonNull
+        Builder setCreated(long created) {
+            mCreated = created;
+            return this;
+        }
+
+        @NonNull
+        Builder setClientSecret(@Nullable String clientSecret) {
+            mClientSecret = clientSecret;
+            return this;
+        }
+
+        @NonNull
+        Builder setCustomerId(@Nullable String customerId) {
+            mCustomerId = customerId;
+            return this;
+        }
+
+        @NonNull
+        Builder setDescription(@Nullable String description) {
+            mDescription = description;
+            return this;
+        }
+
+        @NonNull
+        Builder setLiveMode(boolean liveMode) {
+            mLiveMode = liveMode;
+            return this;
+        }
+
+        @NonNull
+        Builder setNextAction(@Nullable Map<String, Object> nextAction) {
+            mNextAction = nextAction;
+            return this;
+        }
+
+        @NonNull
+        Builder setPaymentMethodId(@Nullable String paymentMethodId) {
+            mPaymentMethodId = paymentMethodId;
+            return this;
+        }
+
+        @NonNull
+        Builder setPaymentMethodTypes(@Nullable List<String> paymentMethodTypes) {
+            mPaymentMethodTypes = paymentMethodTypes;
+            return this;
+        }
+
+        @NonNull
+        Builder setStatus(@Nullable Status status) {
+            mStatus = status;
+            return this;
+        }
+
+        @NonNull
+        Builder setUsage(@Nullable Usage usage) {
+            mUsage = usage;
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public SetupIntent build() {
+            return new SetupIntent(this);
+        }
     }
 }
