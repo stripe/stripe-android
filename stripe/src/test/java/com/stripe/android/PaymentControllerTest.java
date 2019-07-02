@@ -245,6 +245,8 @@ public class PaymentControllerTest {
     public void handleSetupResult_shouldCallbackOnSuccess()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
+        assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+        
         final Intent intent = new Intent()
                 .putExtra(StripeIntentResultExtras.AUTH_STATUS,
                         StripeIntentResult.Status.SUCCEEDED)
