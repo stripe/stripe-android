@@ -233,7 +233,7 @@ public class Stripe {
     public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<SetupIntentResult> callback) {
-        if (data!= null &&
+        if (data != null &&
                 mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
             mPaymentController.handleSetupResult(this, data, publishableKey, callback);
             return true;
