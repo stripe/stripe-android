@@ -177,12 +177,10 @@ public class SetupIntentActivity extends AppCompatActivity {
                 .subscribe(
                         paymentMethod -> {
                             if (paymentMethod != null) {
-                                mSetupIntentValue
-                                        .setText(paymentMethod.id);
-
+                                mSetupIntentValue.setText(paymentMethod.id);
                                 mPaymentMethod = paymentMethod;
-                                mConfirmSetupIntent.setEnabled(mPaymentMethod != null);
-                                mRetrieveSetupIntent.setEnabled(mPaymentMethod != null);
+                                mConfirmSetupIntent.setEnabled(true);
+                                mRetrieveSetupIntent.setEnabled(true);
                             }
                         },
                         throwable -> Log.e(TAG, throwable.toString())
