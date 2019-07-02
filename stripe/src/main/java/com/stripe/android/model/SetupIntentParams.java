@@ -11,10 +11,6 @@ import java.util.Map;
 
 public final class SetupIntentParams implements StripeIntentParams {
 
-    static final String API_PARAM_CLIENT_SECRET = "client_secret";
-    static final String API_PARAM_RETURN_URL = "return_url";
-    static final String API_PARAM_PAYMENT_METHOD_ID = "payment_method";
-
     @Nullable private String mClientSecret;
     @Nullable private String mPaymentMethodId;
     @Nullable private String mReturnUrl;
