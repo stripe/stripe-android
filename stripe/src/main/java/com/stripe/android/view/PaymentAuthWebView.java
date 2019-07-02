@@ -17,6 +17,8 @@ import android.widget.ProgressBar;
 
 import com.stripe.android.R;
 
+import java.util.Set;
+
 /**
  * A {@link WebView} used for authenticating payment and deep-linking the user back to the
  * PaymentIntent's return_url[0].
@@ -53,7 +55,8 @@ class PaymentAuthWebView extends WebView {
     }
 
     static class PaymentAuthWebViewClient extends WebViewClient {
-        static final String PARAM_CLIENT_SECRET = "payment_intent_client_secret";
+        static final String PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret";
+        static final String PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret";
 
         @NonNull private final Activity mActivity;
         @NonNull private final Uri mReturnUrl;
@@ -74,9 +77,18 @@ class PaymentAuthWebView extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(@NonNull WebView view,
                                                 @NonNull String urlString) {
-            if (isReturnUrl(urlString)) {
-                final String clientSecret = Uri.parse(urlString)
-                        .getQueryParameter(PARAM_CLIENT_SECRET);
+            final Uri uri = Uri.parse(urlString);
+            if (isReturnUrl(uri)) {
+                final Set<String> paramNames = uri.getQueryParameterNames();
+                final String clientSecret;
+                if (paramNames.contains(PARAM_PAYMENT_CLIENT_SECRET)) {
+                    clientSecret = uri.getQueryParameter(PARAM_PAYMENT_CLIENT_SECRET);
+                } else if (paramNames.contains(PARAM_SETUP_CLIENT_SECRET)) {
+                    clientSecret = uri.getQueryParameter(PARAM_SETUP_CLIENT_SECRET);
+                } else {
+                    clientSecret = null;
+                }
+
                 mActivity.setResult(Activity.RESULT_OK,
                         new Intent()
                                 .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
@@ -94,8 +106,7 @@ class PaymentAuthWebView extends WebView {
             return shouldOverrideUrlLoading(view, request.getUrl().toString());
         }
 
-        private boolean isReturnUrl(@NonNull String urlString) {
-            final Uri uri = Uri.parse(urlString);
+        private boolean isReturnUrl(@NonNull Uri uri) {
             return mReturnUrl.getScheme() != null &&
                     mReturnUrl.getScheme().equals(uri.getScheme()) &&
                     mReturnUrl.getHost() != null &&

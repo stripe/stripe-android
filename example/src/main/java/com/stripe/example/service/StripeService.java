@@ -21,4 +21,8 @@ public interface StripeService {
     @FormUrlEncoded
     @POST("create_intent")
     Observable<ResponseBody> createPaymentIntent(@FieldMap Map<String, Object> params);
+
+    @FormUrlEncoded
+    @POST("create_setup_intent")
+    Observable<ResponseBody> createSetupIntent(@FieldMap Map<String, Object> params);
 }

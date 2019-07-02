@@ -108,6 +108,44 @@ public interface StripeIntent {
         }
     }
 
+    /**
+     * See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-usage and
+     * https://stripe.com/docs/payments/payment-intents/off-session
+     */
+    enum Usage {
+        OnSession("on_session"),
+        OffSession("off_session"),
+        OneTime("one_time");
+
+        @NonNull
+        public final String code;
+
+        Usage(@NonNull String code) {
+            this.code = code;
+        }
+
+        @Nullable
+        public static Usage fromCode(@Nullable String code) {
+            if (code == null) {
+                return null;
+            }
+
+            for (Usage usage : values()) {
+                if (usage.code.equals(code)) {
+                    return usage;
+                }
+            }
+
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return code;
+        }
+    }
+
     final class SdkData {
         private static final String FIELD_TYPE = "type";
 

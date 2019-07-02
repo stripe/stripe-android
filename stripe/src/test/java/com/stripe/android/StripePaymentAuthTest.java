@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.SetupIntentParams;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,8 @@ public class StripePaymentAuthTest {
 
     @Mock private Activity mActivity;
     @Mock private PaymentController mPaymentController;
-    @Mock private ApiResultCallback<PaymentIntentResult> mCallback;
+    @Mock private ApiResultCallback<PaymentIntentResult> mPaymentCallback;
+    @Mock private ApiResultCallback<SetupIntentResult> mSetupCallback;
 
     @Before
     public void setup() {
@@ -50,6 +52,19 @@ public class StripePaymentAuthTest {
     }
 
     @Test
+    public void confirmSetupIntent_shouldConfirmAndAuth() {
+        final Stripe stripe = createStripe();
+        final SetupIntentParams setupIntentParams =
+                SetupIntentParams.createConfirmSetupIntentParamsWithPaymentMethodId(
+                        "pm_card_threeDSecure2Required",
+                        "client_secret",
+                        "yourapp://post-authentication-return-url");
+        stripe.confirmSetupIntent(mActivity, setupIntentParams);
+        verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
+                eq(setupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+    }
+
+    @Test
     public void authenticatePayment_shouldAuth() {
         final Stripe stripe = createStripe();
         stripe.authenticatePayment(mActivity, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2);
@@ -63,15 +78,29 @@ public class StripePaymentAuthTest {
     @Test
     public void onPaymentResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
         final Intent data = new Intent();
-        when(mPaymentController.shouldHandleResult(
-                PaymentController.REQUEST_CODE, Activity.RESULT_OK, data))
+        when(mPaymentController.shouldHandlePaymentResult(
+                PaymentController.PAYMENT_REQUEST_CODE, Activity.RESULT_OK, data))
                 .thenReturn(true);
         final Stripe stripe = createStripe();
-        stripe.onPaymentResult(PaymentController.REQUEST_CODE, Activity.RESULT_OK,
-                data, mCallback);
+        stripe.onPaymentResult(PaymentController.PAYMENT_REQUEST_CODE, Activity.RESULT_OK,
+                data, mPaymentCallback);
 
-        verify(mPaymentController).handleResult(stripe, data,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mCallback);
+        verify(mPaymentController).handlePaymentResult(stripe, data,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentCallback);
+    }
+
+    @Test
+    public void onSetupResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
+        final Intent data = new Intent();
+        when(mPaymentController.shouldHandleSetupResult(
+                PaymentController.SETUP_REQUEST_CODE, Activity.RESULT_OK, data))
+                .thenReturn(true);
+        final Stripe stripe = createStripe();
+        stripe.onSetupResult(PaymentController.SETUP_REQUEST_CODE, Activity.RESULT_OK,
+                data, mSetupCallback);
+
+        verify(mPaymentController).handleSetupResult(stripe, data,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mSetupCallback);
     }
 
     @NonNull

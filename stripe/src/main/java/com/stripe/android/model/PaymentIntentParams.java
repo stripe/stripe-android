@@ -3,20 +3,18 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.utils.ObjectUtils;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class PaymentIntentParams {
+public final class PaymentIntentParams implements StripeIntentParams {
 
     public static final String API_PARAM_SOURCE_DATA = "source_data";
     public static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";
 
-    static final String API_PARAM_PAYMENT_METHOD_ID = "payment_method";
     static final String API_PARAM_SOURCE_ID = "source";
-
-    static final String API_PARAM_RETURN_URL = "return_url";
-    static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
     static final String API_PARAM_SAVE_PAYMENT_METHOD = "save_payment_method";
 
@@ -399,5 +397,28 @@ public final class PaymentIntentParams {
 
     public boolean shouldSavePaymentMethod() {
         return mSavePaymentMethod;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof PaymentIntentParams &&
+                typedEquals((PaymentIntentParams) obj));
+    }
+
+    private boolean typedEquals(@NonNull PaymentIntentParams paymentIntentParams) {
+        return ObjectUtils.equals(mReturnUrl, paymentIntentParams.mReturnUrl)
+                && ObjectUtils.equals(mPaymentMethodCreateParams,
+                paymentIntentParams.mPaymentMethodCreateParams)
+                && ObjectUtils.equals(mSourceParams, paymentIntentParams.mSourceParams)
+                && ObjectUtils.equals(mSourceId, paymentIntentParams.mSourceId)
+                && ObjectUtils.equals(mExtraParams, paymentIntentParams.mExtraParams)
+                && ObjectUtils.equals(mSavePaymentMethod, paymentIntentParams.mSavePaymentMethod)
+                && ObjectUtils.equals(mPaymentMethodId, paymentIntentParams.mPaymentMethodId);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mPaymentMethodCreateParams, mSourceParams, mSourceId,
+                mExtraParams, mReturnUrl, mClientSecret, mPaymentMethodId, mSavePaymentMethod);
     }
 }

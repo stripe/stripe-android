@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.StripeIntent;
 
 public final class PaymentIntentResult implements StripeIntentResult<PaymentIntent> {
     @NonNull private final PaymentIntent paymentIntent;
@@ -25,8 +24,7 @@ public final class PaymentIntentResult implements StripeIntentResult<PaymentInte
         return status;
     }
 
-    static final class Builder<T extends StripeIntent>
-            implements ObjectBuilder<PaymentIntentResult> {
+    static final class Builder implements ObjectBuilder<PaymentIntentResult> {
         private PaymentIntent mPaymentIntent;
         @Status private int mStatus;
 

@@ -22,6 +22,8 @@ import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.SetupIntent;
+import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
@@ -130,6 +132,27 @@ public class Stripe {
     }
 
     /**
+     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
+     *
+     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param setupIntentParams {@link SetupIntentParams} used to confirm the {@link SetupIntent}
+     */
+    public void confirmSetupIntent(@NonNull Activity activity,
+                                   @NonNull SetupIntentParams setupIntentParams,
+                                   @NonNull String publishableKey) {
+        mPaymentController.startConfirmAndAuth(this, activity,
+                setupIntentParams, publishableKey);
+    }
+
+    /**
+     * See {@link #confirmSetupIntent(Activity, SetupIntentParams, String)}}
+     */
+    public void confirmSetupIntent(@NonNull Activity activity,
+                                   @NonNull SetupIntentParams setupIntentParams) {
+        confirmSetupIntent(activity, setupIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
      * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
      * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
      * automatic confirmation</a> flow.
@@ -184,8 +207,9 @@ public class Stripe {
     public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
-        if (data != null && mPaymentController.shouldHandleResult(requestCode, resultCode, data)) {
-            mPaymentController.handleResult(this, data, publishableKey, callback);
+        if (data != null &&
+                mPaymentController.shouldHandlePaymentResult(requestCode, resultCode, data)) {
+            mPaymentController.handlePaymentResult(this, data, publishableKey, callback);
             return true;
         }
 
@@ -199,6 +223,31 @@ public class Stripe {
             int requestCode, int resultCode, @Nullable Intent data,
             @NonNull ApiResultCallback<PaymentIntentResult> callback) {
         return onPaymentResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
+    }
+
+    /**
+     * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
+     * result of a SetupIntent confirmation
+     * (see {@link #confirmSetupIntent(Activity, SetupIntentParams)})
+     */
+    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
+                                   @NonNull String publishableKey,
+                                   @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        if (data != null &&
+                mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
+            mPaymentController.handleSetupResult(this, data, publishableKey, callback);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * See {@link #onSetupResult(int, int, Intent, String, ApiResultCallback)}
+     */
+    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
+            @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        return onSetupResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
     /**
@@ -591,6 +640,59 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmPaymentIntent(
                 paymentIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * Blocking method to retrieve a {@link SetupIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param setupIntentParams a set of params with which to retrieve the Setup Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link SetupIntent} or {@code null} if a problem occurred
+     */
+    @Nullable
+    public SetupIntent retrieveSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mApiHandler.retrieveSetupIntent(
+                setupIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #retrieveSetupIntentSynchronous(SetupIntentParams, String)}
+     */
+    @Nullable
+    public SetupIntent retrieveSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams)
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        return retrieveSetupIntentSynchronous(setupIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Blocking method to confirm a {@link SetupIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * @param setupIntentParams a set of params with which to confirm the Setup Intent
+     * @param publishableKey a publishable API key to use
+     * @return a {@link SetupIntent} or {@code null} if a problem occurred
+     */
+    @Nullable
+    public SetupIntent confirmSetupIntentSynchronous(
+            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String publishableKey) throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mApiHandler.confirmSetupIntent(
+                setupIntentParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }

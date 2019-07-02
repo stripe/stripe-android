@@ -12,9 +12,12 @@ import android.support.annotation.VisibleForTesting;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.SetupIntent;
+import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.model.StripeIntent;
+import com.stripe.android.model.StripeIntentParams;
 import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl;
@@ -37,10 +40,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
  * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
- * by the {@link PaymentIntent} object.
+ * by the {@link PaymentIntent} or {@link SetupIntent} object.
  */
 class PaymentController {
-    static final int REQUEST_CODE = 50000;
+    static final int PAYMENT_REQUEST_CODE = 50000;
+    static final int SETUP_REQUEST_CODE = 50001;
+
 
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
@@ -71,15 +76,16 @@ class PaymentController {
     }
 
     /**
-     * Confirm the PaymentIntent and resolve any next actions
+     * Confirm the Stripe Intent and resolve any next actions
      */
     void startConfirmAndAuth(@NonNull Stripe stripe,
                              @NonNull Activity activity,
-                             @NonNull PaymentIntentParams paymentIntentParams,
+                             @NonNull StripeIntentParams stripeIntentParams,
                              @NonNull String publishableKey) {
         mApiKeyValidator.requireValid(publishableKey);
-        new ConfirmStripeIntentTask(stripe, paymentIntentParams, publishableKey,
-                new ConfirmPaymentIntentCallback(activity, publishableKey, this))
+        new ConfirmStripeIntentTask(stripe, stripeIntentParams, publishableKey,
+                new ConfirmStripeIntentCallback(activity, publishableKey, this,
+                        getRequestCode(stripeIntentParams)))
                 .execute();
     }
 
@@ -90,11 +96,21 @@ class PaymentController {
     }
 
     /**
-     * Decide whether {@link #handleResult(Stripe, Intent, String, ApiResultCallback)} should be
-     * called.
+     * Decide whether {@link #handlePaymentResult(Stripe, Intent, String, ApiResultCallback)}
+     * should be called.
      */
-    boolean shouldHandleResult(int requestCode, int resultCode, @Nullable Intent data) {
-        return requestCode == REQUEST_CODE &&
+    boolean shouldHandlePaymentResult(int requestCode, int resultCode, @Nullable Intent data) {
+        return requestCode == PAYMENT_REQUEST_CODE &&
+                resultCode == Activity.RESULT_OK &&
+                data != null;
+    }
+
+    /**
+     * Decide whether {@link #handleSetupResult(Stripe, Intent, String, ApiResultCallback)}
+     * should be called.
+     */
+    boolean shouldHandleSetupResult(int requestCode, int resultCode, @Nullable Intent data) {
+        return requestCode == SETUP_REQUEST_CODE &&
                 resultCode == Activity.RESULT_OK &&
                 data != null;
     }
@@ -103,13 +119,14 @@ class PaymentController {
      * If payment authentication triggered an exception, get the exception object and pass to
      * {@link ApiResultCallback#onError(Exception)}.
      *
-     * Otherwise, get the PaymentIntent's client_secret from {@param data} and use to retrieve the
-     * PaymentIntent object with updated status.
+     * Otherwise, get the PaymentIntent's client_secret from {@param data} and use to retrieve
+     * the PaymentIntent object with updated status.
      *
      * @param data the result Intent
      */
-    void handleResult(@NonNull Stripe stripe, @NonNull Intent data, @NonNull String publishableKey,
-                      @NonNull final ApiResultCallback<PaymentIntentResult> callback) {
+    void handlePaymentResult(@NonNull Stripe stripe, @NonNull Intent data,
+                             @NonNull String publishableKey,
+                             @NonNull final ApiResultCallback<PaymentIntentResult> callback) {
         final Exception authException = (Exception) data.getSerializableExtra(
                 StripeIntentResultExtras.AUTH_EXCEPTION);
         if (authException != null) {
@@ -124,7 +141,7 @@ class PaymentController {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
                         if (stripeIntent instanceof PaymentIntent) {
-                            callback.onSuccess(new PaymentIntentResult.Builder<>()
+                            callback.onSuccess(new PaymentIntentResult.Builder()
                                     .setPaymentIntent((PaymentIntent) stripeIntent)
                                     .setStatus(authStatus)
                                     .build());
@@ -139,10 +156,60 @@ class PaymentController {
                 .execute();
     }
 
+    /**
+     * If setup authentication triggered an exception, get the exception object and pass to
+     * {@link ApiResultCallback#onError(Exception)}.
+     *
+     * Otherwise, get the SetupIntent's client_secret from {@param data} and use to retrieve the
+     * SetupIntent object with updated status.
+     *
+     * @param data the result Intent
+     */
+    void handleSetupResult(@NonNull Stripe stripe, @NonNull Intent data,
+                           @NonNull String publishableKey,
+                           @NonNull final ApiResultCallback<SetupIntentResult> callback) {
+        final Exception authException = (Exception) data.getSerializableExtra(
+                StripeIntentResultExtras.AUTH_EXCEPTION);
+        if (authException != null) {
+            callback.onError(authException);
+            return;
+        }
+
+        @StripeIntentResult.Status final int authStatus = data.getIntExtra(
+                StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
+
+        new RetrieveIntentTask(stripe, createSetupIntentParams(data), publishableKey,
+                new ApiResultCallback<StripeIntent>() {
+                    @Override
+                    public void onSuccess(@NonNull StripeIntent stripeIntent) {
+                        if (stripeIntent instanceof SetupIntent) {
+                            callback.onSuccess(new SetupIntentResult.Builder()
+                                    .setSetupIntent((SetupIntent) stripeIntent)
+                                    .setStatus(authStatus)
+                                    .build());
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception e) {
+                        callback.onError(e);
+                    }
+                })
+                .execute();
+    }
+
+    @VisibleForTesting
     @NonNull
-    private PaymentIntentParams createPaymentIntentParams(@NonNull Intent data) {
+    PaymentIntentParams createPaymentIntentParams(@NonNull Intent data) {
         final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
         return PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
+        final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
+        return SetupIntentParams.createRetrieveSetupIntentParams(clientSecret);
     }
 
     /**
@@ -166,7 +233,7 @@ class PaymentController {
                     bypassAuth(activity, stripeIntent);
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
-                begin3ds1Auth(activity,
+                begin3ds1Auth(activity, getRequestCode(stripeIntent),
                         Objects.requireNonNull(stripeIntent.getRedirectData()));
             } else {
                 // next action type is not supported, so bypass authentication
@@ -178,8 +245,34 @@ class PaymentController {
         }
     }
 
+    /**
+     * Get the appropriate request code for the given stripe intent type
+     *
+     * @param intent the {@link StripeIntent} to get the request code for
+     * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
+     */
+    static int getRequestCode(@NonNull StripeIntent intent) {
+        if (intent instanceof PaymentIntent) {
+            return PAYMENT_REQUEST_CODE;
+        }
+        return SETUP_REQUEST_CODE;
+    }
+
+    /**
+     * Get the appropriate request code for the given stripe intent params type
+     *
+     * @param params the {@link StripeIntentParams} to get the request code for
+     * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
+     */
+    static int getRequestCode(@NonNull StripeIntentParams params) {
+        if (params instanceof PaymentIntentParams) {
+            return PAYMENT_REQUEST_CODE;
+        }
+        return SETUP_REQUEST_CODE;
+    }
+
     private void bypassAuth(@NonNull Activity activity, @NonNull StripeIntent stripeIntent) {
-        new PaymentRelayStarter(activity, REQUEST_CODE)
+        new PaymentRelayStarter(activity, getRequestCode(stripeIntent))
                 .start(new PaymentRelayStarter.Data(stripeIntent));
     }
 
@@ -219,23 +312,25 @@ class PaymentController {
      *         {@link Activity}
      */
     private void begin3ds1Auth(@NonNull Activity activity,
+                               int requestCode,
                                @NonNull StripeIntent.RedirectData redirectData) {
-        new PaymentAuthWebViewStarter(activity, REQUEST_CODE).start(redirectData);
+        new PaymentAuthWebViewStarter(activity, requestCode).start(redirectData);
     }
 
     private static void handleError(@NonNull Activity activity,
+                                    int requestCode,
                                     @NonNull Exception exception) {
-        new PaymentRelayStarter(activity, REQUEST_CODE)
+        new PaymentRelayStarter(activity, requestCode)
                 .start(new PaymentRelayStarter.Data(exception));
     }
 
     private static final class RetrieveIntentTask extends ApiOperation<StripeIntent> {
         @NonNull private final Stripe mStripe;
-        @NonNull private final PaymentIntentParams mParams;
+        @NonNull private final StripeIntentParams mParams;
         @NonNull private final String mPublishableKey;
 
         private RetrieveIntentTask(@NonNull Stripe stripe,
-                                   @NonNull PaymentIntentParams params,
+                                   @NonNull StripeIntentParams params,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
@@ -246,18 +341,25 @@ class PaymentController {
 
         @Nullable
         @Override
-        PaymentIntent getResult() throws StripeException {
-            return mStripe.retrievePaymentIntentSynchronous(mParams, mPublishableKey);
+        StripeIntent getResult() throws StripeException {
+            if (mParams instanceof PaymentIntentParams) {
+                return mStripe.retrievePaymentIntentSynchronous(
+                        (PaymentIntentParams) mParams, mPublishableKey);
+            } else if (mParams instanceof SetupIntentParams) {
+                return mStripe.retrieveSetupIntentSynchronous(
+                        (SetupIntentParams) mParams, mPublishableKey);
+            }
+            return null;
         }
     }
 
     private static final class ConfirmStripeIntentTask extends ApiOperation<StripeIntent> {
         @NonNull private final Stripe mStripe;
-        @NonNull private final PaymentIntentParams mParams;
+        @NonNull private final StripeIntentParams mParams;
         @NonNull private final String mPublishableKey;
 
         private ConfirmStripeIntentTask(@NonNull Stripe stripe,
-                                        @NonNull PaymentIntentParams params,
+                                        @NonNull StripeIntentParams params,
                                         @NonNull String publishableKey,
                                         @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
@@ -268,24 +370,34 @@ class PaymentController {
 
         @Nullable
         @Override
-        PaymentIntent getResult() throws StripeException {
-            return mStripe.confirmPaymentIntentSynchronous(mParams, mPublishableKey);
+        StripeIntent getResult() throws StripeException {
+            if (mParams instanceof PaymentIntentParams) {
+                return mStripe.confirmPaymentIntentSynchronous(
+                        (PaymentIntentParams) mParams, mPublishableKey);
+            } else if (mParams instanceof SetupIntentParams) {
+                return mStripe.confirmSetupIntentSynchronous(
+                        (SetupIntentParams) mParams, mPublishableKey);
+            }
+            return null;
         }
     }
 
-    private static final class ConfirmPaymentIntentCallback
+    private static final class ConfirmStripeIntentCallback
             implements ApiResultCallback<StripeIntent> {
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final String mPublishableKey;
         @NonNull private final PaymentController mPaymentController;
+        private final int mRequestCode;
 
-        private ConfirmPaymentIntentCallback(
+        private ConfirmStripeIntentCallback(
                 @NonNull Activity activity,
                 @NonNull String publishableKey,
-                @NonNull PaymentController paymentController) {
+                @NonNull PaymentController paymentController,
+                int requestCode) {
             mActivityRef = new WeakReference<>(activity);
             mPublishableKey = publishableKey;
             mPaymentController = paymentController;
+            mRequestCode = requestCode;
         }
 
         @Override
@@ -300,7 +412,7 @@ class PaymentController {
         public void onError(@NonNull Exception e) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                handleError(activity, e);
+                handleError(activity, mRequestCode, e);
             }
         }
     }
@@ -326,7 +438,8 @@ class PaymentController {
                 @NonNull String sourceId,
                 @NonNull String publishableKey) {
             this(activity, apiHandler, transaction, maxTimeout, stripeIntent,
-                    sourceId, publishableKey, new PaymentRelayStarter(activity, REQUEST_CODE));
+                    sourceId, publishableKey, new PaymentRelayStarter(activity,
+                            getRequestCode(stripeIntent)));
         }
 
         @VisibleForTesting
@@ -437,7 +550,7 @@ class PaymentController {
                 @NonNull String publishableKey) {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
                     activity,
-                    new Stripe3ds2CompletionStarter(activity, REQUEST_CODE),
+                    new Stripe3ds2CompletionStarter(activity, getRequestCode(stripeIntent)),
                     apiHandler,
                     stripeIntent,
                     sourceId,
@@ -507,7 +620,7 @@ class PaymentController {
                         public void onError(@NonNull Exception e) {
                             final Activity activity = mActivityRef.get();
                             if (activity != null) {
-                                handleError(activity, e);
+                                handleError(activity, getRequestCode(mStripeIntent), e);
                             }
                         }
                     });

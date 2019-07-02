@@ -41,7 +41,9 @@ class LoggingUtils {
             EVENT_DELETE_SOURCE,
             EVENT_SET_SHIPPING_INFO,
             EVENT_CONFIRM_PAYMENT_INTENT,
-            EVENT_RETRIEVE_PAYMENT_INTENT})
+            EVENT_RETRIEVE_PAYMENT_INTENT,
+            EVENT_CONFIRM_SETUP_INTENT,
+            EVENT_RETRIEVE_SETUP_INTENT})
     @interface LoggingEventName {
     }
 
@@ -56,6 +58,8 @@ class LoggingUtils {
     static final String EVENT_SET_SHIPPING_INFO = "set_shipping_info";
     static final String EVENT_CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation";
     static final String EVENT_RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
+    static final String EVENT_CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
+    static final String EVENT_RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
@@ -206,6 +210,28 @@ class LoggingUtils {
                 null,
                 null,
                 publishableApiKey, EVENT_RETRIEVE_PAYMENT_INTENT);
+    }
+
+    @NonNull
+    Map<String, Object> getSetupIntentConfirmationParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableApiKey, EVENT_CONFIRM_SETUP_INTENT);
+    }
+
+    @NonNull
+    Map<String, Object> getSetupIntentRetrieveParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey) {
+        return getEventLoggingParams(
+                productUsageTokens,
+                null,
+                null,
+                publishableApiKey, EVENT_RETRIEVE_SETUP_INTENT);
     }
 
     @NonNull

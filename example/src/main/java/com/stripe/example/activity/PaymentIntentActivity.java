@@ -71,7 +71,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
         mErrorDialogHandler = new ErrorDialogHandler(this);
         mStripe = new Stripe(getApplicationContext(),
                 PaymentConfiguration.getInstance().getPublishableKey());
-        Retrofit retrofit = RetrofitFactory.getInstance();
+        final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
 
         createPaymentIntent.setOnClickListener(v -> createPaymentIntent());

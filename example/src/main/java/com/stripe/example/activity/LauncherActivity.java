@@ -53,6 +53,8 @@ public class LauncherActivity extends AppCompatActivity {
             this.mItems = new ArrayList<>(Arrays.asList(
                     new Item(activity.getString(R.string.launch_payment_intent_example),
                             PaymentIntentActivity.class),
+                    new Item(activity.getString(R.string.launch_setup_intent_example),
+                            SetupIntentActivity.class),
                     new Item(activity.getString(R.string.launch_payment_auth_example),
                             PaymentAuthActivity.class),
                     new Item(activity.getString(R.string.create_card_tokens),

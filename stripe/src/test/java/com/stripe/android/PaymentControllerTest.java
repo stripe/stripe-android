@@ -5,7 +5,14 @@ import android.content.Intent;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.exception.APIConnectionException;
+import com.stripe.android.exception.APIException;
+import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.PaymentIntentFixtures;
+import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.SetupIntentFixtures;
+import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
@@ -30,6 +37,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -60,6 +68,7 @@ public class PaymentControllerTest {
     @Mock private MessageVersionRegistry mMessageVersionRegistry;
     @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentIntentResult> mPaymentAuthResultCallback;
+    @Mock private ApiResultCallback<SetupIntentResult> mSetupAuthResultCallback;
     @Mock private PaymentRelayStarter mPaymentRelayStarter;
 
     @Captor private ArgumentCaptor<PaymentRelayStarter.Data> mRelayStarterDataArgumentCaptor;
@@ -135,12 +144,38 @@ public class PaymentControllerTest {
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
                 PUBLISHABLE_KEY);
         verify(mActivity).startActivityForResult(any(Intent.class),
-                eq(PaymentController.REQUEST_CODE));
+                eq(PaymentController.PAYMENT_REQUEST_CODE));
+    }
+
+    @Test
+    public void handleNextAction_when3dsRedirectWithSetupIntent() {
+        mController.handleNextAction(mActivity, SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+                PUBLISHABLE_KEY);
+        verify(mActivity).startActivityForResult(any(Intent.class),
+                eq(PaymentController.SETUP_REQUEST_CODE));
     }
 
     @Test
     public void shouldHandleResult_withInvalidResultCode() {
-        assertFalse(mController.shouldHandleResult(500, Activity.RESULT_OK, new Intent()));
+        assertFalse(mController.shouldHandlePaymentResult(500, Activity.RESULT_OK, new Intent()));
+        assertFalse(mController.shouldHandleSetupResult(500, Activity.RESULT_OK, new Intent()));
+    }
+
+    @Test
+    public void getRequestCode_withIntents_correctCodeReturned() {
+        assertEquals(PaymentController.PAYMENT_REQUEST_CODE,
+                PaymentController.getRequestCode(PaymentIntentFixtures.PI_REQUIRES_3DS1));
+        assertEquals(PaymentController.SETUP_REQUEST_CODE,
+                PaymentController.getRequestCode(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT));
+    }
+
+    @Test
+    public void getRequestCode_withParams_correctCodeReturned() {
+        assertEquals(PaymentController.PAYMENT_REQUEST_CODE,
+                PaymentController.getRequestCode(PaymentIntentParams.createCustomParams()));
+        assertEquals(PaymentController.SETUP_REQUEST_CODE,
+                PaymentController.getRequestCode(
+                        SetupIntentParams.createRetrieveSetupIntentParams("")));
     }
 
     @Test
@@ -155,15 +190,83 @@ public class PaymentControllerTest {
     }
 
     @Test
-    public void handleResult_withAuthException_shouldCallCallbackOnError() {
+    public void createPaymentIntentParams_shouldCreateParams() {
+        final Intent data = new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+
+        assertNotNull(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+        final PaymentIntentParams expectedPaymentParams = PaymentIntentParams.createCustomParams()
+                .setClientSecret(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
+
+        assertEquals(expectedPaymentParams, mController.createPaymentIntentParams(data));
+    }
+
+    @Test
+    public void createSetupIntentParams_shouldCreateParams() {
+        final Intent data = new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+
+        assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+        final SetupIntentParams expectedSetupParams = SetupIntentParams.createCustomParams()
+                .setClientSecret(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+
+        assertEquals(expectedSetupParams, mController.createSetupIntentParams(data));
+    }
+
+    @Test
+    public void handlePaymentResult_withAuthException_shouldCallCallbackOnError() {
         final Exception exception = new RuntimeException();
         final Intent intent = new Intent()
                 .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, exception);
 
-        mController.handleResult(mStripe, intent, PUBLISHABLE_KEY, mPaymentAuthResultCallback);
+        mController
+                .handlePaymentResult(mStripe, intent, PUBLISHABLE_KEY, mPaymentAuthResultCallback);
         verify(mPaymentAuthResultCallback).onError(exception);
         verify(mPaymentAuthResultCallback, never())
                 .onSuccess(ArgumentMatchers.<PaymentIntentResult>any());
+    }
+
+    @Test
+    public void handleSetupResult_withAuthException_shouldCallCallbackOnError() {
+        final Exception exception = new RuntimeException();
+        final Intent intent = new Intent()
+                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, exception);
+
+        mController.handleSetupResult(mStripe, intent, PUBLISHABLE_KEY, mSetupAuthResultCallback);
+
+        verify(mSetupAuthResultCallback).onError(exception);
+        verify(mSetupAuthResultCallback, never())
+                .onSuccess(ArgumentMatchers.<SetupIntentResult>any());
+    }
+
+    @Test
+    public void handleSetupResult_shouldCallbackOnSuccess()
+            throws APIException, AuthenticationException, InvalidRequestException,
+            APIConnectionException {
+        assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+        
+        final Intent intent = new Intent()
+                .putExtra(StripeIntentResultExtras.AUTH_STATUS,
+                        StripeIntentResult.Status.SUCCEEDED)
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
+                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+
+        when(mStripe.retrieveSetupIntentSynchronous(
+                eq(SetupIntentParams.createRetrieveSetupIntentParams(
+                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret())),
+                eq(PUBLISHABLE_KEY)))
+                .thenReturn(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT);
+
+        mController.handleSetupResult(mStripe, intent, PUBLISHABLE_KEY, mSetupAuthResultCallback);
+
+        final ArgumentCaptor<SetupIntentResult> resultCaptor =
+                ArgumentCaptor.forClass(SetupIntentResult.class);
+        verify(mSetupAuthResultCallback).onSuccess(resultCaptor.capture());
+        final SetupIntentResult result = resultCaptor.getValue();
+        assertEquals(StripeIntentResult.Status.SUCCEEDED, result.getStatus());
+        assertEquals(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT, result.getIntent());
     }
 
     @Test

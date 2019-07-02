@@ -50,6 +50,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     static final String FIELD_RECEIPT_EMAIL = "receipt_email";
     static final String FIELD_SOURCE = "source";
     static final String FIELD_STATUS = "status";
+    static final String FIELD_SETUP_FUTURE_USAGE = "setup_future_usage";
 
     private static final String FIELD_NEXT_ACTION_TYPE = "type";
 
@@ -70,6 +71,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final String mReceiptEmail;
     @Nullable private final String mSource;
     @Nullable private final Status mStatus;
+    @Nullable private final Usage mSetupFutureUsage;
 
     @Nullable
     public String getId() {
@@ -226,8 +228,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @Nullable Map<String, Object> nextAction,
             @Nullable String receiptEmail,
             @Nullable String source,
-            @Nullable Status status
-    ) {
+            @Nullable Status status,
+            @Nullable Usage setupFutureUsage) {
         mId = id;
         mObjectType = objectType;
         mPaymentMethodTypes = paymentMethodTypes;
@@ -244,6 +246,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         mReceiptEmail = receiptEmail;
         mSource = source;
         mStatus = status;
+        mSetupFutureUsage = setupFutureUsage;
         mNextActionType = mNextAction != null ?
                 NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
     }
@@ -284,6 +287,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         final Boolean livemode = optBoolean(jsonObject, FIELD_LIVEMODE);
         final String receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL);
         final Status status = Status.fromCode(optString(jsonObject, FIELD_STATUS));
+        final Usage setupFutureUsage =
+                Usage.fromCode(optString(jsonObject, FIELD_SETUP_FUTURE_USAGE));
         final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
         final String source = optString(jsonObject, FIELD_SOURCE);
 
@@ -303,22 +308,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 nextAction,
                 receiptEmail,
                 source,
-                status);
-    }
-
-    @NonNull
-    private static List<String> jsonArrayToList(@Nullable JSONArray jsonArray) {
-        final List<String> list = new ArrayList<>();
-        if (jsonArray != null) {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                try {
-                    list.add(jsonArray.getString(i));
-                } catch (JSONException ignored) {
-                }
-            }
-        }
-
-        return list;
+                status,
+                setupFutureUsage);
     }
 
     @NonNull
@@ -340,6 +331,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         map.put(FIELD_NEXT_ACTION, mNextAction);
         map.put(FIELD_RECEIPT_EMAIL, mReceiptEmail);
         map.put(FIELD_STATUS, mStatus != null ? mStatus.code : null);
+        map.put(FIELD_SETUP_FUTURE_USAGE,
+                mSetupFutureUsage != null ? mSetupFutureUsage.code : null);
         map.put(FIELD_SOURCE, mSource);
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
@@ -365,6 +358,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
                 && ObjectUtils.equals(mSource, paymentIntent.mSource)
                 && ObjectUtils.equals(mStatus, paymentIntent.mStatus)
+                && ObjectUtils.equals(mSetupFutureUsage, paymentIntent.mSetupFutureUsage)
                 && ObjectUtils.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
                 && ObjectUtils.equals(mNextAction, paymentIntent.mNextAction)
                 && ObjectUtils.equals(mNextActionType, paymentIntent.mNextActionType);
@@ -374,7 +368,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     public int hashCode() {
         return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCaptureMethod,
                 mClientSecret, mConfirmationMethod, mCreated, mCurrency, mDescription, mLiveMode,
-                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction, mNextActionType);
+                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction,
+                mNextActionType, mSetupFutureUsage);
     }
 
 }
