@@ -37,6 +37,8 @@ public class SetupIntentTest {
 
         final StripeIntent.RedirectData redirectData = setupIntent.getRedirectData();
         assertNotNull(redirectData);
+        assertNotNull(redirectData.returnUrl);
+        assertNotNull(setupIntent.getRedirectUrl());
         assertEquals("stripe://setup_intent_return", redirectData.returnUrl.toString());
         assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" +
                 "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString());
