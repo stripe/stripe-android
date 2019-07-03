@@ -101,7 +101,7 @@ public final class PaymentIntentFixtures {
                     "            \"directory_server_encryption\": {\n" +
                     "               \"directory_server_id\": \"A000000003\",\n" +
                     "               \"algorithm\": \"RSA\",\n" +
-                    "               \"public_key\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
+                    "               \"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
                     "            }\n" +
                     "        }\n" +
                     "    },\n" +

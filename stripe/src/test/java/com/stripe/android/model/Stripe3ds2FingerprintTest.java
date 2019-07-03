@@ -30,7 +30,7 @@ public class Stripe3ds2FingerprintTest {
             "\t\"directory_server_encryption\": {\n" +
             "\t\t\"directory_server_id\": \"A000000003\",\n" +
             "\t\t\"algorithm\": \"RSA\",\n" +
-            "\t\t\"public_key\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
+            "\t\t\"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
             "\t}\n" +
             "}";
 
@@ -43,7 +43,7 @@ public class Stripe3ds2FingerprintTest {
             "\t\"directory_server_encryption\": {\n" +
             "\t\t\"directory_server_id\": \"A000000004\",\n" +
             "\t\t\"algorithm\": \"RSA\",\n" +
-            "\t\t\"public_key\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\",\n" +
+            "\t\t\"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\",\n" +
             "\t\t\"key_id\": \"7c4debe3f4af7f9d1569a2ffea4343c2566826ee\"\n" +
             "\t}\n" +
             "}";
@@ -90,7 +90,7 @@ public class Stripe3ds2FingerprintTest {
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
         assertEquals("RSA", stripe3ds2Fingerprint.directoryServerEncryption.algorithm);
         assertEquals("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI",
-                stripe3ds2Fingerprint.directoryServerEncryption.publicKey);
+                stripe3ds2Fingerprint.directoryServerEncryption.certificate);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -130,7 +130,7 @@ public class Stripe3ds2FingerprintTest {
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
         assertEquals("RSA", stripe3ds2Fingerprint.directoryServerEncryption.algorithm);
         assertEquals("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI",
-                stripe3ds2Fingerprint.directoryServerEncryption.publicKey);
+                stripe3ds2Fingerprint.directoryServerEncryption.certificate);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class Stripe3ds2FingerprintTest {
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
         assertEquals("RSA", stripe3ds2Fingerprint.directoryServerEncryption.algorithm);
         assertEquals("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI",
-                stripe3ds2Fingerprint.directoryServerEncryption.publicKey);
+                stripe3ds2Fingerprint.directoryServerEncryption.certificate);
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
                 stripe3ds2Fingerprint.directoryServerEncryption.keyId);
 

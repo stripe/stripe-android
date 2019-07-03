@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.Objects;
 
 public final class Stripe3ds2Fingerprint {
     private static final String FIELD_TYPE = "type";
@@ -71,41 +72,46 @@ public final class Stripe3ds2Fingerprint {
     public static class DirectoryServerEncryption {
         private static final String FIELD_DIRECTORY_SERVER_ID = "directory_server_id";
         private static final String FIELD_ALGORITHM = "algorithm";
-        private static final String FIELD_PUBLIC_KEY = "public_key";
+        private static final String FIELD_CERTIFICATE = "certificate";
         private static final String FIELD_KEY_ID = "key_id";
 
         @NonNull public final String directoryServerId;
         @NonNull public final String algorithm;
-        @NonNull public final String publicKey;
+        @NonNull public final String certificate;
         @Nullable public final String keyId;
 
         private DirectoryServerEncryption(@NonNull String directoryServerId,
                                           @NonNull String algorithm,
-                                          @NonNull String publicKey,
+                                          @NonNull String certificate,
                                           @Nullable String keyId) {
             this.directoryServerId = directoryServerId;
             this.algorithm = algorithm;
-            this.publicKey = publicKey;
+            this.certificate = certificate;
             this.keyId = keyId;
         }
 
         @Nullable
         static DirectoryServerEncryption create(@Nullable Map<String, ?> data) {
-            if (data == null) {
+            if (data == null || data.get(FIELD_DIRECTORY_SERVER_ID) == null ||
+                    data.get(FIELD_ALGORITHM) == null || data.get(FIELD_CERTIFICATE) == null) {
                 return null;
             }
-            return new DirectoryServerEncryption((String) data.get(FIELD_DIRECTORY_SERVER_ID),
-                    (String) data.get(FIELD_ALGORITHM), (String) data.get(FIELD_PUBLIC_KEY),
+
+            return new DirectoryServerEncryption(
+                    Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
+                    Objects.requireNonNull((String) data.get(FIELD_ALGORITHM)),
+                    Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
                     (String) data.get(FIELD_KEY_ID));
         }
 
         @Nullable
         static DirectoryServerEncryption create(@Nullable JSONObject json) throws JSONException {
-            if (json == null) {
+            if (json == null || json.isNull(FIELD_DIRECTORY_SERVER_ID) ||
+                    json.isNull(FIELD_ALGORITHM) || json.isNull(FIELD_CERTIFICATE)) {
                 return null;
             }
             return new DirectoryServerEncryption(json.getString(FIELD_DIRECTORY_SERVER_ID),
-                    json.getString(FIELD_ALGORITHM), json.getString(FIELD_PUBLIC_KEY),
+                    json.getString(FIELD_ALGORITHM), json.getString(FIELD_CERTIFICATE),
                     json.optString(FIELD_KEY_ID, null));
         }
 
