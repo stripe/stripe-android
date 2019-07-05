@@ -175,7 +175,7 @@ public class PaymentControllerTest {
                 PaymentController.getRequestCode(PaymentIntentParams.createCustomParams()));
         assertEquals(PaymentController.SETUP_REQUEST_CODE,
                 PaymentController.getRequestCode(
-                        SetupIntentParams.createRetrieveSetupIntentParams("")));
+                        SetupIntentParams.createRetrieveParams("")));
     }
 
     @Test
@@ -209,8 +209,8 @@ public class PaymentControllerTest {
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
-        final SetupIntentParams expectedSetupParams = SetupIntentParams.createCustomParams()
-                .setClientSecret(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
+        final SetupIntentParams expectedSetupParams = SetupIntentParams.createRetrieveParams(
+                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         assertEquals(expectedSetupParams, mController.createSetupIntentParams(data));
     }
@@ -254,7 +254,7 @@ public class PaymentControllerTest {
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         when(mStripe.retrieveSetupIntentSynchronous(
-                eq(SetupIntentParams.createRetrieveSetupIntentParams(
+                eq(SetupIntentParams.createRetrieveParams(
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret())),
                 eq(PUBLISHABLE_KEY)))
                 .thenReturn(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT);

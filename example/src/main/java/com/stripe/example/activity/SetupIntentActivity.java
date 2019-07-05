@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -140,7 +141,7 @@ public class SetupIntentActivity extends AppCompatActivity {
     private void retrieveSetupIntent() {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> mStripe.retrieveSetupIntentSynchronous(
-                        SetupIntentParams.createRetrieveSetupIntentParams(mClientSecret)));
+                        SetupIntentParams.createRetrieveParams(mClientSecret)));
 
         final Disposable disposable = setupIntentObservable
                 .subscribeOn(Schedulers.io())
@@ -187,12 +188,12 @@ public class SetupIntentActivity extends AppCompatActivity {
     }
 
     private void confirmSetupIntent() {
-
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> {
-                    final SetupIntentParams setupIntentParams = SetupIntentParams
-                            .createConfirmSetupIntentParamsWithPaymentMethodId(
-                                    mPaymentMethod.id, mClientSecret, RETURN_URL);
+                    final SetupIntentParams setupIntentParams =
+                            SetupIntentParams.createConfirmParams(
+                                    Objects.requireNonNull(mPaymentMethod.id), mClientSecret,
+                                    RETURN_URL);
                     return mStripe.confirmSetupIntentSynchronous(setupIntentParams,
                             PaymentConfiguration.getInstance().getPublishableKey());
                 });
