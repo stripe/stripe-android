@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -18,12 +19,18 @@ import com.google.android.gms.wallet.CardRequirements;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentMethodToken;
 import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.TransactionInfo;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.Stripe;
+import com.stripe.android.model.Address;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.Token;
 import com.stripe.example.R;
 
@@ -92,31 +99,13 @@ public class PayWithGoogleActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode,
+                                 @Nullable Intent data) {
         if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
             switch (resultCode) {
                 case Activity.RESULT_OK: {
-                    final PaymentData paymentData = PaymentData.getFromIntent(data);
-                    if (paymentData == null) {
-                        break;
-                    }
-                    // You can get some data on the user's card, such as the brand and
-                    // last 4 digits
-                    CardInfo info = paymentData.getCardInfo();
-                    // You can also pull the user address from the PaymentData object.
-                    UserAddress address = paymentData.getShippingAddress();
-                    // This is the raw string version of your Stripe token.
-                    String rawToken = paymentData.getPaymentMethodToken().getToken();
-
-                    // Now that you have a Stripe token object, charge that by using the id
-                    Token stripeToken = Token.fromString(rawToken);
-                    if (stripeToken != null) {
-                        // This chargeToken function is a call to your own server, which
-                        // should then connect to Stripe's API to finish the charge.
-                        // chargeToken(stripeToken.getId());
-                        Toast.makeText(PayWithGoogleActivity.this,
-                                "Got token " + stripeToken.toString(), Toast.LENGTH_LONG)
-                                .show();
+                    if (data != null) {
+                        handleGooglePayResult(data);
                     }
                     break;
                 }
@@ -142,6 +131,58 @@ public class PayWithGoogleActivity extends AppCompatActivity {
                     break;
                 }
             }
+        }
+    }
+
+    private void handleGooglePayResult(@NonNull Intent data) {
+        final PaymentData paymentData = PaymentData.getFromIntent(data);
+        if (paymentData == null) {
+            return;
+        }
+
+        // You can get some data on the user's card, such as the brand and last 4 digits
+        final CardInfo info = paymentData.getCardInfo();
+        // You can also pull the user address from the PaymentData object.
+        final UserAddress address = paymentData.getShippingAddress();
+        final PaymentMethodToken paymentMethodToken =
+                paymentData.getPaymentMethodToken();
+        // This is the raw string version of your Stripe token.
+        final String rawToken = paymentMethodToken != null ?
+                paymentMethodToken.getToken() : null;
+
+        final Token stripeToken = Token.fromString(rawToken);
+        if (stripeToken != null) {
+            // Create a PaymentMethod object using the token id
+            final PaymentMethod.BillingDetails billingDetails;
+            if (address != null) {
+                billingDetails = new PaymentMethod.BillingDetails.Builder()
+                        .setAddress(new Address.Builder()
+                                .setLine1(address.getAddress1())
+                                .setLine2(address.getAddress2())
+                                .setCity(address.getLocality())
+                                .setState(address.getAdministrativeArea())
+                                .setPostalCode(address.getPostalCode())
+                                .setCountry(address.getCountryCode())
+                                .build())
+                        .setEmail(address.getEmailAddress())
+                        .setName(address.getName())
+                        .setPhone(address.getPhoneNumber())
+                        .build();
+            } else {
+                billingDetails = null;
+            }
+            final PaymentMethodCreateParams paymentMethodCreateParams =
+                    PaymentMethodCreateParams.create(
+                            PaymentMethodCreateParams.Card.create(
+                                    stripeToken.getId()),
+                            billingDetails);
+
+            // Now create PaymentMethod using
+            // Stripe#createPaymentMethod(paymentMethodCreateParams, callback)
+
+            Toast.makeText(PayWithGoogleActivity.this,
+                    "Got token " + stripeToken.toString(), Toast.LENGTH_LONG)
+                    .show();
         }
     }
 
