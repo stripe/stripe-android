@@ -14,6 +14,11 @@ import retrofit2.http.POST;
  */
 public interface StripeService {
 
+    /**
+     * Returns the PaymentIntent client secret in the format shown below.
+     *
+     * {"secret": "pi_1Eu5SqCRMb_secret_O2Avhk5V0Pjeo"}
+     */
     @POST("capture_payment")
     Observable<ResponseBody> capturePayment(@Body Map<String, Object> params);
 
@@ -23,6 +28,10 @@ public interface StripeService {
      * @see <a
      * href="https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
      * Manual Confirmation Flow</a>
+     *
+     * Returns the PaymentIntent client secret in the format shown below.
+     *
+     * {"secret": "pi_1Eu5SqCRMb_secret_O2Avhk5V0Pjeo"}
      */
     @POST("confirm_payment")
     Observable<ResponseBody> confirmPayment(@Body Map<String, Object> params);

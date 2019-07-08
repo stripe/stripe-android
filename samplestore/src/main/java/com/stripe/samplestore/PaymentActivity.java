@@ -33,10 +33,14 @@ import com.stripe.android.StripeError;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
+import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 import com.stripe.samplestore.service.StripeService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -301,7 +305,7 @@ public class PaymentActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
                 .doFinally(this::stopLoading)
-                .subscribe(this::onPaymentIntentResponse,
+                .subscribe(this::onPaymentIntentClientSecretResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
@@ -341,14 +345,25 @@ public class PaymentActivity extends AppCompatActivity {
                 .doOnSubscribe(disposable -> startLoading())
                 .doFinally(this::stopLoading)
                 .subscribe(
-                        this::onPaymentIntentResponse,
+                        this::onPaymentIntentClientSecretResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
-    private void onPaymentIntentResponse(@NonNull ResponseBody responseBody) throws IOException {
-        final PaymentIntent paymentIntent = Objects.requireNonNull(
-                PaymentIntent.fromString(responseBody.string()));
-        processPaymentIntent(paymentIntent);
+    private void onPaymentIntentClientSecretResponse(@NonNull ResponseBody responseBody)
+            throws IOException, JSONException {
+        final String clientSecret = new JSONObject(responseBody.string()).getString("secret");
+        final PaymentIntentParams paymentIntentParams =
+                PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
+        mCompositeDisposable.add(
+                Observable
+                        .fromCallable(() ->
+                                mStripe.retrievePaymentIntentSynchronous(paymentIntentParams))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable -> startLoading())
+                        .doFinally(this::stopLoading)
+                        .subscribe(this::processPaymentIntent)
+        );
     }
 
     private void finishPayment() {
