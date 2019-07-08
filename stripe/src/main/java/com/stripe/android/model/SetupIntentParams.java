@@ -11,46 +11,39 @@ import java.util.Map;
 
 public final class SetupIntentParams implements StripeIntentParams {
 
-    @Nullable private String mClientSecret;
-    @Nullable private String mPaymentMethodId;
-    @Nullable private String mReturnUrl;
+    @NonNull private final String mClientSecret;
+    @Nullable private final String mReturnUrl;
+    @Nullable private final String mPaymentMethodId;
 
-    private SetupIntentParams() {
+    private SetupIntentParams(@NonNull String clientSecret, @Nullable String returnUrl,
+                              @Nullable String paymentMethodId) {
+        this.mClientSecret = clientSecret;
+        this.mReturnUrl = returnUrl;
+        this.mPaymentMethodId = paymentMethodId;
+    }
 
+    private SetupIntentParams(@NonNull String clientSecret) {
+        this.mClientSecret = clientSecret;
+        this.mReturnUrl = null;
+        this.mPaymentMethodId = null;
     }
 
     /**
-     * Create a custom {@link SetupIntentParams}. Incorrect attributes may result in errors
-     * when connecting to Stripe's API.
-     *
-     * @return an empty Params object. Call the setter methods on this class to specific values on
-     *         the params
-     */
-    @NonNull
-    public static SetupIntentParams createCustomParams() {
-        return new SetupIntentParams();
-    }
-
-    /**
-     * Create the parameters necessary for confirming a PaymentIntent while attaching a
+     * Create the parameters necessary for confirming a SetupIntent while attaching a
      * PaymentMethod that already exits.
      *
      * @param paymentMethodId the ID of the PaymentMethod that is being attached to the
-     *         PaymentIntent being confirmed
-     * @param clientSecret client secret from the PaymentIntent being confirmed
-     * @param returnUrl the URL the customer should be redirected to after the authorization
-     *         process
-     * @return params that can be use to confirm a PaymentIntent
+     *                        SetupIntent being confirmed
+     * @param clientSecret client secret from the SetupIntent being confirmed
+     * @param returnUrl the URL the customer should be redirected to after the authorization process
+     * @return params that can be use to confirm a SetupIntent
      */
     @NonNull
-    public static SetupIntentParams createConfirmSetupIntentParamsWithPaymentMethodId(
-            @Nullable String paymentMethodId,
+    public static SetupIntentParams createConfirmParams(
+            @NonNull String paymentMethodId,
             @NonNull String clientSecret,
             @NonNull String returnUrl) {
-        return new SetupIntentParams()
-                .setPaymentMethodId(paymentMethodId)
-                .setClientSecret(clientSecret)
-                .setReturnUrl(returnUrl);
+        return new SetupIntentParams(clientSecret, returnUrl, paymentMethodId);
     }
 
     /**
@@ -60,69 +53,13 @@ public final class SetupIntentParams implements StripeIntentParams {
      * @return params that can be used to retrieve a SetupIntent
      */
     @NonNull
-    public static SetupIntentParams createRetrieveSetupIntentParams(
-            @NonNull String clientSecret) {
-        return new SetupIntentParams().setClientSecret(clientSecret);
+    public static SetupIntentParams createRetrieveParams(@NonNull String clientSecret) {
+        return new SetupIntentParams(clientSecret);
     }
 
-    /**
-     * Sets the client secret that is used to authenticate actions on this SetupIntent
-     *
-     * @param clientSecret client secret associated with this SetupIntent
-     * @return {@code this}, for chaining purposes
-     */
-    public SetupIntentParams setClientSecret(@NonNull String clientSecret) {
-        mClientSecret = clientSecret;
-        return this;
-    }
-
-    /**
-     * @return client secret associated with the SetupIntent, used to identify the SetupIntent
-     *         and authenticate actions.
-     */
-    @Nullable
+    @NonNull
     public String getClientSecret() {
         return mClientSecret;
-    }
-
-    /**
-     * Sets a pre-existing PaymentMethod that will be attached to this SetupIntent
-     *
-     * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
-     *         SetupIntent.
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public SetupIntentParams setPaymentMethodId(@Nullable String paymentMethodId) {
-        mPaymentMethodId = paymentMethodId;
-        return this;
-    }
-
-    /**
-     * @return the ID of the existing PaymentMethod that is being attached to this SetupIntent.
-     */
-    @Nullable
-    public String getPaymentMethodId() {
-        return mPaymentMethodId;
-    }
-
-    /**
-     * @param returnUrl the URL the customer should be redirected to after the authorization
-     *         process
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public SetupIntentParams setReturnUrl(@NonNull String returnUrl) {
-        mReturnUrl = returnUrl;
-        return this;
-    }
-
-    /**
-     * @return the URL the customer should be redirected to after the authorization process
-     */
-    @Nullable
-    public String getReturnUrl() {
-        return mReturnUrl;
     }
 
     /**

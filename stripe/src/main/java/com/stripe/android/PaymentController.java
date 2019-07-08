@@ -209,7 +209,7 @@ class PaymentController {
     @NonNull
     SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
         final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
-        return SetupIntentParams.createRetrieveSetupIntentParams(clientSecret);
+        return SetupIntentParams.createRetrieveParams(clientSecret);
     }
 
     /**
