@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.6 - 2019-07-08
+* [#1148](https://github.com/stripe/stripe-android/pull/1148) Fix 3DS2 dependency Proguard issues
+
 ## 9.3.5 - 2019-06-20
 * [#1138](https://github.com/stripe/stripe-android/pull/1138) Fix `AppInfo` param name
 
