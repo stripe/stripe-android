@@ -18,7 +18,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                PRICE_MULTIPLIER: 0.01
+                PRICE_MULTIPLIER: 1.0
         ]
     }
 
