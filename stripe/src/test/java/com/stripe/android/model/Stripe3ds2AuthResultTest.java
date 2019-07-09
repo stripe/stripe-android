@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class Stripe3ds2AuthResultTest {
     private static final String AUTH_RESULT_JSON = "{\n" +
@@ -117,6 +119,29 @@ public class Stripe3ds2AuthResultTest {
             "\t\"livemode\": false,\n" +
             "\t\"source\": \"src_1Ecwz1CRMbs6FrXfUwt98lxf\",\n" +
             "\t\"state\": \"challenge_required\"\n" +
+            "}";
+
+    private static final String AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON = "{\n" +
+            "\t\"ares\": null,\n" +
+            "\t\"livemode\": true,\n" +
+            "\t\"created\": 1562711486,\n" +
+            "\t\"id\": \"threeds2_1EuRqMAWhjPjYwPi83sPpdVY\",\n" +
+            "\t\"source\": \"src_1EuRqGAWhjPjYwPid0T5ZrrF\",\n" +
+            "\t\"state\": \"failed\",\n" +
+            "\t\"error\": {\n" +
+            "\t\t\"errorComponent\": \"D\",\n" +
+            "\t\t\"acsTransID\": null,\n" +
+            "\t\t\"errorDescription\": \"Format or value of one or more Data Elements is Invalid according to the Specification\",\n" +
+            "\t\t\"messageType\": \"Erro\",\n" +
+            "\t\t\"dsTransID\": \"3fa2e398-4146-42f0-b905-a52c06b5caa2\",\n" +
+            "\t\t\"errorCode\": \"203\",\n" +
+            "\t\t\"errorDetail\": \"sdkMaxTimeout\",\n" +
+            "\t\t\"errorMessageType\": \"AReq\",\n" +
+            "\t\t\"messageVersion\": \"2.1.0\",\n" +
+            "\t\t\"sdkTransID\": \"a9e7db5d-e95c-4cc6-a8b7-df1cee092879\",\n" +
+            "\t\t\"threeDSServerTransID\": \"161d5143-340c-4e40-8ee1-a272be64aecc\"\n" +
+            "\t},\n" +
+            "\t\"object\": \"three_d_secure_2\"\n" +
             "}";
 
     @Test
@@ -243,5 +268,19 @@ public class Stripe3ds2AuthResultTest {
                 .build();
 
         assertEquals(expectedResult, jsonResult);
+    }
+
+    @Test
+    public void fromJson_invalidElementFormatJson_shouldPopulateErrorField() throws JSONException {
+        final Stripe3ds2AuthResult result = Stripe3ds2AuthResult.fromJson(
+                new JSONObject(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON));
+        assertNull(result.ares);
+        assertNotNull(result.error);
+        assertEquals(
+                "sdkMaxTimeout",
+                result.error.errorDetail);
+        assertEquals(
+                "Format or value of one or more Data Elements is Invalid according to the Specification",
+                result.error.errorDescription);
     }
 }
