@@ -203,7 +203,6 @@ public interface StripeIntent {
             return new RedirectData(url, returnUrl);
         }
 
-        @VisibleForTesting
         RedirectData(@NonNull String url, @Nullable String returnUrl) {
             this.url = Uri.parse(url);
             this.returnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;

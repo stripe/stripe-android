@@ -16,6 +16,7 @@ import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
+import com.stripe.android.model.Stripe3dsRedirect;
 import com.stripe.android.model.StripeIntent;
 import com.stripe.android.model.StripeIntentParams;
 import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
@@ -228,6 +229,9 @@ class PaymentController {
                 if (sdkData.is3ds2()) {
                     begin3ds2Auth(activity, stripeIntent,
                             Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                } else if (sdkData.is3ds1()) {
+                    begin3ds1Auth(activity, getRequestCode(stripeIntent),
+                            Stripe3dsRedirect.create(sdkData).getRedirectData());
                 } else {
                     // authentication type is not supported
                     bypassAuth(activity, stripeIntent);
