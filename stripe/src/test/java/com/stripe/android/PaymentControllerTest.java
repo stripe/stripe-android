@@ -38,6 +38,7 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -72,6 +73,7 @@ public class PaymentControllerTest {
     @Mock private PaymentRelayStarter mPaymentRelayStarter;
 
     @Captor private ArgumentCaptor<PaymentRelayStarter.Data> mRelayStarterDataArgumentCaptor;
+    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     @Before
     public void setup() {
@@ -140,11 +142,33 @@ public class PaymentControllerTest {
     }
 
     @Test
-    public void handleNextAction_when3dsRedirect() {
+    public void handleNextAction_whenSdk3ds1() {
+        mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS1,
+                PUBLISHABLE_KEY);
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
+                eq(PaymentController.PAYMENT_REQUEST_CODE));
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
+                intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+        );
+        assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL));
+    }
+
+    @Test
+    public void handleNextAction_whenBrowser3ds1() {
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
                 PUBLISHABLE_KEY);
-        verify(mActivity).startActivityForResult(any(Intent.class),
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 eq(PaymentController.PAYMENT_REQUEST_CODE));
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv",
+                intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+        );
+        assertEquals("stripe://deeplink",
+                intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL)
+        );
     }
 
     @Test
