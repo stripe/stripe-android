@@ -44,10 +44,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
-    private MaskedCardAdapter mMaskedCardAdapter;
+    @Nullable private MaskedCardAdapter mMaskedCardAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
-    private boolean mRecyclerViewUpdated;
     private boolean mStartedFromPaymentSession;
 
     private CustomerSession mCustomerSession;
@@ -169,21 +168,20 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new GetPaymentMethodsRetrievalListener(this, selectPaymentMethodId));
     }
 
-    private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
-        if (!mRecyclerViewUpdated) {
+    private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods,
+                                      @Nullable String selectPaymentMethodId) {
+        if (mMaskedCardAdapter == null) {
             mMaskedCardAdapter = new MaskedCardAdapter(paymentMethods);
             // init the RecyclerView
             mRecyclerView.setHasFixedSize(false);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             mRecyclerView.setAdapter(mMaskedCardAdapter);
-            mRecyclerViewUpdated = true;
         } else {
             mMaskedCardAdapter.setPaymentMethods(paymentMethods);
         }
-    }
-
-    private void selectPaymentMethod(@NonNull String paymentMethodId) {
-        mMaskedCardAdapter.setSelectedPaymentMethod(paymentMethodId);
+        if (selectPaymentMethodId != null) {
+            mMaskedCardAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
+        }
     }
 
     private void initLoggingTokens() {
@@ -257,10 +255,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.updatePaymentMethods(paymentMethods);
-            if (mSelectPaymentMethodId != null) {
-                activity.selectPaymentMethod(mSelectPaymentMethodId);
-            }
+            activity.updatePaymentMethods(paymentMethods, mSelectPaymentMethodId);
             activity.setCommunicatingProgress(false);
         }
 
@@ -286,7 +281,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(STATE_SELECTED_PAYMENT_METHOD,
-                mMaskedCardAdapter.getSelectedPaymentMethodId());
+        if (mMaskedCardAdapter != null) {
+            outState.putString(STATE_SELECTED_PAYMENT_METHOD,
+                    mMaskedCardAdapter.getSelectedPaymentMethodId());
+        }
     }
 }
