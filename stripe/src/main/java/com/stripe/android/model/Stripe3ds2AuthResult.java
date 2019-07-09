@@ -63,7 +63,8 @@ public final class Stripe3ds2AuthResult {
                 .setLiveMode(authResultJson.getBoolean(FIELD_LIVEMODE))
                 .setSource(authResultJson.getString(FIELD_SOURCE))
                 .setState(authResultJson.optString(FIELD_STATE))
-                .setAres(Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES)))
+                .setAres(authResultJson.isNull(FIELD_ARES) ? null :
+                        Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES)))
                 .setError(authResultJson.isNull(FIELD_ERROR) ? null :
                         ThreeDS2Error.fromJson(authResultJson.optJSONObject(FIELD_ERROR)))
                 .build();
@@ -203,8 +204,12 @@ public final class Stripe3ds2AuthResult {
             this.sdkTransId = sdkTransId;
         }
 
-        @NonNull
-        static Ares fromJson(@NonNull JSONObject aresJson) throws JSONException {
+        @Nullable
+        static Ares fromJson(@Nullable JSONObject aresJson) throws JSONException {
+            if (aresJson == null) {
+                return null;
+            }
+
             return new Ares.Builder()
                     .setThreeDSServerTransId(aresJson.getString(FIELD_THREE_DS_SERVER_TRANS_ID))
                     .setAcsChallengeMandated(optString(aresJson, FIELD_ACS_CHALLENGE_MANDATED))

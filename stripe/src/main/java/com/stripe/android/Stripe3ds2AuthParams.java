@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ class Stripe3ds2AuthParams {
 
     private static final String FIELD_SDK_INTERFACE = "sdkInterface";
     private static final String FIELD_SDK_UI_TYPE = "sdkUiType";
+
+    private static final DecimalFormat MAX_TIMEOUT_FORMATTER = new DecimalFormat("00");
 
     @NonNull private final String mSourceId;
     @NonNull private final String mDeviceData;
@@ -70,7 +73,7 @@ class Stripe3ds2AuthParams {
             appParams.put(FIELD_SDK_TRANS_ID, mSdkTransactionId);
             appParams.put(FIELD_SDK_ENC_DATA, mDeviceData);
             appParams.put(FIELD_SDK_EPHEM_PUB_KEY, new JSONObject(mSdkEphemeralPublicKey));
-            appParams.put(FIELD_SDK_MAX_TIMEOUT, mMaxTimeout);
+            appParams.put(FIELD_SDK_MAX_TIMEOUT, MAX_TIMEOUT_FORMATTER.format(mMaxTimeout));
             appParams.put(FIELD_SDK_REFERENCE_NUMBER, mSdkReferenceNumber);
             appParams.put(FIELD_MESSAGE_VERSION, mMessageVersion);
             appParams.put(FIELD_DEVICE_RENDER_OPTIONS, createDeviceRenderOptions());
