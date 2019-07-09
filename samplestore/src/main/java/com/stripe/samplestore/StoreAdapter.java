@@ -100,14 +100,16 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     // Storing an activity here only so we can launch for result
     @NonNull private final Activity mActivity;
+    private final float mPriceMultiplier;
     @NonNull private final Currency mCurrency;
 
     @NonNull private final int[] mQuantityOrdered;
     private int mTotalOrdered;
     @NonNull private final TotalItemsChangedListener mTotalItemsChangedListener;
 
-    StoreAdapter(@NonNull StoreActivity activity) {
+    StoreAdapter(@NonNull StoreActivity activity, float priceMultiplier) {
         mActivity = activity;
+        mPriceMultiplier = priceMultiplier;
         mTotalItemsChangedListener = activity;
         // Note: our sample backend assumes USD as currency. This code would be
         // otherwise functional if you switched that assumption on the backend and passed
@@ -138,7 +140,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         } else {
             holder.setHidden(false);
             holder.setEmoji(EMOJI_CLOTHES[position]);
-            holder.setPrice(EMOJI_PRICES[position]);
+            holder.setPrice(getPrice(position));
             holder.setQuantity(mQuantityOrdered[position]);
             holder.setPosition(position);
         }
@@ -164,7 +166,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             if (mQuantityOrdered[i] > 0) {
                 cart.addStoreLineItem(
                         StoreUtils.getEmojiByUnicode(EMOJI_CLOTHES[i]),
-                        mQuantityOrdered[i], EMOJI_PRICES[i]);
+                        mQuantityOrdered[i],
+                        getPrice(i));
             }
         }
 
@@ -179,6 +182,10 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
         notifyDataSetChanged();
         mTotalItemsChangedListener.onTotalItemsChanged(0);
+    }
+
+    private int getPrice(int position) {
+        return (int) (EMOJI_PRICES[position] * mPriceMultiplier);
     }
 
     public interface TotalItemsChangedListener {

@@ -2,6 +2,7 @@ package com.stripe.samplestore;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -65,7 +66,7 @@ public class StoreActivity
 
         PaymentConfiguration.init(PUBLISHABLE_KEY);
         mGoToCartButton = findViewById(R.id.fab_checkout);
-        mStoreAdapter = new StoreAdapter(this);
+        mStoreAdapter = new StoreAdapter(this, getPriceMultiplier());
 
         mGoToCartButton.hide();
         setSupportActionBar(findViewById(R.id.my_toolbar));
@@ -79,6 +80,17 @@ public class StoreActivity
         setupCustomerSession();
 
         handlePostAuthReturn();
+    }
+
+    private float getPriceMultiplier() {
+        try {
+            return getPackageManager()
+                    .getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA)
+                    .metaData
+                    .getFloat("com.stripe.samplestore.price_multiplier");
+        } catch (PackageManager.NameNotFoundException e) {
+            return 1.0f;
+        }
     }
 
     @Override

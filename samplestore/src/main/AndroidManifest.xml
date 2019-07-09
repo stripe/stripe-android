@@ -15,6 +15,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
+        <meta-data
+            android:name="com.stripe.samplestore.price_multiplier"
+            android:value="${PRICE_MULTIPLIER}" />
+
         <activity android:name=".StoreActivity"
                   android:theme="@style/AppTheme.NoActionBar">
 
