@@ -3,9 +3,6 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,26 +34,6 @@ public final class Stripe3ds2Fingerprint {
                 DirectoryServerEncryption.create(
                         (Map<String, ?>) sdkData.data.get(FIELD_DIRECTORY_SERVER_ENCRYPTION))
         );
-    }
-
-    @NonNull
-    static Stripe3ds2Fingerprint create(@NonNull JSONObject json) throws JSONException {
-        final String type = json.optString(FIELD_TYPE);
-        if (!TYPE.equals(type)) {
-            throw new IllegalArgumentException(
-                    "Expected JSON with type='stripe_3ds2_fingerprint'. " +
-                            "Received type='" + type + "'");
-        }
-
-        final String source = json.getString(FIELD_THREE_D_SECURE_2_SOURCE);
-        final DirectoryServer directoryServer =
-                DirectoryServer.lookup(json.getString(FIELD_DIRECTORY_SERVER_NAME));
-        final String serverTransactionId = json.getString(FIELD_SERVER_TRANSACTION_ID);
-        final DirectoryServerEncryption directoryServerEncryption =
-                DirectoryServerEncryption.create(
-                        json.getJSONObject(FIELD_DIRECTORY_SERVER_ENCRYPTION));
-        return new Stripe3ds2Fingerprint(source, directoryServer, serverTransactionId,
-                directoryServerEncryption);
     }
 
     private Stripe3ds2Fingerprint(@NonNull String source,
@@ -98,15 +75,6 @@ public final class Stripe3ds2Fingerprint {
                     Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
                     (String) data.get(FIELD_KEY_ID));
         }
-
-        @NonNull
-        static DirectoryServerEncryption create(@NonNull JSONObject json) throws JSONException {
-            return new DirectoryServerEncryption(json.getString(FIELD_DIRECTORY_SERVER_ID),
-                    json.getString(FIELD_ALGORITHM), json.getString(FIELD_CERTIFICATE),
-                    json.optString(FIELD_KEY_ID, null));
-        }
-
-
     }
 
     public enum DirectoryServer {
