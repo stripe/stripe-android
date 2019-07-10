@@ -140,8 +140,7 @@ public class SetupIntentActivity extends AppCompatActivity {
 
     private void retrieveSetupIntent() {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
-                () -> mStripe.retrieveSetupIntentSynchronous(
-                        ConfirmSetupIntentParams.createRetrieveParams(mClientSecret)));
+                () -> mStripe.retrieveSetupIntentSynchronous(mClientSecret));
 
         final Disposable disposable = setupIntentObservable
                 .subscribeOn(Schedulers.io())
