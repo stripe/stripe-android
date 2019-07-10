@@ -278,8 +278,7 @@ public class PaymentControllerTest {
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         when(mStripe.retrieveSetupIntentSynchronous(
-                eq(SetupIntentParams.createRetrieveParams(
-                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret())),
+                eq(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret()),
                 eq(PUBLISHABLE_KEY)))
                 .thenReturn(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT);
 
