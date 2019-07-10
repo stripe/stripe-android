@@ -7,12 +7,10 @@ import android.support.annotation.Nullable;
 import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +63,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final Long mCreated;
     @Nullable private final String mCurrency;
     @Nullable private final String mDescription;
-    @Nullable private final Boolean mLiveMode;
+    private final boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
     @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mReceiptEmail;
@@ -123,8 +121,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         return mDescription;
     }
 
-    @Nullable
-    public Boolean isLiveMode() {
+    @Override
+    public boolean isLiveMode() {
         return mLiveMode;
     }
 
@@ -224,7 +222,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @Nullable Long created,
             @Nullable String currency,
             @Nullable String description,
-            @Nullable Boolean liveMode,
+            boolean liveMode,
             @Nullable Map<String, Object> nextAction,
             @Nullable String receiptEmail,
             @Nullable String source,
@@ -284,7 +282,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         final Long created = optLong(jsonObject, FIELD_CREATED);
         final String currency = optCurrency(jsonObject, FIELD_CURRENCY);
         final String description = optString(jsonObject, FIELD_DESCRIPTION);
-        final Boolean livemode = optBoolean(jsonObject, FIELD_LIVEMODE);
+        final boolean livemode = Boolean.TRUE.equals(optBoolean(jsonObject, FIELD_LIVEMODE));
         final String receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL);
         final Status status = Status.fromCode(optString(jsonObject, FIELD_STATUS));
         final Usage setupFutureUsage =

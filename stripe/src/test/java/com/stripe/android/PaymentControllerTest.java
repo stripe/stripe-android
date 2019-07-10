@@ -96,7 +96,7 @@ public class PaymentControllerTest {
         when(mThreeDs2Service.createTransaction(
                 Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
                 MESSAGE_VERSION,
-                false,
+                PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.isLiveMode(),
                 Stripe3ds2Fingerprint.DirectoryServer.Visa.name))
                 .thenReturn(mTransaction);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
@@ -104,7 +104,7 @@ public class PaymentControllerTest {
         verify(mThreeDs2Service).createTransaction(
                 Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
                 MESSAGE_VERSION,
-                false,
+                PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.isLiveMode(),
                 Stripe3ds2Fingerprint.DirectoryServer.Visa.name);
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),
@@ -121,7 +121,7 @@ public class PaymentControllerTest {
         when(mThreeDs2Service.createTransaction(
                 Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
                 MESSAGE_VERSION,
-                false,
+                PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode(),
                 Stripe3ds2Fingerprint.DirectoryServer.Amex.name))
                 .thenReturn(mTransaction);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
@@ -129,7 +129,7 @@ public class PaymentControllerTest {
         verify(mThreeDs2Service).createTransaction(
                 Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
                 MESSAGE_VERSION,
-                false,
+                PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode(),
                 Stripe3ds2Fingerprint.DirectoryServer.Amex.name);
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(PUBLISHABLE_KEY),

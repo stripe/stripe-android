@@ -30,7 +30,7 @@ public class SetupIntentTest {
         assertEquals(1561677666, (long)setupIntent.getCreated());
         assertEquals("a description", setupIntent.getDescription());
         assertEquals("pm_1EqTSoGMT9dGPIDG7dgafX1H", setupIntent.getPaymentMethodId());
-        assertFalse(setupIntent.getLiveMode());
+        assertFalse(setupIntent.isLiveMode());
         assertTrue(setupIntent.requiresAction());
         assertEquals(StripeIntent.Status.RequiresAction, setupIntent.getStatus());
         assertEquals(StripeIntent.Usage.OffSession, setupIntent.getUsage());
