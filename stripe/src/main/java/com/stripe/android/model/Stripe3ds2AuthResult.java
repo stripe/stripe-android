@@ -25,6 +25,7 @@ public final class Stripe3ds2AuthResult {
     private static final String FIELD_ARES = "ares";
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_ERROR = "error";
+    private static final String FIELD_FALLBACK_REDIRECT_URL = "fallback_redirect_url";
     private static final String FIELD_LIVEMODE = "livemode";
     private static final String FIELD_SOURCE = "source";
     private static final String FIELD_STATE = "state";
@@ -37,12 +38,13 @@ public final class Stripe3ds2AuthResult {
     @Nullable public final String state;
     public final boolean liveMode;
     @Nullable public final ThreeDS2Error error;
-
+    @Nullable public final String fallbackRedirectUrl;
 
     private Stripe3ds2AuthResult(@NonNull String id, @NonNull String objectType,
                                  @Nullable Ares ares, @NonNull Long created,
                                  @NonNull String source, @Nullable String state,
-                                 boolean liveMode, @Nullable ThreeDS2Error error) {
+                                 boolean liveMode, @Nullable ThreeDS2Error error,
+                                 @Nullable String fallbackRedirectUrl) {
         this.id = id;
         this.objectType = objectType;
         this.ares = ares;
@@ -51,6 +53,7 @@ public final class Stripe3ds2AuthResult {
         this.state = state;
         this.liveMode = liveMode;
         this.error = error;
+        this.fallbackRedirectUrl = fallbackRedirectUrl;
     }
 
     @NonNull
@@ -67,6 +70,8 @@ public final class Stripe3ds2AuthResult {
                         Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES)))
                 .setError(authResultJson.isNull(FIELD_ERROR) ? null :
                         ThreeDS2Error.fromJson(authResultJson.optJSONObject(FIELD_ERROR)))
+                .setFallbackRedirectUrl(authResultJson.isNull(FIELD_FALLBACK_REDIRECT_URL) ? null :
+                        authResultJson.optString(FIELD_FALLBACK_REDIRECT_URL))
                 .build();
     }
 
@@ -93,6 +98,12 @@ public final class Stripe3ds2AuthResult {
                 && Objects.equals(error, obj.error);
     }
 
+    @Nullable
+    public StripeIntent.RedirectData getFallbackRedirectData() {
+        return fallbackRedirectUrl != null ?
+                new StripeIntent.RedirectData(fallbackRedirectUrl, null) : null;
+    }
+
     static class Builder implements ObjectBuilder<Stripe3ds2AuthResult> {
         private String mId;
         private String mObjectType;
@@ -102,6 +113,7 @@ public final class Stripe3ds2AuthResult {
         @Nullable private String mState;
         private boolean mLiveMode;
         @Nullable private ThreeDS2Error mError;
+        @Nullable private String mFallbackRedirectUrl;
 
         @NonNull
         Builder setId(@NonNull String id) {
@@ -152,9 +164,15 @@ public final class Stripe3ds2AuthResult {
         }
 
         @NonNull
+        Builder setFallbackRedirectUrl(@Nullable String fallbackRedirectUrl) {
+            mFallbackRedirectUrl = fallbackRedirectUrl;
+            return this;
+        }
+
+        @NonNull
         public Stripe3ds2AuthResult build() {
             return new Stripe3ds2AuthResult(mId, mObjectType, mAres, mCreated, mSource, mState,
-                    mLiveMode, mError);
+                    mLiveMode, mError, mFallbackRedirectUrl);
         }
     }
 
@@ -347,7 +365,6 @@ public final class Stripe3ds2AuthResult {
     }
 
     public static class MessageExtension {
-
         static final String FIELD_NAME = "name";
         static final String FIELD_ID = "id";
         static final String FIELD_CRITICALITY_INDICATOR = "criticalityIndicator";
