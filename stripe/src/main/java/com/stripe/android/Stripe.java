@@ -135,17 +135,18 @@ public class Stripe {
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
      * @param activity the {@link Activity} that is launching the payment authentication flow
-     * @param confirmSetupIntentParams {@link ConfirmSetupIntentParams} used to confirm the {@link SetupIntent}
+     * @param confirmSetupIntentParams {@link ConfirmSetupIntentParams} used to confirm the
+     *         {@link SetupIntent}
      */
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
                                    @NonNull String publishableKey) {
         mPaymentController.startConfirmAndAuth(this, activity,
-                setupIntentParams, publishableKey);
+                confirmSetupIntentParams, publishableKey);
     }
 
     /**
-     * See {@link #confirmSetupIntent(Activity, SetupIntentParams, String)}}
+     * See {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams, String)}}
      */
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
