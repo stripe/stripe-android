@@ -54,7 +54,7 @@ public final class Stripe3ds2Fingerprint {
         final String serverTransactionId = json.getString(FIELD_SERVER_TRANSACTION_ID);
         final DirectoryServerEncryption directoryServerEncryption =
                 DirectoryServerEncryption.create(
-                        json.optJSONObject(FIELD_DIRECTORY_SERVER_ENCRYPTION));
+                        json.getJSONObject(FIELD_DIRECTORY_SERVER_ENCRYPTION));
         return new Stripe3ds2Fingerprint(source, directoryServer, serverTransactionId,
                 directoryServerEncryption);
     }
@@ -90,13 +90,8 @@ public final class Stripe3ds2Fingerprint {
             this.keyId = keyId;
         }
 
-        @Nullable
-        static DirectoryServerEncryption create(@Nullable Map<String, ?> data) {
-            if (data == null || data.get(FIELD_DIRECTORY_SERVER_ID) == null ||
-                    data.get(FIELD_ALGORITHM) == null || data.get(FIELD_CERTIFICATE) == null) {
-                return null;
-            }
-
+        @NonNull
+        static DirectoryServerEncryption create(@NonNull Map<String, ?> data) {
             return new DirectoryServerEncryption(
                     Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
                     Objects.requireNonNull((String) data.get(FIELD_ALGORITHM)),
@@ -104,12 +99,8 @@ public final class Stripe3ds2Fingerprint {
                     (String) data.get(FIELD_KEY_ID));
         }
 
-        @Nullable
-        static DirectoryServerEncryption create(@Nullable JSONObject json) throws JSONException {
-            if (json == null || json.isNull(FIELD_DIRECTORY_SERVER_ID) ||
-                    json.isNull(FIELD_ALGORITHM) || json.isNull(FIELD_CERTIFICATE)) {
-                return null;
-            }
+        @NonNull
+        static DirectoryServerEncryption create(@NonNull JSONObject json) throws JSONException {
             return new DirectoryServerEncryption(json.getString(FIELD_DIRECTORY_SERVER_ID),
                     json.getString(FIELD_ALGORITHM), json.getString(FIELD_CERTIFICATE),
                     json.optString(FIELD_KEY_ID, null));
