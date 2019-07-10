@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import java.util.Objects;
 
 public final class PaymentIntentFixtures {
+
     @NonNull
     public static final PaymentIntent PI_REQUIRES_VISA_3DS2 = Objects.requireNonNull(
             PaymentIntent.fromString("{\n" +
@@ -42,7 +43,11 @@ public final class PaymentIntentFixtures {
                     "            \"three_d_secure_2_source\": \"src_1EceOlCRMbs6FrXf2hqrI1g5\",\n" +
                     "            \"directory_server_name\": \"visa\",\n" +
                     "            \"server_transaction_id\": \"e64bb72f-60ac-4845-b8b6-47cfdb0f73aa\",\n" +
-                    "            \"three_ds_method_url\": \"\"\n" +
+                    "            \"three_ds_method_url\": \"\",\n" +
+                    "            \"directory_server_encryption\": {\n" +
+                    "               \"directory_server_id\": \"A000000003\",\n" +
+                    "               \"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
+                    "            }\n" +
                     "        }\n" +
                     "    },\n" +
                     "    \"on_behalf_of\": null,\n" +
@@ -97,7 +102,12 @@ public final class PaymentIntentFixtures {
                     "            \"three_d_secure_2_source\": \"src_1EceOlCRMbs6FrXf2hqrI1g5\",\n" +
                     "            \"directory_server_name\": \"american_express\",\n" +
                     "            \"server_transaction_id\": \"e64bb72f-60ac-4845-b8b6-47cfdb0f73aa\",\n" +
-                    "            \"three_ds_method_url\": \"\"\n" +
+                    "            \"three_ds_method_url\": \"\",\n" +
+                    "            \"directory_server_encryption\": {\n" +
+                    "               \"directory_server_id\": \"A000000025\",\n" +
+                    "               \"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\",\n" +
+                    "               \"key_id\": \"7c4debe3f4af7f9d1569a2ffea4343c2566826ee\"\n" +
+                    "            }\n" +
                     "        }\n" +
                     "    },\n" +
                     "    \"on_behalf_of\": null,\n" +

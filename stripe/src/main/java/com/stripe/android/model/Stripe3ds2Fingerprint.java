@@ -1,21 +1,21 @@
 package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map;
+import java.util.Objects;
 
 public final class Stripe3ds2Fingerprint {
-    private static final String FIELD_TYPE = "type";
     private static final String FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source";
     private static final String FIELD_DIRECTORY_SERVER_NAME = "directory_server_name";
     private static final String FIELD_SERVER_TRANSACTION_ID = "server_transaction_id";
-
-    private static final String TYPE = "stripe_3ds2_fingerprint";
+    private static final String FIELD_DIRECTORY_SERVER_ENCRYPTION = "directory_server_encryption";
 
     @NonNull public final String source;
     @NonNull public final DirectoryServer directoryServer;
     @NonNull public final String serverTransactionId;
+    @NonNull public final DirectoryServerEncryption directoryServerEncryption;
 
     @NonNull
     public static Stripe3ds2Fingerprint create(@NonNull StripeIntent.SdkData sdkData) {
@@ -27,32 +27,46 @@ public final class Stripe3ds2Fingerprint {
         return new Stripe3ds2Fingerprint(
                 (String) sdkData.data.get(FIELD_THREE_D_SECURE_2_SOURCE),
                 DirectoryServer.lookup((String) sdkData.data.get(FIELD_DIRECTORY_SERVER_NAME)),
-                (String) sdkData.data.get(FIELD_SERVER_TRANSACTION_ID)
+                (String) sdkData.data.get(FIELD_SERVER_TRANSACTION_ID),
+                DirectoryServerEncryption.create(
+                        (Map<String, ?>) sdkData.data.get(FIELD_DIRECTORY_SERVER_ENCRYPTION))
         );
-    }
-
-    @NonNull
-    static Stripe3ds2Fingerprint create(@NonNull JSONObject json) throws JSONException {
-        final String type = json.optString(FIELD_TYPE);
-        if (!TYPE.equals(type)) {
-            throw new IllegalArgumentException(
-                    "Expected JSON with type='stripe_3ds2_fingerprint'. " +
-                            "Received type='" + type + "'");
-        }
-
-        final String source = json.getString(FIELD_THREE_D_SECURE_2_SOURCE);
-        final DirectoryServer directoryServer =
-                DirectoryServer.lookup(json.getString(FIELD_DIRECTORY_SERVER_NAME));
-        final String serverTransactionId = json.getString(FIELD_SERVER_TRANSACTION_ID);
-        return new Stripe3ds2Fingerprint(source, directoryServer, serverTransactionId);
     }
 
     private Stripe3ds2Fingerprint(@NonNull String source,
                                   @NonNull DirectoryServer directoryServer,
-                                  @NonNull String serverTransactionId) {
+                                  @NonNull String serverTransactionId,
+                                  @NonNull DirectoryServerEncryption directoryServerEncryption) {
         this.source = source;
         this.directoryServer = directoryServer;
         this.serverTransactionId = serverTransactionId;
+        this.directoryServerEncryption = directoryServerEncryption;
+    }
+
+    public static class DirectoryServerEncryption {
+        private static final String FIELD_DIRECTORY_SERVER_ID = "directory_server_id";
+        private static final String FIELD_CERTIFICATE = "certificate";
+        private static final String FIELD_KEY_ID = "key_id";
+
+        @NonNull public final String directoryServerId;
+        @NonNull public final String certificate;
+        @Nullable public final String keyId;
+
+        private DirectoryServerEncryption(@NonNull String directoryServerId,
+                                          @NonNull String certificate,
+                                          @Nullable String keyId) {
+            this.directoryServerId = directoryServerId;
+            this.certificate = certificate;
+            this.keyId = keyId;
+        }
+
+        @NonNull
+        static DirectoryServerEncryption create(@NonNull Map<String, ?> data) {
+            return new DirectoryServerEncryption(
+                    Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
+                    Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
+                    (String) data.get(FIELD_KEY_ID));
+        }
     }
 
     public enum DirectoryServer {
