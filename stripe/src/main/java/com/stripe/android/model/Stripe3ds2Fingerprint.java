@@ -21,7 +21,7 @@ public final class Stripe3ds2Fingerprint {
     @NonNull public final String source;
     @NonNull public final DirectoryServer directoryServer;
     @NonNull public final String serverTransactionId;
-    @Nullable public final DirectoryServerEncryption directoryServerEncryption;
+    @NonNull public final DirectoryServerEncryption directoryServerEncryption;
 
     @NonNull
     public static Stripe3ds2Fingerprint create(@NonNull StripeIntent.SdkData sdkData) {
