@@ -62,7 +62,7 @@ public final class Stripe3ds2Fingerprint {
     private Stripe3ds2Fingerprint(@NonNull String source,
                                   @NonNull DirectoryServer directoryServer,
                                   @NonNull String serverTransactionId,
-                                  @Nullable DirectoryServerEncryption directoryServerEncryption) {
+                                  @NonNull DirectoryServerEncryption directoryServerEncryption) {
         this.source = source;
         this.directoryServer = directoryServer;
         this.serverTransactionId = serverTransactionId;
