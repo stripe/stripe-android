@@ -33,4 +33,9 @@ public final class Stripe3ds2AuthResultFixtures {
                             .setErrorMessageType("Erro")
                     .build())
             .build();
+
+    public static final Stripe3ds2AuthResult FALLBACK_REDIRECT_URL =
+            new Stripe3ds2AuthResult.Builder()
+                    .setFallbackRedirectUrl("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
+                    .build();
 }

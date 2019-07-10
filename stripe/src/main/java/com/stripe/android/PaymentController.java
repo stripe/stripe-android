@@ -315,9 +315,9 @@ class PaymentController {
      * @param activity the payment authentication result will be returned as a result to this
      *         {@link Activity}
      */
-    private void begin3ds1Auth(@NonNull Activity activity,
-                               int requestCode,
-                               @NonNull StripeIntent.RedirectData redirectData) {
+    private static void begin3ds1Auth(@NonNull Activity activity,
+                                      int requestCode,
+                                      @NonNull StripeIntent.RedirectData redirectData) {
         new PaymentAuthWebViewStarter(activity, requestCode).start(redirectData);
     }
 
@@ -486,6 +486,9 @@ class PaymentController {
                 } else {
                     startFrictionlessFlow();
                 }
+            } else if (result.getFallbackRedirectData() != null) {
+                begin3ds1Auth(activity, getRequestCode(mStripeIntent),
+                        result.getFallbackRedirectData());
             } else {
                 final Stripe3ds2AuthResult.ThreeDS2Error error = result.error;
                 final String errorMessage;

@@ -3,6 +3,8 @@ package com.stripe.android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+@RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2AuthResultTest {
     private static final String AUTH_RESULT_JSON = "{\n" +
             "\t\"id\": \"threeds2_1Ecwz3CRMbs6FrXfThtfogua\",\n" +
@@ -141,6 +144,17 @@ public class Stripe3ds2AuthResultTest {
             "\t\t\"sdkTransID\": \"a9e7db5d-e95c-4cc6-a8b7-df1cee092879\",\n" +
             "\t\t\"threeDSServerTransID\": \"161d5143-340c-4e40-8ee1-a272be64aecc\"\n" +
             "\t},\n" +
+            "\t\"object\": \"three_d_secure_2\"\n" +
+            "}";
+
+    private static final String AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON = "{\n" +
+            "\t\"ares\": null,\n" +
+            "\t\"livemode\": true,\n" +
+            "\t\"created\": 1562711486,\n" +
+            "\t\"id\": \"threeds2_1EuRqMAWhjPjYwPi83sPpdVY\",\n" +
+            "\t\"source\": \"src_1EuRqGAWhjPjYwPid0T5ZrrF\",\n" +
+            "\t\"state\": \"failed\",\n" +
+            "\t\"fallback_redirect_url\": \"https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW\",\n" +
             "\t\"object\": \"three_d_secure_2\"\n" +
             "}";
 
@@ -275,6 +289,8 @@ public class Stripe3ds2AuthResultTest {
         final Stripe3ds2AuthResult result = Stripe3ds2AuthResult.fromJson(
                 new JSONObject(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON));
         assertNull(result.ares);
+        assertNull(result.fallbackRedirectUrl);
+        assertNull(result.getFallbackRedirectData());
         assertNotNull(result.error);
         assertEquals(
                 "sdkMaxTimeout",
@@ -282,5 +298,21 @@ public class Stripe3ds2AuthResultTest {
         assertEquals(
                 "Format or value of one or more Data Elements is Invalid according to the Specification",
                 result.error.errorDescription);
+    }
+
+    @Test
+    public void fromJson_fallbackRedirectUrl_shouldReturnValidRedirectData() throws JSONException {
+        final Stripe3ds2AuthResult result = Stripe3ds2AuthResult.fromJson(
+                new JSONObject(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON));
+        assertNull(result.ares);
+        assertNull(result.error);
+
+        final StripeIntent.RedirectData redirectData = result.getFallbackRedirectData();
+        assertNotNull(redirectData);
+        assertEquals(
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
+                redirectData.url.toString()
+        );
+        assertNull(redirectData.returnUrl);
     }
 }

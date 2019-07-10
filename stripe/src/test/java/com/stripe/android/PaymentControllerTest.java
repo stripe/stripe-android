@@ -321,6 +321,25 @@ public class PaymentControllerTest {
     }
 
     @Test
+    public void authCallback_withFallbackRedirectUrl_shouldStartAuthWebView() {
+        final PaymentController.Stripe3ds2AuthCallback authCallback =
+                new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
+                        mTransaction, MAX_TIMEOUT,
+                        PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        mPaymentRelayStarter);
+        authCallback.onSuccess(Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL);
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
+                eq(PaymentController.PAYMENT_REQUEST_CODE));
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
+                intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+        );
+        assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL));
+    }
+
+    @Test
     public void authCallback_withError_shouldStartRelayActivityWithException() {
         final PaymentController.Stripe3ds2AuthCallback authCallback =
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
