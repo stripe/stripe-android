@@ -168,7 +168,7 @@ class StripeApiHandler {
      *
      * @param setupIntentParams contains the confirmation params
      * @return a {@link SetupIntent} reflecting the updated state after applying the parameter
-     * provided
+     *         provided
      */
     @Nullable
     SetupIntent confirmSetupIntent(
@@ -201,24 +201,24 @@ class StripeApiHandler {
 
     /**
      * Retrieve a {@link SetupIntent} using the provided {@link SetupIntentParams}
-     * @param setupIntentParams contains the retrieval params
+     *
+     * @param clientSecret The client secret of the Setup Intent to retrieve. Used for client-side
+     *         retrieval using a publishable key.
      */
     @Nullable
     SetupIntent retrieveSetupIntent(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
-
         try {
             logTelemetryData();
             logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(null, options.apiKey),
                     options.apiKey);
-            final String setupIntentId = SetupIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
+            final String setupIntentId = SetupIntent.parseIdFromClientSecret(clientSecret);
+            final Map<String, ?> paramMap = new HashMap<>(0);
             final StripeResponse response = makeApiRequest(ApiRequest.createGet(
                     getRetrieveSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
             return SetupIntent.fromString(response.getResponseBody());

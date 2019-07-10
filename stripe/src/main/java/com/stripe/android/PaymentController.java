@@ -351,7 +351,7 @@ class PaymentController {
                         (PaymentIntentParams) mParams, mPublishableKey);
             } else if (mParams instanceof SetupIntentParams) {
                 return mStripe.retrieveSetupIntentSynchronous(
-                        (SetupIntentParams) mParams, mPublishableKey);
+                        ((SetupIntentParams) mParams).getClientSecret(), mPublishableKey);
             }
             return null;
         }

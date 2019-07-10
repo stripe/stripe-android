@@ -231,8 +231,8 @@ public class Stripe {
      * (see {@link #confirmSetupIntent(Activity, SetupIntentParams)})
      */
     public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
-                                   @NonNull String publishableKey,
-                                   @NonNull ApiResultCallback<SetupIntentResult> callback) {
+                                 @NonNull String publishableKey,
+                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
         if (data != null &&
                 mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
             mPaymentController.handleSetupResult(this, data, publishableKey, callback);
@@ -246,7 +246,7 @@ public class Stripe {
      * See {@link #onSetupResult(int, int, Intent, String, ApiResultCallback)}
      */
     public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<SetupIntentResult> callback) {
+                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
         return onSetupResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
     }
 
@@ -648,32 +648,33 @@ public class Stripe {
      * Blocking method to retrieve a {@link SetupIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
-     * @param setupIntentParams a set of params with which to retrieve the Setup Intent
+     * @param clientSecret The client secret of the Setup Intent to retrieve. Used for client-side
+     *         retrieval using a publishable key.
      * @param publishableKey a publishable API key to use
      * @return a {@link SetupIntent} or {@code null} if a problem occurred
      */
     @Nullable
     public SetupIntent retrieveSetupIntentSynchronous(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String clientSecret,
             @NonNull String publishableKey) throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         return mApiHandler.retrieveSetupIntent(
-                setupIntentParams,
+                clientSecret,
                 ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }
 
     /**
-     * See {@link #retrieveSetupIntentSynchronous(SetupIntentParams, String)}
+     * See {@link #retrieveSetupIntentSynchronous(String, String)}
      */
     @Nullable
     public SetupIntent retrieveSetupIntentSynchronous(
-            @NonNull SetupIntentParams setupIntentParams)
+            @NonNull String clientSecret)
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        return retrieveSetupIntentSynchronous(setupIntentParams, mDefaultPublishableKey);
+        return retrieveSetupIntentSynchronous(clientSecret, mDefaultPublishableKey);
     }
 
     /**
