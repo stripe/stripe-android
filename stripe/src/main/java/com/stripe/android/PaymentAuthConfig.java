@@ -1,5 +1,6 @@
 package com.stripe.android;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -74,8 +75,16 @@ public final class PaymentAuthConfig {
         @NonNull final Stripe3ds2UiCustomization uiCustomization;
 
         private Stripe3ds2Config(@NonNull Builder builder) {
-            timeout = builder.mTimeout;
+            timeout = checkValidTimeout(builder.mTimeout);
             uiCustomization = Objects.requireNonNull(builder.mUiCustomization);
+        }
+
+        private int checkValidTimeout(int timeout) {
+            if (timeout < 5 || timeout > 99) {
+                throw new IllegalArgumentException(
+                        "Timeout value must be between 5 and 99, inclusive");
+            }
+            return timeout;
         }
 
         public static final class Builder implements ObjectBuilder<Stripe3ds2Config> {
@@ -84,7 +93,7 @@ public final class PaymentAuthConfig {
                     new Stripe3ds2UiCustomization.Builder().build();
 
             @NonNull
-            public Builder setTimeout(int timeout) {
+            public Builder setTimeout(@IntRange(from = 5, to = 99) int timeout) {
                 this.mTimeout = timeout;
                 return this;
             }

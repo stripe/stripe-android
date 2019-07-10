@@ -13,11 +13,13 @@ import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentAuthConfigTest {
@@ -43,6 +45,27 @@ public class PaymentAuthConfigTest {
                         .build())
                 .build());
         assertEquals(20, PaymentAuthConfig.get().stripe3ds2Config.timeout);
+    }
+
+    @Test
+    public void testCheckValidTimeout() {
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(1)
+                        .build();
+            }
+        });
+
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(100)
+                        .build();
+            }
+        });
     }
 
     @Test
