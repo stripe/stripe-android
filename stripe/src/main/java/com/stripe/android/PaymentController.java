@@ -3,6 +3,7 @@ package com.stripe.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -291,6 +292,9 @@ class PaymentController {
 
         ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
 
+        final StripeIntent.RedirectData redirectData = stripeIntent.getRedirectData();
+        final Uri returnUrl = redirectData != null ? redirectData.returnUrl : null;
+
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
         final int timeout = mConfig.stripe3ds2Config.timeout;
@@ -302,7 +306,8 @@ class PaymentController {
                 areqParams.getDeviceData(),
                 areqParams.getSDKEphemeralPublicKey(),
                 areqParams.getMessageVersion(),
-                timeout
+                timeout,
+                returnUrl != null ? returnUrl.toString() : null
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,

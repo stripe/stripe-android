@@ -5,12 +5,15 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2AuthParamsTest {
+
+    private static final String RETURN_URL = "stripe://payment-auth-return";
 
     @Test
     public void toParamMap_shouldReturnCorrectObject() {
@@ -25,7 +28,7 @@ public class Stripe3ds2AuthParamsTest {
 
         final Stripe3ds2AuthParams authParams = new Stripe3ds2AuthParams(sourceId, appId,
                 sdkReferenceNumber, sdkTransactionId, deviceData, sdkEphemeralPublicKey,
-                messageVersion, timeout);
+                messageVersion, timeout, RETURN_URL);
         final Map<String, Object> paramsMap = authParams.toParamMap();
         assertEquals(sourceId, paramsMap.get(Stripe3ds2AuthParams.FIELD_SOURCE));
 
@@ -44,5 +47,9 @@ public class Stripe3ds2AuthParamsTest {
                 "{\"sdkInterface\":\"03\"," +
                 "\"sdkUiType\":[\"01\",\"02\",\"03\",\"04\",\"05\"]}}";
         assertEquals(expectedAppData, appData);
+
+        assertEquals(RETURN_URL,
+                Objects.requireNonNull(
+                        paramsMap.get(Stripe3ds2AuthParams.FIELD_FALLBACK_RETURN_URL)).toString());
     }
 }

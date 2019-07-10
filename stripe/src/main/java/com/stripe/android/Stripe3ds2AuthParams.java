@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +16,7 @@ class Stripe3ds2AuthParams {
 
     static final String FIELD_APP = "app";
     static final String FIELD_SOURCE = "source";
+    static final String FIELD_FALLBACK_RETURN_URL = "fallback_return_url";
 
     private static final String FIELD_SDK_APP_ID = "sdkAppID";
     private static final String FIELD_SDK_TRANS_ID = "sdkTransID";
@@ -38,6 +40,7 @@ class Stripe3ds2AuthParams {
     @NonNull private final String mSdkEphemeralPublicKey;
     @NonNull private final String mMessageVersion;
     private final int mMaxTimeout;
+    @Nullable private final String mReturnUrl;
 
     Stripe3ds2AuthParams(@NonNull String sourceId,
                          @NonNull String sdkAppId,
@@ -46,7 +49,8 @@ class Stripe3ds2AuthParams {
                          @NonNull String deviceData,
                          @NonNull String sdkEphemeralPublicKey,
                          @NonNull String messageVersion,
-                         int maxTimeout) {
+                         int maxTimeout,
+                         @Nullable String returnUrl) {
         mSourceId = sourceId;
         mSdkAppId = sdkAppId;
         mSdkReferenceNumber = sdkReferenceNumber;
@@ -55,6 +59,7 @@ class Stripe3ds2AuthParams {
         mSdkEphemeralPublicKey = sdkEphemeralPublicKey;
         mMessageVersion = messageVersion;
         mMaxTimeout = maxTimeout;
+        mReturnUrl = returnUrl;
     }
 
     @NonNull
@@ -62,6 +67,9 @@ class Stripe3ds2AuthParams {
         final Map<String, Object> params = new HashMap<>();
         params.put(FIELD_SOURCE, mSourceId);
         params.put(FIELD_APP, createAppParams().toString());
+        if (mReturnUrl != null) {
+            params.put(FIELD_FALLBACK_RETURN_URL, mReturnUrl);
+        }
         return params;
     }
 
