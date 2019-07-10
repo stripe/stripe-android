@@ -46,7 +46,6 @@ public final class PaymentIntentFixtures {
                     "            \"three_ds_method_url\": \"\",\n" +
                     "            \"directory_server_encryption\": {\n" +
                     "               \"directory_server_id\": \"A000000003\",\n" +
-                    "               \"algorithm\": \"RSA\",\n" +
                     "               \"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\"\n" +
                     "            }\n" +
                     "        }\n" +
@@ -106,7 +105,6 @@ public final class PaymentIntentFixtures {
                     "            \"three_ds_method_url\": \"\",\n" +
                     "            \"directory_server_encryption\": {\n" +
                     "               \"directory_server_id\": \"A000000025\",\n" +
-                    "               \"algorithm\": \"RSA\",\n" +
                     "               \"certificate\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI\",\n" +
                     "               \"key_id\": \"7c4debe3f4af7f9d1569a2ffea4343c2566826ee\"\n" +
                     "            }\n" +

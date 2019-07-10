@@ -7,13 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class Stripe3ds2Fingerprint {
-    private static final String FIELD_TYPE = "type";
     private static final String FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source";
     private static final String FIELD_DIRECTORY_SERVER_NAME = "directory_server_name";
     private static final String FIELD_SERVER_TRANSACTION_ID = "server_transaction_id";
     private static final String FIELD_DIRECTORY_SERVER_ENCRYPTION = "directory_server_encryption";
-
-    private static final String TYPE = "stripe_3ds2_fingerprint";
 
     @NonNull public final String source;
     @NonNull public final DirectoryServer directoryServer;
@@ -48,21 +45,17 @@ public final class Stripe3ds2Fingerprint {
 
     public static class DirectoryServerEncryption {
         private static final String FIELD_DIRECTORY_SERVER_ID = "directory_server_id";
-        private static final String FIELD_ALGORITHM = "algorithm";
         private static final String FIELD_CERTIFICATE = "certificate";
         private static final String FIELD_KEY_ID = "key_id";
 
         @NonNull public final String directoryServerId;
-        @NonNull public final String algorithm;
         @NonNull public final String certificate;
         @Nullable public final String keyId;
 
         private DirectoryServerEncryption(@NonNull String directoryServerId,
-                                          @NonNull String algorithm,
                                           @NonNull String certificate,
                                           @Nullable String keyId) {
             this.directoryServerId = directoryServerId;
-            this.algorithm = algorithm;
             this.certificate = certificate;
             this.keyId = keyId;
         }
@@ -71,7 +64,6 @@ public final class Stripe3ds2Fingerprint {
         static DirectoryServerEncryption create(@NonNull Map<String, ?> data) {
             return new DirectoryServerEncryption(
                     Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
-                    Objects.requireNonNull((String) data.get(FIELD_ALGORITHM)),
                     Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
                     (String) data.get(FIELD_KEY_ID));
         }

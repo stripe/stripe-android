@@ -27,7 +27,6 @@ public class Stripe3ds2FingerprintTest {
         assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
-        assertEquals("RSA", stripe3ds2Fingerprint.directoryServerEncryption.algorithm);
         assertEquals("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI",
                 stripe3ds2Fingerprint.directoryServerEncryption.certificate);
         assertNull(stripe3ds2Fingerprint.directoryServerEncryption.keyId);
@@ -49,7 +48,6 @@ public class Stripe3ds2FingerprintTest {
         assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
-        assertEquals("RSA", stripe3ds2Fingerprint.directoryServerEncryption.algorithm);
         assertEquals("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI",
                 stripe3ds2Fingerprint.directoryServerEncryption.certificate);
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
