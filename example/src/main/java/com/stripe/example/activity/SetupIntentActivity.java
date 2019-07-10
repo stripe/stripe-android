@@ -13,10 +13,10 @@ import android.widget.Toast;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
 import com.stripe.example.controller.ErrorDialogHandler;
@@ -141,7 +141,7 @@ public class SetupIntentActivity extends AppCompatActivity {
     private void retrieveSetupIntent() {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> mStripe.retrieveSetupIntentSynchronous(
-                        SetupIntentParams.createRetrieveParams(mClientSecret)));
+                        ConfirmSetupIntentParams.createRetrieveParams(mClientSecret)));
 
         final Disposable disposable = setupIntentObservable
                 .subscribeOn(Schedulers.io())
@@ -190,11 +190,11 @@ public class SetupIntentActivity extends AppCompatActivity {
     private void confirmSetupIntent() {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> {
-                    final SetupIntentParams setupIntentParams =
-                            SetupIntentParams.createConfirmParams(
+                    final ConfirmSetupIntentParams confirmSetupIntentParams =
+                            ConfirmSetupIntentParams.createConfirmParams(
                                     Objects.requireNonNull(mPaymentMethod.id), mClientSecret,
                                     RETURN_URL);
-                    return mStripe.confirmSetupIntentSynchronous(setupIntentParams,
+                    return mStripe.confirmSetupIntentSynchronous(confirmSetupIntentParams,
                             PaymentConfiguration.getInstance().getPublishableKey());
                 });
 

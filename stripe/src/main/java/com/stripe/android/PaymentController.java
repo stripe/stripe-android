@@ -10,10 +10,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.model.Stripe3dsRedirect;
@@ -208,9 +208,9 @@ class PaymentController {
 
     @VisibleForTesting
     @NonNull
-    SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
+    ConfirmSetupIntentParams createSetupIntentParams(@NonNull Intent data) {
         final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
-        return SetupIntentParams.createRetrieveParams(clientSecret);
+        return ConfirmSetupIntentParams.createRetrieveParams(clientSecret);
     }
 
     /**
@@ -349,9 +349,9 @@ class PaymentController {
             if (mParams instanceof PaymentIntentParams) {
                 return mStripe.retrievePaymentIntentSynchronous(
                         (PaymentIntentParams) mParams, mPublishableKey);
-            } else if (mParams instanceof SetupIntentParams) {
+            } else if (mParams instanceof ConfirmSetupIntentParams) {
                 return mStripe.retrieveSetupIntentSynchronous(
-                        ((SetupIntentParams) mParams).getClientSecret(), mPublishableKey);
+                        ((ConfirmSetupIntentParams) mParams).getClientSecret(), mPublishableKey);
             }
             return null;
         }
@@ -378,9 +378,9 @@ class PaymentController {
             if (mParams instanceof PaymentIntentParams) {
                 return mStripe.confirmPaymentIntentSynchronous(
                         (PaymentIntentParams) mParams, mPublishableKey);
-            } else if (mParams instanceof SetupIntentParams) {
+            } else if (mParams instanceof ConfirmSetupIntentParams) {
                 return mStripe.confirmSetupIntentSynchronous(
-                        (SetupIntentParams) mParams, mPublishableKey);
+                        (ConfirmSetupIntentParams) mParams, mPublishableKey);
             }
             return null;
         }

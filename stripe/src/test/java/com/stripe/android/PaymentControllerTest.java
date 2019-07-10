@@ -12,7 +12,7 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntentFixtures;
-import com.stripe.android.model.SetupIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
@@ -199,7 +199,7 @@ public class PaymentControllerTest {
                 PaymentController.getRequestCode(PaymentIntentParams.createCustomParams()));
         assertEquals(PaymentController.SETUP_REQUEST_CODE,
                 PaymentController.getRequestCode(
-                        SetupIntentParams.createRetrieveParams("")));
+                        ConfirmSetupIntentParams.createRetrieveParams("")));
     }
 
     @Test
@@ -233,7 +233,7 @@ public class PaymentControllerTest {
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
-        final SetupIntentParams expectedSetupParams = SetupIntentParams.createRetrieveParams(
+        final ConfirmSetupIntentParams expectedSetupParams = ConfirmSetupIntentParams.createRetrieveParams(
                 SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         assertEquals(expectedSetupParams, mController.createSetupIntentParams(data));

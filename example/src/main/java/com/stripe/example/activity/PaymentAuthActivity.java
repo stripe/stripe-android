@@ -20,7 +20,7 @@ import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.example.R;
 import com.stripe.example.module.RetrofitFactory;
 import com.stripe.example.service.StripeService;
@@ -109,7 +109,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
     private void confirmSetupIntent(@NonNull String setupIntentClientSecret) {
         mStatusTextView.append("\n\nStarting setup intent authentication");
         mStripe.confirmSetupIntent(this,
-                SetupIntentParams.createConfirmParams(
+                ConfirmSetupIntentParams.createConfirmParams(
                         PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP,
                         setupIntentClientSecret,
                         RETURN_URL));

@@ -7,9 +7,9 @@ import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.PaymentIntentParams;
-import com.stripe.android.model.SetupIntentParams;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,14 +54,14 @@ public class StripePaymentAuthTest {
     @Test
     public void confirmSetupIntent_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
-        final SetupIntentParams setupIntentParams =
-                SetupIntentParams.createConfirmParams(
+        final ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.createConfirmParams(
                         "pm_card_threeDSecure2Required",
                         "client_secret",
                         "yourapp://post-authentication-return-url");
-        stripe.confirmSetupIntent(mActivity, setupIntentParams);
+        stripe.confirmSetupIntent(mActivity, confirmSetupIntentParams);
         verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(setupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+                eq(confirmSetupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test

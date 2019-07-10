@@ -18,12 +18,12 @@ import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
@@ -135,10 +135,10 @@ public class Stripe {
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
      * @param activity the {@link Activity} that is launching the payment authentication flow
-     * @param setupIntentParams {@link SetupIntentParams} used to confirm the {@link SetupIntent}
+     * @param confirmSetupIntentParams {@link ConfirmSetupIntentParams} used to confirm the {@link SetupIntent}
      */
     public void confirmSetupIntent(@NonNull Activity activity,
-                                   @NonNull SetupIntentParams setupIntentParams,
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
                                    @NonNull String publishableKey) {
         mPaymentController.startConfirmAndAuth(this, activity,
                 setupIntentParams, publishableKey);
@@ -148,8 +148,8 @@ public class Stripe {
      * See {@link #confirmSetupIntent(Activity, SetupIntentParams, String)}}
      */
     public void confirmSetupIntent(@NonNull Activity activity,
-                                   @NonNull SetupIntentParams setupIntentParams) {
-        confirmSetupIntent(activity, setupIntentParams, mDefaultPublishableKey);
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        confirmSetupIntent(activity, confirmSetupIntentParams, mDefaultPublishableKey);
     }
 
     /**
@@ -228,7 +228,7 @@ public class Stripe {
     /**
      * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
      * result of a SetupIntent confirmation
-     * (see {@link #confirmSetupIntent(Activity, SetupIntentParams)})
+     * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
      */
     public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
                                  @NonNull String publishableKey,
@@ -681,19 +681,19 @@ public class Stripe {
      * Blocking method to confirm a {@link SetupIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
-     * @param setupIntentParams a set of params with which to confirm the Setup Intent
+     * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @param publishableKey a publishable API key to use
      * @return a {@link SetupIntent} or {@code null} if a problem occurred
      */
     @Nullable
     public SetupIntent confirmSetupIntentSynchronous(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
             @NonNull String publishableKey) throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
         return mApiHandler.confirmSetupIntent(
-                setupIntentParams,
+                confirmSetupIntentParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccount)
         );
     }

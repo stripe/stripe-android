@@ -14,13 +14,13 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -164,21 +164,21 @@ class StripeApiHandler {
     }
 
     /**
-     * Confirm a {@link SetupIntent} using the provided {@link SetupIntentParams}
+     * Confirm a {@link SetupIntent} using the provided {@link ConfirmSetupIntentParams}
      *
-     * @param setupIntentParams contains the confirmation params
+     * @param confirmSetupIntentParams contains the confirmation params
      * @return a {@link SetupIntent} reflecting the updated state after applying the parameter
      *         provided
      */
     @Nullable
     SetupIntent confirmSetupIntent(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
+        final Map<String, Object> paramMap = confirmSetupIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
 
         try {
@@ -188,7 +188,7 @@ class StripeApiHandler {
                     options.apiKey
             );
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
+                    Objects.requireNonNull(confirmSetupIntentParams.getClientSecret()));
             final StripeResponse response = makeApiRequest(ApiRequest.createPost(
                     getConfirmSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
             return SetupIntent.fromString(response.getResponseBody());
@@ -200,7 +200,7 @@ class StripeApiHandler {
     }
 
     /**
-     * Retrieve a {@link SetupIntent} using the provided {@link SetupIntentParams}
+     * Retrieve a {@link SetupIntent} using the provided client secret.
      *
      * @param clientSecret The client secret of the Setup Intent to retrieve. Used for client-side
      *         retrieval using a publishable key.

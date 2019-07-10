@@ -9,20 +9,20 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class SetupIntentParams implements StripeIntentParams {
+public final class ConfirmSetupIntentParams implements StripeIntentParams {
 
     @NonNull private final String mClientSecret;
     @Nullable private final String mReturnUrl;
     @Nullable private final String mPaymentMethodId;
 
-    private SetupIntentParams(@NonNull String clientSecret, @Nullable String returnUrl,
-                              @Nullable String paymentMethodId) {
+    private ConfirmSetupIntentParams(@NonNull String clientSecret, @Nullable String returnUrl,
+                                     @Nullable String paymentMethodId) {
         this.mClientSecret = clientSecret;
         this.mReturnUrl = returnUrl;
         this.mPaymentMethodId = paymentMethodId;
     }
 
-    private SetupIntentParams(@NonNull String clientSecret) {
+    private ConfirmSetupIntentParams(@NonNull String clientSecret) {
         this.mClientSecret = clientSecret;
         this.mReturnUrl = null;
         this.mPaymentMethodId = null;
@@ -39,11 +39,11 @@ public final class SetupIntentParams implements StripeIntentParams {
      * @return params that can be use to confirm a SetupIntent
      */
     @NonNull
-    public static SetupIntentParams createConfirmParams(
+    public static ConfirmSetupIntentParams createConfirmParams(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
             @NonNull String returnUrl) {
-        return new SetupIntentParams(clientSecret, returnUrl, paymentMethodId);
+        return new ConfirmSetupIntentParams(clientSecret, returnUrl, paymentMethodId);
     }
 
     /**
@@ -53,8 +53,8 @@ public final class SetupIntentParams implements StripeIntentParams {
      * @return params that can be used to retrieve a SetupIntent
      */
     @NonNull
-    public static SetupIntentParams createRetrieveParams(@NonNull String clientSecret) {
-        return new SetupIntentParams(clientSecret);
+    public static ConfirmSetupIntentParams createRetrieveParams(@NonNull String clientSecret) {
+        return new ConfirmSetupIntentParams(clientSecret);
     }
 
     @NonNull
@@ -87,14 +87,14 @@ public final class SetupIntentParams implements StripeIntentParams {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return this == obj || (obj instanceof SetupIntentParams &&
-                typedEquals((SetupIntentParams) obj));
+        return this == obj || (obj instanceof ConfirmSetupIntentParams &&
+                typedEquals((ConfirmSetupIntentParams) obj));
     }
 
-    private boolean typedEquals(@NonNull SetupIntentParams setupIntentParams) {
-        return ObjectUtils.equals(mReturnUrl, setupIntentParams.mReturnUrl)
-                && ObjectUtils.equals(mClientSecret, setupIntentParams.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, setupIntentParams.mPaymentMethodId);
+    private boolean typedEquals(@NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        return ObjectUtils.equals(mReturnUrl, confirmSetupIntentParams.mReturnUrl)
+                && ObjectUtils.equals(mClientSecret, confirmSetupIntentParams.mClientSecret)
+                && ObjectUtils.equals(mPaymentMethodId, confirmSetupIntentParams.mPaymentMethodId);
     }
 
     @Override
