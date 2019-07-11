@@ -15,9 +15,8 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import static com.stripe.android.model.StripeJsonUtils.optBoolean;
-import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optMap;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
@@ -29,18 +28,18 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 public final class SetupIntent extends StripeModel implements StripeIntent {
     private static final String VALUE_SETUP_INTENT = "setup_intent";
 
-    static final String FIELD_ID = "id";
-    static final String FIELD_OBJECT = "object";
-    static final String FIELD_CREATED = "created";
-    static final String FIELD_CLIENT_SECRET = "client_secret";
-    static final String FIELD_CUSTOMER = "customer";
-    static final String FIELD_DESCRIPTION = "description";
-    static final String FIELD_LIVEMODE = "livemode";
-    static final String FIELD_NEXT_ACTION = "next_action";
-    static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
-    static final String FIELD_STATUS = "status";
-    static final String FIELD_USAGE = "usage";
-    static final String FIELD_PAYMENT_METHOD = "payment_method";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_CLIENT_SECRET = "client_secret";
+    private static final String FIELD_CUSTOMER = "customer";
+    private static final String FIELD_DESCRIPTION = "description";
+    private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_NEXT_ACTION = "next_action";
+    private static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_USAGE = "usage";
+    private static final String FIELD_PAYMENT_METHOD = "payment_method";
 
     private static final String FIELD_NEXT_ACTION_TYPE = "type";
 
@@ -54,7 +53,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     @Nullable private final Map<String, Object> mNextAction;
     @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mPaymentMethodId;
-    @Nullable private final List<String> mPaymentMethodTypes;
+    @NonNull private final List<String> mPaymentMethodTypes;
     @Nullable private final Status mStatus;
     @Nullable private final Usage mUsage;
 
@@ -70,12 +69,10 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         mNextActionType = mNextAction != null ?
                 NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
         mPaymentMethodId = builder.mPaymentMethodId;
-        mPaymentMethodTypes = builder.mPaymentMethodTypes;
+        mPaymentMethodTypes = Objects.requireNonNull(builder.mPaymentMethodTypes);
         mStatus = builder.mStatus;
         mUsage = builder.mUsage;
     }
-
-
 
     @NonNull
     public static String parseIdFromClientSecret(@NonNull String clientSecret) {
@@ -101,7 +98,8 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return mDescription;
     }
 
-    public boolean getLiveMode() {
+    @Override
+    public boolean isLiveMode() {
         return mLiveMode;
     }
 
@@ -291,7 +289,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         boolean mLiveMode;
         @Nullable Map<String, Object> mNextAction;
         @Nullable String mPaymentMethodId;
-        @Nullable List<String> mPaymentMethodTypes;
+        List<String> mPaymentMethodTypes;
         @Nullable Status mStatus;
         @Nullable Usage mUsage;
 
@@ -350,7 +348,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         }
 
         @NonNull
-        Builder setPaymentMethodTypes(@Nullable List<String> paymentMethodTypes) {
+        Builder setPaymentMethodTypes(@NonNull List<String> paymentMethodTypes) {
             mPaymentMethodTypes = paymentMethodTypes;
             return this;
         }

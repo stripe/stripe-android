@@ -287,7 +287,7 @@ class PaymentController {
                                @NonNull String publishableKey) {
         final Transaction transaction =
                 mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
-                        mMessageVersionRegistry.getCurrent(), false,
+                        mMessageVersionRegistry.getCurrent(), stripeIntent.isLiveMode(),
                         stripe3ds2Fingerprint.directoryServer.name);
 
         ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
