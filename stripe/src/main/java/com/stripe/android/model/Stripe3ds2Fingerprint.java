@@ -60,8 +60,8 @@ public final class Stripe3ds2Fingerprint {
 
         @VisibleForTesting
         DirectoryServerEncryption(@NonNull String directoryServerId,
-                                          @NonNull String certificate,
-                                          @Nullable String keyId) throws CertificateException {
+                                  @NonNull String certificate,
+                                  @Nullable String keyId) throws CertificateException {
             this.directoryServerId = directoryServerId;
             this.certificate = generateCertificate(certificate);
             this.keyId = keyId;
@@ -77,7 +77,8 @@ public final class Stripe3ds2Fingerprint {
         }
 
         @NonNull
-        private Certificate generateCertificate(@NonNull String certificate) throws CertificateException {
+        private Certificate generateCertificate(@NonNull String certificate)
+                throws CertificateException {
             final CertificateFactory factory = CertificateFactory.getInstance("X.509");
             return factory.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
         }
