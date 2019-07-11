@@ -60,10 +60,10 @@ public final class Stripe3ds2Fingerprint {
 
         @VisibleForTesting
         DirectoryServerEncryption(@NonNull String directoryServerId,
-                                  @NonNull String certificate,
+                                  @NonNull String certificateData,
                                   @Nullable String keyId) throws CertificateException {
             this.directoryServerId = directoryServerId;
-            this.certificate = generateCertificate(certificate);
+            this.certificate = generateCertificate(certificateData);
             this.keyId = keyId;
         }
 
