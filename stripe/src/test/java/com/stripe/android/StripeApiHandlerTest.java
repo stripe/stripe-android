@@ -190,7 +190,9 @@ public class StripeApiHandlerTest {
                 "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"b23da28b-d611-46a8-93af-44ad57ce9c9d\",\"x\":\"hSwyaaAp3ppSGkpt7d9G8wnp3aIXelsZVo05EPpqetg\",\"y\":\"OUVOv9xPh5RYWapla0oz3vCJWRRXlDmppy5BGNeSl-A\"}",
                 "2.1.0",
                 10,
-                "stripe://payment-auth-return"
+
+                // TODO(mshafrir): change to "stripe://payment-auth-return"
+                null
         );
 
         final InvalidRequestException invalidRequestException = assertThrows(
@@ -203,8 +205,8 @@ public class StripeApiHandlerTest {
                     }
                 });
 
-        assertEquals("fallback_return_url", invalidRequestException.getParam());
-        assertEquals("parameter_unknown", invalidRequestException.getErrorCode());
+        assertEquals("source", invalidRequestException.getParam());
+        assertEquals("resource_missing", invalidRequestException.getErrorCode());
     }
 
     @Test
