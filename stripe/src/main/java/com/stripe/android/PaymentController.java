@@ -307,7 +307,9 @@ class PaymentController {
                 areqParams.getSDKEphemeralPublicKey(),
                 areqParams.getMessageVersion(),
                 timeout,
-                returnUrl != null ? returnUrl.toString() : null
+
+                // TODO(mshafrir): change to "returnUrl != null ? returnUrl.toString() : null"
+                null
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
