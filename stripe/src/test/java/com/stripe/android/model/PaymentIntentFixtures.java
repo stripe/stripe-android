@@ -10,6 +10,9 @@ import java.util.Objects;
 public final class PaymentIntentFixtures {
 
     @NonNull
+    public static final String KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee";
+
+    @NonNull
     public static final PaymentIntent PI_REQUIRES_VISA_3DS2 = Objects.requireNonNull(
             PaymentIntent.fromString("{\n" +
                     "    \"id\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx\",\n" +
@@ -109,7 +112,7 @@ public final class PaymentIntentFixtures {
                     "            \"directory_server_encryption\": {\n" +
                     "               \"directory_server_id\": \"A000000025\",\n" +
                     "               \"certificate\": " + JSONObject.quote(Stripe3ds2FingerprintTest.DS_CERT_DATA_RSA) + ",\n" +
-                    "               \"key_id\": \"7c4debe3f4af7f9d1569a2ffea4343c2566826ee\"\n" +
+                    "               \"key_id\": \"" + KEY_ID + "\"\n" +
                     "            }\n" +
                     "        }\n" +
                     "    },\n" +

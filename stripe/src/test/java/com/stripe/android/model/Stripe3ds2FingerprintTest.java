@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Objects;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +49,9 @@ public class Stripe3ds2FingerprintTest {
             "ByxdC5v3tXGcK56iQdtKVPhFGOOEBugw7AcuRzv3f1GhvzAQZg==\n" +
             "-----END CERTIFICATE-----\n";
 
-    public static final Certificate DS_CERTIFICATE_RSA = generateCertificate(DS_CERT_DATA_RSA);
+    @NonNull
+    public static final Certificate DS_CERTIFICATE_RSA =
+            Objects.requireNonNull(generateCertificate(DS_CERT_DATA_RSA));
 
     @Test
     public void create_with3ds2SdkData_shouldCreateObject() throws CertificateException {
