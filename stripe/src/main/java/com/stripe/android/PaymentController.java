@@ -36,6 +36,7 @@ import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
 import java.lang.ref.WeakReference;
+import java.security.cert.CertificateException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -228,8 +229,12 @@ class PaymentController {
                 final StripeIntent.SdkData sdkData =
                         Objects.requireNonNull(stripeIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
-                    begin3ds2Auth(activity, stripeIntent,
-                            Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                    try {
+                        begin3ds2Auth(activity, stripeIntent,
+                                Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                    } catch (CertificateException e) {
+                        handleError(activity, getRequestCode(stripeIntent), e);
+                    }
                 } else if (sdkData.is3ds1()) {
                     begin3ds1Auth(activity, getRequestCode(stripeIntent),
                             Stripe3dsRedirect.create(sdkData).getRedirectData());
@@ -288,7 +293,9 @@ class PaymentController {
         final Transaction transaction =
                 mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
                         mMessageVersionRegistry.getCurrent(), stripeIntent.isLiveMode(),
-                        stripe3ds2Fingerprint.directoryServer.name);
+                        stripe3ds2Fingerprint.directoryServer.name,
+                        stripe3ds2Fingerprint.directoryServerEncryption.certificate,
+                        stripe3ds2Fingerprint.directoryServerEncryption.keyId);
 
         ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
 

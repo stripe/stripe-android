@@ -2,7 +2,12 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
+import java.io.ByteArrayInputStream;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,7 +23,8 @@ public final class Stripe3ds2Fingerprint {
     @NonNull public final DirectoryServerEncryption directoryServerEncryption;
 
     @NonNull
-    public static Stripe3ds2Fingerprint create(@NonNull StripeIntent.SdkData sdkData) {
+    public static Stripe3ds2Fingerprint create(@NonNull StripeIntent.SdkData sdkData)
+            throws CertificateException {
         if (!sdkData.is3ds2()) {
             throw new IllegalArgumentException(
                     "Expected SdkData with type='stripe_3ds2_fingerprint'.");
@@ -43,29 +49,37 @@ public final class Stripe3ds2Fingerprint {
         this.directoryServerEncryption = directoryServerEncryption;
     }
 
-    public static class DirectoryServerEncryption {
+    public static final class DirectoryServerEncryption {
         private static final String FIELD_DIRECTORY_SERVER_ID = "directory_server_id";
         private static final String FIELD_CERTIFICATE = "certificate";
         private static final String FIELD_KEY_ID = "key_id";
 
         @NonNull public final String directoryServerId;
-        @NonNull public final String certificate;
+        @NonNull public final Certificate certificate;
         @Nullable public final String keyId;
 
-        private DirectoryServerEncryption(@NonNull String directoryServerId,
+        @VisibleForTesting
+        DirectoryServerEncryption(@NonNull String directoryServerId,
                                           @NonNull String certificate,
-                                          @Nullable String keyId) {
+                                          @Nullable String keyId) throws CertificateException {
             this.directoryServerId = directoryServerId;
-            this.certificate = certificate;
+            this.certificate = generateCertificate(certificate);
             this.keyId = keyId;
         }
 
         @NonNull
-        static DirectoryServerEncryption create(@NonNull Map<String, ?> data) {
+        static DirectoryServerEncryption create(@NonNull Map<String, ?> data)
+                throws CertificateException {
             return new DirectoryServerEncryption(
                     Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
                     Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
                     (String) data.get(FIELD_KEY_ID));
+        }
+
+        @NonNull
+        private Certificate generateCertificate(@NonNull String certificate) throws CertificateException {
+            final CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            return factory.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
         }
     }
 
