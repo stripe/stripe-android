@@ -67,10 +67,12 @@ public class StripePaymentAuthTest {
     @Test
     public void authenticatePayment_shouldAuth() {
         final Stripe stripe = createStripe();
-        stripe.authenticatePayment(mActivity, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2);
+        final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret();
+        stripe.authenticatePayment(mActivity, clientSecret);
         verify(mPaymentController).startAuth(
+                eq(stripe),
                 eq(mActivity),
-                eq(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2),
+                eq(clientSecret),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         );
     }

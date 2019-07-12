@@ -182,27 +182,27 @@ public class Stripe {
      * manual confirmation</a> flow.
      *
      * @param activity the {@link Activity} that is launching the payment authentication flow
-     * @param paymentIntent a confirmed {@link PaymentIntent} object
+     * @param clientSecret the `client_secret` property of a confirmed {@link PaymentIntent} object
      */
     public void authenticatePayment(@NonNull Activity activity,
-                                    @NonNull PaymentIntent paymentIntent,
+                                    @NonNull String clientSecret,
                                     @NonNull String publishableKey) {
-        mPaymentController.startAuth(activity, paymentIntent, publishableKey);
+        mPaymentController.startAuth(this, activity, clientSecret, publishableKey);
     }
 
     /**
-     * See {@link #authenticatePayment(Activity, PaymentIntent, String)}}
+     * See {@link #authenticatePayment(Activity, String, String)}}
      */
     public void authenticatePayment(@NonNull Activity activity,
-                                    @NonNull PaymentIntent paymentIntent) {
-        authenticatePayment(activity, paymentIntent, mDefaultPublishableKey);
+                                    @NonNull String clientSecret) {
+        authenticatePayment(activity, clientSecret, mDefaultPublishableKey);
     }
 
     /**
      * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
      * result of a PaymentIntent automatic confirmation
      * (see {@link #confirmPayment(Activity, PaymentIntentParams, String)}) or manual confirmation
-     * (see {@link #authenticatePayment(Activity, PaymentIntent, String)}})
+     * (see {@link #authenticatePayment(Activity, String, String)}})
      */
     public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
