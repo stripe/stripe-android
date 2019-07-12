@@ -6,7 +6,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class Stripe3dsRedirectTest {

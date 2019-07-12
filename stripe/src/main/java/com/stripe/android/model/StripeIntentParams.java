@@ -14,6 +14,6 @@ public interface StripeIntentParams {
     @NonNull
     Map<String, Object> toParamMap();
 
-    @Nullable
+    @NonNull
     String getClientSecret();
 }

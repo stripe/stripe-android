@@ -13,8 +13,8 @@ import android.widget.Toast;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.example.R;
@@ -148,8 +148,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
 
     private void retrievePaymentIntent() {
         final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
-                () -> mStripe.retrievePaymentIntentSynchronous(
-                        PaymentIntentParams.createRetrievePaymentIntentParams(mClientSecret)));
+                () -> mStripe.retrievePaymentIntentSynchronous(mClientSecret));
         final Disposable disposable = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe((d) ->
@@ -170,11 +169,11 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
         final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
                 () -> {
-                    final PaymentIntentParams paymentIntentParams = PaymentIntentParams
-                            .createConfirmPaymentIntentWithPaymentMethodCreateParams(
+                    final ConfirmPaymentIntentParams confirmPaymentIntentParams =
+                            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                                     paymentMethodCreateParams, mClientSecret, RETURN_URL);
                     return mStripe.confirmPaymentIntentSynchronous(
-                            paymentIntentParams,
+                            confirmPaymentIntentParams,
                             PaymentConfiguration.getInstance().getPublishableKey());
                 });
 

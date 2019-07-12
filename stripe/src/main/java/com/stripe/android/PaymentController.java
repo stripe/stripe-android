@@ -11,10 +11,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.model.Stripe3dsRedirect;
@@ -97,7 +97,7 @@ class PaymentController {
                    @NonNull final String publishableKey) {
         mApiKeyValidator.requireValid(publishableKey);
         new RetrieveIntentTask(stripe,
-                PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
+                clientSecret,
                 publishableKey,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
@@ -154,7 +154,7 @@ class PaymentController {
 
         @StripeIntentResult.Status final int authStatus = data.getIntExtra(
                 StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
-        new RetrieveIntentTask(stripe, createPaymentIntentParams(data), publishableKey,
+        new RetrieveIntentTask(stripe, getClientSecret(data), publishableKey,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -196,7 +196,7 @@ class PaymentController {
         @StripeIntentResult.Status final int authStatus = data.getIntExtra(
                 StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
 
-        new RetrieveIntentTask(stripe, createSetupIntentParams(data), publishableKey,
+        new RetrieveIntentTask(stripe, getClientSecret(data), publishableKey,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -218,16 +218,8 @@ class PaymentController {
 
     @VisibleForTesting
     @NonNull
-    PaymentIntentParams createPaymentIntentParams(@NonNull Intent data) {
-        final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
-        return PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
-    }
-
-    @VisibleForTesting
-    @NonNull
-    SetupIntentParams createSetupIntentParams(@NonNull Intent data) {
-        final String clientSecret = data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
-        return SetupIntentParams.createRetrieveParams(clientSecret);
+    String getClientSecret(@NonNull Intent data) {
+        return data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET);
     }
 
     /**
@@ -290,7 +282,7 @@ class PaymentController {
      * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
      */
     static int getRequestCode(@NonNull StripeIntentParams params) {
-        if (params instanceof PaymentIntentParams) {
+        if (params instanceof ConfirmPaymentIntentParams) {
             return PAYMENT_REQUEST_CODE;
         }
         return SETUP_REQUEST_CODE;
@@ -359,28 +351,27 @@ class PaymentController {
 
     private static final class RetrieveIntentTask extends ApiOperation<StripeIntent> {
         @NonNull private final Stripe mStripe;
-        @NonNull private final StripeIntentParams mParams;
+        @NonNull private final String mClientSecret;
         @NonNull private final String mPublishableKey;
 
         private RetrieveIntentTask(@NonNull Stripe stripe,
-                                   @NonNull StripeIntentParams params,
+                                   @NonNull String clientSecret,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
             mStripe = stripe;
-            mParams = params;
+            mClientSecret = clientSecret;
             mPublishableKey = publishableKey;
         }
 
         @Nullable
         @Override
         StripeIntent getResult() throws StripeException {
-            if (mParams instanceof PaymentIntentParams) {
+            if (mClientSecret.startsWith("pi_")) {
                 return mStripe.retrievePaymentIntentSynchronous(
-                        (PaymentIntentParams) mParams, mPublishableKey);
-            } else if (mParams instanceof SetupIntentParams) {
-                return mStripe.retrieveSetupIntentSynchronous(
-                        (SetupIntentParams) mParams, mPublishableKey);
+                        mClientSecret, mPublishableKey);
+            } else if (mClientSecret.startsWith("seti_")) {
+                return mStripe.retrieveSetupIntentSynchronous(mClientSecret, mPublishableKey);
             }
             return null;
         }
@@ -404,12 +395,12 @@ class PaymentController {
         @Nullable
         @Override
         StripeIntent getResult() throws StripeException {
-            if (mParams instanceof PaymentIntentParams) {
+            if (mParams instanceof ConfirmPaymentIntentParams) {
                 return mStripe.confirmPaymentIntentSynchronous(
-                        (PaymentIntentParams) mParams, mPublishableKey);
-            } else if (mParams instanceof SetupIntentParams) {
+                        (ConfirmPaymentIntentParams) mParams, mPublishableKey);
+            } else if (mParams instanceof ConfirmSetupIntentParams) {
                 return mStripe.confirmSetupIntentSynchronous(
-                        (SetupIntentParams) mParams, mPublishableKey);
+                        (ConfirmSetupIntentParams) mParams, mPublishableKey);
             }
             return null;
         }

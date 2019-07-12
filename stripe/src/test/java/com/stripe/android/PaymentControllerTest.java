@@ -9,10 +9,9 @@ import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentIntentFixtures;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntentFixtures;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
@@ -24,8 +23,6 @@ import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
 import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
-import java.util.Objects;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +32,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -205,10 +204,9 @@ public class PaymentControllerTest {
     @Test
     public void getRequestCode_withParams_correctCodeReturned() {
         assertEquals(PaymentController.PAYMENT_REQUEST_CODE,
-                PaymentController.getRequestCode(PaymentIntentParams.createCustomParams()));
-        assertEquals(PaymentController.SETUP_REQUEST_CODE,
                 PaymentController.getRequestCode(
-                        SetupIntentParams.createRetrieveParams("")));
+                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                                "pm_123", "client_secret", "")));
     }
 
     @Test
@@ -223,29 +221,13 @@ public class PaymentControllerTest {
     }
 
     @Test
-    public void createPaymentIntentParams_shouldCreateParams() {
+    public void getClientSecret_shouldGetClientSecretFromIntent() {
         final Intent data = new Intent()
                 .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
-
         assertNotNull(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
-        final PaymentIntentParams expectedPaymentParams = PaymentIntentParams.createCustomParams()
-                .setClientSecret(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret());
-
-        assertEquals(expectedPaymentParams, mController.createPaymentIntentParams(data));
-    }
-
-    @Test
-    public void createSetupIntentParams_shouldCreateParams() {
-        final Intent data = new Intent()
-                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
-                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
-
-        assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
-        final SetupIntentParams expectedSetupParams = SetupIntentParams.createRetrieveParams(
-                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
-
-        assertEquals(expectedSetupParams, mController.createSetupIntentParams(data));
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret(),
+                mController.getClientSecret(data));
     }
 
     @Test
@@ -287,8 +269,7 @@ public class PaymentControllerTest {
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         when(mStripe.retrieveSetupIntentSynchronous(
-                eq(SetupIntentParams.createRetrieveParams(
-                        SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret())),
+                eq(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret()),
                 eq(PUBLISHABLE_KEY)))
                 .thenReturn(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT);
 

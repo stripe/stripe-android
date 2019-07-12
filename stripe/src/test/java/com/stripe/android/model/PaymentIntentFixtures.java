@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 
 import org.json.JSONObject;
-import org.json.JSONString;
 
 import java.util.Objects;
 

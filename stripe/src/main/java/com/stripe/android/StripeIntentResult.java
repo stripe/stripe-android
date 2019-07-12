@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.StripeIntent;
 
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * A model representing the result of a {@link StripeIntent} confirmation or authentication attempt
- * via {@link Stripe#confirmPayment(Activity, PaymentIntentParams)} or
+ * via {@link Stripe#confirmPayment(Activity, ConfirmPaymentIntentParams)} or
  * {@link Stripe#authenticatePayment(Activity, PaymentIntent)}}
  *
  * {@link #getIntent()} represents a {@link StripeIntent} retrieved after

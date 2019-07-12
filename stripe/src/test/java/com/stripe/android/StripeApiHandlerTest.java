@@ -11,8 +11,8 @@ import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -279,14 +279,14 @@ public class StripeApiHandlerTest {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publishableKey = "put a public key that matches the private key here";
 
-        final PaymentIntentParams paymentIntentParams =
-                PaymentIntentParams.createConfirmPaymentIntentWithSourceDataParams(
+        final ConfirmPaymentIntentParams confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithSourceParams(
                         SourceParams.createCardParams(CARD),
                         clientSecret,
                         "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
-                paymentIntentParams, ApiRequest.Options.create(publishableKey));
+                confirmPaymentIntentParams, ApiRequest.Options.create(publishableKey));
 
         assertNotNull(paymentIntent);
     }
@@ -299,14 +299,14 @@ public class StripeApiHandlerTest {
         String publishableKey = "put a public key that matches the private key here";
         String sourceId = "id of the source created on the backend";
 
-        final PaymentIntentParams paymentIntentParams =
-                PaymentIntentParams.createConfirmPaymentIntentWithSourceIdParams(
+        final ConfirmPaymentIntentParams confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithSourceId(
                         sourceId,
                         clientSecret,
                         "yourapp://post-authentication-return-url"
                 );
         final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
-                paymentIntentParams, ApiRequest.Options.create(publishableKey));
+                confirmPaymentIntentParams, ApiRequest.Options.create(publishableKey));
         assertNotNull(paymentIntent);
     }
 
@@ -318,7 +318,7 @@ public class StripeApiHandlerTest {
         String publishableKey = "put a public key that matches the private key here";
 
         final PaymentIntent paymentIntent = mApiHandler.retrievePaymentIntent(
-                PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
+                clientSecret,
                 ApiRequest.Options.create(publishableKey)
         );
         assertNotNull(paymentIntent);

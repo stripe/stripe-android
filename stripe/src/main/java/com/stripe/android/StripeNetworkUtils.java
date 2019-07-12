@@ -6,7 +6,7 @@ import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
-import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.Token;
 
 import java.util.AbstractMap;
@@ -152,13 +152,13 @@ public class StripeNetworkUtils {
     }
 
     void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
-        final Object sourceData = params.get(PaymentIntentParams.API_PARAM_SOURCE_DATA);
+        final Object sourceData = params.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA);
         if (sourceData instanceof Map) {
             //noinspection unchecked
             ((Map<String, Object>) sourceData).putAll(createUidParams());
         } else {
             final Object paymentMethodData = params
-                    .get(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
+                    .get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
             if (paymentMethodData instanceof Map) {
                 //noinspection unchecked
                 ((Map) paymentMethodData).putAll(createUidParams());
