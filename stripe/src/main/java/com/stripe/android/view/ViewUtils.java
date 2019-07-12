@@ -139,7 +139,7 @@ class ViewUtils {
             return false;
         }
 
-        if (Card.AMERICAN_EXPRESS.equals(cardBrand)) {
+        if (Card.CardBrand.AMERICAN_EXPRESS.equals(cardBrand)) {
             return cvcText.trim().length() == CVC_LENGTH_AMERICAN_EXPRESS;
         } else {
             return cvcText.trim().length() == CVC_LENGTH_COMMON;
@@ -163,7 +163,7 @@ class ViewUtils {
             spacelessCardNumber = spacelessCardNumber.substring(0, 16);
         }
         String[] numberGroups;
-        if (brand.equals(Card.AMERICAN_EXPRESS)) {
+        if (brand.equals(Card.CardBrand.AMERICAN_EXPRESS)) {
             numberGroups = new String[3];
 
             int length = spacelessCardNumber.length();

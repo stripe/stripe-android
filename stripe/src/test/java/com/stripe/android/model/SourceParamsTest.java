@@ -49,8 +49,8 @@ public class SourceParamsTest {
                 "jdog@lesmis.net",
                 "stripe://start");
 
-        assertEquals(Source.ALIPAY, params.getType());
-        assertEquals(Source.REUSABLE, params.getUsage());
+        assertEquals(Source.SourceType.ALIPAY, params.getType());
+        assertEquals(Source.Usage.REUSABLE, params.getUsage());
         assertNull(params.getAmount());
         assertEquals("usd", params.getCurrency());
         assertNotNull(params.getRedirect());
@@ -69,8 +69,8 @@ public class SourceParamsTest {
                 null,
                 "stripe://start");
 
-        assertEquals(Source.ALIPAY, params.getType());
-        assertEquals(Source.REUSABLE, params.getUsage());
+        assertEquals(Source.SourceType.ALIPAY, params.getType());
+        assertEquals(Source.Usage.REUSABLE, params.getUsage());
         assertNull(params.getAmount());
         assertEquals("cad", params.getCurrency());
         assertNotNull(params.getRedirect());
@@ -90,7 +90,7 @@ public class SourceParamsTest {
                 "jane@test.com",
                 "stripe://testactivity");
 
-        assertEquals(Source.ALIPAY, params.getType());
+        assertEquals(Source.SourceType.ALIPAY, params.getType());
         assertNotNull(params.getAmount());
         assertEquals(1000L, params.getAmount().longValue());
         assertEquals("aud", params.getCurrency());
@@ -110,7 +110,7 @@ public class SourceParamsTest {
                 null,
                 "stripe://testactivity2");
 
-        assertEquals(Source.ALIPAY, params.getType());
+        assertEquals(Source.SourceType.ALIPAY, params.getType());
         assertNotNull(params.getAmount());
         assertEquals(555L, params.getAmount().longValue());
         assertEquals("eur", params.getCurrency());
@@ -130,7 +130,7 @@ public class SourceParamsTest {
                 "descriptor",
                 "en");
 
-        assertEquals(Source.BANCONTACT, params.getType());
+        assertEquals(Source.SourceType.BANCONTACT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getAmount());
         assertEquals(1000L, params.getAmount().longValue());
@@ -155,13 +155,13 @@ public class SourceParamsTest {
                 "en");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.BANCONTACT);
+        expectedMap.put("type", Source.SourceType.BANCONTACT);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 1000L);
         expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "return/url/3000"); }});
-        expectedMap.put(Source.BANCONTACT,
+        expectedMap.put(Source.SourceType.BANCONTACT,
                 new HashMap<String, Object>() {{
                     put("statement_descriptor", "descriptor");
                     put("preferred_language", "en");
@@ -284,7 +284,7 @@ public class SourceParamsTest {
                 "stripe://return",
                 "stripe descriptor");
 
-        assertEquals(Source.EPS, params.getType());
+        assertEquals(Source.SourceType.EPS, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertEquals("Stripe", Objects.requireNonNull(params.getOwner()).get("name"));
         assertEquals("stripe://return",
@@ -303,13 +303,13 @@ public class SourceParamsTest {
                 "stripe descriptor");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.EPS);
+        expectedMap.put("type", Source.SourceType.EPS);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 150L);
         expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
-        expectedMap.put(Source.EPS,
+        expectedMap.put(Source.SourceType.EPS,
                 new HashMap<String, Object>() {{
                     put("statement_descriptor", "stripe descriptor");
                 }});
@@ -326,7 +326,7 @@ public class SourceParamsTest {
                 null);
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.EPS);
+        expectedMap.put("type", Source.SourceType.EPS);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 150L);
         expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
@@ -344,7 +344,7 @@ public class SourceParamsTest {
                 "stripe://return",
                 "stripe descriptor");
 
-        assertEquals(Source.GIROPAY, params.getType());
+        assertEquals(Source.SourceType.GIROPAY, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getAmount());
         assertEquals(150L, params.getAmount().longValue());
@@ -366,13 +366,13 @@ public class SourceParamsTest {
                 "stripe descriptor");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.GIROPAY);
+        expectedMap.put("type", Source.SourceType.GIROPAY);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 150L);
         expectedMap.put("owner", new HashMap<String, Object>() {{ put("name", "Stripe"); }});
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
-        expectedMap.put(Source.GIROPAY,
+        expectedMap.put(Source.SourceType.GIROPAY,
                 new HashMap<String, Object>() {{
                     put("statement_descriptor", "stripe descriptor");
                 }});
@@ -388,7 +388,7 @@ public class SourceParamsTest {
                 "stripe://return",
                 null);
 
-        assertEquals(Source.GIROPAY, params.getType());
+        assertEquals(Source.SourceType.GIROPAY, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getAmount());
         assertEquals(150L, params.getAmount().longValue());
@@ -407,7 +407,7 @@ public class SourceParamsTest {
                 "stripe://anotherurl",
                 "something you bought",
                 "SVB");
-        assertEquals(Source.IDEAL, params.getType());
+        assertEquals(Source.SourceType.IDEAL, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getAmount());
         assertEquals(900L, params.getAmount().longValue());
@@ -432,14 +432,14 @@ public class SourceParamsTest {
                 "SVB");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.IDEAL);
+        expectedMap.put("type", Source.SourceType.IDEAL);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 900L);
         expectedMap.put("owner",
                 new HashMap<String, Object>() {{ put("name", "Default Name"); }});
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://anotherurl"); }});
-        expectedMap.put(Source.IDEAL,
+        expectedMap.put(Source.SourceType.IDEAL,
                 new HashMap<String, Object>() {{
                     put("statement_descriptor", "something you bought");
                     put("bank", "SVB");
@@ -457,7 +457,7 @@ public class SourceParamsTest {
                 "jane@test.com",
                 "stripe://testactivity");
 
-        assertEquals(Source.P24, params.getType());
+        assertEquals(Source.SourceType.P24, params.getType());
         assertNotNull(params.getAmount());
         assertEquals(1000L, params.getAmount().longValue());
         assertEquals("eur", params.getCurrency());
@@ -477,7 +477,7 @@ public class SourceParamsTest {
                 "jane@test.com",
                 "stripe://testactivity");
 
-        assertEquals(Source.P24, params.getType());
+        assertEquals(Source.SourceType.P24, params.getType());
         assertNotNull(params.getAmount());
         assertEquals(1000L, params.getAmount().longValue());
         assertEquals("eur", params.getCurrency());
@@ -495,7 +495,7 @@ public class SourceParamsTest {
                 "stripe://testactivity",
                 "multibancoholder@stripe.com");
 
-        assertEquals(Source.MULTIBANCO, params.getType());
+        assertEquals(Source.SourceType.MULTIBANCO, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertEquals(150L, Objects.requireNonNull(params.getAmount()).longValue());
         assertEquals("stripe://testactivity",
@@ -512,7 +512,7 @@ public class SourceParamsTest {
                 "multibancoholder@stripe.com");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.MULTIBANCO);
+        expectedMap.put("type", Source.SourceType.MULTIBANCO);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 150L);
         expectedMap.put("owner",
@@ -534,7 +534,7 @@ public class SourceParamsTest {
                 "90210",
                 "EI");
 
-        assertEquals(Source.SEPA_DEBIT, params.getType());
+        assertEquals(Source.SourceType.SEPA_DEBIT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getOwner());
         assertEquals("Jai Testa", params.getOwner().get("name"));
@@ -560,7 +560,7 @@ public class SourceParamsTest {
                 "EI");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.SEPA_DEBIT);
+        expectedMap.put("type", Source.SourceType.SEPA_DEBIT);
         expectedMap.put("currency", Source.EURO);
 
         final Map<String, Object> addressMap = new HashMap<>();
@@ -576,9 +576,9 @@ public class SourceParamsTest {
                     put("address", addressMap);
                 }});
 
-        expectedMap.put(Source.SEPA_DEBIT,
+        expectedMap.put(Source.SourceType.SEPA_DEBIT,
                 new HashMap<String, Object>() {{ put("iban", "ibaniban"); }});
-                assertEquals(Source.SEPA_DEBIT, params.getType());
+                assertEquals(Source.SourceType.SEPA_DEBIT, params.getType());
 
         Map<String, Object> actualMap = params.toParamMap();
         JsonTestUtils.assertMapEquals(expectedMap, actualMap);
@@ -592,7 +592,7 @@ public class SourceParamsTest {
                 "UK",
                 "a thing you bought");
 
-        assertEquals(Source.SOFORT, params.getType());
+        assertEquals(Source.SourceType.SOFORT, params.getType());
         assertEquals(Source.EURO, params.getCurrency());
         assertNotNull(params.getAmount());
         assertEquals(50000L, params.getAmount().longValue());
@@ -614,12 +614,12 @@ public class SourceParamsTest {
                 "a thing you bought");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.SOFORT);
+        expectedMap.put("type", Source.SourceType.SOFORT);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 50000L);
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "example://return"); }});
-        expectedMap.put(Source.SOFORT,
+        expectedMap.put(Source.SourceType.SOFORT,
                 new HashMap<String, Object>() {{
                     put("country", "UK");
                     put("statement_descriptor", "a thing you bought");
@@ -636,7 +636,7 @@ public class SourceParamsTest {
                 "stripe://returnaddress",
                 "card_id_123");
 
-        assertEquals(Source.THREE_D_SECURE, params.getType());
+        assertEquals(Source.SourceType.THREE_D_SECURE, params.getType());
         // Brazilian Real
         assertEquals("brl", params.getCurrency());
         assertNotNull(params.getAmount());
@@ -659,12 +659,12 @@ public class SourceParamsTest {
                 "card_id_123");
 
         Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("type", Source.THREE_D_SECURE);
+        expectedMap.put("type", Source.SourceType.THREE_D_SECURE);
         expectedMap.put("currency", "brl");
         expectedMap.put("amount", 99000L);
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://returnaddress"); }});
-        expectedMap.put(Source.THREE_D_SECURE,
+        expectedMap.put(Source.SourceType.THREE_D_SECURE,
                 new HashMap<String, Object>() {{ put("card", "card_id_123"); }});
 
         JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
@@ -701,7 +701,7 @@ public class SourceParamsTest {
     public void setCustomType_forEmptyParams_setsTypeToUnknown() {
         final SourceParams params = SourceParams.createCustomParams();
         params.setTypeRaw("dogecoin");
-        assertEquals(Source.UNKNOWN, params.getType());
+        assertEquals(Source.SourceType.UNKNOWN, params.getType());
         assertEquals("dogecoin", params.getTypeRaw());
     }
 
@@ -713,7 +713,7 @@ public class SourceParamsTest {
                 "stripe://returnaddress",
                 "card_id_123");
         params.setTypeRaw("bar_tab");
-        assertEquals(Source.UNKNOWN, params.getType());
+        assertEquals(Source.SourceType.UNKNOWN, params.getType());
         assertEquals("bar_tab", params.getTypeRaw());
     }
 

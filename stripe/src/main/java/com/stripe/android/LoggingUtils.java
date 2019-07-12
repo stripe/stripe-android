@@ -31,35 +31,34 @@ class LoggingUtils {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            EVENT_TOKEN_CREATION,
-            EVENT_ADD_PAYMENT_METHOD,
-            EVENT_ATTACH_PAYMENT_METHOD,
-            EVENT_DETACH_PAYMENT_METHOD,
-            EVENT_SOURCE_CREATION,
-            EVENT_ADD_SOURCE,
-            EVENT_DEFAULT_SOURCE,
-            EVENT_DELETE_SOURCE,
-            EVENT_SET_SHIPPING_INFO,
-            EVENT_CONFIRM_PAYMENT_INTENT,
-            EVENT_RETRIEVE_PAYMENT_INTENT,
-            EVENT_CONFIRM_SETUP_INTENT,
-            EVENT_RETRIEVE_SETUP_INTENT})
-    @interface LoggingEventName {
+            EventName.TOKEN_CREATION,
+            EventName.ADD_PAYMENT_METHOD,
+            EventName.ATTACH_PAYMENT_METHOD,
+            EventName.DETACH_PAYMENT_METHOD,
+            EventName.SOURCE_CREATION,
+            EventName.ADD_SOURCE,
+            EventName.DEFAULT_SOURCE,
+            EventName.DELETE_SOURCE,
+            EventName.SET_SHIPPING_INFO,
+            EventName.CONFIRM_PAYMENT_INTENT,
+            EventName.RETRIEVE_PAYMENT_INTENT,
+            EventName.CONFIRM_SETUP_INTENT,
+            EventName.RETRIEVE_SETUP_INTENT})
+    @interface EventName {
+        String TOKEN_CREATION = "token_creation";
+        String ADD_PAYMENT_METHOD = "add_payment_method";
+        String ATTACH_PAYMENT_METHOD = "attach_payment_method";
+        String DETACH_PAYMENT_METHOD = "detach_payment_method";
+        String SOURCE_CREATION = "source_creation";
+        String ADD_SOURCE = "add_source";
+        String DEFAULT_SOURCE = "default_source";
+        String DELETE_SOURCE = "delete_source";
+        String SET_SHIPPING_INFO = "set_shipping_info";
+        String CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation";
+        String RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
+        String CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
+        String RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
     }
-
-    static final String EVENT_TOKEN_CREATION = "token_creation";
-    static final String EVENT_ADD_PAYMENT_METHOD = "add_payment_method";
-    static final String EVENT_ATTACH_PAYMENT_METHOD = "attach_payment_method";
-    static final String EVENT_DETACH_PAYMENT_METHOD = "detach_payment_method";
-    static final String EVENT_SOURCE_CREATION = "source_creation";
-    static final String EVENT_ADD_SOURCE = "add_source";
-    static final String EVENT_DEFAULT_SOURCE = "default_source";
-    static final String EVENT_DELETE_SOURCE = "delete_source";
-    static final String EVENT_SET_SHIPPING_INFO = "set_shipping_info";
-    static final String EVENT_CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation";
-    static final String EVENT_RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
-    static final String EVENT_CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
-    static final String EVENT_RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
     static final String FIELD_ANALYTICS_UA = "analytics_ua";
@@ -118,7 +117,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 tokenType,
-                publishableApiKey, EVENT_TOKEN_CREATION);
+                publishableApiKey, EventName.TOKEN_CREATION);
     }
 
     @NonNull
@@ -129,7 +128,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey, EVENT_ADD_PAYMENT_METHOD);
+                publishableApiKey, EventName.ADD_PAYMENT_METHOD);
     }
 
     @NonNull
@@ -141,7 +140,7 @@ class LoggingUtils {
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableApiKey, EVENT_SOURCE_CREATION);
+                publishableApiKey, EventName.SOURCE_CREATION);
     }
 
     @NonNull
@@ -153,7 +152,7 @@ class LoggingUtils {
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableKey, EVENT_ADD_SOURCE);
+                publishableKey, EventName.ADD_SOURCE);
     }
 
     @NonNull
@@ -164,7 +163,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableKey, EVENT_DELETE_SOURCE);
+                publishableKey, EventName.DELETE_SOURCE);
     }
 
     @NonNull
@@ -175,7 +174,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableKey, EVENT_ATTACH_PAYMENT_METHOD);
+                publishableKey, EventName.ATTACH_PAYMENT_METHOD);
     }
 
     @NonNull
@@ -186,7 +185,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableKey, EVENT_DETACH_PAYMENT_METHOD);
+                publishableKey, EventName.DETACH_PAYMENT_METHOD);
     }
 
     @NonNull
@@ -198,7 +197,7 @@ class LoggingUtils {
                 productUsageTokens,
                 sourceType,
                 null,
-                publishableApiKey, EVENT_CONFIRM_PAYMENT_INTENT);
+                publishableApiKey, EventName.CONFIRM_PAYMENT_INTENT);
     }
 
     @NonNull
@@ -209,7 +208,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey, EVENT_RETRIEVE_PAYMENT_INTENT);
+                publishableApiKey, EventName.RETRIEVE_PAYMENT_INTENT);
     }
 
     @NonNull
@@ -220,7 +219,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey, EVENT_CONFIRM_SETUP_INTENT);
+                publishableApiKey, EventName.CONFIRM_SETUP_INTENT);
     }
 
     @NonNull
@@ -231,7 +230,7 @@ class LoggingUtils {
                 productUsageTokens,
                 null,
                 null,
-                publishableApiKey, EVENT_RETRIEVE_SETUP_INTENT);
+                publishableApiKey, EventName.RETRIEVE_SETUP_INTENT);
     }
 
     @NonNull
@@ -240,7 +239,7 @@ class LoggingUtils {
             @Nullable @Source.SourceType String sourceType,
             @Nullable @Token.TokenType String tokenType,
             @NonNull String publishableApiKey,
-            @NonNull @LoggingEventName String eventName) {
+            @NonNull @EventName String eventName) {
         final Map<String, Object> paramsObject = new HashMap<>();
         paramsObject.put(FIELD_ANALYTICS_UA, getAnalyticsUa());
         paramsObject.put(FIELD_EVENT, getEventParamName(eventName));
@@ -312,7 +311,7 @@ class LoggingUtils {
     }
 
     @NonNull
-    static String getEventParamName(@NonNull @LoggingEventName String eventName) {
+    static String getEventParamName(@NonNull @EventName String eventName) {
         return ANALYTICS_NAME + '.' + eventName;
     }
 }

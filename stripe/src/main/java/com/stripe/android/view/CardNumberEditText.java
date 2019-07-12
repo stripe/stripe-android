@@ -38,7 +38,8 @@ public class CardNumberEditText extends StripeEditText {
     private static final Set<Integer> SPACE_SET_AMEX =
             new HashSet<>(Arrays.asList(SPACES_ARRAY_AMEX));
 
-    @VisibleForTesting @Card.CardBrand String mCardBrand = Card.UNKNOWN;
+    @VisibleForTesting @Card.CardBrand
+    String mCardBrand = Card.CardBrand.UNKNOWN;
     private CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberCompleteListener mCardNumberCompleteListener;
     private int mLengthMax = 19;
@@ -133,7 +134,7 @@ public class CardNumberEditText extends StripeEditText {
             int editActionStart,
             int editActionAddition) {
         int newPosition, gapsJumped = 0;
-        Set<Integer> gapSet = Card.AMERICAN_EXPRESS.equals(mCardBrand)
+        Set<Integer> gapSet = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand)
                 ? SPACE_SET_AMEX
                 : SPACE_SET_COMMON;
         boolean skipBack = false;
@@ -260,7 +261,8 @@ public class CardNumberEditText extends StripeEditText {
     }
 
     private static int getLengthForBrand(@Card.CardBrand String cardBrand) {
-        if (Card.AMERICAN_EXPRESS.equals(cardBrand) || Card.DINERS_CLUB.equals(cardBrand)) {
+        if (Card.CardBrand.AMERICAN_EXPRESS.equals(cardBrand) ||
+                Card.CardBrand.DINERS_CLUB.equals(cardBrand)) {
             return MAX_LENGTH_AMEX_DINERS;
         } else {
             return MAX_LENGTH_COMMON;

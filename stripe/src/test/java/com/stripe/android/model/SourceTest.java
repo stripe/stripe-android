@@ -215,7 +215,7 @@ public class SourceTest {
     public void fromJsonString_withCustomType_createsSourceWithCustomType() {
         Source customSource = Source.fromString(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE);
         assertNotNull("Parsing failure", customSource);
-        assertEquals(Source.UNKNOWN, customSource.getType());
+        assertEquals(Source.SourceType.UNKNOWN, customSource.getType());
         assertEquals(DOGE_COIN, customSource.getTypeRaw());
         assertNull(customSource.getSourceTypeModel());
         assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
@@ -233,10 +233,10 @@ public class SourceTest {
         final Source source = Source.fromString(CREATED_CARD_JSON);
         assertNotNull(source);
         assertEquals("card_1ELxrOCRMbs6FrXfdxOGjnaD", source.getId());
-        assertEquals(Source.CARD, source.getType());
+        assertEquals(Source.SourceType.CARD, source.getType());
         assertTrue(source.getSourceTypeModel() instanceof SourceCardData);
 
         final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
-        assertEquals(Card.VISA, sourceCardData.getBrand());
+        assertEquals(Card.CardBrand.VISA, sourceCardData.getBrand());
     }
 }

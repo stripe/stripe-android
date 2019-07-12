@@ -285,7 +285,7 @@ public class Stripe {
         createTokenFromParams(
                 mStripeNetworkUtils.createBankAccountTokenParams(bankAccount),
                 publishableKey,
-                Token.TYPE_BANK_ACCOUNT,
+                Token.TokenType.BANK_ACCOUNT,
                 executor,
                 callback);
     }
@@ -321,7 +321,7 @@ public class Stripe {
         createTokenFromParams(
                 createPersonalIdTokenParams(personalId),
                 publishableKey,
-                Token.TYPE_PII,
+                Token.TokenType.PII,
                 executor,
                 callback);
     }
@@ -377,7 +377,7 @@ public class Stripe {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.createBankAccountTokenParams(bankAccount),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
-                Token.TYPE_BANK_ACCOUNT
+                Token.TokenType.BANK_ACCOUNT
         );
     }
 
@@ -412,7 +412,7 @@ public class Stripe {
         createTokenFromParams(
                 createUpdateCvcTokenParams(cvc),
                 publishableKey,
-                Token.TYPE_CVC_UPDATE,
+                Token.TokenType.CVC_UPDATE,
                 executor,
                 callback);
     }
@@ -538,7 +538,7 @@ public class Stripe {
         createTokenFromParams(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 publishableKey,
-                Token.TYPE_CARD,
+                Token.TokenType.CARD,
                 executor,
                 callback);
     }
@@ -772,7 +772,7 @@ public class Stripe {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
-                Token.TYPE_CARD
+                Token.TokenType.CARD
         );
     }
 
@@ -822,7 +822,7 @@ public class Stripe {
         return mApiHandler.createToken(
                 createPersonalIdTokenParams(personalId),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
-                Token.TYPE_PII
+                Token.TokenType.PII
         );
     }
 
@@ -872,7 +872,7 @@ public class Stripe {
         return mApiHandler.createToken(
                 createUpdateCvcTokenParams(cvc),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
-                Token.TYPE_CVC_UPDATE
+                Token.TokenType.CVC_UPDATE
         );
     }
 
@@ -924,7 +924,7 @@ public class Stripe {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
                     ApiRequest.Options.create(publishableKey, mStripeAccount),
-                    Token.TYPE_ACCOUNT
+                    Token.TokenType.ACCOUNT
             );
         } catch (CardException exception) {
             // Should never occur. CardException is only for card related requests.

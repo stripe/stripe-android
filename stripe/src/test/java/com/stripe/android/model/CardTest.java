@@ -104,62 +104,62 @@ public class CardTest {
 
     @Test
     public void asCardBrand_whenNonemptyButWeird_returnsUnknown() {
-        assertEquals(Card.UNKNOWN, asCardBrand("Awesome New Brand"));
+        assertEquals(Card.CardBrand.UNKNOWN, asCardBrand("Awesome New CardBrand"));
     }
 
     @Test
     public void asCardBrand_whenMastercard_returnsMasterCard() {
-        assertEquals(Card.MASTERCARD, asCardBrand("MasterCard"));
+        assertEquals(Card.CardBrand.MASTERCARD, asCardBrand("MasterCard"));
     }
 
     @Test
     public void asCardBrand_whenCapitalizedStrangely_stillRecognizesCard() {
-        assertEquals(Card.MASTERCARD, asCardBrand("Mastercard"));
+        assertEquals(Card.CardBrand.MASTERCARD, asCardBrand("Mastercard"));
     }
 
     @Test
     public void asCardBrand_whenVisa_returnsVisa() {
-        assertEquals(Card.VISA, asCardBrand("visa"));
+        assertEquals(Card.CardBrand.VISA, asCardBrand("visa"));
     }
 
     @Test
     public void asCardBrand_whenJcb_returnsJcb() {
-        assertEquals(Card.JCB, asCardBrand("Jcb"));
+        assertEquals(Card.CardBrand.JCB, asCardBrand("Jcb"));
     }
 
     @Test
     public void asCardBrand_whenDiscover_returnsDiscover() {
-        assertEquals(Card.DISCOVER, asCardBrand("Discover"));
+        assertEquals(Card.CardBrand.DISCOVER, asCardBrand("Discover"));
     }
 
     @Test
     public void asCardBrand_whenDinersClub_returnsDinersClub() {
-        assertEquals(Card.DINERS_CLUB, asCardBrand("Diners Club"));
+        assertEquals(Card.CardBrand.DINERS_CLUB, asCardBrand("Diners Club"));
     }
 
     @Test
     public void asCardBrand_whenAmericanExpress_returnsAmericanExpress() {
-        assertEquals(Card.AMERICAN_EXPRESS, asCardBrand("American express"));
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, asCardBrand("American express"));
     }
 
     @Test
     public void asCardBrand_whenUnionPay_returnsUnionPay() {
-        assertEquals(Card.UNIONPAY, asCardBrand("UnionPay"));
+        assertEquals(Card.CardBrand.UNIONPAY, asCardBrand("UnionPay"));
     }
 
     @Test
     public void asFundingType_whenDebit_returnsDebit() {
-        assertEquals(Card.FUNDING_DEBIT, asFundingType("debit"));
+        assertEquals(Card.FundingType.DEBIT, asFundingType("debit"));
     }
 
     @Test
     public void asFundingType_whenCredit_returnsCredit() {
-        assertEquals(Card.FUNDING_CREDIT, asFundingType("credit"));
+        assertEquals(Card.FundingType.CREDIT, asFundingType("credit"));
     }
 
     @Test
     public void asFundingType_whenCreditAndCapitalized_returnsCredit() {
-        assertEquals(Card.FUNDING_CREDIT, asFundingType("Credit"));
+        assertEquals(Card.FundingType.CREDIT, asFundingType("Credit"));
     }
 
     @Test
@@ -174,12 +174,12 @@ public class CardTest {
 
     @Test
     public void asFundingType_whenUnknown_returnsUnknown() {
-        assertEquals(Card.FUNDING_UNKNOWN, asFundingType("unknown"));
+        assertEquals(Card.FundingType.UNKNOWN, asFundingType("unknown"));
     }
 
     @Test
     public void asFundingType_whenGobbledegook_returnsUnkown() {
-        assertEquals(Card.FUNDING_UNKNOWN, asFundingType("personal iou"));
+        assertEquals(Card.FundingType.UNKNOWN, asFundingType("personal iou"));
     }
 
     @Test
@@ -191,43 +191,43 @@ public class CardTest {
     @Test
     public void testTypeReturnsCorrectlyForAmexCard() {
         Card card = Card.create("3412123412341234", null, null, null);
-        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForDiscoverCard() {
         Card card = Card.create("6452123412341234", null, null, null);
-        assertEquals(Card.DISCOVER, card.getBrand());
+        assertEquals(Card.CardBrand.DISCOVER, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForJCBCard() {
         Card card = Card.create("3512123412341234", null, null, null);
-        assertEquals(Card.JCB, card.getBrand());
+        assertEquals(Card.CardBrand.JCB, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForDinersClubCard() {
         Card card = Card.create("3612123412341234", null, null, null);
-        assertEquals(Card.DINERS_CLUB, card.getBrand());
+        assertEquals(Card.CardBrand.DINERS_CLUB, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForVisaCard() {
         Card card = Card.create("4112123412341234", null, null, null);
-        assertEquals(Card.VISA, card.getBrand());
+        assertEquals(Card.CardBrand.VISA, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForMasterCard() {
         Card card = Card.create("5112123412341234", null, null, null);
-        assertEquals(Card.MASTERCARD, card.getBrand());
+        assertEquals(Card.CardBrand.MASTERCARD, card.getBrand());
     }
 
     @Test
     public void testTypeReturnsCorrectlyForUnionPay() {
         Card card = Card.create("6200000000000005", null, null, null);
-        assertEquals(Card.UNIONPAY, card.getBrand());
+        assertEquals(Card.CardBrand.UNIONPAY, card.getBrand());
     }
 
     @Test
@@ -245,7 +245,7 @@ public class CardTest {
     @Test
     public void shouldPassValidateNumberIfLuhnNumberAmex() {
         Card card = Card.create("378282246310005", null, null, null);
-        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.getBrand());
         assertTrue(card.validateNumber());
     }
 
@@ -282,7 +282,7 @@ public class CardTest {
     @Test
     public void shouldFailValidateNumberIfTooLong() {
         Card card = Card.create("4242 4242 4242 4242 6", null, null, null);
-        assertEquals(Card.VISA, card.getBrand());
+        assertEquals(Card.CardBrand.VISA, card.getBrand());
         assertFalse(card.validateNumber());
     }
 
@@ -660,6 +660,24 @@ public class CardTest {
     }
 
     @Test
+    public void getLast4_whenNumberIsNullButLast4IsSet_returnsCorrectValue() {
+        final Card card = new Card.Builder(null, 2, 2020, "123")
+                .name("John Q Public")
+                .last4("1234")
+                .build();
+        assertEquals("1234", card.getLast4());
+    }
+
+    @Test
+    public void getBrand_whenNumberIsNullButBrandIsSet_returnsCorrectValue() {
+        final Card card = new Card.Builder(null, 2, 2020, "123")
+                .name("John Q Public")
+                .brand(Card.CardBrand.AMERICAN_EXPRESS)
+                .build();
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.getBrand());
+    }
+
+    @Test
     public void fromString_whenStringIsValidJson_returnsExpectedCard() {
         final Card expectedCard = createUsdCard();
         final Card actualCard = Card.fromString(JSON_CARD_USD);
@@ -707,8 +725,8 @@ public class CardTest {
         metadata.put("animal", "dog");
 
         return new Card.Builder(null, 8, 2017, null)
-                .brand(Card.VISA)
-                .funding(Card.FUNDING_CREDIT)
+                .brand(Card.CardBrand.VISA)
+                .funding(Card.FundingType.CREDIT)
                 .last4("4242")
                 .id("card_189fi32eZvKYlo2CHK8NPRME")
                 .country("US")

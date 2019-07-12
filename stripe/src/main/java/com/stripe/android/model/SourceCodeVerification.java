@@ -27,14 +27,15 @@ public final class SourceCodeVerification extends StripeModel {
     // They don't have to stay the same forever, so they are redefined here.
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            PENDING,
-            SUCCEEDED,
-            FAILED
+            Status.PENDING,
+            Status.SUCCEEDED,
+            Status.FAILED
     })
-    @interface Status { }
-    static final String PENDING = "pending";
-    static final String SUCCEEDED = "succeeded";
-    static final String FAILED = "failed";
+    @interface Status {
+        String PENDING = "pending";
+        String SUCCEEDED = "succeeded";
+        String FAILED = "failed";
+    }
 
     private static final String FIELD_ATTEMPTS_REMAINING = "attempts_remaining";
     private static final String FIELD_STATUS = "status";
@@ -92,12 +93,12 @@ public final class SourceCodeVerification extends StripeModel {
     @Nullable
     @Status
     private static String asStatus(@Nullable String stringStatus) {
-        if (PENDING.equals(stringStatus)) {
-            return PENDING;
-        } else if (SUCCEEDED.equals(stringStatus)) {
-            return SUCCEEDED;
-        } else if (FAILED.equals(stringStatus)) {
-            return FAILED;
+        if (Status.PENDING.equals(stringStatus)) {
+            return Status.PENDING;
+        } else if (Status.SUCCEEDED.equals(stringStatus)) {
+            return Status.SUCCEEDED;
+        } else if (Status.FAILED.equals(stringStatus)) {
+            return Status.FAILED;
         }
 
         return null;

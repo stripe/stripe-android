@@ -41,13 +41,13 @@ public class SourceRedirectTest {
 
     @Test
     public void asStatus() {
-        assertEquals(SourceRedirect.FAILED,
+        assertEquals(SourceRedirect.Status.FAILED,
                 SourceRedirect.asStatus("failed"));
-        assertEquals(SourceRedirect.SUCCEEDED,
+        assertEquals(SourceRedirect.Status.SUCCEEDED,
                 SourceRedirect.asStatus("succeeded"));
-        assertEquals(SourceRedirect.PENDING,
+        assertEquals(SourceRedirect.Status.PENDING,
                 SourceRedirect.asStatus("pending"));
-        assertEquals(SourceRedirect.NOT_REQUIRED,
+        assertEquals(SourceRedirect.Status.NOT_REQUIRED,
                 SourceRedirect.asStatus("not_required"));
         assertNull(SourceRedirect.asStatus("something_else"));
     }

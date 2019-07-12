@@ -31,18 +31,19 @@ public final class SourceCardData extends StripeSourceTypeModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            REQUIRED,
-            OPTIONAL,
-            NOT_SUPPORTED,
-            RECOMMENDED,
-            UNKNOWN
+            ThreeDSecureStatus.REQUIRED,
+            ThreeDSecureStatus.OPTIONAL,
+            ThreeDSecureStatus.NOT_SUPPORTED,
+            ThreeDSecureStatus.RECOMMENDED,
+            ThreeDSecureStatus.UNKNOWN
     })
-    public @interface ThreeDSecureStatus { }
-    public static final String REQUIRED = "required";
-    public static final String OPTIONAL = "optional";
-    public static final String NOT_SUPPORTED = "not_supported";
-    public static final String RECOMMENDED = "recommended";
-    public static final String UNKNOWN = "unknown";
+    public @interface ThreeDSecureStatus {
+        String REQUIRED = "required";
+        String OPTIONAL = "optional";
+        String NOT_SUPPORTED = "not_supported";
+        String RECOMMENDED = "recommended";
+        String UNKNOWN = "unknown";
+    }
 
     private static final String FIELD_ADDRESS_LINE1_CHECK = "address_line1_check";
     private static final String FIELD_ADDRESS_ZIP_CHECK = "address_zip_check";
@@ -73,7 +74,8 @@ public final class SourceCardData extends StripeSourceTypeModel {
 
     @Nullable private final String mAddressLine1Check;
     @Nullable private final String mAddressZipCheck;
-    @Nullable @Card.CardBrand private final String mBrand;
+    @Nullable @Card.CardBrand
+    private final String mBrand;
     @Nullable private final String mCountry;
     @Nullable private final String mCvcCheck;
     @Nullable private final String mDynamicLast4;
@@ -230,16 +232,16 @@ public final class SourceCardData extends StripeSourceTypeModel {
             return null;
         }
 
-        if (REQUIRED.equalsIgnoreCase(threeDSecureStatus)) {
-            return REQUIRED;
-        } else if (OPTIONAL.equalsIgnoreCase(threeDSecureStatus)) {
-            return OPTIONAL;
-        } else if (NOT_SUPPORTED.equalsIgnoreCase(threeDSecureStatus)) {
-            return NOT_SUPPORTED;
-        } else if (RECOMMENDED.equalsIgnoreCase(threeDSecureStatus)) {
-            return RECOMMENDED;
+        if (ThreeDSecureStatus.REQUIRED.equalsIgnoreCase(threeDSecureStatus)) {
+            return ThreeDSecureStatus.REQUIRED;
+        } else if (ThreeDSecureStatus.OPTIONAL.equalsIgnoreCase(threeDSecureStatus)) {
+            return ThreeDSecureStatus.OPTIONAL;
+        } else if (ThreeDSecureStatus.NOT_SUPPORTED.equalsIgnoreCase(threeDSecureStatus)) {
+            return ThreeDSecureStatus.NOT_SUPPORTED;
+        } else if (ThreeDSecureStatus.RECOMMENDED.equalsIgnoreCase(threeDSecureStatus)) {
+            return ThreeDSecureStatus.RECOMMENDED;
         } else {
-            return UNKNOWN;
+            return ThreeDSecureStatus.UNKNOWN;
         }
     }
 
@@ -274,7 +276,8 @@ public final class SourceCardData extends StripeSourceTypeModel {
     private static final class Builder extends BaseBuilder {
         private String mAddressLine1Check;
         private String mAddressZipCheck;
-        @Card.CardBrand private String mBrand;
+        @Card.CardBrand
+        private String mBrand;
         private String mCountry;
         private String mCvcCheck;
         private String mDynamicLast4;

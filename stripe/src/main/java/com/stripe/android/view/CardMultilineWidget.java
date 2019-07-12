@@ -66,7 +66,8 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     private boolean mHasAdjustedDrawable;
     @Nullable private String mCustomCvcLabel;
 
-    private @Card.CardBrand String mCardBrand;
+    private @Card.CardBrand
+    String mCardBrand;
     private @ColorInt int mTintColorInt;
 
     public CardMultilineWidget(@NonNull Context context) {
@@ -105,7 +106,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mExpiryDateEditText.setShouldShowError(false);
         mCvcEditText.setShouldShowError(false);
         mPostalCodeEditText.setShouldShowError(false);
-        updateBrand(Card.UNKNOWN);
+        updateBrand(Card.CardBrand.UNKNOWN);
     }
 
     /**
@@ -346,7 +347,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     private boolean isCvcLengthValid() {
         int cvcLength = mCvcEditText.getText().toString().trim().length();
-        if (TextUtils.equals(Card.AMERICAN_EXPRESS, mCardBrand)
+        if (TextUtils.equals(Card.CardBrand.AMERICAN_EXPRESS, mCardBrand)
                 && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
             return true;
         }
@@ -377,7 +378,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             return;
         }
 
-        @DrawableRes int resourceId = Card.AMERICAN_EXPRESS.equals(mCardBrand)
+        @DrawableRes int resourceId = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand)
                 ? R.drawable.ic_cvc_amex
                 : R.drawable.ic_cvc;
 
@@ -386,7 +387,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     @StringRes
     private int getCvcHelperText() {
-        return Card.AMERICAN_EXPRESS.equals(mCardBrand)
+        return Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand)
                 ? R.string.cvc_multiline_helper_amex
                 : R.string.cvc_multiline_helper;
     }
@@ -418,7 +419,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             mPostalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE);
         }
 
-        mCardBrand = Card.UNKNOWN;
+        mCardBrand = Card.CardBrand.UNKNOWN;
         // This sets the value of mShouldShowPostalCode
         checkAttributeSet(attrs);
 
@@ -507,7 +508,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                 });
 
         mCardNumberEditText.updateLengthFilter();
-        updateBrand(Card.UNKNOWN);
+        updateBrand(Card.CardBrand.UNKNOWN);
         setEnabled(true);
     }
 
@@ -621,11 +622,11 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     private void updateBrand(@NonNull @Card.CardBrand String brand) {
         mCardBrand = brand;
         updateCvc();
-        updateDrawable(Card.getBrandIcon(brand), Card.UNKNOWN.equals(brand));
+        updateDrawable(Card.getBrandIcon(brand), Card.CardBrand.UNKNOWN.equals(brand));
     }
 
     private void updateCvc() {
-        final int maxLength = Card.AMERICAN_EXPRESS.equals(mCardBrand) ?
+        final int maxLength = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand) ?
                 Card.CVC_LENGTH_AMERICAN_EXPRESS : Card.CVC_LENGTH_COMMON;
         mCvcEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
         mCvcTextInputLayout.setHint(getCvcLabel());
@@ -637,7 +638,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             return mCustomCvcLabel;
         }
 
-        return getResources().getString(Card.AMERICAN_EXPRESS.equals(mCardBrand) ?
+        return getResources().getString(Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand) ?
                 R.string.cvc_amex_hint : R.string.cvc_number_hint);
     }
 

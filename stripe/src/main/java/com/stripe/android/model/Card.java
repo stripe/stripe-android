@@ -39,40 +39,42 @@ public final class Card extends StripeModel implements StripePaymentSource {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            AMERICAN_EXPRESS,
-            DISCOVER,
-            JCB,
-            DINERS_CLUB,
-            VISA,
-            MASTERCARD,
-            UNIONPAY,
-            UNKNOWN
+            CardBrand.AMERICAN_EXPRESS,
+            CardBrand.DISCOVER,
+            CardBrand.JCB,
+            CardBrand.DINERS_CLUB,
+            CardBrand.VISA,
+            CardBrand.MASTERCARD,
+            CardBrand.UNIONPAY,
+            CardBrand.UNKNOWN
     })
-    public @interface CardBrand { }
-    public static final String AMERICAN_EXPRESS = "American Express";
-    public static final String DISCOVER = "Discover";
-    public static final String JCB = "JCB";
-    public static final String DINERS_CLUB = "Diners Club";
-    public static final String VISA = "Visa";
-    public static final String MASTERCARD = "MasterCard";
-    public static final String UNIONPAY = "UnionPay";
-    public static final String UNKNOWN = "Unknown";
+    public @interface CardBrand {
+        String AMERICAN_EXPRESS = "American Express";
+        String DISCOVER = "Discover";
+        String JCB = "JCB";
+        String DINERS_CLUB = "Diners Club";
+        String VISA = "Visa";
+        String MASTERCARD = "MasterCard";
+        String UNIONPAY = "UnionPay";
+        String UNKNOWN = "Unknown";
+    }
 
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
     public static final int CVC_LENGTH_COMMON = 3;
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            FUNDING_CREDIT,
-            FUNDING_DEBIT,
-            FUNDING_PREPAID,
-            FUNDING_UNKNOWN
+            FundingType.CREDIT,
+            FundingType.DEBIT,
+            FundingType.PREPAID,
+            FundingType.UNKNOWN
     })
-    public @interface FundingType { }
-    public static final String FUNDING_CREDIT = "credit";
-    public static final String FUNDING_DEBIT = "debit";
-    public static final String FUNDING_PREPAID = "prepaid";
-    public static final String FUNDING_UNKNOWN = "unknown";
+    public @interface FundingType {
+        String CREDIT = "credit";
+        String DEBIT = "debit";
+        String PREPAID = "prepaid";
+        String UNKNOWN = "unknown";
+    }
 
     // Based on http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29
     public static final String[] PREFIXES_AMERICAN_EXPRESS = {"34", "37"};
@@ -122,14 +124,14 @@ public final class Card extends StripeModel implements StripePaymentSource {
 
     private static final Map<String , Integer> BRAND_RESOURCE_MAP =
             new HashMap<String , Integer>() {{
-                put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
-                put(Card.DINERS_CLUB, R.drawable.ic_diners);
-                put(Card.DISCOVER, R.drawable.ic_discover);
-                put(Card.JCB, R.drawable.ic_jcb);
-                put(Card.MASTERCARD, R.drawable.ic_mastercard);
-                put(Card.VISA, R.drawable.ic_visa);
-                put(Card.UNIONPAY, R.drawable.ic_unionpay);
-                put(Card.UNKNOWN, R.drawable.ic_unknown);
+                put(CardBrand.AMERICAN_EXPRESS, R.drawable.ic_amex);
+                put(CardBrand.DINERS_CLUB, R.drawable.ic_diners);
+                put(CardBrand.DISCOVER, R.drawable.ic_discover);
+                put(CardBrand.JCB, R.drawable.ic_jcb);
+                put(CardBrand.MASTERCARD, R.drawable.ic_mastercard);
+                put(CardBrand.VISA, R.drawable.ic_visa);
+                put(CardBrand.UNIONPAY, R.drawable.ic_unionpay);
+                put(CardBrand.UNKNOWN, R.drawable.ic_unknown);
             }};
 
     @Nullable private final String number;
@@ -171,22 +173,22 @@ public final class Card extends StripeModel implements StripePaymentSource {
             return null;
         }
 
-        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
-            return Card.AMERICAN_EXPRESS;
-        } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
-            return Card.MASTERCARD;
-        } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
-            return Card.DINERS_CLUB;
-        } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
-            return Card.DISCOVER;
-        } else if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
-            return Card.JCB;
-        } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
-            return Card.VISA;
-        } else if (Card.UNIONPAY.equalsIgnoreCase(possibleCardType)) {
-            return Card.UNIONPAY;
+        if (CardBrand.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.AMERICAN_EXPRESS;
+        } else if (CardBrand.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.MASTERCARD;
+        } else if (CardBrand.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.DINERS_CLUB;
+        } else if (CardBrand.DISCOVER.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.DISCOVER;
+        } else if (CardBrand.JCB.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.JCB;
+        } else if (CardBrand.VISA.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.VISA;
+        } else if (CardBrand.UNIONPAY.equalsIgnoreCase(possibleCardType)) {
+            return CardBrand.UNIONPAY;
         } else {
-            return Card.UNKNOWN;
+            return CardBrand.UNKNOWN;
         }
     }
 
@@ -203,14 +205,14 @@ public final class Card extends StripeModel implements StripePaymentSource {
             return null;
         }
 
-        if (Card.FUNDING_CREDIT.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_CREDIT;
-        } else if (Card.FUNDING_DEBIT.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_DEBIT;
-        } else if (Card.FUNDING_PREPAID.equalsIgnoreCase(possibleFundingType)) {
-            return Card.FUNDING_PREPAID;
+        if (FundingType.CREDIT.equalsIgnoreCase(possibleFundingType)) {
+            return FundingType.CREDIT;
+        } else if (FundingType.DEBIT.equalsIgnoreCase(possibleFundingType)) {
+            return FundingType.DEBIT;
+        } else if (FundingType.PREPAID.equalsIgnoreCase(possibleFundingType)) {
+            return FundingType.PREPAID;
         } else {
-            return Card.FUNDING_UNKNOWN;
+            return FundingType.UNKNOWN;
         }
     }
 
@@ -380,7 +382,7 @@ public final class Card extends StripeModel implements StripePaymentSource {
         String updatedType = getBrand();
         boolean validLength =
                 (updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4)
-                || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
+                || (CardBrand.AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
                 || cvcValue.length() == 3;
 
         return ModelUtils.isWholePositiveNumber(cvcValue) && validLength;

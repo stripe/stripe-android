@@ -640,7 +640,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
                 new CardNumberEditText.CardBrandChangeListener() {
                     @Override
                     public void onCardBrandChanged(@NonNull @Card.CardBrand String brand) {
-                        mIsAmEx = Card.AMERICAN_EXPRESS.equals(brand);
+                        mIsAmEx = Card.CardBrand.AMERICAN_EXPRESS.equals(brand);
                         updateIcon(brand);
                         updateCvc(brand);
                     }
@@ -834,7 +834,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      * Determines whether or not the icon should show the card brand instead of the
      * CVC helper icon.
      *
-     * @param brand the {@link CardBrand} in question, used for determining max length
+     * @param brand the {@link Card.CardBrand} in question, used for determining max length
      * @param cvcHasFocus {@code true} if the CVC entry field has focus, {@code false} otherwise
      * @param cvcText the current content of {@link #mCvcNumberEditText}
      * @return {@code true} if we should show the brand of the card, or {@code false} if we
@@ -880,8 +880,8 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     @NonNull
-    private String getHiddenTextForBrand(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
+    private String getHiddenTextForBrand(@NonNull @CardBrand String brand) {
+        if (Card.CardBrand.AMERICAN_EXPRESS.equals(brand)) {
             return HIDDEN_TEXT_AMEX;
         } else {
             return HIDDEN_TEXT_COMMON;
@@ -890,7 +890,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
 
     @NonNull
     private String getCvcPlaceHolderForBrand(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
+        if (Card.CardBrand.AMERICAN_EXPRESS.equals(brand)) {
             return CVC_PLACEHOLDER_AMEX;
         } else {
             return CVC_PLACEHOLDER_COMMON;
@@ -900,10 +900,10 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     @NonNull
     private String getPeekCardTextForBrand(@NonNull @Card.CardBrand String brand) {
         switch (brand) {
-            case Card.AMERICAN_EXPRESS: {
+            case Card.CardBrand.AMERICAN_EXPRESS: {
                 return PEEK_TEXT_AMEX;
             }
-            case Card.DINERS_CLUB: {
+            case Card.CardBrand.DINERS_CLUB: {
                 return PEEK_TEXT_DINERS;
             }
             default: {
@@ -913,7 +913,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     private void applyTint(boolean isCvc) {
-        if (isCvc || Card.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
+        if (isCvc || Card.CardBrand.UNKNOWN.equals(mCardNumberEditText.getCardBrand())) {
             Drawable icon = mCardIconImageView.getDrawable();
             Drawable compatIcon = DrawableCompat.wrap(icon);
             DrawableCompat.setTint(compatIcon.mutate(), mTintColorInt);
@@ -922,7 +922,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     private void updateCvc(@NonNull @Card.CardBrand String brand) {
-        if (Card.AMERICAN_EXPRESS.equals(brand)) {
+        if (Card.CardBrand.AMERICAN_EXPRESS.equals(brand)) {
             mCvcNumberEditText.setFilters(
                     new InputFilter[] {
                             new InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS)});
@@ -935,7 +935,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     private void updateIcon(@NonNull @Card.CardBrand String brand) {
-        if (Card.UNKNOWN.equals(brand)) {
+        if (Card.CardBrand.UNKNOWN.equals(brand)) {
             Drawable icon  = getResources().getDrawable(R.drawable.ic_unknown);
             mCardIconImageView.setImageDrawable(icon);
             applyTint(false);
@@ -945,13 +945,13 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     private void updateIconCvc(
-            @NonNull @Card.CardBrand String brand,
+            @NonNull @CardBrand String brand,
             boolean hasFocus,
             @Nullable String cvcText) {
         if (shouldIconShowBrand(brand, hasFocus, cvcText)) {
             updateIcon(brand);
         } else {
-            updateIconForCvcEntry(Card.AMERICAN_EXPRESS.equals(brand));
+            updateIconForCvcEntry(Card.CardBrand.AMERICAN_EXPRESS.equals(brand));
         }
     }
 

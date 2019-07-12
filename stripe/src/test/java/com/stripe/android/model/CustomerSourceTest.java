@@ -80,13 +80,13 @@ public class CustomerSourceTest {
     public void getSourceType_whenCard_returnsCard() throws JSONException {
         final CustomerSource sourceData = CustomerSource.fromJson(new JSONObject(JSON_CARD_USD));
         assertNotNull(sourceData);
-        assertEquals(Source.CARD, sourceData.getSourceType());
+        assertEquals(Source.SourceType.CARD, sourceData.getSourceType());
     }
 
     @Test
     public void getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
         final CustomerSource alipaySource = CustomerSource.fromString(EXAMPLE_ALIPAY_SOURCE);
         assertNotNull(alipaySource);
-        assertEquals(Source.ALIPAY, alipaySource.getSourceType());
+        assertEquals(Source.SourceType.ALIPAY, alipaySource.getSourceType());
     }
 }

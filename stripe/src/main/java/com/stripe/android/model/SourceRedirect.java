@@ -27,16 +27,17 @@ public final class SourceRedirect extends StripeModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            PENDING,
-            SUCCEEDED,
-            FAILED,
-            NOT_REQUIRED
+            Status.PENDING,
+            Status.SUCCEEDED,
+            Status.FAILED,
+            Status.NOT_REQUIRED
     })
-    @interface Status { }
-    public static final String PENDING = "pending";
-    public static final String SUCCEEDED = "succeeded";
-    public static final String FAILED = "failed";
-    public static final String NOT_REQUIRED = "not_required";
+    @interface Status {
+        String PENDING = "pending";
+        String SUCCEEDED = "succeeded";
+        String FAILED = "failed";
+        String NOT_REQUIRED = "not_required";
+    }
 
     private static final String FIELD_RETURN_URL = "return_url";
     private static final String FIELD_STATUS = "status";
@@ -105,14 +106,14 @@ public final class SourceRedirect extends StripeModel {
     @Status
     @VisibleForTesting
     static String asStatus(@Nullable String stringStatus) {
-        if (PENDING.equals(stringStatus)) {
-            return PENDING;
-        } else if (SUCCEEDED.equals(stringStatus)) {
-            return SUCCEEDED;
-        } else if (FAILED.equals(stringStatus)) {
-            return FAILED;
-        } else if (NOT_REQUIRED.equals(stringStatus)) {
-            return NOT_REQUIRED;
+        if (Status.PENDING.equals(stringStatus)) {
+            return Status.PENDING;
+        } else if (Status.SUCCEEDED.equals(stringStatus)) {
+            return Status.SUCCEEDED;
+        } else if (Status.FAILED.equals(stringStatus)) {
+            return Status.FAILED;
+        } else if (Status.NOT_REQUIRED.equals(stringStatus)) {
+            return Status.NOT_REQUIRED;
         }
 
         return null;

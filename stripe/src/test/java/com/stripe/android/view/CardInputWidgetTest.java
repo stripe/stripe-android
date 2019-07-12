@@ -713,7 +713,7 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         assertEquals(12, (int) card.getExpMonth());
         assertEquals(2079, (int) card.getExpYear());
         assertEquals("1234", card.getCVC());
-        assertEquals(Card.AMERICAN_EXPRESS, card.getBrand());
+        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.getBrand());
 
         final PaymentMethodCreateParams.Card paymentMethodCard =
                 mCardInputWidget.getPaymentMethodCard();
@@ -739,44 +739,44 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
     @Test
     public void shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
-        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, "1234"));
-        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, false, ""));
-        assertTrue(shouldIconShowBrand(Card.VISA, false, "333"));
-        assertTrue(shouldIconShowBrand(Card.DINERS_CLUB, false, "12"));
-        assertTrue(shouldIconShowBrand(Card.DISCOVER, false, null));
-        assertTrue(shouldIconShowBrand(Card.JCB, false, "7"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, false, "1234"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, false, ""));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.VISA, false, "333"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, false, "12"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.DISCOVER, false, null));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.JCB, false, "7"));
     }
 
     @Test
     public void shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
-        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, ""));
-        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1"));
-        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "22"));
-        assertFalse(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "333"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, ""));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "1"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "22"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "333"));
     }
 
     @Test
     public void shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
-        assertTrue(shouldIconShowBrand(Card.AMERICAN_EXPRESS, true, "1234"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "1234"));
     }
 
     @Test
     public void shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
-        assertFalse(shouldIconShowBrand(Card.VISA, true, ""));
-        assertFalse(shouldIconShowBrand(Card.DISCOVER, true, "12"));
-        assertFalse(shouldIconShowBrand(Card.JCB, true, "55"));
-        assertFalse(shouldIconShowBrand(Card.MASTERCARD, true, "9"));
-        assertFalse(shouldIconShowBrand(Card.DINERS_CLUB, true, null));
-        assertFalse(shouldIconShowBrand(Card.UNKNOWN, true, "12"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.VISA, true, ""));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.DISCOVER, true, "12"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.JCB, true, "55"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.MASTERCARD, true, "9"));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, true, null));
+        assertFalse(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "12"));
     }
 
     @Test
     public void shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
-        assertTrue(shouldIconShowBrand(Card.VISA, true, "999"));
-        assertTrue(shouldIconShowBrand(Card.DISCOVER, true, "123"));
-        assertTrue(shouldIconShowBrand(Card.JCB, true, "555"));
-        assertTrue(shouldIconShowBrand(Card.MASTERCARD, true, "919"));
-        assertTrue(shouldIconShowBrand(Card.DINERS_CLUB, true, "415"));
-        assertTrue(shouldIconShowBrand(Card.UNKNOWN, true, "212"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.VISA, true, "999"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.DISCOVER, true, "123"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.JCB, true, "555"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.MASTERCARD, true, "919"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, true, "415"));
+        assertTrue(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "212"));
     }
 }
