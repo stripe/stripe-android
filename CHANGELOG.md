@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 10.0.0 - upcoming
+* [#1154](https://github.com/stripe/stripe-android/pull/1154) Fix potential NPE in `PaymentMethodsActivity`
+* [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
+* [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
+* [#1174](https://github.com/stripe/stripe-android/pull/1174) Add `getCardBuilder()` to `CardInputWidget` and `CardMultilineWidget`
+
 ## 9.3.6 - 2019-07-08
 * [#1148](https://github.com/stripe/stripe-android/pull/1148) Fix 3DS2 dependency Proguard issues
 
