@@ -34,6 +34,8 @@ import com.stripe.android.R;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 
 import static com.stripe.android.model.Card.CardBrand;
@@ -44,7 +46,7 @@ import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
 /**
  * A card input widget that handles all animation on its own.
  */
-public class CardInputWidget extends LinearLayout {
+public class CardInputWidget extends LinearLayout implements CardWidget {
 
     static final String LOGGING_TOKEN = "CardInputView";
 
@@ -121,7 +123,8 @@ public class CardInputWidget extends LinearLayout {
         final String cvcValue = mCvcNumberEditText.getText().toString().trim();
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        if (cardNumber == null || cardDate == null || cardDate.length != 2 || !isCvcLengthValid()) {
+        if (cardNumber == null || cardDate == null || cardDate.length != 2 ||
+                !isCvcLengthValid(cvcValue)) {
             return null;
         }
 
@@ -139,22 +142,30 @@ public class CardInputWidget extends LinearLayout {
      * @return a valid {@link Card} object based on user input, or {@code null} if any field is
      * invalid
      */
+    @Override
     @Nullable
     public Card getCard() {
-        String cardNumber = mCardNumberEditText.getCardNumber();
-        int[] cardDate = mExpiryDateEditText.getValidDateFields();
+        final Card.Builder builder = getCardBuilder();
+        return builder != null ? builder.build() : null;
+    }
+
+    @Override
+    @Nullable
+    public Card.Builder getCardBuilder() {
+        final String cardNumber = mCardNumberEditText.getCardNumber();
+        final int[] cardDate = mExpiryDateEditText.getValidDateFields();
         if (cardNumber == null || cardDate == null || cardDate.length != 2) {
             return null;
         }
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        String cvcValue = mCvcNumberEditText.getText().toString().trim();
-        if (!isCvcLengthValid()) {
+        final String cvcValue = mCvcNumberEditText.getText().toString().trim();
+        if (!isCvcLengthValid(cvcValue)) {
             return null;
         }
 
-        return Card.create(cardNumber, cardDate[0], cardDate[1], cvcValue)
-                .addLoggingToken(LOGGING_TOKEN);
+        return new Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
+                .loggingTokens(new ArrayList<>(Collections.singletonList(LOGGING_TOKEN)));
     }
 
     /**
@@ -456,16 +467,13 @@ public class CardInputWidget extends LinearLayout {
         }
     }
 
-    private boolean isCvcLengthValid() {
-        String cvcValue = mCvcNumberEditText.getText().toString().trim();
-        int cvcLength = cvcValue.length();
+    private boolean isCvcLengthValid(@NonNull String cvcValue) {
+        final int cvcLength = cvcValue.length();
         if (mIsAmEx && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
             return true;
         }
-        if (cvcLength == Card.CVC_LENGTH_COMMON) {
-            return true;
-        }
-        return false;
+
+        return cvcLength == Card.CVC_LENGTH_COMMON;
     }
 
     private void setLayoutValues(int width, int margin, @NonNull StripeEditText editText) {

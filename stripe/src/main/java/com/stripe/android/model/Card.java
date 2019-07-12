@@ -421,18 +421,6 @@ public final class Card extends StripeModel implements StripePaymentSource {
     }
 
     /**
-     * Add a logging token to this {@link Card} object.
-     *
-     * @param loggingToken a token to be logged with this card
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public Card addLoggingToken(@NonNull String loggingToken) {
-        loggingTokens.add(loggingToken);
-        return this;
-    }
-
-    /**
      * @return the {@link #cvc} for this card
      */
     @Nullable
@@ -947,7 +935,7 @@ public final class Card extends StripeModel implements StripePaymentSource {
         }
 
         @NonNull
-        private Builder loggingTokens(@NonNull List<String> loggingTokens) {
+        public Builder loggingTokens(@NonNull List<String> loggingTokens) {
             this.loggingTokens = loggingTokens;
             return this;
         }

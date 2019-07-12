@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -693,7 +694,8 @@ public class CardTest {
     @Test
     public void toBuilder_withLoggingToken_whenUnchanged_isEquals() {
         final Card card = Objects.requireNonNull(Card.fromString(JSON_CARD_USD));
-        card.addLoggingToken("hello");
+        card.toBuilder()
+                .loggingTokens(Collections.singletonList("hello"));
 
         assertEquals(card, card.toBuilder().build());
     }
