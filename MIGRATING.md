@@ -1,5 +1,61 @@
 ## Migration Guides
 
+### Migration from versions < 10.0.0
+- The signature of `Stripe#retrievePaymentIntentSynchronous()` has [changed](https://github.com/stripe/stripe-android/commit/5e56663c739ec694a6a393e96b651bd3d3c7a3e7#diff-26062503dd732750d15be3173b992de6R618). It now takes a [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret) `String` instead of a `PaymentIntentParams` instance.
+  See [#1172](https://github.com/stripe/stripe-android/pull/1172).
+    ```java
+    // before
+    stripe.retrievePaymentIntentSynchronous(
+          PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret));
+
+    // after
+    stripe.retrievePaymentIntentSynchronous(clientSecret);
+    ```
+
+- `PaymentIntentParams` is now [`ConfirmPaymentIntentParams`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.java) and its method names have been simplified.
+  See [#1172](https://github.com/stripe/stripe-android/pull/1172).
+    ```java
+    // before
+    PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
+          paymentMethodId, clientSecret, returnUrl);
+
+    // after
+    ConfirmPaymentIntentParams.createWithPaymentMethodId(paymentMethodId, clientSecret, returnUrl);
+    ```
+
+- All `@StringDef` constants have been inlined in their respective `@interface`. Below is an example from `Card.FundingType`.
+  See [#1173](https://github.com/stripe/stripe-android/pull/1173).
+    ```java
+    // before
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            FUNDING_CREDIT,
+            FUNDING_DEBIT,
+            FUNDING_PREPAID,
+            FUNDING_UNKNOWN
+    })
+    public @interface FundingType { }
+    public static final String FUNDING_CREDIT = "credit";
+    public static final String FUNDING_DEBIT = "debit";
+    public static final String FUNDING_PREPAID = "prepaid";
+    public static final String FUNDING_UNKNOWN = "unknown";
+
+    // after
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            FundingType.CREDIT,
+            FundingType.DEBIT,
+            FundingType.PREPAID,
+            FundingType.UNKNOWN
+    })
+    public @interface FundingType {
+        String CREDIT = "credit";
+        String DEBIT = "debit";
+        String PREPAID = "prepaid";
+        String UNKNOWN = "unknown";
+    }
+    ```
+
 ### Migration from versions < 9.3.3
 - The enum `PaymentIntent.Status` is now `StripeIntent.Status`
 - The enum `PaymentIntent.NextActionType` is now `StripeIntent.NextActionType`
