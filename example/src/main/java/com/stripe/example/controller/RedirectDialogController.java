@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
 import com.stripe.android.model.Card;
-import com.stripe.android.model.SourceCardData;
 import com.stripe.example.R;
 
 import java.util.Map;

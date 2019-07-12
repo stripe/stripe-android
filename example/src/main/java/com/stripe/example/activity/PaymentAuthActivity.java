@@ -17,10 +17,10 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.SetupIntentResult;
 import com.stripe.android.Stripe;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.example.R;
 import com.stripe.example.module.RetrofitFactory;
 import com.stripe.example.service.StripeService;
@@ -40,7 +40,7 @@ import okhttp3.ResponseBody;
 
 /**
  * An example of creating a PaymentIntent, then confirming it with
- * {@link Stripe#confirmPayment(Activity, PaymentIntentParams)}}
+ * {@link Stripe#confirmPayment(Activity, ConfirmPaymentIntentParams)}}
  */
 public class PaymentAuthActivity extends AppCompatActivity {
 
@@ -100,7 +100,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
     private void confirmPaymentIntent(@NonNull String paymentIntentClientSecret) {
         mStatusTextView.append("\n\nStarting payment authentication");
         mStripe.confirmPayment(this,
-                PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
                         PAYMENT_METHOD_3DS2_REQUIRED,
                         paymentIntentClientSecret,
                         RETURN_URL));
@@ -109,7 +109,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
     private void confirmSetupIntent(@NonNull String setupIntentClientSecret) {
         mStatusTextView.append("\n\nStarting setup intent authentication");
         mStripe.confirmSetupIntent(this,
-                SetupIntentParams.createConfirmParams(
+                ConfirmSetupIntentParams.create(
                         PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP,
                         setupIntentClientSecret,
                         RETURN_URL));

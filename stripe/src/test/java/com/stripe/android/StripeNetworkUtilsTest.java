@@ -8,7 +8,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
-import com.stripe.android.model.PaymentIntentParams;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 
 import org.junit.Before;
@@ -187,7 +187,7 @@ public class StripeNetworkUtilsTest {
     public void addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
         final Map<String, Object> existingMap = new HashMap<>();
         final Map<String, Object> sourceDataMap = new HashMap<>();
-        existingMap.put(PaymentIntentParams.API_PARAM_SOURCE_DATA, sourceDataMap);
+        existingMap.put(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA, sourceDataMap);
 
         mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
         assertEquals(1, existingMap.size());
@@ -202,7 +202,7 @@ public class StripeNetworkUtilsTest {
                 .setType(PaymentMethod.Type.Card.code)
                 .build()
                 .toMap();
-        existingMap.put(PaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA, paymentMethodData);
+        existingMap.put(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA, paymentMethodData);
 
         mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
         assertEquals(1, existingMap.size());

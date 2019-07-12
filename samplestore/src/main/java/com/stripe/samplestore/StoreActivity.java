@@ -21,7 +21,6 @@ import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider;
 
 import java.lang.ref.WeakReference;
@@ -134,16 +133,14 @@ public class StoreActivity
         if (intentUri != null) {
             if ("stripe".equals(intentUri.getScheme()) &&
                     "payment-auth-return".equals(intentUri.getHost())) {
-                final String paymentIntentClientSecret =
+                final String clientSecret =
                         intentUri.getQueryParameter("payment_intent_client_secret");
-                if (paymentIntentClientSecret != null) {
+                if (clientSecret != null) {
                     final Stripe stripe = new Stripe(getApplicationContext(),
                             PaymentConfiguration.getInstance().getPublishableKey());
-                    final PaymentIntentParams paymentIntentParams = PaymentIntentParams
-                            .createRetrievePaymentIntentParams(paymentIntentClientSecret);
                     mCompositeDisposable.add(Observable
                             .fromCallable(() ->
-                                    stripe.retrievePaymentIntentSynchronous(paymentIntentParams))
+                                    stripe.retrievePaymentIntentSynchronous(clientSecret))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe((paymentIntent -> {

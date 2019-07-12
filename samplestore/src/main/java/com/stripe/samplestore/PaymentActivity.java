@@ -33,7 +33,6 @@ import com.stripe.android.StripeError;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
@@ -353,12 +352,10 @@ public class PaymentActivity extends AppCompatActivity {
     private void onPaymentIntentClientSecretResponse(@NonNull ResponseBody responseBody)
             throws IOException, JSONException {
         final String clientSecret = new JSONObject(responseBody.string()).getString("secret");
-        final PaymentIntentParams paymentIntentParams =
-                PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret);
         mCompositeDisposable.add(
                 Observable
                         .fromCallable(() ->
-                                mStripe.retrievePaymentIntentSynchronous(paymentIntentParams))
+                                mStripe.retrievePaymentIntentSynchronous(clientSecret))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(disposable -> startLoading())

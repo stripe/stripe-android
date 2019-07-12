@@ -14,13 +14,13 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.PermissionException;
 import com.stripe.android.exception.RateLimitException;
 import com.stripe.android.exception.StripeException;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
-import com.stripe.android.model.PaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.SetupIntent;
-import com.stripe.android.model.SetupIntentParams;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -93,26 +93,26 @@ class StripeApiHandler {
     }
 
     /**
-     * Confirm a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
+     * Confirm a {@link PaymentIntent} using the provided {@link ConfirmPaymentIntentParams}
      *
-     * @param paymentIntentParams contains the confirmation params
+     * @param confirmPaymentIntentParams contains the confirmation params
      * @return a {@link PaymentIntent} reflecting the updated state after applying the parameter
      * provided
      */
     @Nullable
     PaymentIntent confirmPaymentIntent(
-            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
+        final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
 
         try {
             logTelemetryData();
-            final SourceParams sourceParams = paymentIntentParams.getSourceParams();
+            final SourceParams sourceParams = confirmPaymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
 
             logApiCall(
@@ -121,7 +121,7 @@ class StripeApiHandler {
                     options.apiKey
             );
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(paymentIntentParams.getClientSecret()));
+                    confirmPaymentIntentParams.getClientSecret());
             final StripeResponse response = makeApiRequest(ApiRequest.createPost(
                     getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options, mAppInfo));
             return PaymentIntent.fromString(response.getResponseBody());
@@ -133,28 +133,29 @@ class StripeApiHandler {
     }
 
     /**
-     * Retrieve a {@link PaymentIntent} using the provided {@link PaymentIntentParams}
-     * @param paymentIntentParams contains the retrieval params
+     * Retrieve a {@link PaymentIntent} using its client_secret
+     *
+     * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
     @Nullable
     PaymentIntent retrievePaymentIntent(
-            @NonNull PaymentIntentParams paymentIntentParams,
+            @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = paymentIntentParams.toParamMap();
-
         try {
             logTelemetryData();
             logApiCall(
                     mLoggingUtils.getPaymentIntentRetrieveParams(null, options.apiKey),
                     options.apiKey);
-            final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(paymentIntentParams.getClientSecret()));
-            final StripeResponse response = makeApiRequest(ApiRequest.createGet(
-                    getRetrievePaymentIntentUrl(paymentIntentId), paramMap, options, mAppInfo));
+            final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(clientSecret);
+            final StripeResponse response = makeApiRequest(
+                    ApiRequest.createGet(getRetrievePaymentIntentUrl(paymentIntentId),
+                            createClientSecretParam(clientSecret),
+                            options,
+                            mAppInfo));
             return PaymentIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -164,21 +165,21 @@ class StripeApiHandler {
     }
 
     /**
-     * Confirm a {@link SetupIntent} using the provided {@link SetupIntentParams}
+     * Confirm a {@link SetupIntent} using the provided {@link ConfirmSetupIntentParams}
      *
-     * @param setupIntentParams contains the confirmation params
+     * @param confirmSetupIntentParams contains the confirmation params
      * @return a {@link SetupIntent} reflecting the updated state after applying the parameter
      * provided
      */
     @Nullable
     SetupIntent confirmSetupIntent(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
+        final Map<String, Object> paramMap = confirmSetupIntentParams.toParamMap();
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
 
         try {
@@ -188,7 +189,7 @@ class StripeApiHandler {
                     options.apiKey
             );
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
+                    confirmSetupIntentParams.getClientSecret());
             final StripeResponse response = makeApiRequest(ApiRequest.createPost(
                     getConfirmSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
             return SetupIntent.fromString(response.getResponseBody());
@@ -200,27 +201,30 @@ class StripeApiHandler {
     }
 
     /**
-     * Retrieve a {@link SetupIntent} using the provided {@link SetupIntentParams}
-     * @param setupIntentParams contains the retrieval params
+     * Retrieve a {@link SetupIntent} using its client_secret
+     *
+     * @param clientSecret client_secret of the SetupIntent to retrieve
      */
     @Nullable
     SetupIntent retrieveSetupIntent(
-            @NonNull SetupIntentParams setupIntentParams,
+            @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = setupIntentParams.toParamMap();
-
         try {
             logTelemetryData();
             logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(null, options.apiKey),
                     options.apiKey);
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
-                    Objects.requireNonNull(setupIntentParams.getClientSecret()));
-            final StripeResponse response = makeApiRequest(ApiRequest.createGet(
-                    getRetrieveSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
+                    Objects.requireNonNull(clientSecret));
+            final StripeResponse response = makeApiRequest(
+                    ApiRequest.createGet(
+                            getRetrieveSetupIntentUrl(setupIntentId),
+                            createClientSecretParam(clientSecret),
+                            options,
+                            mAppInfo));
             return SetupIntent.fromString(response.getResponseBody());
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -1094,6 +1098,13 @@ class StripeApiHandler {
         if (mShouldLogRequest) {
             makeFireAndForgetRequest(mFingerprintRequestFactory.create());
         }
+    }
+
+    @NonNull
+    private Map<String, String> createClientSecretParam(@NonNull String clientSecret) {
+        final Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("client_secret", clientSecret);
+        return paramMap;
     }
 
     private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {

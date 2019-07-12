@@ -7,9 +7,9 @@ import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.model.ConfirmPaymentIntentParams;
+import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntentFixtures;
-import com.stripe.android.model.PaymentIntentParams;
-import com.stripe.android.model.SetupIntentParams;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+
+import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -41,34 +43,34 @@ public class StripePaymentAuthTest {
     @Test
     public void confirmPayment_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
-        final PaymentIntentParams paymentIntentParams =
-                PaymentIntentParams.createConfirmPaymentIntentWithPaymentMethodId(
+        final ConfirmPaymentIntentParams confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
                         "pm_card_threeDSecure2Required",
                         "client_secret",
                         "yourapp://post-authentication-return-url");
-        stripe.confirmPayment(mActivity, paymentIntentParams);
+        stripe.confirmPayment(mActivity, confirmPaymentIntentParams);
         verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(paymentIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+                eq(confirmPaymentIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test
     public void confirmSetupIntent_shouldConfirmAndAuth() {
         final Stripe stripe = createStripe();
-        final SetupIntentParams setupIntentParams =
-                SetupIntentParams.createConfirmParams(
+        final ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
                         "pm_card_threeDSecure2Required",
                         "client_secret",
                         "yourapp://post-authentication-return-url");
-        stripe.confirmSetupIntent(mActivity, setupIntentParams);
+        stripe.confirmSetupIntent(mActivity, confirmSetupIntentParams);
         verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(setupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+                eq(confirmSetupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
     }
 
     @Test
     public void authenticatePayment_shouldAuth() {
         final Stripe stripe = createStripe();
         final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret();
-        stripe.authenticatePayment(mActivity, clientSecret);
+        stripe.authenticatePayment(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
                 eq(stripe),
                 eq(mActivity),

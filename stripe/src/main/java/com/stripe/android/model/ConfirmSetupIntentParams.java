@@ -5,27 +5,20 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class SetupIntentParams implements StripeIntentParams {
+public final class ConfirmSetupIntentParams implements StripeIntentParams {
 
     @NonNull private final String mClientSecret;
     @Nullable private final String mReturnUrl;
-    @Nullable private final String mPaymentMethodId;
+    @NonNull private final String mPaymentMethodId;
 
-    private SetupIntentParams(@NonNull String clientSecret, @Nullable String returnUrl,
-                              @Nullable String paymentMethodId) {
+    private ConfirmSetupIntentParams(@NonNull String clientSecret, @Nullable String returnUrl,
+                                     @NonNull String paymentMethodId) {
         this.mClientSecret = clientSecret;
         this.mReturnUrl = returnUrl;
         this.mPaymentMethodId = paymentMethodId;
-    }
-
-    private SetupIntentParams(@NonNull String clientSecret) {
-        this.mClientSecret = clientSecret;
-        this.mReturnUrl = null;
-        this.mPaymentMethodId = null;
     }
 
     /**
@@ -39,22 +32,11 @@ public final class SetupIntentParams implements StripeIntentParams {
      * @return params that can be use to confirm a SetupIntent
      */
     @NonNull
-    public static SetupIntentParams createConfirmParams(
+    public static ConfirmSetupIntentParams create(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
             @NonNull String returnUrl) {
-        return new SetupIntentParams(clientSecret, returnUrl, paymentMethodId);
-    }
-
-    /**
-     * Create the parameters necessary for retrieving the details of SetupIntent
-     *
-     * @param clientSecret client secret from the SetupIntent that is being retrieved
-     * @return params that can be used to retrieve a SetupIntent
-     */
-    @NonNull
-    public static SetupIntentParams createRetrieveParams(@NonNull String clientSecret) {
-        return new SetupIntentParams(clientSecret);
+        return new ConfirmSetupIntentParams(clientSecret, returnUrl, paymentMethodId);
     }
 
     @NonNull
@@ -70,31 +52,26 @@ public final class SetupIntentParams implements StripeIntentParams {
      */
     @NonNull
     public Map<String, Object> toParamMap() {
-        final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
-
-        if (mPaymentMethodId != null) {
-            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
-        }
-
+        final Map<String, Object> networkReadyMap = new HashMap<>();
+        networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+        networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
         if (mReturnUrl != null) {
             networkReadyMap.put(API_PARAM_RETURN_URL, mReturnUrl);
         }
-
-        networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
 
         return networkReadyMap;
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return this == obj || (obj instanceof SetupIntentParams &&
-                typedEquals((SetupIntentParams) obj));
+        return this == obj || (obj instanceof ConfirmSetupIntentParams &&
+                typedEquals((ConfirmSetupIntentParams) obj));
     }
 
-    private boolean typedEquals(@NonNull SetupIntentParams setupIntentParams) {
-        return ObjectUtils.equals(mReturnUrl, setupIntentParams.mReturnUrl)
-                && ObjectUtils.equals(mClientSecret, setupIntentParams.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, setupIntentParams.mPaymentMethodId);
+    private boolean typedEquals(@NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        return ObjectUtils.equals(mReturnUrl, confirmSetupIntentParams.mReturnUrl)
+                && ObjectUtils.equals(mClientSecret, confirmSetupIntentParams.mClientSecret)
+                && ObjectUtils.equals(mPaymentMethodId, confirmSetupIntentParams.mPaymentMethodId);
     }
 
     @Override
