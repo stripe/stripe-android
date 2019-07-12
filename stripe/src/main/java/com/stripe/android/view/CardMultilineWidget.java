@@ -32,6 +32,8 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
@@ -43,7 +45,7 @@ import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
  * A multiline card input widget using the support design library's {@link TextInputLayout}
  * to match Material Design.
  */
-public class CardMultilineWidget extends LinearLayout {
+public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     static final String CARD_MULTILINE_TOKEN = "CardMultilineView";
     static final long CARD_NUMBER_HINT_DELAY = 120L;
@@ -162,21 +164,28 @@ public class CardMultilineWidget extends LinearLayout {
      * @return a valid {@link Card} object based on user input, or {@code null} if any field is
      * invalid
      */
+    @Override
     @Nullable
     public Card getCard() {
-        if (validateAllFields()) {
-            final String cardNumber = mCardNumberEditText.getCardNumber();
-            final int[] cardDate = Objects.requireNonNull(mExpiryDateEditText.getValidDateFields());
-            final String cvcValue = mCvcEditText.getText().toString();
+        final Card.Builder cardBuilder = getCardBuilder();
+        return cardBuilder != null ? cardBuilder.build() : null;
+    }
 
-            final Card card = new Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
-                    .addressZip(mShouldShowPostalCode ?
-                            mPostalCodeEditText.getText().toString() : null)
-                    .build();
-            return card.addLoggingToken(CARD_MULTILINE_TOKEN);
+    @Override
+    @Nullable
+    public Card.Builder getCardBuilder() {
+        if (!validateAllFields()) {
+            return null;
         }
 
-        return null;
+        final String cardNumber = mCardNumberEditText.getCardNumber();
+        final int[] cardDate = Objects.requireNonNull(mExpiryDateEditText.getValidDateFields());
+        final String cvcValue = mCvcEditText.getText().toString();
+
+        return new Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
+                .addressZip(mShouldShowPostalCode ?
+                        mPostalCodeEditText.getText().toString() : null)
+                .loggingTokens(new ArrayList<>(Collections.singletonList(CARD_MULTILINE_TOKEN)));
     }
 
     /**
