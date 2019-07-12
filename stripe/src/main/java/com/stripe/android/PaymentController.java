@@ -95,14 +95,14 @@ class PaymentController {
                    @NonNull final Activity activity,
                    @NonNull String clientSecret,
                    @NonNull final String publishableKey) {
+        mApiKeyValidator.requireValid(publishableKey);
         new RetrieveIntentTask(stripe,
                 PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
                 publishableKey,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
-                        handleNextAction(activity, stripeIntent,
-                                mApiKeyValidator.requireValid(publishableKey));
+                        handleNextAction(activity, stripeIntent, publishableKey);
                     }
 
                     @Override
