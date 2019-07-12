@@ -49,7 +49,6 @@ class PaymentController {
     static final int PAYMENT_REQUEST_CODE = 50000;
     static final int SETUP_REQUEST_CODE = 50001;
 
-
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
@@ -92,10 +91,26 @@ class PaymentController {
                 .execute();
     }
 
-    void startAuth(@NonNull Activity activity,
-                   @NonNull StripeIntent stripeIntent,
-                   @NonNull String publishableKey) {
-        handleNextAction(activity, stripeIntent, mApiKeyValidator.requireValid(publishableKey));
+    void startAuth(@NonNull Stripe stripe,
+                   @NonNull final Activity activity,
+                   @NonNull String clientSecret,
+                   @NonNull final String publishableKey) {
+        mApiKeyValidator.requireValid(publishableKey);
+        new RetrieveIntentTask(stripe,
+                PaymentIntentParams.createRetrievePaymentIntentParams(clientSecret),
+                publishableKey,
+                new ApiResultCallback<StripeIntent>() {
+                    @Override
+                    public void onSuccess(@NonNull StripeIntent stripeIntent) {
+                        handleNextAction(activity, stripeIntent, publishableKey);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception e) {
+                        handleError(activity, PAYMENT_REQUEST_CODE, e);
+                    }
+                })
+                .execute();
     }
 
     /**

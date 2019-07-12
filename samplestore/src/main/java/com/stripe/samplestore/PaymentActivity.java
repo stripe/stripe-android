@@ -320,7 +320,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
         if (paymentIntent.requiresAction()) {
-            mStripe.authenticatePayment(this, paymentIntent);
+            mStripe.authenticatePayment(this,
+                    Objects.requireNonNull(paymentIntent.getClientSecret()));
         } else if (paymentIntent.requiresConfirmation()) {
             confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
         } else if (paymentIntent.getStatus() == PaymentIntent.Status.Succeeded) {
