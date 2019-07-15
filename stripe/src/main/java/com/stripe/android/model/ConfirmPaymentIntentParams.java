@@ -417,8 +417,9 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
 
         /**
          * Sets a pre-existing source that will be attached to this PaymentIntent
-         * @param sourceId the ID of an existing Source that is being attached to this PaymentIntent.
-         *                 Only one of SourceParam and SourceId should be used at at time
+         * @param sourceId the ID of an existing Source that is being attached to this
+         *                 PaymentIntent. Only one of SourceParam and SourceId should be used at a
+         *                 time.
          */
         @NonNull
         private Builder setSourceId(@Nullable String sourceId) {
