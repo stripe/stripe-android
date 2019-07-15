@@ -28,6 +28,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -43,6 +44,9 @@ import static com.stripe.android.StripeNetworkUtils.createUpdateCvcTokenParams;
  */
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
+    public static final String VERSION =
+            String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME);
+
     @Nullable private static AppInfo sAppInfo;
 
     @NonNull private final StripeApiHandler mApiHandler;

@@ -21,8 +21,8 @@ abstract class StripeRequest {
 
     static final String CHARSET = "UTF-8";
 
-    static final String DEFAULT_USER_AGENT = String.format(
-            Locale.ROOT, "Stripe/v1 AndroidBindings/%s", BuildConfig.VERSION_NAME);
+    static final String DEFAULT_USER_AGENT =
+            String.format(Locale.ROOT, "Stripe/v1 %s", Stripe.VERSION);
 
     @NonNull final Method method;
     @Nullable final Map<String, ?> params;
