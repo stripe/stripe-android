@@ -11,13 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class ConfirmPaymentIntentParams implements StripeIntentParams {
+public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentParams {
 
     public static final String API_PARAM_SOURCE_DATA = "source_data";
     public static final String API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data";
 
     static final String API_PARAM_SOURCE_ID = "source";
-
     static final String API_PARAM_SAVE_PAYMENT_METHOD = "save_payment_method";
 
     @Nullable private final PaymentMethodCreateParams mPaymentMethodCreateParams;
@@ -30,6 +29,7 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
     @Nullable private final String mReturnUrl;
 
     private final boolean mSavePaymentMethod;
+    private final boolean mUseStripeSdk;
 
     private ConfirmPaymentIntentParams(@NonNull Builder builder) {
         mClientSecret = builder.mClientSecret;
@@ -43,6 +43,7 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         mSavePaymentMethod = builder.mSavePaymentMethod;
 
         mExtraParams = builder.mExtraParams;
+        mUseStripeSdk = builder.mShouldUseSdk;
     }
 
     /**
@@ -321,6 +322,19 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         return mSavePaymentMethod;
     }
 
+    @Override
+    public boolean shouldUseStripeSdk() {
+        return mUseStripeSdk;
+    }
+
+    @NonNull
+    @Override
+    public ConfirmPaymentIntentParams withShouldUseStripeSdk(boolean shouldUseStripeSdk) {
+        return toBuilder()
+                .setShouldUseSdk(shouldUseStripeSdk)
+                .build();
+    }
+
     /**
      * Create a Map representing this object that is prepared for the Stripe API.
      */
@@ -351,7 +365,23 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
             networkReadyMap.put(API_PARAM_SAVE_PAYMENT_METHOD, true);
         }
 
+        if (mUseStripeSdk) {
+            networkReadyMap.put(API_PARAM_USE_STRIPE_SDK, true);
+        }
+
         return networkReadyMap;
+    }
+
+    @NonNull
+    private Builder toBuilder() {
+        return new Builder(mClientSecret)
+                .setReturnUrl(mReturnUrl)
+                .setPaymentMethodId(mPaymentMethodId)
+                .setPaymentMethodCreateParams(mPaymentMethodCreateParams)
+                .setSourceId(mSourceId)
+                .setSourceParams(mSourceParams)
+                .setSavePaymentMethod(mSavePaymentMethod)
+                .setExtraParams(mExtraParams);
     }
 
     private static final class Builder implements ObjectBuilder<ConfirmPaymentIntentParams> {
@@ -366,6 +396,7 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         @Nullable private String mReturnUrl;
 
         private boolean mSavePaymentMethod;
+        private boolean mShouldUseSdk;
 
         /**
          * Sets the client secret that is used to authenticate actions on this PaymentIntent
@@ -454,12 +485,17 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         }
 
         @NonNull
+        public Builder setShouldUseSdk(boolean shouldUseSdk) {
+            mShouldUseSdk = shouldUseSdk;
+            return this;
+        }
+
+        @NonNull
         @Override
         public ConfirmPaymentIntentParams build() {
             return new ConfirmPaymentIntentParams(this);
         }
     }
-
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -469,17 +505,20 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
 
     private boolean typedEquals(@NonNull ConfirmPaymentIntentParams params) {
         return ObjectUtils.equals(mReturnUrl, params.mReturnUrl)
+                && ObjectUtils.equals(mClientSecret, params.mClientSecret)
+                && ObjectUtils.equals(mPaymentMethodId, params.mPaymentMethodId)
                 && ObjectUtils.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
-                && ObjectUtils.equals(mSourceParams, params.mSourceParams)
                 && ObjectUtils.equals(mSourceId, params.mSourceId)
+                && ObjectUtils.equals(mSourceParams, params.mSourceParams)
                 && ObjectUtils.equals(mExtraParams, params.mExtraParams)
                 && ObjectUtils.equals(mSavePaymentMethod, params.mSavePaymentMethod)
-                && ObjectUtils.equals(mPaymentMethodId, params.mPaymentMethodId);
+                && ObjectUtils.equals(mUseStripeSdk, params.mUseStripeSdk);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mPaymentMethodCreateParams, mSourceParams, mSourceId,
-                mExtraParams, mReturnUrl, mClientSecret, mPaymentMethodId, mSavePaymentMethod);
+        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId,
+                mPaymentMethodCreateParams, mSourceId, mSourceParams, mExtraParams,
+                mSavePaymentMethod, mUseStripeSdk);
     }
 }
