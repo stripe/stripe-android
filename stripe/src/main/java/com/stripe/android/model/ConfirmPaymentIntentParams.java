@@ -72,7 +72,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     }
 
     /**
-     * See {@link #create(String, String, Map)}
+     * See {@link #create(String, String)}
      */
     @NonNull
     public static ConfirmPaymentIntentParams create(@NonNull String clientSecret) {
