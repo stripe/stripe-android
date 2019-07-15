@@ -102,12 +102,13 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     private boolean typedEquals(@NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
         return ObjectUtils.equals(mReturnUrl, confirmSetupIntentParams.mReturnUrl)
                 && ObjectUtils.equals(mClientSecret, confirmSetupIntentParams.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, confirmSetupIntentParams.mPaymentMethodId);
+                && ObjectUtils.equals(mPaymentMethodId, confirmSetupIntentParams.mPaymentMethodId)
+                && ObjectUtils.equals(mUseStripeSdk, confirmSetupIntentParams.mUseStripeSdk);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId);
+        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId, mUseStripeSdk);
     }
 
 
