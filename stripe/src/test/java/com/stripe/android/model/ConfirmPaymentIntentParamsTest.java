@@ -73,7 +73,7 @@ public class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    public void createRetrievePaymentIntentwithPaymentMethodCreateParams_hasExpectedFields() {
+    public void createWithPaymentMethodCreateParams_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
                         .build(), null);
@@ -130,7 +130,7 @@ public class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    public void createCustomParams_withSourceId_toParamMap_createsExpectedMap() {
+    public void createWithSourceId_toParamMap_createsExpectedMap() {
         final ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams
                 .createWithSourceId(
                         TEST_SOURCE_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
@@ -146,7 +146,7 @@ public class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    public void createCustomParams_withPaymentMethodId_toParamMap_createsExpectedMap() {
+    public void createWithPaymentMethodId_toParamMap_createsExpectedMap() {
         final ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams
                 .createWithPaymentMethodId(
                         TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
@@ -185,5 +185,12 @@ public class ConfirmPaymentIntentParamsTest {
         Assert.assertEquals(
                 paramMap.get(extraParamKey2), extraParamValue2);
         assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
+    }
+
+    @Test
+    public void create_withClientSecret() {
+        assertEquals("client_secret",
+                ConfirmPaymentIntentParams.create("client_secret", "")
+                        .getClientSecret());
     }
 }

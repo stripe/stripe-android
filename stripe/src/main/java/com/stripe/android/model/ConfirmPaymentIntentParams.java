@@ -46,6 +46,30 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
     }
 
     /**
+     * Create a {@link ConfirmPaymentIntentParams} without a payment method.
+     */
+    @NonNull
+    public static ConfirmPaymentIntentParams create(
+            @NonNull String clientSecret,
+            @NonNull String returnUrl,
+            @Nullable Map<String, Object> extraParams) {
+        return new Builder(clientSecret)
+                .setReturnUrl(returnUrl)
+                .setExtraParams(extraParams)
+                .build();
+    }
+
+    /**
+     * See {@link #create(String, String, Map)}
+     */
+    @NonNull
+    public static ConfirmPaymentIntentParams create(
+            @NonNull String clientSecret,
+            @NonNull String returnUrl) {
+        return create(clientSecret, returnUrl, null);
+    }
+
+    /**
      * Create the parameters necessary for confirming a PaymentIntent while attaching a
      * PaymentMethod that already exits.
      *
@@ -60,7 +84,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
      *                          in the same request or the current payment method attached to the
      *                          PaymentIntent and must be specified again if a new payment method is
      *                          added.
-     * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
@@ -77,6 +100,9 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
                 .build();
     }
 
+    /**
+     * See {@link #createWithPaymentMethodId(String, String, String, boolean, Map)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
             @NonNull String paymentMethodId,
@@ -87,6 +113,9 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
                 returnUrl, savePaymentMethod, null);
     }
 
+    /**
+     * See {@link #createWithPaymentMethodId(String, String, String, boolean)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
             @NonNull String paymentMethodId,
@@ -111,7 +140,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
      *                          in the same request or the current payment method attached to the
      *                          PaymentIntent and must be specified again if a new payment method is
      *                          added.
-     * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
@@ -128,6 +156,10 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
                 .build();
     }
 
+    /**
+     * See {@link #createWithPaymentMethodCreateParams(PaymentMethodCreateParams, String, String,
+     * boolean, Map)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -138,6 +170,10 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
                 clientSecret, returnUrl, savePaymentMethod, null);
     }
 
+    /**
+     * See {@link #createWithPaymentMethodCreateParams(PaymentMethodCreateParams, String, String,
+     * boolean)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -148,8 +184,8 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
     }
 
     /**
-     * Create the parameters necessary for confirming a PaymentIntent while attaching a source that
-     * already exits.
+     * Create the parameters necessary for confirming a PaymentIntent with an
+     * existing {@link Source}.
      *
      * @param sourceId the ID of the source that is being attached to the PaymentIntent being
      *                 confirmed
@@ -161,7 +197,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
      *                          This parameter only applies to the source passed in the same request
      *                          or the current source attached to the PaymentIntent and must be
      *                          specified again if a new source is added.
-     * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static ConfirmPaymentIntentParams createWithSourceId(
@@ -178,6 +213,9 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
                 .build();
     }
 
+    /**
+     * See {@link #createWithSourceId(String, String, String, boolean, Map)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithSourceId(
             @NonNull String sourceId,
@@ -187,6 +225,9 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         return createWithSourceId(sourceId, clientSecret, returnUrl, savePaymentMethod, null);
     }
 
+    /**
+     * See {@link #createWithSourceId(String, String, String, boolean)}
+     */
     @NonNull
     public static ConfirmPaymentIntentParams createWithSourceId(
             @NonNull String sourceId,
@@ -196,7 +237,7 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
     }
 
     /**
-     * Create the parameters necessary for confirming a PaymentIntent while attaching Source data
+     * Create the parameters necessary for confirming a PaymentIntent with {@link SourceParams}
      *
      * @param sourceParams params for the source that will be attached to this PaymentIntent
      * @param clientSecret client secret from the PaymentIntent that is to be confirmed
@@ -207,7 +248,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
      *                          This parameter only applies to the source passed in the same request
      *                          or the current source attached to the PaymentIntent and must be
      *                          specified again if a new source is added.
-     * @return params that can be use to confirm a PaymentIntent
      */
     @NonNull
     public static ConfirmPaymentIntentParams createWithSourceParams(
@@ -282,10 +322,7 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
     }
 
     /**
-     * Create a string-keyed map representing this object that is
-     * ready to be sent over the network.
-     *
-     * @return a String-keyed map
+     * Create a Map representing this object that is prepared for the Stripe API.
      */
     @NonNull
     public Map<String, Object> toParamMap() {
@@ -333,7 +370,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         /**
          * Sets the client secret that is used to authenticate actions on this PaymentIntent
          * @param clientSecret client secret associated with this PaymentIntent
-         * @return {@code this}, for chaining purposes
          */
         private Builder(@NonNull String clientSecret) {
             mClientSecret = Objects.requireNonNull(clientSecret);
@@ -346,7 +382,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
          *                                  this PaymentIntent. Only one of PaymentMethodParam,
          *                                  PaymentMethodId, SourceParam, SourceId should be used
          *                                  at a time.
-         * @return {@code this}, for chaining purposes
          */
         @NonNull
         private Builder setPaymentMethodCreateParams(
@@ -361,7 +396,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
          * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
          *                        PaymentIntent. Only one of PaymentMethodParam, PaymentMethodId,
          *                        SourceParam, SourceId should be used at a time.
-         * @return {@code this}, for chaining purposes
          */
         @NonNull
         private Builder setPaymentMethodId(@NonNull String paymentMethodId) {
@@ -374,7 +408,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
          *
          * @param sourceParams params for the source that will be attached to this PaymentIntent.
          *                     Only one of SourceParam and SourceId should be used at at time.
-         * @return {@code this}, for chaining purposes
          */
         @NonNull
         private Builder setSourceParams(@NonNull SourceParams sourceParams) {
@@ -384,9 +417,8 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
 
         /**
          * Sets a pre-existing source that will be attached to this PaymentIntent
-         * @param sourceId the ID of the source that is being attached to this PaymentIntent. Only
-         *                     one of SourceParam and SourceId should be used at at time
-         * @return {@code this}, for chaining purposes
+         * @param sourceId the ID of an existing Source that is being attached to this PaymentIntent.
+         *                 Only one of SourceParam and SourceId should be used at at time
          */
         @NonNull
         private Builder setSourceId(@Nullable String sourceId) {
@@ -395,9 +427,8 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         }
 
         /**
-         * @param returnUrl the URL the customer should be redirected to after the authorization
+         * @param returnUrl the URL the customer should be redirected to after the authentication
          *                  process
-         * @return {@code this}, for chaining purposes
          */
         @NonNull
         private Builder setReturnUrl(@NonNull String returnUrl) {
@@ -408,7 +439,6 @@ public final class ConfirmPaymentIntentParams implements StripeIntentParams {
         /**
          * @param extraParams params that will be included in the request. Incorrect params may
          *                    result in errors when connecting to Stripe's API.
-         * @return {@code this}, for chaining purposes
          */
         @NonNull
         private Builder setExtraParams(@Nullable Map<String, Object> extraParams) {
