@@ -647,6 +647,17 @@ public class Stripe {
     }
 
     /**
+     * See {@link #confirmPaymentIntentSynchronous(ConfirmPaymentIntentParams, String)}
+     */
+    @Nullable
+    public PaymentIntent confirmPaymentIntentSynchronous(
+            @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams)
+            throws AuthenticationException, InvalidRequestException, APIConnectionException,
+            APIException {
+        return confirmPaymentIntentSynchronous(confirmPaymentIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
      * Blocking method to retrieve a {@link SetupIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
