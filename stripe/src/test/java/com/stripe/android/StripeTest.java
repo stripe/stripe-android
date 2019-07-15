@@ -84,71 +84,121 @@ public class StripeTest {
         mContext = ApplicationProvider.getApplicationContext();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
+    public void testVersion() {
+        assertEquals("AndroidBindings/9.3.6", Stripe.VERSION);
+    }
+
+    @Test
     public void constructorShouldFailWithNullPublishableKey() {
-        new Stripe(mContext, null);
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext, null);
+            }
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorShouldFailWithEmptyPublishableKey() {
-        new Stripe(mContext, "");
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext, "");
+            }
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorShouldFailWithSecretKey() {
-        new Stripe(mContext, DEFAULT_SECRET_KEY);
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext, DEFAULT_SECRET_KEY);
+            }
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void setDefaultPublishableKeyShouldFailWhenNull() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.setDefaultPublishableKey(null);
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .setDefaultPublishableKey(null);
+            }
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void setDefaultPublishableKeyShouldFailWhenEmpty() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.setDefaultPublishableKey("");
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .setDefaultPublishableKey("");
+            }
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void setDefaultPublishableKeyShouldFailWithSecretKey() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.setDefaultPublishableKey(DEFAULT_SECRET_KEY);
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .setDefaultPublishableKey(DEFAULT_SECRET_KEY);
+            }
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void createTokenShouldFailWithNull() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.createToken(null, null);
+        assertThrows(RuntimeException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .createToken(null, null);
+            }
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void createTokenShouldFailWithNullCard() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.createToken(null, DEFAULT_TOKEN_CALLBACK);
+        assertThrows(RuntimeException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .createToken(null, DEFAULT_TOKEN_CALLBACK);
+            }
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void createTokenShouldFailWithNullTokenCallback() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.createToken(DEFAULT_CARD, null);
+        assertThrows(RuntimeException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                new Stripe(mContext)
+                        .createToken(DEFAULT_CARD, null);
+            }
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createTokenShouldFailWithNullPublishableKey() {
-        Stripe stripe = new Stripe(mContext);
-        stripe.createToken(DEFAULT_CARD, new TokenCallback() {
-            @Override
-            public void onError(@NonNull Exception error) {
-                fail("Should not call method");
-            }
+        new Stripe(mContext)
+                .createToken(DEFAULT_CARD, new TokenCallback() {
+                    @Override
+                    public void onError(@NonNull Exception error) {
+                        fail("Should not call method");
+                    }
 
-            @Override
-            public void onSuccess(@NonNull Token token) {
-                fail("Should not call method");
-            }
-        });
+                    @Override
+                    public void onSuccess(@NonNull Token token) {
+                        fail("Should not call method");
+                    }
+                });
     }
 
     @Test
