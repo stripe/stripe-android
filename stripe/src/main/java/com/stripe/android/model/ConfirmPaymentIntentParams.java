@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@SuppressWarnings("WeakerAccess")
 public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentParams {
 
     public static final String API_PARAM_SOURCE_DATA = "source_data";
@@ -90,7 +91,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl,
+            @Nullable String returnUrl,
             boolean savePaymentMethod,
             @Nullable Map<String, Object> extraParams) {
         return new Builder(clientSecret)
@@ -108,7 +109,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl,
+            @Nullable String returnUrl,
             boolean savePaymentMethod) {
         return createWithPaymentMethodId(paymentMethodId, clientSecret,
                 returnUrl, savePaymentMethod, null);
@@ -121,9 +122,19 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodId(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @Nullable String returnUrl) {
         return createWithPaymentMethodId(paymentMethodId, clientSecret,
                 returnUrl, false);
+    }
+
+    /**
+     * See {@link #createWithPaymentMethodId(String, String, String)}
+     */
+    @NonNull
+    public static ConfirmPaymentIntentParams createWithPaymentMethodId(
+            @NonNull String paymentMethodId,
+            @NonNull String clientSecret) {
+        return createWithPaymentMethodId(paymentMethodId, clientSecret, null);
     }
 
     /**
@@ -146,7 +157,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
-            @NonNull String returnUrl,
+            @Nullable String returnUrl,
             boolean savePaymentMethod,
             @Nullable Map<String, Object> extraParams) {
         return new Builder(clientSecret)
@@ -165,7 +176,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
-            @NonNull String returnUrl,
+            @Nullable String returnUrl,
             boolean savePaymentMethod) {
         return createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                 clientSecret, returnUrl, savePaymentMethod, null);
@@ -179,9 +190,19 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @Nullable String returnUrl) {
         return createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                 clientSecret, returnUrl, false);
+    }
+
+    /**
+     * See {@link #createWithPaymentMethodCreateParams(PaymentMethodCreateParams, String, String)}
+     */
+    @NonNull
+    public static ConfirmPaymentIntentParams createWithPaymentMethodCreateParams(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull String clientSecret) {
+        return createWithPaymentMethodCreateParams(paymentMethodCreateParams, clientSecret, null);
     }
 
     /**
@@ -463,7 +484,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
          *                  process
          */
         @NonNull
-        private Builder setReturnUrl(@NonNull String returnUrl) {
+        private Builder setReturnUrl(@Nullable String returnUrl) {
             mReturnUrl = returnUrl;
             return this;
         }
@@ -485,7 +506,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
         }
 
         @NonNull
-        public Builder setShouldUseSdk(boolean shouldUseSdk) {
+        private Builder setShouldUseSdk(boolean shouldUseSdk) {
             mShouldUseSdk = shouldUseSdk;
             return this;
         }

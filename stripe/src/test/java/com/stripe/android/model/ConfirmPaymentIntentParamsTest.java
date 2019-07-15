@@ -148,8 +148,7 @@ public class ConfirmPaymentIntentParamsTest {
     @Test
     public void createWithPaymentMethodId_toParamMap_createsExpectedMap() {
         final ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams
-                .createWithPaymentMethodId(
-                        TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
+                .createWithPaymentMethodId(TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET);
 
         final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
 
