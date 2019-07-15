@@ -28,6 +28,9 @@ import java.util.List;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD;
+import com.stripe.android.model.Customer;
+import com.stripe.android.model.Source;
+
 
 /**
  * An activity that allows a user to select from a customer's available payment methods, or
@@ -182,6 +185,20 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (selectPaymentMethodId != null) {
             mMaskedCardAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
         }
+        
+         Customer arr = mCustomerSession.getCachedCustomer();
+        int selectedIndex = 0;
+        String defaultSource = arr.getDefaultSource();
+        for (int j = 0; j < paymentMethods.size(); j++) {
+            if (defaultSource.equalsIgnoreCase(paymentMethods.get(j).id)) {
+                selectedIndex = j;
+                break;
+            }
+        }
+        mMaskedCardAdapter.setSelectedPaymentMethod(paymentMethods.get(selectedIndex).id);
+        mMaskedCardAdapter.setSelectedIndex(selectedIndex);
+
+        mMaskedCardAdapter.notifyDataSetChanged();
     }
 
     private void initLoggingTokens() {
@@ -217,6 +234,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             cancelAndFinish();
             return;
         }
+        
+        mCustomerSession.setCustomerDefaultSource(paymentMethod.id, Source.CARD, new CustomerSession.CustomerRetrievalListener() {
+            @Override
+            public void onCustomerRetrieved(@NonNull Customer customer) {
+                
+            }
+
+            @Override
+            public void onError(int errorCode, @NonNull String errorMessage, @Nullable StripeError stripeError) {
+
+            }
+        });
 
         final Intent intent = new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod);
         setResult(RESULT_OK, intent);
