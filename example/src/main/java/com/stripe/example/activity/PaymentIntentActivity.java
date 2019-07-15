@@ -172,9 +172,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
                     final ConfirmPaymentIntentParams confirmPaymentIntentParams =
                             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                                     paymentMethodCreateParams, mClientSecret, RETURN_URL);
-                    return mStripe.confirmPaymentIntentSynchronous(
-                            confirmPaymentIntentParams,
-                            PaymentConfiguration.getInstance().getPublishableKey());
+                    return mStripe.confirmPaymentIntentSynchronous(confirmPaymentIntentParams);
                 });
 
         final Disposable disposable = paymentIntentObservable
