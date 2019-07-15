@@ -13,13 +13,13 @@ import android.support.annotation.VisibleForTesting;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.ConfirmSetupIntentParams;
+import com.stripe.android.model.ConfirmStripeIntentParams;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.Stripe3ds2AuthResult;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.model.Stripe3dsRedirect;
 import com.stripe.android.model.StripeIntent;
-import com.stripe.android.model.StripeIntentParams;
 import com.stripe.android.stripe3ds2.init.StripeConfigParameters;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl;
@@ -82,12 +82,12 @@ class PaymentController {
      */
     void startConfirmAndAuth(@NonNull Stripe stripe,
                              @NonNull Activity activity,
-                             @NonNull StripeIntentParams stripeIntentParams,
+                             @NonNull ConfirmStripeIntentParams confirmStripeIntentParams,
                              @NonNull String publishableKey) {
         mApiKeyValidator.requireValid(publishableKey);
-        new ConfirmStripeIntentTask(stripe, stripeIntentParams, publishableKey,
+        new ConfirmStripeIntentTask(stripe, confirmStripeIntentParams, publishableKey,
                 new ConfirmStripeIntentCallback(activity, publishableKey, this,
-                        getRequestCode(stripeIntentParams)))
+                        getRequestCode(confirmStripeIntentParams)))
                 .execute();
     }
 
@@ -278,10 +278,10 @@ class PaymentController {
     /**
      * Get the appropriate request code for the given stripe intent params type
      *
-     * @param params the {@link StripeIntentParams} to get the request code for
+     * @param params the {@link ConfirmStripeIntentParams} to get the request code for
      * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
      */
-    static int getRequestCode(@NonNull StripeIntentParams params) {
+    static int getRequestCode(@NonNull ConfirmStripeIntentParams params) {
         if (params instanceof ConfirmPaymentIntentParams) {
             return PAYMENT_REQUEST_CODE;
         }
@@ -377,17 +377,19 @@ class PaymentController {
 
     private static final class ConfirmStripeIntentTask extends ApiOperation<StripeIntent> {
         @NonNull private final Stripe mStripe;
-        @NonNull private final StripeIntentParams mParams;
+        @NonNull private final ConfirmStripeIntentParams mParams;
         @NonNull private final String mPublishableKey;
 
         private ConfirmStripeIntentTask(@NonNull Stripe stripe,
-                                        @NonNull StripeIntentParams params,
+                                        @NonNull ConfirmStripeIntentParams params,
                                         @NonNull String publishableKey,
                                         @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
             mStripe = stripe;
-            mParams = params;
             mPublishableKey = publishableKey;
+
+            // mark this request as `use_stripe_sdk=true`
+            mParams = params.withShouldUseStripeSdk(true);
         }
 
         @Nullable

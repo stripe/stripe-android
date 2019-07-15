@@ -193,4 +193,15 @@ public class ConfirmPaymentIntentParamsTest {
                 ConfirmPaymentIntentParams.create("client_secret", "")
                         .getClientSecret());
     }
+
+    @Test
+    public void shouldUseStripeSdk() {
+        final ConfirmPaymentIntentParams confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.create("client_secret", "return_url");
+        assertFalse(confirmPaymentIntentParams.shouldUseStripeSdk());
+
+        assertTrue(confirmPaymentIntentParams
+                .withShouldUseStripeSdk(true)
+                .shouldUseStripeSdk());
+    }
 }
