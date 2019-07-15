@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentParams {
 
     public static final String API_PARAM_SOURCE_DATA = "source_data";
@@ -53,7 +53,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     @NonNull
     public static ConfirmPaymentIntentParams create(
             @NonNull String clientSecret,
-            @NonNull String returnUrl,
+            @Nullable String returnUrl,
             @Nullable Map<String, Object> extraParams) {
         return new Builder(clientSecret)
                 .setReturnUrl(returnUrl)
@@ -67,8 +67,16 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     @NonNull
     public static ConfirmPaymentIntentParams create(
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @Nullable String returnUrl) {
         return create(clientSecret, returnUrl, null);
+    }
+
+    /**
+     * See {@link #create(String, String, Map)}
+     */
+    @NonNull
+    public static ConfirmPaymentIntentParams create(@NonNull String clientSecret) {
+        return create(clientSecret, null);
     }
 
     /**
