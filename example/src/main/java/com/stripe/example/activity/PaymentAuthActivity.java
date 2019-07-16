@@ -122,9 +122,13 @@ public class PaymentAuthActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.VISIBLE);
         mStatusTextView.append("\n\nPayment authentication completed, getting result");
 
-        mStripe.onPaymentResult(requestCode, resultCode, data, new AuthResultListener(this));
+        final boolean isPaymentResult =
+                mStripe.onPaymentResult(requestCode, data, new AuthResultListener(this));
 
-        mStripe.onSetupResult(requestCode, resultCode, data, new SetupAuthResultListener(this));
+        if (!isPaymentResult) {
+            final boolean isSetupResult =
+                    mStripe.onSetupResult(requestCode, data, new SetupAuthResultListener(this));
+        }
     }
 
     @Override

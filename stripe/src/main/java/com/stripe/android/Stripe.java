@@ -207,11 +207,11 @@ public class Stripe {
      * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams, String)}) or manual
      * confirmation (see {@link #authenticatePayment(Activity, String, String)}})
      */
-    public boolean onPaymentResult(int requestCode, int resultCode, @Nullable Intent data,
+    public boolean onPaymentResult(int requestCode, @Nullable Intent data,
                                    @NonNull String publishableKey,
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
         if (data != null &&
-                mPaymentController.shouldHandlePaymentResult(requestCode, resultCode, data)) {
+                mPaymentController.shouldHandlePaymentResult(requestCode, data)) {
             mPaymentController.handlePaymentResult(this, data, publishableKey, callback);
             return true;
         }
@@ -220,12 +220,11 @@ public class Stripe {
     }
 
     /**
-     * See {@link #onPaymentResult(int, int, Intent, String, ApiResultCallback)}
+     * See {@link #onPaymentResult(int, Intent, String, ApiResultCallback)}
      */
-    public boolean onPaymentResult(
-            int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<PaymentIntentResult> callback) {
-        return onPaymentResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
+    public boolean onPaymentResult(int requestCode, @Nullable Intent data,
+                                   @NonNull ApiResultCallback<PaymentIntentResult> callback) {
+        return onPaymentResult(requestCode, data, mDefaultPublishableKey, callback);
     }
 
     /**
@@ -233,11 +232,11 @@ public class Stripe {
      * result of a SetupIntent confirmation
      * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
      */
-    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
-                                   @NonNull String publishableKey,
-                                   @NonNull ApiResultCallback<SetupIntentResult> callback) {
+    public boolean onSetupResult(int requestCode, @Nullable Intent data,
+                                 @NonNull String publishableKey,
+                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
         if (data != null &&
-                mPaymentController.shouldHandleSetupResult(requestCode, resultCode, data)) {
+                mPaymentController.shouldHandleSetupResult(requestCode, data)) {
             mPaymentController.handleSetupResult(this, data, publishableKey, callback);
             return true;
         }
@@ -246,11 +245,11 @@ public class Stripe {
     }
 
     /**
-     * See {@link #onSetupResult(int, int, Intent, String, ApiResultCallback)}
+     * See {@link #onSetupResult(int, Intent, String, ApiResultCallback)}
      */
-    public boolean onSetupResult(int requestCode, int resultCode, @Nullable Intent data,
-            @NonNull ApiResultCallback<SetupIntentResult> callback) {
-        return onSetupResult(requestCode, resultCode, data, mDefaultPublishableKey, callback);
+    public boolean onSetupResult(int requestCode, @Nullable Intent data,
+                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        return onSetupResult(requestCode, data, mDefaultPublishableKey, callback);
     }
 
     /**

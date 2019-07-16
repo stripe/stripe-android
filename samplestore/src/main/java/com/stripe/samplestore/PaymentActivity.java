@@ -182,7 +182,7 @@ public class PaymentActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         final boolean isHandled = mStripe.onPaymentResult(
-                requestCode, resultCode, data,
+                requestCode, data,
                 new ApiResultCallback<PaymentIntentResult>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntentResult result) {
