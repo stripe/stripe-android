@@ -3,7 +3,6 @@ package com.stripe.android.model;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import java.util.Map;
 import java.util.Objects;
@@ -189,7 +188,7 @@ public interface StripeIntent {
          * PaymentIntent.next_action.redirect_to_url.return_url
          * </a>
          */
-        @Nullable public final Uri returnUrl;
+        @Nullable public final String returnUrl;
 
         @Nullable
         static RedirectData create(@NonNull Map<?, ?> redirectToUrlHash) {
@@ -207,7 +206,7 @@ public interface StripeIntent {
 
         RedirectData(@NonNull String url, @Nullable String returnUrl) {
             this.url = Uri.parse(url);
-            this.returnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
+            this.returnUrl = returnUrl;
         }
     }
 }

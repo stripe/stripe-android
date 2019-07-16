@@ -36,6 +36,7 @@ public class PaymentAuthWebViewTest {
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "pi_123_secret_456",
                         "stripe://payment_intent_return");
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
         verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
@@ -53,6 +54,7 @@ public class PaymentAuthWebViewTest {
 
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "seti_1234_secret_5678",
                         "stripe://payment_auth");
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
         verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
@@ -64,12 +66,44 @@ public class PaymentAuthWebViewTest {
     }
 
     @Test
-    public void shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
+    public void shouldOverrideUrlLoading_withoutReturnUrl_onPaymentIntentImplicitReturnUrl_shouldSetResult() {
         final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
-                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity, null);
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "pi_123_secret_456", null);
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
+        verify(mActivity).finish();
+
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals("pi_123_secret_456",
+                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withoutReturnUrl_onSetupIntentImplicitReturnUrl_shouldSetResult() {
+        final String deepLink = "stripe://payment_auth?setup_intent=seti_1234" +
+                "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "seti_1234_secret_5678", null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
+        verify(mActivity).finish();
+
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals("seti_1234_secret_5678",
+                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "pi_123_secret_456", null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView,
+                "https://example.com");
         verify(mActivity, never()).finish();
     }
 }

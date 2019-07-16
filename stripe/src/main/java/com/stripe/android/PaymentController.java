@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -244,6 +243,7 @@ class PaymentController {
                     }
                 } else if (sdkData.is3ds1()) {
                     begin3ds1Auth(activity, getRequestCode(stripeIntent),
+                            Objects.requireNonNull(stripeIntent.getClientSecret()),
                             Stripe3dsRedirect.create(sdkData).getRedirectData());
                 } else {
                     // authentication type is not supported
@@ -251,6 +251,7 @@ class PaymentController {
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
                 begin3ds1Auth(activity, getRequestCode(stripeIntent),
+                        Objects.requireNonNull(stripeIntent.getClientSecret()),
                         Objects.requireNonNull(stripeIntent.getRedirectData()));
             } else {
                 // next action type is not supported, so bypass authentication
@@ -307,7 +308,7 @@ class PaymentController {
         ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
 
         final StripeIntent.RedirectData redirectData = stripeIntent.getRedirectData();
-        final Uri returnUrl = redirectData != null ? redirectData.returnUrl : null;
+        final String returnUrl = redirectData != null ? redirectData.returnUrl : null;
 
         final AuthenticationRequestParameters areqParams =
                 transaction.getAuthenticationRequestParameters();
@@ -321,7 +322,7 @@ class PaymentController {
                 areqParams.getSDKEphemeralPublicKey(),
                 areqParams.getMessageVersion(),
                 timeout,
-                returnUrl != null ? returnUrl.toString() : null
+                returnUrl
         );
         mApiHandler.start3ds2Auth(authParams, publishableKey,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
@@ -336,8 +337,12 @@ class PaymentController {
      */
     private static void begin3ds1Auth(@NonNull Activity activity,
                                       int requestCode,
+                                      @NonNull String clientSecret,
                                       @NonNull StripeIntent.RedirectData redirectData) {
-        new PaymentAuthWebViewStarter(activity, requestCode).start(redirectData);
+        new PaymentAuthWebViewStarter(activity, requestCode).start(
+                new PaymentAuthWebViewStarter.Data(
+                        clientSecret, redirectData.url.toString(),
+                        redirectData.returnUrl));
     }
 
     private static void handleError(@NonNull Activity activity,
@@ -508,6 +513,7 @@ class PaymentController {
                 }
             } else if (result.getFallbackRedirectData() != null) {
                 begin3ds1Auth(activity, getRequestCode(mStripeIntent),
+                        Objects.requireNonNull(mStripeIntent.getClientSecret()),
                         result.getFallbackRedirectData());
             } else {
                 final Stripe3ds2AuthResult.ThreeDS2Error error = result.error;
