@@ -1,7 +1,6 @@
 package com.stripe.android.model;
 
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -39,9 +38,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithSourceParams(
                         sourceParams, TEST_CLIENT_SECRET, TEST_RETURN_URL);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(sourceParams, params.getSourceParams());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(sourceParams, params.getSourceParams());
         assertFalse(params.shouldSavePaymentMethod());
     }
 
@@ -51,9 +50,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithSourceId(
                         TEST_SOURCE_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(TEST_SOURCE_ID, params.getSourceId());
         assertFalse(params.shouldSavePaymentMethod());
     }
 
@@ -63,9 +62,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithSourceId(
                         TEST_SOURCE_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(TEST_SOURCE_ID, params.getSourceId());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(TEST_SOURCE_ID, params.getSourceId());
         assertTrue(params.shouldSavePaymentMethod());
 
         assertEquals(Boolean.TRUE,
@@ -81,9 +80,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         TEST_CLIENT_SECRET, TEST_RETURN_URL);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
         assertFalse(params.shouldSavePaymentMethod());
     }
 
@@ -93,9 +92,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithPaymentMethodId(
                         TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
         assertFalse(params.shouldSavePaymentMethod());
     }
 
@@ -108,9 +107,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(paymentMethodCreateParams, params.getPaymentMethodCreateParams());
         assertTrue(params.shouldSavePaymentMethod());
     }
 
@@ -120,9 +119,9 @@ public class ConfirmPaymentIntentParamsTest {
                 .createWithPaymentMethodId(
                         TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL, true);
 
-        Assert.assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
-        Assert.assertEquals(TEST_RETURN_URL, params.getReturnUrl());
-        Assert.assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
+        assertEquals(TEST_CLIENT_SECRET, params.getClientSecret());
+        assertEquals(TEST_RETURN_URL, params.getReturnUrl());
+        assertEquals(TEST_PAYMENT_METHOD_ID, params.getPaymentMethodId());
         assertTrue(params.shouldSavePaymentMethod());
 
         assertEquals(Boolean.TRUE,
@@ -137,27 +136,41 @@ public class ConfirmPaymentIntentParamsTest {
 
         final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
 
-        Assert.assertEquals(paramMap.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_ID), TEST_SOURCE_ID);
-        Assert.assertEquals(
+        assertEquals(paramMap.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_ID), TEST_SOURCE_ID);
+        assertEquals(
                 paramMap.get(ConfirmPaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
-        Assert.assertEquals(
+        assertEquals(
                 paramMap.get(ConfirmPaymentIntentParams.API_PARAM_RETURN_URL), TEST_RETURN_URL);
         assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
 
     @Test
-    public void createWithPaymentMethodId_toParamMap_createsExpectedMap() {
+    public void createWithPaymentMethodId_withoutReturnUrl_toParamMap_createsExpectedMap() {
         final ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams
-                .createWithPaymentMethodId(
-                        TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
+                .createWithPaymentMethodId(TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET);
 
         final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
 
-        Assert.assertEquals(paramMap.get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_ID),
+        assertEquals(paramMap.get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_ID),
                 TEST_PAYMENT_METHOD_ID);
-        Assert.assertEquals(
+        assertEquals(
                 paramMap.get(ConfirmPaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
-        Assert.assertEquals(
+        assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_RETURN_URL));
+        assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
+    }
+
+    @Test
+    public void createWithPaymentMethodId_withReturnUrl_toParamMap_createsExpectedMap() {
+        final ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams
+                .createWithPaymentMethodId(TEST_PAYMENT_METHOD_ID, TEST_CLIENT_SECRET, TEST_RETURN_URL);
+
+        final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
+
+        assertEquals(paramMap.get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_ID),
+                TEST_PAYMENT_METHOD_ID);
+        assertEquals(
+                paramMap.get(ConfirmPaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
+        assertEquals(
                 paramMap.get(ConfirmPaymentIntentParams.API_PARAM_RETURN_URL), TEST_RETURN_URL);
         assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }
@@ -178,11 +191,11 @@ public class ConfirmPaymentIntentParamsTest {
 
         final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
 
-        Assert.assertEquals(
+        assertEquals(
                 paramMap.get(ConfirmPaymentIntentParams.API_PARAM_CLIENT_SECRET), TEST_CLIENT_SECRET);
-        Assert.assertEquals(
+        assertEquals(
                 paramMap.get(extraParamKey1), extraParamValue1);
-        Assert.assertEquals(
+        assertEquals(
                 paramMap.get(extraParamKey2), extraParamValue2);
         assertFalse(paramMap.containsKey(ConfirmPaymentIntentParams.API_PARAM_SAVE_PAYMENT_METHOD));
     }

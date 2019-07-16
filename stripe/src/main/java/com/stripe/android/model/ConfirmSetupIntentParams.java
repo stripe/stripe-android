@@ -13,8 +13,8 @@ import java.util.Objects;
 public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams {
 
     @NonNull private final String mClientSecret;
-    @Nullable private final String mReturnUrl;
     @NonNull private final String mPaymentMethodId;
+    @Nullable private final String mReturnUrl;
     private final boolean mUseStripeSdk;
 
     private ConfirmSetupIntentParams(@NonNull Builder builder) {
@@ -41,6 +41,15 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
             @NonNull String returnUrl) {
         return new ConfirmSetupIntentParams.Builder(clientSecret)
                 .setReturnUrl(returnUrl)
+                .setPaymentMethodId(paymentMethodId)
+                .build();
+    }
+
+    @NonNull
+    public static ConfirmSetupIntentParams create(
+            @NonNull String paymentMethodId,
+            @NonNull String clientSecret) {
+        return new ConfirmSetupIntentParams.Builder(clientSecret)
                 .setPaymentMethodId(paymentMethodId)
                 .build();
     }
@@ -136,7 +145,7 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
         }
 
         @NonNull
-        public ConfirmSetupIntentParams.Builder setShouldUseSdk(boolean shouldUseSdk) {
+        private ConfirmSetupIntentParams.Builder setShouldUseSdk(boolean shouldUseSdk) {
             mShouldUseSdk = shouldUseSdk;
             return this;
         }
