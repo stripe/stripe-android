@@ -15,6 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,7 +31,7 @@ public class PaymentAuthWebViewTest {
     }
 
     @Test
-    public void shouldOverrideUrlLoading_paymentIntent_shouldSetResult() {
+    public void shouldOverrideUrlLoading_withPaymentIntent_shouldSetResult() {
         final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
@@ -46,7 +47,7 @@ public class PaymentAuthWebViewTest {
     }
 
     @Test
-    public void shouldOverrideUrlLoading_setupIntent_shouldSetResult() {
+    public void shouldOverrideUrlLoading_withSetupIntent_shouldSetResult() {
         final String deepLink = "stripe://payment_auth?setup_intent=seti_1234" +
                 "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card";
 
@@ -60,5 +61,15 @@ public class PaymentAuthWebViewTest {
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals("seti_1234_secret_5678",
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
+        final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
+                "payment_intent_client_secret=pi_123_secret_456&source_type=card";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity, null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        verify(mActivity, never()).finish();
     }
 }
