@@ -17,7 +17,9 @@
         android:id="@+id/auth_web_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/payment_auth_web_view_toolbar" />
+        android:layout_below="@id/payment_auth_web_view_toolbar"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
     <ProgressBar
         android:id="@+id/auth_web_view_progress_bar"
