@@ -189,7 +189,7 @@ public class LoggingUtilsTest {
                 null, API_KEY, Token.TokenType.BANK_ACCOUNT);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 2, params.size());
         assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
-        assertEquals(Token.TokenType.BANK_ACCOUNT, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
+        assertEquals(Token.TokenType.BANK_ACCOUNT, params.get(LoggingUtils.FIELD_SOURCE_TYPE));
 
         assertEquals(Build.VERSION.SDK_INT, params.get(LoggingUtils.FIELD_OS_VERSION));
         assertNotNull(params.get(LoggingUtils.FIELD_OS_RELEASE));
