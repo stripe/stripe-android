@@ -118,4 +118,5 @@
     <!-- Screen title telling users they should select a shipping address -->
     <string name="title_select_shipping_method">Selecteer een verzendmethode</string>
     <string name="invalid_shipping_information">Ongeldig verzendadres</string>
+    <string name="secure_checkout">Beveiligde Checkout</string>
 </resources>

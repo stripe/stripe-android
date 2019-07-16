@@ -118,4 +118,5 @@
     <!-- Screen title telling users they should select a shipping address -->
     <string name="title_select_shipping_method">Sélectionnez un mode d’expédition</string>
     <string name="invalid_shipping_information">Adresse d’expédition incorrecte</string>
+    <string name="secure_checkout">Paiement sécurisé</string>
 </resources>
