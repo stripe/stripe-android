@@ -44,8 +44,8 @@ class PaymentAuthWebView extends WebView {
         configureSettings();
     }
 
-    void init(@NonNull Activity activity, @NonNull String returnUrl) {
-        setWebViewClient(new PaymentAuthWebViewClient(activity, returnUrl));
+    void init(@NonNull Activity activity, @NonNull String clientSecret, @NonNull String returnUrl) {
+        setWebViewClient(new PaymentAuthWebViewClient(activity, clientSecret, returnUrl));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -59,11 +59,14 @@ class PaymentAuthWebView extends WebView {
         static final String PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret";
 
         @NonNull private final Activity mActivity;
+        @NonNull private final String mClientSecret;
         @Nullable private final Uri mReturnUrl;
         @NonNull private final ProgressBar mProgressBar;
 
-        PaymentAuthWebViewClient(@NonNull Activity activity, @Nullable String returnUrl) {
+        PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull String clientSecret,
+                                 @Nullable String returnUrl) {
             mActivity = activity;
+            mClientSecret = clientSecret;
             mReturnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
             mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
         }
@@ -79,19 +82,9 @@ class PaymentAuthWebView extends WebView {
                                                 @NonNull String urlString) {
             final Uri uri = Uri.parse(urlString);
             if (isReturnUrl(uri)) {
-                final Set<String> paramNames = uri.getQueryParameterNames();
-                final String clientSecret;
-                if (paramNames.contains(PARAM_PAYMENT_CLIENT_SECRET)) {
-                    clientSecret = uri.getQueryParameter(PARAM_PAYMENT_CLIENT_SECRET);
-                } else if (paramNames.contains(PARAM_SETUP_CLIENT_SECRET)) {
-                    clientSecret = uri.getQueryParameter(PARAM_SETUP_CLIENT_SECRET);
-                } else {
-                    clientSecret = null;
-                }
-
                 mActivity.setResult(Activity.RESULT_OK,
                         new Intent()
-                                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
+                                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, mClientSecret));
                 mActivity.finish();
                 return true;
             }
@@ -107,11 +100,30 @@ class PaymentAuthWebView extends WebView {
         }
 
         private boolean isReturnUrl(@NonNull Uri uri) {
-            return mReturnUrl != null &&
-                    mReturnUrl.getScheme() != null &&
-                    mReturnUrl.getScheme().equals(uri.getScheme()) &&
-                    mReturnUrl.getHost() != null &&
-                    mReturnUrl.getHost().equals(uri.getHost());
+            if (mReturnUrl != null) {
+                // If the `returnUrl` is known, look for URIs that match it.
+
+                return mReturnUrl.getScheme() != null &&
+                        mReturnUrl.getScheme().equals(uri.getScheme()) &&
+                        mReturnUrl.getHost() != null &&
+                        mReturnUrl.getHost().equals(uri.getHost());
+            } else {
+                // If the `returnUrl` is unknown, look for URIs that contain a
+                // `payment_intent_client_secret` or `setup_intent_client_secret`
+                // query parameter, and check if its values matches the given `clientSecret`
+                // as a query parameter.
+
+                final Set<String> paramNames = uri.getQueryParameterNames();
+                final String clientSecret;
+                if (paramNames.contains(PARAM_PAYMENT_CLIENT_SECRET)) {
+                    clientSecret = uri.getQueryParameter(PARAM_PAYMENT_CLIENT_SECRET);
+                } else if (paramNames.contains(PARAM_SETUP_CLIENT_SECRET)) {
+                    clientSecret = uri.getQueryParameter(PARAM_SETUP_CLIENT_SECRET);
+                } else {
+                    clientSecret = null;
+                }
+                return mClientSecret.equals(clientSecret);
+            }
         }
     }
 }

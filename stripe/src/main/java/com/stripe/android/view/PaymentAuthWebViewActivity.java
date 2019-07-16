@@ -31,11 +31,13 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
                 getIntent().getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION);
         customizeToolbar(toolbar);
 
+        final String clientSecret = getIntent()
+                .getStringExtra(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET);
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
         final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
-        webView.init(this, returnUrl);
+        webView.init(this, clientSecret, returnUrl);
         webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
     }
 

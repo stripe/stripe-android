@@ -28,7 +28,7 @@ public class PaymentIntentRedirectDataTest {
                 StripeIntent.RedirectData.create(redirectMap);
         assertNotNull(redirectData);
         assertEquals(Uri.parse(url), redirectData.url);
-        assertEquals(Uri.parse(returnUrl), redirectData.returnUrl);
+        assertEquals(returnUrl, redirectData.returnUrl);
     }
 
     @Test
