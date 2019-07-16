@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 9.3.8 - 2019-07-16
+* [#1193](https://github.com/stripe/stripe-android/pull/1193) Fix `RuntimeException` related to 3DS2
+
 ## 9.3.7 - 2019-07-15
 * [#1154](https://github.com/stripe/stripe-android/pull/1154) Fix `NullPointerException` in `PaymentMethodsActivity`
 * [#1174](https://github.com/stripe/stripe-android/pull/1174) Add `getCardBuilder()` method to Card widgets
