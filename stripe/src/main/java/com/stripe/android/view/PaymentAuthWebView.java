@@ -59,12 +59,12 @@ class PaymentAuthWebView extends WebView {
         static final String PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret";
 
         @NonNull private final Activity mActivity;
-        @NonNull private final Uri mReturnUrl;
+        @Nullable private final Uri mReturnUrl;
         @NonNull private final ProgressBar mProgressBar;
 
-        PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull String returnUrl) {
+        PaymentAuthWebViewClient(@NonNull Activity activity, @Nullable String returnUrl) {
             mActivity = activity;
-            mReturnUrl = Uri.parse(returnUrl);
+            mReturnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
             mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
         }
 
@@ -107,7 +107,8 @@ class PaymentAuthWebView extends WebView {
         }
 
         private boolean isReturnUrl(@NonNull Uri uri) {
-            return mReturnUrl.getScheme() != null &&
+            return mReturnUrl != null &&
+                    mReturnUrl.getScheme() != null &&
                     mReturnUrl.getScheme().equals(uri.getScheme()) &&
                     mReturnUrl.getHost() != null &&
                     mReturnUrl.getHost().equals(uri.getHost());
