@@ -116,20 +116,16 @@ class PaymentController {
      * Decide whether {@link #handlePaymentResult(Stripe, Intent, String, ApiResultCallback)}
      * should be called.
      */
-    boolean shouldHandlePaymentResult(int requestCode, int resultCode, @Nullable Intent data) {
-        return requestCode == PAYMENT_REQUEST_CODE &&
-                resultCode == Activity.RESULT_OK &&
-                data != null;
+    boolean shouldHandlePaymentResult(int requestCode, @Nullable Intent data) {
+        return requestCode == PAYMENT_REQUEST_CODE && data != null;
     }
 
     /**
      * Decide whether {@link #handleSetupResult(Stripe, Intent, String, ApiResultCallback)}
      * should be called.
      */
-    boolean shouldHandleSetupResult(int requestCode, int resultCode, @Nullable Intent data) {
-        return requestCode == SETUP_REQUEST_CODE &&
-                resultCode == Activity.RESULT_OK &&
-                data != null;
+    boolean shouldHandleSetupResult(int requestCode, @Nullable Intent data) {
+        return requestCode == SETUP_REQUEST_CODE && data != null;
     }
 
     /**

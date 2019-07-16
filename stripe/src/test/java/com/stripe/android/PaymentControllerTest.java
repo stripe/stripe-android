@@ -189,8 +189,8 @@ public class PaymentControllerTest {
 
     @Test
     public void shouldHandleResult_withInvalidResultCode() {
-        assertFalse(mController.shouldHandlePaymentResult(500, Activity.RESULT_OK, new Intent()));
-        assertFalse(mController.shouldHandleSetupResult(500, Activity.RESULT_OK, new Intent()));
+        assertFalse(mController.shouldHandlePaymentResult(500, new Intent()));
+        assertFalse(mController.shouldHandleSetupResult(500, new Intent()));
     }
 
     @Test
