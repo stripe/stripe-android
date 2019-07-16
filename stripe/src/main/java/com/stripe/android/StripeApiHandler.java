@@ -185,7 +185,7 @@ class StripeApiHandler {
         try {
             logTelemetryData();
             logApiCall(
-                    mLoggingUtils.getSetupIntentConfirmationParams(null, options.apiKey),
+                    mLoggingUtils.getSetupIntentConfirmationParams(options.apiKey),
                     options.apiKey
             );
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
@@ -215,7 +215,7 @@ class StripeApiHandler {
             APIException {
         try {
             logTelemetryData();
-            logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(null, options.apiKey),
+            logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(options.apiKey),
                     options.apiKey);
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(clientSecret));
@@ -319,7 +319,7 @@ class StripeApiHandler {
         logTelemetryData();
 
         logApiCall(
-                mLoggingUtils.getPaymentMethodCreationParams(null, options.apiKey),
+                mLoggingUtils.getPaymentMethodCreationParams(options.apiKey),
                 options.apiKey);
 
         try {
@@ -597,8 +597,8 @@ class StripeApiHandler {
         params.put("shipping", shippingInformation.toMap());
 
         logApiCall(
-                mLoggingUtils.getEventLoggingParams(productUsageTokens, null, null,
-                        publishableKey, LoggingUtils.EventName.SET_SHIPPING_INFO),
+                mLoggingUtils.getEventLoggingParams(productUsageTokens, publishableKey,
+                        LoggingUtils.EventName.SET_SHIPPING_INFO),
                 publishableKey
         );
 
@@ -693,6 +693,12 @@ class StripeApiHandler {
                                        @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException, JSONException {
+        logApiCall(
+                mLoggingUtils.getEventLoggingParams(publishableKey,
+                        LoggingUtils.EventName.START_3DS2_AUTH),
+                publishableKey
+        );
+
         final StripeResponse response = getStripeResponse(
                 ApiRequest.createPost(
                         getApiUrl("3ds2/authenticate"),
@@ -715,6 +721,12 @@ class StripeApiHandler {
                              @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
+        logApiCall(
+                mLoggingUtils.getEventLoggingParams(publishableKey,
+                        LoggingUtils.EventName.COMPLETE_3DS2_AUTH),
+                publishableKey
+        );
+
         final Map<String, String> params = new HashMap<>();
         params.put("source", sourceId);
 

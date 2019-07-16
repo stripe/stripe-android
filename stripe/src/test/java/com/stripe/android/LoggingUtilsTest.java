@@ -16,13 +16,11 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -86,7 +84,8 @@ public class LoggingUtilsTest {
                 API_KEY,
                 Source.SourceType.SEPA_DEBIT);
         assertEquals(expectedSize, loggingParams.size());
-        assertEquals(Source.SourceType.SEPA_DEBIT, loggingParams.get(LoggingUtils.FIELD_SOURCE_TYPE));
+        assertEquals(Source.SourceType.SEPA_DEBIT,
+                loggingParams.get(LoggingUtils.FIELD_SOURCE_TYPE));
         assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EventName.SOURCE_CREATION),
                 loggingParams.get(LoggingUtils.FIELD_EVENT));
@@ -97,7 +96,7 @@ public class LoggingUtilsTest {
     @Test
     public void getPaymentMethodCreationParams() {
         final Map<String, Object> loggingParams = mLoggingUtils
-                .getPaymentMethodCreationParams(null, API_KEY);
+                .getPaymentMethodCreationParams(API_KEY);
         assertNotNull(loggingParams);
         assertEquals(API_KEY, loggingParams.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(LoggingUtils.getEventParamName(LoggingUtils.EventName.ADD_PAYMENT_METHOD),
@@ -159,11 +158,7 @@ public class LoggingUtilsTest {
                 .thenReturn(packageInfo);
 
         final Map<String, Object> params = new LoggingUtils(packageManager, packageName)
-                .getEventLoggingParams(
-                        tokensList,
-                        null,
-                        Token.TokenType.CARD,
-                        API_KEY, LoggingUtils.EventName.TOKEN_CREATION);
+                .getTokenCreationParams(tokensList, API_KEY, Token.TokenType.CARD);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 1, params.size());
         assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(EXPECTED_SINGLE_TOKEN_LIST, params.get(LoggingUtils.FIELD_PRODUCT_USAGE));
@@ -179,7 +174,8 @@ public class LoggingUtilsTest {
         assertEquals(expectedTokenName, params.get(LoggingUtils.FIELD_EVENT));
         assertEquals(expectedUaName, params.get(LoggingUtils.FIELD_ANALYTICS_UA));
 
-        assertEquals("unknown_Android_robolectric", params.get(LoggingUtils.FIELD_DEVICE_TYPE));
+        assertEquals("unknown_Android_robolectric",
+                params.get(LoggingUtils.FIELD_DEVICE_TYPE));
     }
 
     @Test
@@ -189,11 +185,8 @@ public class LoggingUtilsTest {
                 LoggingUtils.getEventParamName(LoggingUtils.EventName.SOURCE_CREATION);
         final String expectedUaName = LoggingUtils.getAnalyticsUa();
 
-        final Map<String, Object> params = mLoggingUtils.getEventLoggingParams(
-                null,
-                null,
-                Token.TokenType.BANK_ACCOUNT,
-                API_KEY, LoggingUtils.EventName.SOURCE_CREATION);
+        final Map<String, Object> params = mLoggingUtils.getSourceCreationParams(
+                null, API_KEY, Token.TokenType.BANK_ACCOUNT);
         assertEquals(LoggingUtils.VALID_PARAM_FIELDS.size() - 2, params.size());
         assertEquals(API_KEY, params.get(LoggingUtils.FIELD_PUBLISHABLE_KEY));
         assertEquals(Token.TokenType.BANK_ACCOUNT, params.get(LoggingUtils.FIELD_TOKEN_TYPE));
@@ -212,26 +205,23 @@ public class LoggingUtilsTest {
 
     @Test
     public void addNameAndVersion_whenApplicationContextIsNull_addsNoContextValues() {
-        Map<String, Object> paramsMap = new HashMap<>();
-        new LoggingUtils(null, null).addNameAndVersion(paramsMap);
+        final Map<String, Object> paramsMap = new LoggingUtils(null, null)
+                .createNameAndVersionParams();
         assertEquals(LoggingUtils.NO_CONTEXT, paramsMap.get(LoggingUtils.FIELD_APP_NAME));
         assertEquals(LoggingUtils.NO_CONTEXT, paramsMap.get(LoggingUtils.FIELD_APP_VERSION));
     }
 
     @Test
-    public void addNameAndVersion_whenPackageInfoNotFound_addsUnknownValues() {
-        final String dummyName = "dummy_name";
+    public void addNameAndVersion_whenPackageInfoNotFound_addsUnknownValues()
+            throws PackageManager.NameNotFoundException {
+        final String packageName = "dummy_name";
         PackageManager manager = mock(PackageManager.class);
 
-        try {
-            when(manager.getPackageInfo(dummyName, 0))
-                    .thenThrow(new PackageManager.NameNotFoundException());
-        } catch (PackageManager.NameNotFoundException namex) {
-            fail("Unexpected exception thrown.");
-        }
+        when(manager.getPackageInfo(packageName, 0))
+                .thenThrow(new PackageManager.NameNotFoundException());
 
-        Map<String, Object> paramsMap = new HashMap<>();
-        new LoggingUtils(manager, dummyName).addNameAndVersion(paramsMap);
+        final Map<String, Object> paramsMap = new LoggingUtils(manager, packageName)
+                .createNameAndVersionParams();
         assertEquals(LoggingUtils.UNKNOWN, paramsMap.get(LoggingUtils.FIELD_APP_NAME));
         assertEquals(LoggingUtils.UNKNOWN, paramsMap.get(LoggingUtils.FIELD_APP_VERSION));
     }
