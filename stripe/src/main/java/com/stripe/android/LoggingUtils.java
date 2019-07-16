@@ -14,6 +14,7 @@ import com.stripe.android.model.Token;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +44,9 @@ class LoggingUtils {
             EventName.CONFIRM_PAYMENT_INTENT,
             EventName.RETRIEVE_PAYMENT_INTENT,
             EventName.CONFIRM_SETUP_INTENT,
-            EventName.RETRIEVE_SETUP_INTENT})
+            EventName.RETRIEVE_SETUP_INTENT,
+            EventName.START_3DS2_AUTH,
+            EventName.COMPLETE_3DS2_AUTH})
     @interface EventName {
         String TOKEN_CREATION = "token_creation";
         String ADD_PAYMENT_METHOD = "add_payment_method";
@@ -58,6 +61,9 @@ class LoggingUtils {
         String RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval";
         String CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
         String RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
+
+        String START_3DS2_AUTH = "start_3ds2_auth";
+        String COMPLETE_3DS2_AUTH = "complete_3ds2_auth";
     }
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
@@ -73,23 +79,10 @@ class LoggingUtils {
     static final String FIELD_PUBLISHABLE_KEY = "publishable_key";
     static final String FIELD_SOURCE_TYPE = "source_type";
     static final String FIELD_TOKEN_TYPE = "token_type";
-    static final Set<String> VALID_PARAM_FIELDS = new HashSet<>();
-
-    static {
-        VALID_PARAM_FIELDS.add(FIELD_ANALYTICS_UA);
-        VALID_PARAM_FIELDS.add(FIELD_APP_NAME);
-        VALID_PARAM_FIELDS.add(FIELD_APP_VERSION);
-        VALID_PARAM_FIELDS.add(FIELD_BINDINGS_VERSION);
-        VALID_PARAM_FIELDS.add(FIELD_DEVICE_TYPE);
-        VALID_PARAM_FIELDS.add(FIELD_EVENT);
-        VALID_PARAM_FIELDS.add(FIELD_OS_VERSION);
-        VALID_PARAM_FIELDS.add(FIELD_OS_NAME);
-        VALID_PARAM_FIELDS.add(FIELD_OS_RELEASE);
-        VALID_PARAM_FIELDS.add(FIELD_PRODUCT_USAGE);
-        VALID_PARAM_FIELDS.add(FIELD_PUBLISHABLE_KEY);
-        VALID_PARAM_FIELDS.add(FIELD_SOURCE_TYPE);
-        VALID_PARAM_FIELDS.add(FIELD_TOKEN_TYPE);
-    }
+    static final Set<String> VALID_PARAM_FIELDS = new HashSet<>(Arrays.asList(
+            FIELD_ANALYTICS_UA, FIELD_APP_NAME, FIELD_APP_VERSION, FIELD_BINDINGS_VERSION,
+            FIELD_DEVICE_TYPE, FIELD_EVENT, FIELD_OS_VERSION, FIELD_OS_NAME, FIELD_OS_RELEASE,
+            FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_SOURCE_TYPE, FIELD_TOKEN_TYPE));
 
     private static final String ANALYTICS_PREFIX = "analytics";
     private static final String ANALYTICS_NAME = "stripe_android";
@@ -121,14 +114,8 @@ class LoggingUtils {
     }
 
     @NonNull
-    Map<String, Object> getPaymentMethodCreationParams(
-            @Nullable List<String> productUsageTokens,
-            @NonNull String publishableApiKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableApiKey, EventName.ADD_PAYMENT_METHOD);
+    Map<String, Object> getPaymentMethodCreationParams(@NonNull String publishableApiKey) {
+        return getEventLoggingParams(publishableApiKey, EventName.ADD_PAYMENT_METHOD);
     }
 
     @NonNull
@@ -159,33 +146,23 @@ class LoggingUtils {
     Map<String, Object> getDeleteSourceParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableKey, EventName.DELETE_SOURCE);
+        return getEventLoggingParams(productUsageTokens, publishableKey, EventName.DELETE_SOURCE);
     }
 
     @NonNull
     Map<String, Object> getAttachPaymentMethodParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableKey, EventName.ATTACH_PAYMENT_METHOD);
+        return getEventLoggingParams(productUsageTokens, publishableKey,
+                EventName.ATTACH_PAYMENT_METHOD);
     }
 
     @NonNull
     Map<String, Object> getDetachPaymentMethodParams(
             @Nullable List<String> productUsageTokens,
             @NonNull String publishableKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableKey, EventName.DETACH_PAYMENT_METHOD);
+        return getEventLoggingParams(productUsageTokens, publishableKey,
+                EventName.DETACH_PAYMENT_METHOD);
     }
 
     @NonNull
@@ -206,31 +183,33 @@ class LoggingUtils {
             @NonNull String publishableApiKey) {
         return getEventLoggingParams(
                 productUsageTokens,
-                null,
-                null,
                 publishableApiKey, EventName.RETRIEVE_PAYMENT_INTENT);
     }
 
     @NonNull
-    Map<String, Object> getSetupIntentConfirmationParams(
-            @Nullable List<String> productUsageTokens,
-            @NonNull String publishableApiKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableApiKey, EventName.CONFIRM_SETUP_INTENT);
+    Map<String, Object> getSetupIntentConfirmationParams(@NonNull String publishableApiKey) {
+        return getEventLoggingParams(publishableApiKey, EventName.CONFIRM_SETUP_INTENT);
     }
 
     @NonNull
     Map<String, Object> getSetupIntentRetrieveParams(
-            @Nullable List<String> productUsageTokens,
             @NonNull String publishableApiKey) {
-        return getEventLoggingParams(
-                productUsageTokens,
-                null,
-                null,
-                publishableApiKey, EventName.RETRIEVE_SETUP_INTENT);
+        return getEventLoggingParams(publishableApiKey, EventName.RETRIEVE_SETUP_INTENT);
+    }
+
+    @NonNull
+    Map<String, Object> getEventLoggingParams(
+            @NonNull String publishableApiKey,
+            @NonNull @EventName String eventName) {
+        return getEventLoggingParams(null, null, null, publishableApiKey, eventName);
+    }
+
+    @NonNull
+    Map<String, Object> getEventLoggingParams(
+            @Nullable List<String> productUsageTokens,
+            @NonNull String publishableApiKey,
+            @NonNull @EventName String eventName) {
+        return getEventLoggingParams(productUsageTokens, null, null, publishableApiKey, eventName);
     }
 
     @NonNull
@@ -250,7 +229,7 @@ class LoggingUtils {
         paramsObject.put(FIELD_DEVICE_TYPE, getDeviceLoggingString());
         paramsObject.put(FIELD_BINDINGS_VERSION, BuildConfig.VERSION_NAME);
 
-        addNameAndVersion(paramsObject);
+        paramsObject.putAll(createNameAndVersionParams());
 
         if (productUsageTokens != null) {
             paramsObject.put(FIELD_PRODUCT_USAGE, productUsageTokens);
@@ -271,7 +250,10 @@ class LoggingUtils {
         return paramsObject;
     }
 
-    void addNameAndVersion(@NonNull Map<String, Object> paramsObject) {
+    @NonNull
+    Map<String, Object> createNameAndVersionParams() {
+        final Map<String, Object> paramsObject = new HashMap<>(2);
+
         if (mPackageManager != null) {
             try {
                 final PackageInfo info = mPackageManager.getPackageInfo(mPackageName, 0);
@@ -298,6 +280,8 @@ class LoggingUtils {
             paramsObject.put(FIELD_APP_NAME, NO_CONTEXT);
             paramsObject.put(FIELD_APP_VERSION, NO_CONTEXT);
         }
+
+        return paramsObject;
     }
 
     @NonNull
