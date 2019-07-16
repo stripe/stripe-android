@@ -86,7 +86,7 @@ public class StripeTest {
 
     @Test
     public void testVersion() {
-        assertEquals("AndroidBindings/9.3.6", Stripe.VERSION);
+        assertEquals("AndroidBindings/9.3.8", Stripe.VERSION);
     }
 
     @Test
