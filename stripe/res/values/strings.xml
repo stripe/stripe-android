@@ -118,4 +118,5 @@
     <!--Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application-->
     <string name="add_card">Add a new debit or credit card to make purchases in this app.</string>
     <string name="invalid_shipping_information">Invalid Shipping Address</string>
+    <string name="secure_checkout">Secure Checkout</string>
 </resources>
