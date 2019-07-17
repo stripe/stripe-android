@@ -57,7 +57,7 @@ public class StripeApiHandlerTest {
     @NonNull private final StripeApiHandler mApiHandler =
             new StripeApiHandler(ApplicationProvider.getApplicationContext(), null);
 
-    @Mock private RequestExecutor mRequestExecutor;
+    @Mock private ApiRequestExecutor mStripeApiRequestExecutor;
 
     @Before
     public void before() {
@@ -224,10 +224,10 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void logApiCall_shouldReturnSuccessful() {
+    public void fireAnalyticsRequest_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        mApiHandler.logApiCall(new HashMap<String, Object>(),
+        mApiHandler.fireAnalyticsRequest(new HashMap<String, Object>(),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
     }
 
@@ -328,8 +328,8 @@ public class StripeApiHandlerTest {
             APIConnectionException {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                new RequestExecutor(),
-                false,
+                new StripeApiRequestExecutor(),
+                new FakeFireAndForgetRequestExecutor(),
                 null);
         final Source source = apiHandler.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
@@ -339,14 +339,14 @@ public class StripeApiHandlerTest {
     }
 
     @Test
-    public void logApiCall_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
+    public void fireAnalyticsRequest_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mRequestExecutor,
-                false,
+                mStripeApiRequestExecutor,
+                new FakeFireAndForgetRequestExecutor(),
                 null);
-        apiHandler.logApiCall(new HashMap<String, Object>(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
-        verifyNoMoreInteractions(mRequestExecutor);
+        apiHandler.fireAnalyticsRequest(new HashMap<String, Object>(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
+        verifyNoMoreInteractions(mStripeApiRequestExecutor);
     }
 
     @Test
@@ -495,7 +495,7 @@ public class StripeApiHandlerTest {
                 queryParams, options, null)
                 .getUrl();
 
-        when(mRequestExecutor.execute(argThat(
+        when(mStripeApiRequestExecutor.execute(argThat(
                 new ApiRequestMatcher(
                         StripeRequest.Method.GET,
                         url,
@@ -504,8 +504,8 @@ public class StripeApiHandlerTest {
                 .thenReturn(stripeResponse);
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mRequestExecutor,
-                false,
+                mStripeApiRequestExecutor,
+                new FakeFireAndForgetRequestExecutor(),
                 null);
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
@@ -543,7 +543,7 @@ public class StripeApiHandlerTest {
                 null)
                 .getUrl();
 
-        when(mRequestExecutor.execute(argThat(
+        when(mStripeApiRequestExecutor.execute(argThat(
                 new ApiRequestMatcher(
                         StripeRequest.Method.GET,
                         url,
@@ -552,8 +552,8 @@ public class StripeApiHandlerTest {
                 .thenReturn(stripeResponse);
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mRequestExecutor,
-                false,
+                mStripeApiRequestExecutor,
+                new FakeFireAndForgetRequestExecutor(),
                 null);
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,

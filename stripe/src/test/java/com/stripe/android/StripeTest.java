@@ -1323,7 +1323,8 @@ public class StripeTest {
 
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull String publishableKey) {
-        final StripeApiHandler apiHandler = createApiHandler(false);
+        final StripeApiHandler apiHandler = createApiHandler(
+                new FakeFireAndForgetRequestExecutor());
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1333,7 +1334,8 @@ public class StripeTest {
 
     @NonNull
     private Stripe createNonLoggingStripe(@NonNull Stripe.TokenCreator tokenCreator) {
-        final StripeApiHandler apiHandler = createApiHandler(false);
+        final StripeApiHandler apiHandler = createApiHandler(
+                new FakeFireAndForgetRequestExecutor());
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1345,7 +1347,8 @@ public class StripeTest {
 
     @NonNull
     private Stripe createLoggingStripe() {
-        final StripeApiHandler apiHandler = createApiHandler(true);
+        final StripeApiHandler apiHandler = createApiHandler(
+                new StripeFireAndForgetRequestExecutor());
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),
@@ -1355,8 +1358,11 @@ public class StripeTest {
     }
 
     @NonNull
-    private StripeApiHandler createApiHandler(boolean shouldLogRequest) {
-        return new StripeApiHandler(mContext, new RequestExecutor(), shouldLogRequest,
+    private StripeApiHandler createApiHandler(
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
+        return new StripeApiHandler(mContext,
+                new StripeApiRequestExecutor(),
+                fireAndForgetRequestExecutor,
                 null,
                 new FingerprintRequestFactory(
                         new TelemetryClientUtil(mContext, new FakeUidSupplier())));

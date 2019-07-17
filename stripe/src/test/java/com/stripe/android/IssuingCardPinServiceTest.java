@@ -37,7 +37,7 @@ public class IssuingCardPinServiceTest {
             "            }]\n" +
             "}";
 
-    @Mock private RequestExecutor mRequestExecutor;
+    @Mock private ApiRequestExecutor mStripeApiRequestExecutor;
     @Mock private IssuingCardPinService.IssuingCardPinRetrievalListener mMockRetrievalListener;
     @Mock private IssuingCardPinService.IssuingCardPinUpdateListener mMockUpdateListener;
 
@@ -52,8 +52,8 @@ public class IssuingCardPinServiceTest {
 
         final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
-                mRequestExecutor,
-                false,
+                mStripeApiRequestExecutor,
+                new FakeFireAndForgetRequestExecutor(),
                 null);
 
         mService = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
@@ -69,7 +69,7 @@ public class IssuingCardPinServiceTest {
                         "{\"card\":\"ic_abcdef\",\"pin\":\"1234\"}",
                         null);
 
-        when(mRequestExecutor.execute(
+        when(mStripeApiRequestExecutor.execute(
                 argThat(new ApiRequestMatcher(
                         StripeRequest.Method.GET,
                         "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456",
@@ -98,7 +98,7 @@ public class IssuingCardPinServiceTest {
                         "{\"card\":\"ic_abcdef\",\"pin\":\"\"}",
                         null);
 
-        when(mRequestExecutor.execute(
+        when(mStripeApiRequestExecutor.execute(
                 argThat(new ApiRequestMatcher(
                         StripeRequest.Method.POST,
                         "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
@@ -129,7 +129,7 @@ public class IssuingCardPinServiceTest {
                                 "\"Verification failed\", \"type\": \"invalid_request_error\"}}",
                         null);
 
-        when(mRequestExecutor.execute(
+        when(mStripeApiRequestExecutor.execute(
                 argThat(new ApiRequestMatcher(
                         StripeRequest.Method.GET,
                         "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bid%5D=iv_abcd&verification%5Bone_time_code%5D=123-456",

@@ -51,45 +51,36 @@ class StripeApiHandler {
     @NonNull private final LoggingUtils mLoggingUtils;
     @NonNull private final FingerprintRequestFactory mFingerprintRequestFactory;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
-    @NonNull private final RequestExecutor mRequestExecutor;
-    private final boolean mShouldLogRequest;
+    @NonNull private final ApiRequestExecutor mStripeApiRequestExecutor;
+    @NonNull private final FireAndForgetRequestExecutor mFireAndForgetRequestExecutor;
     @Nullable private final AppInfo mAppInfo;
 
     StripeApiHandler(@NonNull Context context, @Nullable AppInfo appInfo) {
-        this(context.getApplicationContext(), new RequestExecutor(), true, appInfo);
+        this(context.getApplicationContext(), new StripeApiRequestExecutor(),
+                new StripeFireAndForgetRequestExecutor(), appInfo);
     }
 
     @VisibleForTesting
     StripeApiHandler(@NonNull Context context,
-                     @NonNull RequestExecutor requestExecutor,
-                     boolean shouldLogRequest,
+                     @NonNull ApiRequestExecutor stripeApiRequestExecutor,
+                     @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
                      @Nullable AppInfo appInfo) {
-        this(context, requestExecutor, shouldLogRequest, appInfo,
+        this(context, stripeApiRequestExecutor, fireAndForgetRequestExecutor, appInfo,
                 new FingerprintRequestFactory(context));
     }
 
     @VisibleForTesting
     StripeApiHandler(@NonNull Context context,
-                     @NonNull RequestExecutor requestExecutor,
-                     boolean shouldLogRequest,
+                     @NonNull ApiRequestExecutor stripeApiRequestExecutor,
+                     @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
                      @Nullable AppInfo appInfo,
                      @NonNull FingerprintRequestFactory fingerprintRequestFactory) {
-        mRequestExecutor = requestExecutor;
-        mShouldLogRequest = shouldLogRequest;
+        mStripeApiRequestExecutor = stripeApiRequestExecutor;
+        mFireAndForgetRequestExecutor = fireAndForgetRequestExecutor;
         mLoggingUtils = new LoggingUtils(context);
         mFingerprintRequestFactory = fingerprintRequestFactory;
         mNetworkUtils = new StripeNetworkUtils(context);
         mAppInfo = appInfo;
-    }
-
-    void logApiCall(
-            @NonNull Map<String, Object> loggingMap,
-            @NonNull String publishableKey) {
-        if (mShouldLogRequest) {
-            makeFireAndForgetRequest(
-                    ApiRequest.createAnalyticsRequest(loggingMap,
-                            ApiRequest.Options.create(publishableKey), mAppInfo));
-        }
     }
 
     /**
@@ -111,11 +102,11 @@ class StripeApiHandler {
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
 
         try {
-            logTelemetryData();
+            fireFingerprintRequest();
             final SourceParams sourceParams = confirmPaymentIntentParams.getSourceParams();
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
 
-            logApiCall(
+            fireAnalyticsRequest(
                     mLoggingUtils.getPaymentIntentConfirmationParams(null,
                             options.apiKey, sourceType),
                     options.apiKey
@@ -146,8 +137,8 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         try {
-            logTelemetryData();
-            logApiCall(
+            fireFingerprintRequest();
+            fireAnalyticsRequest(
                     mLoggingUtils.getPaymentIntentRetrieveParams(null, options.apiKey),
                     options.apiKey);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(clientSecret);
@@ -183,8 +174,8 @@ class StripeApiHandler {
         mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
 
         try {
-            logTelemetryData();
-            logApiCall(
+            fireFingerprintRequest();
+            fireAnalyticsRequest(
                     mLoggingUtils.getSetupIntentConfirmationParams(options.apiKey),
                     options.apiKey
             );
@@ -214,8 +205,8 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         try {
-            logTelemetryData();
-            logApiCall(mLoggingUtils.getSetupIntentRetrieveParams(options.apiKey),
+            fireFingerprintRequest();
+            fireAnalyticsRequest(mLoggingUtils.getSetupIntentRetrieveParams(options.apiKey),
                     options.apiKey);
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(clientSecret));
@@ -256,8 +247,8 @@ class StripeApiHandler {
         requestParams.putAll(mNetworkUtils.createUidParams());
 
         try {
-            logTelemetryData();
-            logApiCall(
+            fireFingerprintRequest();
+            fireAnalyticsRequest(
                     mLoggingUtils.getSourceCreationParams(null, options.apiKey,
                             sourceParams.getType()),
                     options.apiKey);
@@ -316,9 +307,9 @@ class StripeApiHandler {
             APIException {
         final Map<String, Object> params = paymentMethodCreateParams.toParamMap();
         params.putAll(mNetworkUtils.createUidParams());
-        logTelemetryData();
+        fireFingerprintRequest();
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getPaymentMethodCreationParams(options.apiKey),
                 options.apiKey);
 
@@ -364,9 +355,9 @@ class StripeApiHandler {
                     (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
             tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
 
-            logTelemetryData();
+            fireFingerprintRequest();
 
-            logApiCall(
+            fireAnalyticsRequest(
                     mLoggingUtils.getTokenCreationParams(loggingTokens, options.apiKey, tokenType),
                     options.apiKey
             );
@@ -394,13 +385,13 @@ class StripeApiHandler {
         final Map<String, Object> params = new HashMap<>();
         params.put("source", sourceId);
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getAddSourceParams(productUsageTokens, publishableKey, sourceType),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getAddCustomerSourceUrl(customerId),
                         params,
@@ -423,13 +414,13 @@ class StripeApiHandler {
             APIException,
             AuthenticationException,
             CardException {
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getDeleteSourceParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createDelete(
                         getDeleteCustomerSourceUrl(customerId, sourceId),
                         ApiRequest.Options.create(ephemeralKey), mAppInfo)
@@ -455,13 +446,13 @@ class StripeApiHandler {
         final Map<String, Object> params = new HashMap<>();
         params.put("customer", customerId);
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getAttachPaymentMethodUrl(paymentMethodId),
                         params,
@@ -483,13 +474,13 @@ class StripeApiHandler {
             APIException,
             AuthenticationException,
             CardException {
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getDetachPaymentMethodUrl(paymentMethodId),
                         ApiRequest.Options.create(ephemeralKey), mAppInfo)
@@ -518,13 +509,13 @@ class StripeApiHandler {
         queryParams.put("customer", customerId);
         queryParams.put("type", paymentMethodType);
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createGet(
                         getPaymentMethodsUrl(),
                         queryParams,
@@ -563,13 +554,13 @@ class StripeApiHandler {
         final Map<String, Object> params = new HashMap<>();
         params.put("default_source", sourceId);
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, sourceType, null,
                         publishableKey, LoggingUtils.EventName.DEFAULT_SOURCE),
                 ephemeralKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
@@ -596,13 +587,13 @@ class StripeApiHandler {
         final Map<String, Object> params = new HashMap<>();
         params.put("shipping", shippingInformation.toMap());
 
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getEventLoggingParams(productUsageTokens, publishableKey,
                         LoggingUtils.EventName.SET_SHIPPING_INFO),
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
@@ -621,7 +612,7 @@ class StripeApiHandler {
             APIException,
             AuthenticationException,
             CardException {
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createGet(getRetrieveCustomerUrl(customerId),
                         ApiRequest.Options.create(ephemeralKey), mAppInfo)
         );
@@ -652,7 +643,7 @@ class StripeApiHandler {
         final Map<String, Map<String, String>> params = new HashMap<>();
         params.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
-        StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createGet(getIssuingCardPinUrl(cardId), params,
                         ApiRequest.Options.create(ephemeralKeySecret), mAppInfo)
         );
@@ -677,7 +668,7 @@ class StripeApiHandler {
         params.put("verification", createVerificationParam(verificationId, userOneTimeCode));
         params.put("pin", newPin);
 
-        StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                 getIssuingCardPinUrl(cardId),
                 params,
@@ -693,13 +684,13 @@ class StripeApiHandler {
                                        @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException, JSONException {
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getEventLoggingParams(publishableKey,
                         LoggingUtils.EventName.START_3DS2_AUTH),
                 publishableKey
         );
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getApiUrl("3ds2/authenticate"),
                         authParams.toParamMap(),
@@ -721,7 +712,7 @@ class StripeApiHandler {
                              @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
-        logApiCall(
+        fireAnalyticsRequest(
                 mLoggingUtils.getEventLoggingParams(publishableKey,
                         LoggingUtils.EventName.COMPLETE_3DS2_AUTH),
                 publishableKey
@@ -730,7 +721,7 @@ class StripeApiHandler {
         final Map<String, String> params = new HashMap<>();
         params.put("source", sourceId);
 
-        final StripeResponse response = getStripeResponse(
+        final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getApiUrl("3ds2/challenge_complete"),
                         params,
@@ -989,9 +980,9 @@ class StripeApiHandler {
     }
 
     @NonNull
-    private StripeResponse getStripeResponse(@NonNull StripeRequest request)
+    private StripeResponse fireStripeApiRequest(@NonNull ApiRequest apiRequest)
             throws InvalidRequestException, APIConnectionException {
-        return mRequestExecutor.execute(request);
+        return mStripeApiRequestExecutor.execute(apiRequest);
     }
 
     private void handleAPIError(@Nullable String responseBody, int responseCode,
@@ -1046,7 +1037,7 @@ class StripeApiHandler {
             APIConnectionException, CardException, APIException {
         final Pair<Boolean, String> dnsCacheData = disableDnsCache();
 
-        final StripeResponse response = getStripeResponse(request);
+        final StripeResponse response = fireStripeApiRequest(request);
         if (response.hasErrorCode()) {
             handleAPIError(response.getResponseBody(), response.getResponseCode(),
                     response.getRequestId());
@@ -1061,7 +1052,7 @@ class StripeApiHandler {
         final Pair<Boolean, String> dnsCacheData = disableDnsCache();
 
         try {
-            mRequestExecutor.executeAndForget(request);
+            mFireAndForgetRequestExecutor.execute(request);
         } catch (StripeException ignore) {
             // We're just logging. No need to crash here or attempt to re-log things.
         } finally {
@@ -1106,10 +1097,17 @@ class StripeApiHandler {
         return Token.fromString(response.getResponseBody());
     }
 
-    private void logTelemetryData() {
-        if (mShouldLogRequest) {
-            makeFireAndForgetRequest(mFingerprintRequestFactory.create());
-        }
+    private void fireFingerprintRequest() {
+        makeFireAndForgetRequest(mFingerprintRequestFactory.create());
+    }
+
+    @VisibleForTesting
+    void fireAnalyticsRequest(
+            @NonNull Map<String, Object> loggingMap,
+            @NonNull String publishableKey) {
+        makeFireAndForgetRequest(
+                ApiRequest.createAnalyticsRequest(loggingMap,
+                        ApiRequest.Options.create(publishableKey), mAppInfo));
     }
 
     @NonNull
