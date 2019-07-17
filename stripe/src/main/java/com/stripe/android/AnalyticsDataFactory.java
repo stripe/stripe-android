@@ -25,8 +25,7 @@ import java.util.Set;
  * Util class to create logging items, which are fed as {@link java.util.Map Map} objects in
  * query parameters to our server.
  */
-class LoggingUtils {
-
+class AnalyticsDataFactory {
     static final String UNKNOWN = "unknown";
     static final String NO_CONTEXT = "no_context";
 
@@ -91,12 +90,13 @@ class LoggingUtils {
     @Nullable private final PackageManager mPackageManager;
     @Nullable private final String mPackageName;
 
-    LoggingUtils(@NonNull Context context) {
+    AnalyticsDataFactory(@NonNull Context context) {
         this(context.getPackageManager(), context.getPackageName());
     }
 
     @VisibleForTesting
-    LoggingUtils(@Nullable PackageManager packageManager, @Nullable String packageName) {
+    AnalyticsDataFactory(@Nullable PackageManager packageManager,
+                         @Nullable String packageName) {
         mPackageManager = packageManager;
         mPackageName = packageName;
     }

@@ -66,7 +66,7 @@ public class StripeNetworkUtils {
 
         // We store the logging items in this field, which is extracted from the parameters
         // sent to the API.
-        tokenParams.put(LoggingUtils.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
+        tokenParams.put(AnalyticsDataFactory.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
 
         tokenParams.put(Token.TokenType.CARD, cardParams);
         tokenParams.putAll(createUidParams());

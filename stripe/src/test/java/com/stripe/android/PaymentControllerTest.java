@@ -71,6 +71,8 @@ public class PaymentControllerTest {
     @Mock private ApiResultCallback<PaymentIntentResult> mPaymentAuthResultCallback;
     @Mock private ApiResultCallback<SetupIntentResult> mSetupAuthResultCallback;
     @Mock private PaymentRelayStarter mPaymentRelayStarter;
+    @Mock private FireAndForgetRequestExecutor mFireAndForgetRequestExecutor;
+    @Mock private AnalyticsDataFactory mAnalyticsDataFactory;
 
     @Captor private ArgumentCaptor<PaymentRelayStarter.Data> mRelayStarterDataArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
@@ -88,7 +90,9 @@ public class PaymentControllerTest {
                 mThreeDs2Service,
                 mApiHandler,
                 mMessageVersionRegistry,
-                CONFIG);
+                CONFIG,
+                mFireAndForgetRequestExecutor,
+                mAnalyticsDataFactory);
     }
 
     @Test
@@ -213,7 +217,8 @@ public class PaymentControllerTest {
     public void test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
                 .cancelled();
         verify(mApiHandler).complete3ds2Auth(eq("src_123"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -289,7 +294,8 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter);
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter,
+                        mFireAndForgetRequestExecutor, mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW);
         verify(mPaymentRelayStarter, never())
                 .start(ArgumentMatchers.<PaymentRelayStarter.Data>any());
@@ -302,7 +308,9 @@ public class PaymentControllerTest {
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
                         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                        mPaymentRelayStarter);
+                        mPaymentRelayStarter,
+                        mFireAndForgetRequestExecutor,
+                        mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW);
         verify(mPaymentRelayStarter)
                 .start(mRelayStarterDataArgumentCaptor.capture());
@@ -317,7 +325,9 @@ public class PaymentControllerTest {
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
                         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                        mPaymentRelayStarter);
+                        mPaymentRelayStarter,
+                        mFireAndForgetRequestExecutor,
+                        mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 eq(PaymentController.PAYMENT_REQUEST_CODE));
@@ -335,7 +345,9 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter);
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter,
+                        mFireAndForgetRequestExecutor,
+                        mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);
         verify(mPaymentRelayStarter).start(mRelayStarterDataArgumentCaptor.capture());
         final Exception exception = Objects.requireNonNull(
