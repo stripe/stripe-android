@@ -96,7 +96,9 @@ class PaymentAuthWebView extends WebView {
         }
 
         private boolean isReturnUrl(@NonNull Uri uri) {
-            if (mReturnUrl != null) {
+            if (isPredefinedReturnUrl(uri)) {
+                return true;
+            } else if (mReturnUrl != null) {
                 // If the `returnUrl` is known, look for URIs that match it.
 
                 return mReturnUrl.getScheme() != null &&
@@ -120,6 +122,11 @@ class PaymentAuthWebView extends WebView {
                 }
                 return mClientSecret.equals(clientSecret);
             }
+        }
+
+        // pre-defined return URLs
+        private boolean isPredefinedReturnUrl(@NonNull Uri uri) {
+            return "stripejs://use_stripe_sdk/return_url".equals(uri.toString());
         }
     }
 }
