@@ -90,4 +90,14 @@ public class PaymentAuthWebViewTest {
                 "stripejs://use_stripe_sdk/return_url");
         verify(mActivity).finish();
     }
+
+    @Test
+    public void onPageFinished_wit3DSecureCompleteUrl_shouldFinish() {
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "pi_123_secret_456", null);
+        paymentAuthWebViewClient.onPageFinished(mWebView,
+                "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng");
+        verify(mActivity).finish();
+    }
 }

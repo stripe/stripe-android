@@ -77,6 +77,14 @@ class PaymentAuthWebView extends WebView {
         }
 
         @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (url.startsWith("https://hooks.stripe.com/3d_secure/complete/")) {
+                mActivity.finish();
+            }
+        }
+
+        @Override
         public boolean shouldOverrideUrlLoading(@NonNull WebView view,
                                                 @NonNull String urlString) {
             final Uri uri = Uri.parse(urlString);
