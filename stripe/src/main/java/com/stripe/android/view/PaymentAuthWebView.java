@@ -16,6 +16,8 @@ import android.widget.ProgressBar;
 
 import com.stripe.android.R;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -57,6 +59,12 @@ class PaymentAuthWebView extends WebView {
         static final String PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret";
         static final String PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret";
 
+        private static final Set<String> COMPLETION_URLS =
+                new HashSet<>(Arrays.asList(
+                        "https://hooks.stripe.com/redirect/complete/src_",
+                        "https://hooks.stripe.com/3d_secure/complete/tdsrc_"
+                ));
+
         @NonNull private final Activity mActivity;
         @NonNull private final String mClientSecret;
         @Nullable private final Uri mReturnUrl;
@@ -79,9 +87,19 @@ class PaymentAuthWebView extends WebView {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            if (url.startsWith("https://hooks.stripe.com/3d_secure/complete/")) {
+            if (url != null && isCompletionUrl(url)) {
                 mActivity.finish();
             }
+        }
+
+        private boolean isCompletionUrl(@NonNull String url) {
+            for (String completionUrl : COMPLETION_URLS) {
+                if (url.startsWith(completionUrl)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         @Override
