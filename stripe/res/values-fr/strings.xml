@@ -119,5 +119,5 @@
     <string name="title_select_shipping_method">Sélectionnez un mode d’expédition</string>
     <string name="invalid_shipping_information">Adresse d’expédition incorrecte</string>
     <string name="secure_checkout">Paiement sécurisé</string>
-    <string name="close">Close</string>
+    <string name="close">Fermer</string>
 </resources>
