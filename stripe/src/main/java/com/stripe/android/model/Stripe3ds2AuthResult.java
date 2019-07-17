@@ -98,12 +98,6 @@ public final class Stripe3ds2AuthResult {
                 && Objects.equals(error, obj.error);
     }
 
-    @Nullable
-    public StripeIntent.RedirectData getFallbackRedirectData() {
-        return fallbackRedirectUrl != null ?
-                new StripeIntent.RedirectData(fallbackRedirectUrl, null) : null;
-    }
-
     static class Builder implements ObjectBuilder<Stripe3ds2AuthResult> {
         private String mId;
         private String mObjectType;

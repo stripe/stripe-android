@@ -26,7 +26,7 @@ public final class Stripe3dsRedirect {
     }
 
     @NonNull
-    public StripeIntent.RedirectData getRedirectData() {
-        return new StripeIntent.RedirectData(mUrl, null);
+    public String getUrl() {
+        return mUrl;
     }
 }

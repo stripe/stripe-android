@@ -290,7 +290,6 @@ public class Stripe3ds2AuthResultTest {
                 new JSONObject(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON));
         assertNull(result.ares);
         assertNull(result.fallbackRedirectUrl);
-        assertNull(result.getFallbackRedirectData());
         assertNotNull(result.error);
         assertEquals(
                 "sdkMaxTimeout",
@@ -307,12 +306,9 @@ public class Stripe3ds2AuthResultTest {
         assertNull(result.ares);
         assertNull(result.error);
 
-        final StripeIntent.RedirectData redirectData = result.getFallbackRedirectData();
-        assertNotNull(redirectData);
         assertEquals(
                 "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-                redirectData.url.toString()
+                result.fallbackRedirectUrl
         );
-        assertNull(redirectData.returnUrl);
     }
 }

@@ -238,17 +238,20 @@ class PaymentController {
                         handleError(activity, getRequestCode(stripeIntent), e);
                     }
                 } else if (sdkData.is3ds1()) {
-                    begin3ds1Auth(activity, getRequestCode(stripeIntent),
+                    beginWebAuth(activity, getRequestCode(stripeIntent),
                             Objects.requireNonNull(stripeIntent.getClientSecret()),
-                            Stripe3dsRedirect.create(sdkData).getRedirectData());
+                            Stripe3dsRedirect.create(sdkData).getUrl(), null);
                 } else {
                     // authentication type is not supported
                     bypassAuth(activity, stripeIntent);
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
-                begin3ds1Auth(activity, getRequestCode(stripeIntent),
+                final StripeIntent.RedirectData redirectData =
+                        Objects.requireNonNull(stripeIntent.getRedirectData());
+                beginWebAuth(activity, getRequestCode(stripeIntent),
                         Objects.requireNonNull(stripeIntent.getClientSecret()),
-                        Objects.requireNonNull(stripeIntent.getRedirectData()));
+                        redirectData.url.toString(),
+                        redirectData.returnUrl);
             } else {
                 // next action type is not supported, so bypass authentication
                 bypassAuth(activity, stripeIntent);
@@ -331,14 +334,13 @@ class PaymentController {
      * @param activity the payment authentication result will be returned as a result to this
      *         {@link Activity}
      */
-    private static void begin3ds1Auth(@NonNull Activity activity,
-                                      int requestCode,
-                                      @NonNull String clientSecret,
-                                      @NonNull StripeIntent.RedirectData redirectData) {
+    private static void beginWebAuth(@NonNull Activity activity,
+                                     int requestCode,
+                                     @NonNull String clientSecret,
+                                     @NonNull String authUrl,
+                                     @Nullable String returnUrl) {
         new PaymentAuthWebViewStarter(activity, requestCode).start(
-                new PaymentAuthWebViewStarter.Data(
-                        clientSecret, redirectData.url.toString(),
-                        redirectData.returnUrl));
+                new PaymentAuthWebViewStarter.Data(clientSecret, authUrl, returnUrl));
     }
 
     private static void handleError(@NonNull Activity activity,
@@ -507,10 +509,10 @@ class PaymentController {
                 } else {
                     startFrictionlessFlow();
                 }
-            } else if (result.getFallbackRedirectData() != null) {
-                begin3ds1Auth(activity, getRequestCode(mStripeIntent),
+            } else if (result.fallbackRedirectUrl != null) {
+                beginWebAuth(activity, getRequestCode(mStripeIntent),
                         Objects.requireNonNull(mStripeIntent.getClientSecret()),
-                        result.getFallbackRedirectData());
+                        result.fallbackRedirectUrl, null);
             } else {
                 final Stripe3ds2AuthResult.ThreeDS2Error error = result.error;
                 final String errorMessage;

@@ -17,7 +17,7 @@ public class Stripe3dsRedirectTest {
                 Objects.requireNonNull(PaymentIntentFixtures.PI_REQUIRES_3DS1.getStripeSdkData()));
         assertEquals(
                 "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-                redirect.getRedirectData().url.toString()
+                redirect.getUrl()
         );
     }
 }
