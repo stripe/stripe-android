@@ -51,6 +51,11 @@ abstract class StripeRequest {
     }
 
     @NonNull
+    String getBaseUrl() {
+        return mUrl;
+    }
+
+    @NonNull
     String getContentType() {
         return String.format(Locale.ROOT, "%s; charset=%s", mMimeType, CHARSET);
     }

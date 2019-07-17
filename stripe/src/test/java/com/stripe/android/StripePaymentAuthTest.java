@@ -110,8 +110,8 @@ public class StripePaymentAuthTest {
         return new Stripe(
                 new StripeApiHandler(
                         mContext,
-                        new RequestExecutor(),
-                        false,
+                        new StripeApiRequestExecutor(),
+                        new FakeFireAndForgetRequestExecutor(),
                         null),
                 new StripeNetworkUtils(mContext),
                 mPaymentController,
