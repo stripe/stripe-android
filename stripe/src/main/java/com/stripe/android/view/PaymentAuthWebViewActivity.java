@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -43,15 +44,12 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
+        setResult(Activity.RESULT_OK,
+                new Intent().putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
+
         final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
         webView.init(this, clientSecret, returnUrl);
         webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
-    }
-
-    @Override
-    public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
     }
 
     @Override
@@ -70,7 +68,6 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_close) {
-            setResult(RESULT_CANCELED);
             finish();
             return true;
         }
