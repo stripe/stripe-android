@@ -1117,7 +1117,7 @@ class StripeApiHandler {
             @NonNull Map<String, Object> loggingMap,
             @NonNull String publishableKey) {
         makeFireAndForgetRequest(
-                ApiRequest.createAnalyticsRequest(
+                AnalyticsRequest.create(
                         loggingMap,
                         ApiRequest.Options.create(publishableKey),
                         mAppInfo)

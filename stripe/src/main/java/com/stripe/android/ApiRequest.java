@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.utils.ObjectUtils;
@@ -22,13 +21,11 @@ final class ApiRequest extends StripeRequest {
     static final String MIME_TYPE = "application/x-www-form-urlencoded";
 
     static final String API_HOST = "https://api.stripe.com";
-    static final String ANALYTICS_HOST = "https://q.stripe.com";
 
     @NonNull final Options options;
     @NonNull private final String mApiVersion;
     @Nullable private final AppInfo mAppInfo;
 
-    @VisibleForTesting
     ApiRequest(@NonNull Method method,
                @NonNull String url,
                @Nullable Map<String, ?> params,
@@ -75,13 +72,6 @@ final class ApiRequest extends StripeRequest {
                                    @NonNull Options options,
                                    @Nullable AppInfo appInfo) {
         return new ApiRequest(Method.DELETE, url, null, options, appInfo);
-    }
-
-    @NonNull
-    static ApiRequest createAnalyticsRequest(@NonNull Map<String, ?> params,
-                                             @NonNull ApiRequest.Options requestOptions,
-                                             @Nullable AppInfo appInfo) {
-        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, requestOptions, appInfo);
     }
 
     @NonNull
