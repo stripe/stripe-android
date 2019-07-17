@@ -119,5 +119,5 @@
     <string name="add_card">Adicione um novo cartão de débito ou cartão de crédito para fazer compras neste app.</string>
     <string name="invalid_shipping_information">Endereço de entrega inválido</string>
     <string name="secure_checkout">Finalização de compra segura</string>
-    <string name="close">Close</string>
+    <string name="close">Fechar</string>
 </resources>
