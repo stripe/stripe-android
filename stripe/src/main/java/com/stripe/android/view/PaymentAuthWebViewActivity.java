@@ -1,10 +1,12 @@
 package com.stripe.android.view;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,6 +18,8 @@ import com.stripe.android.StripeTextUtils;
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization;
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils;
 
+import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
+
 public class PaymentAuthWebViewActivity extends AppCompatActivity {
 
     @Nullable private ToolbarCustomization mToolbarCustomization;
@@ -23,6 +27,9 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(this)
+                .sendBroadcast(new Intent().setAction(UL_HANDLE_CHALLENGE_ACTION));
+
         setContentView(R.layout.payment_auth_web_view_layout);
 
         final Toolbar toolbar = findViewById(R.id.payment_auth_web_view_toolbar);
