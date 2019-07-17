@@ -1,20 +1,15 @@
 package com.stripe.android.view;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.webkit.WebView;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -23,7 +18,6 @@ public class PaymentAuthWebViewTest {
 
     @Mock private Activity mActivity;
     @Mock private WebView mWebView;
-    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     @Before
     public void setup() {
@@ -39,12 +33,7 @@ public class PaymentAuthWebViewTest {
                         "pi_123_secret_456",
                         "stripe://payment_intent_return");
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
-        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
         verify(mActivity).finish();
-
-        final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals("pi_123_secret_456",
-                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
     }
 
     @Test
@@ -57,12 +46,7 @@ public class PaymentAuthWebViewTest {
                         "seti_1234_secret_5678",
                         "stripe://payment_auth");
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
-        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
         verify(mActivity).finish();
-
-        final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals("seti_1234_secret_5678",
-                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
     }
 
     @Test
@@ -73,12 +57,7 @@ public class PaymentAuthWebViewTest {
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
                         "pi_123_secret_456", null);
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
-        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
         verify(mActivity).finish();
-
-        final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals("pi_123_secret_456",
-                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
     }
 
     @Test
@@ -89,12 +68,7 @@ public class PaymentAuthWebViewTest {
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
                         "seti_1234_secret_5678", null);
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
-        verify(mActivity).setResult(eq(Activity.RESULT_OK), mIntentArgumentCaptor.capture());
         verify(mActivity).finish();
-
-        final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals("seti_1234_secret_5678",
-                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
     }
 
     @Test
@@ -105,5 +79,15 @@ public class PaymentAuthWebViewTest {
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView,
                 "https://example.com");
         verify(mActivity, never()).finish();
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_witKnownReturnUrl_shouldFinish() {
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity,
+                        "pi_123_secret_456", null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView,
+                "stripejs://use_stripe_sdk/return_url");
+        verify(mActivity).finish();
     }
 }
