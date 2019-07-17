@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -82,9 +81,6 @@ class PaymentAuthWebView extends WebView {
                                                 @NonNull String urlString) {
             final Uri uri = Uri.parse(urlString);
             if (isReturnUrl(uri)) {
-                mActivity.setResult(Activity.RESULT_OK,
-                        new Intent()
-                                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, mClientSecret));
                 mActivity.finish();
                 return true;
             }
