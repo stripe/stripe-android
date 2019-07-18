@@ -11,4 +11,9 @@ interface FireAndForgetRequestExecutor {
      */
     int execute(@NonNull StripeRequest request)
             throws APIConnectionException, InvalidRequestException;
+
+    /**
+     * Call {@link #execute(StripeRequest)} asynchronously.
+     */
+    void executeAsync(@NonNull StripeRequest request);
 }

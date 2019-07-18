@@ -11,6 +11,9 @@ import java.util.Objects;
  * An interface for methods available in {@link PaymentIntent}
  */
 public interface StripeIntent {
+    @Nullable
+    String getId();
+
     boolean isLiveMode();
 
     boolean requiresAction();

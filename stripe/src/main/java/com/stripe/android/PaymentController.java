@@ -53,12 +53,16 @@ class PaymentController {
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final PaymentAuthConfig mConfig;
     @NonNull private final ApiKeyValidator mApiKeyValidator;
+    @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
+    @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
     PaymentController(@NonNull Context context,
                       @NonNull StripeApiHandler apiHandler) {
         this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
                 new MessageVersionRegistry(),
-                PaymentAuthConfig.get());
+                PaymentAuthConfig.get(),
+                new StripeFireAndForgetRequestExecutor(),
+                new AnalyticsDataFactory(context));
     }
 
     @VisibleForTesting
@@ -66,7 +70,9 @@ class PaymentController {
                       @NonNull StripeThreeDs2Service threeDs2Service,
                       @NonNull StripeApiHandler apiHandler,
                       @NonNull MessageVersionRegistry messageVersionRegistry,
-                      @NonNull PaymentAuthConfig config) {
+                      @NonNull PaymentAuthConfig config,
+                      @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
+                      @NonNull AnalyticsDataFactory analyticsDataFactory) {
         mConfig = config;
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
@@ -74,6 +80,8 @@ class PaymentController {
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
         mApiKeyValidator = new ApiKeyValidator();
+        mAnalyticsRequestExecutor = analyticsRequestExecutor;
+        mAnalyticsDataFactory = analyticsDataFactory;
     }
 
     /**
@@ -246,6 +254,17 @@ class PaymentController {
                     bypassAuth(activity, stripeIntent);
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
+                mAnalyticsRequestExecutor.executeAsync(
+                        ApiRequest.createAnalyticsRequest(
+                                mAnalyticsDataFactory.createAuthParams(
+                                        AnalyticsDataFactory.EventName.AUTH_REDIRECT,
+                                        StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+                                        publishableKey),
+                                publishableKey,
+                                null
+                        )
+                );
+
                 final StripeIntent.RedirectData redirectData =
                         Objects.requireNonNull(stripeIntent.getRedirectData());
                 beginWebAuth(activity, getRequestCode(stripeIntent),
@@ -323,9 +342,11 @@ class PaymentController {
                 timeout,
                 returnUrl
         );
-        mApiHandler.start3ds2Auth(authParams, publishableKey,
+        mApiHandler.start3ds2Auth(authParams, StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+                publishableKey,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
-                        stripeIntent, stripe3ds2Fingerprint.source, publishableKey));
+                        stripeIntent, stripe3ds2Fingerprint.source, publishableKey,
+                        mAnalyticsRequestExecutor, mAnalyticsDataFactory));
     }
 
     /**
@@ -455,6 +476,8 @@ class PaymentController {
         @NonNull private final String mPublishableKey;
         @NonNull private final PaymentRelayStarter mPaymentRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
+        @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
+        @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
         private Stripe3ds2AuthCallback(
                 @NonNull Activity activity,
@@ -463,10 +486,14 @@ class PaymentController {
                 int maxTimeout,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey) {
+                @NonNull String publishableKey,
+                @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
+                @NonNull AnalyticsDataFactory analyticsDataFactory) {
             this(activity, apiHandler, transaction, maxTimeout, stripeIntent,
-                    sourceId, publishableKey, new PaymentRelayStarter(activity,
-                            getRequestCode(stripeIntent)));
+                    sourceId, publishableKey,
+                    new PaymentRelayStarter(activity, getRequestCode(stripeIntent)),
+                    analyticsRequestExecutor,
+                    analyticsDataFactory);
         }
 
         @VisibleForTesting
@@ -478,7 +505,9 @@ class PaymentController {
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
                 @NonNull String publishableKey,
-                @NonNull PaymentRelayStarter paymentRelayStarter) {
+                @NonNull PaymentRelayStarter paymentRelayStarter,
+                @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
+                @NonNull AnalyticsDataFactory analyticsDataFactory) {
             mActivityRef = new WeakReference<>(activity);
             mApiHandler = apiHandler;
             mTransaction = transaction;
@@ -487,6 +516,8 @@ class PaymentController {
             mSourceId = sourceId;
             mPublishableKey = publishableKey;
             mPaymentRelayStarter = paymentRelayStarter;
+            mAnalyticsRequestExecutor = analyticsRequestExecutor;
+            mAnalyticsDataFactory = analyticsDataFactory;
 
             // create Handler to notifyCompletion challenge flow on background thread
             final HandlerThread handlerThread =
@@ -539,6 +570,16 @@ class PaymentController {
         }
 
         private void startFrictionlessFlow() {
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.createAuthParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_FRICTIONLESS,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    mPublishableKey),
+                            mPublishableKey,
+                            null
+                    )
+            );
             mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mStripeIntent));
         }
 
@@ -556,7 +597,8 @@ class PaymentController {
                     mTransaction.doChallenge(activity,
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mApiHandler,
-                                    mStripeIntent, mSourceId, mPublishableKey),
+                                    mStripeIntent, mSourceId, mPublishableKey,
+                                    mAnalyticsRequestExecutor, mAnalyticsDataFactory),
                             mMaxTimeout);
                 }
             }, TimeUnit.SECONDS.toMillis(2));
@@ -571,6 +613,8 @@ class PaymentController {
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
         @NonNull private final String mPublishableKey;
+        @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
+        @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
         @NonNull
         static PaymentAuth3ds2ChallengeStatusReceiver create(
@@ -578,14 +622,18 @@ class PaymentController {
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey) {
+                @NonNull String publishableKey,
+                @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
+                @NonNull AnalyticsDataFactory analyticsDataFactory) {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
                     activity,
                     new Stripe3ds2CompletionStarter(activity, getRequestCode(stripeIntent)),
                     apiHandler,
                     stripeIntent,
                     sourceId,
-                    publishableKey);
+                    publishableKey,
+                    analyticsRequestExecutor,
+                    analyticsDataFactory);
         }
 
         PaymentAuth3ds2ChallengeStatusReceiver(
@@ -594,18 +642,34 @@ class PaymentController {
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey) {
+                @NonNull String publishableKey,
+                @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
+                @NonNull AnalyticsDataFactory analyticsDataFactory) {
             mActivityRef = new WeakReference<>(activity);
             mStarter = starter;
             mApiHandler = apiHandler;
             mStripeIntent = stripeIntent;
             mSourceId = sourceId;
             mPublishableKey = publishableKey;
+            mAnalyticsRequestExecutor = analyticsRequestExecutor;
+            mAnalyticsDataFactory = analyticsDataFactory;
         }
 
         @Override
         public void completed(@NonNull CompletionEvent completionEvent) {
             super.completed(completionEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(Stripe3ds2CompletionStarter.StartData.createForComplete(mStripeIntent,
                     completionEvent.getTransactionStatus()));
         }
@@ -613,6 +677,18 @@ class PaymentController {
         @Override
         public void cancelled() {
             super.cancelled();
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.CANCEL));
         }
@@ -620,6 +696,18 @@ class PaymentController {
         @Override
         public void timedout() {
             super.timedout();
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT));
         }
@@ -627,6 +715,17 @@ class PaymentController {
         @Override
         public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
             super.protocolError(protocolErrorEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    protocolErrorEvent,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR));
         }
@@ -634,6 +733,17 @@ class PaymentController {
         @Override
         public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    runtimeErrorEvent,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.RUNTIME_ERROR));
         }

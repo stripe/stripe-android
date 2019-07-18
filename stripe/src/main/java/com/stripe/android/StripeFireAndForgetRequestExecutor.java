@@ -1,9 +1,11 @@
 package com.stripe.android;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.exception.StripeException;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -36,5 +38,18 @@ final class StripeFireAndForgetRequestExecutor implements FireAndForgetRequestEx
                 conn.disconnect();
             }
         }
+    }
+
+    @Override
+    public void executeAsync(@NonNull final StripeRequest request) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    execute(request);
+                } catch (StripeException ignore) {
+                }
+            }
+        });
     }
 }

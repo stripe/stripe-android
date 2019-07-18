@@ -48,7 +48,7 @@ class StripeApiHandler {
 
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
 
-    @NonNull private final LoggingUtils mLoggingUtils;
+    @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
     @NonNull private final FingerprintRequestFactory mFingerprintRequestFactory;
     @NonNull private final StripeNetworkUtils mNetworkUtils;
     @NonNull private final ApiRequestExecutor mStripeApiRequestExecutor;
@@ -77,7 +77,7 @@ class StripeApiHandler {
                      @NonNull FingerprintRequestFactory fingerprintRequestFactory) {
         mStripeApiRequestExecutor = stripeApiRequestExecutor;
         mFireAndForgetRequestExecutor = fireAndForgetRequestExecutor;
-        mLoggingUtils = new LoggingUtils(context);
+        mAnalyticsDataFactory = new AnalyticsDataFactory(context);
         mFingerprintRequestFactory = fingerprintRequestFactory;
         mNetworkUtils = new StripeNetworkUtils(context);
         mAppInfo = appInfo;
@@ -107,7 +107,7 @@ class StripeApiHandler {
             final String sourceType = sourceParams != null ? sourceParams.getType() : null;
 
             fireAnalyticsRequest(
-                    mLoggingUtils.getPaymentIntentConfirmationParams(null,
+                    mAnalyticsDataFactory.getPaymentIntentConfirmationParams(null,
                             options.apiKey, sourceType),
                     options.apiKey
             );
@@ -139,7 +139,7 @@ class StripeApiHandler {
         try {
             fireFingerprintRequest();
             fireAnalyticsRequest(
-                    mLoggingUtils.getPaymentIntentRetrieveParams(null, options.apiKey),
+                    mAnalyticsDataFactory.getPaymentIntentRetrieveParams(null, options.apiKey),
                     options.apiKey);
             final String paymentIntentId = PaymentIntent.parseIdFromClientSecret(clientSecret);
             final StripeResponse response = makeApiRequest(
@@ -176,7 +176,7 @@ class StripeApiHandler {
         try {
             fireFingerprintRequest();
             fireAnalyticsRequest(
-                    mLoggingUtils.getSetupIntentConfirmationParams(options.apiKey),
+                    mAnalyticsDataFactory.getSetupIntentConfirmationParams(options.apiKey),
                     options.apiKey
             );
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
@@ -206,7 +206,7 @@ class StripeApiHandler {
             APIException {
         try {
             fireFingerprintRequest();
-            fireAnalyticsRequest(mLoggingUtils.getSetupIntentRetrieveParams(options.apiKey),
+            fireAnalyticsRequest(mAnalyticsDataFactory.getSetupIntentRetrieveParams(options.apiKey),
                     options.apiKey);
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
                     Objects.requireNonNull(clientSecret));
@@ -249,7 +249,7 @@ class StripeApiHandler {
         try {
             fireFingerprintRequest();
             fireAnalyticsRequest(
-                    mLoggingUtils.getSourceCreationParams(null, options.apiKey,
+                    mAnalyticsDataFactory.getSourceCreationParams(null, options.apiKey,
                             sourceParams.getType()),
                     options.apiKey);
             final StripeResponse response = makeApiRequest(
@@ -310,7 +310,7 @@ class StripeApiHandler {
         fireFingerprintRequest();
 
         fireAnalyticsRequest(
-                mLoggingUtils.getPaymentMethodCreationParams(options.apiKey),
+                mAnalyticsDataFactory.getPaymentMethodCreationParams(options.apiKey),
                 options.apiKey);
 
         try {
@@ -352,18 +352,19 @@ class StripeApiHandler {
 
         try {
             final List<String> loggingTokens =
-                    (List<String>) tokenParams.get(LoggingUtils.FIELD_PRODUCT_USAGE);
-            tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+                    (List<String>) tokenParams.get(AnalyticsDataFactory.FIELD_PRODUCT_USAGE);
+            tokenParams.remove(AnalyticsDataFactory.FIELD_PRODUCT_USAGE);
 
             fireFingerprintRequest();
 
             fireAnalyticsRequest(
-                    mLoggingUtils.getTokenCreationParams(loggingTokens, options.apiKey, tokenType),
+                    mAnalyticsDataFactory
+                            .getTokenCreationParams(loggingTokens, options.apiKey, tokenType),
                     options.apiKey
             );
         } catch (ClassCastException classCastEx) {
             // This can only happen if someone puts a weird object in the map.
-            tokenParams.remove(LoggingUtils.FIELD_PRODUCT_USAGE);
+            tokenParams.remove(AnalyticsDataFactory.FIELD_PRODUCT_USAGE);
         }
 
         return requestToken(getTokensUrl(), tokenParams, options);
@@ -386,7 +387,8 @@ class StripeApiHandler {
         params.put("source", sourceId);
 
         fireAnalyticsRequest(
-                mLoggingUtils.getAddSourceParams(productUsageTokens, publishableKey, sourceType),
+                mAnalyticsDataFactory
+                        .getAddSourceParams(productUsageTokens, publishableKey, sourceType),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
@@ -415,7 +417,7 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         fireAnalyticsRequest(
-                mLoggingUtils.getDeleteSourceParams(productUsageTokens, publishableKey),
+                mAnalyticsDataFactory.getDeleteSourceParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
@@ -447,7 +449,8 @@ class StripeApiHandler {
         params.put("customer", customerId);
 
         fireAnalyticsRequest(
-                mLoggingUtils.getAttachPaymentMethodParams(productUsageTokens, publishableKey),
+                mAnalyticsDataFactory
+                        .getAttachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
@@ -475,7 +478,8 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         fireAnalyticsRequest(
-                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
+                mAnalyticsDataFactory
+                        .getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
@@ -510,7 +514,8 @@ class StripeApiHandler {
         queryParams.put("type", paymentMethodType);
 
         fireAnalyticsRequest(
-                mLoggingUtils.getDetachPaymentMethodParams(productUsageTokens, publishableKey),
+                mAnalyticsDataFactory
+                        .getDetachPaymentMethodParams(productUsageTokens, publishableKey),
                 // We use the public key to log, so we need different Options.
                 publishableKey
         );
@@ -555,8 +560,8 @@ class StripeApiHandler {
         params.put("default_source", sourceId);
 
         fireAnalyticsRequest(
-                mLoggingUtils.getEventLoggingParams(productUsageTokens, sourceType, null,
-                        publishableKey, LoggingUtils.EventName.DEFAULT_SOURCE),
+                mAnalyticsDataFactory.getEventLoggingParams(productUsageTokens, sourceType,
+                        null, publishableKey, AnalyticsDataFactory.EventName.DEFAULT_SOURCE),
                 ephemeralKey
         );
 
@@ -588,8 +593,8 @@ class StripeApiHandler {
         params.put("shipping", shippingInformation.toMap());
 
         fireAnalyticsRequest(
-                mLoggingUtils.getEventLoggingParams(productUsageTokens, publishableKey,
-                        LoggingUtils.EventName.SET_SHIPPING_INFO),
+                mAnalyticsDataFactory.getEventLoggingParams(productUsageTokens,
+                        publishableKey, AnalyticsDataFactory.EventName.SET_SHIPPING_INFO),
                 publishableKey
         );
 
@@ -681,12 +686,14 @@ class StripeApiHandler {
     @NonNull
     @VisibleForTesting
     Stripe3ds2AuthResult start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+                                       @NonNull String stripeIntentId,
                                        @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException, JSONException {
         fireAnalyticsRequest(
-                mLoggingUtils.getEventLoggingParams(publishableKey,
-                        LoggingUtils.EventName.START_3DS2_AUTH),
+                mAnalyticsDataFactory.createAuthParams(
+                        AnalyticsDataFactory.EventName.AUTH_3DS2_START,
+                        stripeIntentId, publishableKey),
                 publishableKey
         );
 
@@ -701,9 +708,10 @@ class StripeApiHandler {
     }
 
     void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+                       @NonNull String stripeIntentId,
                        @NonNull String publishableKey,
                        @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
-        new Start3ds2AuthTask(this, authParams, publishableKey, callback)
+        new Start3ds2AuthTask(this, authParams, stripeIntentId, publishableKey, callback)
                 .execute();
     }
 
@@ -712,12 +720,6 @@ class StripeApiHandler {
                              @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
-        fireAnalyticsRequest(
-                mLoggingUtils.getEventLoggingParams(publishableKey,
-                        LoggingUtils.EventName.COMPLETE_3DS2_AUTH),
-                publishableKey
-        );
-
         final Map<String, String> params = new HashMap<>();
         params.put("source", sourceId);
 
@@ -1106,8 +1108,7 @@ class StripeApiHandler {
             @NonNull Map<String, Object> loggingMap,
             @NonNull String publishableKey) {
         makeFireAndForgetRequest(
-                ApiRequest.createAnalyticsRequest(loggingMap,
-                        ApiRequest.Options.create(publishableKey), mAppInfo));
+                ApiRequest.createAnalyticsRequest(loggingMap, publishableKey, mAppInfo));
     }
 
     @NonNull
@@ -1120,22 +1121,25 @@ class StripeApiHandler {
     private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Stripe3ds2AuthParams mParams;
+        @NonNull private final String mStripeIntentId;
         @NonNull private final String mPublishableKey;
 
         private Start3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
                                   @NonNull Stripe3ds2AuthParams params,
+                                  @NonNull String stripeIntentId,
                                   @NonNull String publishableKey,
                                   @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mParams = params;
+            mStripeIntentId = stripeIntentId;
             mPublishableKey = publishableKey;
         }
 
         @NonNull
         @Override
         Stripe3ds2AuthResult getResult() throws StripeException, JSONException {
-            return mApiHandler.start3ds2Auth(mParams, mPublishableKey);
+            return mApiHandler.start3ds2Auth(mParams, mStripeIntentId, mPublishableKey);
         }
     }
 

@@ -7,4 +7,8 @@ final class FakeFireAndForgetRequestExecutor implements FireAndForgetRequestExec
     public int execute(@NonNull StripeRequest request) {
         return 200;
     }
+
+    @Override
+    public void executeAsync(@NonNull StripeRequest request) {
+    }
 }
