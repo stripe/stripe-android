@@ -11,6 +11,9 @@ import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Source;
 import com.stripe.android.model.Token;
+import com.stripe.android.stripe3ds2.transaction.ErrorMessage;
+import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
+import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,8 +47,13 @@ class AnalyticsDataFactory {
             EventName.RETRIEVE_PAYMENT_INTENT,
             EventName.CONFIRM_SETUP_INTENT,
             EventName.RETRIEVE_SETUP_INTENT,
-            EventName.START_3DS2_AUTH,
-            EventName.COMPLETE_3DS2_AUTH})
+            EventName.AUTH_3DS2_START,
+            EventName.AUTH_3DS2_COMPLETE,
+            EventName.AUTH_3DS2_FRICTIONLESS,
+            EventName.AUTH_3DS2_CHALLENGE_ERROR,
+            EventName.AUTH_REDIRECT,
+            EventName.AUTH_ERROR
+    })
     @interface EventName {
         String TOKEN_CREATION = "token_creation";
         String ADD_PAYMENT_METHOD = "add_payment_method";
@@ -61,8 +69,29 @@ class AnalyticsDataFactory {
         String CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
         String RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
 
-        String START_3DS2_AUTH = "start_3ds2_auth";
-        String COMPLETE_3DS2_AUTH = "complete_3ds2_auth";
+        String AUTH_3DS2_START = "start_3ds2_auth";
+        String AUTH_3DS2_COMPLETE = "complete_3ds2_auth";
+        String AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow";
+        String AUTH_3DS2_CHALLENGE_ERROR = "3ds2_challenge_flow_errored";
+        String AUTH_REDIRECT = "url_redirect_next_action";
+        String AUTH_ERROR = "auth_error";
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            ThreeDS2UiType.NONE,
+            ThreeDS2UiType.TEXT,
+            ThreeDS2UiType.SINGLE_SELECT,
+            ThreeDS2UiType.MULTI_SELECT,
+            ThreeDS2UiType.OOB,
+            ThreeDS2UiType.HTML})
+    @interface ThreeDS2UiType {
+        String NONE = "none";
+        String TEXT = "text";
+        String SINGLE_SELECT = "single_select";
+        String MULTI_SELECT = "multi_select";
+        String OOB = "oob";
+        String HTML = "html";
     }
 
     static final String FIELD_PRODUCT_USAGE = "product_usage";
@@ -72,11 +101,14 @@ class AnalyticsDataFactory {
     static final String FIELD_BINDINGS_VERSION = "bindings_version";
     static final String FIELD_DEVICE_TYPE = "device_type";
     static final String FIELD_EVENT = "event";
+    static final String FIELD_ERROR_DATA = "error";
+    static final String FIELD_INTENT_ID = "intent_id";
     static final String FIELD_OS_NAME = "os_name";
     static final String FIELD_OS_RELEASE = "os_release";
     static final String FIELD_OS_VERSION = "os_version";
     static final String FIELD_PUBLISHABLE_KEY = "publishable_key";
     static final String FIELD_SOURCE_TYPE = "source_type";
+    static final String FIELD_3DS2_UI_TYPE = "3ds2_ui_type";
     static final String FIELD_TOKEN_TYPE = "token_type";
     static final Set<String> VALID_PARAM_FIELDS = new HashSet<>(Arrays.asList(
             FIELD_ANALYTICS_UA, FIELD_APP_NAME, FIELD_APP_VERSION, FIELD_BINDINGS_VERSION,
@@ -99,6 +131,62 @@ class AnalyticsDataFactory {
                          @Nullable String packageName) {
         mPackageManager = packageManager;
         mPackageName = packageName;
+    }
+
+    @NonNull
+    Map<String, Object> createAuthParams(@NonNull @EventName String eventName,
+                                         @NonNull String intentId,
+                                         @NonNull String publishableKey) {
+        final Map<String, Object> params = getEventLoggingParams(publishableKey, eventName);
+        params.put(FIELD_INTENT_ID, intentId);
+        return params;
+    }
+
+    @NonNull
+    Map<String, Object> create3ds2ChallengeParams(@NonNull @EventName String eventName,
+                                                  @NonNull String intentId,
+                                                  @NonNull @ThreeDS2UiType String uiType,
+                                                  @NonNull String publishableKey) {
+        final Map<String, Object> params = getEventLoggingParams(publishableKey, eventName);
+        params.put(FIELD_INTENT_ID, intentId);
+        params.put(FIELD_3DS2_UI_TYPE, uiType);
+        return params;
+    }
+
+    @NonNull
+    Map<String, Object> create3ds2ChallengeErrorParams(
+            @NonNull String intentId,
+            @NonNull RuntimeErrorEvent runtimeErrorEvent,
+            @NonNull String publishableKey) {
+        final Map<String, String> errorData = new HashMap<>();
+        errorData.put("type", "runtime_error_event");
+        errorData.put("error_code", runtimeErrorEvent.getErrorCode());
+        errorData.put("error_message", runtimeErrorEvent.getErrorMessage());
+        final Map<String, Object> params = getEventLoggingParams(publishableKey,
+                EventName.AUTH_3DS2_CHALLENGE_ERROR);
+        params.put(FIELD_INTENT_ID, intentId);
+        params.put(FIELD_ERROR_DATA, errorData);
+        return params;
+    }
+
+    @NonNull
+    Map<String, Object> create3ds2ChallengeErrorParams(
+            @NonNull String intentId,
+            @NonNull ProtocolErrorEvent protocolErrorEvent,
+            @NonNull String publishableKey) {
+        final Map<String, String> errorData = new HashMap<>();
+        final ErrorMessage errorMessage = protocolErrorEvent.getErrorMessage();
+        errorData.put("type", "protocol_error_event");
+        errorData.put("sdk_trans_id", protocolErrorEvent.getSDKTransactionID());
+        errorData.put("error_code", errorMessage.getErrorCode());
+        errorData.put("error_description", errorMessage.getErrorDescription());
+        errorData.put("error_details", errorMessage.getErrorDetails());
+        errorData.put("trans_id", errorMessage.getTransactionID());
+        final Map<String, Object> params = getEventLoggingParams(publishableKey,
+                EventName.AUTH_3DS2_CHALLENGE_ERROR);
+        params.put(FIELD_INTENT_ID, intentId);
+        params.put(FIELD_ERROR_DATA, errorData);
+        return params;
     }
 
     @NonNull

@@ -254,6 +254,17 @@ class PaymentController {
                     bypassAuth(activity, stripeIntent);
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
+                mAnalyticsRequestExecutor.executeAsync(
+                        ApiRequest.createAnalyticsRequest(
+                                mAnalyticsDataFactory.createAuthParams(
+                                        AnalyticsDataFactory.EventName.AUTH_REDIRECT,
+                                        StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+                                        publishableKey),
+                                publishableKey,
+                                null
+                        )
+                );
+
                 final StripeIntent.RedirectData redirectData =
                         Objects.requireNonNull(stripeIntent.getRedirectData());
                 beginWebAuth(activity, getRequestCode(stripeIntent),
@@ -331,7 +342,8 @@ class PaymentController {
                 timeout,
                 returnUrl
         );
-        mApiHandler.start3ds2Auth(authParams, publishableKey,
+        mApiHandler.start3ds2Auth(authParams, StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+                publishableKey,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
                         stripeIntent, stripe3ds2Fingerprint.source, publishableKey,
                         mAnalyticsRequestExecutor, mAnalyticsDataFactory));
@@ -558,6 +570,16 @@ class PaymentController {
         }
 
         private void startFrictionlessFlow() {
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.createAuthParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_FRICTIONLESS,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    mPublishableKey),
+                            mPublishableKey,
+                            null
+                    )
+            );
             mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mStripeIntent));
         }
 
@@ -657,6 +679,17 @@ class PaymentController {
         @Override
         public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
             super.protocolError(protocolErrorEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    protocolErrorEvent,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR));
         }
@@ -664,6 +697,17 @@ class PaymentController {
         @Override
         public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    runtimeErrorEvent,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.RUNTIME_ERROR));
         }

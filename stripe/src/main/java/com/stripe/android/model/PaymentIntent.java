@@ -72,6 +72,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final Usage mSetupFutureUsage;
 
     @Nullable
+    @Override
     public String getId() {
         return mId;
     }

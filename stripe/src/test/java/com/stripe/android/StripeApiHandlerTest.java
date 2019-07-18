@@ -198,7 +198,7 @@ public class StripeApiHandlerTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        mApiHandler.start3ds2Auth(authParams,
+                        mApiHandler.start3ds2Auth(authParams, "pi_12345",
                                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
                     }
                 });

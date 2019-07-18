@@ -111,7 +111,7 @@ abstract class StripeRequest {
 
     @NonNull
     private List<Parameter> flattenParamsList(@NonNull List<?> params,
-                                                              @NonNull String keyPrefix)
+                                              @NonNull String keyPrefix)
             throws InvalidRequestException {
         final List<Parameter> flatParams = new LinkedList<>();
 
@@ -133,7 +133,7 @@ abstract class StripeRequest {
 
     @NonNull
     private List<Parameter> flattenParamsMap(@Nullable Map<String, ?> params,
-                                                             @Nullable String keyPrefix)
+                                             @Nullable String keyPrefix)
             throws InvalidRequestException {
         final List<Parameter> flatParams = new LinkedList<>();
         if (params == null) {
