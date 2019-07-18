@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntentFixtures;
+import com.stripe.android.model.SetupIntentFixtures;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +72,19 @@ public class StripePaymentAuthTest {
         final Stripe stripe = createStripe();
         final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret();
         stripe.authenticatePayment(mActivity, Objects.requireNonNull(clientSecret));
+        verify(mPaymentController).startAuth(
+                eq(stripe),
+                eq(mActivity),
+                eq(clientSecret),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        );
+    }
+
+    @Test
+    public void authenticateSetup_shouldAuth() {
+        final Stripe stripe = createStripe();
+        final String clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret();
+        stripe.authenticateSetup(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
                 eq(stripe),
                 eq(mActivity),

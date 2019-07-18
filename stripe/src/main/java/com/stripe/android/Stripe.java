@@ -202,6 +202,26 @@ public class Stripe {
     }
 
     /**
+     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
+     *
+     * @param activity     the {@link Activity} that is launching the payment authentication flow
+     * @param clientSecret the `client_secret` property of a confirmed {@link SetupIntent} object
+     */
+    public void authenticateSetup(@NonNull Activity activity,
+                                  @NonNull String clientSecret,
+                                  @NonNull String publishableKey) {
+        mPaymentController.startAuth(this, activity, clientSecret, publishableKey);
+    }
+
+    /**
+     * See {@link #authenticateSetup(Activity, String, String)}}
+     */
+    public void authenticateSetup(@NonNull Activity activity,
+                                  @NonNull String clientSecret) {
+        authenticateSetup(activity, clientSecret, mDefaultPublishableKey);
+    }
+
+    /**
      * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
      * result of a PaymentIntent automatic confirmation
      * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams, String)}) or manual
