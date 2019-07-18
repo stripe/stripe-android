@@ -3,7 +3,6 @@ package com.stripe.samplestore;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,20 +14,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
-import com.stripe.android.Stripe;
-import com.stripe.android.model.PaymentIntent;
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider;
 
 import java.lang.ref.WeakReference;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class StoreActivity
         extends AppCompatActivity
@@ -77,8 +70,6 @@ public class StoreActivity
 
         mGoToCartButton.setOnClickListener(v -> mStoreAdapter.launchPurchaseActivityWithCart());
         setupCustomerSession();
-
-        handlePostAuthReturn();
     }
 
     private float getPriceMultiplier() {
@@ -106,9 +97,11 @@ public class StoreActivity
         if (requestCode == PURCHASE_REQUEST
                 && resultCode == RESULT_OK
                 && data.getExtras() != null) {
-            long price = data.getExtras().getLong(EXTRA_PRICE_PAID, -1L);
+            final long price = data.getExtras().getLong(EXTRA_PRICE_PAID, -1L);
             if (price != -1L) {
                 displayPurchase(price);
+            } else {
+                displaySetupComplete();
             }
             mStoreAdapter.clearItemSelections();
         }
@@ -123,53 +116,6 @@ public class StoreActivity
         }
     }
 
-    /**
-     * If the intent URI matches the post auth deep-link URI, the user attempted to authenticate
-     * payment and was returned to the app. Retrieve the PaymentIntent and inform the user about
-     * the state of their payment.
-     */
-    private void handlePostAuthReturn() {
-        final Uri intentUri = getIntent().getData();
-        if (intentUri != null) {
-            if ("stripe".equals(intentUri.getScheme()) &&
-                    "payment-auth-return".equals(intentUri.getHost())) {
-                final String clientSecret =
-                        intentUri.getQueryParameter("payment_intent_client_secret");
-                if (clientSecret != null) {
-                    final Stripe stripe = new Stripe(getApplicationContext(),
-                            PaymentConfiguration.getInstance().getPublishableKey());
-                    mCompositeDisposable.add(Observable
-                            .fromCallable(() ->
-                                    stripe.retrievePaymentIntentSynchronous(clientSecret))
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe((paymentIntent -> {
-                                if (paymentIntent != null) {
-                                    handleRetrievedPaymentIntent(paymentIntent);
-                                }
-                            }))
-                    );
-                }
-            }
-        }
-    }
-
-    private void handleRetrievedPaymentIntent(@NonNull PaymentIntent paymentIntent) {
-        final PaymentIntent.Status status = paymentIntent.getStatus();
-        if (status == PaymentIntent.Status.Succeeded) {
-            if (paymentIntent.getAmount() != null) {
-                displayPurchase(paymentIntent.getAmount());
-            }
-        } else if (status == PaymentIntent.Status.RequiresPaymentMethod) {
-            Toast.makeText(this, "User failed authentication", Toast.LENGTH_SHORT)
-                    .show();
-        } else {
-            Toast.makeText(this, "PaymentIntent status: " + paymentIntent.getStatus(),
-                    Toast.LENGTH_SHORT)
-                    .show();
-        }
-    }
-
     private void displayPurchase(long price) {
         final View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.purchase_complete_notification, null);
@@ -180,6 +126,20 @@ public class StoreActivity
 
         final TextView priceView = dialogView.findViewById(R.id.dlg_price_display);
         priceView.setText(StoreUtils.getPriceString(price, null));
+
+        new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+                .show();
+    }
+
+    private void displaySetupComplete() {
+        final View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.setup_complete_notification, null);
+
+        final TextView emojiView = dialogView.findViewById(R.id.dlg_emoji_display);
+        // Show a smiley face!
+        emojiView.setText(StoreUtils.getEmojiByUnicode(0x1F642));
 
         new AlertDialog.Builder(this)
                 .setView(dialogView)
