@@ -658,6 +658,18 @@ class PaymentController {
         @Override
         public void completed(@NonNull CompletionEvent completionEvent) {
             super.completed(completionEvent);
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(Stripe3ds2CompletionStarter.StartData.createForComplete(mStripeIntent,
                     completionEvent.getTransactionStatus()));
         }
@@ -665,6 +677,18 @@ class PaymentController {
         @Override
         public void cancelled() {
             super.cancelled();
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.CANCEL));
         }
@@ -672,6 +696,18 @@ class PaymentController {
         @Override
         public void timedout() {
             super.timedout();
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT));
         }

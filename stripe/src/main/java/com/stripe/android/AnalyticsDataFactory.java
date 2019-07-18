@@ -48,9 +48,11 @@ class AnalyticsDataFactory {
             EventName.CONFIRM_SETUP_INTENT,
             EventName.RETRIEVE_SETUP_INTENT,
             EventName.AUTH_3DS2_START,
-            EventName.AUTH_3DS2_COMPLETE,
             EventName.AUTH_3DS2_FRICTIONLESS,
-            EventName.AUTH_3DS2_CHALLENGE_ERROR,
+            EventName.AUTH_3DS2_CHALLENGE_CANCELED,
+            EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
+            EventName.AUTH_3DS2_CHALLENGE_ERRORED,
+            EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
             EventName.AUTH_REDIRECT,
             EventName.AUTH_ERROR
     })
@@ -69,10 +71,12 @@ class AnalyticsDataFactory {
         String CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
         String RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
 
-        String AUTH_3DS2_START = "start_3ds2_auth";
-        String AUTH_3DS2_COMPLETE = "complete_3ds2_auth";
+        String AUTH_3DS2_START = "3ds2_authenticate";
         String AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow";
-        String AUTH_3DS2_CHALLENGE_ERROR = "3ds2_challenge_flow_errored";
+        String AUTH_3DS2_CHALLENGE_CANCELED = "3ds2_challenge_flow_canceled";
+        String AUTH_3DS2_CHALLENGE_COMPLETED = "3ds2_challenge_flow_completed";
+        String AUTH_3DS2_CHALLENGE_ERRORED = "3ds2_challenge_flow_errored";
+        String AUTH_3DS2_CHALLENGE_TIMEDOUT = "3ds2_challenge_flow_timed_out";
         String AUTH_REDIRECT = "url_redirect_next_action";
         String AUTH_ERROR = "auth_error";
     }
@@ -163,7 +167,7 @@ class AnalyticsDataFactory {
         errorData.put("error_code", runtimeErrorEvent.getErrorCode());
         errorData.put("error_message", runtimeErrorEvent.getErrorMessage());
         final Map<String, Object> params = getEventLoggingParams(publishableKey,
-                EventName.AUTH_3DS2_CHALLENGE_ERROR);
+                EventName.AUTH_3DS2_CHALLENGE_ERRORED);
         params.put(FIELD_INTENT_ID, intentId);
         params.put(FIELD_ERROR_DATA, errorData);
         return params;
@@ -183,7 +187,7 @@ class AnalyticsDataFactory {
         errorData.put("error_details", errorMessage.getErrorDetails());
         errorData.put("trans_id", errorMessage.getTransactionID());
         final Map<String, Object> params = getEventLoggingParams(publishableKey,
-                EventName.AUTH_3DS2_CHALLENGE_ERROR);
+                EventName.AUTH_3DS2_CHALLENGE_ERRORED);
         params.put(FIELD_INTENT_ID, intentId);
         params.put(FIELD_ERROR_DATA, errorData);
         return params;

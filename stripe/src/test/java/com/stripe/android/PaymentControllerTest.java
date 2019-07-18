@@ -18,6 +18,7 @@ import com.stripe.android.model.Stripe3ds2AuthResultFixtures;
 import com.stripe.android.model.Stripe3ds2Fingerprint;
 import com.stripe.android.model.Stripe3ds2FingerprintTest;
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service;
+import com.stripe.android.stripe3ds2.transaction.CompletionEvent;
 import com.stripe.android.stripe3ds2.transaction.ErrorMessage;
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry;
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
@@ -229,6 +230,60 @@ public class PaymentControllerTest {
                 PaymentController.getRequestCode(
                         ConfirmPaymentIntentParams.createWithPaymentMethodId(
                                 "pm_123", "client_secret", "")));
+    }
+
+    @Test
+    public void test3ds2Receiver_whenCompleted_shouldFireAnalyticsRequest() {
+        final CompletionEvent completionEvent = new CompletionEvent() {
+            @Override
+            public String getSDKTransactionID() {
+                return "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1";
+            }
+
+            @Override
+            public String getTransactionStatus() {
+                return "C";
+            }
+        };
+
+        new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
+                m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
+                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
+                .completed(completionEvent);
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds2_challenge_flow_completed",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
+    }
+
+    @Test
+    public void test3ds2Receiver_whenTimedout_shouldFireAnalyticsRequest() {
+        new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
+                m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
+                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
+                .timedout();
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds2_challenge_flow_timed_out",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
+    }
+
+    @Test
+    public void test3ds2Receiver_whenCanceled_shouldFireAnalyticsRequest() {
+        new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
+                m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
+                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
+                .cancelled();
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds2_challenge_flow_canceled",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
     }
 
     @Test

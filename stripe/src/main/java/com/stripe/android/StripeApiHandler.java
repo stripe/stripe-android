@@ -720,12 +720,6 @@ class StripeApiHandler {
                              @NonNull String publishableKey)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
-        fireAnalyticsRequest(
-                mAnalyticsDataFactory.getEventLoggingParams(publishableKey,
-                        AnalyticsDataFactory.EventName.AUTH_3DS2_COMPLETE),
-                publishableKey
-        );
-
         final Map<String, String> params = new HashMap<>();
         params.put("source", sourceId);
 
