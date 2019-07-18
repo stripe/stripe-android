@@ -111,6 +111,7 @@ class AnalyticsDataFactory {
     static final String FIELD_OS_RELEASE = "os_release";
     static final String FIELD_OS_VERSION = "os_version";
     static final String FIELD_PAYMENT_METHOD_ID = "payment_method_id";
+    static final String FIELD_PAYMENT_METHOD_TYPE = "payment_method_type";
     static final String FIELD_PUBLISHABLE_KEY = "publishable_key";
     static final String FIELD_SOURCE_TYPE = "source_type";
     static final String FIELD_3DS2_UI_TYPE = "3ds2_ui_type";
@@ -286,8 +287,14 @@ class AnalyticsDataFactory {
     }
 
     @NonNull
-    Map<String, Object> getSetupIntentConfirmationParams(@NonNull String publishableApiKey) {
-        return getEventLoggingParams(publishableApiKey, EventName.CONFIRM_SETUP_INTENT);
+    Map<String, Object> getSetupIntentConfirmationParams(@NonNull String publishableApiKey,
+                                                         @Nullable String paymentMethodType) {
+        final Map<String, Object> params =
+                getEventLoggingParams(publishableApiKey, EventName.CONFIRM_SETUP_INTENT);
+        if (paymentMethodType != null) {
+            params.put(FIELD_PAYMENT_METHOD_TYPE, paymentMethodType);
+        }
+        return params;
     }
 
     @NonNull

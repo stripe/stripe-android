@@ -105,6 +105,11 @@ public final class PaymentMethodCreateParams {
         return params;
     }
 
+    @NonNull
+    public String getTypeCode() {
+        return type.mCode;
+    }
+
     enum Type {
         Card("card"),
         Ideal("ideal");
