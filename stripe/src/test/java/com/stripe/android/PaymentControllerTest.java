@@ -248,6 +248,8 @@ public class PaymentControllerTest {
             }
         };
 
+        when(mTransaction.getInitialChallengeUiType()).thenReturn("04");
+
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -267,6 +269,8 @@ public class PaymentControllerTest {
                 Objects.requireNonNull(analyticsRequests.get(1).params);
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
+        assertEquals("oob",
+                analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_3DS2_UI_TYPE));
     }
 
     @Test

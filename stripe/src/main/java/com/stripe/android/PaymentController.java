@@ -762,8 +762,8 @@ class PaymentController {
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
-                                    // TODO(mshafrir): pass transaction's initial challenge UI type
-                                    StripeTextUtils.emptyIfNull(null),
+                                    StripeTextUtils.emptyIfNull(
+                                            mTransaction.getInitialChallengeUiType()),
                                     mPublishableKey
                             ),
                             mPublishableKey,
