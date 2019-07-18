@@ -172,7 +172,6 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
             return this;
         }
 
-
         @NonNull
         private ConfirmSetupIntentParams.Builder setPaymentMethodCreateParams(
                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams) {
