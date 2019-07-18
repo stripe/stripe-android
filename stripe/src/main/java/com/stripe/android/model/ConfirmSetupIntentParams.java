@@ -13,14 +13,16 @@ import java.util.Objects;
 public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams {
 
     @NonNull private final String mClientSecret;
-    @NonNull private final String mPaymentMethodId;
+    @Nullable private final String mPaymentMethodId;
+    @Nullable private final PaymentMethodCreateParams mPaymentMethodCreateParams;
     @Nullable private final String mReturnUrl;
     private final boolean mUseStripeSdk;
 
     private ConfirmSetupIntentParams(@NonNull Builder builder) {
         this.mClientSecret = builder.mClientSecret;
         this.mReturnUrl = builder.mReturnUrl;
-        this.mPaymentMethodId = Objects.requireNonNull(builder.mPaymentMethodId);
+        this.mPaymentMethodId = builder.mPaymentMethodId;
+        this.mPaymentMethodCreateParams = builder.mPaymentMethodCreateParams;
         this.mUseStripeSdk = builder.mShouldUseSdk;
     }
 
@@ -38,13 +40,16 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     public static ConfirmSetupIntentParams create(
             @NonNull String paymentMethodId,
             @NonNull String clientSecret,
-            @NonNull String returnUrl) {
+            @Nullable String returnUrl) {
         return new ConfirmSetupIntentParams.Builder(clientSecret)
                 .setReturnUrl(returnUrl)
                 .setPaymentMethodId(paymentMethodId)
                 .build();
     }
 
+    /**
+     * See {@link #create(String, String, String)}
+     */
     @NonNull
     public static ConfirmSetupIntentParams create(
             @NonNull String paymentMethodId,
@@ -52,6 +57,27 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
         return new ConfirmSetupIntentParams.Builder(clientSecret)
                 .setPaymentMethodId(paymentMethodId)
                 .build();
+    }
+
+    @NonNull
+    public static ConfirmSetupIntentParams create(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull String clientSecret,
+            @Nullable String returnUrl) {
+        return new ConfirmSetupIntentParams.Builder(clientSecret)
+                .setPaymentMethodCreateParams(paymentMethodCreateParams)
+                .setReturnUrl(returnUrl)
+                .build();
+    }
+
+    /**
+     * See {@link #create(String, String, String)}
+     */
+    @NonNull
+    public static ConfirmSetupIntentParams createWithPaymentMethodCreateParams(
+            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+            @NonNull String clientSecret) {
+        return create(paymentMethodCreateParams, clientSecret, null);
     }
 
     @NonNull
@@ -81,7 +107,14 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     @NonNull
     public Map<String, Object> toParamMap() {
         final Map<String, Object> networkReadyMap = new HashMap<>();
-        networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+
+        if (mPaymentMethodCreateParams != null) {
+            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_DATA,
+                    mPaymentMethodCreateParams.toParamMap());
+        } else if (mPaymentMethodId != null) {
+            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+        }
+
         networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
         if (mReturnUrl != null) {
             networkReadyMap.put(API_PARAM_RETURN_URL, mReturnUrl);
@@ -124,6 +157,7 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     private static final class Builder implements ObjectBuilder<ConfirmSetupIntentParams> {
         @NonNull private final String mClientSecret;
         @Nullable private String mPaymentMethodId;
+        @Nullable private PaymentMethodCreateParams mPaymentMethodCreateParams;
         @Nullable private String mReturnUrl;
         private boolean mShouldUseSdk;
 
@@ -139,7 +173,14 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
         }
 
         @NonNull
-        private ConfirmSetupIntentParams.Builder setReturnUrl(@NonNull String returnUrl) {
+        private ConfirmSetupIntentParams.Builder setPaymentMethodCreateParams(
+                @NonNull PaymentMethodCreateParams paymentMethodCreateParams) {
+            mPaymentMethodCreateParams = paymentMethodCreateParams;
+            return this;
+        }
+
+        @NonNull
+        private ConfirmSetupIntentParams.Builder setReturnUrl(@Nullable String returnUrl) {
             mReturnUrl = returnUrl;
             return this;
         }
