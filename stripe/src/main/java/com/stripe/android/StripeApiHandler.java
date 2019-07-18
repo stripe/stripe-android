@@ -175,15 +175,26 @@ class StripeApiHandler {
 
         try {
             fireFingerprintRequest();
-            fireAnalyticsRequest(
-                    mAnalyticsDataFactory.getSetupIntentConfirmationParams(options.apiKey),
-                    options.apiKey
-            );
             final String setupIntentId = SetupIntent.parseIdFromClientSecret(
                     confirmSetupIntentParams.getClientSecret());
             final StripeResponse response = makeApiRequest(ApiRequest.createPost(
                     getConfirmSetupIntentUrl(setupIntentId), paramMap, options, mAppInfo));
-            return SetupIntent.fromString(response.getResponseBody());
+            final SetupIntent setupIntent = SetupIntent.fromString(response.getResponseBody());
+
+            final String paymentMethodType;
+            final PaymentMethodCreateParams paymentMethodCreateParams =
+                    confirmSetupIntentParams.getPaymentMethodCreateParams();
+            if (paymentMethodCreateParams != null) {
+                paymentMethodType = paymentMethodCreateParams.getTypeCode();
+            } else {
+                paymentMethodType = null;
+            }
+            fireAnalyticsRequest(
+                    mAnalyticsDataFactory.getSetupIntentConfirmationParams(
+                            options.apiKey, paymentMethodType),
+                    options.apiKey
+            );
+            return setupIntent;
         } catch (CardException unexpected) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),

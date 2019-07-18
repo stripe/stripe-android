@@ -137,10 +137,18 @@ public class AnalyticsDataFactoryTest {
                 API_KEY);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(API_KEY, loggingParams.get(AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY));
-        assertEquals(AnalyticsDataFactory.getEventParamName(AnalyticsDataFactory.EventName.RETRIEVE_PAYMENT_INTENT),
+        assertEquals(AnalyticsDataFactory.getEventParamName(
+                AnalyticsDataFactory.EventName.RETRIEVE_PAYMENT_INTENT),
                 loggingParams.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals(AnalyticsDataFactory.getAnalyticsUa(),
                 loggingParams.get(AnalyticsDataFactory.FIELD_ANALYTICS_UA));
+    }
+
+    @Test
+    public void getSetupIntentConfirmationParams_withValidInput_createsCorrectMap() {
+        final Map<String, Object> params =
+                mAnalyticsDataFactory.getSetupIntentConfirmationParams(API_KEY, "card");
+        assertEquals("card", params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_TYPE));
     }
 
     @Test

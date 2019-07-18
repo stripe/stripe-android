@@ -127,6 +127,11 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
         return networkReadyMap;
     }
 
+    @Nullable
+    public PaymentMethodCreateParams getPaymentMethodCreateParams() {
+        return mPaymentMethodCreateParams;
+    }
+
     @NonNull
     private ConfirmSetupIntentParams.Builder toBuilder() {
         return new ConfirmSetupIntentParams.Builder(mClientSecret)
