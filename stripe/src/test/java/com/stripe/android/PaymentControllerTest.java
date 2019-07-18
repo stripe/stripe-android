@@ -250,7 +250,7 @@ public class PaymentControllerTest {
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
-                .completed(completionEvent);
+                .completed(completionEvent, "01");
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
         final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
@@ -264,7 +264,7 @@ public class PaymentControllerTest {
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
-                .timedout();
+                .timedout("01");
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
         final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
@@ -278,7 +278,7 @@ public class PaymentControllerTest {
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
-                .cancelled();
+                .cancelled("01");
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
         final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
@@ -376,7 +376,7 @@ public class PaymentControllerTest {
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
                 "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory)
-                .cancelled();
+                .cancelled("01");
         verify(mApiHandler).complete3ds2Auth(eq("src_123"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<ApiResultCallback<Boolean>>any());
