@@ -5,9 +5,9 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import java.io.ByteArrayInputStream;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Objects;
 
@@ -55,7 +55,7 @@ public final class Stripe3ds2Fingerprint {
         private static final String FIELD_KEY_ID = "key_id";
 
         @NonNull public final String directoryServerId;
-        @NonNull public final Certificate certificate;
+        @NonNull public final X509Certificate certificate;
         @Nullable public final String keyId;
 
         @VisibleForTesting
@@ -77,10 +77,11 @@ public final class Stripe3ds2Fingerprint {
         }
 
         @NonNull
-        private Certificate generateCertificate(@NonNull String certificate)
+        private X509Certificate generateCertificate(@NonNull String certificate)
                 throws CertificateException {
             final CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            return factory.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
+            return (X509Certificate)
+                    factory.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
         }
     }
 

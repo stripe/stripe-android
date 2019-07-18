@@ -7,9 +7,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.ByteArrayInputStream;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
@@ -50,7 +50,7 @@ public class Stripe3ds2FingerprintTest {
             "-----END CERTIFICATE-----\n";
 
     @NonNull
-    public static final Certificate DS_CERTIFICATE_RSA =
+    public static final X509Certificate DS_CERTIFICATE_RSA =
             Objects.requireNonNull(generateCertificate(DS_CERT_DATA_RSA));
 
     @Test
@@ -104,10 +104,12 @@ public class Stripe3ds2FingerprintTest {
         Stripe3ds2Fingerprint.create(sdkData);
     }
 
-    private static Certificate generateCertificate(@NonNull String certificate) {
+    @NonNull
+    private static X509Certificate generateCertificate(@NonNull String certificate) {
         try {
             final CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            return factory.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
+            return (X509Certificate) factory
+                    .generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
         } catch (CertificateException e) {
             return null;
         }
