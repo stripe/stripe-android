@@ -598,7 +598,8 @@ class PaymentController {
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mApiHandler,
                                     mStripeIntent, mSourceId, mPublishableKey,
-                                    mAnalyticsRequestExecutor, mAnalyticsDataFactory),
+                                    mAnalyticsRequestExecutor, mAnalyticsDataFactory,
+                                    mTransaction),
                             mMaxTimeout);
                 }
             }, TimeUnit.SECONDS.toMillis(2));
@@ -615,6 +616,7 @@ class PaymentController {
         @NonNull private final String mPublishableKey;
         @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
         @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
+        @NonNull private final Transaction mTransaction;
 
         @NonNull
         static PaymentAuth3ds2ChallengeStatusReceiver create(
@@ -624,7 +626,8 @@ class PaymentController {
                 @NonNull String sourceId,
                 @NonNull String publishableKey,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
-                @NonNull AnalyticsDataFactory analyticsDataFactory) {
+                @NonNull AnalyticsDataFactory analyticsDataFactory,
+                @NonNull Transaction transaction) {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
                     activity,
                     new Stripe3ds2CompletionStarter(activity, getRequestCode(stripeIntent)),
@@ -633,7 +636,8 @@ class PaymentController {
                     sourceId,
                     publishableKey,
                     analyticsRequestExecutor,
-                    analyticsDataFactory);
+                    analyticsDataFactory,
+                    transaction);
         }
 
         PaymentAuth3ds2ChallengeStatusReceiver(
@@ -644,7 +648,8 @@ class PaymentController {
                 @NonNull String sourceId,
                 @NonNull String publishableKey,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
-                @NonNull AnalyticsDataFactory analyticsDataFactory) {
+                @NonNull AnalyticsDataFactory analyticsDataFactory,
+                @NonNull Transaction transaction) {
             mActivityRef = new WeakReference<>(activity);
             mStarter = starter;
             mApiHandler = apiHandler;
@@ -653,6 +658,7 @@ class PaymentController {
             mPublishableKey = publishableKey;
             mAnalyticsRequestExecutor = analyticsRequestExecutor;
             mAnalyticsDataFactory = analyticsDataFactory;
+            mTransaction = transaction;
         }
 
         @Override
@@ -751,6 +757,20 @@ class PaymentController {
 
         private void notifyCompletion(
                 @NonNull final Stripe3ds2CompletionStarter.StartData startData) {
+            mAnalyticsRequestExecutor.executeAsync(
+                    ApiRequest.createAnalyticsRequest(
+                            mAnalyticsDataFactory.create3ds2ChallengeParams(
+                                    AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
+                                    StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
+                                    // TODO(mshafrir): pass transaction's initial challenge UI type
+                                    StripeTextUtils.emptyIfNull(null),
+                                    mPublishableKey
+                            ),
+                            mPublishableKey,
+                            null
+                    )
+            );
+
             mApiHandler.complete3ds2Auth(mSourceId, mPublishableKey,
                     new ApiResultCallback<Boolean>() {
                         @Override

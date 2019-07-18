@@ -49,6 +49,7 @@ class AnalyticsDataFactory {
             EventName.RETRIEVE_SETUP_INTENT,
             EventName.AUTH_3DS2_START,
             EventName.AUTH_3DS2_FRICTIONLESS,
+            EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
             EventName.AUTH_3DS2_CHALLENGE_CANCELED,
             EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
             EventName.AUTH_3DS2_CHALLENGE_ERRORED,
@@ -73,6 +74,7 @@ class AnalyticsDataFactory {
 
         String AUTH_3DS2_START = "3ds2_authenticate";
         String AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow";
+        String AUTH_3DS2_CHALLENGE_PRESENTED = "3ds2_challenge_flow_presented";
         String AUTH_3DS2_CHALLENGE_CANCELED = "3ds2_challenge_flow_canceled";
         String AUTH_3DS2_CHALLENGE_COMPLETED = "3ds2_challenge_flow_completed";
         String AUTH_3DS2_CHALLENGE_ERRORED = "3ds2_challenge_flow_errored";
