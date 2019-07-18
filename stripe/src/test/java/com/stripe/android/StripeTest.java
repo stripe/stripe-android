@@ -27,10 +27,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -41,6 +45,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test class for {@link Stripe}.
@@ -79,8 +86,11 @@ public class StripeTest {
 
     private Context mContext;
 
+    @Captor private ArgumentCaptor<StripeRequest> mStripeRequestArgumentCaptor;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mContext = ApplicationProvider.getApplicationContext();
     }
 
@@ -1220,6 +1230,9 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withCardAndMetadata()
             throws StripeException {
+        final FireAndForgetRequestExecutor fireAndForgetRequestExecutor =
+                mock(FireAndForgetRequestExecutor.class);
+
         final PaymentMethod.BillingDetails expectedBillingDetails =
                 new PaymentMethod.BillingDetails.Builder()
                         .setName("Home")
@@ -1263,18 +1276,30 @@ public class StripeTest {
                                 .build(),
                         expectedBillingDetails,
                         metadata);
-        final Stripe stripe = createNonLoggingStripe();
+        final Stripe stripe = createNonLoggingStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
         assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
         assertEquals(expectedCard, createdPaymentMethod.card);
         assertEquals(metadata, createdPaymentMethod.metadata);
+
+        verify(fireAndForgetRequestExecutor, times(2))
+                .execute(mStripeRequestArgumentCaptor.capture());
+        final List<StripeRequest> fireAndForgetRequests =
+                mStripeRequestArgumentCaptor.getAllValues();
+        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        assertEquals(ApiRequest.ANALYTICS_HOST, analyticsRequest.getBaseUrl());
+        assertEquals(createdPaymentMethod.id,
+                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
 
     @Test
     public void createPaymentMethodSynchronous_withIdeal()
             throws StripeException {
+        final FireAndForgetRequestExecutor fireAndForgetRequestExecutor =
+                mock(FireAndForgetRequestExecutor.class);
+
         final PaymentMethod.BillingDetails expectedBillingDetails =
                 new PaymentMethod.BillingDetails.Builder()
                         .setName("Home")
@@ -1294,7 +1319,7 @@ public class StripeTest {
                                 .setBank("ing")
                                 .build(),
                         expectedBillingDetails);
-        final Stripe stripe = createNonLoggingStripe();
+        final Stripe stripe = createNonLoggingStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
@@ -1305,6 +1330,15 @@ public class StripeTest {
                         .setBankIdentifierCode("INGBNL2A")
                         .build(),
                 createdPaymentMethod.ideal);
+
+        verify(fireAndForgetRequestExecutor, times(2))
+                .execute(mStripeRequestArgumentCaptor.capture());
+        final List<StripeRequest> fireAndForgetRequests =
+                mStripeRequestArgumentCaptor.getAllValues();
+        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        assertEquals(ApiRequest.ANALYTICS_HOST, analyticsRequest.getBaseUrl());
+        assertEquals(createdPaymentMethod.id,
+                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
 
     @Test
@@ -1322,9 +1356,22 @@ public class StripeTest {
     }
 
     @NonNull
+    private Stripe createNonLoggingStripe(
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
+        return createNonLoggingStripe(NON_LOGGING_PK, fireAndForgetRequestExecutor);
+    }
+
+    @NonNull
     private Stripe createNonLoggingStripe(@NonNull String publishableKey) {
+        return createNonLoggingStripe(publishableKey, new FakeFireAndForgetRequestExecutor());
+    }
+
+    @NonNull
+    private Stripe createNonLoggingStripe(
+            @NonNull String publishableKey,
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
         final StripeApiHandler apiHandler = createApiHandler(
-                new FakeFireAndForgetRequestExecutor());
+                fireAndForgetRequestExecutor);
         return new Stripe(
                 apiHandler,
                 new StripeNetworkUtils(mContext),

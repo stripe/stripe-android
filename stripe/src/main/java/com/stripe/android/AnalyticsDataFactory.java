@@ -14,7 +14,6 @@ import com.stripe.android.model.Token;
 import com.stripe.android.stripe3ds2.transaction.ErrorMessage;
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
-import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,7 +35,7 @@ class AnalyticsDataFactory {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             EventName.TOKEN_CREATION,
-            EventName.ADD_PAYMENT_METHOD,
+            EventName.CREATE_PAYMENT_METHOD,
             EventName.ATTACH_PAYMENT_METHOD,
             EventName.DETACH_PAYMENT_METHOD,
             EventName.SOURCE_CREATION,
@@ -59,7 +58,7 @@ class AnalyticsDataFactory {
     })
     @interface EventName {
         String TOKEN_CREATION = "token_creation";
-        String ADD_PAYMENT_METHOD = "add_payment_method";
+        String CREATE_PAYMENT_METHOD = "payment_method_creation";
         String ATTACH_PAYMENT_METHOD = "attach_payment_method";
         String DETACH_PAYMENT_METHOD = "detach_payment_method";
         String SOURCE_CREATION = "source_creation";
@@ -111,6 +110,7 @@ class AnalyticsDataFactory {
     static final String FIELD_OS_NAME = "os_name";
     static final String FIELD_OS_RELEASE = "os_release";
     static final String FIELD_OS_VERSION = "os_version";
+    static final String FIELD_PAYMENT_METHOD_ID = "payment_method_id";
     static final String FIELD_PUBLISHABLE_KEY = "publishable_key";
     static final String FIELD_SOURCE_TYPE = "source_type";
     static final String FIELD_3DS2_UI_TYPE = "3ds2_ui_type";
@@ -207,8 +207,14 @@ class AnalyticsDataFactory {
     }
 
     @NonNull
-    Map<String, Object> getPaymentMethodCreationParams(@NonNull String publishableApiKey) {
-        return getEventLoggingParams(publishableApiKey, EventName.ADD_PAYMENT_METHOD);
+    Map<String, Object> createPaymentMethodCreationParams(@NonNull String publishableApiKey,
+                                                          @Nullable String paymentMethodId) {
+        final Map<String, Object> params =
+                getEventLoggingParams(publishableApiKey, EventName.CREATE_PAYMENT_METHOD);
+        if (paymentMethodId != null) {
+            params.put("payment_method_id", paymentMethodId);
+        }
+        return params;
     }
 
     @NonNull
