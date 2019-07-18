@@ -656,14 +656,15 @@ class PaymentController {
         }
 
         @Override
-        public void completed(@NonNull CompletionEvent completionEvent) {
-            super.completed(completionEvent);
+        public void completed(@NonNull CompletionEvent completionEvent,
+                              @NonNull String uiTypeCode) {
+            super.completed(completionEvent, uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
                     ApiRequest.createAnalyticsRequest(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
-                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    uiTypeCode,
                                     mPublishableKey
                             ),
                             mPublishableKey,
@@ -675,14 +676,14 @@ class PaymentController {
         }
 
         @Override
-        public void cancelled() {
-            super.cancelled();
+        public void cancelled(@NonNull String uiTypeCode) {
+            super.cancelled(uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
                     ApiRequest.createAnalyticsRequest(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
-                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    uiTypeCode,
                                     mPublishableKey
                             ),
                             mPublishableKey,
@@ -694,14 +695,14 @@ class PaymentController {
         }
 
         @Override
-        public void timedout() {
-            super.timedout();
+        public void timedout(@NonNull String uiTypeCode) {
+            super.timedout(uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
                     ApiRequest.createAnalyticsRequest(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
-                                    AnalyticsDataFactory.ThreeDS2UiType.NONE,
+                                    uiTypeCode,
                                     mPublishableKey
                             ),
                             mPublishableKey,

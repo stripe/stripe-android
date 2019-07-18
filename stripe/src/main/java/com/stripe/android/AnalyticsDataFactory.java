@@ -14,6 +14,7 @@ import com.stripe.android.model.Token;
 import com.stripe.android.stripe3ds2.transaction.ErrorMessage;
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
+import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -89,7 +90,7 @@ class AnalyticsDataFactory {
             ThreeDS2UiType.MULTI_SELECT,
             ThreeDS2UiType.OOB,
             ThreeDS2UiType.HTML})
-    @interface ThreeDS2UiType {
+    private @interface ThreeDS2UiType {
         String NONE = "none";
         String TEXT = "text";
         String SINGLE_SELECT = "single_select";
@@ -149,11 +150,11 @@ class AnalyticsDataFactory {
     @NonNull
     Map<String, Object> create3ds2ChallengeParams(@NonNull @EventName String eventName,
                                                   @NonNull String intentId,
-                                                  @NonNull @ThreeDS2UiType String uiType,
+                                                  @NonNull String uiTypeCode,
                                                   @NonNull String publishableKey) {
         final Map<String, Object> params = getEventLoggingParams(publishableKey, eventName);
         params.put(FIELD_INTENT_ID, intentId);
-        params.put(FIELD_3DS2_UI_TYPE, uiType);
+        params.put(FIELD_3DS2_UI_TYPE, get3ds2UiType(uiTypeCode));
         return params;
     }
 
@@ -389,5 +390,23 @@ class AnalyticsDataFactory {
     @NonNull
     static String getEventParamName(@NonNull @EventName String eventName) {
         return ANALYTICS_NAME + '.' + eventName;
+    }
+
+    @ThreeDS2UiType
+    private static String get3ds2UiType(@NonNull String uiTypeCode) {
+        switch (uiTypeCode) {
+            case "01":
+                return ThreeDS2UiType.TEXT;
+            case "02":
+                return ThreeDS2UiType.SINGLE_SELECT;
+            case "03":
+                return ThreeDS2UiType.MULTI_SELECT;
+            case "04":
+                return ThreeDS2UiType.OOB;
+            case "05":
+                return ThreeDS2UiType.HTML;
+            default:
+                return ThreeDS2UiType.NONE;
+        }
     }
 }
