@@ -309,14 +309,19 @@ class StripeApiHandler {
         params.putAll(mNetworkUtils.createUidParams());
         fireFingerprintRequest();
 
-        fireAnalyticsRequest(
-                mAnalyticsDataFactory.getPaymentMethodCreationParams(options.apiKey),
-                options.apiKey);
-
         try {
             final StripeResponse response = makeApiRequest(
                     ApiRequest.createPost(getPaymentMethodsUrl(), params, options, mAppInfo));
-            return PaymentMethod.fromString(response.getResponseBody());
+            final PaymentMethod paymentMethod =
+                    PaymentMethod.fromString(response.getResponseBody());
+
+            fireAnalyticsRequest(
+                    mAnalyticsDataFactory.createPaymentMethodCreationParams(
+                            options.apiKey,
+                            paymentMethod != null ? paymentMethod.id : null),
+                    options.apiKey);
+
+            return paymentMethod;
         } catch (CardException unexpected) {
             throw new APIException(unexpected.getMessage(), unexpected.getRequestId(),
                     unexpected.getStatusCode(), null, unexpected);

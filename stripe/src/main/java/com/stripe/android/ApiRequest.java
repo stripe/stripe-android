@@ -21,9 +21,9 @@ import java.util.Map;
  */
 final class ApiRequest extends StripeRequest {
     static final String MIME_TYPE = "application/x-www-form-urlencoded";
-    static final String API_HOST = "https://api.stripe.com";
 
-    private static final String ANALYTICS_HOST = "https://q.stripe.com";
+    static final String API_HOST = "https://api.stripe.com";
+    static final String ANALYTICS_HOST = "https://q.stripe.com";
 
     @NonNull final Options options;
     @Nullable private final AppInfo mAppInfo;

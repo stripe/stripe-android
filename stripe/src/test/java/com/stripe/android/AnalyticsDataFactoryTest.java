@@ -96,10 +96,15 @@ public class AnalyticsDataFactoryTest {
     @Test
     public void getPaymentMethodCreationParams() {
         final Map<String, Object> loggingParams = mAnalyticsDataFactory
-                .getPaymentMethodCreationParams(API_KEY);
+                .createPaymentMethodCreationParams(API_KEY, "pm_12345");
         assertNotNull(loggingParams);
-        assertEquals(API_KEY, loggingParams.get(AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY));
-        assertEquals(AnalyticsDataFactory.getEventParamName(AnalyticsDataFactory.EventName.ADD_PAYMENT_METHOD),
+        assertEquals(API_KEY,
+                loggingParams.get(AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY));
+        assertEquals("pm_12345",
+                loggingParams.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+        assertEquals(
+                AnalyticsDataFactory.getEventParamName(
+                        AnalyticsDataFactory.EventName.CREATE_PAYMENT_METHOD),
                 loggingParams.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals(AnalyticsDataFactory.getAnalyticsUa(),
                 loggingParams.get(AnalyticsDataFactory.FIELD_ANALYTICS_UA));
