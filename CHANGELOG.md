@@ -1,16 +1,16 @@
 # CHANGELOG
 
 ## 10.0.0 - 2019-07-19
-* Add support for 3DS2 authentication. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
-    * Payment Intents
-        * `Stripe#confirmPayment()` for automatic confirmation
-        * `Stripe#authenticatePayment()` for manual confirmation
-    * Setup Intents
-        * `Stripe#confirmSetupIntent()` for automatic confirmation
-        * `Stripe#authenticateSetup()` for manual confirmation
-    * `PaymentAuthConfig` for optional authentication customization
-* Add support for SetupIntents. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
-    * `ConfirmSetupIntentParams`
+* Add support for 3DS2 authentication through the Payment Intents API and Setup Intents API. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
+    * Payment Intents - see our guide for [Using Payment Intents on Android](https://stripe.com/docs/payments/payment-intents/android)
+        * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmPayment-android.app.Activity-com.stripe.android.model.ConfirmPaymentIntentParams-) for automatic confirmation
+        * [Stripe#authenticatePayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticatePayment-android.app.Activity-java.lang.String-) for manual confirmation
+    * Setup Intents - see our guide for [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment)
+        * [Stripe#confirmSetupIntent()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmSetupIntent-android.app.Activity-com.stripe.android.model.ConfirmSetupIntentParams-) for automatic confirmation
+        * [Stripe#authenticateSetup()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticateSetup-android.app.Activity-java.lang.String-) for manual confirmation
+    * [PaymentAuthConfig](https://stripe.dev/stripe-android/com/stripe/android/PaymentAuthConfig.html) for optional authentication customization
+* Add support for the Setup Intents API. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
+    * Use [ConfirmSetupIntentParams](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html) to confirm a SetupIntent
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
 
