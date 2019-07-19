@@ -96,7 +96,7 @@ public class StripeTest {
 
     @Test
     public void testVersion() {
-        assertEquals("AndroidBindings/9.3.8", Stripe.VERSION);
+        assertEquals("AndroidBindings/10.0.0", Stripe.VERSION);
     }
 
     @Test
@@ -1285,7 +1285,7 @@ public class StripeTest {
         assertEquals(metadata, createdPaymentMethod.metadata);
 
         verify(fireAndForgetRequestExecutor, times(2))
-                .execute(mStripeRequestArgumentCaptor.capture());
+                .executeAsync(mStripeRequestArgumentCaptor.capture());
         final List<StripeRequest> fireAndForgetRequests =
                 mStripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
@@ -1332,7 +1332,7 @@ public class StripeTest {
                 createdPaymentMethod.ideal);
 
         verify(fireAndForgetRequestExecutor, times(2))
-                .execute(mStripeRequestArgumentCaptor.capture());
+                .executeAsync(mStripeRequestArgumentCaptor.capture());
         final List<StripeRequest> fireAndForgetRequests =
                 mStripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
