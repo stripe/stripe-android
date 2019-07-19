@@ -1,14 +1,18 @@
 # CHANGELOG
 
 ## 10.0.0 - 2019-07-19
+* Add support for 3DS2 authentication. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
+    * Payment Intents
+        * `Stripe#confirmPayment()` for automatic confirmation
+        * `Stripe#authenticatePayment()` for manual confirmation
+    * Setup Intents
+        * `Stripe#confirmSetupIntent()` for automatic confirmation
+        * `Stripe#authenticateSetup()` for manual confirmation
+    * `PaymentAuthConfig` for optional authentication customization
+* Add support for SetupIntents. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
+    * `ConfirmSetupIntentParams`
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
-* Add support for SetupIntents. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
-* Add support for 3DS2 authentication. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
-    * Stripe#confirmPayment()
-    * Stripe#authenticatePayment()
-    * Stripe#confirmSetupIntent()
-    * Stripe#authenticateSetup()
 
 ## 9.3.8 - 2019-07-16
 * [#1193](https://github.com/stripe/stripe-android/pull/1193) Fix `RuntimeException` related to 3DS2
