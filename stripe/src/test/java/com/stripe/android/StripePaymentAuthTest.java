@@ -70,7 +70,7 @@ public class StripePaymentAuthTest {
     @Test
     public void authenticatePayment_shouldAuth() {
         final Stripe stripe = createStripe();
-        final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret();
+        final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret();
         stripe.authenticatePayment(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
                 eq(stripe),

@@ -320,7 +320,8 @@ class PaymentController {
                 mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
                         mMessageVersionRegistry.getCurrent(), stripeIntent.isLiveMode(),
                         stripe3ds2Fingerprint.directoryServer.name,
-                        stripe3ds2Fingerprint.directoryServerEncryption.certificate,
+                        stripe3ds2Fingerprint.directoryServerEncryption.rootCerts,
+                        stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey,
                         stripe3ds2Fingerprint.directoryServerEncryption.keyId);
 
         ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name);
