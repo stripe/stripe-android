@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.ByteArrayInputStream;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -14,7 +15,6 @@ import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2FingerprintTest {
@@ -50,28 +50,30 @@ public class Stripe3ds2FingerprintTest {
             "-----END CERTIFICATE-----\n";
 
     @NonNull
-    public static final X509Certificate DS_CERTIFICATE_RSA =
-            Objects.requireNonNull(generateCertificate(DS_CERT_DATA_RSA));
+    public static final PublicKey DS_RSA_PUBLIC_KEY =
+            Objects.requireNonNull(generateCertificate(DS_CERT_DATA_RSA)).getPublicKey();
 
     @Test
     public void create_with3ds2SdkData_shouldCreateObject() throws CertificateException {
-        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2
+        final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
                 .getStripeSdkData();
         assertNotNull(sdkData);
         final Stripe3ds2Fingerprint stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData);
-        assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5",
+        assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA",
                 stripe3ds2Fingerprint.source);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Visa,
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard,
                 stripe3ds2Fingerprint.directoryServer);
-        assertEquals("e64bb72f-60ac-4845-b8b6-47cfdb0f73aa",
+        assertEquals("34b16ea1-1206-4ee8-84d2-d292bc73c2ae",
                 stripe3ds2Fingerprint.serverTransactionId);
 
         assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Visa.id,
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id,
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
-        assertEquals(DS_CERTIFICATE_RSA,
-                stripe3ds2Fingerprint.directoryServerEncryption.certificate);
-        assertNull(stripe3ds2Fingerprint.directoryServerEncryption.keyId);
+        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey);
+        assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
+                stripe3ds2Fingerprint.directoryServerEncryption.keyId);
+        assertEquals(1,
+                stripe3ds2Fingerprint.directoryServerEncryption.rootCerts.size());
     }
 
     @Test
@@ -90,8 +92,8 @@ public class Stripe3ds2FingerprintTest {
         assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
                 stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
-        assertEquals(DS_CERTIFICATE_RSA,
-                stripe3ds2Fingerprint.directoryServerEncryption.certificate);
+        assertEquals(DS_RSA_PUBLIC_KEY,
+                stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey);
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
                 stripe3ds2Fingerprint.directoryServerEncryption.keyId);
     }

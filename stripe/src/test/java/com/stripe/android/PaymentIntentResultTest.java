@@ -13,9 +13,9 @@ public class PaymentIntentResultTest {
 
     @Test
     public void testBuilder() {
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2,
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 new PaymentIntentResult.Builder()
-                        .setPaymentIntent(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2)
+                        .setPaymentIntent(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
                         .build()
                         .getIntent());
     }

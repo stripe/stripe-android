@@ -35,10 +35,10 @@ public class PaymentRelayStarterTest {
 
     @Test
     public void start_withPaymentIntent_shouldSetCorrectIntentExtras() {
-        mStarter.start(new PaymentRelayStarter.Data(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2));
+        mStarter.start(new PaymentRelayStarter.Data(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_VISA_3DS2.getClientSecret(),
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
         assertEquals(StripeIntentResult.Status.SUCCEEDED,
                 intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,

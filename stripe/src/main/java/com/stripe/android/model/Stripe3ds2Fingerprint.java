@@ -5,9 +5,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import java.io.ByteArrayInputStream;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -53,27 +57,48 @@ public final class Stripe3ds2Fingerprint {
         private static final String FIELD_DIRECTORY_SERVER_ID = "directory_server_id";
         private static final String FIELD_CERTIFICATE = "certificate";
         private static final String FIELD_KEY_ID = "key_id";
+        private static final String FIELD_ROOT_CAS = "root_certificate_authorities";
 
         @NonNull public final String directoryServerId;
-        @NonNull public final X509Certificate certificate;
+        @NonNull public final PublicKey directoryServerPublicKey;
+        @NonNull public final List<X509Certificate> rootCerts;
         @Nullable public final String keyId;
 
         @VisibleForTesting
         DirectoryServerEncryption(@NonNull String directoryServerId,
-                                  @NonNull String certificateData,
+                                  @NonNull String dsCertificateData,
+                                  @NonNull List<String> rootCertsData,
                                   @Nullable String keyId) throws CertificateException {
             this.directoryServerId = directoryServerId;
-            this.certificate = generateCertificate(certificateData);
+            this.directoryServerPublicKey = generateCertificate(dsCertificateData).getPublicKey();
             this.keyId = keyId;
+            this.rootCerts = generateCertificates(rootCertsData);
         }
 
         @NonNull
         static DirectoryServerEncryption create(@NonNull Map<String, ?> data)
                 throws CertificateException {
+            final List<String> rootCertData;
+            if (data.containsKey(FIELD_ROOT_CAS)) {
+                rootCertData = (List<String>) Objects.requireNonNull(data.get(FIELD_ROOT_CAS));
+            } else {
+                rootCertData = Collections.emptyList();
+            }
             return new DirectoryServerEncryption(
                     Objects.requireNonNull((String) data.get(FIELD_DIRECTORY_SERVER_ID)),
                     Objects.requireNonNull((String) data.get(FIELD_CERTIFICATE)),
+                    rootCertData,
                     (String) data.get(FIELD_KEY_ID));
+        }
+
+        @NonNull
+        private List<X509Certificate> generateCertificates(@NonNull List<String> certificatesData)
+                throws CertificateException {
+            final List<X509Certificate> certs = new ArrayList<>(certificatesData.size());
+            for (final String certData : certificatesData) {
+                certs.add(generateCertificate(certData));
+            }
+            return certs;
         }
 
         @NonNull
