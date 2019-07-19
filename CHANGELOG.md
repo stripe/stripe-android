@@ -1,12 +1,14 @@
 # CHANGELOG
 
-## 10.0.0 - upcoming
-* [#1154](https://github.com/stripe/stripe-android/pull/1154) Fix potential NPE in `PaymentMethodsActivity`
+## 10.0.0 - 2019-07-19
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
-* [#1174](https://github.com/stripe/stripe-android/pull/1174) Add `getCardBuilder()` to `CardInputWidget` and `CardMultilineWidget`
 * Add support for SetupIntents. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
 * Add support for 3DS2 authentication. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
+    * Stripe#confirmPayment()
+    * Stripe#authenticatePayment()
+    * Stripe#confirmSetupIntent()
+    * Stripe#authenticateSetup()
 
 ## 9.3.8 - 2019-07-16
 * [#1193](https://github.com/stripe/stripe-android/pull/1193) Fix `RuntimeException` related to 3DS2
