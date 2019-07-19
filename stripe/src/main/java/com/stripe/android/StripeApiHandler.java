@@ -1067,15 +1067,7 @@ class StripeApiHandler {
     }
 
     private void makeFireAndForgetRequest(@NonNull StripeRequest request) {
-        final Pair<Boolean, String> dnsCacheData = disableDnsCache();
-
-        try {
-            mFireAndForgetRequestExecutor.execute(request);
-        } catch (StripeException ignore) {
-            // We're just logging. No need to crash here or attempt to re-log things.
-        } finally {
-            resetDnsCacheTtl(dnsCacheData);
-        }
+        mFireAndForgetRequestExecutor.executeAsync(request);
     }
 
     @NonNull
