@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 10.0.0 - upcoming
+## 10.0.0 - 2019-07-19
 * [#1154](https://github.com/stripe/stripe-android/pull/1154) Fix potential NPE in `PaymentMethodsActivity`
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
