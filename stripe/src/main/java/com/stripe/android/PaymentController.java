@@ -62,7 +62,7 @@ class PaymentController {
                 new MessageVersionRegistry(),
                 PaymentAuthConfig.get(),
                 new StripeFireAndForgetRequestExecutor(),
-                new AnalyticsDataFactory(context));
+                new AnalyticsDataFactory(context.getApplicationContext()));
     }
 
     @VisibleForTesting

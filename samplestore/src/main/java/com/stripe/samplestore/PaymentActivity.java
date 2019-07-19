@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.ApiResultCallback;
-import com.stripe.android.AppInfo;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
 import com.stripe.android.PaymentConfiguration;
@@ -28,14 +27,17 @@ import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
+import com.stripe.android.SetupIntentResult;
 import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
+import com.stripe.android.model.StripeIntent;
 import com.stripe.samplestore.service.StripeService;
 
 import org.json.JSONException;
@@ -70,10 +72,12 @@ public class PaymentActivity extends AppCompatActivity {
 
     private BroadcastReceiver mBroadcastReceiver;
     private LinearLayout mCartItemLayout;
-    private Button mConfirmPaymentButton;
     private TextView mEnterShippingInfo;
     private TextView mEnterPaymentInfo;
     private ProgressBar mProgressBar;
+
+    private Button mConfirmPaymentButton;
+    private Button mSetupPaymentCredentialsButton;
 
     private Stripe mStripe;
     private PaymentSession mPaymentSession;
@@ -93,8 +97,6 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        Stripe.setAppInfo(AppInfo.create("MyAwesomePlugin", "1.2.34",
-                "https://myawesomeplugin.info", "pp_partner_1234"));
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
         mService = RetrofitFactory.getInstance().create(StripeService.class);
 
@@ -103,7 +105,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.progress_bar);
         mCartItemLayout = findViewById(R.id.cart_list_items);
-        mConfirmPaymentButton = findViewById(R.id.btn_purchase);
+        mConfirmPaymentButton = findViewById(R.id.btn_confirm_payment);
+        mSetupPaymentCredentialsButton = findViewById(R.id.btn_setup_intent);
 
         setupPaymentSession();
 
@@ -116,11 +119,14 @@ public class PaymentActivity extends AppCompatActivity {
                 .subscribe(aVoid -> mPaymentSession.presentShippingFlow()));
         mCompositeDisposable.add(RxView.clicks(mEnterPaymentInfo)
                 .subscribe(aVoid -> mPaymentSession.presentPaymentMethodSelection(true)));
-        mCompositeDisposable.add(RxView.clicks(mConfirmPaymentButton)
-                .subscribe(aVoid -> CustomerSession.getInstance().retrieveCurrentCustomer(
-                        new AttemptPurchaseCustomerRetrievalListener(
-                                PaymentActivity.this))));
 
+        final CustomerSession customerSession = CustomerSession.getInstance();
+        mCompositeDisposable.add(RxView.clicks(mConfirmPaymentButton)
+                .subscribe(aVoid -> customerSession.retrieveCurrentCustomer(
+                        new PaymentIntentCustomerRetrievalListener(PaymentActivity.this))));
+        mCompositeDisposable.addAll(RxView.clicks(mSetupPaymentCredentialsButton)
+                        .subscribe(aVoid -> customerSession.retrieveCurrentCustomer(
+                                new SetupIntentCustomerRetrievalListener(PaymentActivity.this))));
         final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -181,13 +187,13 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        final boolean isHandled = mStripe.onPaymentResult(
+        final boolean isPaymentIntentResult = mStripe.onPaymentResult(
                 requestCode, data,
                 new ApiResultCallback<PaymentIntentResult>() {
                     @Override
                     public void onSuccess(@NonNull PaymentIntentResult result) {
                         stopLoading();
-                        processPaymentIntent(result.getIntent());
+                        processStripeIntent(result.getIntent());
                     }
 
                     @Override
@@ -197,18 +203,34 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 });
 
-        if (isHandled) {
+        if (isPaymentIntentResult) {
             startLoading();
         } else {
-            mPaymentSession.handlePaymentData(requestCode, resultCode, data);
+            final boolean isSetupIntentResult = mStripe.onSetupResult(requestCode, data,
+                    new ApiResultCallback<SetupIntentResult>() {
+                        @Override
+                        public void onSuccess(@NonNull SetupIntentResult result) {
+                            stopLoading();
+                            processStripeIntent(result.getIntent());
+                        }
+
+                        @Override
+                        public void onError(@NonNull Exception e) {
+                            stopLoading();
+                            displayError(e.getMessage());
+                        }
+                    });
+            if (!isSetupIntentResult) {
+                mPaymentSession.handlePaymentData(requestCode, resultCode, data);
+            }
         }
     }
 
     private void updateConfirmPaymentButton() {
         final long price = mPaymentSession.getPaymentSessionData().getCartTotal();
 
-        mConfirmPaymentButton.setText(String.format(Locale.ENGLISH,
-                "Pay %s", StoreUtils.getPriceString(price, null)));
+        mConfirmPaymentButton.setText(
+                getString(R.string.pay_label, StoreUtils.getPriceString(price, null)));
     }
 
     private void addCartItems() {
@@ -291,6 +313,16 @@ public class PaymentActivity extends AppCompatActivity {
         return params;
     }
 
+    @NonNull
+    private Map<String, Object> createSetupIntentParams(@NonNull PaymentSessionData data,
+                                                        @NonNull String customerId) {
+        final AbstractMap<String, Object> params = new HashMap<>();
+        params.put("payment_method", Objects.requireNonNull(data.getPaymentMethod()).id);
+        params.put("customer_id", customerId);
+        params.put("return_url", "stripe://payment-auth-return");
+        return params;
+    }
+
     private void capturePayment(@NonNull String customerId) {
         if (mPaymentSession.getPaymentSessionData().getPaymentMethod() == null) {
             displayError("No payment method selected");
@@ -304,7 +336,24 @@ public class PaymentActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
                 .doFinally(this::stopLoading)
-                .subscribe(this::onPaymentIntentClientSecretResponse,
+                .subscribe(this::onStripeIntentClientSecretResponse,
+                        throwable -> displayError(throwable.getLocalizedMessage())));
+    }
+
+    private void createSetupIntent(@NonNull String customerId) {
+        if (mPaymentSession.getPaymentSessionData().getPaymentMethod() == null) {
+            displayError("No payment method selected");
+            return;
+        }
+
+        final Observable<ResponseBody> stripeResponse = mService.createSetupIntent(
+                createSetupIntentParams(mPaymentSession.getPaymentSessionData(), customerId));
+        mCompositeDisposable.add(stripeResponse
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> startLoading())
+                .doFinally(this::stopLoading)
+                .subscribe(this::onStripeIntentClientSecretResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
@@ -317,50 +366,62 @@ public class PaymentActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void processPaymentIntent(@NonNull PaymentIntent paymentIntent) {
-        if (paymentIntent.requiresAction()) {
+    private void processStripeIntent(@NonNull StripeIntent stripeIntent) {
+        if (stripeIntent.requiresAction()) {
             mStripe.authenticatePayment(this,
-                    Objects.requireNonNull(paymentIntent.getClientSecret()));
-        } else if (paymentIntent.requiresConfirmation()) {
-            confirmPaymentIntent(Objects.requireNonNull(paymentIntent.getId()));
-        } else if (paymentIntent.getStatus() == PaymentIntent.Status.Succeeded) {
-            finishPayment();
-        } else if (paymentIntent.getStatus() == PaymentIntent.Status.RequiresPaymentMethod) {
+                    Objects.requireNonNull(stripeIntent.getClientSecret()));
+        } else if (stripeIntent.requiresConfirmation()) {
+            confirmStripeIntent(Objects.requireNonNull(stripeIntent.getId()));
+        } else if (stripeIntent.getStatus() == StripeIntent.Status.Succeeded) {
+            if (stripeIntent instanceof PaymentIntent) {
+                finishPayment();
+            } else if (stripeIntent instanceof SetupIntent) {
+                finishSetup();
+            }
+        } else if (stripeIntent.getStatus() == StripeIntent.Status.RequiresPaymentMethod) {
             // reset payment method and shipping if authentication fails
             setupPaymentSession();
             mEnterPaymentInfo.setText(getString(R.string.add_credit_card));
             mEnterShippingInfo.setText(getString(R.string.add_shipping_details));
         } else {
             displayError("Unhandled Payment Intent Status: " +
-                    Objects.requireNonNull(paymentIntent.getStatus()).toString());
+                    Objects.requireNonNull(stripeIntent.getStatus()).toString());
         }
     }
 
-    private void confirmPaymentIntent(@NonNull String paymentIntentId) {
+    private void confirmStripeIntent(@NonNull String stripeIntentId) {
         final Map<String, Object> params = new HashMap<>();
-        params.put("payment_intent_id", paymentIntentId);
+        params.put("payment_intent_id", stripeIntentId);
         mCompositeDisposable.add(mService.confirmPayment(params)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> startLoading())
                 .doFinally(this::stopLoading)
                 .subscribe(
-                        this::onPaymentIntentClientSecretResponse,
+                        this::onStripeIntentClientSecretResponse,
                         throwable -> displayError(throwable.getLocalizedMessage())));
     }
 
-    private void onPaymentIntentClientSecretResponse(@NonNull ResponseBody responseBody)
+    private void onStripeIntentClientSecretResponse(@NonNull ResponseBody responseBody)
             throws IOException, JSONException {
         final String clientSecret = new JSONObject(responseBody.string()).getString("secret");
         mCompositeDisposable.add(
                 Observable
-                        .fromCallable(() ->
-                                mStripe.retrievePaymentIntentSynchronous(clientSecret))
+                        .fromCallable(() -> {
+                            if (clientSecret.startsWith("pi_")) {
+                                return mStripe.retrievePaymentIntentSynchronous(clientSecret);
+                            } else if (clientSecret.startsWith("seti_")) {
+                                return mStripe.retrieveSetupIntentSynchronous(clientSecret);
+                            } else {
+                                throw new IllegalArgumentException(
+                                        "Invalid client_secret: " + clientSecret);
+                            }
+                        })
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(disposable -> startLoading())
                         .doFinally(this::stopLoading)
-                        .subscribe(this::processPaymentIntent)
+                        .subscribe(this::processStripeIntent)
         );
     }
 
@@ -372,29 +433,45 @@ public class PaymentActivity extends AppCompatActivity {
         finish();
     }
 
+    private void finishSetup() {
+        mPaymentSession.onCompleted();
+        setResult(RESULT_OK, new Intent().putExtras(new Bundle()));
+        finish();
+    }
+
     private void setupPaymentSession() {
         mPaymentSession = new PaymentSession(this);
         mPaymentSession.init(new PaymentSessionListenerImpl(this),
                 new PaymentSessionConfig.Builder()
                         .setPrepopulatedShippingInfo(getExampleShippingInfo()).build());
         mPaymentSession.setCartTotal(mStoreCart.getTotalPrice());
-        mConfirmPaymentButton.setEnabled(mPaymentSession.getPaymentSessionData()
-                .isPaymentReadyToCharge());
+
+        final boolean isPaymentReadyToCharge = mPaymentSession
+                .getPaymentSessionData().isPaymentReadyToCharge();
+        mConfirmPaymentButton.setEnabled(isPaymentReadyToCharge);
+        mSetupPaymentCredentialsButton.setEnabled(isPaymentReadyToCharge);
     }
 
     private void startLoading() {
         mProgressBar.setVisibility(View.VISIBLE);
         mEnterPaymentInfo.setEnabled(false);
         mEnterShippingInfo.setEnabled(false);
+
         mConfirmPaymentButton.setTag(mConfirmPaymentButton.isEnabled());
         mConfirmPaymentButton.setEnabled(false);
+
+        mSetupPaymentCredentialsButton.setTag(mSetupPaymentCredentialsButton.isEnabled());
+        mSetupPaymentCredentialsButton.setEnabled(false);
     }
 
     private void stopLoading() {
         mProgressBar.setVisibility(View.INVISIBLE);
         mEnterPaymentInfo.setEnabled(true);
         mEnterShippingInfo.setEnabled(true);
+
         mConfirmPaymentButton.setEnabled(Boolean.TRUE.equals(mConfirmPaymentButton.getTag()));
+        mSetupPaymentCredentialsButton
+                .setEnabled(Boolean.TRUE.equals(mSetupPaymentCredentialsButton.getTag()));
     }
 
     @Nullable
@@ -436,6 +513,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         if (data.isPaymentReadyToCharge()) {
             mConfirmPaymentButton.setEnabled(true);
+            mSetupPaymentCredentialsButton.setEnabled(true);
         }
     }
 
@@ -470,9 +548,9 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private static final class AttemptPurchaseCustomerRetrievalListener
+    private static final class PaymentIntentCustomerRetrievalListener
             extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
-        private AttemptPurchaseCustomerRetrievalListener(@NonNull PaymentActivity activity) {
+        private PaymentIntentCustomerRetrievalListener(@NonNull PaymentActivity activity) {
             super(activity);
         }
 
@@ -484,6 +562,34 @@ public class PaymentActivity extends AppCompatActivity {
             }
 
             activity.capturePayment(Objects.requireNonNull(customer.getId()));
+        }
+
+        @Override
+        public void onError(int httpCode, @NonNull String errorMessage,
+                            @Nullable StripeError stripeError) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.displayError("Error getting payment method:. " + errorMessage);
+        }
+    }
+
+    private static final class SetupIntentCustomerRetrievalListener
+            extends CustomerSession.ActivityCustomerRetrievalListener<PaymentActivity> {
+        private SetupIntentCustomerRetrievalListener(@NonNull PaymentActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void onCustomerRetrieved(@NonNull Customer customer) {
+            final PaymentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            activity.createSetupIntent(Objects.requireNonNull(customer.getId()));
         }
 
         @Override

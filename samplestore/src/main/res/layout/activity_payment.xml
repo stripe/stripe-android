@@ -63,12 +63,19 @@
                 android:background="@drawable/item_divider"/>
 
             <Button
-                android:id="@+id/btn_purchase"
+                android:id="@+id/btn_confirm_payment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/payment_screen_spacing" />
+
+            <Button
+                android:id="@+id/btn_setup_intent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/payment_screen_spacing"
-                android:text="@string/confirm_purchase" />
+                android:text="@string/setup_payment_credentials" />
 
         </LinearLayout>
 
