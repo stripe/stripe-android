@@ -6,6 +6,7 @@
 * Update Stripe 3DS2 library
     * Re-enable R8 following bug fix in Android Studio 3.5
     * Move `org.ow2.asm:asm` dependency to `testImplementation`
+    * Fix known issue with 3DS2 challenge flow and API 19 devices
 
 ## 10.0.0 - 2019-07-19
 * Add support for 3DS2 authentication through the Payment Intents API and Setup Intents API. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
