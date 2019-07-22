@@ -58,7 +58,9 @@ class PaymentController {
 
     PaymentController(@NonNull Context context,
                       @NonNull StripeApiHandler apiHandler) {
-        this(context, new StripeThreeDs2ServiceImpl(context), apiHandler,
+        this(context,
+                new StripeThreeDs2ServiceImpl(context, new StripeSSLSocketFactory()),
+                apiHandler,
                 new MessageVersionRegistry(),
                 PaymentAuthConfig.get(),
                 new StripeFireAndForgetRequestExecutor(),
