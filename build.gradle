@@ -35,7 +35,7 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "29.0.0"
+    buildToolsVersion = "29.0.1"
     compileSdkVersion = 28
 
     javaAnnotationVersion = "1.0"
