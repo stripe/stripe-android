@@ -17,7 +17,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Wraps a SSLSocketFactory and enables more TLS versions on older versions of Android.
  * Most of the code is taken from stripe-java.
  */
-class StripeSSLSocketFactory extends SSLSocketFactory {
+final class StripeSSLSocketFactory extends SSLSocketFactory {
 
     private final SSLSocketFactory under;
     private final boolean tlsv11Supported;
