@@ -35,6 +35,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -96,7 +97,10 @@ public class StripeTest {
 
     @Test
     public void testVersion() {
-        assertEquals("AndroidBindings/10.0.0", Stripe.VERSION);
+        assertEquals(
+                String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME),
+                Stripe.VERSION
+        );
     }
 
     @Test
