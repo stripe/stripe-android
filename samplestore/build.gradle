@@ -61,8 +61,8 @@ dependencies {
     /* Used for server calls */
     implementation 'com.squareup.okio:okio:2.2.2'
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
-    compile 'com.facebook.stetho:stetho:1.5.1'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.5.1'
+    implementation 'com.facebook.stetho:stetho:1.5.1'
+    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
     implementation 'com.google.code.gson:gson:2.8.5'
