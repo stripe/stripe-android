@@ -3,6 +3,7 @@ package com.stripe.example.module;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -31,6 +32,7 @@ public class RetrofitFactory {
 
             final OkHttpClient httpClient = new OkHttpClient.Builder()
                     .addInterceptor(logging)
+                    .addNetworkInterceptor(new StethoInterceptor())
                     .build();
 
             final Gson gson = new GsonBuilder()
