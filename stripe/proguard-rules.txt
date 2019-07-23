@@ -1,3 +1,5 @@
 -keep class android.support.design.widget.TextInputLayout { *; }
 -keep class android.support.design.widget.CollapsingTextHelper { *; }
+-keep class org.bouncycastle.** { *; }
+
 -dontwarn com.stripe.android.view.**
