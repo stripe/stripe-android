@@ -1,12 +1,17 @@
 # CHANGELOG
 
+## 10.0.3 - 2019-07-24
+* Update Stripe 3DS2 library to `v1.1.2`
+    * Disable R8 following new user-reported issue
+    * Update Proguard rules
+
 ## 10.0.2 - 2019-07-23
 * [#1238](https://github.com/stripe/stripe-android/pull/1238) Update Proguard rules to fix integration issues with Stripe 3DS2 library
 
 ## 10.0.1 - 2019-07-22
 * [#1226](https://github.com/stripe/stripe-android/pull/1226) Prevent non-critical network requests from blocking API requests by moving fire-and-forget requests to separate thread
 * [#1228](https://github.com/stripe/stripe-android/pull/1228) Update to Android Gradle Plugin to 3.5.0-rc01
-* Update Stripe 3DS2 library
+* Update Stripe 3DS2 library to `v1.1.0`
     * Re-enable R8 following bug fix in Android Studio 3.5
     * Move `org.ow2.asm:asm` dependency to `testImplementation`
     * Fix known issue with 3DS2 challenge flow and API 19 devices
