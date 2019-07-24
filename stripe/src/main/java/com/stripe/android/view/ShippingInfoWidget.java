@@ -20,6 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A widget used to collect address data from a user.
@@ -49,6 +50,7 @@ public class ShippingInfoWidget extends LinearLayout {
         String PHONE_FIELD = "phone";
     }
 
+    @NonNull private final ShippingPostalCodeValidator mShippingPostalCodeValidator;
     private List<String> mOptionalShippingInfoFields = new ArrayList<>();
     private List<String> mHiddenShippingInfoFields = new ArrayList<>();
 
@@ -79,9 +81,9 @@ public class ShippingInfoWidget extends LinearLayout {
     public ShippingInfoWidget(@NonNull Context context, @Nullable AttributeSet attrs,
                               int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
         setOrientation(VERTICAL);
         inflate(context, R.layout.add_address_widget, this);
+
         mCountryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw);
         mAddressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw);
         mAddressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw);
@@ -104,6 +106,8 @@ public class ShippingInfoWidget extends LinearLayout {
             mPostalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE);
             mPhoneNumberEditText.setAutofillHints(View.AUTOFILL_HINT_PHONE);
         }
+
+        mShippingPostalCodeValidator = new ShippingPostalCodeValidator();
 
         initView();
     }
@@ -182,30 +186,12 @@ public class ShippingInfoWidget extends LinearLayout {
      * @return {@code true} if all shown fields are valid, {@code false} otherwise
      */
     public boolean validateAllFields() {
-        final boolean postalCodeValid;
-
-        final String countrySelected = mCountryAutoCompleteTextView.getSelectedCountryCode();
-        if (mPostalCodeEditText.getText().toString().isEmpty() &&
-                (mOptionalShippingInfoFields
-                        .contains(CustomizableShippingField.POSTAL_CODE_FIELD) ||
-                        mHiddenShippingInfoFields
-                                .contains(CustomizableShippingField.POSTAL_CODE_FIELD))) {
-            postalCodeValid = true;
-        } else if (countrySelected.equals(Locale.US.getCountry())) {
-            postalCodeValid = CountryUtils.isUSZipCodeValid(mPostalCodeEditText.getText()
-                    .toString().trim());
-        } else if (countrySelected.equals(Locale.UK.getCountry())) {
-            postalCodeValid = CountryUtils.isUKPostcodeValid(mPostalCodeEditText.getText()
-                    .toString().trim());
-        } else if (countrySelected.equals(Locale.CANADA.getCountry())) {
-            postalCodeValid = CountryUtils.isCanadianPostalCodeValid(mPostalCodeEditText.getText()
-                    .toString().trim());
-        } else if (CountryUtils.doesCountryUsePostalCode(countrySelected)) {
-            postalCodeValid = !mPostalCodeEditText.getText().toString().isEmpty();
-        } else {
-            postalCodeValid = true;
-        }
-        mPostalCodeEditText.setShouldShowError(!postalCodeValid);
+        final boolean isPostalCodeValid = mShippingPostalCodeValidator.isValid(
+                Objects.requireNonNull(mPostalCodeEditText.getText()).toString(),
+                mCountryAutoCompleteTextView.getSelectedCountryCode(),
+                mOptionalShippingInfoFields, mHiddenShippingInfoFields
+        );
+        mPostalCodeEditText.setShouldShowError(!isPostalCodeValid);
 
         final boolean requiredAddressLine1Empty = mAddressEditText.getText().toString().isEmpty() &&
                 !mOptionalShippingInfoFields
@@ -234,7 +220,7 @@ public class ShippingInfoWidget extends LinearLayout {
                         !mHiddenShippingInfoFields.contains(CustomizableShippingField.PHONE_FIELD);
         mPhoneNumberEditText.setShouldShowError(requiredPhoneNumberEmpty);
 
-        return postalCodeValid && !requiredAddressLine1Empty && !requiredCityEmpty &&
+        return isPostalCodeValid && !requiredAddressLine1Empty && !requiredCityEmpty &&
                 !requiredStateEmpty && !requiredNameEmpty && !requiredPhoneNumberEmpty;
     }
 
