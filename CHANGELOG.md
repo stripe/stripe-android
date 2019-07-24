@@ -2,7 +2,7 @@
 
 ## 10.0.3 - 2019-07-24
 * Update Stripe 3DS2 library to `v1.1.2`
-    * Disable R8 following new user-reported issue
+    * Disable R8 following [user-reported issue](https://github.com/stripe/stripe-android/issues/1236)
     * Update Proguard rules
 
 ## 10.0.2 - 2019-07-23
