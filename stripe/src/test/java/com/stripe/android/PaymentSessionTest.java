@@ -93,7 +93,7 @@ public class PaymentSessionTest {
                 PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
         assertNotNull(paymentMethod);
 
-        when(mApiHandler.retrieveCustomer(anyString(), anyString()))
+        when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(firstCustomer, secondCustomer);
         when(mApiHandler.createPaymentMethod(
                 ArgumentMatchers.<PaymentMethodCreateParams>any(),
@@ -105,7 +105,7 @@ public class PaymentSessionTest {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(secondCustomer);
 
         doAnswer(new Answer() {
@@ -335,6 +335,7 @@ public class PaymentSessionTest {
     @NonNull
     private CustomerSession createCustomerSession() {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
-                mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler);
+                mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler,
+                "acct_abc123");
     }
 }

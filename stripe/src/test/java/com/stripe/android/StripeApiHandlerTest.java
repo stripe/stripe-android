@@ -510,7 +510,7 @@ public class StripeApiHandlerTest {
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
-                        ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
+                        ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
         assertEquals(3, paymentMethods.size());
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods.get(0).id);
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods.get(1).id);
@@ -558,7 +558,7 @@ public class StripeApiHandlerTest {
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
-                        ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
+                        ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
         assertTrue(paymentMethods.isEmpty());
     }
 }

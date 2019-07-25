@@ -183,6 +183,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Captor private ArgumentCaptor<List<PaymentMethod>> mPaymentMethodsArgumentCaptor;
     @Captor private ArgumentCaptor<Customer> mCustomerArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
+    @Captor private ArgumentCaptor<ApiRequest.Options> mRequestOptionsArgumentCaptor;
 
     private TestEphemeralKeyProvider mEphemeralKeyProvider;
     private Source mAddedSource;
@@ -223,7 +224,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mPaymentMethod = PaymentMethod.fromString(PAYMENT_METHOD_OBJECT);
         assertNotNull(mPaymentMethod);
 
-        when(mApiHandler.retrieveCustomer(anyString(), anyString()))
+        when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
         when(mApiHandler.addCustomerSource(
                 anyString(),
@@ -231,7 +232,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenReturn(mAddedSource);
         when(mApiHandler.deleteCustomerSource(
@@ -239,7 +240,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
@@ -247,7 +248,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(SECOND_CUSTOMER);
 
         when(mApiHandler.attachPaymentMethod(
@@ -255,7 +256,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenReturn(mPaymentMethod);
 
@@ -263,7 +264,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenReturn(mPaymentMethod);
 
@@ -272,7 +273,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenReturn(Collections.singletonList(mPaymentMethod));
 
@@ -328,7 +329,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(null);
 
-        verify(mApiHandler).retrieveCustomer(firstKey.getCustomerId(), firstKey.getSecret());
+        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
         assertNotNull(customerSession.getCustomer());
         assertNotNull(FIRST_CUSTOMER);
         assertEquals(FIRST_CUSTOMER.getId(), customerSession.getCustomer().getId());
@@ -357,7 +361,9 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq(shippingInformation),
-                eq(firstKey.getSecret()));
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
         assertTrue(mListArgumentCaptor.getValue().contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY));
     }
 
@@ -408,8 +414,14 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         //  Make sure the value is cached.
         assertEquals(SECOND_CUSTOMER.getId(), customerSession.getCustomer().getId());
 
-        verify(mApiHandler).retrieveCustomer(firstKey.getCustomerId(), firstKey.getSecret());
-        verify(mApiHandler).retrieveCustomer(secondKey.getCustomerId(), secondKey.getSecret());
+        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
+        verify(mApiHandler).retrieveCustomer(eq(secondKey.getCustomerId()),
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(secondKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
     }
 
     @Test
@@ -436,7 +448,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertEquals(firstKey.getCustomerId(), FIRST_CUSTOMER.getId());
         assertEquals(firstKey.getCustomerId(), customerSession.getCustomer().getId());
 
-        verify(mApiHandler).retrieveCustomer(firstKey.getCustomerId(), firstKey.getSecret());
+        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -506,8 +521,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.SourceType.CARD),
-                eq(firstKey.getSecret())
-        );
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
+
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY));
@@ -610,7 +627,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
-                eq(firstKey.getSecret()));
+                mRequestOptionsArgumentCaptor.capture());
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
+
         final List productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY));
@@ -711,7 +731,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mListArgumentCaptor.capture(),
                 eq("abc123"),
                 eq(Source.SourceType.CARD),
-                eq(firstKey.getSecret()));
+                mRequestOptionsArgumentCaptor.capture()
+        );
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(1, productUsage.size());
@@ -841,8 +864,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("pm_abc123"),
-                eq(firstKey.getSecret())
+                mRequestOptionsArgumentCaptor.capture()
         );
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -943,7 +968,11 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("pm_abc123"),
-                eq(firstKey.getSecret()));
+                mRequestOptionsArgumentCaptor.capture()
+        );
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
+
         final List productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY));
@@ -1040,8 +1069,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq("card"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
-                eq(firstKey.getSecret())
+                mRequestOptionsArgumentCaptor.capture()
         );
+        assertEquals(firstKey.getSecret(),
+                mRequestOptionsArgumentCaptor.getValue().apiKey);
 
         final List<String> productUsage = mListArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -1061,7 +1092,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
                         null));
@@ -1071,7 +1102,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
                         null));
 
@@ -1081,7 +1112,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("auth error", "reqId", 405, null, null));
 
         when(mApiHandler.attachPaymentMethod(
@@ -1089,7 +1120,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()
+                ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenThrow(new APIException("The payment method is invalid", "request_123", 404,
                         null, null));
@@ -1098,7 +1129,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("The payment method does not exist", "request_123",
                         404, null, null));
 
@@ -1107,7 +1138,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
-                anyString()))
+                ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("The payment method does not exist", "request_123",
                         404, null, null));
     }
@@ -1115,6 +1146,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @NonNull
     private CustomerSession createCustomerSession(@Nullable Calendar calendar) {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
-                mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler);
+                mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler,
+                "acct_abc123");
     }
 }
