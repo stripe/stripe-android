@@ -52,7 +52,6 @@ class PaymentController {
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final PaymentAuthConfig mConfig;
-    @NonNull private final ApiKeyValidator mApiKeyValidator;
     @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
     @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
@@ -81,7 +80,6 @@ class PaymentController {
                 config.stripe3ds2Config.uiCustomization.getUiCustomization());
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
-        mApiKeyValidator = new ApiKeyValidator();
         mAnalyticsRequestExecutor = analyticsRequestExecutor;
         mAnalyticsDataFactory = analyticsDataFactory;
     }
@@ -92,7 +90,6 @@ class PaymentController {
     void startConfirmAndAuth(@NonNull Activity activity,
                              @NonNull ConfirmStripeIntentParams confirmStripeIntentParams,
                              @NonNull ApiRequest.Options requestOptions) {
-        mApiKeyValidator.requireValid(requestOptions.apiKey);
         new ConfirmStripeIntentTask(mApiHandler, confirmStripeIntentParams, requestOptions,
                 new ConfirmStripeIntentCallback(activity, requestOptions, this,
                         getRequestCode(confirmStripeIntentParams)))
@@ -102,7 +99,6 @@ class PaymentController {
     void startAuth(@NonNull final Activity activity,
                    @NonNull String clientSecret,
                    @NonNull final ApiRequest.Options requestOptions) {
-        mApiKeyValidator.requireValid(requestOptions.apiKey);
         new RetrieveIntentTask(mApiHandler,
                 clientSecret,
                 requestOptions,
@@ -121,7 +117,7 @@ class PaymentController {
     }
 
     /**
-     * Decide whether {@link #handlePaymentResult(Stripe, Intent, String, ApiResultCallback)}
+     * Decide whether {@link #handlePaymentResult(Intent, ApiRequest.Options, ApiResultCallback)}
      * should be called.
      */
     boolean shouldHandlePaymentResult(int requestCode, @Nullable Intent data) {
@@ -129,7 +125,7 @@ class PaymentController {
     }
 
     /**
-     * Decide whether {@link #handleSetupResult(Stripe, Intent, String, ApiResultCallback)}
+     * Decide whether {@link #handleSetupResult(Intent, ApiRequest.Options, ApiResultCallback)}
      * should be called.
      */
     boolean shouldHandleSetupResult(int requestCode, @Nullable Intent data) {
