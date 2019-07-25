@@ -67,6 +67,7 @@ import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_MET
 public class PaymentActivity extends AppCompatActivity {
 
     private static final String EXTRA_CART = "extra_cart";
+    @Nullable private static final String STRIPE_ACCOUNT_ID = null;
 
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
@@ -98,6 +99,12 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
+
+        // set an optional Stripe Connect account to use for API requests
+        if (STRIPE_ACCOUNT_ID != null) {
+            mStripe.setStripeAccount(STRIPE_ACCOUNT_ID);
+        }
+
         mService = RetrofitFactory.getInstance().create(StripeService.class);
 
         final Bundle extras = getIntent().getExtras();
@@ -302,7 +309,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     @NonNull
     private Map<String, Object> createCapturePaymentParams(@NonNull PaymentSessionData data,
-                                                           @NonNull String customerId) {
+                                                           @NonNull String customerId,
+                                                           @Nullable String stripeAccountId) {
         final AbstractMap<String, Object> params = new HashMap<>();
         params.put("amount", Long.toString(data.getCartTotal()));
         params.put("payment_method", Objects.requireNonNull(data.getPaymentMethod()).id);
@@ -310,16 +318,23 @@ public class PaymentActivity extends AppCompatActivity {
         params.put("shipping", data.getShippingInformation() != null ?
                 data.getShippingInformation().toMap() : null);
         params.put("return_url", "stripe://payment-auth-return");
+        if (stripeAccountId != null) {
+            params.put("stripe_account", stripeAccountId);
+        }
         return params;
     }
 
     @NonNull
     private Map<String, Object> createSetupIntentParams(@NonNull PaymentSessionData data,
-                                                        @NonNull String customerId) {
+                                                        @NonNull String customerId,
+                                                        @Nullable String stripeAccountId) {
         final AbstractMap<String, Object> params = new HashMap<>();
         params.put("payment_method", Objects.requireNonNull(data.getPaymentMethod()).id);
         params.put("customer_id", customerId);
         params.put("return_url", "stripe://payment-auth-return");
+        if (stripeAccountId != null) {
+            params.put("stripe_account", stripeAccountId);
+        }
         return params;
     }
 
@@ -330,7 +345,8 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         final Observable<ResponseBody> stripeResponse = mService.capturePayment(
-                createCapturePaymentParams(mPaymentSession.getPaymentSessionData(), customerId));
+                createCapturePaymentParams(mPaymentSession.getPaymentSessionData(), customerId,
+                        STRIPE_ACCOUNT_ID));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -347,7 +363,8 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         final Observable<ResponseBody> stripeResponse = mService.createSetupIntent(
-                createSetupIntentParams(mPaymentSession.getPaymentSessionData(), customerId));
+                createSetupIntentParams(mPaymentSession.getPaymentSessionData(), customerId,
+                        STRIPE_ACCOUNT_ID));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -371,7 +388,7 @@ public class PaymentActivity extends AppCompatActivity {
             mStripe.authenticatePayment(this,
                     Objects.requireNonNull(stripeIntent.getClientSecret()));
         } else if (stripeIntent.requiresConfirmation()) {
-            confirmStripeIntent(Objects.requireNonNull(stripeIntent.getId()));
+            confirmStripeIntent(Objects.requireNonNull(stripeIntent.getId()), STRIPE_ACCOUNT_ID);
         } else if (stripeIntent.getStatus() == StripeIntent.Status.Succeeded) {
             if (stripeIntent instanceof PaymentIntent) {
                 finishPayment();
@@ -389,9 +406,14 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private void confirmStripeIntent(@NonNull String stripeIntentId) {
+    private void confirmStripeIntent(@NonNull String stripeIntentId,
+                                     @Nullable String stripeAccountId) {
         final Map<String, Object> params = new HashMap<>();
         params.put("payment_intent_id", stripeIntentId);
+        if (stripeAccountId != null) {
+            params.put("stripe_account", stripeAccountId);
+        }
+
         mCompositeDisposable.add(mService.confirmPayment(params)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
