@@ -703,21 +703,23 @@ class StripeApiHandler {
     @VisibleForTesting
     Stripe3ds2AuthResult start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
                                        @NonNull String stripeIntentId,
-                                       @NonNull String publishableKey)
+                                       @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException, JSONException {
         fireAnalyticsRequest(
                 mAnalyticsDataFactory.createAuthParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_START,
-                        stripeIntentId, publishableKey),
-                publishableKey
+                        stripeIntentId, requestOptions.apiKey),
+                requestOptions.apiKey
         );
 
         final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getApiUrl("3ds2/authenticate"),
                         authParams.toParamMap(),
-                        ApiRequest.Options.create(publishableKey), mAppInfo)
+                        requestOptions,
+                        mAppInfo
+                )
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Stripe3ds2AuthResult.fromJson(new JSONObject(response.getResponseBody()));
@@ -725,15 +727,15 @@ class StripeApiHandler {
 
     void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
                        @NonNull String stripeIntentId,
-                       @NonNull String publishableKey,
+                       @NonNull ApiRequest.Options requestOptions,
                        @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
-        new Start3ds2AuthTask(this, authParams, stripeIntentId, publishableKey, callback)
+        new Start3ds2AuthTask(this, authParams, stripeIntentId, requestOptions, callback)
                 .execute();
     }
 
     @VisibleForTesting
     boolean complete3ds2Auth(@NonNull String sourceId,
-                             @NonNull String publishableKey)
+                             @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException, APIConnectionException, APIException, CardException,
             AuthenticationException {
         final Map<String, String> params = new HashMap<>();
@@ -743,16 +745,16 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getApiUrl("3ds2/challenge_complete"),
                         params,
-                        ApiRequest.Options.create(publishableKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return response.isOk();
     }
 
     void complete3ds2Auth(@NonNull String sourceId,
-                          @NonNull String publishableKey,
+                          @NonNull ApiRequest.Options requestOptions,
                           @NonNull ApiResultCallback<Boolean> callback) {
-        new Complete3ds2AuthTask(this, sourceId, publishableKey, callback)
+        new Complete3ds2AuthTask(this, sourceId, requestOptions, callback)
                 .execute();
     }
 
@@ -1116,7 +1118,11 @@ class StripeApiHandler {
             @NonNull Map<String, Object> loggingMap,
             @NonNull String publishableKey) {
         makeFireAndForgetRequest(
-                ApiRequest.createAnalyticsRequest(loggingMap, publishableKey, mAppInfo));
+                ApiRequest.createAnalyticsRequest(
+                        loggingMap,
+                        ApiRequest.Options.create(publishableKey),
+                        mAppInfo)
+        );
     }
 
     @NonNull
@@ -1130,46 +1136,46 @@ class StripeApiHandler {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final Stripe3ds2AuthParams mParams;
         @NonNull private final String mStripeIntentId;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
 
         private Start3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
                                   @NonNull Stripe3ds2AuthParams params,
                                   @NonNull String stripeIntentId,
-                                  @NonNull String publishableKey,
+                                  @NonNull ApiRequest.Options requestOptions,
                                   @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mParams = params;
             mStripeIntentId = stripeIntentId;
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
         }
 
         @NonNull
         @Override
         Stripe3ds2AuthResult getResult() throws StripeException, JSONException {
-            return mApiHandler.start3ds2Auth(mParams, mStripeIntentId, mPublishableKey);
+            return mApiHandler.start3ds2Auth(mParams, mStripeIntentId, mRequestOptions);
         }
     }
 
     private static final class Complete3ds2AuthTask extends ApiOperation<Boolean> {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final String mSourceId;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
 
         private Complete3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
                                      @NonNull String sourceId,
-                                     @NonNull String publishableKey,
+                                     @NonNull ApiRequest.Options requestOptions,
                                      @NonNull ApiResultCallback<Boolean> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mSourceId = sourceId;
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
         }
 
         @NonNull
         @Override
         Boolean getResult() throws StripeException {
-            return mApiHandler.complete3ds2Auth(mSourceId, mPublishableKey);
+            return mApiHandler.complete3ds2Auth(mSourceId, mRequestOptions);
         }
     }
 }

@@ -28,6 +28,9 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class StripePaymentAuthTest {
 
+    private static final ApiRequest.Options REQUEST_OPTIONS =
+            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+
     private Context mContext;
 
     @Mock private Activity mActivity;
@@ -50,8 +53,8 @@ public class StripePaymentAuthTest {
                         "client_secret",
                         "yourapp://post-authentication-return-url");
         stripe.confirmPayment(mActivity, confirmPaymentIntentParams);
-        verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(confirmPaymentIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+        verify(mPaymentController).startConfirmAndAuth(eq(mActivity),
+                eq(confirmPaymentIntentParams), eq(REQUEST_OPTIONS));
     }
 
     @Test
@@ -63,8 +66,8 @@ public class StripePaymentAuthTest {
                         "client_secret",
                         "yourapp://post-authentication-return-url");
         stripe.confirmSetupIntent(mActivity, confirmSetupIntentParams);
-        verify(mPaymentController).startConfirmAndAuth(eq(stripe), eq(mActivity),
-                eq(confirmSetupIntentParams), eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY));
+        verify(mPaymentController).startConfirmAndAuth(eq(mActivity),
+                eq(confirmSetupIntentParams), eq(REQUEST_OPTIONS));
     }
 
     @Test
@@ -73,10 +76,9 @@ public class StripePaymentAuthTest {
         final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret();
         stripe.authenticatePayment(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
-                eq(stripe),
                 eq(mActivity),
                 eq(clientSecret),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                eq(REQUEST_OPTIONS)
         );
     }
 
@@ -86,10 +88,9 @@ public class StripePaymentAuthTest {
         final String clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret();
         stripe.authenticateSetup(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
-                eq(stripe),
                 eq(mActivity),
                 eq(clientSecret),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                eq(REQUEST_OPTIONS)
         );
     }
 
@@ -102,8 +103,9 @@ public class StripePaymentAuthTest {
         final Stripe stripe = createStripe();
         stripe.onPaymentResult(PaymentController.PAYMENT_REQUEST_CODE, data, mPaymentCallback);
 
-        verify(mPaymentController).handlePaymentResult(stripe, data,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentCallback);
+        verify(mPaymentController).handlePaymentResult(data,
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                mPaymentCallback);
     }
 
     @Test
@@ -115,8 +117,9 @@ public class StripePaymentAuthTest {
         final Stripe stripe = createStripe();
         stripe.onSetupResult(PaymentController.SETUP_REQUEST_CODE, data, mSetupCallback);
 
-        verify(mPaymentController).handleSetupResult(stripe, data,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mSetupCallback);
+        verify(mPaymentController).handleSetupResult(data,
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                mSetupCallback);
     }
 
     @NonNull
