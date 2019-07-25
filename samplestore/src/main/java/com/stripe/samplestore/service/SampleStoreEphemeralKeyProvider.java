@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -20,12 +22,19 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
     @NonNull private final CompositeDisposable mCompositeDisposable;
     @NonNull private final StripeService mStripeService;
     @NonNull private final ProgressListener mProgressListener;
+    @Nullable private final String mStripeAccountId;
 
-    public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
+    public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener,
+                                           @Nullable String stripeAccountId) {
         final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
         mCompositeDisposable = new CompositeDisposable();
         mProgressListener = progressListener;
+        mStripeAccountId = stripeAccountId;
+    }
+
+    public SampleStoreEphemeralKeyProvider(@NonNull ProgressListener progressListener) {
+        this(progressListener, null);
     }
 
     @Override
@@ -33,6 +42,7 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
                                    @NonNull final EphemeralKeyUpdateListener keyUpdateListener) {
         final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
+        apiParamMap.put("stripe_account", mStripeAccountId);
 
         mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
                 .subscribeOn(Schedulers.io())
