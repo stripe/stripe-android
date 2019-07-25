@@ -393,7 +393,7 @@ class StripeApiHandler {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -410,10 +410,8 @@ class StripeApiHandler {
         );
 
         final StripeResponse response = fireStripeApiRequest(
-                ApiRequest.createPost(
-                        getAddCustomerSourceUrl(customerId),
-                        params,
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                ApiRequest.createPost(getAddCustomerSourceUrl(customerId),
+                        params, requestOptions, mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -426,7 +424,7 @@ class StripeApiHandler {
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -441,7 +439,7 @@ class StripeApiHandler {
         final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createDelete(
                         getDeleteCustomerSourceUrl(customerId, sourceId),
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -455,7 +453,7 @@ class StripeApiHandler {
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String paymentMethodId,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -475,7 +473,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getAttachPaymentMethodUrl(paymentMethodId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -487,7 +485,7 @@ class StripeApiHandler {
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String paymentMethodId,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -503,7 +501,7 @@ class StripeApiHandler {
         final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getDetachPaymentMethodUrl(paymentMethodId),
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -519,7 +517,7 @@ class StripeApiHandler {
             @NonNull String paymentMethodType,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -540,7 +538,7 @@ class StripeApiHandler {
                 ApiRequest.createGet(
                         getPaymentMethodsUrl(),
                         queryParams,
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -566,7 +564,7 @@ class StripeApiHandler {
             @NonNull List<String> productUsageTokens,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -578,14 +576,14 @@ class StripeApiHandler {
         fireAnalyticsRequest(
                 mAnalyticsDataFactory.getEventLoggingParams(productUsageTokens, sourceType,
                         null, publishableKey, AnalyticsDataFactory.EventName.DEFAULT_SOURCE),
-                ephemeralKey
+                publishableKey
         );
 
         final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
 
         // Method throws if errors are found, so no return value occurs.
@@ -599,7 +597,7 @@ class StripeApiHandler {
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull ShippingInformation shippingInformation,
-            @NonNull String ephemeralKey)
+            @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -618,7 +616,7 @@ class StripeApiHandler {
                 ApiRequest.createPost(
                         getRetrieveCustomerUrl(customerId),
                         params,
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response);
@@ -627,7 +625,8 @@ class StripeApiHandler {
 
 
     @Nullable
-    Customer retrieveCustomer(@NonNull String customerId, @NonNull String ephemeralKey)
+    Customer retrieveCustomer(@NonNull String customerId,
+                              @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
             APIException,
@@ -635,7 +634,7 @@ class StripeApiHandler {
             CardException {
         final StripeResponse response = fireStripeApiRequest(
                 ApiRequest.createGet(getRetrieveCustomerUrl(customerId),
-                        ApiRequest.Options.create(ephemeralKey), mAppInfo)
+                        requestOptions, mAppInfo)
         );
         convertErrorsToExceptionsAndThrowIfNecessary(response);
         return Customer.fromString(response.getResponseBody());
