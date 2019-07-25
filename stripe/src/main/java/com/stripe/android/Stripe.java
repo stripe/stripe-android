@@ -143,8 +143,8 @@ public class Stripe {
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
                                    @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(this, activity,
-                confirmSetupIntentParams, publishableKey);
+        mPaymentController.startConfirmAndAuth(activity, confirmSetupIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -167,8 +167,8 @@ public class Stripe {
     public void confirmPayment(@NonNull Activity activity,
                                @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
                                @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(this, activity,
-                confirmPaymentIntentParams, publishableKey);
+        mPaymentController.startConfirmAndAuth(activity, confirmPaymentIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -190,7 +190,8 @@ public class Stripe {
     public void authenticatePayment(@NonNull Activity activity,
                                     @NonNull String clientSecret,
                                     @NonNull String publishableKey) {
-        mPaymentController.startAuth(this, activity, clientSecret, publishableKey);
+        mPaymentController.startAuth(activity, clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -210,7 +211,8 @@ public class Stripe {
     public void authenticateSetup(@NonNull Activity activity,
                                   @NonNull String clientSecret,
                                   @NonNull String publishableKey) {
-        mPaymentController.startAuth(this, activity, clientSecret, publishableKey);
+        mPaymentController.startAuth(activity, clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount));
     }
 
     /**
@@ -232,7 +234,10 @@ public class Stripe {
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
         if (data != null &&
                 mPaymentController.shouldHandlePaymentResult(requestCode, data)) {
-            mPaymentController.handlePaymentResult(this, data, publishableKey, callback);
+            mPaymentController.handlePaymentResult(
+                    data,
+                    ApiRequest.Options.create(publishableKey, mStripeAccount),
+                    callback);
             return true;
         }
 
@@ -257,7 +262,11 @@ public class Stripe {
                                  @NonNull ApiResultCallback<SetupIntentResult> callback) {
         if (data != null &&
                 mPaymentController.shouldHandleSetupResult(requestCode, data)) {
-            mPaymentController.handleSetupResult(this, data, publishableKey, callback);
+            mPaymentController.handleSetupResult(
+                    data,
+                    ApiRequest.Options.create(publishableKey, mStripeAccount),
+                    callback
+            );
             return true;
         }
 

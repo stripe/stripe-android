@@ -52,7 +52,6 @@ class PaymentController {
     @NonNull private final StripeApiHandler mApiHandler;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final PaymentAuthConfig mConfig;
-    @NonNull private final ApiKeyValidator mApiKeyValidator;
     @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
     @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
@@ -81,7 +80,6 @@ class PaymentController {
                 config.stripe3ds2Config.uiCustomization.getUiCustomization());
         mApiHandler = apiHandler;
         mMessageVersionRegistry = messageVersionRegistry;
-        mApiKeyValidator = new ApiKeyValidator();
         mAnalyticsRequestExecutor = analyticsRequestExecutor;
         mAnalyticsDataFactory = analyticsDataFactory;
     }
@@ -89,29 +87,25 @@ class PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
-    void startConfirmAndAuth(@NonNull Stripe stripe,
-                             @NonNull Activity activity,
+    void startConfirmAndAuth(@NonNull Activity activity,
                              @NonNull ConfirmStripeIntentParams confirmStripeIntentParams,
-                             @NonNull String publishableKey) {
-        mApiKeyValidator.requireValid(publishableKey);
-        new ConfirmStripeIntentTask(stripe, confirmStripeIntentParams, publishableKey,
-                new ConfirmStripeIntentCallback(activity, publishableKey, this,
+                             @NonNull ApiRequest.Options requestOptions) {
+        new ConfirmStripeIntentTask(mApiHandler, confirmStripeIntentParams, requestOptions,
+                new ConfirmStripeIntentCallback(activity, requestOptions, this,
                         getRequestCode(confirmStripeIntentParams)))
                 .execute();
     }
 
-    void startAuth(@NonNull Stripe stripe,
-                   @NonNull final Activity activity,
+    void startAuth(@NonNull final Activity activity,
                    @NonNull String clientSecret,
-                   @NonNull final String publishableKey) {
-        mApiKeyValidator.requireValid(publishableKey);
-        new RetrieveIntentTask(stripe,
+                   @NonNull final ApiRequest.Options requestOptions) {
+        new RetrieveIntentTask(mApiHandler,
                 clientSecret,
-                publishableKey,
+                requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
-                        handleNextAction(activity, stripeIntent, publishableKey);
+                        handleNextAction(activity, stripeIntent, requestOptions);
                     }
 
                     @Override
@@ -123,7 +117,7 @@ class PaymentController {
     }
 
     /**
-     * Decide whether {@link #handlePaymentResult(Stripe, Intent, String, ApiResultCallback)}
+     * Decide whether {@link #handlePaymentResult(Intent, ApiRequest.Options, ApiResultCallback)}
      * should be called.
      */
     boolean shouldHandlePaymentResult(int requestCode, @Nullable Intent data) {
@@ -131,7 +125,7 @@ class PaymentController {
     }
 
     /**
-     * Decide whether {@link #handleSetupResult(Stripe, Intent, String, ApiResultCallback)}
+     * Decide whether {@link #handleSetupResult(Intent, ApiRequest.Options, ApiResultCallback)}
      * should be called.
      */
     boolean shouldHandleSetupResult(int requestCode, @Nullable Intent data) {
@@ -147,8 +141,8 @@ class PaymentController {
      *
      * @param data the result Intent
      */
-    void handlePaymentResult(@NonNull Stripe stripe, @NonNull Intent data,
-                             @NonNull String publishableKey,
+    void handlePaymentResult(@NonNull Intent data,
+                             @NonNull ApiRequest.Options requestOptions,
                              @NonNull final ApiResultCallback<PaymentIntentResult> callback) {
         final Exception authException = (Exception) data.getSerializableExtra(
                 StripeIntentResultExtras.AUTH_EXCEPTION);
@@ -159,7 +153,7 @@ class PaymentController {
 
         @StripeIntentResult.Status final int authStatus = data.getIntExtra(
                 StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
-        new RetrieveIntentTask(stripe, getClientSecret(data), publishableKey,
+        new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -188,8 +182,8 @@ class PaymentController {
      *
      * @param data the result Intent
      */
-    void handleSetupResult(@NonNull Stripe stripe, @NonNull Intent data,
-                           @NonNull String publishableKey,
+    void handleSetupResult(@NonNull Intent data,
+                           @NonNull ApiRequest.Options requestOptions,
                            @NonNull final ApiResultCallback<SetupIntentResult> callback) {
         final Exception authException = (Exception) data.getSerializableExtra(
                 StripeIntentResultExtras.AUTH_EXCEPTION);
@@ -201,7 +195,7 @@ class PaymentController {
         @StripeIntentResult.Status final int authStatus = data.getIntExtra(
                 StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
 
-        new RetrieveIntentTask(stripe, getClientSecret(data), publishableKey,
+        new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -234,7 +228,7 @@ class PaymentController {
     @VisibleForTesting
     void handleNextAction(@NonNull Activity activity,
                           @NonNull StripeIntent stripeIntent,
-                          @NonNull String publishableKey) {
+                          @NonNull ApiRequest.Options requestOptions) {
         if (stripeIntent.requiresAction()) {
             final StripeIntent.NextActionType nextActionType = stripeIntent.getNextActionType();
             if (StripeIntent.NextActionType.UseStripeSdk == nextActionType) {
@@ -243,7 +237,8 @@ class PaymentController {
                 if (sdkData.is3ds2()) {
                     try {
                         begin3ds2Auth(activity, stripeIntent,
-                                Stripe3ds2Fingerprint.create(sdkData), publishableKey);
+                                Stripe3ds2Fingerprint.create(sdkData),
+                                requestOptions);
                     } catch (CertificateException e) {
                         handleError(activity, getRequestCode(stripeIntent), e);
                     }
@@ -261,8 +256,8 @@ class PaymentController {
                                 mAnalyticsDataFactory.createAuthParams(
                                         AnalyticsDataFactory.EventName.AUTH_REDIRECT,
                                         StripeTextUtils.emptyIfNull(stripeIntent.getId()),
-                                        publishableKey),
-                                publishableKey,
+                                        requestOptions.apiKey),
+                                requestOptions,
                                 null
                         )
                 );
@@ -317,7 +312,7 @@ class PaymentController {
     private void begin3ds2Auth(@NonNull Activity activity,
                                @NonNull StripeIntent stripeIntent,
                                @NonNull Stripe3ds2Fingerprint stripe3ds2Fingerprint,
-                               @NonNull String publishableKey) {
+                               @NonNull ApiRequest.Options requestOptions) {
         final Transaction transaction =
                 mThreeDs2Service.createTransaction(stripe3ds2Fingerprint.directoryServer.id,
                         mMessageVersionRegistry.getCurrent(), stripeIntent.isLiveMode(),
@@ -346,9 +341,9 @@ class PaymentController {
                 returnUrl
         );
         mApiHandler.start3ds2Auth(authParams, StripeTextUtils.emptyIfNull(stripeIntent.getId()),
-                publishableKey,
+                requestOptions,
                 new Stripe3ds2AuthCallback(activity, mApiHandler, transaction, timeout,
-                        stripeIntent, stripe3ds2Fingerprint.source, publishableKey,
+                        stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
                         mAnalyticsRequestExecutor, mAnalyticsDataFactory));
     }
 
@@ -375,45 +370,44 @@ class PaymentController {
     }
 
     private static final class RetrieveIntentTask extends ApiOperation<StripeIntent> {
-        @NonNull private final Stripe mStripe;
+        @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final String mClientSecret;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private RetrieveIntentTask(@NonNull Stripe stripe,
+        private RetrieveIntentTask(@NonNull StripeApiHandler apiHandler,
                                    @NonNull String clientSecret,
-                                   @NonNull String publishableKey,
+                                   @NonNull ApiRequest.Options requestOptions,
                                    @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
-            mStripe = stripe;
+            mApiHandler = apiHandler;
             mClientSecret = clientSecret;
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
         }
 
         @Nullable
         @Override
         StripeIntent getResult() throws StripeException {
             if (mClientSecret.startsWith("pi_")) {
-                return mStripe.retrievePaymentIntentSynchronous(
-                        mClientSecret, mPublishableKey);
+                return mApiHandler.retrievePaymentIntent(mClientSecret, mRequestOptions);
             } else if (mClientSecret.startsWith("seti_")) {
-                return mStripe.retrieveSetupIntentSynchronous(mClientSecret, mPublishableKey);
+                return mApiHandler.retrieveSetupIntent(mClientSecret, mRequestOptions);
             }
             return null;
         }
     }
 
     private static final class ConfirmStripeIntentTask extends ApiOperation<StripeIntent> {
-        @NonNull private final Stripe mStripe;
+        @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final ConfirmStripeIntentParams mParams;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private ConfirmStripeIntentTask(@NonNull Stripe stripe,
+        private ConfirmStripeIntentTask(@NonNull StripeApiHandler apiHandler,
                                         @NonNull ConfirmStripeIntentParams params,
-                                        @NonNull String publishableKey,
+                                        @NonNull ApiRequest.Options requestOptions,
                                         @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
-            mStripe = stripe;
-            mPublishableKey = publishableKey;
+            mApiHandler = apiHandler;
+            mRequestOptions = requestOptions;
 
             // mark this request as `use_stripe_sdk=true`
             mParams = params.withShouldUseStripeSdk(true);
@@ -423,11 +417,15 @@ class PaymentController {
         @Override
         StripeIntent getResult() throws StripeException {
             if (mParams instanceof ConfirmPaymentIntentParams) {
-                return mStripe.confirmPaymentIntentSynchronous(
-                        (ConfirmPaymentIntentParams) mParams, mPublishableKey);
+                return mApiHandler.confirmPaymentIntent(
+                        (ConfirmPaymentIntentParams) mParams,
+                        mRequestOptions
+                );
             } else if (mParams instanceof ConfirmSetupIntentParams) {
-                return mStripe.confirmSetupIntentSynchronous(
-                        (ConfirmSetupIntentParams) mParams, mPublishableKey);
+                return mApiHandler.confirmSetupIntent(
+                        (ConfirmSetupIntentParams) mParams,
+                        mRequestOptions
+                );
             }
             return null;
         }
@@ -436,17 +434,17 @@ class PaymentController {
     private static final class ConfirmStripeIntentCallback
             implements ApiResultCallback<StripeIntent> {
         @NonNull private final WeakReference<Activity> mActivityRef;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
         @NonNull private final PaymentController mPaymentController;
         private final int mRequestCode;
 
         private ConfirmStripeIntentCallback(
                 @NonNull Activity activity,
-                @NonNull String publishableKey,
+                @NonNull ApiRequest.Options requestOptions,
                 @NonNull PaymentController paymentController,
                 int requestCode) {
             mActivityRef = new WeakReference<>(activity);
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
             mPaymentController = paymentController;
             mRequestCode = requestCode;
         }
@@ -455,7 +453,7 @@ class PaymentController {
         public void onSuccess(@NonNull StripeIntent stripeIntent) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                mPaymentController.handleNextAction(activity, stripeIntent, mPublishableKey);
+                mPaymentController.handleNextAction(activity, stripeIntent, mRequestOptions);
             }
         }
 
@@ -476,7 +474,7 @@ class PaymentController {
         private final int mMaxTimeout;
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
         @NonNull private final PaymentRelayStarter mPaymentRelayStarter;
         @NonNull private final Handler mBackgroundHandler;
         @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
@@ -489,11 +487,11 @@ class PaymentController {
                 int maxTimeout,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey,
+                @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory) {
             this(activity, apiHandler, transaction, maxTimeout, stripeIntent,
-                    sourceId, publishableKey,
+                    sourceId, requestOptions,
                     new PaymentRelayStarter(activity, getRequestCode(stripeIntent)),
                     analyticsRequestExecutor,
                     analyticsDataFactory);
@@ -507,7 +505,7 @@ class PaymentController {
                 int maxTimeout,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey,
+                @NonNull ApiRequest.Options requestOptions,
                 @NonNull PaymentRelayStarter paymentRelayStarter,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory) {
@@ -517,7 +515,7 @@ class PaymentController {
             mMaxTimeout = maxTimeout;
             mStripeIntent = stripeIntent;
             mSourceId = sourceId;
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
             mPaymentRelayStarter = paymentRelayStarter;
             mAnalyticsRequestExecutor = analyticsRequestExecutor;
             mAnalyticsDataFactory = analyticsDataFactory;
@@ -578,8 +576,8 @@ class PaymentController {
                             mAnalyticsDataFactory.createAuthParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_FRICTIONLESS,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
-                                    mPublishableKey),
-                            mPublishableKey,
+                                    mRequestOptions.apiKey),
+                            mRequestOptions,
                             null
                     )
             );
@@ -600,7 +598,7 @@ class PaymentController {
                     mTransaction.doChallenge(activity,
                             challengeParameters,
                             PaymentAuth3ds2ChallengeStatusReceiver.create(activity, mApiHandler,
-                                    mStripeIntent, mSourceId, mPublishableKey,
+                                    mStripeIntent, mSourceId, mRequestOptions,
                                     mAnalyticsRequestExecutor, mAnalyticsDataFactory,
                                     mTransaction),
                             mMaxTimeout);
@@ -616,7 +614,7 @@ class PaymentController {
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
-        @NonNull private final String mPublishableKey;
+        @NonNull private final ApiRequest.Options mRequestOptions;
         @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
         @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
         @NonNull private final Transaction mTransaction;
@@ -627,7 +625,7 @@ class PaymentController {
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey,
+                @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory,
                 @NonNull Transaction transaction) {
@@ -637,7 +635,7 @@ class PaymentController {
                     apiHandler,
                     stripeIntent,
                     sourceId,
-                    publishableKey,
+                    requestOptions,
                     analyticsRequestExecutor,
                     analyticsDataFactory,
                     transaction);
@@ -649,7 +647,7 @@ class PaymentController {
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
-                @NonNull String publishableKey,
+                @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory,
                 @NonNull Transaction transaction) {
@@ -658,7 +656,7 @@ class PaymentController {
             mApiHandler = apiHandler;
             mStripeIntent = stripeIntent;
             mSourceId = sourceId;
-            mPublishableKey = publishableKey;
+            mRequestOptions = requestOptions;
             mAnalyticsRequestExecutor = analyticsRequestExecutor;
             mAnalyticsDataFactory = analyticsDataFactory;
             mTransaction = transaction;
@@ -674,9 +672,9 @@ class PaymentController {
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
@@ -693,9 +691,9 @@ class PaymentController {
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
@@ -712,9 +710,9 @@ class PaymentController {
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
@@ -730,9 +728,9 @@ class PaymentController {
                             mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     protocolErrorEvent,
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
@@ -748,9 +746,9 @@ class PaymentController {
                             mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     runtimeErrorEvent,
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
@@ -767,14 +765,14 @@ class PaymentController {
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     StripeTextUtils.emptyIfNull(
                                             mTransaction.getInitialChallengeUiType()),
-                                    mPublishableKey
+                                    mRequestOptions.apiKey
                             ),
-                            mPublishableKey,
+                            mRequestOptions,
                             null
                     )
             );
 
-            mApiHandler.complete3ds2Auth(mSourceId, mPublishableKey,
+            mApiHandler.complete3ds2Auth(mSourceId, mRequestOptions,
                     new ApiResultCallback<Boolean>() {
                         @Override
                         public void onSuccess(@NonNull Boolean result) {

@@ -60,8 +60,9 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class PaymentControllerTest {
 
-    private static final String MESSAGE_VERSION = "2.1.0";
-    private static final String PUBLISHABLE_KEY = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY;
+    private static final String MESSAGE_VERSION = Stripe3ds2Fixtures.MESSAGE_VERSION;
+    private static final ApiRequest.Options REQUEST_OPTIONS =
+            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
     private static final int MAX_TIMEOUT = 5;
     private static final String SOURCE_ID = "src_123";
 
@@ -74,7 +75,6 @@ public class PaymentControllerTest {
     private PaymentController mController;
     private AnalyticsDataFactory mAnalyticsDataFactory;
 
-    @Mock private Stripe mStripe;
     @Mock private Activity mActivity;
     @Mock private StripeThreeDs2Service mThreeDs2Service;
     @Mock private Transaction mTransaction;
@@ -114,7 +114,8 @@ public class PaymentControllerTest {
     public void handleNextAction_withMastercardAnd3ds2() throws CertificateException {
         final PaymentIntent paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2;
         final PublicKey dsPublicKey =
-                Stripe3ds2Fingerprint.create(paymentIntent.getStripeSdkData())
+                Stripe3ds2Fingerprint.create(
+                        Objects.requireNonNull(paymentIntent.getStripeSdkData()))
                         .directoryServerEncryption
                         .directoryServerPublicKey;
         when(mThreeDs2Service.createTransaction(
@@ -126,7 +127,7 @@ public class PaymentControllerTest {
                 eq(dsPublicKey),
                 eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee")))
                 .thenReturn(mTransaction);
-        mController.handleNextAction(mActivity, paymentIntent, PUBLISHABLE_KEY);
+        mController.handleNextAction(mActivity, paymentIntent, REQUEST_OPTIONS);
         verify(mThreeDs2Service).createTransaction(
                 eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id),
                 eq(MESSAGE_VERSION),
@@ -137,7 +138,7 @@ public class PaymentControllerTest {
                 eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee"));
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(Objects.requireNonNull(paymentIntent.getId())),
-                eq(PUBLISHABLE_KEY),
+                eq(REQUEST_OPTIONS),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
 
         verify(mActivity).startActivity(eq(
@@ -158,7 +159,7 @@ public class PaymentControllerTest {
                 eq(PaymentIntentFixtures.KEY_ID)))
                 .thenReturn(mTransaction);
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
-                PUBLISHABLE_KEY);
+                REQUEST_OPTIONS);
         verify(mThreeDs2Service).createTransaction(
                 eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.id),
                 eq(MESSAGE_VERSION),
@@ -169,7 +170,7 @@ public class PaymentControllerTest {
                 eq(PaymentIntentFixtures.KEY_ID));
         verify(mApiHandler).start3ds2Auth(ArgumentMatchers.<Stripe3ds2AuthParams>any(),
                 eq(Objects.requireNonNull(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.getId())),
-                eq(PUBLISHABLE_KEY),
+                eq(REQUEST_OPTIONS),
                 ArgumentMatchers.<ApiResultCallback<Stripe3ds2AuthResult>>any());
 
         verify(mActivity).startActivity(eq(
@@ -181,7 +182,7 @@ public class PaymentControllerTest {
     @Test
     public void handleNextAction_whenSdk3ds1() {
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_3DS1,
-                PUBLISHABLE_KEY);
+                REQUEST_OPTIONS);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 eq(PaymentController.PAYMENT_REQUEST_CODE));
         final Intent intent = mIntentArgumentCaptor.getValue();
@@ -195,7 +196,7 @@ public class PaymentControllerTest {
     @Test
     public void handleNextAction_whenBrowser3ds1() {
         mController.handleNextAction(mActivity, PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
-                PUBLISHABLE_KEY);
+                REQUEST_OPTIONS);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 eq(PaymentController.PAYMENT_REQUEST_CODE));
         final Intent intent = mIntentArgumentCaptor.getValue();
@@ -219,7 +220,7 @@ public class PaymentControllerTest {
     @Test
     public void handleNextAction_when3dsRedirectWithSetupIntent() {
         mController.handleNextAction(mActivity, SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-                PUBLISHABLE_KEY);
+                REQUEST_OPTIONS);
         verify(mActivity).startActivityForResult(any(Intent.class),
                 eq(PaymentController.SETUP_REQUEST_CODE));
     }
@@ -264,7 +265,7 @@ public class PaymentControllerTest {
 
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123", REQUEST_OPTIONS,
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .completed(completionEvent, "01");
 
@@ -289,7 +290,8 @@ public class PaymentControllerTest {
     public void test3ds2Receiver_whenTimedout_shouldFireAnalyticsRequest() {
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123",
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .timedout("01");
         verify(mFireAndForgetRequestExecutor, times(2))
@@ -311,7 +313,8 @@ public class PaymentControllerTest {
     public void test3ds2Receiver_whenCanceled_shouldFireAnalyticsRequest() {
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123",
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .cancelled("01");
 
@@ -348,7 +351,8 @@ public class PaymentControllerTest {
 
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123",
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .runtimeError(runtimeErrorEvent);
 
@@ -411,7 +415,8 @@ public class PaymentControllerTest {
 
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123",
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .protocolError(protocolErrorEvent);
 
@@ -439,11 +444,11 @@ public class PaymentControllerTest {
     public void test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
         new PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(mActivity,
                 m3ds2Starter, mApiHandler, PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                "src_123", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "src_123",
+                ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mFireAndForgetRequestExecutor, mAnalyticsDataFactory, mTransaction)
                 .cancelled("01");
-        verify(mApiHandler).complete3ds2Auth(eq("src_123"),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+        verify(mApiHandler).complete3ds2Auth(eq("src_123"), eq(REQUEST_OPTIONS),
                 ArgumentMatchers.<ApiResultCallback<Boolean>>any());
     }
 
@@ -463,8 +468,7 @@ public class PaymentControllerTest {
         final Intent intent = new Intent()
                 .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, exception);
 
-        mController
-                .handlePaymentResult(mStripe, intent, PUBLISHABLE_KEY, mPaymentAuthResultCallback);
+        mController.handlePaymentResult(intent, REQUEST_OPTIONS, mPaymentAuthResultCallback);
         verify(mPaymentAuthResultCallback).onError(exception);
         verify(mPaymentAuthResultCallback, never())
                 .onSuccess(ArgumentMatchers.<PaymentIntentResult>any());
@@ -476,7 +480,7 @@ public class PaymentControllerTest {
         final Intent intent = new Intent()
                 .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, exception);
 
-        mController.handleSetupResult(mStripe, intent, PUBLISHABLE_KEY, mSetupAuthResultCallback);
+        mController.handleSetupResult(intent, REQUEST_OPTIONS, mSetupAuthResultCallback);
 
         verify(mSetupAuthResultCallback).onError(exception);
         verify(mSetupAuthResultCallback, never())
@@ -495,12 +499,12 @@ public class PaymentControllerTest {
                 .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
-        when(mStripe.retrieveSetupIntentSynchronous(
+        when(mApiHandler.retrieveSetupIntent(
                 eq(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret()),
-                eq(PUBLISHABLE_KEY)))
+                eq(REQUEST_OPTIONS)))
                 .thenReturn(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT);
 
-        mController.handleSetupResult(mStripe, intent, PUBLISHABLE_KEY, mSetupAuthResultCallback);
+        mController.handleSetupResult(intent, REQUEST_OPTIONS, mSetupAuthResultCallback);
 
         final ArgumentCaptor<SetupIntentResult> resultCaptor =
                 ArgumentCaptor.forClass(SetupIntentResult.class);
@@ -516,7 +520,7 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter,
+                        REQUEST_OPTIONS, mPaymentRelayStarter,
                         mFireAndForgetRequestExecutor, mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW);
         verify(mPaymentRelayStarter, never())
@@ -529,7 +533,7 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        REQUEST_OPTIONS,
                         mPaymentRelayStarter,
                         mFireAndForgetRequestExecutor,
                         mAnalyticsDataFactory);
@@ -554,7 +558,7 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        REQUEST_OPTIONS,
                         mPaymentRelayStarter,
                         mFireAndForgetRequestExecutor,
                         mAnalyticsDataFactory);
@@ -575,7 +579,7 @@ public class PaymentControllerTest {
                 new PaymentController.Stripe3ds2AuthCallback(mActivity, mApiHandler,
                         mTransaction, MAX_TIMEOUT,
                         PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, mPaymentRelayStarter,
+                        REQUEST_OPTIONS, mPaymentRelayStarter,
                         mFireAndForgetRequestExecutor,
                         mAnalyticsDataFactory);
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);

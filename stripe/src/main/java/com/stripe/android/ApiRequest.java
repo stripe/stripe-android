@@ -78,10 +78,9 @@ final class ApiRequest extends StripeRequest {
 
     @NonNull
     static ApiRequest createAnalyticsRequest(@NonNull Map<String, ?> params,
-                                             @NonNull String apiKey,
+                                             @NonNull ApiRequest.Options requestOptions,
                                              @Nullable AppInfo appInfo) {
-        return new ApiRequest(Method.GET, ANALYTICS_HOST, params,
-                ApiRequest.Options.create(apiKey), appInfo);
+        return new ApiRequest(Method.GET, ANALYTICS_HOST, params, requestOptions, appInfo);
     }
 
     @NonNull
