@@ -52,6 +52,8 @@ public class PaymentAuthActivity extends AppCompatActivity {
     private static final String PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP =
             "pm_card_authenticationRequiredOnSetup";
 
+    @Nullable private static final String STRIPE_ACCOUNT_ID = null;
+
     private static final String RETURN_URL = "stripe://payment_auth";
 
     private static final String STATE_STATUS = "status";
@@ -88,8 +90,13 @@ public class PaymentAuthActivity extends AppCompatActivity {
         mStripeService = RetrofitFactory.getInstance().create(StripeService.class);
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
 
+        // set an optional Stripe Connect account to use for API requests
+        if (STRIPE_ACCOUNT_ID != null) {
+            mStripe.setStripeAccount(STRIPE_ACCOUNT_ID);
+        }
+
         mBuyButton = findViewById(R.id.buy_button);
-        mBuyButton.setOnClickListener((v) -> createPaymentIntent());
+        mBuyButton.setOnClickListener((v) -> createPaymentIntent(STRIPE_ACCOUNT_ID));
 
         mSetupButton = findViewById(R.id.setup_button);
         mSetupButton.setOnClickListener((v) -> createSetupIntent());
@@ -149,9 +156,9 @@ public class PaymentAuthActivity extends AppCompatActivity {
         bundle.putString(STATE_STATUS, mStatusTextView.getText().toString());
     }
 
-    private void createPaymentIntent() {
+    private void createPaymentIntent(@Nullable String stripeAccountId) {
         mCompositeSubscription.add(
-                mStripeService.createPaymentIntent(createPaymentIntentParams())
+                mStripeService.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe((d) -> {
@@ -210,11 +217,14 @@ public class PaymentAuthActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private Map<String, Object> createPaymentIntentParams() {
+    private Map<String, Object> createPaymentIntentParams(@Nullable String stripeAccountId) {
         final Map<String, Object> params = new HashMap<>();
         params.put("payment_method_types[]", "card");
         params.put("amount", 1000);
         params.put("currency", "usd");
+        if (stripeAccountId != null) {
+            params.put("stripe_account", stripeAccountId);
+        }
         return params;
     }
 
