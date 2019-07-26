@@ -340,7 +340,7 @@ The example application needs a public key from your Stripe account to interact 
 Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
 [AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
 
-### Building and Running the samplestore project and CustomerSessions
+### Configuring the samplestore app
 
 Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
 
