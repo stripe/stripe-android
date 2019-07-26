@@ -67,7 +67,6 @@ import static com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_MET
 public class PaymentActivity extends AppCompatActivity {
 
     private static final String EXTRA_CART = "extra_cart";
-    @Nullable private static final String STRIPE_ACCOUNT_ID = null;
 
     @NonNull private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
@@ -99,10 +98,8 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         mStripe = new Stripe(this, PaymentConfiguration.getInstance().getPublishableKey());
-
-        // set an optional Stripe Connect account to use for API requests
-        if (STRIPE_ACCOUNT_ID != null) {
-            mStripe.setStripeAccount(STRIPE_ACCOUNT_ID);
+        if (Settings.STRIPE_ACCOUNT_ID != null) {
+            mStripe.setStripeAccount(Settings.STRIPE_ACCOUNT_ID);
         }
 
         mService = RetrofitFactory.getInstance().create(StripeService.class);
@@ -346,7 +343,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         final Observable<ResponseBody> stripeResponse = mService.capturePayment(
                 createCapturePaymentParams(mPaymentSession.getPaymentSessionData(), customerId,
-                        STRIPE_ACCOUNT_ID));
+                        Settings.STRIPE_ACCOUNT_ID));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -364,7 +361,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         final Observable<ResponseBody> stripeResponse = mService.createSetupIntent(
                 createSetupIntentParams(mPaymentSession.getPaymentSessionData(), customerId,
-                        STRIPE_ACCOUNT_ID));
+                        Settings.STRIPE_ACCOUNT_ID));
         mCompositeDisposable.add(stripeResponse
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -388,7 +385,8 @@ public class PaymentActivity extends AppCompatActivity {
             mStripe.authenticatePayment(this,
                     Objects.requireNonNull(stripeIntent.getClientSecret()));
         } else if (stripeIntent.requiresConfirmation()) {
-            confirmStripeIntent(Objects.requireNonNull(stripeIntent.getId()), STRIPE_ACCOUNT_ID);
+            confirmStripeIntent(Objects.requireNonNull(stripeIntent.getId()),
+                    Settings.STRIPE_ACCOUNT_ID);
         } else if (stripeIntent.getStatus() == StripeIntent.Status.Succeeded) {
             if (stripeIntent instanceof PaymentIntent) {
                 finishPayment();

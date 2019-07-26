@@ -17,10 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Factory instance to keep our Retrofit instance.
  */
 public class RetrofitFactory {
-
-    // Put your Base URL here. Unless you customized it, the URL will be something like
-    // https://hidden-beach-12345.herokuapp.com/
-    private static final String BASE_URL = "put your base url here";
     @Nullable private static Retrofit mInstance = null;
 
     @NonNull
@@ -44,7 +40,7 @@ public class RetrofitFactory {
             mInstance = new Retrofit.Builder()
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(gson))
-                    .baseUrl(BASE_URL)
+                    .baseUrl(Settings.BASE_URL)
                     .client(httpClient)
                     .build();
         }

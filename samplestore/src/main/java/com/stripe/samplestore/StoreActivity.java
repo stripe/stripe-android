@@ -27,14 +27,6 @@ public class StoreActivity
         extends AppCompatActivity
         implements StoreAdapter.TotalItemsChangedListener{
 
-    /*
-     * Change this to your publishable key.
-     *
-     * You can get your key here: https://dashboard.stripe.com/account/apikeys
-     */
-    private static final String PUBLISHABLE_KEY =
-            "put your publishable key here";
-
     static final int PURCHASE_REQUEST = 37;
 
     private static final String EXTRA_PRICE_PAID = "EXTRA_PRICE_PAID";
@@ -56,7 +48,7 @@ public class StoreActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
 
-        PaymentConfiguration.init(PUBLISHABLE_KEY);
+        PaymentConfiguration.init(Settings.PUBLISHABLE_KEY);
         mGoToCartButton = findViewById(R.id.fab_checkout);
         mStoreAdapter = new StoreAdapter(this, getPriceMultiplier());
 
@@ -69,7 +61,7 @@ public class StoreActivity
         recyclerView.setAdapter(mStoreAdapter);
 
         mGoToCartButton.setOnClickListener(v -> mStoreAdapter.launchPurchaseActivityWithCart());
-        setupCustomerSession();
+        setupCustomerSession(Settings.STRIPE_ACCOUNT_ID);
     }
 
     private float getPriceMultiplier() {
@@ -147,11 +139,14 @@ public class StoreActivity
                 .show();
     }
 
-    private void setupCustomerSession() {
+    private void setupCustomerSession(@Nullable String stripeAccountId) {
         // CustomerSession only needs to be initialized once per app.
         mEphemeralKeyProvider = new SampleStoreEphemeralKeyProvider(
-                new ProgressListenerImpl(this));
-        CustomerSession.initCustomerSession(this, mEphemeralKeyProvider);
+                new ProgressListenerImpl(this),
+                stripeAccountId
+        );
+        CustomerSession.initCustomerSession(this, mEphemeralKeyProvider,
+                stripeAccountId);
     }
 
     private static final class ProgressListenerImpl
