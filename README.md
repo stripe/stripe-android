@@ -344,10 +344,10 @@ Three different ways of creating tokens are shown, with all the Stripe-specific 
 
 Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
 
-1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to [https://dashboard.stripe.com/apikeys](https://dashboard.stripe.com/apikeys).
-2. Replace the `PUBLISHABLE_KEY` constant in [StoreActivity.java](samplestore/src/main/java/com/stripe/samplestore/StoreActivity.java) (where it says "put your publishable key here") with your Test Publishable Key.
-3. Head to https://github.com/stripe/example-ios-backend and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the `STRIPE_TEST_SECRET_KEY` field under 'Env'. Click "Deploy for Free".
-4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in [RetrofitFactory.java](samplestore/src/main/java/com/stripe/samplestore/RetrofitFactory.java) with the app URL Heroku provides you with (e.g. "https://my-example-app.herokuapp.com")
+1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to the Stripe Dashboard's [API keys](https://dashboard.stripe.com/test/apikeys).
+2. Replace the `PUBLISHABLE_KEY` constant in [Settomgs.java](samplestore/src/main/java/com/stripe/samplestore/Settings.java) (where it says "put your publishable key here") with your Test Publishable Key.
+3. Navigate to the [example mobile backend repo](https://github.com/stripe/example-ios-backend) and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the `STRIPE_TEST_SECRET_KEY` field under 'Env'. Click "Deploy for Free".
+4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in [Settings.java](samplestore/src/main/java/com/stripe/samplestore/Settings.java) with the app URL Heroku provides you with (e.g. `"https://my-example-app.herokuapp.com"`)
 
 After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to [https://stripe.com/docs/testing#cards](https://stripe.com/docs/testing#cards) for a list of test card numbers.
 
