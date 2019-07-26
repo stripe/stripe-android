@@ -57,7 +57,7 @@ class PaymentIntentActivity : AppCompatActivity() {
 
         progressDialogController = ProgressDialogController(supportFragmentManager, resources)
         errorDialogHandler = ErrorDialogHandler(this)
-        stripe = Stripe(applicationContext, PaymentConfiguration.getInstance().publishableKey)
+        stripe = Stripe(applicationContext, PaymentConfiguration.getInstance(this).publishableKey)
         val retrofit = RetrofitFactory.instance
         backendApi = retrofit.create(BackendApi::class.java)
 

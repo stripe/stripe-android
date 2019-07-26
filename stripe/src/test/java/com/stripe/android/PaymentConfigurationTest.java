@@ -1,5 +1,7 @@
 package com.stripe.android;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -26,15 +28,21 @@ public class PaymentConfigurationTest {
         assertThrows(IllegalStateException.class, new ThrowingRunnable() {
             @Override
             public void run() {
-                PaymentConfiguration.getInstance();
+                PaymentConfiguration.getInstance(ApplicationProvider.getApplicationContext());
             }
         });
     }
 
     @Test
-    public void getInstance_withPublicKey_returnsDefaultInstance() {
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+    public void getInstance_whenInstanceIsNull_loadsFromPrefs() {
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+
+        PaymentConfiguration.clearInstance();
+
         assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                PaymentConfiguration.getInstance().getPublishableKey());
+                PaymentConfiguration
+                        .getInstance(ApplicationProvider.getApplicationContext())
+                        .getPublishableKey());
     }
 }

@@ -48,7 +48,7 @@ class RedirectActivity : AppCompatActivity() {
             resources)
         redirectDialogController = RedirectDialogController(this)
 
-        val publishableKey = PaymentConfiguration.getInstance().publishableKey
+        val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
         stripe = Stripe(applicationContext, publishableKey)
 
         val threeDSecureButton = findViewById<Button>(R.id.btn_three_d_secure)

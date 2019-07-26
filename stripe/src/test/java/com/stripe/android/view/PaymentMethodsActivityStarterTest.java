@@ -1,5 +1,9 @@
 package com.stripe.android.view;
 
+import android.content.Context;
+
+import androidx.test.core.app.ApplicationProvider;
+
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
@@ -22,7 +26,8 @@ public class PaymentMethodsActivityStarterTest {
 
     @Test
     public void testParceling() {
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        final Context context = ApplicationProvider.getApplicationContext();
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         final Set<PaymentMethod.Type> paymentMethodTypes = new HashSet<>(
                 Arrays.asList(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx)
@@ -33,7 +38,7 @@ public class PaymentMethodsActivityStarterTest {
                         .setIsPaymentSessionActive(true)
                         .setShouldRequirePostalCode(true)
                         .setPaymentMethodTypes(paymentMethodTypes)
-                        .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                        .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                         .build();
 
         final PaymentMethodsActivityStarter.Args createdArgs =
