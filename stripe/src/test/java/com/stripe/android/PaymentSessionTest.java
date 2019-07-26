@@ -336,6 +336,7 @@ public class PaymentSessionTest {
     private CustomerSession createCustomerSession() {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_abc123");
     }
 }

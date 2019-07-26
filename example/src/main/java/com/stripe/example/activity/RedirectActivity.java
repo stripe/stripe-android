@@ -23,6 +23,8 @@ import com.stripe.example.controller.ErrorDialogHandler;
 import com.stripe.example.controller.ProgressDialogController;
 import com.stripe.example.controller.RedirectDialogController;
 
+import java.util.Objects;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -60,14 +62,15 @@ public class RedirectActivity extends AppCompatActivity {
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mRedirectDialogController = new RedirectDialogController(this);
-        mStripe = new Stripe(getApplicationContext(),
-                PaymentConfiguration.getInstance().getPublishableKey());
+
+        final String publishableKey = PaymentConfiguration.getInstance().getPublishableKey();
+        mStripe = new Stripe(getApplicationContext(), publishableKey);
 
         final Button threeDSecureButton = findViewById(R.id.btn_three_d_secure);
-        threeDSecureButton.setOnClickListener(v -> beginSequence());
+        threeDSecureButton.setOnClickListener(v -> beginSequence(publishableKey));
 
         final Button threeDSyncButton = findViewById(R.id.btn_three_d_secure_sync);
-        threeDSyncButton.setOnClickListener(v -> beginSequence());
+        threeDSyncButton.setOnClickListener(v -> beginSequence(publishableKey));
 
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         final RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -102,12 +105,12 @@ public class RedirectActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void beginSequence() {
+    void beginSequence(@NonNull String publishableKey) {
         final Card displayCard = mCardInputWidget.getCard();
         if (displayCard == null) {
             return;
         }
-        createCardSource(displayCard);
+        createCardSource(displayCard, publishableKey);
     }
 
     /**
@@ -115,7 +118,7 @@ public class RedirectActivity extends AppCompatActivity {
      *
      * @param card the {@link Card} used to create a source
      */
-    void createCardSource(@NonNull Card card) {
+    void createCardSource(@NonNull Card card, @NonNull String publishableKey) {
         final SourceParams cardSourceParams = SourceParams.createCardParams(card);
         final Observable<Source> cardSourceObservable = Observable.fromCallable(
                         () -> mStripe.createSourceSynchronous(cardSourceParams));
@@ -145,7 +148,10 @@ public class RedirectActivity extends AppCompatActivity {
                             if (SourceCardData.ThreeDSecureStatus.REQUIRED
                                     .equals(threeDSecureStatus)) {
                                 // The card Source can be used to create a 3DS Source
-                                createThreeDSecureSource(source.getId());
+                                createThreeDSecureSource(
+                                        Objects.requireNonNull(source.getId()),
+                                        publishableKey
+                                );
                             } else {
                                 mProgressDialogController.dismiss();
                             }
@@ -162,7 +168,7 @@ public class RedirectActivity extends AppCompatActivity {
      *
      * @param sourceId the {@link Source#getId()} from the {@link Card}-created {@link Source}.
      */
-    void createThreeDSecureSource(String sourceId) {
+    void createThreeDSecureSource(@NonNull String sourceId, @NonNull String publishableKey) {
         // This represents a request for a 3DS purchase of 10.00 euro.
         final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
                 1000L,
@@ -170,10 +176,8 @@ public class RedirectActivity extends AppCompatActivity {
                 getUrl(true),
                 sourceId);
 
-        Observable<Source> threeDSecureObservable = Observable.fromCallable(
-                () -> mStripe.createSourceSynchronous(
-                        threeDParams,
-                        PaymentConfiguration.getInstance().getPublishableKey()));
+        final Observable<Source> threeDSecureObservable = Observable.fromCallable(
+                () -> mStripe.createSourceSynchronous(threeDParams, publishableKey));
 
         mCompositeDisposable.add(threeDSecureObservable
                 .subscribeOn(Schedulers.io())

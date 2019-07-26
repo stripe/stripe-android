@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.example.R;
 import com.stripe.example.module.DependencyHandler;
 
@@ -20,7 +21,8 @@ public class PaymentActivity extends AppCompatActivity {
         mDependencyHandler = new DependencyHandler(
                 this,
                 findViewById(R.id.card_input_widget),
-                findViewById(R.id.listview));
+                findViewById(R.id.listview),
+                PaymentConfiguration.getInstance().getPublishableKey());
 
         final Button saveButton = findViewById(R.id.save);
         mDependencyHandler.attachAsyncTaskTokenController(saveButton);

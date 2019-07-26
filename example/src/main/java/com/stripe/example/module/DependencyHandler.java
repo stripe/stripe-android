@@ -26,6 +26,7 @@ public class DependencyHandler {
     @Nullable private AsyncTaskTokenController mAsyncTaskController;
     @NonNull private final CardInputWidget mCardInputWidget;
     @NonNull private final Context mContext;
+    @NonNull private final String mPublishableKey;
     @NonNull private final ProgressDialogController mProgressDialogController;
     @NonNull private final ErrorDialogHandler mErrorDialogHandler;
     @Nullable private IntentServiceTokenController mIntentServiceTokenController;
@@ -35,10 +36,11 @@ public class DependencyHandler {
     public DependencyHandler(
             @NonNull AppCompatActivity activity,
             @NonNull CardInputWidget cardInputWidget,
-            @NonNull ListView outputListView) {
-
+            @NonNull ListView outputListView,
+            @NonNull String publishableKey) {
         mCardInputWidget = cardInputWidget;
         mContext = activity.getApplicationContext();
+        mPublishableKey = publishableKey;
 
         mProgressDialogController = new ProgressDialogController(
                 activity.getSupportFragmentManager(),
@@ -64,7 +66,8 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgressDialogController);
+                    mProgressDialogController,
+                    mPublishableKey);
         }
     }
 
@@ -106,7 +109,8 @@ public class DependencyHandler {
                     mContext,
                     mErrorDialogHandler,
                     mListViewController,
-                    mProgressDialogController);
+                    mProgressDialogController,
+                    mPublishableKey);
         }
     }
 

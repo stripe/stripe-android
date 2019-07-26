@@ -207,8 +207,6 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @Before
     public void setup() throws StripeException {
         MockitoAnnotations.initMocks(this);
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
-
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .registerReceiver(mBroadcastReceiver,
                         new IntentFilter(CustomerSession.ACTION_API_EXCEPTION));
@@ -226,25 +224,28 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
+
         when(mApiHandler.addCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()
         ))
                 .thenReturn(mAddedSource);
+
         when(mApiHandler.deleteCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
+
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
@@ -253,7 +254,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.attachPaymentMethod(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()
@@ -261,7 +262,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .thenReturn(mPaymentMethod);
 
         when(mApiHandler.detachPaymentMethod(
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()
@@ -270,8 +271,8 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.getPaymentMethods(
                 anyString(),
-                anyString(),
-                anyString(),
+                eq("card"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 ArgumentMatchers.<ApiRequest.Options>any()
         ))
@@ -298,7 +299,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         final CustomerSession customerSession = createCustomerSession(null);
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
 
-        List<String> expectedTokens = new ArrayList<>();
+        final List<String> expectedTokens = new ArrayList<>();
         expectedTokens.add(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
 
         JsonTestUtils.assertListEquals(expectedTokens,
@@ -1088,7 +1089,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
             throws StripeException {
         when(mApiHandler.addCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
@@ -1099,7 +1100,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.deleteCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()))
@@ -1108,7 +1109,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.setDefaultCustomerSource(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 anyString(),
@@ -1117,7 +1118,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.attachPaymentMethod(
                 anyString(),
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()
@@ -1126,7 +1127,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                         null, null));
 
         when(mApiHandler.detachPaymentMethod(
-                anyString(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()))
@@ -1135,8 +1136,8 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         when(mApiHandler.getPaymentMethods(
                 anyString(),
-                anyString(),
-                anyString(),
+                eq("card"),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("The payment method does not exist", "request_123",
@@ -1147,6 +1148,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     private CustomerSession createCustomerSession(@Nullable Calendar calendar) {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_abc123");
     }
 }
