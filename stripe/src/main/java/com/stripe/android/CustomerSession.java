@@ -115,6 +115,7 @@ public class CustomerSession {
     @Nullable private final Calendar mProxyNowCalendar;
     @NonNull private final ThreadPoolExecutor mThreadPoolExecutor;
     @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final String mPublishableKey;
     @Nullable private final String mStripeAccountId;
 
     /**
@@ -130,6 +131,7 @@ public class CustomerSession {
                                            @NonNull EphemeralKeyProvider keyProvider,
                                            @Nullable String stripeAccountId) {
         setInstance(new CustomerSession(context, keyProvider, Stripe.getAppInfo(),
+                PaymentConfiguration.getInstance().getPublishableKey(),
                 stripeAccountId));
     }
 
@@ -197,9 +199,10 @@ public class CustomerSession {
     }
 
     private CustomerSession(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider,
-                            @Nullable AppInfo appInfo, @Nullable String stripeAccountId) {
+                            @Nullable AppInfo appInfo, @NonNull String publishableKey,
+                            @Nullable String stripeAccountId) {
         this(context, keyProvider, null, createThreadPoolExecutor(),
-                new StripeApiHandler(context, appInfo), stripeAccountId);
+                new StripeApiHandler(context, appInfo), publishableKey, stripeAccountId);
     }
 
     @VisibleForTesting
@@ -209,6 +212,7 @@ public class CustomerSession {
             @Nullable Calendar proxyNowCalendar,
             @NonNull ThreadPoolExecutor threadPoolExecutor,
             @NonNull StripeApiHandler apiHandler,
+            @NonNull String publishableKey,
             @Nullable String stripeAccountId) {
         mOperationIdFactory = new OperationIdFactory();
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
@@ -217,6 +221,7 @@ public class CustomerSession {
         mProductUsageTokens = new HashSet<>();
         mApiHandler = apiHandler;
         mStripeAccountId = stripeAccountId;
+        mPublishableKey = publishableKey;
         mUiThreadHandler = new CustomerSessionHandler(new CustomerSessionHandler.Listener() {
             @Override
             public void onCustomerRetrieved(@Nullable Customer customer,
@@ -739,7 +744,7 @@ public class CustomerSession {
             @NonNull @Source.SourceType String sourceType) throws StripeException {
         return mApiHandler.addCustomerSource(
                 key.getCustomerId(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,
@@ -753,7 +758,7 @@ public class CustomerSession {
             @NonNull String sourceId) throws StripeException {
         return mApiHandler.deleteCustomerSource(
                 key.getCustomerId(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId)
@@ -766,7 +771,7 @@ public class CustomerSession {
             @NonNull String paymentMethodId) throws StripeException {
         return mApiHandler.attachPaymentMethod(
                 key.getCustomerId(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 paymentMethodId,
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId)
@@ -778,7 +783,7 @@ public class CustomerSession {
             @NonNull CustomerEphemeralKey key,
             @NonNull String paymentMethodId) throws StripeException {
         return mApiHandler.detachPaymentMethod(
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 paymentMethodId,
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId)
@@ -792,7 +797,7 @@ public class CustomerSession {
         return mApiHandler.getPaymentMethods(
                 key.getCustomerId(),
                 paymentMethodType,
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId)
         );
@@ -804,7 +809,7 @@ public class CustomerSession {
             @NonNull ShippingInformation shippingInformation) throws StripeException {
         return mApiHandler.setCustomerShippingInfo(
                 key.getCustomerId(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 shippingInformation,
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId)
@@ -818,7 +823,7 @@ public class CustomerSession {
             @NonNull @Source.SourceType String sourceType) throws StripeException {
         return mApiHandler.setDefaultCustomerSource(
                 key.getCustomerId(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 sourceId,
                 sourceType,

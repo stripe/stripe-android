@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.Button;
 
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Card;
@@ -31,9 +30,10 @@ public class AsyncTaskTokenController {
             @NonNull Context context,
             @NonNull final ErrorDialogHandler errorDialogHandler,
             @NonNull final ListViewController outputListController,
-            @NonNull final ProgressDialogController progressDialogController) {
+            @NonNull final ProgressDialogController progressDialogController,
+            @NonNull String publishableKey) {
         mCardInputWidget = cardInputWidget;
-        mStripe = new Stripe(context, PaymentConfiguration.getInstance().getPublishableKey());
+        mStripe = new Stripe(context, publishableKey);
         mErrorDialogHandler = errorDialogHandler;
         mProgressDialogController = progressDialogController;
 

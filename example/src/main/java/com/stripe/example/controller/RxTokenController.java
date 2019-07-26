@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.widget.Button;
 
 import com.jakewharton.rxbinding2.view.RxView;
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.Token;
@@ -26,8 +25,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class RxTokenController {
 
+    @NonNull private final Stripe mStripe;
     @NonNull private final CompositeDisposable mCompositeDisposable;
-    @NonNull private final Context mContext;
     @NonNull private final ErrorDialogHandler mErrorDialogHandler;
     @NonNull private final ListViewController mOutputListController;
     @NonNull private final ProgressDialogController mProgressDialogController;
@@ -40,11 +39,11 @@ public class RxTokenController {
             @NonNull Context context,
             @NonNull ErrorDialogHandler errorDialogHandler,
             @NonNull ListViewController outputListController,
-            @NonNull ProgressDialogController progressDialogController) {
+            @NonNull ProgressDialogController progressDialogController,
+            @NonNull String publishableKey) {
         mCompositeDisposable = new CompositeDisposable();
 
         mCardInputWidget = cardInputWidget;
-        mContext = context;
         mErrorDialogHandler = errorDialogHandler;
         mOutputListController = outputListController;
         mProgressDialogController = progressDialogController;
@@ -52,6 +51,8 @@ public class RxTokenController {
         mCompositeDisposable.add(
                 RxView.clicks(button).subscribe(aVoid -> saveCard())
         );
+
+        mStripe = new Stripe(context, publishableKey);
     }
 
     /**
@@ -68,13 +69,11 @@ public class RxTokenController {
             mErrorDialogHandler.show("Invalid Card Data");
             return;
         }
-        final Stripe stripe = new Stripe(mContext,
-                PaymentConfiguration.getInstance().getPublishableKey());
 
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
         final Observable<Token> tokenObservable =
-                Observable.fromCallable(() -> stripe.createTokenSynchronous(cardToSave));
+                Observable.fromCallable(() -> mStripe.createTokenSynchronous(cardToSave));
 
         mCompositeDisposable.add(tokenObservable
                 .subscribeOn(Schedulers.io())

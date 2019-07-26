@@ -73,8 +73,9 @@ public class SetupIntentActivity extends AppCompatActivity {
         mProgressDialogController = new ProgressDialogController(getSupportFragmentManager(),
                 getResources());
         mErrorDialogHandler = new ErrorDialogHandler(this);
-        mStripe = new Stripe(getApplicationContext(),
-                PaymentConfiguration.getInstance().getPublishableKey());
+
+        final String publishableKey = PaymentConfiguration.getInstance().getPublishableKey();
+        mStripe = new Stripe(getApplicationContext(), publishableKey);
         final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
 
@@ -82,11 +83,11 @@ public class SetupIntentActivity extends AppCompatActivity {
         mCreatePaymentMethod.setOnClickListener(v -> {
             final Card card = mCardInputWidget.getCard();
             if (card != null) {
-                createPaymentMethod(card);
+                createPaymentMethod(card, publishableKey);
             }
         });
         mRetrieveSetupIntent.setOnClickListener(v -> retrieveSetupIntent());
-        mConfirmSetupIntent.setOnClickListener(v -> confirmSetupIntent());
+        mConfirmSetupIntent.setOnClickListener(v -> confirmSetupIntent(publishableKey));
     }
 
     @Override
@@ -157,13 +158,13 @@ public class SetupIntentActivity extends AppCompatActivity {
         mCompositeDisposable.add(disposable);
     }
 
-    private void createPaymentMethod(@NonNull final Card card) {
+    private void createPaymentMethod(@NonNull final Card card, @NonNull String publishableKey) {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
 
         final Observable<PaymentMethod> paymentMethodObservable = Observable.fromCallable(
                 () -> mStripe.createPaymentMethodSynchronous(paymentMethodCreateParams,
-                        PaymentConfiguration.getInstance().getPublishableKey()));
+                        publishableKey));
 
         final Disposable disposable = paymentMethodObservable
                 .subscribeOn(Schedulers.io())
@@ -186,7 +187,7 @@ public class SetupIntentActivity extends AppCompatActivity {
         mCompositeDisposable.add(disposable);
     }
 
-    private void confirmSetupIntent() {
+    private void confirmSetupIntent(@NonNull String publishableKey) {
         final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
                 () -> {
                     final ConfirmSetupIntentParams confirmSetupIntentParams =
@@ -194,7 +195,7 @@ public class SetupIntentActivity extends AppCompatActivity {
                                     Objects.requireNonNull(mPaymentMethod.id), mClientSecret,
                                     RETURN_URL);
                     return mStripe.confirmSetupIntentSynchronous(confirmSetupIntentParams,
-                            PaymentConfiguration.getInstance().getPublishableKey());
+                            publishableKey);
                 });
 
         final Disposable disposable = setupIntentObservable
