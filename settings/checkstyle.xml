@@ -53,7 +53,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
         </module>
 
         <module name="ImportOrder">
-            <property name="groups" value="android,com,org,java,javax"/>
+            <property name="groups" value="android,androidx,com,org,java,javax"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="bottom"/>
