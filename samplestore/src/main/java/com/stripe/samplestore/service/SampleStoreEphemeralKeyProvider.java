@@ -42,7 +42,9 @@ public class SampleStoreEphemeralKeyProvider implements EphemeralKeyProvider {
                                    @NonNull final EphemeralKeyUpdateListener keyUpdateListener) {
         final Map<String, String> apiParamMap = new HashMap<>();
         apiParamMap.put("api_version", apiVersion);
-        apiParamMap.put("stripe_account", mStripeAccountId);
+        if (mStripeAccountId != null) {
+            apiParamMap.put("stripe_account", mStripeAccountId);
+        }
 
         mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
                 .subscribeOn(Schedulers.io())
