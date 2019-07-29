@@ -12,18 +12,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 import com.stripe.android.PaymentAuthWebViewStarter;
 import com.stripe.android.R;
+import com.stripe.android.StripeIntentResult;
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization;
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils;
 
 import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
-public class PaymentAuthWebViewActivity extends AppCompatActivity {
+public class PaymentAuthWebViewActivity
+        extends AppCompatActivity
+        implements PaymentAuthWebView.PaymentAuthWebViewClient.Listener {
 
     @Nullable private ToolbarCustomization mToolbarCustomization;
+    private Intent mResultIntent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,11 +49,12 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
-        setResult(Activity.RESULT_OK,
-                new Intent().putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
+        mResultIntent = new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret);
 
         final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
-        webView.init(this, clientSecret, returnUrl);
+        final ProgressBar progressBar = findViewById(R.id.auth_web_view_progress_bar);
+        webView.init(this, progressBar, clientSecret, returnUrl);
         webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
     }
 
@@ -66,15 +72,20 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        onAuthCompleted(StripeIntentResult.Status.CANCELED);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_close) {
-            finish();
+            onAuthCompleted(StripeIntentResult.Status.CANCELED);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    void customizeToolbar(@NonNull Toolbar toolbar) {
+    private void customizeToolbar(@NonNull Toolbar toolbar) {
         if (mToolbarCustomization != null) {
             if (!StripeTextUtils.isBlank(mToolbarCustomization.getHeaderText())) {
                 toolbar.setTitle(CustomizeUtils.buildStyledText(this,
@@ -89,5 +100,12 @@ public class PaymentAuthWebViewActivity extends AppCompatActivity {
                 CustomizeUtils.setStatusBarColor(this, backgroundColor);
             }
         }
+    }
+
+    @Override
+    public void onAuthCompleted(@StripeIntentResult.Status int status) {
+        setResult(Activity.RESULT_OK,
+                mResultIntent.putExtra(StripeIntentResultExtras.AUTH_STATUS, status));
+        finish();
     }
 }

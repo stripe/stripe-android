@@ -2,7 +2,6 @@ package com.stripe.android.view;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -14,17 +13,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
-import com.stripe.android.R;
+import com.stripe.android.StripeIntentResult;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A {@link WebView} used for authenticating payment and deep-linking the user back to the
- * PaymentIntent's return_url[0].
- * <p>
- * [0] https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url
+ * A {@link WebView} used for authenticating payment details
  */
 class PaymentAuthWebView extends WebView {
     @SuppressWarnings("RedundantModifier")
@@ -45,8 +41,10 @@ class PaymentAuthWebView extends WebView {
         configureSettings();
     }
 
-    void init(@NonNull Activity activity, @NonNull String clientSecret, @NonNull String returnUrl) {
-        setWebViewClient(new PaymentAuthWebViewClient(activity, clientSecret, returnUrl));
+    void init(@NonNull PaymentAuthWebViewClient.Listener listener, @NonNull ProgressBar progressBar,
+              @NonNull String clientSecret, @NonNull String returnUrl) {
+        setWebViewClient(new PaymentAuthWebViewClient(listener, progressBar, clientSecret,
+                returnUrl));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -65,17 +63,17 @@ class PaymentAuthWebView extends WebView {
                         "https://hooks.stripe.com/3d_secure/complete/tdsrc_"
                 ));
 
-        @NonNull private final Activity mActivity;
         @NonNull private final String mClientSecret;
         @Nullable private final Uri mReturnUrl;
         @NonNull private final ProgressBar mProgressBar;
+        @NonNull private final Listener mListener;
 
-        PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull String clientSecret,
-                                 @Nullable String returnUrl) {
-            mActivity = activity;
+        PaymentAuthWebViewClient(@NonNull Listener listener, @NonNull ProgressBar progressBar,
+                                 @NonNull String clientSecret, @Nullable String returnUrl) {
+            mListener = listener;
             mClientSecret = clientSecret;
             mReturnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
-            mProgressBar = activity.findViewById(R.id.auth_web_view_progress_bar);
+            mProgressBar = progressBar;
         }
 
         @Override
@@ -88,7 +86,7 @@ class PaymentAuthWebView extends WebView {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             if (url != null && isCompletionUrl(url)) {
-                mActivity.finish();
+                onAuthCompleted();
             }
         }
 
@@ -107,7 +105,7 @@ class PaymentAuthWebView extends WebView {
                                                 @NonNull String urlString) {
             final Uri uri = Uri.parse(urlString);
             if (isReturnUrl(uri)) {
-                mActivity.finish();
+                onAuthCompleted();
                 return true;
             }
 
@@ -153,6 +151,14 @@ class PaymentAuthWebView extends WebView {
         // pre-defined return URLs
         private boolean isPredefinedReturnUrl(@NonNull Uri uri) {
             return "stripejs://use_stripe_sdk/return_url".equals(uri.toString());
+        }
+
+        private void onAuthCompleted() {
+            mListener.onAuthCompleted(StripeIntentResult.Status.SUCCEEDED);
+        }
+
+        interface Listener {
+            void onAuthCompleted(@StripeIntentResult.Status int status);
         }
     }
 }
