@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 10.0.4 - upcoming
+* [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
+* [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass Status.FAILED when 3DS2 auth fails
+* [#1259](https://github.com/stripe/stripe-android/pull/1259) Add StripeIntentResult.Status.TIMEDOUT value
+
 ## 10.0.3 - 2019-07-24
 * Update Stripe 3DS2 library to `v1.1.2`
     * Disable R8 following [user-reported issue](https://github.com/stripe/stripe-android/issues/1236)
