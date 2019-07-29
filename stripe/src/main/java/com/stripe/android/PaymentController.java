@@ -235,6 +235,17 @@ class PaymentController {
                 final StripeIntent.SdkData sdkData =
                         Objects.requireNonNull(stripeIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
+                    mAnalyticsRequestExecutor.executeAsync(
+                            ApiRequest.createAnalyticsRequest(
+                                    mAnalyticsDataFactory.createAuthParams(
+                                            AnalyticsDataFactory.EventName.AUTH_3DS2_FINGERPRINT,
+                                            StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+                                            requestOptions.apiKey
+                                    ),
+                                    requestOptions,
+                                    null
+                            )
+                    );
                     try {
                         begin3ds2Auth(activity, stripeIntent,
                                 Stripe3ds2Fingerprint.create(sdkData),

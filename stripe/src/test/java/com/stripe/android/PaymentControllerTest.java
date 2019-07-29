@@ -145,6 +145,14 @@ public class PaymentControllerTest {
                 new Intent(mActivity, ChallengeProgressDialogActivity.class)
                         .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
                                 Stripe3ds2Fingerprint.DirectoryServer.Visa.name)));
+
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds2_fingerprint",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getId(),
+                analyticsParams.get(AnalyticsDataFactory.FIELD_INTENT_ID));
     }
 
     @Test
