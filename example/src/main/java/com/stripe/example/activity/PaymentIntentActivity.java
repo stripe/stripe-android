@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
@@ -29,6 +31,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -50,7 +53,7 @@ public class PaymentIntentActivity extends AppCompatActivity {
     private ErrorDialogHandler mErrorDialogHandler;
     private Stripe mStripe;
     private StripeService mStripeService;
-    private String mClientSecret;
+    @Nullable private String mClientSecret;
     private Button mConfirmPaymentIntent;
     private Button mRetrievePaymentIntent;
     private CardInputWidget mCardInputWidget;
@@ -92,18 +95,23 @@ public class PaymentIntentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(@NonNull Intent intent) {
-        super.onNewIntent(intent);
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        if (intent.getData() != null && intent.getData().getQuery() != null) {
-            Toast.makeText(PaymentIntentActivity.this,
-                    "Retrieving PaymentIntent after authorizing",
-                    Toast.LENGTH_SHORT)
-                    .show();
-            mClientSecret = intent.getData().getQueryParameter(
-                    "payment_intent_client_secret");
-            retrievePaymentIntent();
-        }
+        mStripe.onPaymentResult(requestCode, data, new ApiResultCallback<PaymentIntentResult>() {
+            @Override
+            public void onSuccess(@NonNull PaymentIntentResult result) {
+                mClientSecret = result.getIntent().getClientSecret();
+                displayPaymentIntent(result.getIntent());
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                Toast.makeText(PaymentIntentActivity.this,
+                        "Error: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
     }
 
     @NonNull
@@ -140,15 +148,14 @@ public class PaymentIntentActivity extends AppCompatActivity {
             mClientSecret = jsonObject.getString("secret");
             mConfirmPaymentIntent.setEnabled(mClientSecret != null);
             mRetrievePaymentIntent.setEnabled(mClientSecret != null);
-
         } catch (IOException | JSONException exception) {
             Log.e(TAG, exception.toString());
         }
     }
 
     private void retrievePaymentIntent() {
-        final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
-                () -> mStripe.retrievePaymentIntentSynchronous(mClientSecret));
+        final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(() ->
+                mStripe.retrievePaymentIntentSynchronous(Objects.requireNonNull(mClientSecret)));
         final Disposable disposable = paymentIntentObservable
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe((d) ->
@@ -156,50 +163,20 @@ public class PaymentIntentActivity extends AppCompatActivity {
                 .doOnComplete(() -> mProgressDialogController.dismiss())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        paymentIntent -> mPaymentIntentValue.setText(paymentIntent != null ?
-                                new JSONObject(paymentIntent.toMap()).toString() :
-                                getString(R.string.error_while_retrieving_payment_intent)),
+                        this::displayPaymentIntent,
                         throwable -> Log.e(TAG, throwable.toString())
                 );
         mCompositeDisposable.add(disposable);
     }
 
+    private void displayPaymentIntent(@NonNull PaymentIntent paymentIntent) {
+        mPaymentIntentValue.setText(new JSONObject(paymentIntent.toMap()).toString());
+    }
+
     private void confirmPaymentIntent(@NonNull final Card card) {
-        final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
-        final Observable<PaymentIntent> paymentIntentObservable = Observable.fromCallable(
-                () -> {
-                    final ConfirmPaymentIntentParams confirmPaymentIntentParams =
-                            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                                    paymentMethodCreateParams, mClientSecret, RETURN_URL);
-                    return mStripe.confirmPaymentIntentSynchronous(confirmPaymentIntentParams);
-                });
-
-        final Disposable disposable = paymentIntentObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe((d) ->
-                        mProgressDialogController.show(R.string.confirming_payment_intent))
-                .doOnComplete(() ->
-                        mProgressDialogController.dismiss())
-                .subscribe(
-                        paymentIntent -> {
-                            if (paymentIntent != null) {
-                                mPaymentIntentValue
-                                        .setText(new JSONObject(paymentIntent.toMap()).toString());
-
-                                if (paymentIntent.requiresAction()) {
-                                    Toast.makeText(PaymentIntentActivity.this,
-                                            "Redirecting to redirect URL",
-                                            Toast.LENGTH_SHORT)
-                                            .show();
-                                    startActivity(new Intent(Intent.ACTION_VIEW,
-                                            paymentIntent.getRedirectUrl()));
-                                }
-                            }
-                        },
-                        throwable -> Log.e(TAG, throwable.toString())
-                );
-        mCompositeDisposable.add(disposable);
+        mStripe.confirmPayment(this,
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                        PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null),
+                        Objects.requireNonNull(mClientSecret), RETURN_URL));
     }
 }
