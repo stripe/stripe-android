@@ -63,6 +63,20 @@ public class Stripe3ds2CompletionStarterTest {
     }
 
     @Test
+    public void start_withTimeout_shouldAddClientSecretAndAuthStatusToIntent() {
+        mStarter.start(new Stripe3ds2CompletionStarter.StartData(
+                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT));
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
+                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
+        assertEquals(StripeIntentResult.Status.TIMEDOUT,
+                intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
+                        StripeIntentResult.Status.UNKNOWN));
+    }
+
+    @Test
     public void start_withProtocolError_shouldAddClientSecretAndAuthStatusToIntent() {
         mStarter.start(new Stripe3ds2CompletionStarter.StartData(
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
