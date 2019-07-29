@@ -244,6 +244,7 @@ public class PaymentAuthActivity extends AppCompatActivity {
 
             final PaymentIntent paymentIntent = paymentIntentResult.getIntent();
             activity.mStatusTextView.append("\n\n" +
+                    "Auth status: " + paymentIntentResult.getStatus() + "\n\n" +
                     activity.getString(R.string.payment_intent_status, paymentIntent.getStatus()));
             activity.onAuthComplete();
         }
