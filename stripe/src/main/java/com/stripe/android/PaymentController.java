@@ -620,6 +620,8 @@ class PaymentController {
 
     static final class PaymentAuth3ds2ChallengeStatusReceiver
             extends StripeChallengeStatusReceiver {
+        private static final String VALUE_YES = "Y";
+
         @NonNull private final WeakReference<Activity> mActivityRef;
         @NonNull private final ActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
         @NonNull private final StripeApiHandler mApiHandler;
@@ -689,8 +691,11 @@ class PaymentController {
                             null
                     )
             );
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData.createForComplete(mStripeIntent,
-                    completionEvent.getTransactionStatus()));
+            notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+                    VALUE_YES.equals(completionEvent.getTransactionStatus()) ?
+                            Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_SUCCESSFUL :
+                            Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL
+            ));
         }
 
         @Override
