@@ -28,24 +28,24 @@ import com.stripe.android.exception.StripeException;
  */
 abstract class StripeActivity extends AppCompatActivity {
 
-    BroadcastReceiver mAlertBroadcastReceiver;
-    @Nullable AlertMessageListener mAlertMessageListener;
-    boolean mCommunicating;
-    Toolbar mToolbar;
     ProgressBar mProgressBar;
     ViewStub mViewStub;
+
+    private BroadcastReceiver mAlertBroadcastReceiver;
+    @Nullable private AlertMessageListener mAlertMessageListener;
+    private boolean mCommunicating;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stripe);
         mProgressBar = findViewById(R.id.progress_bar_as);
-        mToolbar = findViewById(R.id.toolbar_as);
+        final Toolbar toolbar = findViewById(R.id.toolbar_as);
         mViewStub = findViewById(R.id.widget_viewstub_as);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -53,7 +53,7 @@ abstract class StripeActivity extends AppCompatActivity {
         mAlertBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                StripeException exception = (StripeException)
+                final StripeException exception = (StripeException)
                         intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION);
                 showError(exception.getLocalizedMessage());
             }
@@ -88,7 +88,7 @@ abstract class StripeActivity extends AppCompatActivity {
             onActionSave();
             return true;
         } else {
-            boolean handled = super.onOptionsItemSelected(item);
+            final boolean handled = super.onOptionsItemSelected(item);
             if (!handled) {
                 onBackPressed();
             }
@@ -98,8 +98,8 @@ abstract class StripeActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem saveItem = menu.findItem(R.id.action_save);
-        Drawable tintedIcon = ViewUtils.getTintedIconWithAttribute(
+        final MenuItem saveItem = menu.findItem(R.id.action_save);
+        final Drawable tintedIcon = ViewUtils.getTintedIconWithAttribute(
                 this,
                 getTheme(),
                 R.attr.titleTextColor,
