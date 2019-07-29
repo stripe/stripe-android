@@ -47,6 +47,7 @@ class AnalyticsDataFactory {
             EventName.RETRIEVE_PAYMENT_INTENT,
             EventName.CONFIRM_SETUP_INTENT,
             EventName.RETRIEVE_SETUP_INTENT,
+            EventName.AUTH_3DS2_FINGERPRINT,
             EventName.AUTH_3DS2_START,
             EventName.AUTH_3DS2_FRICTIONLESS,
             EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
@@ -72,6 +73,7 @@ class AnalyticsDataFactory {
         String CONFIRM_SETUP_INTENT = "setup_intent_confirmation";
         String RETRIEVE_SETUP_INTENT = "setup_intent_retrieval";
 
+        String AUTH_3DS2_FINGERPRINT = "3ds2_fingerprint";
         String AUTH_3DS2_START = "3ds2_authenticate";
         String AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow";
         String AUTH_3DS2_CHALLENGE_PRESENTED = "3ds2_challenge_flow_presented";
