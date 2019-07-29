@@ -35,14 +35,29 @@ public class Stripe3ds2CompletionStarterTest {
     }
 
     @Test
-    public void start_withCompletion_shouldAddClientSecretAndAuthStatusToIntent() {
-        mStarter.start(Stripe3ds2CompletionStarter.StartData.createForComplete(
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "Y"));
+    public void start_withSuccessfulCompletion_shouldAddClientSecretAndAuthStatusToIntent() {
+        mStarter.start(new Stripe3ds2CompletionStarter.StartData(
+                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_SUCCESSFUL));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
         assertEquals(StripeIntentResult.Status.SUCCEEDED,
+                intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
+                        StripeIntentResult.Status.UNKNOWN));
+    }
+
+    @Test
+    public void start_withUnsuccessfulCompletion_shouldAddClientSecretAndAuthStatusToIntent() {
+        mStarter.start(new Stripe3ds2CompletionStarter.StartData(
+                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL));
+        verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
+        final Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
+                intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
+        assertEquals(StripeIntentResult.Status.FAILED,
                 intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
                         StripeIntentResult.Status.UNKNOWN));
     }

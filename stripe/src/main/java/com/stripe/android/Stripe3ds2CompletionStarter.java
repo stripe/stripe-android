@@ -41,47 +41,35 @@ class Stripe3ds2CompletionStarter
         activity.startActivityForResult(intent, mRequestCode);
     }
 
-    @IntDef({ChallengeFlowOutcome.COMPLETE, ChallengeFlowOutcome.CANCEL,
-            ChallengeFlowOutcome.TIMEOUT, ChallengeFlowOutcome.PROTOCOL_ERROR,
-            ChallengeFlowOutcome.RUNTIME_ERROR})
+    @IntDef({ChallengeFlowOutcome.COMPLETE_SUCCESSFUL, ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL,
+            ChallengeFlowOutcome.CANCEL, ChallengeFlowOutcome.TIMEOUT,
+            ChallengeFlowOutcome.PROTOCOL_ERROR, ChallengeFlowOutcome.RUNTIME_ERROR})
     @Retention(RetentionPolicy.SOURCE)
     @interface ChallengeFlowOutcome {
-        int COMPLETE = 0;
-        int CANCEL = 1;
-        int TIMEOUT = 2;
-        int PROTOCOL_ERROR = 3;
-        int RUNTIME_ERROR = 4;
+        int COMPLETE_SUCCESSFUL = 0;
+        int COMPLETE_UNSUCCESSFUL = 1;
+        int CANCEL = 2;
+        int TIMEOUT = 3;
+        int PROTOCOL_ERROR = 4;
+        int RUNTIME_ERROR = 5;
     }
 
     static class StartData {
         @NonNull private final StripeIntent mStripeIntent;
         @ChallengeFlowOutcome private final int mChallengeFlowStatus;
-        @Nullable private final String mCompletionTransactionStatus;
-
-        @NonNull
-        static StartData createForComplete(@NonNull StripeIntent stripeIntent,
-                                           @NonNull String completionTransactionStatus) {
-            return new StartData(stripeIntent, ChallengeFlowOutcome.COMPLETE,
-                    completionTransactionStatus);
-        }
 
         StartData(@NonNull StripeIntent stripeIntent,
-                  @ChallengeFlowOutcome int status) {
-            this(stripeIntent, status, null);
-        }
-
-        private StartData(@NonNull StripeIntent stripeIntent,
-                          @ChallengeFlowOutcome int challengeFlowStatus,
-                          @Nullable String completionTransactionStatus) {
+                  @ChallengeFlowOutcome int challengeFlowStatus) {
             mStripeIntent = stripeIntent;
             mChallengeFlowStatus = challengeFlowStatus;
-            mCompletionTransactionStatus = completionTransactionStatus;
         }
 
         @StripeIntentResult.Status
         private int getAuthStatus() {
-            if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE) {
+            if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE_SUCCESSFUL) {
                 return StripeIntentResult.Status.SUCCEEDED;
+            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL) {
+                return StripeIntentResult.Status.FAILED;
             } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
                 return StripeIntentResult.Status.CANCELED;
             } else {
@@ -91,8 +79,7 @@ class Stripe3ds2CompletionStarter
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mStripeIntent, mChallengeFlowStatus,
-                    mCompletionTransactionStatus);
+            return ObjectUtils.hash(mStripeIntent, mChallengeFlowStatus);
         }
 
         @Override
@@ -102,9 +89,7 @@ class Stripe3ds2CompletionStarter
 
         private boolean typedEquals(@NonNull StartData startData) {
             return ObjectUtils.equals(mStripeIntent, startData.mStripeIntent) &&
-                    ObjectUtils.equals(mChallengeFlowStatus, startData.mChallengeFlowStatus) &&
-                    ObjectUtils.equals(mCompletionTransactionStatus,
-                            startData.mCompletionTransactionStatus);
+                    ObjectUtils.equals(mChallengeFlowStatus, startData.mChallengeFlowStatus);
         }
     }
 }
