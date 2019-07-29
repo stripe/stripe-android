@@ -72,6 +72,8 @@ class Stripe3ds2CompletionStarter
                 return StripeIntentResult.Status.FAILED;
             } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
                 return StripeIntentResult.Status.CANCELED;
+            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.TIMEOUT) {
+                return StripeIntentResult.Status.TIMEDOUT;
             } else {
                 return StripeIntentResult.Status.FAILED;
             }

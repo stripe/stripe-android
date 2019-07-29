@@ -28,7 +28,7 @@ public interface StripeIntentResult<T extends StripeIntent> {
      * Values that indicate the outcome of confirmation and payment authentication.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Status.UNKNOWN, Status.SUCCEEDED, Status.FAILED, Status.CANCELED})
+    @IntDef({Status.UNKNOWN, Status.SUCCEEDED, Status.FAILED, Status.CANCELED, Status.TIMEDOUT})
     @interface Status {
         int UNKNOWN = 0;
 
@@ -46,5 +46,10 @@ public interface StripeIntentResult<T extends StripeIntent> {
          * Payment authentication was canceled by the user
          */
         int CANCELED = 3;
+
+        /**
+         * Payment authentication timed-out
+         */
+        int TIMEDOUT = 4;
     }
 }
