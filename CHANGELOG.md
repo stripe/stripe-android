@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## 10.0.4 - upcoming
+## 10.1.0 - 2019-07-30
 * [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
 * [#1256](https://github.com/stripe/stripe-android/pull/1256) Add `StripeIntentResult.Status` flag to 3DS1 authentication results
-* [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass Status.FAILED when 3DS2 auth fails
-* [#1259](https://github.com/stripe/stripe-android/pull/1259) Add StripeIntentResult.Status.TIMEDOUT value
+* [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass `Status.FAILED` when 3DS2 auth fails
+* [#1259](https://github.com/stripe/stripe-android/pull/1259) Add `StripeIntentResult.Status.TIMEDOUT` value
 * [#1263](https://github.com/stripe/stripe-android/pull/1263) Update `PaymentSession#presentPaymentMethodSelection()` logic
     * Add overloaded `presentPaymentMethodSelection()` that takes a Payment Method ID to initially select
     * Add `PaymentSessionPrefs` to persist customer's Payment Method selection across `PaymentSession` instances
