@@ -234,18 +234,18 @@ public class PaymentSessionTest {
     public void getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
         when(mCustomerSession.getCachedCustomer()).thenReturn(FIRST_CUSTOMER);
         CustomerSession.setInstance(mCustomerSession);
-        assertNull(createPaymentSesson().getSelectedPaymentMethodId());
+        assertNull(createPaymentSesson().getSelectedPaymentMethodId(null));
     }
 
     @Test
-    public void getSelectedPaymentMethodId_whenHasPaymentSessionData_hasId() {
+    public void getSelectedPaymentMethodId_whenHasPaymentSessionData_returnsExpectedId() {
         mPaymentSessionData.setPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
         assertEquals("pm_123456789",
-                createPaymentSesson().getSelectedPaymentMethodId());
+                createPaymentSesson().getSelectedPaymentMethodId(null));
     }
 
     @Test
-    public void getSelectedPaymentMethodId_whenHasPrefsSet_hasId() {
+    public void getSelectedPaymentMethodId_whenHasPrefsSet_returnsExpectedId() {
         final String customerId = Objects.requireNonNull(FIRST_CUSTOMER.getId());
         when(mPaymentSessionPrefs.getSelectedPaymentMethodId(customerId)).thenReturn("pm_12345");
 
@@ -253,7 +253,14 @@ public class PaymentSessionTest {
         CustomerSession.setInstance(mCustomerSession);
 
         assertEquals("pm_12345",
-                createPaymentSesson().getSelectedPaymentMethodId());
+                createPaymentSesson().getSelectedPaymentMethodId(null));
+    }
+
+    @Test
+    public void getSelectedPaymentMethodId_whenHasUserSpecifiedPaymentMethod_returnsExpectedId() {
+        mPaymentSessionData.setPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
+        assertEquals("pm_987",
+                createPaymentSesson().getSelectedPaymentMethodId("pm_987"));
     }
 
     @Test

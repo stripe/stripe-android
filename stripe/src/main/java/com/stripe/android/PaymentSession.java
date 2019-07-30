@@ -199,31 +199,61 @@ public class PaymentSession {
     }
 
     /**
-     * Launch the {@link PaymentMethodsActivity} to allow the user to select a payment method,
-     * or to add a new one.
+     * See {@link #presentPaymentMethodSelection(boolean, String)}
      */
     public void presentPaymentMethodSelection() {
-        presentPaymentMethodSelection(false);
+        presentPaymentMethodSelection(false, null);
     }
 
     /**
-     * @param shouldRequirePostalCode if true, require postal code when adding a payment method
+     * See {@link #presentPaymentMethodSelection(boolean, String)}
      */
     public void presentPaymentMethodSelection(boolean shouldRequirePostalCode) {
+        presentPaymentMethodSelection(shouldRequirePostalCode, null);
+    }
+
+    /**
+     * See {@link #presentPaymentMethodSelection(boolean, String)}
+     */
+    public void presentPaymentMethodSelection(@NonNull String selectedPaymentMethodId) {
+        presentPaymentMethodSelection(false, selectedPaymentMethodId);
+    }
+
+    /**
+     * Launch the {@link PaymentMethodsActivity} to allow the user to select a payment method,
+     * or to add a new one.
+     *
+     * The initial selected Payment Method ID follows this logic:
+     * 1. If {@param userSelectedPaymentMethodId} is specified, use that
+     * 2. If the instance's {@link PaymentSessionData#getPaymentMethod()} is non-null, use that
+     * 3. If the instance's {@link PaymentSessionPrefs#getSelectedPaymentMethodId(String)}
+     *    is non-null, use that
+     * 4. Otherwise, choose the most recently added Payment Method
+     *
+     * See {@link #getSelectedPaymentMethodId(String)}
+     *
+     * @param shouldRequirePostalCode if true, require postal code when adding a payment method
+     * @param userSelectedPaymentMethodId if non-null, the ID of the Payment Method that should be
+     *                                    initially selected on the Payment Method selection screen
+     */
+    public void presentPaymentMethodSelection(boolean shouldRequirePostalCode,
+                                              @Nullable String userSelectedPaymentMethodId) {
         final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true)
                 .putExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
                         shouldRequirePostalCode)
                 .putExtra(PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
-                        getSelectedPaymentMethodId());
+                        getSelectedPaymentMethodId(userSelectedPaymentMethodId));
         mActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
     }
 
     @Nullable
     @VisibleForTesting
-    String getSelectedPaymentMethodId() {
+    String getSelectedPaymentMethodId(@Nullable String userSelectedPaymentMethodId) {
         final String selectedPaymentMethodId;
-        if (mPaymentSessionData.getPaymentMethod() != null) {
+        if (userSelectedPaymentMethodId != null) {
+            selectedPaymentMethodId = userSelectedPaymentMethodId;
+        } else if (mPaymentSessionData.getPaymentMethod() != null) {
             selectedPaymentMethodId = mPaymentSessionData.getPaymentMethod().id;
         } else {
             final Customer customer = mCustomerSession.getCachedCustomer();
