@@ -11,6 +11,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/appName"
         android:name=".ExampleApplication"
+        android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
         <!-- Enables the Google Payment API -->
@@ -19,21 +20,17 @@
             android:value="true"/>
 
         <activity
-            android:name=".activity.PaymentActivity"
-            android:theme="@style/AppTheme">
+            android:name=".activity.PaymentActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PaymentIntentActivity"
-            android:theme="@style/AppTheme">
-        </activity>
+            android:name=".activity.PaymentIntentActivity" />
 
         <activity
             android:name=".activity.SetupIntentActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme">
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -51,8 +48,7 @@
 
         <activity
             android:name=".activity.RedirectActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/AppTheme">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
@@ -76,8 +72,7 @@
         </activity>
         <activity
             android:name=".activity.LauncherActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/AppTheme">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -85,36 +80,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.CustomerSessionActivity"
-            android:theme="@style/AppTheme">
+            android:name=".activity.CustomerSessionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PaymentMultilineActivity"
-            android:theme="@style/AppTheme">
+            android:name=".activity.PaymentMultilineActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PaymentSessionActivity"
-            android:theme="@style/AppTheme">
+            android:name=".activity.PaymentSessionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PayWithGoogleActivity"
-                  android:theme="@style/AppTheme">
+        <activity android:name=".activity.PayWithGoogleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
 
         <activity
-            android:name=".activity.PaymentAuthActivity"
-            android:theme="@style/AppTheme" />
+            android:name=".activity.PaymentAuthActivity" />
     </application>
 
 </manifest>

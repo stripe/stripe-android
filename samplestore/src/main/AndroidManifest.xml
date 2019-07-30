@@ -28,8 +28,7 @@
         </activity>
 
         <activity
-            android:name=".PaymentActivity"
-            android:launchMode="singleTask">
+            android:name=".PaymentActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
