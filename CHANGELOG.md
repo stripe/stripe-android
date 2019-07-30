@@ -2,6 +2,7 @@
 
 ## 10.0.4 - upcoming
 * [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
+* [#1256](https://github.com/stripe/stripe-android/pull/1256) Add `StripeIntentResult.Status` flag to 3DS1 authentication results
 * [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass Status.FAILED when 3DS2 auth fails
 * [#1259](https://github.com/stripe/stripe-android/pull/1259) Add StripeIntentResult.Status.TIMEDOUT value
 
