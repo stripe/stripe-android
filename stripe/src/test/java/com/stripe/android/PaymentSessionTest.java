@@ -15,6 +15,7 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.AddPaymentMethodActivity;
@@ -33,6 +34,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -45,6 +47,7 @@ import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,7 +65,15 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class PaymentSessionTest {
 
-    private TestEphemeralKeyProvider mEphemeralKeyProvider;
+    @NonNull private static final Customer FIRST_CUSTOMER =
+            Objects.requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT));
+    @NonNull private static final Customer SECOND_CUSTOMER =
+            Objects.requireNonNull(Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT));
+
+    @NonNull private final TestEphemeralKeyProvider mEphemeralKeyProvider =
+            new TestEphemeralKeyProvider();
+
+    @NonNull private final PaymentSessionData mPaymentSessionData = new PaymentSessionData();
 
     @Mock private Activity mActivity;
     @Mock private StripeApiHandler mApiHandler;
@@ -70,6 +81,7 @@ public class PaymentSessionTest {
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
     @Mock private CustomerSession mCustomerSession;
     @Mock private PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    @Mock private PaymentSessionPrefs mPaymentSessionPrefs;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
@@ -82,19 +94,14 @@ public class PaymentSessionTest {
 
         PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
-        mEphemeralKeyProvider = new TestEphemeralKeyProvider();
-
-        final Customer firstCustomer = Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
-        assertNotNull(firstCustomer);
-        final Customer secondCustomer = Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
-        assertNotNull(secondCustomer);
+        assertNotNull(FIRST_CUSTOMER);
 
         final PaymentMethod paymentMethod =
                 PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
         assertNotNull(paymentMethod);
 
         when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
-                .thenReturn(firstCustomer, secondCustomer);
+                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
         when(mApiHandler.createPaymentMethod(
                 ArgumentMatchers.<PaymentMethodCreateParams>any(),
                 ArgumentMatchers.<ApiRequest.Options>any()
@@ -106,7 +113,7 @@ public class PaymentSessionTest {
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<ApiRequest.Options>any()))
-                .thenReturn(secondCustomer);
+                .thenReturn(SECOND_CUSTOMER);
 
         doAnswer(new Answer() {
             @Override
@@ -224,6 +231,32 @@ public class PaymentSessionTest {
     }
 
     @Test
+    public void getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
+        when(mCustomerSession.getCachedCustomer()).thenReturn(FIRST_CUSTOMER);
+        CustomerSession.setInstance(mCustomerSession);
+        assertNull(createPaymentSesson().getSelectedPaymentMethodId());
+    }
+
+    @Test
+    public void getSelectedPaymentMethodId_whenHasPaymentSessionData_hasId() {
+        mPaymentSessionData.setPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
+        assertEquals("pm_123456789",
+                createPaymentSesson().getSelectedPaymentMethodId());
+    }
+
+    @Test
+    public void getSelectedPaymentMethodId_whenHasPrefsSet_hasId() {
+        final String customerId = Objects.requireNonNull(FIRST_CUSTOMER.getId());
+        when(mPaymentSessionPrefs.getSelectedPaymentMethodId(customerId)).thenReturn("pm_12345");
+
+        when(mCustomerSession.getCachedCustomer()).thenReturn(FIRST_CUSTOMER);
+        CustomerSession.setInstance(mCustomerSession);
+
+        assertEquals("pm_12345",
+                createPaymentSesson().getSelectedPaymentMethodId());
+    }
+
+    @Test
     public void init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
         final CustomerSession customerSession = createCustomerSession();
         CustomerSession.setInstance(customerSession);
@@ -315,8 +348,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_withInvalidRequestCode_aborts() {
-        final PaymentSession paymentSession = new PaymentSession(mActivity, mCustomerSession,
-                mPaymentMethodsActivityStarter, new PaymentSessionData());
+        final PaymentSession paymentSession = createPaymentSesson();
         assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, new Intent()));
         verify(mCustomerSession, never()).retrieveCurrentCustomer(
                 ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
@@ -324,12 +356,17 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_withValidRequestCodeAndCanceledResult_retrievesCustomer() {
-        final PaymentSession paymentSession = new PaymentSession(mActivity, mCustomerSession,
-                mPaymentMethodsActivityStarter, new PaymentSessionData());
+        final PaymentSession paymentSession = createPaymentSesson();
         assertFalse(paymentSession.handlePaymentData(PaymentSession.PAYMENT_METHOD_REQUEST,
                 RESULT_CANCELED, new Intent()));
         verify(mCustomerSession).retrieveCurrentCustomer(
                 ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
+    }
+
+    @NonNull
+    private PaymentSession createPaymentSesson() {
+        return new PaymentSession(mActivity, mCustomerSession,
+                mPaymentMethodsActivityStarter, mPaymentSessionData, mPaymentSessionPrefs);
     }
 
     @NonNull

@@ -31,9 +31,10 @@ public class PaymentSession {
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
-    @NonNull private final Activity mHostActivity;
+    @NonNull private final Activity mActivity;
     @NonNull private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
     @NonNull private final CustomerSession mCustomerSession;
+    @NonNull private final PaymentSessionPrefs mPaymentSessionPrefs;
     private PaymentSessionData mPaymentSessionData;
     @Nullable private PaymentSessionListener mPaymentSessionListener;
     private PaymentSessionConfig mPaymentSessionConfig;
@@ -41,27 +42,30 @@ public class PaymentSession {
     /**
      * Create a PaymentSession attached to the given host Activity.
      *
-     * @param hostActivity an {@link Activity} from which to launch other Stripe Activities. This
+     * @param activity an {@link Activity} from which to launch other Stripe Activities. This
      *                     Activity will receive results in
      *                     {@link Activity#onActivityResult(int, int, Intent)} that should be passed
      *                     back to this session.
      */
-    public PaymentSession(@NonNull Activity hostActivity) {
-        this(hostActivity,
+    public PaymentSession(@NonNull Activity activity) {
+        this(activity,
                 CustomerSession.getInstance(),
-                new PaymentMethodsActivityStarter(hostActivity),
-                new PaymentSessionData());
+                new PaymentMethodsActivityStarter(activity),
+                new PaymentSessionData(),
+                new PaymentSessionPrefs(activity));
     }
 
     @VisibleForTesting
-    PaymentSession(@NonNull Activity hostActivity,
+    PaymentSession(@NonNull Activity activity,
                    @NonNull CustomerSession customerSession,
                    @NonNull PaymentMethodsActivityStarter paymentMethodsActivityStarter,
-                   @NonNull PaymentSessionData paymentSessionData) {
-        mHostActivity = hostActivity;
+                   @NonNull PaymentSessionData paymentSessionData,
+                   @NonNull PaymentSessionPrefs paymentSessionPrefs) {
+        mActivity = activity;
         mCustomerSession = customerSession;
         mPaymentMethodsActivityStarter = paymentMethodsActivityStarter;
         mPaymentSessionData = paymentSessionData;
+        mPaymentSessionPrefs = paymentSessionPrefs;
     }
 
     /**
@@ -96,6 +100,7 @@ public class PaymentSession {
                     final PaymentMethod paymentMethod =
                             data.getParcelableExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
                     if (paymentMethod != null) {
+                        persistPaymentMethod(paymentMethod);
                         mPaymentSessionData.setPaymentMethod(paymentMethod);
                         mPaymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
                         if (mPaymentSessionListener != null) {
@@ -122,6 +127,15 @@ public class PaymentSession {
             }
         }
         return false;
+    }
+
+    private void persistPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+        final Customer customer = mCustomerSession.getCachedCustomer();
+        final String customerId = customer != null ? customer.getId() : null;
+        if (customerId != null && paymentMethod.id != null) {
+            mPaymentSessionPrefs
+                    .saveSelectedPaymentMethodId(customerId, paymentMethod.id);
+        }
     }
 
     /**
@@ -199,14 +213,26 @@ public class PaymentSession {
         final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true)
                 .putExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
-                        shouldRequirePostalCode);
+                        shouldRequirePostalCode)
+                .putExtra(PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
+                        getSelectedPaymentMethodId());
+        mActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
+    }
+
+    @Nullable
+    @VisibleForTesting
+    String getSelectedPaymentMethodId() {
+        final String selectedPaymentMethodId;
         if (mPaymentSessionData.getPaymentMethod() != null) {
-            paymentMethodsIntent
-                    .putExtra(
-                            PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
-                            mPaymentSessionData.getPaymentMethod().id);
+            selectedPaymentMethodId = mPaymentSessionData.getPaymentMethod().id;
+        } else {
+            final Customer customer = mCustomerSession.getCachedCustomer();
+            final String customerId = customer != null ? customer.getId() : null;
+            selectedPaymentMethodId = customerId != null ?
+                    mPaymentSessionPrefs.getSelectedPaymentMethodId(customerId) : null;
         }
-        mHostActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
+
+        return selectedPaymentMethodId;
     }
 
     /**
@@ -233,11 +259,11 @@ public class PaymentSession {
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
      */
     public void presentShippingFlow() {
-        final Intent intent = new Intent(mHostActivity, PaymentFlowActivity.class)
+        final Intent intent = new Intent(mActivity, PaymentFlowActivity.class)
                 .putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig)
                 .putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData)
                 .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mHostActivity.startActivityForResult(intent, PAYMENT_SHIPPING_DETAILS_REQUEST);
+        mActivity.startActivityForResult(intent, PAYMENT_SHIPPING_DETAILS_REQUEST);
     }
 
     /**
