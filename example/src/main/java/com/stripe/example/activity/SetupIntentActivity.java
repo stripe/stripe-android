@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.SetupIntentResult;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmSetupIntentParams;
@@ -74,8 +76,8 @@ public class SetupIntentActivity extends AppCompatActivity {
                 getResources());
         mErrorDialogHandler = new ErrorDialogHandler(this);
 
-        final String publishableKey = PaymentConfiguration.getInstance().getPublishableKey();
-        mStripe = new Stripe(getApplicationContext(), publishableKey);
+        mStripe = new Stripe(this,
+                PaymentConfiguration.getInstance().getPublishableKey());
         final Retrofit retrofit = RetrofitFactory.getInstance();
         mStripeService = retrofit.create(StripeService.class);
 
@@ -83,11 +85,11 @@ public class SetupIntentActivity extends AppCompatActivity {
         mCreatePaymentMethod.setOnClickListener(v -> {
             final Card card = mCardInputWidget.getCard();
             if (card != null) {
-                createPaymentMethod(card, publishableKey);
+                createPaymentMethod(card);
             }
         });
         mRetrieveSetupIntent.setOnClickListener(v -> retrieveSetupIntent());
-        mConfirmSetupIntent.setOnClickListener(v -> confirmSetupIntent(publishableKey));
+        mConfirmSetupIntent.setOnClickListener(v -> confirmSetupIntent());
     }
 
     @Override
@@ -97,18 +99,23 @@ public class SetupIntentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(@NonNull Intent intent) {
-        super.onNewIntent(intent);
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        if (intent.getData() != null && intent.getData().getQuery() != null) {
-            Toast.makeText(SetupIntentActivity.this,
-                    "Retrieving SetupIntent after authorizing",
-                    Toast.LENGTH_SHORT)
-                    .show();
-            mClientSecret = intent.getData().getQueryParameter(
-                    "setup_intent_client_secret");
-            retrieveSetupIntent();
-        }
+        mStripe.onSetupResult(requestCode, data, new ApiResultCallback<SetupIntentResult>() {
+            @Override
+            public void onSuccess(@NonNull SetupIntentResult result) {
+                mClientSecret = result.getIntent().getClientSecret();
+                displaySetupIntent(result.getIntent());
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                Toast.makeText(SetupIntentActivity.this,
+                        "Error: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
     }
 
     private void createSetupIntent() {
@@ -150,21 +157,18 @@ public class SetupIntentActivity extends AppCompatActivity {
                 .doOnComplete(() -> mProgressDialogController.dismiss())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        setupIntent -> mSetupIntentValue.setText(setupIntent != null ?
-                                new JSONObject(setupIntent.toMap()).toString() :
-                                getString(R.string.error_while_retrieving_setup_intent)),
+                        this::displaySetupIntent,
                         throwable -> Log.e(TAG, throwable.toString())
                 );
         mCompositeDisposable.add(disposable);
     }
 
-    private void createPaymentMethod(@NonNull final Card card, @NonNull String publishableKey) {
+    private void createPaymentMethod(@NonNull final Card card) {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null);
 
         final Observable<PaymentMethod> paymentMethodObservable = Observable.fromCallable(
-                () -> mStripe.createPaymentMethodSynchronous(paymentMethodCreateParams,
-                        publishableKey));
+                () -> mStripe.createPaymentMethodSynchronous(paymentMethodCreateParams));
 
         final Disposable disposable = paymentMethodObservable
                 .subscribeOn(Schedulers.io())
@@ -187,42 +191,14 @@ public class SetupIntentActivity extends AppCompatActivity {
         mCompositeDisposable.add(disposable);
     }
 
-    private void confirmSetupIntent(@NonNull String publishableKey) {
-        final Observable<SetupIntent> setupIntentObservable = Observable.fromCallable(
-                () -> {
-                    final ConfirmSetupIntentParams confirmSetupIntentParams =
-                            ConfirmSetupIntentParams.create(
-                                    Objects.requireNonNull(mPaymentMethod.id), mClientSecret,
-                                    RETURN_URL);
-                    return mStripe.confirmSetupIntentSynchronous(confirmSetupIntentParams,
-                            publishableKey);
-                });
+    private void displaySetupIntent(@NonNull SetupIntent setupIntent) {
+        mSetupIntentValue.setText(new JSONObject(setupIntent.toMap()).toString());
+    }
 
-        final Disposable disposable = setupIntentObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe((d) ->
-                        mProgressDialogController.show(R.string.confirm_setup_intent))
-                .doOnComplete(() ->
-                        mProgressDialogController.dismiss())
-                .subscribe(
-                        setupIntent -> {
-                            if (setupIntent != null) {
-                                mSetupIntentValue
-                                        .setText(new JSONObject(setupIntent.toMap()).toString());
-
-                                if (setupIntent.requiresAction()) {
-                                    Toast.makeText(SetupIntentActivity.this,
-                                            "Redirecting to redirect URL",
-                                            Toast.LENGTH_SHORT)
-                                            .show();
-                                    startActivity(new Intent(Intent.ACTION_VIEW,
-                                            setupIntent.getRedirectUrl()));
-                                }
-                            }
-                        },
-                        throwable -> Log.e(TAG, throwable.toString())
-                );
-        mCompositeDisposable.add(disposable);
+    private void confirmSetupIntent() {
+        mStripe.confirmSetupIntent(this,
+                ConfirmSetupIntentParams.create(
+                        Objects.requireNonNull(mPaymentMethod.id), mClientSecret,
+                        RETURN_URL));
     }
 }
