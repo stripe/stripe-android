@@ -22,6 +22,7 @@ import com.jakewharton.rxbinding2.view.RxView;
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PayWithGoogleUtils;
+import com.stripe.android.PaymentAuthConfig;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.PaymentSession;
@@ -101,6 +102,22 @@ public class PaymentActivity extends AppCompatActivity {
         if (Settings.STRIPE_ACCOUNT_ID != null) {
             mStripe.setStripeAccount(Settings.STRIPE_ACCOUNT_ID);
         }
+
+        final PaymentAuthConfig.Stripe3ds2ButtonCustomization selectCustomization =
+                new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
+                        .setBackgroundColor("#EC4847")
+                        .setTextColor("#000000")
+                        .build();
+        final PaymentAuthConfig.Stripe3ds2UiCustomization uiCustomization =
+                PaymentAuthConfig.Stripe3ds2UiCustomization.Builder.createWithAppTheme(this)
+                        .setButtonCustomization(selectCustomization,
+                                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.SELECT)
+                        .build();
+        PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
+                .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setUiCustomization(uiCustomization)
+                        .build())
+                .build());
 
         mService = RetrofitFactory.getInstance().create(StripeService.class);
 
