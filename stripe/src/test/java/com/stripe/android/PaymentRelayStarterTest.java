@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -40,9 +41,7 @@ public class PaymentRelayStarterTest {
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
-        assertEquals(StripeIntentResult.Status.SUCCEEDED,
-                intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
-                        StripeIntentResult.Status.UNKNOWN));
+        assertFalse(intent.hasExtra(StripeIntentResultExtras.AUTH_STATUS));
         assertNull(intent.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION));
     }
 
@@ -53,9 +52,7 @@ public class PaymentRelayStarterTest {
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertNull(intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
-        assertEquals(StripeIntentResult.Status.FAILED,
-                intent.getIntExtra(StripeIntentResultExtras.AUTH_STATUS,
-                        StripeIntentResult.Status.UNKNOWN));
+        assertFalse(intent.hasExtra(StripeIntentResultExtras.AUTH_STATUS));
         assertEquals(exception,
                 intent.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION));
     }
