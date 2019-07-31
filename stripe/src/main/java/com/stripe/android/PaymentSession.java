@@ -7,9 +7,11 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.app.Fragment;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
@@ -31,8 +33,8 @@ public class PaymentSession {
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
     public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
-    @NonNull private final Activity mActivity;
-    @NonNull private final PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    @NonNull private final ActivityStarter<PaymentMethodsActivity> mPaymentMethodsActivityStarter;
+    @NonNull private final ActivityStarter<PaymentFlowActivity> mPaymentFlowActivityStarter;
     @NonNull private final CustomerSession mCustomerSession;
     @NonNull private final PaymentSessionPrefs mPaymentSessionPrefs;
     private PaymentSessionData mPaymentSessionData;
@@ -48,22 +50,31 @@ public class PaymentSession {
      *                     back to this session.
      */
     public PaymentSession(@NonNull Activity activity) {
-        this(activity,
-                CustomerSession.getInstance(),
+        this(CustomerSession.getInstance(),
                 new PaymentMethodsActivityStarter(activity),
+                new PaymentFlowActivityStarter(activity),
                 new PaymentSessionData(),
                 new PaymentSessionPrefs(activity));
     }
 
+    public PaymentSession(@NonNull Fragment fragment) {
+        this(CustomerSession.getInstance(),
+                new PaymentMethodsActivityStarter(fragment),
+                new PaymentFlowActivityStarter(fragment),
+                new PaymentSessionData(),
+                new PaymentSessionPrefs(fragment.requireActivity()));
+    }
+
     @VisibleForTesting
-    PaymentSession(@NonNull Activity activity,
-                   @NonNull CustomerSession customerSession,
-                   @NonNull PaymentMethodsActivityStarter paymentMethodsActivityStarter,
-                   @NonNull PaymentSessionData paymentSessionData,
-                   @NonNull PaymentSessionPrefs paymentSessionPrefs) {
-        mActivity = activity;
+    PaymentSession(
+            @NonNull CustomerSession customerSession,
+            @NonNull ActivityStarter<PaymentMethodsActivity> paymentMethodsActivityStarter,
+            @NonNull ActivityStarter<PaymentFlowActivity> paymentFlowActivityStarter,
+            @NonNull PaymentSessionData paymentSessionData,
+            @NonNull PaymentSessionPrefs paymentSessionPrefs) {
         mCustomerSession = customerSession;
         mPaymentMethodsActivityStarter = paymentMethodsActivityStarter;
+        mPaymentFlowActivityStarter = paymentFlowActivityStarter;
         mPaymentSessionData = paymentSessionData;
         mPaymentSessionPrefs = paymentSessionPrefs;
     }
@@ -238,13 +249,13 @@ public class PaymentSession {
      */
     public void presentPaymentMethodSelection(boolean shouldRequirePostalCode,
                                               @Nullable String userSelectedPaymentMethodId) {
-        final Intent paymentMethodsIntent = mPaymentMethodsActivityStarter.newIntent()
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true)
-                .putExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
-                        shouldRequirePostalCode)
-                .putExtra(PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
-                        getSelectedPaymentMethodId(userSelectedPaymentMethodId));
-        mActivity.startActivityForResult(paymentMethodsIntent, PAYMENT_METHOD_REQUEST);
+        final Bundle bundle = new Bundle();
+        bundle.putBoolean(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        bundle.putBoolean(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
+                shouldRequirePostalCode);
+        bundle.putString(PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
+                getSelectedPaymentMethodId(userSelectedPaymentMethodId));
+        mPaymentMethodsActivityStarter.startForResult(PAYMENT_METHOD_REQUEST, bundle);
     }
 
     @Nullable
@@ -289,11 +300,11 @@ public class PaymentSession {
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
      */
     public void presentShippingFlow() {
-        final Intent intent = new Intent(mActivity, PaymentFlowActivity.class)
-                .putExtra(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData)
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mActivity.startActivityForResult(intent, PAYMENT_SHIPPING_DETAILS_REQUEST);
+        final Bundle bundle = new Bundle();
+        bundle.putParcelable(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig);
+        bundle.putParcelable(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
+        bundle.putBoolean(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        mPaymentFlowActivityStarter.startForResult(PAYMENT_SHIPPING_DETAILS_REQUEST, bundle);
     }
 
     /**

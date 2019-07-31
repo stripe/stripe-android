@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.model.StripeIntent;
 import com.stripe.android.utils.ObjectUtils;
-import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.PaymentRelayActivity;
 import com.stripe.android.view.StripeIntentResultExtras;
 
@@ -15,7 +15,7 @@ import com.stripe.android.view.StripeIntentResultExtras;
  * Starts an instance of {@link PaymentRelayStarter}.
  * Should only be called from {@link PaymentController}.
  */
-class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
+class PaymentRelayStarter implements AuthActivityStarter<PaymentRelayStarter.Data> {
     @NonNull private final Activity mActivity;
     private final int mRequestCode;
 

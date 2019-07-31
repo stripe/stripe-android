@@ -18,9 +18,10 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
+import com.stripe.android.view.ActivityStarter;
 import com.stripe.android.view.AddPaymentMethodActivity;
+import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentMethodsActivity;
-import com.stripe.android.view.PaymentMethodsActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +81,8 @@ public class PaymentSessionTest {
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
     @Mock private CustomerSession mCustomerSession;
-    @Mock private PaymentMethodsActivityStarter mPaymentMethodsActivityStarter;
+    @Mock private ActivityStarter<PaymentMethodsActivity> mPaymentMethodsActivityStarter;
+    @Mock private ActivityStarter<PaymentFlowActivity> mPaymentFlowActivityStarter;
     @Mock private PaymentSessionPrefs mPaymentSessionPrefs;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
@@ -372,8 +374,9 @@ public class PaymentSessionTest {
 
     @NonNull
     private PaymentSession createPaymentSesson() {
-        return new PaymentSession(mActivity, mCustomerSession,
-                mPaymentMethodsActivityStarter, mPaymentSessionData, mPaymentSessionPrefs);
+        return new PaymentSession(mCustomerSession, mPaymentMethodsActivityStarter,
+                mPaymentFlowActivityStarter, mPaymentSessionData,
+                mPaymentSessionPrefs);
     }
 
     @NonNull

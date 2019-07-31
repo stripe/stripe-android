@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.model.StripeIntent;
 import com.stripe.android.utils.ObjectUtils;
-import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.PaymentRelayActivity;
 import com.stripe.android.view.StripeIntentResultExtras;
 
@@ -17,7 +17,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 class Stripe3ds2CompletionStarter
-        implements ActivityStarter<Stripe3ds2CompletionStarter.StartData> {
+        implements AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> {
     @NonNull private final WeakReference<Activity> mActivityRef;
     private final int mRequestCode;
 

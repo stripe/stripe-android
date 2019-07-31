@@ -1,23 +1,16 @@
 package com.stripe.android.view;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 
-public class PaymentMethodsActivityStarter {
-
-    @NonNull private final Activity mActivity;
-
+public final class PaymentMethodsActivityStarter
+        extends ActivityStarter<PaymentMethodsActivity> {
     public PaymentMethodsActivityStarter(@NonNull Activity activity) {
-        mActivity = activity;
+        super(activity, PaymentMethodsActivity.class);
     }
 
-    public void startForResult(final int requestCode) {
-        mActivity.startActivityForResult(newIntent(), requestCode);
-    }
-
-    @NonNull
-    public Intent newIntent() {
-        return new Intent(mActivity, PaymentMethodsActivity.class);
+    public PaymentMethodsActivityStarter(@NonNull Fragment fragment) {
+        super(fragment, PaymentMethodsActivity.class);
     }
 }

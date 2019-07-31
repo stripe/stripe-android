@@ -26,7 +26,7 @@ import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
-import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
 import org.junit.Before;
@@ -80,7 +80,7 @@ public class PaymentControllerTest {
     @Mock private Transaction mTransaction;
     @Mock private StripeApiHandler mApiHandler;
     @Mock private MessageVersionRegistry mMessageVersionRegistry;
-    @Mock private ActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
+    @Mock private AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> m3ds2Starter;
     @Mock private ApiResultCallback<PaymentIntentResult> mPaymentAuthResultCallback;
     @Mock private ApiResultCallback<SetupIntentResult> mSetupAuthResultCallback;
     @Mock private PaymentRelayStarter mPaymentRelayStarter;
