@@ -1,5 +1,6 @@
 package com.stripe.example;
 
+import android.os.StrictMode;
 import android.support.multidex.MultiDexApplication;
 
 import com.facebook.stetho.Stetho;
@@ -10,6 +11,13 @@ public class ExampleApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectLeakedSqlLiteObjects()
+                .detectLeakedClosableObjects()
+                .penaltyLog()
+                .penaltyDeath()
+                .build());
 
         Stetho.initializeWithDefaults(this);
 
