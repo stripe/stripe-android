@@ -10,7 +10,9 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization;
 import com.stripe.android.stripe3ds2.init.ui.TextBoxCustomization;
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization;
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization;
+import com.stripe.android.view.BaseViewTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -22,11 +24,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 @RunWith(RobolectricTestRunner.class)
-public class PaymentAuthConfigTest {
+public class PaymentAuthConfigTest extends BaseViewTest<Fake3ds2ChallengeActivity> {
+
+    public PaymentAuthConfigTest() {
+        super(Fake3ds2ChallengeActivity.class);
+    }
 
     @Before
     public void setup() {
         PaymentAuthConfig.reset();
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
@@ -182,6 +194,10 @@ public class PaymentAuthConfigTest {
                 new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
                         .setTextColor("#000011").build();
 
+        final PaymentAuthConfig.Stripe3ds2ButtonCustomization selectStripe3ds2ButtonCustomization =
+                new PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
+                        .setBackgroundColor("#000066").build();
+
         final PaymentAuthConfig.Stripe3ds2LabelCustomization stripe3ds2LabelCustomization =
                 new PaymentAuthConfig.Stripe3ds2LabelCustomization.Builder()
                         .setTextColor("#000002").build();
@@ -200,6 +216,8 @@ public class PaymentAuthConfigTest {
                                 PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.NEXT)
                         .setButtonCustomization(cancelStripe3ds2ButtonCustomization,
                                 PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.CANCEL)
+                        .setButtonCustomization(selectStripe3ds2ButtonCustomization,
+                                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.SELECT)
                         .setLabelCustomization(stripe3ds2LabelCustomization)
                         .setTextBoxCustomization(stripe3ds2TextBoxCustomization)
                         .setToolbarCustomization(stripe3ds2ToolbarCustomization)
@@ -210,6 +228,9 @@ public class PaymentAuthConfigTest {
 
         final ButtonCustomization cancelButtonCustomization = new StripeButtonCustomization();
         cancelButtonCustomization.setTextColor("#000011");
+
+        final ButtonCustomization selectButtonCustomization = new StripeButtonCustomization();
+        selectButtonCustomization.setBackgroundColor("#000066");
 
         final LabelCustomization labelCustomization = new StripeLabelCustomization();
         labelCustomization.setTextColor("#000002");
@@ -225,10 +246,25 @@ public class PaymentAuthConfigTest {
                 UiCustomization.ButtonType.NEXT);
         expectedUiCustomization.setButtonCustomization(cancelButtonCustomization,
                 UiCustomization.ButtonType.CANCEL);
+        expectedUiCustomization.setButtonCustomization(selectButtonCustomization,
+                UiCustomization.ButtonType.SELECT);
         expectedUiCustomization.setLabelCustomization(labelCustomization);
         expectedUiCustomization.setTextBoxCustomization(textBoxCustomization);
         expectedUiCustomization.setToolbarCustomization(toolbarCustomization);
 
         assertEquals(expectedUiCustomization, uiCustomization.getUiCustomization());
+    }
+
+    @Test
+    public void createWithAppTheme_shouldCreateExpectedToolbarCustomization() {
+        final PaymentAuthConfig.Stripe3ds2UiCustomization uiCustomizationFromTheme =
+                PaymentAuthConfig.Stripe3ds2UiCustomization.Builder
+                        .createWithAppTheme(createActivity())
+                        .build();
+        final ToolbarCustomization toolbarCustomization = new StripeToolbarCustomization();
+        toolbarCustomization.setBackgroundColor("#FF222222");
+        toolbarCustomization.setTextColor("#00000621");
+        assertEquals(toolbarCustomization,
+                uiCustomizationFromTheme.getUiCustomization().getToolbarCustomization());
     }
 }

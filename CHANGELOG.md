@@ -1,10 +1,21 @@
 # CHANGELOG
 
-## 10.0.4 - upcoming
+## 10.1.1 - 2019-07-31
+* [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
+* [#1276](https://github.com/stripe/stripe-android/pull/1276) Update Stripe 3DS2 library to `v1.1.5`
+    * Fix crash in 3DS2 challenge flow when [conscrypt](https://github.com/google/conscrypt) is installed
+* [#1277](https://github.com/stripe/stripe-android/pull/1277) Fix StrictMode failure in `StripeFireAndForgetRequestExecutor`
+
+## 10.1.0 - 2019-07-30
 * [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
 * [#1256](https://github.com/stripe/stripe-android/pull/1256) Add `StripeIntentResult.Status` flag to 3DS1 authentication results
-* [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass Status.FAILED when 3DS2 auth fails
-* [#1259](https://github.com/stripe/stripe-android/pull/1259) Add StripeIntentResult.Status.TIMEDOUT value
+* [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass `Status.FAILED` when 3DS2 auth fails
+* [#1259](https://github.com/stripe/stripe-android/pull/1259) Add `StripeIntentResult.Status.TIMEDOUT` value
+* [#1263](https://github.com/stripe/stripe-android/pull/1263) Update `PaymentSession#presentPaymentMethodSelection()` logic
+    * Add overloaded `presentPaymentMethodSelection()` that takes a Payment Method ID to initially select
+    * Add `PaymentSessionPrefs` to persist customer's Payment Method selection across `PaymentSession` instances
+* [#1264](https://github.com/stripe/stripe-android/pull/1264) Update `Stripe3ds2UiCustomization`
+    * Add `Stripe3ds2UiCustomization.Builder.createWithAppTheme(Activity)` to create a `Stripe3ds2UiCustomization.Builder` based on the app theme
 
 ## 10.0.3 - 2019-07-24
 * Update Stripe 3DS2 library to `v1.1.2`

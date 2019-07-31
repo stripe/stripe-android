@@ -79,56 +79,6 @@ public class PaymentMethodTest {
             "\t}\n" +
             "}";
 
-    private static final PaymentMethod.Card CARD = new PaymentMethod.Card.Builder()
-            .setBrand(PaymentMethod.Card.Brand.VISA)
-            .setChecks(new PaymentMethod.Card.Checks.Builder()
-                    .setAddressLine1Check("unchecked")
-                    .setAddressPostalCodeCheck(null)
-                    .setCvcCheck("unchecked")
-                    .build())
-            .setCountry("US")
-            .setExpiryMonth(8)
-            .setExpiryYear(2022)
-            .setFunding("credit")
-            .setLast4("4242")
-            .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
-                    .setSupported(true)
-                    .build())
-            .setWallet(null)
-            .build();
-
-    private static final PaymentMethod.BillingDetails BILLING_DETAILS =
-            new PaymentMethod.BillingDetails.Builder()
-                    .setAddress(new Address.Builder()
-                            .setLine1("510 Townsend St")
-                            .setCity("San Francisco")
-                            .setState("CA")
-                            .setPostalCode("94103")
-                            .setCountry("USA")
-                            .build())
-                    .setEmail("patrick@example.com")
-                    .setName("Patrick")
-                    .setPhone("123-456-7890")
-                    .build();
-
-    private static final PaymentMethod CARD_PAYMENT_METHOD;
-
-    static {
-        final Map<String, String> metadata = new HashMap<>();
-        metadata.put("order_id", "123456789");
-
-        CARD_PAYMENT_METHOD = new PaymentMethod.Builder()
-                .setId("pm_123456789")
-                .setCreated(1550757934255L)
-                .setLiveMode(true)
-                .setType("card")
-                .setCustomerId("cus_AQsHpvKfKwJDrF")
-                .setBillingDetails(BILLING_DETAILS)
-                .setCard(CARD)
-                .setMetadata(metadata)
-                .build();
-    }
-
     @Test
     public void toJson_withIdeal_shouldReturnExpectedJson() {
         final JSONObject paymentMethod = new JSONObject(new PaymentMethod.Builder()
@@ -137,7 +87,7 @@ public class PaymentMethodTest {
                 .setLiveMode(true)
                 .setType("ideal")
                 .setCustomerId("cus_AQsHpvKfKwJDrF")
-                .setBillingDetails(BILLING_DETAILS)
+                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
                 .setIdeal(new PaymentMethod.Ideal.Builder()
                         .setBank("my bank")
                         .setBankIdentifierCode("bank id")
@@ -151,20 +101,22 @@ public class PaymentMethodTest {
 
     @Test
     public void equals_withEqualPaymentMethods_shouldReturnTrue() {
-        assertEquals(CARD_PAYMENT_METHOD, new PaymentMethod.Builder()
-                .setId("pm_123456789")
-                .setCreated(1550757934255L)
-                .setLiveMode(true)
-                .setType("card")
-                .setCustomerId("cus_AQsHpvKfKwJDrF")
-                .setBillingDetails(BILLING_DETAILS)
-                .setCard(CARD)
-                .build());
+        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                new PaymentMethod.Builder()
+                        .setId("pm_123456789")
+                        .setCreated(1550757934255L)
+                        .setLiveMode(true)
+                        .setType("card")
+                        .setCustomerId("cus_AQsHpvKfKwJDrF")
+                        .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+                        .setCard(PaymentMethodFixtures.CARD)
+                        .build());
     }
 
     @Test
     public void fromString_shouldReturnExpectedPaymentMethod() {
-        assertEquals(CARD_PAYMENT_METHOD, PaymentMethod.fromString(RAW_CARD_JSON));
+        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                PaymentMethod.fromString(RAW_CARD_JSON));
     }
 
     @Test
@@ -192,8 +144,8 @@ public class PaymentMethodTest {
         metadata.put("meta", "data");
         metadata.put("meta2", "data2");
         final PaymentMethod paymentMethod = new PaymentMethod.Builder()
-                .setBillingDetails(BILLING_DETAILS)
-                .setCard(CARD)
+                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+                .setCard(PaymentMethodFixtures.CARD)
                 .setCardPresent(PaymentMethod.CardPresent.EMPTY)
                 .setCreated(1550757934255L)
                 .setCustomerId("cus_AQsHpvKfKwJDrF")

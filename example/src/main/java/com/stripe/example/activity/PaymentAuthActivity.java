@@ -74,7 +74,8 @@ public class PaymentAuthActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment_auth);
 
         final PaymentAuthConfig.Stripe3ds2UiCustomization uiCustomization =
-                new PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build();
+                PaymentAuthConfig.Stripe3ds2UiCustomization.Builder.createWithAppTheme(this)
+                        .build();
         PaymentAuthConfig.init(new PaymentAuthConfig.Builder()
                 .set3ds2Config(new PaymentAuthConfig.Stripe3ds2Config.Builder()
                         .setTimeout(6)
