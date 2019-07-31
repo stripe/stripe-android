@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 10.1.1 - 2019-07-31
+* [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
+* [#1276](https://github.com/stripe/stripe-android/pull/1276) Update Stripe 3DS2 library to `v1.1.5`
+    * Fix crash in 3DS2 challenge flow when [conscrypt](https://github.com/google/conscrypt) is installed
+* [#1277](https://github.com/stripe/stripe-android/pull/1277) Fix StrictMode failure in `StripeFireAndForgetRequestExecutor`
+
 ## 10.1.0 - 2019-07-30
 * [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
 * [#1256](https://github.com/stripe/stripe-android/pull/1256) Add `StripeIntentResult.Status` flag to 3DS1 authentication results
