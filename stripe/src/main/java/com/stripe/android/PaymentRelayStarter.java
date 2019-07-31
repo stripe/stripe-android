@@ -29,22 +29,19 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
         final Intent intent = new Intent(mActivity, PaymentRelayActivity.class)
                 .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
                         data.stripeIntent != null ? data.stripeIntent.getClientSecret() : null)
-                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception)
-                .putExtra(StripeIntentResultExtras.AUTH_STATUS, data.status);
+                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception);
         mActivity.startActivityForResult(intent, mRequestCode);
     }
 
     public static final class Data {
         @Nullable final StripeIntent stripeIntent;
         @Nullable final Exception exception;
-        @StripeIntentResult.Status final int status;
 
         /**
          * Use when payment authentication completed or can be bypassed.
          */
         Data(@NonNull StripeIntent stripeIntent) {
             this.stripeIntent = stripeIntent;
-            this.status = StripeIntentResult.Status.SUCCEEDED;
             this.exception = null;
         }
 
@@ -53,13 +50,12 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
          */
         Data(@NonNull Exception exception) {
             this.stripeIntent = null;
-            this.status = StripeIntentResult.Status.FAILED;
             this.exception = exception;
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(stripeIntent, exception, status);
+            return ObjectUtils.hash(stripeIntent, exception);
         }
 
         @Override
@@ -69,8 +65,7 @@ class PaymentRelayStarter implements ActivityStarter<PaymentRelayStarter.Data> {
 
         private boolean typedEquals(@NonNull Data data) {
             return ObjectUtils.equals(stripeIntent, data.stripeIntent) &&
-                    ObjectUtils.equals(exception, data.exception) &&
-                    ObjectUtils.equals(status, data.status);
+                    ObjectUtils.equals(exception, data.exception);
         }
     }
 }

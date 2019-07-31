@@ -71,17 +71,33 @@ public interface StripeIntent {
     }
 
     /**
-     * See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status
+     * <ul>
+     * <li>
+     * <a href="https://stripe.com/docs/payments/intents#intent-statuses">
+     *     The Intent State Machine - Intent statuses</a>
+     * </li>
+     *
+     * <li>
+     * <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status">
+     *     PaymentIntent.status API reference</a>
+     * </li>
+     *
+     * <li>
+     * <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status">
+     *     SetupIntent.status API reference</a>
+     * </li>
+     * </ul>
      */
     enum Status {
         Canceled("canceled"),
         Processing("processing"),
         RequiresAction("requires_action"),
-        RequiresAuthorization("requires_authorization"),
-        RequiresCapture("requires_capture"),
         RequiresConfirmation("requires_confirmation"),
         RequiresPaymentMethod("requires_payment_method"),
-        Succeeded("succeeded");
+        Succeeded("succeeded"),
+
+        // only applies to Payment Intents
+        RequiresCapture("requires_capture");
 
         @NonNull
         public final String code;

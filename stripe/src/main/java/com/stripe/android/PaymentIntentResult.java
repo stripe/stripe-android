@@ -4,24 +4,10 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.model.PaymentIntent;
 
-public final class PaymentIntentResult implements StripeIntentResult<PaymentIntent> {
-    @NonNull private final PaymentIntent paymentIntent;
-    @Status private final int status;
+public final class PaymentIntentResult extends StripeIntentResult<PaymentIntent> {
 
     private PaymentIntentResult(@NonNull Builder builder) {
-        this.paymentIntent = builder.mPaymentIntent;
-        this.status = builder.mStatus;
-    }
-
-    @NonNull
-    @Override
-    public PaymentIntent getIntent() {
-        return paymentIntent;
-    }
-
-    @Override
-    public int getStatus() {
-        return status;
+        super(builder.mPaymentIntent, builder.mStatus);
     }
 
     static final class Builder implements ObjectBuilder<PaymentIntentResult> {
@@ -29,13 +15,13 @@ public final class PaymentIntentResult implements StripeIntentResult<PaymentInte
         @Status private int mStatus;
 
         @NonNull
-        public Builder setPaymentIntent(@NonNull PaymentIntent paymentIntent) {
+        Builder setPaymentIntent(@NonNull PaymentIntent paymentIntent) {
             mPaymentIntent = paymentIntent;
             return this;
         }
 
         @NonNull
-        public Builder setStatus(@Status int status) {
+        Builder setStatus(@Status int status) {
             mStatus = status;
             return this;
         }

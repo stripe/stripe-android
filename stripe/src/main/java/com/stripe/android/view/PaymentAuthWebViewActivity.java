@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 
 import com.stripe.android.PaymentAuthWebViewStarter;
 import com.stripe.android.R;
-import com.stripe.android.StripeIntentResult;
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization;
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils;
@@ -24,11 +23,9 @@ import com.stripe.android.stripe3ds2.utils.CustomizeUtils;
 import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
 public class PaymentAuthWebViewActivity
-        extends AppCompatActivity
-        implements PaymentAuthWebView.PaymentAuthWebViewClient.Listener {
+        extends AppCompatActivity {
 
     @Nullable private ToolbarCustomization mToolbarCustomization;
-    private Intent mResultIntent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,8 +46,8 @@ public class PaymentAuthWebViewActivity
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
-        mResultIntent = new Intent()
-                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret);
+        setResult(Activity.RESULT_OK, new Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret));
 
         final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
         final ProgressBar progressBar = findViewById(R.id.auth_web_view_progress_bar);
@@ -72,14 +69,9 @@ public class PaymentAuthWebViewActivity
     }
 
     @Override
-    public void onBackPressed() {
-        onAuthCompleted(StripeIntentResult.Status.CANCELED);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_close) {
-            onAuthCompleted(StripeIntentResult.Status.CANCELED);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -100,12 +92,5 @@ public class PaymentAuthWebViewActivity
                 CustomizeUtils.setStatusBarColor(this, backgroundColor);
             }
         }
-    }
-
-    @Override
-    public void onAuthCompleted(@StripeIntentResult.Status int status) {
-        setResult(Activity.RESULT_OK,
-                mResultIntent.putExtra(StripeIntentResultExtras.AUTH_STATUS, status));
-        finish();
     }
 }

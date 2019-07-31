@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -12,8 +13,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-
-import com.stripe.android.StripeIntentResult;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -41,9 +40,9 @@ class PaymentAuthWebView extends WebView {
         configureSettings();
     }
 
-    void init(@NonNull PaymentAuthWebViewClient.Listener listener, @NonNull ProgressBar progressBar,
+    void init(@NonNull Activity activity, @NonNull ProgressBar progressBar,
               @NonNull String clientSecret, @NonNull String returnUrl) {
-        setWebViewClient(new PaymentAuthWebViewClient(listener, progressBar, clientSecret,
+        setWebViewClient(new PaymentAuthWebViewClient(activity, progressBar, clientSecret,
                 returnUrl));
     }
 
@@ -66,11 +65,11 @@ class PaymentAuthWebView extends WebView {
         @NonNull private final String mClientSecret;
         @Nullable private final Uri mReturnUrl;
         @NonNull private final ProgressBar mProgressBar;
-        @NonNull private final Listener mListener;
+        @NonNull private final Activity mActivity;
 
-        PaymentAuthWebViewClient(@NonNull Listener listener, @NonNull ProgressBar progressBar,
+        PaymentAuthWebViewClient(@NonNull Activity activity, @NonNull ProgressBar progressBar,
                                  @NonNull String clientSecret, @Nullable String returnUrl) {
-            mListener = listener;
+            mActivity = activity;
             mClientSecret = clientSecret;
             mReturnUrl = returnUrl != null ? Uri.parse(returnUrl) : null;
             mProgressBar = progressBar;
@@ -154,11 +153,7 @@ class PaymentAuthWebView extends WebView {
         }
 
         private void onAuthCompleted() {
-            mListener.onAuthCompleted(StripeIntentResult.Status.SUCCEEDED);
-        }
-
-        interface Listener {
-            void onAuthCompleted(@StripeIntentResult.Status int status);
+            mActivity.finish();
         }
     }
 }
