@@ -67,6 +67,8 @@ public class LauncherActivity extends AppCompatActivity {
                             CustomerSessionActivity.class),
                     new Item(activity.getString(R.string.launch_payment_session),
                             PaymentSessionActivity.class),
+                    new Item(activity.getString(R.string.launch_payment_session_from_fragment),
+                            PaymentSessionFromFragmentActivity.class),
                     new Item(activity.getString(R.string.launch_pay_with_google),
                             PayWithGoogleActivity.class)
             ));

@@ -31,7 +31,7 @@ import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters;
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver;
 import com.stripe.android.stripe3ds2.transaction.Transaction;
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
-import com.stripe.android.view.ActivityStarter;
+import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
 import java.lang.ref.WeakReference;
@@ -623,7 +623,7 @@ class PaymentController {
         private static final String VALUE_YES = "Y";
 
         @NonNull private final WeakReference<Activity> mActivityRef;
-        @NonNull private final ActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
+        @NonNull private final AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
         @NonNull private final StripeApiHandler mApiHandler;
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
@@ -656,7 +656,7 @@ class PaymentController {
 
         PaymentAuth3ds2ChallengeStatusReceiver(
                 @NonNull Activity activity,
-                @NonNull ActivityStarter<Stripe3ds2CompletionStarter.StartData> starter,
+                @NonNull AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> starter,
                 @NonNull StripeApiHandler apiHandler,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,

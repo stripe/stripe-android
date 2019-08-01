@@ -95,6 +95,9 @@
 
         <activity
             android:name=".activity.PaymentAuthActivity" />
+
+        <activity
+            android:name=".activity.PaymentSessionFromFragmentActivity" />
     </application>
 
 </manifest>
