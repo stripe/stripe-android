@@ -24,9 +24,9 @@ import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
- * A model class representing a source in the Android SDK. More detailed information and interaction
- * can be seen at <a href="https://stripe.com/docs/api/sources/object?lang=java">
- * https://stripe.com/docs/api/sources/object?lang=java</a>.
+ * Model for a <a href="https://stripe.com/docs/sources">Sources API</a> object.
+ *
+ * See <a href="https://stripe.com/docs/api/sources/object">Sources API Reference</a>.
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class Source extends StripeModel implements StripePaymentSource {

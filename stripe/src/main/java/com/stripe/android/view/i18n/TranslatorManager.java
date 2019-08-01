@@ -6,7 +6,8 @@ import android.support.annotation.Nullable;
 
 /**
  * A class that provides a {@link ErrorMessageTranslator} for translating server-provided error
- * messages, as defined in https://stripe.com/docs/api/errors.
+ * messages, as defined in
+ * <a href="https://stripe.com/docs/api/errors">Stripe API Errors Reference</a>.
  *
  * See {@link com.stripe.android.view.PaymentMethodsActivity} for example usage.
  *

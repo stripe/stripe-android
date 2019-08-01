@@ -13,11 +13,12 @@ import java.util.Map;
 
 /**
  * Model for PaymentMethod creation parameters.
+ *
  * Used by {@link Stripe#createPaymentMethodSynchronous(PaymentMethodCreateParams, String)}
  *
- * See https://stripe.com/docs/api/payment_methods/create for documentation
+ * See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.
  *
- * See {@link PaymentMethod} for API object
+ * See {@link PaymentMethod} for API object.
  */
 public final class PaymentMethodCreateParams {
 

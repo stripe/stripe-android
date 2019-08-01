@@ -24,10 +24,19 @@ public final class AccountParams {
 
     /**
      * Create an {@link AccountParams} instance for a {@link BusinessType#Individual} or
-     * {@link BusinessType#Company}
+     * {@link BusinessType#Company}.
      *
-     * Note: API version {@code 2019-02-19} [0] replaced {@code legal_entity} with
-     * {@code individual} and {@code company}.
+     * <ol>
+     * <li>
+     * <a href="https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted">account.tos_shown_and_accepted</a>
+     * </li>
+     * <li>
+     * <a href="https://stripe.com/docs/api/accounts/create#create_account-company">company</a>
+     * </li>
+     * <li>
+     * <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">individual</a>
+     * </li>
+     * </ol>
      *
      * @param tosShownAndAccepted Whether the user described by the data in the token has been shown
      *                            the Stripe Connected Account Agreement [1]. When creating an
@@ -35,14 +44,6 @@ public final class AccountParams {
      *                            be true.
      * @param businessType        See {@link BusinessType}
      * @param businessData        A map of company [2] or individual [3] params.
-     *
-     * [0] <a href="https://stripe.com/docs/upgrades#2019-02-19">
-     *     https://stripe.com/docs/upgrades#2019-02-19</a>
-     * [1] https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted
-     * [2] <a href="https://stripe.com/docs/api/accounts/create#create_account-company">
-     *     https://stripe.com/docs/api/accounts/create#create_account-company</a>
-     * [3] <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">
-     *     https://stripe.com/docs/api/accounts/create#create_account-individual</a>
      *
      *
      * @return {@link AccountParams}

@@ -23,7 +23,8 @@ public final class PaymentConfiguration {
     }
 
     /**
-     * A publishable key from https://dashboard.stripe.com/apikeys
+     * A publishable key from the Dashboard's
+     * <a href="https://dashboard.stripe.com/apikeys">API keys</a> page.
      */
     public static void init(@NonNull String publishableKey) {
         mInstance = new PaymentConfiguration(publishableKey);

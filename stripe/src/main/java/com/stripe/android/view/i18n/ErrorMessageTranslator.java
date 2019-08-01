@@ -7,7 +7,8 @@ import com.stripe.android.StripeError;
 
 public interface ErrorMessageTranslator {
     /**
-     * See https://stripe.com/docs/api/errors for a list of error codes and associated messages
+     * See <a href="https://stripe.com/docs/api/errors">Stripe API Errors</a> for a list of error
+     * codes and associated messages.
      *
      * @param httpCode The HTTP code associated with the error response.
      * @param errorMessage A human-readable message providing more details about the error.

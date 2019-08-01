@@ -36,7 +36,8 @@ public interface StripeIntent {
     PaymentIntent.Status getStatus();
 
     /**
-     * See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-type
+     * See <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-type">
+     *     payment_intent.next_action_type</a>
      */
     enum NextActionType {
         RedirectToUrl("redirect_to_url"),
@@ -129,8 +130,9 @@ public interface StripeIntent {
     }
 
     /**
-     * See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-usage and
-     * https://stripe.com/docs/payments/payment-intents/off-session
+     * See <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-usage">
+     *     setup_intent.usage</a> and
+     *     <a href="https://stripe.com/docs/payments/cards/reusing-cards">Reusing Cards</a>.
      */
     enum Usage {
         OnSession("on_session"),

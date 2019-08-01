@@ -28,9 +28,10 @@ import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
- * Model for PaymentMethod object
+ * Model for a <a href="https://stripe.com/docs/payments/payment-methods">Payment Methods API</a>
+ * object.
  *
- * See https://stripe.com/docs/api/payment_methods for documentation
+ * See <a href="https://stripe.com/docs/api/payment_methods">Payment Methods API reference</a>.
  *
  * See {@link PaymentMethodCreateParams} for PaymentMethod creation
  */

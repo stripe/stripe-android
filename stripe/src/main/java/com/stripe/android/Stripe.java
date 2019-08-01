@@ -124,7 +124,7 @@ public class Stripe {
      * Setter for identifying your plug-in or library.
      *
      * See <a href="https://stripe.com/docs/building-plugins#setappinfo">
-     *     https://stripe.com/docs/building-plugins#setappinfo</a>
+     *     Building Stripe Plug-ins and Libraries - Setting the API version</a>.
      */
     public static void setAppInfo(@Nullable AppInfo appInfo) {
         sAppInfo = appInfo;
