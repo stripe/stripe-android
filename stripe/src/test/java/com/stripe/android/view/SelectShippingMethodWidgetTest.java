@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,28 +23,36 @@ import static org.junit.Assert.assertEquals;
 public class SelectShippingMethodWidgetTest {
 
     private ShippingMethodAdapter mShippingMethodAdapter;
-    private List<ShippingMethod> mShippingMethods;
+    private static final ShippingMethod UPS = new ShippingMethod(
+            "UPS Ground",
+            "ups-ground",
+            "Arrives in 3-5 days",
+            0,
+            "USD"
+    );
+    private static final ShippingMethod FEDEX = new ShippingMethod(
+            "FedEx",
+            "fedex",
+            "Arrives tomorrow",
+            599,
+            "USD"
+    );
+    private static final List<ShippingMethod> SHIPPING_METHODS =
+            new ArrayList<>(Arrays.asList(UPS, FEDEX));
 
     @Before
     public void setup() {
         Locale.setDefault(Locale.US);
-        mShippingMethods = new ArrayList<>();
-        ShippingMethod ups = new ShippingMethod("UPS Ground", "ups-ground", "Arrives in 3-5 days", 0, "USD");
-        ShippingMethod fedEx = new ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
-        mShippingMethods.add(ups);
-        mShippingMethods.add(fedEx);
-
         final SelectShippingMethodWidget selectShippingMethodWidget =
                 new SelectShippingMethodWidget(ApplicationProvider.getApplicationContext());
-        selectShippingMethodWidget.setShippingMethods(mShippingMethods, ups);
+        selectShippingMethodWidget.setShippingMethods(SHIPPING_METHODS, UPS);
         mShippingMethodAdapter = selectShippingMethodWidget.mShippingMethodAdapter;
     }
 
     @Test
     public void selectShippingMethodWidget_whenSelected_selectionChanges() {
-        assertEquals(mShippingMethodAdapter.getSelectedShippingMethod(), mShippingMethods.get(0));
-        mShippingMethodAdapter.setSelectedIndex(1);
-        assertEquals(mShippingMethodAdapter.getSelectedShippingMethod(), mShippingMethods.get(1));
+        assertEquals(mShippingMethodAdapter.getSelectedShippingMethod(), SHIPPING_METHODS.get(0));
+        mShippingMethodAdapter.onShippingMethodSelected(1);
+        assertEquals(mShippingMethodAdapter.getSelectedShippingMethod(), SHIPPING_METHODS.get(1));
     }
-
 }

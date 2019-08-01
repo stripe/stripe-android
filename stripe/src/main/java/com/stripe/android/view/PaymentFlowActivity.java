@@ -159,16 +159,15 @@ public class PaymentFlowActivity extends StripeActivity {
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
         } else {
             mPaymentSessionData.setShippingInformation(mShippingInformationSubmitted);
-            Intent intent = new Intent();
-            intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
-            setResult(RESULT_OK, intent);
+            setResult(RESULT_OK,
+                    new Intent().putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData));
             finish();
         }
     }
 
     private void onShippingInfoSubmitted() {
-        ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
-        ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
+        final ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
+        final ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
         if (shippingInformation !=  null) {
             mShippingInformationSubmitted = shippingInformation;
             setCommunicatingProgress(true);
@@ -195,13 +194,13 @@ public class PaymentFlowActivity extends StripeActivity {
     }
 
     private void onShippingMethodSave() {
-        SelectShippingMethodWidget selectShippingMethodWidget =
+        final SelectShippingMethodWidget selectShippingMethodWidget =
                 findViewById(R.id.select_shipping_method_widget);
-        ShippingMethod shippingMethod = selectShippingMethodWidget.getSelectedShippingMethod();
+        final ShippingMethod shippingMethod = selectShippingMethodWidget
+                .getSelectedShippingMethod();
         mPaymentSessionData.setShippingMethod(shippingMethod);
-        Intent intent = new Intent();
-        intent.putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
-        setResult(RESULT_OK, intent);
+        setResult(RESULT_OK,
+                new Intent().putExtra(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData));
         finish();
     }
 

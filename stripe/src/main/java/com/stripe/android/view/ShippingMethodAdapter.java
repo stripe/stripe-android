@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Adapter that populates a list with shipping methods
  */
-class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder> {
+final class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder> {
 
     @NonNull private List<ShippingMethod> mShippingMethods = new ArrayList<>();
     private int mSelectedIndex = 0;
@@ -33,17 +33,15 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
 
     @NonNull
     @Override
-    public ShippingMethodAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
-                                                               int i) {
-        ShippingMethodView shippingMethodView = new ShippingMethodView(viewGroup.getContext());
-        return new ViewHolder(shippingMethodView);
+    public ShippingMethodAdapter.ViewHolder onCreateViewHolder(
+            @NonNull ViewGroup viewGroup, int i) {
+        return new ViewHolder(new ShippingMethodView(viewGroup.getContext()), this);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
         holder.setShippingMethod(mShippingMethods.get(i));
-        holder.setIndex(i);
-        holder.setUIAsSelected(i == mSelectedIndex);
+        holder.setSelected(i == mSelectedIndex);
     }
 
     @Nullable
@@ -64,37 +62,33 @@ class ShippingMethodAdapter extends RecyclerView.Adapter<ShippingMethodAdapter.V
         notifyDataSetChanged();
     }
 
-    void setSelectedIndex(int selectedIndex) {
+    void onShippingMethodSelected(int selectedIndex) {
         mSelectedIndex = selectedIndex;
         notifyDataSetChanged();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
-        ShippingMethodView shippingMethodView;
-        int index;
+        @NonNull private final ShippingMethodView shippingMethodView;
 
-        ViewHolder(final ShippingMethodView shippingMethodView) {
+        private ViewHolder(@NonNull final ShippingMethodView shippingMethodView,
+                           @NonNull final ShippingMethodAdapter adapter) {
             super(shippingMethodView);
             this.shippingMethodView = shippingMethodView;
             shippingMethodView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    setSelectedIndex(index);
+                    adapter.onShippingMethodSelected(getAdapterPosition());
                 }
             });
         }
 
-        void setShippingMethod(ShippingMethod shippingMethod) {
+        private void setShippingMethod(@NonNull ShippingMethod shippingMethod) {
             shippingMethodView.setShippingMethod(shippingMethod);
         }
 
-        void setUIAsSelected(boolean selected) {
+        private void setSelected(boolean selected) {
             shippingMethodView.setSelected(selected);
-        }
-
-        void setIndex(int index) {
-            this.index = index;
         }
     }
 }
