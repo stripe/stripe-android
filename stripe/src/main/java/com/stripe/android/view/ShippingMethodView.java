@@ -50,17 +50,17 @@ class ShippingMethodView extends RelativeLayout {
         mCheckmark = findViewById(R.id.iv_selected_icon);
 
         final int rawSelectedColorInt = getThemeAccentColor(context).data;
-        final int rawUselectedTextColorPrimaryInt = getThemeTextColorPrimary(context).data;
+        final int rawUnselectedTextColorPrimaryInt = getThemeTextColorPrimary(context).data;
         final int rawUnselectedTextColorSecondaryInt = getThemeTextColorSecondary(context).data;
         mSelectedColorInt =
                 ViewUtils.isColorTransparent(rawSelectedColorInt) ?
                         ContextCompat.getColor(context, R.color.accent_color_default) :
                         rawSelectedColorInt;
         mUnselectedTextColorPrimaryInt =
-                ViewUtils.isColorTransparent(rawUselectedTextColorPrimaryInt) ?
+                ViewUtils.isColorTransparent(rawUnselectedTextColorPrimaryInt) ?
                         ContextCompat.getColor(context,
                                 R.color.color_text_unselected_primary_default) :
-                        rawUselectedTextColorPrimaryInt;
+                        rawUnselectedTextColorPrimaryInt;
         mUnselectedTextColorSecondaryInt =
                 ViewUtils.isColorTransparent(rawUnselectedTextColorSecondaryInt) ?
                         ContextCompat.getColor(context,
