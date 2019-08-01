@@ -27,7 +27,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  *
  * See <a href="https://stripe.com/docs/api/sources/object">Sources API Reference</a>.
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess"})
 public final class Source extends StripeModel implements StripePaymentSource {
 
     static final String VALUE_SOURCE = "source";
@@ -129,24 +129,25 @@ public final class Source extends StripeModel implements StripePaymentSource {
     private static final String FIELD_USAGE = "usage";
     private static final String FIELD_WECHAT = "wechat";
 
-    @Nullable private String mId;
-    @Nullable private Long mAmount;
-    @Nullable private String mClientSecret;
-    @Nullable private SourceCodeVerification mCodeVerification;
-    @Nullable private Long mCreated;
-    @Nullable private String mCurrency;
-    @Nullable private String mTypeRaw;
-    @Nullable @SourceFlow private String mFlow;
-    @Nullable private Boolean mLiveMode;
-    @Nullable private Map<String, String> mMetaData;
-    @Nullable private SourceOwner mOwner;
-    @Nullable private SourceReceiver mReceiver;
-    @Nullable private SourceRedirect mRedirect;
-    @Nullable @SourceStatus private String mStatus;
-    @Nullable private Map<String, Object> mSourceTypeData;
+    @NonNull @SourceType private final String mType;
+    @NonNull private final String mTypeRaw;
+
+    @Nullable private final String mId;
+    @Nullable private final Long mAmount;
+    @Nullable private final String mClientSecret;
+    @Nullable private final SourceCodeVerification mCodeVerification;
+    @Nullable private final Long mCreated;
+    @Nullable private final String mCurrency;
+    @Nullable @SourceFlow private final String mFlow;
+    @Nullable private final Boolean mLiveMode;
+    @Nullable private final Map<String, String> mMetaData;
+    @Nullable private final SourceOwner mOwner;
+    @Nullable private final SourceReceiver mReceiver;
+    @Nullable private final SourceRedirect mRedirect;
+    @Nullable @SourceStatus private final String mStatus;
+    @Nullable private final Map<String, Object> mSourceTypeData;
     @Nullable private final StripeSourceTypeModel mSourceTypeModel;
-    @Nullable @SourceType private String mType;
-    @Nullable @Usage private String mUsage;
+    @Nullable @Usage private final String mUsage;
     @Nullable private final WeChat mWeChat;
 
     private Source(
@@ -272,7 +273,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
      *
      * @return the {@link SourceType} of this Source
      */
-    @Nullable
+    @NonNull
     @SourceType
     public String getType() {
         return mType;
@@ -285,7 +286,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
      *
      * @return the type of this Source as a string
      */
-    @Nullable
+    @NonNull
     public String getTypeRaw() {
         return mTypeRaw;
     }
@@ -294,92 +295,6 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @Nullable
     public String getUsage() {
         return mUsage;
-    }
-
-    @Deprecated
-    public void setId(String id) {
-        mId = id;
-    }
-
-    @Deprecated
-    public void setAmount(long amount) {
-        mAmount = amount;
-    }
-
-    @Deprecated
-    public void setClientSecret(String clientSecret) {
-        mClientSecret = clientSecret;
-    }
-
-    @Deprecated
-    public void setCodeVerification(SourceCodeVerification codeVerification) {
-        mCodeVerification = codeVerification;
-    }
-
-    @Deprecated
-    public void setCreated(long created) {
-        mCreated = created;
-    }
-
-    @Deprecated
-    public void setCurrency(String currency) {
-        mCurrency = currency;
-    }
-
-    @Deprecated
-    public void setFlow(@SourceFlow String flow) {
-        mFlow = flow;
-    }
-
-    @Deprecated
-    public void setLiveMode(boolean liveMode) {
-        mLiveMode = liveMode;
-    }
-
-    @Deprecated
-    public void setMetaData(Map<String, String> metaData) {
-        mMetaData = metaData;
-    }
-
-    @Deprecated
-    public void setOwner(SourceOwner owner) {
-        mOwner = owner;
-    }
-
-    @Deprecated
-    public void setReceiver(SourceReceiver receiver) {
-        mReceiver = receiver;
-    }
-
-    @Deprecated
-    public void setRedirect(SourceRedirect redirect) {
-        mRedirect = redirect;
-    }
-
-    @Deprecated
-    public void setStatus(@SourceStatus String status) {
-        mStatus = status;
-    }
-
-    @Deprecated
-    public void setSourceTypeData(Map<String, Object> sourceTypeData) {
-        mSourceTypeData = sourceTypeData;
-    }
-
-    @Deprecated
-    public void setTypeRaw(@NonNull @Size(min = 1) String typeRaw) {
-        mTypeRaw = typeRaw;
-        mType = SourceType.UNKNOWN;
-    }
-
-    @Deprecated
-    public void setType(@SourceType String type) {
-        mType = type;
-    }
-
-    @Deprecated
-    public void setUsage(@Usage String usage) {
-        mUsage = usage;
     }
 
     @NonNull
