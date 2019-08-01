@@ -146,12 +146,6 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @Nullable @SourceType private String mType;
     @Nullable @Usage private String mUsage;
 
-    private Source(@Nullable String id, @Nullable SourceCardData sourceTypeModel) {
-        mId = id;
-        mType = SourceType.CARD;
-        mSourceTypeModel = sourceTypeModel;
-    }
-
     private Source(
             @Nullable String id,
             @Nullable Long amount,
@@ -198,18 +192,22 @@ public final class Source extends StripeModel implements StripePaymentSource {
         return mId;
     }
 
+    @Nullable
     public Long getAmount() {
         return mAmount;
     }
 
+    @Nullable
     public String getClientSecret() {
         return mClientSecret;
     }
 
+    @Nullable
     public SourceCodeVerification getCodeVerification() {
         return mCodeVerification;
     }
 
+    @Nullable
     public Long getCreated() {
         return mCreated;
     }
@@ -223,22 +221,27 @@ public final class Source extends StripeModel implements StripePaymentSource {
         return mFlow;
     }
 
+    @Nullable
     public Boolean isLiveMode() {
         return mLiveMode;
     }
 
+    @Nullable
     public Map<String, String> getMetaData() {
         return mMetaData;
     }
 
+    @Nullable
     public SourceOwner getOwner() {
         return mOwner;
     }
 
+    @Nullable
     public SourceReceiver getReceiver() {
         return mReceiver;
     }
 
+    @Nullable
     public SourceRedirect getRedirect() {
         return mRedirect;
     }
@@ -248,10 +251,12 @@ public final class Source extends StripeModel implements StripePaymentSource {
         return mStatus;
     }
 
+    @Nullable
     public Map<String, Object> getSourceTypeData() {
         return mSourceTypeData;
     }
 
+    @Nullable
     public StripeSourceTypeModel getSourceTypeModel() {
         return mSourceTypeModel;
     }
@@ -263,6 +268,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
      *
      * @return the {@link SourceType} of this Source
      */
+    @Nullable
     @SourceType
     public String getType() {
         return mType;
@@ -275,80 +281,99 @@ public final class Source extends StripeModel implements StripePaymentSource {
      *
      * @return the type of this Source as a string
      */
+    @Nullable
     public String getTypeRaw() {
         return mTypeRaw;
     }
 
     @Usage
+    @Nullable
     public String getUsage() {
         return mUsage;
     }
 
+    @Deprecated
     public void setId(String id) {
         mId = id;
     }
 
+    @Deprecated
     public void setAmount(long amount) {
         mAmount = amount;
     }
 
+    @Deprecated
     public void setClientSecret(String clientSecret) {
         mClientSecret = clientSecret;
     }
 
+    @Deprecated
     public void setCodeVerification(SourceCodeVerification codeVerification) {
         mCodeVerification = codeVerification;
     }
 
+    @Deprecated
     public void setCreated(long created) {
         mCreated = created;
     }
 
+    @Deprecated
     public void setCurrency(String currency) {
         mCurrency = currency;
     }
 
+    @Deprecated
     public void setFlow(@SourceFlow String flow) {
         mFlow = flow;
     }
 
+    @Deprecated
     public void setLiveMode(boolean liveMode) {
         mLiveMode = liveMode;
     }
 
+    @Deprecated
     public void setMetaData(Map<String, String> metaData) {
         mMetaData = metaData;
     }
 
+    @Deprecated
     public void setOwner(SourceOwner owner) {
         mOwner = owner;
     }
 
+    @Deprecated
     public void setReceiver(SourceReceiver receiver) {
         mReceiver = receiver;
     }
 
+    @Deprecated
     public void setRedirect(SourceRedirect redirect) {
         mRedirect = redirect;
     }
 
+    @Deprecated
     public void setStatus(@SourceStatus String status) {
         mStatus = status;
     }
 
+    @Deprecated
     public void setSourceTypeData(Map<String, Object> sourceTypeData) {
         mSourceTypeData = sourceTypeData;
     }
 
+    @Deprecated
     public void setTypeRaw(@NonNull @Size(min = 1) String typeRaw) {
         mTypeRaw = typeRaw;
-        setType(SourceType.UNKNOWN);
+        mType = SourceType.UNKNOWN;
     }
 
+    @Deprecated
     public void setType(@SourceType String type) {
         mType = type;
     }
 
+    @Deprecated
     public void setUsage(@Usage String usage) {
         mUsage = usage;
     }
@@ -417,10 +442,13 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
     @NonNull
     private static Source fromCardJson(@NonNull JSONObject jsonObject) {
-        return new Source(
-                optString(jsonObject, FIELD_ID),
-                SourceCardData.fromJson(jsonObject)
-        );
+        final String id = optString(jsonObject, FIELD_ID);
+        final SourceCardData sourceTypeModel = SourceCardData.fromJson(jsonObject);
+
+        return new Source(id, null, null, null, null,
+                null, null, null, null, null, null,
+                null, null, null, sourceTypeModel, SourceType.CARD,
+                SourceType.CARD, null);
     }
 
     @NonNull
@@ -489,32 +517,39 @@ public final class Source extends StripeModel implements StripePaymentSource {
     private static <T extends StripeModel> T optStripeJsonModel(
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String key,
-            Class<T> type) {
+            @NonNull Class<T> type) {
         if (!jsonObject.has(key)) {
             return null;
         }
 
         switch (key) {
-            case FIELD_CODE_VERIFICATION:
+            case FIELD_CODE_VERIFICATION: {
                 return type.cast(SourceCodeVerification.fromJson(
                         jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)));
-            case FIELD_OWNER:
+            }
+            case FIELD_OWNER: {
                 return type.cast(
                         SourceOwner.fromJson(jsonObject.optJSONObject(FIELD_OWNER)));
-            case FIELD_RECEIVER:
+            }
+            case FIELD_RECEIVER: {
                 return type.cast(
                         SourceReceiver.fromJson(jsonObject.optJSONObject(FIELD_RECEIVER)));
-            case FIELD_REDIRECT:
+            }
+            case FIELD_REDIRECT: {
                 return type.cast(
                         SourceRedirect.fromJson(jsonObject.optJSONObject(FIELD_REDIRECT)));
-            case SourceType.CARD:
+            }
+            case SourceType.CARD: {
                 return type.cast(
                         SourceCardData.fromJson(jsonObject.optJSONObject(SourceType.CARD)));
-            case SourceType.SEPA_DEBIT:
+            }
+            case SourceType.SEPA_DEBIT: {
                 return type.cast(SourceSepaDebitData.fromJson(
                         jsonObject.optJSONObject(SourceType.SEPA_DEBIT)));
-            default:
+            }
+            default: {
                 return null;
+            }
         }
     }
 
