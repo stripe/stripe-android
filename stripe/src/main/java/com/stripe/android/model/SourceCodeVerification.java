@@ -18,8 +18,10 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
  * Model for a
- * https://stripe.com/docs/api/sources/object#source_object-code_verification
- * object in the source api, <em>not</em> source code verification
+ * <a href="https://stripe.com/docs/api/sources/object#source_object-code_verification">
+ *     code verification</a> object in the Sources API.
+ *
+ * <em>Not</em> source code verification.
  */
 public final class SourceCodeVerification extends StripeModel {
 

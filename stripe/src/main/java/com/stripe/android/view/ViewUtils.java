@@ -115,21 +115,24 @@ class ViewUtils {
      * This is subject to much interpretation, but we attempt to follow traditional
      * design standards.
      *
+     * Formula comes from W3C standards and conventional theory about how to calculate the
+     * "brightness" of a color, often thought of as how far along the spectrum from white to black
+     * the gray-scale version would be.
+     *
+     * See <a href="https://www.w3.org/TR/AERT#color-contrast">
+     *     W3C's Techniques For Accessibility Evaluation And Repair Tools</a> and
+     *     <a href="http://paulbourke.net/miscellaneous/colourspace/">RGB colour space</a>
+     *     for further reading.
+     *
      * @param color an integer representation of a color
      * @return {@code true} if the color is "dark," else {@link false}
      */
     static boolean isColorDark(@ColorInt int color) {
-        // Forumla comes from W3C standards and conventional theory
-        // about how to calculate the "brightness" of a color, often
-        // thought of as how far along the spectrum from white to black the
-        // grayscale version would be.
-        // See https://www.w3.org/TR/AERT#color-contrast and
-        // http://paulbourke.net/texture_colour/colourspace/ for further reading.
-        double luminescence = 0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 *
+        final double luminescence = 0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 *
                 Color.blue(color);
 
         // Because the colors are all hex integers.
-        double luminescencePercentage = luminescence / 255;
+        final double luminescencePercentage = luminescence / 255;
         return luminescencePercentage <= 0.5;
     }
 

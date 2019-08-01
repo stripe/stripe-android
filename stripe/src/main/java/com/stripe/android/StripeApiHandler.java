@@ -758,7 +758,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/tokens
+     * @return <code>https://api.stripe.com/v1/tokens</code>
      */
     @NonNull
     static String getTokensUrl() {
@@ -766,7 +766,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/sources
+     * @return <code>https://api.stripe.com/v1/sources</code>
      */
     @NonNull
     @VisibleForTesting
@@ -775,7 +775,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_methods
+     * @return <code>https://api.stripe.com/v1/payment_methods</code>
      */
     @VisibleForTesting
     @NonNull
@@ -784,7 +784,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_intents/:id
+     * @return <code>https://api.stripe.com/v1/payment_intents/:id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -793,7 +793,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_intents/:id/confirm
+     * @return <code>https://api.stripe.com/v1/payment_intents/:id/confirm</code>
      */
     @VisibleForTesting
     @NonNull
@@ -802,7 +802,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_intents/:id
+     * @return <code>https://api.stripe.com/v1/payment_intents/:id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -811,7 +811,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_intents/:id/confirm
+     * @return <code>https://api.stripe.com/v1/payment_intents/:id/confirm</code>
      */
     @VisibleForTesting
     @NonNull
@@ -820,7 +820,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/customers/:customer_id/sources
+     * @return <code>https://api.stripe.com/v1/customers/:customer_id/sources</code>
      */
     @VisibleForTesting
     @NonNull
@@ -829,7 +829,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/customers/:customer_id/sources/:source_id
+     * @return <code>https://api.stripe.com/v1/customers/:customer_id/sources/:source_id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -838,7 +838,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_methods/:id/attach
+     * @return <code>https://api.stripe.com/v1/payment_methods/:id/attach</code>
      */
     @VisibleForTesting
     @NonNull
@@ -847,7 +847,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/payment_methods/:id/detach
+     * @return <code>https://api.stripe.com/v1/payment_methods/:id/detach</code>
      */
     @VisibleForTesting
     @NonNull
@@ -856,7 +856,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/customers/:id
+     * @return <code>https://api.stripe.com/v1/customers/:id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -865,7 +865,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/sources/:id
+     * @return <code>https://api.stripe.com/v1/sources/:id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -874,7 +874,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/tokens/:id
+     * @return <code>https://api.stripe.com/v1/tokens/:id</code>
      */
     @VisibleForTesting
     @NonNull
@@ -883,7 +883,7 @@ class StripeApiHandler {
     }
 
     /**
-     * @return https://api.stripe.com/v1/issuing/cards/:id/pin
+     * @return <code>https://api.stripe.com/v1/issuing/cards/:id/pin</code>
      */
     @VisibleForTesting
     @NonNull

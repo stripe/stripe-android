@@ -7,19 +7,27 @@ import java.io.Serializable;
 /**
  * A model for error objects sent from the Stripe API.
  *
- * https://stripe.com/docs/api/errors
+ * <a href="https://stripe.com/docs/api/errors">Stripe API Errors</a>
  */
 public final class StripeError implements Serializable {
 
-    // https://stripe.com/docs/api/errors (e.g. "invalid_request_error")
+    /**
+     * <a href="https://stripe.com/docs/api/errors">Stripe API Errors</a>
+     * (e.g. "invalid_request_error")
+     */
     @Nullable public final String type;
     @Nullable public final String message;
 
-    // https://stripe.com/docs/error-codes (e.g. "payment_method_unactivated")
+    /**
+     * <a href="https://stripe.com/docs/error-codes">Stripe API Error Codes</a>
+     * (e.g. "payment_method_unactivated")
+     */
     @Nullable public final String code;
     @Nullable public final String param;
 
-    // see https://stripe.com/docs/declines/codes
+    /**
+     * <a href="https://stripe.com/docs/declines/codes">Stripe API Decline Codes</a>
+     */
     @Nullable public final String declineCode;
 
     @Nullable public final String charge;
