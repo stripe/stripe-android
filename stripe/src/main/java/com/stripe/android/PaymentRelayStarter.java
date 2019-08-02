@@ -1,7 +1,6 @@
 package com.stripe.android;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -16,21 +15,21 @@ import com.stripe.android.view.StripeIntentResultExtras;
  * Should only be called from {@link PaymentController}.
  */
 class PaymentRelayStarter implements AuthActivityStarter<PaymentRelayStarter.Data> {
-    @NonNull private final Activity mActivity;
+    @NonNull private final Host mHost;
     private final int mRequestCode;
 
-    PaymentRelayStarter(@NonNull Activity activity, int requestCode) {
-        mActivity = activity;
+    PaymentRelayStarter(@NonNull Host host, int requestCode) {
+        mHost = host;
         mRequestCode = requestCode;
     }
 
     @Override
     public void start(@NonNull Data data) {
-        final Intent intent = new Intent(mActivity, PaymentRelayActivity.class)
-                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
-                        data.stripeIntent != null ? data.stripeIntent.getClientSecret() : null)
-                .putExtra(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception);
-        mActivity.startActivityForResult(intent, mRequestCode);
+        final Bundle extras = new Bundle();
+        extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
+                        data.stripeIntent != null ? data.stripeIntent.getClientSecret() : null);
+        extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception);
+        mHost.startActivityForResult(PaymentRelayActivity.class, extras, mRequestCode);
     }
 
     public static final class Data {

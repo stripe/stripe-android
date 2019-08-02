@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.app.Fragment;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -27,6 +28,7 @@ import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.view.AuthActivityStarter;
 
 import java.util.Locale;
 import java.util.Map;
@@ -143,8 +145,11 @@ public class Stripe {
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
                                    @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(activity, confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmSetupIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
     }
 
     /**
@@ -153,6 +158,29 @@ public class Stripe {
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
         confirmSetupIntent(activity, confirmSetupIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
+     *
+     * @param fragment the {@link Fragment} that is launching the payment authentication flow
+     */
+    public void confirmSetupIntent(@NonNull Fragment fragment,
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
+                                   @NonNull String publishableKey) {
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmSetupIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #confirmSetupIntent(Fragment, ConfirmSetupIntentParams, String)}}
+     */
+    public void confirmSetupIntent(@NonNull Fragment fragment,
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        confirmSetupIntent(fragment, confirmSetupIntentParams, mDefaultPublishableKey);
     }
 
     /**
@@ -167,8 +195,11 @@ public class Stripe {
     public void confirmPayment(@NonNull Activity activity,
                                @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
                                @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(activity, confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmPaymentIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
     }
 
     /**
@@ -177,6 +208,33 @@ public class Stripe {
     public void confirmPayment(@NonNull Activity activity,
                                @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams) {
         confirmPayment(activity, confirmPaymentIntentParams, mDefaultPublishableKey);
+    }
+
+    /**
+     * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
+     * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
+     * automatic confirmation</a> flow.
+     *
+     * @param fragment the {@link Fragment} that is launching the payment authentication flow
+     * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
+     *                                   {@link PaymentIntent}
+     */
+    public void confirmPayment(@NonNull Fragment fragment,
+                               @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
+                               @NonNull String publishableKey) {
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmPaymentIntentParams,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #confirmPayment(Fragment, ConfirmPaymentIntentParams, String)}}
+     */
+    public void confirmPayment(@NonNull Fragment fragment,
+                               @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams) {
+        confirmPayment(fragment, confirmPaymentIntentParams, mDefaultPublishableKey);
     }
 
     /**
@@ -190,8 +248,11 @@ public class Stripe {
     public void authenticatePayment(@NonNull Activity activity,
                                     @NonNull String clientSecret,
                                     @NonNull String publishableKey) {
-        mPaymentController.startAuth(activity, clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
     }
 
     /**
@@ -203,6 +264,32 @@ public class Stripe {
     }
 
     /**
+     * Authenticate a {@link PaymentIntent}. Used for <a href=
+     * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
+     * manual confirmation</a> flow.
+     *
+     * @param fragment the {@link Activity} that is launching the payment authentication flow
+     * @param clientSecret the `client_secret` property of a confirmed {@link PaymentIntent} object
+     */
+    public void authenticatePayment(@NonNull Fragment fragment,
+                                    @NonNull String clientSecret,
+                                    @NonNull String publishableKey) {
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #authenticatePayment(Fragment, String, String)}}
+     */
+    public void authenticatePayment(@NonNull Fragment fragment,
+                                    @NonNull String clientSecret) {
+        authenticatePayment(fragment, clientSecret, mDefaultPublishableKey);
+    }
+
+    /**
      * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
      *
      * @param activity     the {@link Activity} that is launching the payment authentication flow
@@ -211,8 +298,11 @@ public class Stripe {
     public void authenticateSetup(@NonNull Activity activity,
                                   @NonNull String clientSecret,
                                   @NonNull String publishableKey) {
-        mPaymentController.startAuth(activity, clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
     }
 
     /**
@@ -224,7 +314,31 @@ public class Stripe {
     }
 
     /**
-     * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
+     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
+     *
+     * @param fragment     the {@link Fragment} that is launching the payment authentication flow
+     * @param clientSecret the `client_secret` property of a confirmed {@link SetupIntent} object
+     */
+    public void authenticateSetup(@NonNull Fragment fragment,
+                                  @NonNull String clientSecret,
+                                  @NonNull String publishableKey) {
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                clientSecret,
+                ApiRequest.Options.create(publishableKey, mStripeAccount)
+        );
+    }
+
+    /**
+     * See {@link #authenticateSetup(Fragment, String, String)}}
+     */
+    public void authenticateSetup(@NonNull Fragment fragment,
+                                  @NonNull String clientSecret) {
+        authenticateSetup(fragment, clientSecret, mDefaultPublishableKey);
+    }
+
+    /**
+     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
      * result of a PaymentIntent automatic confirmation
      * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams, String)}) or manual
      * confirmation (see {@link #authenticatePayment(Activity, String, String)}})
@@ -253,7 +367,7 @@ public class Stripe {
     }
 
     /**
-     * Should be called via {@link Activity#onActivityResult(int, int, Intent)}} to handle the
+     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
      * result of a SetupIntent confirmation
      * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
      */

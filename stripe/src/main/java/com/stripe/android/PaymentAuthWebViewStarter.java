@@ -1,7 +1,6 @@
 package com.stripe.android;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -20,29 +19,29 @@ public class PaymentAuthWebViewStarter
     public static final String EXTRA_RETURN_URL = "return_url";
     public static final String EXTRA_UI_CUSTOMIZATION = "ui_customization";
 
-    @NonNull private final Activity mActivity;
+    @NonNull private final Host mHost;
     private final int mRequestCode;
     @Nullable private final StripeToolbarCustomization mToolbarCustomization;
 
-    PaymentAuthWebViewStarter(@NonNull Activity activity, int requestCode) {
-        this(activity, requestCode, null);
+    PaymentAuthWebViewStarter(@NonNull Host host, int requestCode) {
+        this(host, requestCode, null);
     }
 
-    PaymentAuthWebViewStarter(@NonNull Activity activity, int requestCode,
+    PaymentAuthWebViewStarter(@NonNull Host host, int requestCode,
                               @Nullable StripeToolbarCustomization toolbarCustomization) {
-        mActivity = activity;
+        mHost = host;
         mRequestCode = requestCode;
         mToolbarCustomization = toolbarCustomization;
     }
 
     public void start(@NonNull PaymentAuthWebViewStarter.Data data) {
-        final Intent intent = new Intent(mActivity, PaymentAuthWebViewActivity.class)
-                .putExtra(EXTRA_CLIENT_SECRET, data.mClientSecret)
-                .putExtra(EXTRA_AUTH_URL, data.mUrl)
-                .putExtra(EXTRA_RETURN_URL, data.mReturnUrl)
-                .putExtra(EXTRA_UI_CUSTOMIZATION, mToolbarCustomization);
+        final Bundle extras = new Bundle();
+        extras.putString(EXTRA_CLIENT_SECRET, data.mClientSecret);
+        extras.putString(EXTRA_AUTH_URL, data.mUrl);
+        extras.putString(EXTRA_RETURN_URL, data.mReturnUrl);
+        extras.putParcelable(EXTRA_UI_CUSTOMIZATION, mToolbarCustomization);
 
-        mActivity.startActivityForResult(intent, mRequestCode);
+        mHost.startActivityForResult(PaymentAuthWebViewActivity.class, extras, mRequestCode);
     }
 
     static final class Data {

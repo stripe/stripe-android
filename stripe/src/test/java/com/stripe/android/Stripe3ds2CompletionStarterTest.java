@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.stripe.android.model.PaymentIntentFixtures;
+import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
 import org.junit.Before;
@@ -31,7 +32,8 @@ public class Stripe3ds2CompletionStarterTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mStarter = new Stripe3ds2CompletionStarter(mActivity, 500);
+        mStarter = new Stripe3ds2CompletionStarter(
+                AuthActivityStarter.Host.create(mActivity), 500);
     }
 
     @Test

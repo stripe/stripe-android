@@ -1,7 +1,6 @@
 package com.stripe.android;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,31 +13,24 @@ import com.stripe.android.view.StripeIntentResultExtras;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 
 class Stripe3ds2CompletionStarter
         implements AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> {
-    @NonNull private final WeakReference<Activity> mActivityRef;
+    @NonNull private final Host mHost;
     private final int mRequestCode;
 
-    Stripe3ds2CompletionStarter(@NonNull Activity activity, int requestCode) {
-        mActivityRef = new WeakReference<>(activity);
+    Stripe3ds2CompletionStarter(@NonNull Host host, int requestCode) {
+        mHost = host;
         mRequestCode = requestCode;
     }
 
     @Override
     public void start(@NonNull StartData data) {
-        final Activity activity = mActivityRef.get();
-        if (activity == null) {
-            return;
-        }
-
-        final Intent intent = new Intent(activity, PaymentRelayActivity.class)
-                .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
-                        data.mStripeIntent.getClientSecret())
-                .putExtra(StripeIntentResultExtras.AUTH_STATUS,
-                        data.getAuthStatus());
-        activity.startActivityForResult(intent, mRequestCode);
+        final Bundle extras = new Bundle();
+        extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
+                data.mStripeIntent.getClientSecret());
+        extras.putInt(StripeIntentResultExtras.AUTH_STATUS, data.getAuthStatus());
+        mHost.startActivityForResult(PaymentRelayActivity.class, extras, mRequestCode);
     }
 
     @IntDef({ChallengeFlowOutcome.COMPLETE_SUCCESSFUL, ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL,

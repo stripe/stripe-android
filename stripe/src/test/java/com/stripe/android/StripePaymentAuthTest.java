@@ -11,16 +11,20 @@ import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.ConfirmSetupIntentParams;
 import com.stripe.android.model.PaymentIntentFixtures;
 import com.stripe.android.model.SetupIntentFixtures;
+import com.stripe.android.view.AuthActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Objects;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +41,7 @@ public class StripePaymentAuthTest {
     @Mock private PaymentController mPaymentController;
     @Mock private ApiResultCallback<PaymentIntentResult> mPaymentCallback;
     @Mock private ApiResultCallback<SetupIntentResult> mSetupCallback;
+    @Captor private ArgumentCaptor<AuthActivityStarter.Host> mHostArgumentCaptor;
 
     @Before
     public void setup() {
@@ -53,8 +58,12 @@ public class StripePaymentAuthTest {
                         "client_secret",
                         "yourapp://post-authentication-return-url");
         stripe.confirmPayment(mActivity, confirmPaymentIntentParams);
-        verify(mPaymentController).startConfirmAndAuth(eq(mActivity),
-                eq(confirmPaymentIntentParams), eq(REQUEST_OPTIONS));
+        verify(mPaymentController).startConfirmAndAuth(
+                mHostArgumentCaptor.capture(),
+                eq(confirmPaymentIntentParams),
+                eq(REQUEST_OPTIONS)
+        );
+        assertEquals(mActivity, mHostArgumentCaptor.getValue().getActivity());
     }
 
     @Test
@@ -66,8 +75,12 @@ public class StripePaymentAuthTest {
                         "client_secret",
                         "yourapp://post-authentication-return-url");
         stripe.confirmSetupIntent(mActivity, confirmSetupIntentParams);
-        verify(mPaymentController).startConfirmAndAuth(eq(mActivity),
-                eq(confirmSetupIntentParams), eq(REQUEST_OPTIONS));
+        verify(mPaymentController).startConfirmAndAuth(
+                mHostArgumentCaptor.capture(),
+                eq(confirmSetupIntentParams),
+                eq(REQUEST_OPTIONS)
+        );
+        assertEquals(mActivity, mHostArgumentCaptor.getValue().getActivity());
     }
 
     @Test
@@ -76,10 +89,11 @@ public class StripePaymentAuthTest {
         final String clientSecret = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret();
         stripe.authenticatePayment(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
-                eq(mActivity),
+                mHostArgumentCaptor.capture(),
                 eq(clientSecret),
                 eq(REQUEST_OPTIONS)
         );
+        assertEquals(mActivity, mHostArgumentCaptor.getValue().getActivity());
     }
 
     @Test
@@ -88,10 +102,11 @@ public class StripePaymentAuthTest {
         final String clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret();
         stripe.authenticateSetup(mActivity, Objects.requireNonNull(clientSecret));
         verify(mPaymentController).startAuth(
-                eq(mActivity),
+                mHostArgumentCaptor.capture(),
                 eq(clientSecret),
                 eq(REQUEST_OPTIONS)
         );
+        assertEquals(mActivity, mHostArgumentCaptor.getValue().getActivity());
     }
 
     @Test
