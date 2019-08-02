@@ -318,9 +318,11 @@ class PaymentActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { startLoading() }
-            .doFinally { this.stopLoading() }
-            .subscribe({ this.onStripeIntentClientSecretResponse(it) },
-                { throwable -> displayError(throwable.localizedMessage) }))
+            .doFinally { stopLoading() }
+            .subscribe(
+                { onStripeIntentClientSecretResponse(it) },
+                { throwable -> displayError(throwable.localizedMessage) }
+            ))
     }
 
     private fun createSetupIntent(customerId: String) {
@@ -336,9 +338,11 @@ class PaymentActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { startLoading() }
-            .doFinally { this.stopLoading() }
-            .subscribe({ this.onStripeIntentClientSecretResponse(it) },
-                { throwable -> displayError(throwable.localizedMessage) }))
+            .doFinally { stopLoading() }
+            .subscribe(
+                { onStripeIntentClientSecretResponse(it) },
+                { throwable -> displayError(throwable.localizedMessage) }
+            ))
     }
 
     private fun displayError(errorMessage: String?) {
@@ -384,10 +388,11 @@ class PaymentActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { startLoading() }
-            .doFinally { this.stopLoading() }
+            .doFinally { stopLoading() }
             .subscribe(
-                { this.onStripeIntentClientSecretResponse(it) },
-                { throwable -> displayError(throwable.localizedMessage) }))
+                { onStripeIntentClientSecretResponse(it) },
+                { throwable -> displayError(throwable.localizedMessage) }
+            ))
     }
 
     @Throws(IOException::class, JSONException::class)
@@ -399,8 +404,8 @@ class PaymentActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { startLoading() }
-                .doFinally { this.stopLoading() }
-                .subscribe { this.processStripeIntent(it) }
+                .doFinally { stopLoading() }
+                .subscribe { processStripeIntent(it) }
         )
     }
 

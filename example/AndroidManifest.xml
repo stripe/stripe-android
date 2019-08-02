@@ -97,7 +97,7 @@
             android:name=".activity.PaymentAuthActivity" />
 
         <activity
-            android:name=".activity.FragmentExampesActivity" />
+            android:name=".activity.FragmentExamplesActivity" />
     </application>
 
 </manifest>
