@@ -9,6 +9,8 @@ import kotlin.math.pow
  */
 internal object StoreUtils {
 
+    private const val CURRENCY_SIGN = '\u00A4'
+
     fun getEmojiByUnicode(unicode: Int): String {
         return String(Character.toChars(unicode))
     }
@@ -18,8 +20,7 @@ internal object StoreUtils {
 
         val fractionDigits = displayCurrency.defaultFractionDigits
         val totalLength = price.toString().length
-        val builder = StringBuilder()
-            .append('\u00A4')   // currency sign
+        val builder = StringBuilder().append(CURRENCY_SIGN)
 
         if (fractionDigits == 0) {
             for (i in 0 until totalLength) {
