@@ -1,5 +1,8 @@
 ## Migration Guides
 
+### Migrating from versions < 11.0.0
+- Version `11.0.0` will require [AndroidX](https://developer.android.com/jetpack/androidx). Please read the [Migrating to AndroidX](https://developer.android.com/jetpack/androidx/migrate) guide for more information.
+
 ### Migration from versions < 10.0.0
 - The signature of `Stripe#retrievePaymentIntentSynchronous()` has [changed](https://github.com/stripe/stripe-android/commit/5e56663c739ec694a6a393e96b651bd3d3c7a3e7#diff-26062503dd732750d15be3173b992de6R618). It now takes a [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret) `String` instead of a `PaymentIntentParams` instance.
   See [#1172](https://github.com/stripe/stripe-android/pull/1172).
