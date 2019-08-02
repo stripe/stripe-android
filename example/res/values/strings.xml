@@ -23,7 +23,7 @@
     <string name="launch_customer_session">Customer Session</string>
     <string name="launch_pay_with_google">Pay with Google</string>
     <string name="launch_payment_session">Payment Session</string>
-    <string name="launch_payment_session_from_fragment">Payment Session from Fragment</string>
+    <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="pollingSource">Polling for source changes&#8230;</string>
     <string name="save">Save</string>
     <string name="saverx">Save Rx</string>
@@ -91,7 +91,8 @@
     <string name="pay_with_google">Pay with Google</string>
 
     <!-- Payment Auth example -->
-    <string name="launch_payment_auth_example">Payment Auth Example</string>
+    <string name="payment_auth_example">Payment Auth Example</string>
+    <string name="launch_payment_auth">Launch Payment Auth Flow</string>
     <string name="buy">Buy!</string>
     <string name="setup">Buy in the Future!</string>
     <string name="payment_intent_status">PaymentIntent status: %s</string>

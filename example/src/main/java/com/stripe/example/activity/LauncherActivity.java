@@ -55,7 +55,7 @@ public class LauncherActivity extends AppCompatActivity {
                             PaymentIntentActivity.class),
                     new Item(activity.getString(R.string.launch_setup_intent_example),
                             SetupIntentActivity.class),
-                    new Item(activity.getString(R.string.launch_payment_auth_example),
+                    new Item(activity.getString(R.string.payment_auth_example),
                             PaymentAuthActivity.class),
                     new Item(activity.getString(R.string.create_card_tokens),
                             PaymentActivity.class),
@@ -68,7 +68,7 @@ public class LauncherActivity extends AppCompatActivity {
                     new Item(activity.getString(R.string.launch_payment_session),
                             PaymentSessionActivity.class),
                     new Item(activity.getString(R.string.launch_payment_session_from_fragment),
-                            PaymentSessionFromFragmentActivity.class),
+                            FragmentExampesActivity.class),
                     new Item(activity.getString(R.string.launch_pay_with_google),
                             PayWithGoogleActivity.class)
             ));

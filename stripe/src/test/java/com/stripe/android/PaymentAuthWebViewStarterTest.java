@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization;
+import com.stripe.android.view.AuthActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,14 +36,17 @@ public class PaymentAuthWebViewStarterTest {
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     @Captor private ArgumentCaptor<Integer> mRequestCodeCaptor;
 
+    private AuthActivityStarter.Host mHost;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mHost = AuthActivityStarter.Host.create(mActivity);
     }
 
     @Test
     public void start_startsWithCorrectIntentAndRequestCode() {
-        new PaymentAuthWebViewStarter(mActivity, 50000).start(DATA);
+        new PaymentAuthWebViewStarter(mHost, 50000).start(DATA);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 mRequestCodeCaptor.capture());
 
@@ -57,7 +61,7 @@ public class PaymentAuthWebViewStarterTest {
 
     @Test
     public void start_startsWithCorrectIntentAndRequestCodeAndCustomization() {
-        new PaymentAuthWebViewStarter(mActivity, 50000,
+        new PaymentAuthWebViewStarter(mHost, 50000,
                 new StripeToolbarCustomization()).start(DATA);
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 mRequestCodeCaptor.capture());

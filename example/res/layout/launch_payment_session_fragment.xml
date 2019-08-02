@@ -9,6 +9,15 @@
     android:orientation="vertical"
     android:id="@+id/root">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        style="?android:attr/progressBarStyleHorizontal"
+        />
+
     <Button
         android:id="@+id/launch_payment_session"
         android:enabled="false"
@@ -18,5 +27,22 @@
         android:layout_marginTop="@dimen/example_vertical_spacing"
         android:text="@string/payment_session_select_payment"
         />
+
+    <Button
+        android:id="@+id/launch_payment_auth"
+        android:enabled="true"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:text="@string/launch_payment_auth"
+        />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:layout_marginTop="40dp"/>
 
 </LinearLayout>
