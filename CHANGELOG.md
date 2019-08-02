@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 10.2.0 - **upcoming**
+* [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
+* [#1288](https://github.com/stripe/stripe-android/pull/1288) Upgrade Android Gradle Plugin to 3.5.0-rc02
+
 ## 10.1.1 - 2019-07-31
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
 * [#1276](https://github.com/stripe/stripe-android/pull/1276) Update Stripe 3DS2 library to `v1.1.5`
