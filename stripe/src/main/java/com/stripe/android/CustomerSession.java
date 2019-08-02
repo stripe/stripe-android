@@ -121,6 +121,9 @@ public class CustomerSession {
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
+     * <p>You must call {@link PaymentConfiguration#init(String)} with your publishable key
+     * before calling this method.</p>
+     *
      * @param context The application context
      * @param keyProvider An {@link EphemeralKeyProvider} used to retrieve
      *                    {@link CustomerEphemeralKey EphemeralKeys}
