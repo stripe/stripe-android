@@ -19,7 +19,7 @@ internal object StoreUtils {
         val fractionDigits = displayCurrency.defaultFractionDigits
         val totalLength = price.toString().length
         val builder = StringBuilder()
-        builder.append('\u00A4')
+            .append('\u00A4')   // currency sign
 
         if (fractionDigits == 0) {
             for (i in 0 until totalLength) {
