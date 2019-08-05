@@ -7,12 +7,12 @@ import com.stripe.android.model.SetupIntent;
 public class SetupIntentResult extends StripeIntentResult<SetupIntent> {
 
     private SetupIntentResult(@NonNull Builder builder) {
-        super(builder.mSetupIntent, builder.mStatus);
+        super(builder.mSetupIntent, builder.mOutcome);
     }
 
     static final class Builder implements ObjectBuilder<SetupIntentResult> {
         private SetupIntent mSetupIntent;
-        @Status private int mStatus;
+        @Outcome private int mOutcome;
 
         @NonNull
         Builder setSetupIntent(@NonNull SetupIntent setupIntent) {
@@ -21,8 +21,8 @@ public class SetupIntentResult extends StripeIntentResult<SetupIntent> {
         }
 
         @NonNull
-        Builder setStatus(@Status int status) {
-            mStatus = status;
+        Builder setOutcome(@Outcome int outcome) {
+            mOutcome = outcome;
             return this;
         }
 

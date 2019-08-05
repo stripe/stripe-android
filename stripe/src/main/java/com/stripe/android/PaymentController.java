@@ -150,8 +150,9 @@ class PaymentController {
             return;
         }
 
-        @StripeIntentResult.Status final int authStatus = data.getIntExtra(
-                StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
+        @StripeIntentResult.Outcome final int flowOutcome =
+                data.getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME,
+                        StripeIntentResult.Outcome.UNKNOWN);
         new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
@@ -159,7 +160,7 @@ class PaymentController {
                         if (stripeIntent instanceof PaymentIntent) {
                             callback.onSuccess(new PaymentIntentResult.Builder()
                                     .setPaymentIntent((PaymentIntent) stripeIntent)
-                                    .setStatus(authStatus)
+                                    .setOutcome(flowOutcome)
                                     .build());
                         }
                     }
@@ -191,8 +192,9 @@ class PaymentController {
             return;
         }
 
-        @StripeIntentResult.Status final int authStatus = data.getIntExtra(
-                StripeIntentResultExtras.AUTH_STATUS, StripeIntentResult.Status.UNKNOWN);
+        @StripeIntentResult.Outcome final int flowOutcome =
+                data.getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME,
+                        StripeIntentResult.Outcome.UNKNOWN);
 
         new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
@@ -201,7 +203,7 @@ class PaymentController {
                         if (stripeIntent instanceof SetupIntent) {
                             callback.onSuccess(new SetupIntentResult.Builder()
                                     .setSetupIntent((SetupIntent) stripeIntent)
-                                    .setStatus(authStatus)
+                                    .setOutcome(flowOutcome)
                                     .build());
                         }
                     }

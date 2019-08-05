@@ -23,36 +23,38 @@ import java.util.Objects;
  */
 public abstract class StripeIntentResult<T extends StripeIntent> {
     @NonNull private final T mStripeIntent;
+    @Outcome private final int mOutcome;
     @Status private final int mStatus;
 
-    public StripeIntentResult(@NonNull T stripeIntent, @Status int status) {
+    StripeIntentResult(@NonNull T stripeIntent, @Status int outcome) {
         mStripeIntent = stripeIntent;
-        mStatus = calculateStatus(Objects.requireNonNull(stripeIntent.getStatus()), status);
+        mOutcome = determineOutcome(Objects.requireNonNull(stripeIntent.getStatus()), outcome);
+        mStatus = mOutcome;
     }
 
-    @StripeIntentResult.Status
-    private static int calculateStatus(@NonNull StripeIntent.Status stripeIntentStatus,
-                                       @StripeIntentResult.Status int authStatus) {
-        if (authStatus != StripeIntentResult.Status.UNKNOWN) {
-            return authStatus;
+    @StripeIntentResult.Outcome
+    private static int determineOutcome(@NonNull StripeIntent.Status stripeIntentStatus,
+                                        @StripeIntentResult.Outcome int outcome) {
+        if (outcome != StripeIntentResult.Outcome.UNKNOWN) {
+            return outcome;
         }
 
         switch (stripeIntentStatus) {
             case RequiresAction:
             case Canceled: {
-                return StripeIntentResult.Status.CANCELED;
+                return StripeIntentResult.Outcome.CANCELED;
             }
             case RequiresPaymentMethod: {
-                return StripeIntentResult.Status.FAILED;
+                return StripeIntentResult.Outcome.FAILED;
             }
             case Succeeded:
             case RequiresCapture:
             case RequiresConfirmation: {
-                return StripeIntentResult.Status.SUCCEEDED;
+                return StripeIntentResult.Outcome.SUCCEEDED;
             }
             case Processing:
             default: {
-                return StripeIntentResult.Status.UNKNOWN;
+                return StripeIntentResult.Outcome.UNKNOWN;
             }
         }
     }
@@ -62,6 +64,16 @@ public abstract class StripeIntentResult<T extends StripeIntent> {
         return mStripeIntent;
     }
 
+    @Outcome
+    public final int getOutcome() {
+        return mOutcome;
+    }
+
+    /**
+     * @deprecated use {@link #getOutcome()}
+     */
+    @Deprecated
+    @Status
     public final int getStatus() {
         return mStatus;
     }
@@ -74,19 +86,50 @@ public abstract class StripeIntentResult<T extends StripeIntent> {
 
     private boolean typedEquals(@NonNull StripeIntentResult setupIntentResult) {
         return ObjectUtils.equals(mStripeIntent, setupIntentResult.mStripeIntent)
-                && ObjectUtils.equals(mStatus, setupIntentResult.mStatus);
+                && ObjectUtils.equals(mOutcome, setupIntentResult.mOutcome);
     }
 
     @Override
     public final int hashCode() {
-        return ObjectUtils.hash(mStripeIntent, mStatus);
+        return ObjectUtils.hash(mStripeIntent, mOutcome);
     }
 
     /**
      * Values that indicate the outcome of confirmation and payment authentication.
      */
     @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Outcome.UNKNOWN, Outcome.SUCCEEDED, Outcome.FAILED, Outcome.CANCELED,
+            Outcome.TIMEDOUT})
+    public @interface Outcome {
+        int UNKNOWN = 0;
+
+        /**
+         * Confirmation or payment authentication succeeded
+         */
+        int SUCCEEDED = 1;
+
+        /**
+         * Confirm or payment authentication failed
+         */
+        int FAILED = 2;
+
+        /**
+         * Payment authentication was canceled by the user
+         */
+        int CANCELED = 3;
+
+        /**
+         * Payment authentication timed-out
+         */
+        int TIMEDOUT = 4;
+    }
+
+    /**
+     * @deprecated use {@link Outcome}
+     */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({Status.UNKNOWN, Status.SUCCEEDED, Status.FAILED, Status.CANCELED, Status.TIMEDOUT})
+    @Deprecated
     public @interface Status {
         int UNKNOWN = 0;
 
