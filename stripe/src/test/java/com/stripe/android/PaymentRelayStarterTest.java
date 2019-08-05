@@ -43,7 +43,7 @@ public class PaymentRelayStarterTest {
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
                 intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
-        assertFalse(intent.hasExtra(StripeIntentResultExtras.AUTH_STATUS));
+        assertFalse(intent.hasExtra(StripeIntentResultExtras.FLOW_OUTCOME));
         assertNull(intent.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION));
     }
 
@@ -54,7 +54,7 @@ public class PaymentRelayStarterTest {
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertNull(intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));
-        assertFalse(intent.hasExtra(StripeIntentResultExtras.AUTH_STATUS));
+        assertFalse(intent.hasExtra(StripeIntentResultExtras.FLOW_OUTCOME));
         assertEquals(exception,
                 intent.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION));
     }

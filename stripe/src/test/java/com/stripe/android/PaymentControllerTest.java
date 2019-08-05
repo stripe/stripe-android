@@ -504,8 +504,8 @@ public class PaymentControllerTest {
         assertNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
         final Intent intent = new Intent()
-                .putExtra(StripeIntentResultExtras.AUTH_STATUS,
-                        StripeIntentResult.Status.SUCCEEDED)
+                .putExtra(StripeIntentResultExtras.FLOW_OUTCOME,
+                        StripeIntentResult.Outcome.SUCCEEDED)
                 .putExtra(StripeIntentResultExtras.CLIENT_SECRET,
                         SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.getClientSecret());
 
@@ -520,7 +520,7 @@ public class PaymentControllerTest {
                 ArgumentCaptor.forClass(SetupIntentResult.class);
         verify(mSetupAuthResultCallback).onSuccess(resultCaptor.capture());
         final SetupIntentResult result = resultCaptor.getValue();
-        assertEquals(StripeIntentResult.Status.SUCCEEDED, result.getStatus());
+        assertEquals(StripeIntentResult.Outcome.SUCCEEDED, result.getOutcome());
         assertEquals(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT, result.getIntent());
     }
 

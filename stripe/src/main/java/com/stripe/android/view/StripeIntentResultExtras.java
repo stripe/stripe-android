@@ -12,9 +12,9 @@ public final class StripeIntentResultExtras {
     public static final String AUTH_EXCEPTION = "exception";
 
     /**
-     * See {@link StripeIntentResult.Status} for possible values
+     * See {@link StripeIntentResult.Outcome} for possible values
      */
-    public static final String AUTH_STATUS = "status";
+    public static final String FLOW_OUTCOME = "flow_outcome";
 
     private StripeIntentResultExtras() {
     }

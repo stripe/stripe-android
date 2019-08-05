@@ -29,7 +29,7 @@ class Stripe3ds2CompletionStarter
         final Bundle extras = new Bundle();
         extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
                 data.mStripeIntent.getClientSecret());
-        extras.putInt(StripeIntentResultExtras.AUTH_STATUS, data.getAuthStatus());
+        extras.putInt(StripeIntentResultExtras.FLOW_OUTCOME, data.getOutcome());
         mHost.startActivityForResult(PaymentRelayActivity.class, extras, mRequestCode);
     }
 
@@ -48,32 +48,32 @@ class Stripe3ds2CompletionStarter
 
     static class StartData {
         @NonNull private final StripeIntent mStripeIntent;
-        @ChallengeFlowOutcome private final int mChallengeFlowStatus;
+        @ChallengeFlowOutcome private final int mChallengeFlowOutcome;
 
         StartData(@NonNull StripeIntent stripeIntent,
-                  @ChallengeFlowOutcome int challengeFlowStatus) {
+                  @ChallengeFlowOutcome int challengeFlowOutcome) {
             mStripeIntent = stripeIntent;
-            mChallengeFlowStatus = challengeFlowStatus;
+            mChallengeFlowOutcome = challengeFlowOutcome;
         }
 
-        @StripeIntentResult.Status
-        private int getAuthStatus() {
-            if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE_SUCCESSFUL) {
-                return StripeIntentResult.Status.SUCCEEDED;
-            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL) {
-                return StripeIntentResult.Status.FAILED;
-            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.CANCEL) {
-                return StripeIntentResult.Status.CANCELED;
-            } else if (mChallengeFlowStatus == ChallengeFlowOutcome.TIMEOUT) {
-                return StripeIntentResult.Status.TIMEDOUT;
+        @StripeIntentResult.Outcome
+        private int getOutcome() {
+            if (mChallengeFlowOutcome == ChallengeFlowOutcome.COMPLETE_SUCCESSFUL) {
+                return StripeIntentResult.Outcome.SUCCEEDED;
+            } else if (mChallengeFlowOutcome == ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL) {
+                return StripeIntentResult.Outcome.FAILED;
+            } else if (mChallengeFlowOutcome == ChallengeFlowOutcome.CANCEL) {
+                return StripeIntentResult.Outcome.CANCELED;
+            } else if (mChallengeFlowOutcome == ChallengeFlowOutcome.TIMEOUT) {
+                return StripeIntentResult.Outcome.TIMEDOUT;
             } else {
-                return StripeIntentResult.Status.FAILED;
+                return StripeIntentResult.Outcome.FAILED;
             }
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mStripeIntent, mChallengeFlowStatus);
+            return ObjectUtils.hash(mStripeIntent, mChallengeFlowOutcome);
         }
 
         @Override
@@ -83,7 +83,7 @@ class Stripe3ds2CompletionStarter
 
         private boolean typedEquals(@NonNull StartData startData) {
             return ObjectUtils.equals(mStripeIntent, startData.mStripeIntent) &&
-                    ObjectUtils.equals(mChallengeFlowStatus, startData.mChallengeFlowStatus);
+                    ObjectUtils.equals(mChallengeFlowOutcome, startData.mChallengeFlowOutcome);
         }
     }
 }
