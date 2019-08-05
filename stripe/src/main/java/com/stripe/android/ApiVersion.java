@@ -15,34 +15,30 @@ import com.stripe.android.utils.ObjectUtils;
  * API changes.
  */
 final class ApiVersion {
-    private static final String DEFAULT_API_VERSION = "2019-05-16";
+    @NonNull private static final String API_VERSION_CODE = "2019-05-16";
 
-    @NonNull private static final ApiVersion DEFAULT_INSTANCE = new ApiVersion(DEFAULT_API_VERSION);
+    @NonNull private static final ApiVersion INSTANCE = new ApiVersion(API_VERSION_CODE);
 
-    @NonNull private final String mCode;
-
-    @NonNull
-    static ApiVersion create(@NonNull String code) {
-        return new ApiVersion(code);
-    }
+    @NonNull public final String code;
 
     @NonNull
-    static ApiVersion getDefault() {
-        return DEFAULT_INSTANCE;
+    static ApiVersion get() {
+        return INSTANCE;
     }
 
     private ApiVersion(@NonNull String code) {
-        this.mCode = code;
+        this.code = code;
     }
 
     @NonNull
-    String getCode() {
-        return mCode;
+    @Override
+    public String toString() {
+        return code;
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mCode);
+        return ObjectUtils.hash(code);
     }
 
     @Override
@@ -51,6 +47,6 @@ final class ApiVersion {
     }
 
     private boolean typedEquals(@NonNull ApiVersion apiVersion) {
-        return ObjectUtils.equals(mCode, apiVersion.mCode);
+        return ObjectUtils.equals(code, apiVersion.code);
     }
 }

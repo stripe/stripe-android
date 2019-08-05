@@ -26,6 +26,7 @@ final class ApiRequest extends StripeRequest {
     static final String ANALYTICS_HOST = "https://q.stripe.com";
 
     @NonNull final Options options;
+    @NonNull private final String mApiVersion;
     @Nullable private final AppInfo mAppInfo;
 
     @VisibleForTesting
@@ -36,6 +37,7 @@ final class ApiRequest extends StripeRequest {
                @Nullable AppInfo appInfo) {
         super(method, url, params, MIME_TYPE);
         this.options = options;
+        mApiVersion = ApiVersion.get().code;
         mAppInfo = appInfo;
     }
 
@@ -90,7 +92,7 @@ final class ApiRequest extends StripeRequest {
         headers.put("Accept-Charset", CHARSET);
         headers.put("Accept", "application/json");
         headers.put("X-Stripe-Client-User-Agent", createStripeClientUserAgent());
-        headers.put("Stripe-Version", ApiVersion.getDefault().getCode());
+        headers.put("Stripe-Version", mApiVersion);
         headers.put("Authorization",
                 String.format(Locale.ENGLISH, "Bearer %s", options.apiKey));
         if (options.stripeAccount != null) {

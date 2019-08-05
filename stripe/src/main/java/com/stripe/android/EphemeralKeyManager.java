@@ -18,6 +18,7 @@ class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
     @NonNull private final KeyManagerListener<TEphemeralKey> mListener;
     private final long mTimeBufferInSeconds;
     @NonNull private final EphemeralKey.Factory<TEphemeralKey> mFactory;
+    @NonNull private final String mApiVersion;
 
     @Nullable private TEphemeralKey mEphemeralKey;
 
@@ -33,6 +34,7 @@ class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
+        mApiVersion = ApiVersion.get().code;
         retrieveEphemeralKey(operationIdFactory.create(), null, null);
     }
 
@@ -43,7 +45,7 @@ class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
                 mEphemeralKey,
                 mTimeBufferInSeconds,
                 mOverrideCalendar)) {
-            mEphemeralKeyProvider.createEphemeralKey(ApiVersion.getDefault().getCode(),
+            mEphemeralKeyProvider.createEphemeralKey(mApiVersion,
                     new ClientKeyUpdateListener(this, operationId, actionString, arguments));
         } else {
             mListener.onKeyUpdate(mEphemeralKey, operationId, actionString, arguments);
