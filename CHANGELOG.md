@@ -1,9 +1,14 @@
 # CHANGELOG
 
-## 10.2.0 - **upcoming**
+## 10.2.0 - 2019-08-05
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
+    * `PaymentSession(Fragment)`
 * [#1288](https://github.com/stripe/stripe-android/pull/1288) Upgrade Android Gradle Plugin to 3.5.0-rc02
-* [#1289](https://github.com/stripe/stripe-android/pull/1289) Add Fragment support to payment confirmation/authentication flow
+* [#1289](https://github.com/stripe/stripe-android/pull/1289) Add `Fragment` support to payment confirmation/authentication flow
+    * `Stripe#confirmPayment(Fragment, ConfirmPaymentIntentParams)`
+    * `Stripe#authenticatePayment(Fragment, String)`
+    * `Stripe#confirmSetupIntent(Fragment, ConfirmSetupIntentParams)`
+    * `Stripe#authenticateSetup(Fragment, String)`
 * [#1290](https://github.com/stripe/stripe-android/pull/1290) Convert [samplestore app](https://github.com/stripe/stripe-android/tree/master/samplestore) to Kotlin
 * [#1297](https://github.com/stripe/stripe-android/pull/1297) Convert [example app](https://github.com/stripe/stripe-android/tree/master/example) to Kotlin
 * [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename `StripeIntentResult#getStatus()` to `StripeIntentResult#getOutcome()`
