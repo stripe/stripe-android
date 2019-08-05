@@ -88,6 +88,7 @@ public final class PaymentMethodCreateParams {
         final String stripeTokenId = Objects.requireNonNull(stripeToken).getId();
 
         final PaymentMethod.BillingDetails billingDetails;
+        final String email = googlePayPaymentData.optString("email");
         if (googlePayBillingAddress != null) {
             final Address billingAddress = new Address.Builder()
                     .setLine1(googlePayBillingAddress.optString("address1"))
@@ -100,12 +101,12 @@ public final class PaymentMethodCreateParams {
             billingDetails = new PaymentMethod.BillingDetails.Builder()
                     .setAddress(billingAddress)
                     .setName(googlePayBillingAddress.optString("name"))
-                    .setEmail(googlePayPaymentData.optString("email"))
+                    .setEmail(email)
                     .setPhone(googlePayBillingAddress.optString("phoneNumber"))
                     .build();
         } else {
             billingDetails = new PaymentMethod.BillingDetails.Builder()
-                    .setEmail(googlePayPaymentData.optString("email"))
+                    .setEmail(email)
                     .build();
         }
 
