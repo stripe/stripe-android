@@ -7,9 +7,13 @@ import com.stripe.android.ObjectBuilder;
 import com.stripe.android.Stripe;
 import com.stripe.android.utils.ObjectUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Model for PaymentMethod creation parameters.
@@ -64,6 +68,53 @@ public final class PaymentMethodCreateParams {
         return new PaymentMethodCreateParams(ideal, billingDetails, metadata);
     }
 
+    /**
+     * @param googlePayPaymentData a {@link JSONObject} derived from Google Pay's
+     *                             <a href="https://developers.google.com/pay/api/android/reference/client#tojson">PaymentData#toJson()</a>
+     */
+    @NonNull
+    public static PaymentMethodCreateParams createFromGooglePay(
+            @NonNull JSONObject googlePayPaymentData)
+            throws JSONException {
+        final JSONObject paymentMethodData = googlePayPaymentData
+                .getJSONObject("paymentMethodData");
+        final JSONObject googlePayBillingAddress = paymentMethodData
+                .getJSONObject("info")
+                .optJSONObject("billingAddress");
+        final String paymentToken = paymentMethodData
+                .getJSONObject("tokenizationData")
+                .getString("token");
+        final Token stripeToken = Token.fromJson(new JSONObject(paymentToken));
+        final String stripeTokenId = Objects.requireNonNull(stripeToken).getId();
+
+        final PaymentMethod.BillingDetails billingDetails;
+        if (googlePayBillingAddress != null) {
+            final Address billingAddress = new Address.Builder()
+                    .setLine1(googlePayBillingAddress.optString("address1"))
+                    .setLine2(googlePayBillingAddress.optString("address2"))
+                    .setCity(googlePayBillingAddress.optString("locality"))
+                    .setState(googlePayBillingAddress.optString("administrativeArea"))
+                    .setCountry(googlePayBillingAddress.optString("countryCode"))
+                    .setPostalCode(googlePayBillingAddress.optString("postalCode"))
+                    .build();
+            billingDetails = new PaymentMethod.BillingDetails.Builder()
+                    .setAddress(billingAddress)
+                    .setName(googlePayBillingAddress.optString("name"))
+                    .setEmail(googlePayPaymentData.optString("email"))
+                    .setPhone(googlePayBillingAddress.optString("phoneNumber"))
+                    .build();
+        } else {
+            billingDetails = new PaymentMethod.BillingDetails.Builder()
+                    .setEmail(googlePayPaymentData.optString("email"))
+                    .build();
+        }
+
+        return PaymentMethodCreateParams.create(
+                PaymentMethodCreateParams.Card.create(stripeTokenId),
+                billingDetails
+        );
+    }
+
     private PaymentMethodCreateParams(@NonNull Card card,
                                       @Nullable PaymentMethod.BillingDetails billingDetails,
                                       @Nullable Map<String, String> metadata) {
@@ -109,6 +160,26 @@ public final class PaymentMethodCreateParams {
     @NonNull
     public String getTypeCode() {
         return type.mCode;
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(type, card, ideal, billingDetails, metadata);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj ||
+                (obj instanceof PaymentMethodCreateParams &&
+                        typedEquals((PaymentMethodCreateParams) obj));
+    }
+
+    private boolean typedEquals(@NonNull PaymentMethodCreateParams params) {
+        return ObjectUtils.equals(type, params.type)
+                && ObjectUtils.equals(card, params.card)
+                && ObjectUtils.equals(ideal, params.ideal)
+                && ObjectUtils.equals(billingDetails, params.billingDetails)
+                && ObjectUtils.equals(metadata, params.metadata);
     }
 
     enum Type {

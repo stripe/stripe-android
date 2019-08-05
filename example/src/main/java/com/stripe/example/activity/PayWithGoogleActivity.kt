@@ -13,11 +13,11 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
-import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.Token
 import com.stripe.example.R
+import org.json.JSONArray
+import org.json.JSONObject
 
 class PayWithGoogleActivity : AppCompatActivity() {
 
@@ -47,7 +47,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
 
     private fun payWithGoogle() {
         AutoResolveHelper.resolveTask(
-            paymentsClient.loadPaymentData(createGooglePayRequest(false)),
+            paymentsClient.loadPaymentData(createGooglePayRequest()),
             this@PayWithGoogleActivity,
             LOAD_PAYMENT_DATA_REQUEST_CODE
         )
@@ -116,69 +116,25 @@ class PayWithGoogleActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         val paymentData = PaymentData.getFromIntent(data) ?: return
+        val paymentMethodCreateParams =
+            PaymentMethodCreateParams.createFromGooglePay(JSONObject(paymentData.toJson()))
 
-        // Get a Stripe Token object
-        val stripeToken = Token.fromString(paymentData.paymentMethodToken?.token)
-        if (stripeToken != null) {
-            // Create a PaymentMethod object using the token id
-            val billingDetails: PaymentMethod.BillingDetails?
+        stripe.createPaymentMethod(paymentMethodCreateParams,
+            object : ApiResultCallback<PaymentMethod> {
+                override fun onSuccess(result: PaymentMethod) {
+                    progressBar.visibility = View.INVISIBLE
+                    Toast.makeText(this@PayWithGoogleActivity,
+                        "Created PaymentMethod ${result.id}", Toast.LENGTH_LONG)
+                        .show()
+                }
 
-            // Get the billing address to include in the Payment Method creation params
-            val address = paymentData.cardInfo.billingAddress
-            if (address != null) {
-                billingDetails = PaymentMethod.BillingDetails.Builder()
-                    .setAddress(Address.Builder()
-                        .setLine1(address.address1)
-                        .setLine2(address.address2)
-                        .setCity(address.locality)
-                        .setState(address.administrativeArea)
-                        .setPostalCode(address.postalCode)
-                        .setCountry(address.countryCode)
-                        .build())
-                    .setEmail(address.emailAddress)
-                    .setName(address.name)
-                    .setPhone(address.phoneNumber)
-                    .build()
-            } else {
-                billingDetails = null
-            }
-            val paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(
-                    PaymentMethodCreateParams.Card.create(
-                        stripeToken.id),
-                    billingDetails)
-
-            stripe.createPaymentMethod(paymentMethodCreateParams,
-                object : ApiResultCallback<PaymentMethod> {
-                    override fun onSuccess(result: PaymentMethod) {
-                        progressBar.visibility = View.INVISIBLE
-                        Toast.makeText(this@PayWithGoogleActivity,
-                            "Created PaymentMethod ${result.id}", Toast.LENGTH_LONG)
-                            .show()
-                    }
-
-                    override fun onError(e: Exception) {
-                        progressBar.visibility = View.INVISIBLE
-                        Toast.makeText(this@PayWithGoogleActivity,
-                            "Exception: " + e.localizedMessage, Toast.LENGTH_LONG)
-                            .show()
-                    }
-                })
-        }
-    }
-
-    private fun createTokenizationParameters(): PaymentMethodTokenizationParameters {
-        val params = GooglePayConfig().tokenizationSpecification
-            .getJSONObject("parameters")
-        return PaymentMethodTokenizationParameters.newBuilder()
-            .setPaymentMethodTokenizationType(
-                WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
-            .addParameter("gateway", "stripe")
-            .addParameter("stripe:publishableKey",
-                params.getString("stripe:publishableKey"))
-            .addParameter("stripe:version",
-                params.getString("stripe:version"))
-            .build()
+                override fun onError(e: Exception) {
+                    progressBar.visibility = View.INVISIBLE
+                    Toast.makeText(this@PayWithGoogleActivity,
+                        "Exception: " + e.localizedMessage, Toast.LENGTH_LONG)
+                        .show()
+                }
+            })
     }
 
     /**
@@ -186,36 +142,55 @@ class PayWithGoogleActivity : AppCompatActivity() {
      *                                 at https://developers.google.com/pay/api/android/reference/object#CardParameters
      */
     private fun createGooglePayRequest(
-        isBillingAddressRequired: Boolean = true
+        isBillingAddressRequired: Boolean = true,
+        isPhoneNumberRequired: Boolean = true,
+        isEmailRequired: Boolean = true
     ): PaymentDataRequest {
         val billingAddressFormat = if (isBillingAddressRequired) {
-            WalletConstants.BILLING_ADDRESS_FORMAT_FULL
+            "FULL"
         } else {
-            WalletConstants.BILLING_ADDRESS_FORMAT_MIN
+            "MIN"
         }
 
-        return PaymentDataRequest.newBuilder()
-            .setTransactionInfo(
-                TransactionInfo.newBuilder()
-                    .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
-                    .setTotalPrice("10.00")
-                    .setCurrencyCode("USD")
-                    .build())
-            .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
-            .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
-            .setCardRequirements(
-                CardRequirements.newBuilder()
-                    .addAllowedCardNetworks(listOf(
-                        WalletConstants.CARD_NETWORK_AMEX,
-                        WalletConstants.CARD_NETWORK_DISCOVER,
-                        WalletConstants.CARD_NETWORK_VISA,
-                        WalletConstants.CARD_NETWORK_MASTERCARD
-                    ))
-                    .setBillingAddressRequired(isBillingAddressRequired)
-                    .setBillingAddressFormat(billingAddressFormat)
-                    .build())
-            .setPaymentMethodTokenizationParameters(createTokenizationParameters())
-            .build()
+        val cardPaymentMethod = JSONObject()
+            .put("type", "CARD")
+            .put(
+                "parameters",
+                JSONObject()
+                    .put("allowedAuthMethods", JSONArray()
+                        .put("PAN_ONLY")
+                        .put("CRYPTOGRAM_3DS"))
+                    .put("allowedCardNetworks",
+                        JSONArray()
+                            .put("AMEX")
+                            .put("DISCOVER")
+                            .put("JCB")
+                            .put("MASTERCARD")
+                            .put("VISA"))
+                    .put("billingAddressRequired", isBillingAddressRequired)
+                    .put(
+                        "billingAddressParameters",
+                        JSONObject()
+                            .put("format", billingAddressFormat)
+                            .put("phoneNumberRequired", isPhoneNumberRequired)
+                    )
+            )
+            .put("tokenizationSpecification", GooglePayConfig().tokenizationSpecification)
+
+        val paymentDataRequest = JSONObject()
+            .put("apiVersion", 2)
+            .put("apiVersionMinor", 0)
+            .put("allowedPaymentMethods", JSONArray().put(cardPaymentMethod))
+            .put("transactionInfo", JSONObject()
+                .put("totalPrice", "10.00")
+                .put("totalPriceStatus", "FINAL")
+                .put("currencyCode", "USD")
+            )
+            .put("merchantInfo", JSONObject()
+                .put("merchantName", "Example Merchant"))
+            .put("emailRequired", isEmailRequired)
+            .toString()
+        return PaymentDataRequest.fromJson(paymentDataRequest)
     }
 
     companion object {
