@@ -7,6 +7,8 @@
 * [#1290](https://github.com/stripe/stripe-android/pull/1290) Convert [samplestore app](https://github.com/stripe/stripe-android/tree/master/samplestore) to Kotlin
 * [#1297](https://github.com/stripe/stripe-android/pull/1297) Convert [example app](https://github.com/stripe/stripe-android/tree/master/example) to Kotlin
 * [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename `StripeIntentResult#getStatus()` to `StripeIntentResult#getOutcome()`
+* [#1302](https://github.com/stripe/stripe-android/pull/1302) Create `GooglePayConfig`
+* [#1304](https://github.com/stripe/stripe-android/pull/1304) Create `PaymentMethodCreateParams#createFromGooglePay()`
 
 ## 10.1.1 - 2019-07-31
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
