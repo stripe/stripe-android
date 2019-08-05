@@ -8,7 +8,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
-import java.util.HashMap
 
 /**
  * An implementation of [EphemeralKeyProvider] that can be used to generate
@@ -24,8 +23,7 @@ class ExampleEphemeralKeyProvider(private val mProgressListener: ProgressListene
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
-        val apiParamMap = HashMap<String, String>()
-        apiParamMap["api_version"] = apiVersion
+        val apiParamMap = hashMapOf("api_version" to apiVersion)
 
         mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
             .subscribeOn(Schedulers.io())

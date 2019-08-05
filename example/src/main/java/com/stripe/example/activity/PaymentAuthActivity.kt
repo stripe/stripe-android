@@ -31,12 +31,12 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private val mCompositeSubscription = CompositeDisposable()
 
-    private var mStripe: Stripe? = null
-    private var mStripeService: StripeService? = null
-    private var mStatusTextView: TextView? = null
-    private var mBuyButton: Button? = null
-    private var mSetupButton: Button? = null
-    private var mProgressBar: ProgressBar? = null
+    private lateinit var stripe: Stripe
+    private lateinit var stripeService: StripeService
+    private lateinit var statusTextView: TextView
+    private lateinit var buyButton: Button
+    private lateinit var setupButton: Button
+    private lateinit var progressBar: ProgressBar
 
     private val stripeAccountId: String? = Settings.STRIPE_ACCOUNT_ID
 
@@ -53,32 +53,32 @@ class PaymentAuthActivity : AppCompatActivity() {
                 .build())
             .build())
 
-        mStatusTextView = findViewById(R.id.status)
+        statusTextView = findViewById(R.id.status)
         if (savedInstanceState != null) {
-            mStatusTextView!!.text = savedInstanceState.getString(STATE_STATUS)
+            statusTextView.text = savedInstanceState.getString(STATE_STATUS)
         }
 
-        mStripeService = RetrofitFactory.instance.create(StripeService::class.java)
-        mStripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+        stripeService = RetrofitFactory.instance.create(StripeService::class.java)
+        stripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
 
         // set an optional Stripe Connect account to use for API requests
 
         if (stripeAccountId != null) {
-            mStripe!!.setStripeAccount(stripeAccountId)
+            stripe.setStripeAccount(stripeAccountId)
         }
 
-        mBuyButton = findViewById(R.id.buy_button)
-        mBuyButton!!.setOnClickListener { createPaymentIntent(stripeAccountId) }
+        buyButton = findViewById(R.id.buy_button)
+        buyButton.setOnClickListener { createPaymentIntent(stripeAccountId) }
 
-        mSetupButton = findViewById(R.id.setup_button)
-        mSetupButton!!.setOnClickListener { createSetupIntent() }
+        setupButton = findViewById(R.id.setup_button)
+        setupButton.setOnClickListener { createSetupIntent() }
 
-        mProgressBar = findViewById(R.id.progress_bar)
+        progressBar = findViewById(R.id.progress_bar)
     }
 
     private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
-        mStatusTextView!!.append("\n\nStarting payment authentication")
-        mStripe!!.confirmPayment(this,
+        statusTextView.append("\n\nStarting payment authentication")
+        stripe.confirmPayment(this,
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 PAYMENT_METHOD_3DS2_REQUIRED,
                 paymentIntentClientSecret,
@@ -86,8 +86,8 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
-        mStatusTextView!!.append("\n\nStarting setup intent authentication")
-        mStripe!!.confirmSetupIntent(this,
+        statusTextView.append("\n\nStarting setup intent authentication")
+        stripe.confirmSetupIntent(this,
             ConfirmSetupIntentParams.create(
                 PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP,
                 setupIntentClientSecret,
@@ -97,18 +97,18 @@ class PaymentAuthActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        mProgressBar!!.visibility = View.VISIBLE
-        mStatusTextView!!.append("\n\nPayment authentication completed, getting result")
+        progressBar.visibility = View.VISIBLE
+        statusTextView.append("\n\nPayment authentication completed, getting result")
 
-        val isPaymentResult = mStripe!!.onPaymentResult(requestCode, data, AuthResultListener(this))
+        val isPaymentResult = stripe.onPaymentResult(requestCode, data, AuthResultListener(this))
 
         if (!isPaymentResult) {
-            val isSetupResult = mStripe!!.onSetupResult(requestCode, data, SetupAuthResultListener(this))
+            val isSetupResult = stripe.onSetupResult(requestCode, data, SetupAuthResultListener(this))
         }
     }
 
     override fun onPause() {
-        mProgressBar!!.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
         super.onPause()
     }
 
@@ -119,33 +119,33 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
-        bundle.putString(STATE_STATUS, mStatusTextView!!.text.toString())
+        bundle.putString(STATE_STATUS, statusTextView.text.toString())
     }
 
     private fun createPaymentIntent(stripeAccountId: String?) {
         mCompositeSubscription.add(
-            mStripeService!!.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
+            stripeService.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { d ->
-                    mProgressBar!!.visibility = View.VISIBLE
-                    mBuyButton!!.isEnabled = false
-                    mSetupButton!!.isEnabled = false
-                    mStatusTextView!!.setText(R.string.creating_payment_intent)
+                .doOnSubscribe {
+                    progressBar.visibility = View.VISIBLE
+                    buyButton.isEnabled = false
+                    setupButton.isEnabled = false
+                    statusTextView.setText(R.string.creating_payment_intent)
                 }
                 .subscribe { handleCreatePaymentIntentResponse(it) })
     }
 
     private fun createSetupIntent() {
         mCompositeSubscription.add(
-            mStripeService!!.createSetupIntent(HashMap(0))
+            stripeService.createSetupIntent(HashMap(0))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { d ->
-                    mProgressBar!!.visibility = View.VISIBLE
-                    mBuyButton!!.isEnabled = false
-                    mSetupButton!!.isEnabled = false
-                    mStatusTextView!!.setText(R.string.creating_setup_intent)
+                .doOnSubscribe {
+                    progressBar.visibility = View.VISIBLE
+                    buyButton.isEnabled = false
+                    setupButton.isEnabled = false
+                    statusTextView.setText(R.string.creating_setup_intent)
                 }
                 .subscribe { handleCreateSetupIntentResponse(it) })
     }
@@ -153,7 +153,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     private fun handleCreatePaymentIntentResponse(responseBody: ResponseBody) {
         try {
             val responseData = JSONObject(responseBody.string())
-            mStatusTextView!!.append("\n\n" + getString(R.string.payment_intent_status,
+            statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
             confirmPaymentIntent(secret)
@@ -167,7 +167,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     private fun handleCreateSetupIntentResponse(responseBody: ResponseBody) {
         try {
             val responseData = JSONObject(responseBody.string())
-            mStatusTextView!!.append("\n\n" + getString(R.string.setup_intent_status,
+            statusTextView.append("\n\n" + getString(R.string.setup_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
             confirmSetupIntent(secret)
@@ -179,16 +179,17 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun onAuthComplete() {
-        mBuyButton!!.isEnabled = true
-        mSetupButton!!.isEnabled = true
-        mProgressBar!!.visibility = View.INVISIBLE
+        buyButton.isEnabled = true
+        setupButton.isEnabled = true
+        progressBar.visibility = View.INVISIBLE
     }
 
     private fun createPaymentIntentParams(stripeAccountId: String?): HashMap<String, Any> {
-        val params = HashMap<String, Any>()
-        params["payment_method_types[]"] = "card"
-        params["amount"] = 1000
-        params["currency"] = "usd"
+        val params = hashMapOf<String, Any>(
+            "payment_method_types[]" to "card",
+            "amount" to 1000,
+            "currency" to "usd"
+        )
         if (stripeAccountId != null) {
             params["stripe_account"] = stripeAccountId
         }
@@ -204,7 +205,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             val activity = mActivityRef.get() ?: return
 
             val paymentIntent = paymentIntentResult.intent
-            activity.mStatusTextView!!.append("\n\n" +
+            activity.statusTextView.append("\n\n" +
                 "Auth status: " + paymentIntentResult.status + "\n\n" +
                 activity.getString(R.string.payment_intent_status, paymentIntent.status))
             activity.onAuthComplete()
@@ -213,7 +214,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         override fun onError(e: Exception) {
             val activity = mActivityRef.get() ?: return
 
-            activity.mStatusTextView!!.append("\n\nException: " + e.message)
+            activity.statusTextView.append("\n\nException: " + e.message)
             activity.onAuthComplete()
         }
     }
@@ -225,14 +226,14 @@ class PaymentAuthActivity : AppCompatActivity() {
             val activity = mActivityRef.get() ?: return
 
             val setupIntent = setupIntentResult.intent
-            activity.mStatusTextView!!.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
+            activity.statusTextView.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
             activity.onAuthComplete()
         }
 
         override fun onError(e: Exception) {
             val activity = mActivityRef.get() ?: return
 
-            activity.mStatusTextView!!.append("\n\nException: " + e.message)
+            activity.statusTextView.append("\n\nException: " + e.message)
             activity.onAuthComplete()
         }
     }

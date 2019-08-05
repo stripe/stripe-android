@@ -26,7 +26,6 @@ class IntentServiceTokenController(
     private var mTokenBroadcastReceiver: TokenBroadcastReceiver? = null
 
     init {
-
         button.setOnClickListener { saveCard() }
         registerBroadcastReceiver()
     }

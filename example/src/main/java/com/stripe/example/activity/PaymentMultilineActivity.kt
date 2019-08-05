@@ -18,45 +18,40 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.ArrayList
-import java.util.HashMap
 
 class PaymentMultilineActivity : AppCompatActivity() {
+    private val compositeDisposable = CompositeDisposable()
+    private val cardSources = ArrayList<Map<String, String>>()
 
-    private var mProgressDialogController: ProgressDialogController? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
-
-    private var mCardMultilineWidget: CardMultilineWidget? = null
-
-    private val mCompositeDisposable = CompositeDisposable()
-    private var mSimpleAdapter: SimpleAdapter? = null
-    private val mCardSources = ArrayList<Map<String, String>>()
+    private lateinit var cardMultilineWidget: CardMultilineWidget
+    private lateinit var progressDialogController: ProgressDialogController
+    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var simpleAdapter: SimpleAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_multiline)
 
-        mCardMultilineWidget = findViewById(R.id.card_multiline_widget)
+        cardMultilineWidget = findViewById(R.id.card_multiline_widget)
+        progressDialogController = ProgressDialogController(supportFragmentManager, resources)
 
-        mProgressDialogController = ProgressDialogController(supportFragmentManager,
-            resources)
-
-        mErrorDialogHandler = ErrorDialogHandler(this)
+        errorDialogHandler = ErrorDialogHandler(this)
 
         val listView = findViewById<ListView>(R.id.card_list_pma)
-        mSimpleAdapter = SimpleAdapter(
+        simpleAdapter = SimpleAdapter(
             this,
-            mCardSources,
+            cardSources,
             R.layout.list_item_layout,
             arrayOf("last4", "tokenId"),
             intArrayOf(R.id.last4, R.id.tokenId))
 
-        listView.adapter = mSimpleAdapter
-        mCompositeDisposable.add(
+        listView.adapter = simpleAdapter
+        compositeDisposable.add(
             RxView.clicks(findViewById(R.id.save_payment)).subscribe { saveCard() })
     }
 
     private fun saveCard() {
-        val card = mCardMultilineWidget!!.card ?: return
+        val card = cardMultilineWidget.card ?: return
 
         val stripe = Stripe(applicationContext,
             PaymentConfiguration.getInstance().publishableKey)
@@ -65,14 +60,14 @@ class PaymentMultilineActivity : AppCompatActivity() {
         // will not be called until we subscribe to it.
         val tokenObservable = Observable.fromCallable { stripe.createPaymentMethodSynchronous(cardSourceParams) }
 
-        mCompositeDisposable.add(tokenObservable
+        compositeDisposable.add(tokenObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { d -> mProgressDialogController!!.show(R.string.progressMessage) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { d -> progressDialogController.show(R.string.progressMessage) }
+            .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { addToList(it) },
-                { throwable -> mErrorDialogHandler!!.show(throwable.localizedMessage) }
+                { throwable -> errorDialogHandler.show(throwable.localizedMessage) }
             )
         )
     }
@@ -84,15 +79,16 @@ class PaymentMultilineActivity : AppCompatActivity() {
 
         val paymentMethodCard = paymentMethod.card
         val endingIn = getString(R.string.endingIn)
-        val map = HashMap<String, String>()
-        map["last4"] = endingIn + " " + paymentMethodCard!!.last4
-        map["tokenId"] = paymentMethod.id!!
-        mCardSources.add(map)
-        mSimpleAdapter!!.notifyDataSetChanged()
+        val map = hashMapOf(
+            "last4" to endingIn + " " + paymentMethodCard!!.last4,
+            "tokenId" to paymentMethod.id!!
+        )
+        cardSources.add(map)
+        simpleAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroy() {
-        mCompositeDisposable.dispose()
+        compositeDisposable.dispose()
         super.onDestroy()
     }
 }

@@ -38,7 +38,7 @@ class AsyncTaskTokenController(
     }
 
     private fun saveCard(tokenCallback: TokenCallback) {
-        val cardToSave = if (mCardInputWidget != null) mCardInputWidget!!.card else null
+        val cardToSave = mCardInputWidget?.card
         if (cardToSave == null) {
             mErrorDialogHandler.show("Invalid Card Data")
             return

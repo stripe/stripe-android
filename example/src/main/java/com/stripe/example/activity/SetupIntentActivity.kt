@@ -29,61 +29,60 @@ import java.io.IOException
 import java.util.HashMap
 
 class SetupIntentActivity : AppCompatActivity() {
+    private val compositeDisposable = CompositeDisposable()
 
-    private val mCompositeDisposable = CompositeDisposable()
+    private lateinit var stripe: Stripe
+    private lateinit var stripeService: StripeService
+    private lateinit var progressDialogController: ProgressDialogController
+    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var createPaymentMethod: Button
+    private lateinit var confirmSetupIntent: Button
+    private lateinit var retrieveSetupIntent: Button
+    private lateinit var cardInputWidget: CardInputWidget
+    private lateinit var setupIntentValue: TextView
 
-    private var mProgressDialogController: ProgressDialogController? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
-    private var mStripe: Stripe? = null
-    private var mStripeService: StripeService? = null
-    private var mClientSecret: String? = null
-    private var mCreatePaymentMethod: Button? = null
-    private var mConfirmSetupIntent: Button? = null
-    private var mRetrieveSetupIntent: Button? = null
-    private var mCardInputWidget: CardInputWidget? = null
-    private var mSetupIntentValue: TextView? = null
-    private var mPaymentMethod: PaymentMethod? = null
+    private var clientSecret: String? = null
+    private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup_intent_demo)
         val createSetupIntent = findViewById<Button>(R.id.btn_create_setup_intent)
-        mCreatePaymentMethod = findViewById(R.id.btn_create_payment_method)
-        mRetrieveSetupIntent = findViewById(R.id.btn_retrieve_setup_intent)
-        mConfirmSetupIntent = findViewById(R.id.btn_confirm_setup_intent)
-        mSetupIntentValue = findViewById(R.id.setup_intent_value)
-        mCardInputWidget = findViewById(R.id.card_input_widget)
+        createPaymentMethod = findViewById(R.id.btn_create_payment_method)
+        retrieveSetupIntent = findViewById(R.id.btn_retrieve_setup_intent)
+        confirmSetupIntent = findViewById(R.id.btn_confirm_setup_intent)
+        setupIntentValue = findViewById(R.id.setup_intent_value)
+        cardInputWidget = findViewById(R.id.card_input_widget)
 
-        mProgressDialogController = ProgressDialogController(supportFragmentManager, resources)
-        mErrorDialogHandler = ErrorDialogHandler(this)
+        progressDialogController = ProgressDialogController(supportFragmentManager, resources)
+        errorDialogHandler = ErrorDialogHandler(this)
 
-        mStripe = Stripe(this,
+        stripe = Stripe(this,
             PaymentConfiguration.getInstance().publishableKey)
         val retrofit = RetrofitFactory.instance
-        mStripeService = retrofit.create(StripeService::class.java)
+        stripeService = retrofit.create(StripeService::class.java)
 
         createSetupIntent.setOnClickListener { createSetupIntent() }
-        mCreatePaymentMethod!!.setOnClickListener {
-            val card = mCardInputWidget!!.card
+        createPaymentMethod.setOnClickListener {
+            val card = cardInputWidget.card
             if (card != null) {
                 createPaymentMethod(card)
             }
         }
-        mRetrieveSetupIntent!!.setOnClickListener { retrieveSetupIntent() }
-        mConfirmSetupIntent!!.setOnClickListener { confirmSetupIntent() }
+        retrieveSetupIntent.setOnClickListener { retrieveSetupIntent() }
+        confirmSetupIntent.setOnClickListener { confirmSetupIntent() }
     }
 
     override fun onDestroy() {
-        mCompositeDisposable.dispose()
+        compositeDisposable.dispose()
         super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        mStripe!!.onSetupResult(requestCode, data, object : ApiResultCallback<SetupIntentResult> {
+        stripe.onSetupResult(requestCode, data, object : ApiResultCallback<SetupIntentResult> {
             override fun onSuccess(result: SetupIntentResult) {
-                mClientSecret = result.intent.clientSecret
+                clientSecret = result.intent.clientSecret
                 displaySetupIntent(result.intent)
             }
 
@@ -96,27 +95,27 @@ class SetupIntentActivity : AppCompatActivity() {
     }
 
     private fun createSetupIntent() {
-        val disposable = mStripeService!!.createSetupIntent(HashMap())
+        val disposable = stripeService.createSetupIntent(HashMap())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.creating_setup_intent) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.creating_setup_intent) }
+            .doOnComplete { progressDialogController.dismiss() }
 
             // Because we've made the mapping above, we're now subscribing
             // to the result of creating a 3DS Source
             .subscribe(
                 { onCreatedSetupIntent(it) },
-                { throwable -> mErrorDialogHandler!!.show(throwable.localizedMessage) }
+                { throwable -> errorDialogHandler.show(throwable.localizedMessage) }
             )
-        mCompositeDisposable.add(disposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun onCreatedSetupIntent(responseBody: ResponseBody) {
         try {
             val jsonObject = JSONObject(responseBody.string())
-            mSetupIntentValue!!.text = jsonObject.toString()
-            mClientSecret = jsonObject.getString("secret")
-            mCreatePaymentMethod!!.isEnabled = mClientSecret != null
+            setupIntentValue.text = jsonObject.toString()
+            clientSecret = jsonObject.getString("secret")
+            createPaymentMethod.isEnabled = clientSecret != null
         } catch (exception: IOException) {
             Log.e(TAG, exception.toString())
         } catch (exception: JSONException) {
@@ -126,52 +125,54 @@ class SetupIntentActivity : AppCompatActivity() {
 
     private fun retrieveSetupIntent() {
         val setupIntentObservable = Observable.fromCallable {
-            mStripe!!.retrieveSetupIntentSynchronous(mClientSecret!!)!!
+            stripe.retrieveSetupIntentSynchronous(clientSecret!!)!!
         }
 
         val disposable = setupIntentObservable
             .subscribeOn(Schedulers.io())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.retrieving_setup_intent) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.retrieving_setup_intent) }
+            .doOnComplete { progressDialogController.dismiss() }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { displaySetupIntent(it) },
                 { throwable -> Log.e(TAG, throwable.toString()) }
             )
-        mCompositeDisposable.add(disposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun createPaymentMethod(card: Card) {
         val paymentMethodCreateParams = PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null)
 
-        val paymentMethodObservable = Observable.fromCallable { mStripe!!.createPaymentMethodSynchronous(paymentMethodCreateParams) }
+        val paymentMethodObservable = Observable.fromCallable {
+            stripe.createPaymentMethodSynchronous(paymentMethodCreateParams)
+        }
 
         val disposable = paymentMethodObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.creating_payment_method) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.creating_payment_method) }
+            .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { paymentMethod ->
                     if (paymentMethod != null) {
-                        mSetupIntentValue!!.text = paymentMethod.id
-                        mPaymentMethod = paymentMethod
-                        mConfirmSetupIntent!!.isEnabled = true
-                        mRetrieveSetupIntent!!.isEnabled = true
+                        setupIntentValue.text = paymentMethod.id
+                        this.paymentMethod = paymentMethod
+                        confirmSetupIntent.isEnabled = true
+                        retrieveSetupIntent.isEnabled = true
                     }
                 },
                 { throwable -> Log.e(TAG, throwable.toString()) }
             )
-        mCompositeDisposable.add(disposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun displaySetupIntent(setupIntent: SetupIntent) {
-        mSetupIntentValue!!.text = JSONObject(setupIntent.toMap()).toString()
+        setupIntentValue.text = JSONObject(setupIntent.toMap()).toString()
     }
 
     private fun confirmSetupIntent() {
-        mStripe!!.confirmSetupIntent(this,
-            ConfirmSetupIntentParams.create(mPaymentMethod!!.id!!, mClientSecret!!, RETURN_URL))
+        stripe.confirmSetupIntent(this,
+            ConfirmSetupIntentParams.create(paymentMethod!!.id!!, clientSecret!!, RETURN_URL))
     }
 
     companion object {

@@ -10,31 +10,32 @@ import com.stripe.example.module.DependencyHandler
 
 class PaymentActivity : AppCompatActivity() {
 
-    private var mDependencyHandler: DependencyHandler? = null
+    private lateinit var dependencyHandler: DependencyHandler
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.payment_activity)
 
-        mDependencyHandler = DependencyHandler(
+        dependencyHandler = DependencyHandler(
             this,
             findViewById(R.id.card_input_widget),
             findViewById(R.id.listview),
-            PaymentConfiguration.getInstance().publishableKey)
+            PaymentConfiguration.getInstance().publishableKey
+        )
 
         val saveButton = findViewById<Button>(R.id.save)
-        mDependencyHandler!!.attachAsyncTaskTokenController(saveButton)
+        dependencyHandler.attachAsyncTaskTokenController(saveButton)
 
         val saveRxButton = findViewById<Button>(R.id.saverx)
-        mDependencyHandler!!.attachRxTokenController(saveRxButton)
+        dependencyHandler.attachRxTokenController(saveRxButton)
 
         val saveIntentServiceButton = findViewById<Button>(R.id.saveWithService)
-        mDependencyHandler!!.attachIntentServiceTokenController(this,
+        dependencyHandler.attachIntentServiceTokenController(this,
             saveIntentServiceButton)
     }
 
     override fun onDestroy() {
-        mDependencyHandler!!.clearReferences()
+        dependencyHandler.clearReferences()
         super.onDestroy()
     }
 }

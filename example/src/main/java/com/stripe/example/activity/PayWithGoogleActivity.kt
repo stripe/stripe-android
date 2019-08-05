@@ -18,48 +18,49 @@ import com.stripe.example.R
 
 class PayWithGoogleActivity : AppCompatActivity() {
 
-    private var mPayWithGoogleButton: View? = null
-    private var mPaymentsClient: PaymentsClient? = null
-    private var mProgressBar: ProgressBar? = null
+    private lateinit var payWithGoogleButton: View
+    private lateinit var paymentsClient: PaymentsClient
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_with_google)
-        mPaymentsClient = Wallet.getPaymentsClient(this,
+        paymentsClient = Wallet.getPaymentsClient(this,
             Wallet.WalletOptions.Builder()
                 .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
                 .build())
 
-        mProgressBar = findViewById(R.id.pwg_progress_bar)
-        mPayWithGoogleButton = findViewById(R.id.btn_buy_pwg)
-        mPayWithGoogleButton!!.isEnabled = false
-        mPayWithGoogleButton!!.setOnClickListener { payWithGoogle() }
+        progressBar = findViewById(R.id.pwg_progress_bar)
+        payWithGoogleButton = findViewById(R.id.btn_buy_pwg)
+        payWithGoogleButton.isEnabled = false
+        payWithGoogleButton.setOnClickListener { payWithGoogle() }
 
         isReadyToPay()
     }
 
     private fun payWithGoogle() {
         AutoResolveHelper.resolveTask(
-            mPaymentsClient!!.loadPaymentData(createPaymentDataRequest()),
+            paymentsClient.loadPaymentData(createPaymentDataRequest()),
             this@PayWithGoogleActivity,
-            LOAD_PAYMENT_DATA_REQUEST_CODE)
+            LOAD_PAYMENT_DATA_REQUEST_CODE
+        )
     }
 
     private fun isReadyToPay() {
-        mProgressBar!!.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
         val request = IsReadyToPayRequest.newBuilder()
             .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
             .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
             .build()
-        mPaymentsClient!!.isReadyToPay(request)
+        paymentsClient.isReadyToPay(request)
             .addOnCompleteListener { task ->
                 try {
                     val result = task.getResult(ApiException::class.java)!!
-                    mProgressBar!!.visibility = View.INVISIBLE
+                    progressBar.visibility = View.INVISIBLE
                     if (result) {
                         Toast.makeText(this@PayWithGoogleActivity, "Ready",
                             Toast.LENGTH_SHORT).show()
-                        mPayWithGoogleButton!!.isEnabled = true
+                        payWithGoogleButton.isEnabled = true
                     } else {
                         Toast.makeText(this@PayWithGoogleActivity, "No PWG",
                             Toast.LENGTH_SHORT).show()

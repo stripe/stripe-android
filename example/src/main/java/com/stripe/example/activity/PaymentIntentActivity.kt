@@ -33,57 +33,55 @@ import java.util.HashMap
 
 class PaymentIntentActivity : AppCompatActivity() {
 
-    private val mCompositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
-    private var mProgressDialogController: ProgressDialogController? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
-    private var mStripe: Stripe? = null
-    private var mStripeService: StripeService? = null
-    private var mClientSecret: String? = null
-    private var mConfirmPaymentIntent: Button? = null
-    private var mRetrievePaymentIntent: Button? = null
-    private var mCardInputWidget: CardInputWidget? = null
-    private var mPaymentIntentValue: TextView? = null
+    private lateinit var stripe: Stripe
+    private lateinit var stripeService: StripeService
+    private lateinit var progressDialogController: ProgressDialogController
+    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var confirmPaymentIntent: Button
+    private lateinit var retrievePaymentIntent: Button
+    private lateinit var cardInputWidget: CardInputWidget
+    private lateinit var paymentIntentValue: TextView
+
+    private var clientSecret: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_intent_demo)
         val createPaymentIntent = findViewById<Button>(R.id.btn_create_payment_intent)
-        mRetrievePaymentIntent = findViewById(R.id.btn_retrieve_payment_intent)
-        mConfirmPaymentIntent = findViewById(R.id.btn_confirm_payment_intent)
-        mPaymentIntentValue = findViewById(R.id.payment_intent_value)
-        mCardInputWidget = findViewById(R.id.card_input_widget)
+        retrievePaymentIntent = findViewById(R.id.btn_retrieve_payment_intent)
+        confirmPaymentIntent = findViewById(R.id.btn_confirm_payment_intent)
+        paymentIntentValue = findViewById(R.id.payment_intent_value)
+        cardInputWidget = findViewById(R.id.card_input_widget)
 
-        mProgressDialogController = ProgressDialogController(supportFragmentManager,
-            resources)
-        mErrorDialogHandler = ErrorDialogHandler(this)
-        mStripe = Stripe(applicationContext,
-            PaymentConfiguration.getInstance().publishableKey)
+        progressDialogController = ProgressDialogController(supportFragmentManager, resources)
+        errorDialogHandler = ErrorDialogHandler(this)
+        stripe = Stripe(applicationContext, PaymentConfiguration.getInstance().publishableKey)
         val retrofit = RetrofitFactory.instance
-        mStripeService = retrofit.create(StripeService::class.java)
+        stripeService = retrofit.create(StripeService::class.java)
 
         createPaymentIntent.setOnClickListener { createPaymentIntent() }
 
-        mRetrievePaymentIntent!!.setOnClickListener { retrievePaymentIntent() }
-        mConfirmPaymentIntent!!.setOnClickListener {
-            val card = mCardInputWidget!!.card
-            if (card != null) {
-                confirmPaymentIntent(card)
+        retrievePaymentIntent.setOnClickListener { retrievePaymentIntent() }
+        confirmPaymentIntent.setOnClickListener {
+            cardInputWidget.card?.let {
+                confirmPaymentIntent(it)
             }
         }
     }
 
     override fun onDestroy() {
-        mCompositeDisposable.dispose()
+        compositeDisposable.dispose()
         super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        mStripe!!.onPaymentResult(requestCode, data, object : ApiResultCallback<PaymentIntentResult> {
+        stripe.onPaymentResult(requestCode, data, object : ApiResultCallback<PaymentIntentResult> {
             override fun onSuccess(result: PaymentIntentResult) {
-                mClientSecret = result.intent.clientSecret
+                clientSecret = result.intent.clientSecret
                 displayPaymentIntent(result.intent)
             }
 
@@ -105,28 +103,28 @@ class PaymentIntentActivity : AppCompatActivity() {
 
     private fun createPaymentIntent() {
         val params = createPaymentIntentParams()
-        val disposable = mStripeService!!.createPaymentIntent(params)
+        val disposable = stripeService.createPaymentIntent(params)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.creating_payment_intent) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.creating_payment_intent) }
+            .doOnComplete { progressDialogController.dismiss() }
 
             // Because we've made the mapping above, we're now subscribing
             // to the result of creating a 3DS Source
             .subscribe(
                 { onCreatedPaymentIntent(it) },
-                { throwable -> mErrorDialogHandler!!.show(throwable.localizedMessage) }
+                { throwable -> errorDialogHandler.show(throwable.localizedMessage) }
             )
-        mCompositeDisposable.add(disposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun onCreatedPaymentIntent(responseBody: ResponseBody) {
         try {
             val jsonObject = JSONObject(responseBody.string())
-            mPaymentIntentValue!!.text = jsonObject.toString()
-            mClientSecret = jsonObject.getString("secret")
-            mConfirmPaymentIntent!!.isEnabled = mClientSecret != null
-            mRetrievePaymentIntent!!.isEnabled = mClientSecret != null
+            paymentIntentValue.text = jsonObject.toString()
+            clientSecret = jsonObject.getString("secret")
+            confirmPaymentIntent.isEnabled = clientSecret != null
+            retrievePaymentIntent.isEnabled = clientSecret != null
         } catch (exception: IOException) {
             Log.e(TAG, exception.toString())
         } catch (exception: JSONException) {
@@ -136,29 +134,29 @@ class PaymentIntentActivity : AppCompatActivity() {
 
     private fun retrievePaymentIntent() {
         val paymentIntentObservable = Observable.fromCallable {
-            mStripe!!.retrievePaymentIntentSynchronous(mClientSecret!!)!!
+            stripe.retrievePaymentIntentSynchronous(clientSecret!!)!!
         }
         val disposable = paymentIntentObservable
             .subscribeOn(Schedulers.io())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.retrieving_payment_intent) }
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.retrieving_payment_intent) }
+            .doOnComplete { progressDialogController.dismiss() }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { displayPaymentIntent(it) },
                 { throwable -> Log.e(TAG, throwable.toString()) }
             )
-        mCompositeDisposable.add(disposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun displayPaymentIntent(paymentIntent: PaymentIntent) {
-        mPaymentIntentValue!!.text = JSONObject(paymentIntent.toMap()).toString()
+        paymentIntentValue!!.text = JSONObject(paymentIntent.toMap()).toString()
     }
 
     private fun confirmPaymentIntent(card: Card) {
-        mStripe!!.confirmPayment(this,
+        stripe.confirmPayment(this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null),
-                mClientSecret!!, RETURN_URL))
+                clientSecret!!, RETURN_URL))
     }
 
     companion object {

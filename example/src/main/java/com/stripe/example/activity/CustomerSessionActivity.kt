@@ -27,28 +27,28 @@ import java.lang.ref.WeakReference
  */
 class CustomerSessionActivity : AppCompatActivity() {
 
-    private var mSelectSourceButton: Button? = null
-    private var mSelectedSourceTextView: TextView? = null
-    private var mProgressBar: ProgressBar? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
+    private lateinit var selectSourceButton: Button
+    private lateinit var selectedSourceTextView: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var errorDialogHandler: ErrorDialogHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customer_session)
         setTitle(R.string.customer_payment_data_example)
-        mProgressBar = findViewById(R.id.customer_progress_bar)
-        mSelectedSourceTextView = findViewById(R.id.tv_customer_default_source_acs)
-        mSelectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs)
-        mSelectSourceButton!!.isEnabled = false
-        mErrorDialogHandler = ErrorDialogHandler(this)
+        progressBar = findViewById(R.id.customer_progress_bar)
+        selectedSourceTextView = findViewById(R.id.tv_customer_default_source_acs)
+        selectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs)
+        selectSourceButton.isEnabled = false
+        errorDialogHandler = ErrorDialogHandler(this)
         CustomerSession.initCustomerSession(this,
             ExampleEphemeralKeyProvider(ProgressListenerImpl(this)))
 
-        mProgressBar!!.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
         CustomerSession.getInstance().retrieveCurrentCustomer(
             CustomerRetrievalListenerImpl(this))
 
-        mSelectSourceButton!!.setOnClickListener { launchWithCustomer() }
+        selectSourceButton.setOnClickListener { launchWithCustomer() }
     }
 
     private fun launchWithCustomer() {
@@ -61,7 +61,7 @@ class CustomerSessionActivity : AppCompatActivity() {
             val paymentMethod = data!!.getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT)
 
             if (paymentMethod?.card != null) {
-                mSelectedSourceTextView!!.text = buildCardString(paymentMethod.card!!)
+                selectedSourceTextView.text = buildCardString(paymentMethod.card!!)
             }
         }
     }
@@ -71,14 +71,14 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun onCustomerRetrieved() {
-        mSelectSourceButton!!.isEnabled = true
-        mProgressBar!!.visibility = View.INVISIBLE
+        selectSourceButton.isEnabled = true
+        progressBar.visibility = View.INVISIBLE
     }
 
     private fun onRetrieveError(errorMessage: String) {
-        mSelectSourceButton!!.isEnabled = false
-        mErrorDialogHandler!!.show(errorMessage)
-        mProgressBar!!.visibility = View.INVISIBLE
+        selectSourceButton.isEnabled = false
+        errorDialogHandler.show(errorMessage)
+        progressBar.visibility = View.INVISIBLE
     }
 
     private class CustomerRetrievalListenerImpl constructor(
@@ -103,7 +103,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         override fun onStringResponse(response: String) {
             activityRef.get()?.let {
                 if (response.startsWith("Error: ")) {
-                    it.mErrorDialogHandler!!.show(response)
+                    it.errorDialogHandler.show(response)
                 }
             }
         }

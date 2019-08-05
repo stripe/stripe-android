@@ -6,7 +6,6 @@ import android.widget.SimpleAdapter
 import com.stripe.android.model.Token
 import com.stripe.example.R
 import java.util.ArrayList
-import java.util.HashMap
 
 /**
  * A controller for the [ListView] used to display the results.
@@ -34,9 +33,10 @@ class ListViewController(listView: ListView) {
     }
 
     internal fun addToList(last4: String, tokenId: String) {
-        val map = HashMap<String, String>()
-        map["last4"] = mResources.getString(R.string.endingIn) + " " + last4
-        map["tokenId"] = tokenId
+        val map = hashMapOf(
+            "last4" to mResources.getString(R.string.endingIn) + " " + last4,
+            "tokenId" to tokenId
+        )
         mCardTokens.add(map)
         mAdapter.notifyDataSetChanged()
     }

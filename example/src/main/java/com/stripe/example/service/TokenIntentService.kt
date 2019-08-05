@@ -22,8 +22,8 @@ class TokenIntentService : IntentService("TokenIntentService") {
         var token: Token? = null
         if (intent != null) {
             val cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER)
-            val month = intent.extras!!.get(EXTRA_MONTH) as Int
-            val year = intent.extras!!.get(EXTRA_YEAR) as Int
+            val month = intent.getIntExtra(EXTRA_MONTH, -1)
+            val year = intent.getIntExtra(EXTRA_YEAR, -1)
             val cvc = intent.getStringExtra(EXTRA_CVC)
 
             val card = Card.create(cardNumber, month, year, cvc)

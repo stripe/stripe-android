@@ -38,46 +38,34 @@ import java.util.Locale
  */
 class PaymentSessionActivity : AppCompatActivity() {
 
-    private var mBroadcastReceiver: BroadcastReceiver? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
-    private var mPaymentSession: PaymentSession? = null
-    private var mProgressBar: ProgressBar? = null
-    private var mResultTextView: TextView? = null
-    private var mResultTitleTextView: TextView? = null
-    private var mSelectPaymentButton: Button? = null
-    private var mSelectShippingButton: Button? = null
-    private var mPaymentSessionData: PaymentSessionData? = null
+    private lateinit var broadcastReceiver: BroadcastReceiver
+    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var paymentSession: PaymentSession
+    private lateinit var progressBar: ProgressBar
+    private lateinit var resultTextView: TextView
+    private lateinit var resultTitleTextView: TextView
+    private lateinit var selectPaymentButton: Button
+    private lateinit var selectShippingButton: Button
 
-    private val exampleShippingInfo: ShippingInformation
-        get() {
-            val address = Address.Builder()
-                .setCity("San Francisco")
-                .setCountry("US")
-                .setLine1("123 Market St")
-                .setLine2("#345")
-                .setPostalCode("94107")
-                .setState("CA")
-                .build()
-            return ShippingInformation(address, "Fake Name", "(555) 555-5555")
-        }
+    private var paymentSessionData: PaymentSessionData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_session)
-        mProgressBar = findViewById(R.id.customer_progress_bar)
-        mProgressBar!!.visibility = View.VISIBLE
-        mSelectPaymentButton = findViewById(R.id.btn_select_payment_method_aps)
-        mSelectShippingButton = findViewById(R.id.btn_start_payment_flow)
-        mErrorDialogHandler = ErrorDialogHandler(this)
-        mResultTitleTextView = findViewById(R.id.tv_payment_session_data_title)
-        mResultTextView = findViewById(R.id.tv_payment_session_data)
+        progressBar = findViewById(R.id.customer_progress_bar)
+        progressBar.visibility = View.VISIBLE
+        selectPaymentButton = findViewById(R.id.btn_select_payment_method_aps)
+        selectShippingButton = findViewById(R.id.btn_start_payment_flow)
+        errorDialogHandler = ErrorDialogHandler(this)
+        resultTitleTextView = findViewById(R.id.tv_payment_session_data_title)
+        resultTextView = findViewById(R.id.tv_payment_session_data)
 
         // CustomerSession only needs to be initialized once per app.
         val customerSession = setupCustomerSession()
-        setupPaymentSession(customerSession)
+        paymentSession = createPaymentSession(customerSession)
 
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        mBroadcastReceiver = object : BroadcastReceiver() {
+        broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val shippingInformation = intent
                     .getParcelableExtra<ShippingInformation>(EXTRA_SHIPPING_INFO_DATA)
@@ -99,13 +87,13 @@ class PaymentSessionActivity : AppCompatActivity() {
                 return shippingInfo.address != null && Locale.US.country == shippingInfo.address!!.country
             }
         }
-        localBroadcastManager.registerReceiver(mBroadcastReceiver!!,
+        localBroadcastManager.registerReceiver(broadcastReceiver,
             IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED))
-        mSelectPaymentButton!!.setOnClickListener {
-            mPaymentSession!!.presentPaymentMethodSelection(true)
+        selectPaymentButton.setOnClickListener {
+            paymentSession.presentPaymentMethodSelection(true)
         }
-        mSelectShippingButton!!.setOnClickListener {
-            mPaymentSession!!.presentShippingFlow()
+        selectShippingButton.setOnClickListener {
+            paymentSession.presentShippingFlow()
         }
     }
 
@@ -118,20 +106,22 @@ class PaymentSessionActivity : AppCompatActivity() {
         return customerSession
     }
 
-    private fun setupPaymentSession(customerSession: CustomerSession) {
-        mPaymentSession = PaymentSession(this)
-        val paymentSessionInitialized = mPaymentSession!!.init(
+    private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
+        val paymentSession = PaymentSession(this)
+        val paymentSessionInitialized = paymentSession.init(
             PaymentSessionListenerImpl(this, customerSession),
             PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(exampleShippingInfo)
+                .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields(
                     ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
                     ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
                 )
                 .build())
         if (paymentSessionInitialized) {
-            mPaymentSession!!.setCartTotal(2000L)
+            paymentSession.setCartTotal(2000L)
         }
+
+        return paymentSession
     }
 
     private fun formatStringResults(data: PaymentSessionData): String {
@@ -178,21 +168,21 @@ class PaymentSessionActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        mPaymentSession!!.handlePaymentData(requestCode, resultCode, data!!)
+        paymentSession.handlePaymentData(requestCode, resultCode, data!!)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mPaymentSession!!.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver!!)
+        paymentSession.onDestroy()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
     private fun onPaymentSessionDataChanged(
         customerSession: CustomerSession,
         data: PaymentSessionData
     ) {
-        mPaymentSessionData = data
-        mProgressBar!!.visibility = View.VISIBLE
+        paymentSessionData = data
+        progressBar.visibility = View.VISIBLE
         customerSession.retrieveCurrentCustomer(
             PaymentSessionChangeCustomerRetrievalListener(this))
     }
@@ -204,13 +194,12 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
             val activity = listenerActivity ?: return
-            activity.mProgressBar!!.visibility = if (isCommunicating) View.VISIBLE else View.INVISIBLE
+            activity.progressBar.visibility = if (isCommunicating) View.VISIBLE else View.INVISIBLE
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
             val activity = listenerActivity ?: return
-
-            activity.mErrorDialogHandler!!.show(errorMessage)
+            activity.errorDialogHandler.show(errorMessage)
         }
 
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
@@ -227,13 +216,13 @@ class PaymentSessionActivity : AppCompatActivity() {
         override fun onCustomerRetrieved(customer: Customer) {
             val activity = activity ?: return
 
-            activity.mProgressBar!!.visibility = View.INVISIBLE
+            activity.progressBar.visibility = View.INVISIBLE
         }
 
         override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
             val activity = activity ?: return
-            activity.mErrorDialogHandler!!.show(errorMessage)
-            activity.mProgressBar!!.visibility = View.INVISIBLE
+            activity.errorDialogHandler.show(errorMessage)
+            activity.progressBar.visibility = View.INVISIBLE
         }
     }
 
@@ -244,19 +233,19 @@ class PaymentSessionActivity : AppCompatActivity() {
         override fun onCustomerRetrieved(customer: Customer) {
             val activity = activity ?: return
 
-            activity.mProgressBar!!.visibility = View.INVISIBLE
-            activity.mSelectPaymentButton!!.isEnabled = true
-            activity.mSelectShippingButton!!.isEnabled = true
+            activity.progressBar.visibility = View.INVISIBLE
+            activity.selectPaymentButton.isEnabled = true
+            activity.selectShippingButton.isEnabled = true
 
-            if (activity.mPaymentSessionData != null) {
-                activity.mResultTitleTextView!!.visibility = View.VISIBLE
-                activity.mResultTextView!!.text = activity.formatStringResults(activity.mPaymentSessionData!!)
+            if (activity.paymentSessionData != null) {
+                activity.resultTitleTextView.visibility = View.VISIBLE
+                activity.resultTextView.text = activity.formatStringResults(activity.paymentSessionData!!)
             }
         }
 
         override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
             val activity = activity ?: return
-            activity.mProgressBar!!.visibility = View.INVISIBLE
+            activity.progressBar.visibility = View.INVISIBLE
         }
     }
 
@@ -268,8 +257,23 @@ class PaymentSessionActivity : AppCompatActivity() {
         override fun onStringResponse(response: String) {
             val activity = mActivityRef.get()
             if (activity != null && response.startsWith("Error: ")) {
-                activity.mErrorDialogHandler!!.show(response)
+                activity.errorDialogHandler.show(response)
             }
         }
+    }
+
+    companion object {
+        private val EXAMPLE_SHIPPING_INFO = ShippingInformation(
+            Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .build(),
+            "Fake Name",
+            "(555) 555-5555"
+        )
     }
 }

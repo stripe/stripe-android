@@ -27,29 +27,29 @@ import io.reactivex.schedulers.Schedulers
  * Activity that lets you redirect for a 3DS source verification.
  */
 class RedirectActivity : AppCompatActivity() {
-
     private val mCompositeDisposable = CompositeDisposable()
 
-    private var mCardInputWidget: CardInputWidget? = null
-    private var mRedirectAdapter: RedirectAdapter? = null
-    private var mErrorDialogHandler: ErrorDialogHandler? = null
-    private var mRedirectDialogController: RedirectDialogController? = null
-    private var mRedirectSource: Source? = null
-    private var mProgressDialogController: ProgressDialogController? = null
-    private var mStripe: Stripe? = null
+    private lateinit var cardInputWidget: CardInputWidget
+    private lateinit var mRedirectAdapter: RedirectAdapter
+    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var redirectDialogController: RedirectDialogController
+    private lateinit var progressDialogController: ProgressDialogController
+    private lateinit var stripe: Stripe
+
+    private var redirectSource: Source? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_polling)
 
-        mCardInputWidget = findViewById(R.id.card_widget_three_d)
-        mErrorDialogHandler = ErrorDialogHandler(this)
-        mProgressDialogController = ProgressDialogController(supportFragmentManager,
+        cardInputWidget = findViewById(R.id.card_widget_three_d)
+        errorDialogHandler = ErrorDialogHandler(this)
+        progressDialogController = ProgressDialogController(supportFragmentManager,
             resources)
-        mRedirectDialogController = RedirectDialogController(this)
+        redirectDialogController = RedirectDialogController(this)
 
         val publishableKey = PaymentConfiguration.getInstance().publishableKey
-        mStripe = Stripe(applicationContext, publishableKey)
+        stripe = Stripe(applicationContext, publishableKey)
 
         val threeDSecureButton = findViewById<Button>(R.id.btn_three_d_secure)
         threeDSecureButton.setOnClickListener { beginSequence(publishableKey) }
@@ -74,12 +74,12 @@ class RedirectActivity : AppCompatActivity() {
             val sourceId = intent.data!!.getQueryParameter(QUERY_SOURCE_ID)
             if (clientSecret != null &&
                 sourceId != null &&
-                clientSecret == mRedirectSource!!.clientSecret &&
-                sourceId == mRedirectSource!!.id) {
-                updateSourceList(mRedirectSource)
-                mRedirectSource = null
+                clientSecret == redirectSource!!.clientSecret &&
+                sourceId == redirectSource!!.id) {
+                updateSourceList(redirectSource)
+                redirectSource = null
             }
-            mRedirectDialogController!!.dismissDialog()
+            redirectDialogController.dismissDialog()
         }
     }
 
@@ -89,7 +89,7 @@ class RedirectActivity : AppCompatActivity() {
     }
 
     private fun beginSequence(publishableKey: String) {
-        val displayCard = mCardInputWidget!!.card ?: return
+        val displayCard = cardInputWidget.card ?: return
         createCardSource(displayCard, publishableKey)
     }
 
@@ -101,13 +101,13 @@ class RedirectActivity : AppCompatActivity() {
     private fun createCardSource(card: Card, publishableKey: String) {
         val cardSourceParams = SourceParams.createCardParams(card)
         val cardSourceObservable = Observable.fromCallable {
-            mStripe!!.createSourceSynchronous(cardSourceParams)!!
+            stripe.createSourceSynchronous(cardSourceParams)!!
         }
 
         mCompositeDisposable.add(cardSourceObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { mProgressDialogController!!.show(R.string.createSource) }
+            .doOnSubscribe { progressDialogController.show(R.string.createSource) }
             .subscribe(
                 // Because we've made the mapping above, we're now subscribing
                 // to the result of creating a 3DS Source
@@ -117,7 +117,7 @@ class RedirectActivity : AppCompatActivity() {
                     val threeDSecureStatus = sourceCardData?.threeDSecureStatus
 
                     // Making a note of the Card Source in our list.
-                    mRedirectAdapter!!.addItem(
+                    mRedirectAdapter.addItem(
                         source.status,
                         threeDSecureStatus,
                         source.id,
@@ -128,10 +128,10 @@ class RedirectActivity : AppCompatActivity() {
                         // The card Source can be used to create a 3DS Source
                         createThreeDSecureSource(source.id!!, publishableKey)
                     } else {
-                        mProgressDialogController!!.dismiss()
+                        progressDialogController.dismiss()
                     }
                 },
-                { throwable -> mErrorDialogHandler!!.show(throwable.message ?: "") }
+                { throwable -> errorDialogHandler.show(throwable.message ?: "") }
             ))
     }
 
@@ -151,16 +151,16 @@ class RedirectActivity : AppCompatActivity() {
             sourceId)
 
         val threeDSecureObservable = Observable.fromCallable {
-            mStripe!!.createSourceSynchronous(threeDParams, publishableKey)!!
+            stripe.createSourceSynchronous(threeDParams, publishableKey)!!
         }
 
         mCompositeDisposable.add(threeDSecureObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnComplete { mProgressDialogController!!.dismiss() }
+            .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { showVerifyDialog(it) },
-                { throwable -> mErrorDialogHandler!!.show(throwable.message ?: "") }
+                { throwable -> errorDialogHandler.show(throwable.message ?: "") }
             ))
     }
 
@@ -171,18 +171,18 @@ class RedirectActivity : AppCompatActivity() {
      */
     private fun showVerifyDialog(source: Source) {
         // Caching the source object here because this app makes a lot of them.
-        mRedirectSource = source
+        redirectSource = source
 
         val sourceRedirect = source.redirect
         val redirectUrl = sourceRedirect?.url
         if (redirectUrl != null) {
-            mRedirectDialogController!!.showDialog(redirectUrl, source.sourceTypeData!!)
+            redirectDialogController.showDialog(redirectUrl, source.sourceTypeData!!)
         }
     }
 
     private fun updateSourceList(source: Source?) {
         if (source == null) {
-            mRedirectAdapter!!.addItem(
+            mRedirectAdapter.addItem(
                 "No source found",
                 "Stopped",
                 "Error",
@@ -190,7 +190,7 @@ class RedirectActivity : AppCompatActivity() {
             return
         }
 
-        mRedirectAdapter!!.addItem(
+        mRedirectAdapter.addItem(
             source.status,
             "complete",
             source.id,
