@@ -61,8 +61,9 @@ class StoreCart : Parcelable {
         val count = input.readInt()
         storeLineItems = LinkedHashMap()
         for (i in 0 until count) {
-            storeLineItems[input.readString()!!] =
-                input.readParcelable(StoreLineItem::class.java.classLoader)
+            val id = input.readString()!!
+            val item = input.readParcelable<StoreLineItem>(StoreLineItem::class.java.classLoader)
+            storeLineItems[id] = item
         }
     }
 
