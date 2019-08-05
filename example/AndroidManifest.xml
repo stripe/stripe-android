@@ -37,8 +37,7 @@
             android:exported="false"/>
 
         <activity
-            android:name=".activity.RedirectActivity"
-            android:launchMode="singleTask">
+            android:name=".activity.RedirectActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
@@ -61,8 +60,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.LauncherActivity"
-            android:launchMode="singleTask">
+            android:name=".activity.LauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -97,7 +95,7 @@
             android:name=".activity.PaymentAuthActivity" />
 
         <activity
-            android:name=".activity.FragmentExampesActivity" />
+            android:name=".activity.FragmentExamplesActivity" />
     </application>
 
 </manifest>
