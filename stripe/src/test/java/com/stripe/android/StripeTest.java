@@ -277,7 +277,7 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidData_returnsToken()
             throws StripeException {
-        final Stripe stripe = createLoggingStripe();
+        final Stripe stripe = createNonLoggingStripe();
         final Token token = stripe.createTokenSynchronous(CARD);
 
         assertNotNull(token);
@@ -320,9 +320,9 @@ public class StripeTest {
         final Token token = stripe.createTokenSynchronous(CARD);
         assertNotNull(token);
 
-        final SourceParams sourceParams = SourceParams.createCustomParams();
-        sourceParams.setType(Source.SourceType.CARD);
-        sourceParams.setToken(token.getId());
+        final SourceParams sourceParams = SourceParams.createCustomParams()
+                .setType(Source.SourceType.CARD)
+                .setToken(token.getId());
 
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
@@ -963,7 +963,7 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createLoggingStripe();
+        final Stripe stripe = createNonLoggingStripe();
         final Token token = stripe.createPiiTokenSynchronous("0123456789");
         assertNotNull(token);
         assertEquals(Token.TokenType.PII, token.getType());
