@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
@@ -402,7 +403,8 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     }
 
     @NonNull
-    private Builder toBuilder() {
+    @VisibleForTesting
+    Builder toBuilder() {
         return new Builder(mClientSecret)
                 .setReturnUrl(mReturnUrl)
                 .setPaymentMethodId(mPaymentMethodId)
@@ -413,7 +415,8 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
                 .setExtraParams(mExtraParams);
     }
 
-    private static final class Builder implements ObjectBuilder<ConfirmPaymentIntentParams> {
+    @VisibleForTesting
+    static final class Builder implements ObjectBuilder<ConfirmPaymentIntentParams> {
         @NonNull private final String mClientSecret;
 
         @Nullable private PaymentMethodCreateParams mPaymentMethodCreateParams;
