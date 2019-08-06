@@ -24,4 +24,4 @@ before_install:
 
 script:
   - ./gradlew checkstyle ktlint lintRelease
-  - ./gradlew clean testRelease
+  - ./gradlew clean testRelease -i
