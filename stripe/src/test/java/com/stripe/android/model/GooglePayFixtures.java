@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public final class GooglePayFixtures {
+final class GooglePayFixtures {
     @NonNull private static final String GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS_RAW = "{\n" +
             "\t\"apiVersionMinor\": 0,\n" +
             "\t\"apiVersion\": 2,\n" +
@@ -53,8 +53,11 @@ public final class GooglePayFixtures {
             "\t\"email\": \"stripe@example.com\"" +
             "}";
 
-    @NonNull public static final JSONObject GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS;
-    @NonNull public static final JSONObject GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS;
+    @NonNull
+    static final JSONObject GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS;
+
+    @NonNull
+    static final JSONObject GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS;
 
     static {
         try {

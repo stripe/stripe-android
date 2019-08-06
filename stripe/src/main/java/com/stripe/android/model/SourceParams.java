@@ -956,6 +956,7 @@ public final class SourceParams {
         return ObjectUtils.hash(mAmount, mApiParameterMap, mCurrency, mTypeRaw, mOwner, mMetaData,
                 mRedirect, mExtraParams, mToken, mUsage, mType);
     }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         return this == obj || (obj instanceof SourceParams && typedEquals((SourceParams) obj));
