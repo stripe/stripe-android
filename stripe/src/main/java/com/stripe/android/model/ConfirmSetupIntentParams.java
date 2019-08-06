@@ -137,6 +137,7 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
         return new ConfirmSetupIntentParams.Builder(mClientSecret)
                 .setReturnUrl(mReturnUrl)
                 .setPaymentMethodId(mPaymentMethodId)
+                .setPaymentMethodCreateParams(mPaymentMethodCreateParams)
                 .setShouldUseSdk(mUseStripeSdk);
     }
 

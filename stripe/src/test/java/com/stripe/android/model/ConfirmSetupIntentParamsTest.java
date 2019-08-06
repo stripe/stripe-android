@@ -64,4 +64,36 @@ public class ConfirmSetupIntentParamsTest {
         assertEquals("card", paymentMethodData.get("type"));
         assertNotNull(paymentMethodData.get("card"));
     }
+
+    @Test
+    public void create_withShouldUseStripeSdk_shouldKeepPaymentMethodData() {
+        final PaymentMethodCreateParams.Card expectedCard =
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber("4242424242424242")
+                        .setCvc("123")
+                        .setExpiryMonth(8)
+                        .setExpiryYear(2019)
+                        .build();
+
+        ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                        PaymentMethodCreateParams.create(expectedCard, null),
+                        "client_secret",
+                        null
+                );
+
+        assertEquals(false, confirmSetupIntentParams.shouldUseStripeSdk());
+        confirmSetupIntentParams = confirmSetupIntentParams.withShouldUseStripeSdk(true);
+        assertEquals(true, confirmSetupIntentParams.shouldUseStripeSdk());
+
+
+        // Ensures that payment method data is still present after the withShouldUseStripeSdk call
+        final Map<String, Object> params = confirmSetupIntentParams.toParamMap();
+        assertNull(params.get(ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID));
+        final Map<String, Object> paymentMethodData = (Map<String, Object>)
+                Objects.requireNonNull(
+                        params.get(ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_DATA));
+        assertEquals("card", paymentMethodData.get("type"));
+        assertNotNull(paymentMethodData.get("card"));
+    }
 }
