@@ -234,12 +234,15 @@ public class PaymentSession {
      * Launch the {@link PaymentMethodsActivity} to allow the user to select a payment method,
      * or to add a new one.
      *
-     * The initial selected Payment Method ID follows this logic:
-     * 1. If {@param userSelectedPaymentMethodId} is specified, use that
-     * 2. If the instance's {@link PaymentSessionData#getPaymentMethod()} is non-null, use that
-     * 3. If the instance's {@link PaymentSessionPrefs#getSelectedPaymentMethodId(String)}
-     *    is non-null, use that
-     * 4. Otherwise, choose the most recently added Payment Method
+     * <p>The initial selected Payment Method ID uses the following logic.</p>
+     * <ol>
+     * <li>If {@param userSelectedPaymentMethodId} is specified, use that</li>
+     * <li>If the instance's {@link PaymentSessionData#getPaymentMethod()} is non-null,
+     * use that</li>
+     * <li>If the instance's {@link PaymentSessionPrefs#getSelectedPaymentMethodId(String)}
+     * is non-null, use that</li>
+     * <li>Otherwise, choose the most recently added Payment Method</li>
+     * </ol>
      *
      * See {@link #getSelectedPaymentMethodId(String)}
      *
