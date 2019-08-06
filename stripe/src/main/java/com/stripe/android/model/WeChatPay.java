@@ -1,0 +1,161 @@
+package com.stripe.android.model;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.stripe.android.ObjectBuilder;
+import com.stripe.android.utils.ObjectUtils;
+
+import org.json.JSONObject;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public final class WeChatPay extends StripeModel {
+    private static final String FIELD_APPID = "android_appid";
+    private static final String FIELD_NONCE = "android_noncestr";
+    private static final String FIELD_PACKAGE = "android_package";
+    private static final String FIELD_PARTNERID = "android_partnerid";
+    private static final String FIELD_PREPAYID = "android_prepayid";
+    private static final String FIELD_SIGN = "android_sign";
+    private static final String FIELD_TIMESTAMP = "android_timestamp";
+    private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
+
+    @Nullable public final String statementDescriptor;
+    @Nullable public final String appId;
+    @Nullable public final String nonce;
+    @Nullable public final String packageValue;
+    @Nullable public final String partnerId;
+    @Nullable public final String prepayId;
+    @Nullable public final String sign;
+    @Nullable public final String timestamp;
+
+    private WeChatPay(@NonNull Builder builder) {
+        statementDescriptor = builder.statementDescriptor;
+        appId = builder.appId;
+        nonce = builder.nonce;
+        packageValue = builder.packageValue;
+        partnerId = builder.partnerId;
+        prepayId = builder.prepayId;
+        sign = builder.sign;
+        timestamp = builder.timestamp;
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toMap() {
+        final AbstractMap<String, Object> map = new HashMap<>();
+        map.put(FIELD_APPID, appId);
+        map.put(FIELD_NONCE, nonce);
+        map.put(FIELD_PACKAGE, packageValue);
+        map.put(FIELD_PARTNERID, partnerId);
+        map.put(FIELD_PREPAYID, prepayId);
+        map.put(FIELD_SIGN, sign);
+        map.put(FIELD_TIMESTAMP, timestamp);
+        map.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+        return map;
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(statementDescriptor, appId, nonce, packageValue, partnerId,
+                prepayId, sign, timestamp);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof WeChatPay && typedEquals((WeChatPay) obj));
+    }
+
+    private boolean typedEquals(@NonNull WeChatPay obj) {
+        return Objects.equals(statementDescriptor, obj.statementDescriptor) &&
+                Objects.equals(appId, obj.appId) &&
+                Objects.equals(nonce, obj.nonce) &&
+                Objects.equals(packageValue, obj.packageValue) &&
+                Objects.equals(partnerId, obj.partnerId) &&
+                Objects.equals(prepayId, obj.prepayId) &&
+                Objects.equals(sign, obj.sign) &&
+                Objects.equals(timestamp, obj.timestamp);
+    }
+
+    @NonNull
+    public static WeChatPay fromJson(@NonNull JSONObject json) {
+        return new Builder()
+                .setAppId(json.optString(FIELD_APPID))
+                .setNonce(json.optString(FIELD_NONCE))
+                .setPackageValue(json.optString(FIELD_PACKAGE))
+                .setPartnerId(json.optString(FIELD_PARTNERID))
+                .setPrepayId(json.optString(FIELD_PREPAYID))
+                .setSign(json.optString(FIELD_SIGN))
+                .setTimestamp(json.optString(FIELD_TIMESTAMP))
+                .setStatementDescriptor(json.optString(FIELD_STATEMENT_DESCRIPTOR))
+                .build();
+    }
+
+    static final class Builder implements ObjectBuilder<WeChatPay> {
+        private String statementDescriptor;
+        private String appId;
+        private String nonce;
+        private String packageValue;
+        private String partnerId;
+        private String prepayId;
+        private String sign;
+        private String timestamp;
+
+        @NonNull
+        Builder setStatementDescriptor(@Nullable String statementDescriptor) {
+            this.statementDescriptor = statementDescriptor;
+            return this;
+        }
+
+        @NonNull
+        Builder setAppId(String appId) {
+            this.appId = appId;
+            return this;
+        }
+
+        @NonNull
+        Builder setNonce(@Nullable String nonce) {
+            this.nonce = nonce;
+            return this;
+        }
+
+        @NonNull
+        Builder setPackageValue(@Nullable String packageValue) {
+            this.packageValue = packageValue;
+            return this;
+        }
+
+        @NonNull
+        Builder setPartnerId(@Nullable String partnerId) {
+            this.partnerId = partnerId;
+            return this;
+        }
+
+        @NonNull
+        Builder setPrepayId(@Nullable String prepayId) {
+            this.prepayId = prepayId;
+            return this;
+        }
+
+        @NonNull
+        Builder setSign(@Nullable String sign) {
+            this.sign = sign;
+            return this;
+        }
+
+        @NonNull
+        Builder setTimestamp(@Nullable String timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public WeChatPay build() {
+            return new WeChatPay(this);
+        }
+    }
+}
