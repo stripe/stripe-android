@@ -149,7 +149,7 @@ class PaymentIntentActivity : AppCompatActivity() {
     }
 
     private fun displayPaymentIntent(paymentIntent: PaymentIntent) {
-        paymentIntentValue!!.text = JSONObject(paymentIntent.toMap()).toString()
+        paymentIntentValue.text = JSONObject(paymentIntent.toMap()).toString()
     }
 
     private fun confirmPaymentIntent(card: Card) {

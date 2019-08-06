@@ -11,7 +11,11 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
-import com.stripe.android.model.*
+import com.stripe.android.model.Card
+import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler

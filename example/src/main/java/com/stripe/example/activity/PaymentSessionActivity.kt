@@ -11,8 +11,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.stripe.android.*
+import com.stripe.android.CustomerSession
 import com.stripe.android.PayWithGoogleUtils.getPriceString
+import com.stripe.android.PaymentSession
+import com.stripe.android.PaymentSessionConfig
+import com.stripe.android.PaymentSessionData
+import com.stripe.android.StripeError
 import com.stripe.android.model.Address
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation

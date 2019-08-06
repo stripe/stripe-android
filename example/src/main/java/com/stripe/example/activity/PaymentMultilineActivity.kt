@@ -63,7 +63,7 @@ class PaymentMultilineActivity : AppCompatActivity() {
         compositeDisposable.add(tokenObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { d -> progressDialogController.show(R.string.progressMessage) }
+            .doOnSubscribe { progressDialogController.show(R.string.progressMessage) }
             .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { addToList(it) },

@@ -6,7 +6,12 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.ListView
 import com.stripe.android.view.CardInputWidget
-import com.stripe.example.controller.*
+import com.stripe.example.controller.AsyncTaskTokenController
+import com.stripe.example.controller.ErrorDialogHandler
+import com.stripe.example.controller.IntentServiceTokenController
+import com.stripe.example.controller.ListViewController
+import com.stripe.example.controller.ProgressDialogController
+import com.stripe.example.controller.RxTokenController
 
 /**
  * A dagger-free simple way to handle dependencies in the Example project. Most of this work would
