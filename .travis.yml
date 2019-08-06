@@ -1,27 +1,50 @@
 language: android
+sudo: required
 jdk: oraclejdk8
+
+env:
+  global:
+    - ANDROID_API_LEVEL=29
+    - ANDROID_BUILD_TOOLS_VERSION=29.0.1
 
 android:
   components:
     - tools
     - platform-tools
-    - tools
-    - build-tools-29.0.1
-    - android-28
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-    - extra-android-support
-    - addon-google_apis-google-24
-
-licenses:
+    - tools # Appears twice per Travis docs (to update the tools)
+    - build-tools-$ANDROID_BUILD_TOOLS_VERSION
+    - android-$ANDROID_API_LEVEL
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
-    - '.+'
+
+before_cache:
+  # Do not cache a few Gradle files/directories (see https://docs.travis-ci.com/user/languages/java/#Caching)
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 before_install:
   - yes | sdkmanager "platforms;android-28"
 
-script:
-  - ./gradlew checkstyle ktlint lintRelease
-  - ./gradlew clean testRelease -i
+cache:
+  directories:
+    # Android SDK
+    - $HOME/android-sdk-dl
+    - $HOME/android-sdk
+
+    # Gradle dependencies
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+    # Android build cache (see http://tools.android.com/tech-docs/build-cache)
+    - $HOME/.android/build-cache
+
+jobs:
+  include:
+    - stage: "Testing"
+      name: "Testing"
+      script:
+        - ./gradlew clean ktlint
+        - ./gradlew checkstyle lintRelease
+        - ./gradlew testRelease -i
