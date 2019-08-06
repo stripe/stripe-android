@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
@@ -59,6 +60,15 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
                 .build();
     }
 
+    /**
+     * Create the parameters necessary for confirming a SetupIntent with a new PaymentMethod
+     *
+     * @param paymentMethodCreateParams the params to create a new PaymentMethod that will be
+     *                                  attached to the SetupIntent being confirmed
+     * @param clientSecret client secret from the SetupIntent being confirmed
+     * @param returnUrl the URL the customer should be redirected to after the authorization process
+     * @return params that can be use to confirm a SetupIntent
+     */
     @NonNull
     public static ConfirmSetupIntentParams create(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -71,10 +81,10 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     }
 
     /**
-     * See {@link #create(String, String, String)}
+     * See {@link #create(PaymentMethodCreateParams, String, String)}
      */
     @NonNull
-    public static ConfirmSetupIntentParams createWithPaymentMethodCreateParams(
+    public static ConfirmSetupIntentParams create(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull String clientSecret) {
         return create(paymentMethodCreateParams, clientSecret, null);
@@ -133,10 +143,12 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     }
 
     @NonNull
-    private ConfirmSetupIntentParams.Builder toBuilder() {
+    @VisibleForTesting
+    ConfirmSetupIntentParams.Builder toBuilder() {
         return new ConfirmSetupIntentParams.Builder(mClientSecret)
                 .setReturnUrl(mReturnUrl)
                 .setPaymentMethodId(mPaymentMethodId)
+                .setPaymentMethodCreateParams(mPaymentMethodCreateParams)
                 .setShouldUseSdk(mUseStripeSdk);
     }
 
@@ -146,11 +158,12 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
                 typedEquals((ConfirmSetupIntentParams) obj));
     }
 
-    private boolean typedEquals(@NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
-        return ObjectUtils.equals(mReturnUrl, confirmSetupIntentParams.mReturnUrl)
-                && ObjectUtils.equals(mClientSecret, confirmSetupIntentParams.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, confirmSetupIntentParams.mPaymentMethodId)
-                && ObjectUtils.equals(mUseStripeSdk, confirmSetupIntentParams.mUseStripeSdk);
+    private boolean typedEquals(@NonNull ConfirmSetupIntentParams params) {
+        return ObjectUtils.equals(mReturnUrl, params.mReturnUrl)
+                && ObjectUtils.equals(mClientSecret, params.mClientSecret)
+                && ObjectUtils.equals(mPaymentMethodId, params.mPaymentMethodId)
+                && ObjectUtils.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
+                && ObjectUtils.equals(mUseStripeSdk, params.mUseStripeSdk);
     }
 
     @Override
@@ -159,7 +172,8 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     }
 
 
-    private static final class Builder implements ObjectBuilder<ConfirmSetupIntentParams> {
+    @VisibleForTesting
+    static final class Builder implements ObjectBuilder<ConfirmSetupIntentParams> {
         @NonNull private final String mClientSecret;
         @Nullable private String mPaymentMethodId;
         @Nullable private PaymentMethodCreateParams mPaymentMethodCreateParams;

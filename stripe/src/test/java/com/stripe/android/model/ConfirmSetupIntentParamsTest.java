@@ -13,8 +13,19 @@ import static org.junit.Assert.assertTrue;
 
 public class ConfirmSetupIntentParamsTest {
 
+    private static final PaymentMethodCreateParams PM_CREATE_PARAMS =
+            PaymentMethodCreateParams.create(
+                    new PaymentMethodCreateParams.Card.Builder()
+                            .setNumber("4242424242424242")
+                            .setExpiryMonth(1)
+                            .setExpiryYear(2024)
+                            .setCvc("111")
+                            .build(),
+                    null
+            );
+
     @Test
-    public void shouldUseStripeSdk() {
+    public void shouldUseStripeSdk_withPaymentMethodId() {
         final ConfirmSetupIntentParams confirmSetupIntentParams =
                 ConfirmSetupIntentParams.create(
                         "pm_123", "client_secret", "return_url");
@@ -23,6 +34,39 @@ public class ConfirmSetupIntentParamsTest {
         assertTrue(confirmSetupIntentParams
                 .withShouldUseStripeSdk(true)
                 .shouldUseStripeSdk());
+    }
+
+    @Test
+    public void shouldUseStripeSdk_withPaymentMethodCreateParams() {
+        final ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                        PM_CREATE_PARAMS,
+                        "client_secret",
+                        "return_url"
+                );
+        assertFalse(confirmSetupIntentParams.shouldUseStripeSdk());
+
+        assertTrue(confirmSetupIntentParams
+                .withShouldUseStripeSdk(true)
+                .shouldUseStripeSdk());
+    }
+
+    @Test
+    public void toBuilder_withPaymentMethodId_shouldCreateEqualObject() {
+        final ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                        "pm_123", "client_secret", "return_url");
+        assertEquals(confirmSetupIntentParams,
+                confirmSetupIntentParams.toBuilder().build());
+    }
+
+    @Test
+    public void toBuilder_withPaymentMethodCreateParams_shouldCreateEqualObject() {
+        final ConfirmSetupIntentParams confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                        PM_CREATE_PARAMS, "client_secret", "return_url");
+        assertEquals(confirmSetupIntentParams,
+                confirmSetupIntentParams.toBuilder().build());
     }
 
     @Test
@@ -42,17 +86,9 @@ public class ConfirmSetupIntentParamsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void create_withPaymentMethodCreateParams_shouldPopulateParamMapCorrectly() {
-        final PaymentMethodCreateParams.Card expectedCard =
-                new PaymentMethodCreateParams.Card.Builder()
-                        .setNumber("4242424242424242")
-                        .setCvc("123")
-                        .setExpiryMonth(8)
-                        .setExpiryYear(2019)
-                        .build();
-
         final ConfirmSetupIntentParams confirmSetupIntentParams =
                 ConfirmSetupIntentParams.create(
-                        PaymentMethodCreateParams.create(expectedCard, null),
+                        PM_CREATE_PARAMS,
                         "client_secret",
                         null
                 );
