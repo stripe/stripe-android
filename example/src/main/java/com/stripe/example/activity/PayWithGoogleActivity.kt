@@ -8,7 +8,13 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.wallet.*
+import com.google.android.gms.wallet.AutoResolveHelper
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.PaymentDataRequest
+import com.google.android.gms.wallet.PaymentsClient
+import com.google.android.gms.wallet.Wallet
+import com.google.android.gms.wallet.WalletConstants
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration

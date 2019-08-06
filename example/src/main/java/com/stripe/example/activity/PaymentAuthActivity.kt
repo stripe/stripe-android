@@ -7,7 +7,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.stripe.android.*
+import com.stripe.android.ApiResultCallback
+import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
+import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.example.R
@@ -206,7 +211,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
             val paymentIntent = paymentIntentResult.intent
             activity.statusTextView.append("\n\n" +
-                "Auth status: " + paymentIntentResult.status + "\n\n" +
+                "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
                 activity.getString(R.string.payment_intent_status, paymentIntent.status))
             activity.onAuthComplete()
         }

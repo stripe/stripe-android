@@ -12,7 +12,15 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import com.stripe.android.*
+import com.stripe.android.ApiResultCallback
+import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.PaymentSession
+import com.stripe.android.PaymentSessionConfig
+import com.stripe.android.PaymentSessionData
+import com.stripe.android.Stripe
+import com.stripe.android.StripeError
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.view.ShippingInfoWidget
@@ -245,7 +253,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
                 val paymentIntent = paymentIntentResult.intent
                 fragment.statusTextView.append("\n\n" +
-                    "Auth status: " + paymentIntentResult.status + "\n\n" +
+                    "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
                 fragment.onAuthComplete()
