@@ -46,7 +46,9 @@ import static com.stripe.android.StripeNetworkUtils.createUpdateCvcTokenParams;
  */
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
-    public static final String VERSION =
+    @NonNull public static final String API_VERSION = ApiVersion.get().code;
+
+    @NonNull public static final String VERSION =
             String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME);
 
     @Nullable private static AppInfo sAppInfo;

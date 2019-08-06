@@ -104,6 +104,11 @@ public class StripeTest {
     }
 
     @Test
+    public void testApiVersion() {
+        assertEquals("2019-05-16", Stripe.API_VERSION);
+    }
+
+    @Test
     public void constructorShouldFailWithNullPublishableKey() {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
