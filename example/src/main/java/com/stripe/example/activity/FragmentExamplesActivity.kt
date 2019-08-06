@@ -19,9 +19,11 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
+import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.StripeError
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
@@ -65,6 +67,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         private lateinit var progressBar: ProgressBar
         private lateinit var launchPaymentSessionButton: Button
         private lateinit var launchPaymentAuthButton: Button
+        private lateinit var launchSetupAuthButton: Button
         private lateinit var statusTextView: TextView
 
         override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -85,6 +88,9 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
             launchPaymentAuthButton = rootView.findViewById(R.id.launch_payment_auth)
             launchPaymentAuthButton.setOnClickListener { createPaymentIntent() }
+
+            launchSetupAuthButton = rootView.findViewById(R.id.launch_setup_auth)
+            launchSetupAuthButton.setOnClickListener { createSetupIntent() }
         }
 
         override fun onCreateView(
@@ -121,8 +127,23 @@ class FragmentExamplesActivity : AppCompatActivity() {
                 return
             }
 
-            val isPaymentResult = stripe.onPaymentResult(requestCode, data,
-                AuthResultListener(this))
+            val isPaymentResult = stripe.onPaymentResult(
+                requestCode,
+                data,
+                PaymentAuthResultListener(this)
+            )
+            if (isPaymentResult) {
+                return
+            }
+
+            val isSetupResult = stripe.onSetupResult(
+                requestCode,
+                data,
+                SetupAuthResultListener(this)
+            )
+            if (isSetupResult) {
+                return
+            }
         }
 
         private fun createPaymentIntent() {
@@ -135,7 +156,20 @@ class FragmentExamplesActivity : AppCompatActivity() {
                         launchPaymentAuthButton.isEnabled = false
                         statusTextView.setText(R.string.creating_payment_intent)
                     }
-                    .subscribe { handleCreatePaymentIntentResponse(it) })
+                    .subscribe { onCreatePaymentIntentResponse(it) })
+        }
+
+        private fun createSetupIntent() {
+            compositeDisposable.add(
+                stripeService.createSetupIntent(HashMap(0))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe {
+                        progressBar.visibility = View.VISIBLE
+                        launchSetupAuthButton.isEnabled = false
+                        statusTextView.setText(R.string.creating_setup_intent)
+                    }
+                    .subscribe { onCreateSetupIntentResponse(it) })
         }
 
         private fun onAuthComplete() {
@@ -143,13 +177,27 @@ class FragmentExamplesActivity : AppCompatActivity() {
             progressBar.visibility = View.INVISIBLE
         }
 
-        private fun handleCreatePaymentIntentResponse(responseBody: ResponseBody) {
+        private fun onCreatePaymentIntentResponse(responseBody: ResponseBody) {
             try {
                 val responseData = JSONObject(responseBody.string())
                 statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
                     responseData.getString("status")))
                 val secret = responseData.getString("secret")
                 confirmPaymentIntent(secret)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+
+        private fun onCreateSetupIntentResponse(responseBody: ResponseBody) {
+            try {
+                val responseData = JSONObject(responseBody.string())
+                statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
+                    responseData.getString("status")))
+                val secret = responseData.getString("secret")
+                confirmSetupIntent(secret)
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (e: JSONException) {
@@ -172,6 +220,17 @@ class FragmentExamplesActivity : AppCompatActivity() {
                     PAYMENT_METHOD_3DS2_REQUIRED,
                     paymentIntentClientSecret,
                     RETURN_URL))
+        }
+
+        private fun confirmSetupIntent(setupIntentClientSecret: String) {
+            statusTextView.append("\n\nStarting payment authentication")
+            stripe.confirmSetupIntent(this,
+                ConfirmSetupIntentParams.create(
+                    PAYMENT_METHOD_3DS2_REQUIRED,
+                    setupIntentClientSecret,
+                    RETURN_URL
+                )
+            )
         }
 
         private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
@@ -243,7 +302,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             }
         }
 
-        private class AuthResultListener internal constructor(
+        private class PaymentAuthResultListener internal constructor(
             fragment: LauncherFragment
         ) : ApiResultCallback<PaymentIntentResult> {
             private val fragmentRef: WeakReference<LauncherFragment> = WeakReference(fragment)
@@ -254,6 +313,30 @@ class FragmentExamplesActivity : AppCompatActivity() {
                 val paymentIntent = paymentIntentResult.intent
                 fragment.statusTextView.append("\n\n" +
                     "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
+                    fragment.getString(R.string.payment_intent_status,
+                        paymentIntent.status))
+                fragment.onAuthComplete()
+            }
+
+            override fun onError(e: Exception) {
+                val fragment = fragmentRef.get() ?: return
+
+                fragment.statusTextView.append("\n\nException: " + e.message)
+                fragment.onAuthComplete()
+            }
+        }
+
+        private class SetupAuthResultListener internal constructor(
+            fragment: LauncherFragment
+        ) : ApiResultCallback<SetupIntentResult> {
+            private val fragmentRef: WeakReference<LauncherFragment> = WeakReference(fragment)
+
+            override fun onSuccess(setupIntentResult: SetupIntentResult) {
+                val fragment = fragmentRef.get() ?: return
+
+                val paymentIntent = setupIntentResult.intent
+                fragment.statusTextView.append("\n\n" +
+                    "Outcome: " + setupIntentResult.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
                 fragment.onAuthComplete()
