@@ -5,9 +5,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 
+import com.stripe.android.utils.ObjectUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.Source.SourceType;
@@ -42,6 +48,7 @@ public final class SourceParams {
     private static final String FIELD_LINE_2 = "line2";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_NUMBER = "number";
+    private static final String FIELD_PHONE = "phone";
     private static final String FIELD_POSTAL_CODE = "postal_code";
     private static final String FIELD_RETURN_URL = "return_url";
     private static final String FIELD_STATE = "state";
@@ -247,10 +254,9 @@ public final class SourceParams {
      */
     @NonNull
     public static SourceParams createSourceFromTokenParams(@NonNull String tokenId) {
-        SourceParams sourceParams = SourceParams.createCustomParams();
-        sourceParams.setType(SourceType.CARD);
-        sourceParams.setToken(tokenId);
-        return sourceParams;
+        return SourceParams.createCustomParams()
+                .setType(SourceType.CARD)
+                .setToken(tokenId);
     }
 
     /**
@@ -276,7 +282,7 @@ public final class SourceParams {
 
         params.setApiParameterMap(basicInfoMap);
 
-        final Map<String, Object> addressMap = new HashMap<>();
+        final AbstractMap<String, Object> addressMap = new HashMap<>();
         addressMap.put(FIELD_LINE_1, card.getAddressLine1());
         addressMap.put(FIELD_LINE_2, card.getAddressLine2());
         addressMap.put(FIELD_CITY, card.getAddressCity());
@@ -286,7 +292,7 @@ public final class SourceParams {
         removeNullAndEmptyParams(addressMap);
 
         // If there are any keys left...
-        final Map<String, Object> ownerMap = new HashMap<>();
+        final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, card.getName());
         if (addressMap.keySet().size() > 0) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
@@ -299,6 +305,73 @@ public final class SourceParams {
         final Map<String, String> metadata = card.getMetadata();
         if (metadata != null) {
             params.setMetaData(metadata);
+        }
+
+        return params;
+    }
+
+    /**
+     * @param googlePayPaymentData a {@link JSONObject} derived from Google Pay's
+     *                             <a href="https://developers.google.com/pay/api/android/reference/client#tojson">PaymentData#toJson()</a>
+     */
+    @NonNull
+    public static SourceParams createCardParamsFromGooglePay(
+            @NonNull JSONObject googlePayPaymentData)
+            throws JSONException {
+        final JSONObject paymentMethodData = googlePayPaymentData
+                .getJSONObject("paymentMethodData");
+        final JSONObject googlePayBillingAddress = paymentMethodData
+                .getJSONObject("info")
+                .optJSONObject("billingAddress");
+        final String paymentToken = paymentMethodData
+                .getJSONObject("tokenizationData")
+                .getString("token");
+        final Token stripeToken = Token.fromJson(new JSONObject(paymentToken));
+        final String stripeTokenId = Objects.requireNonNull(stripeToken).getId();
+
+        final SourceParams params = new SourceParams()
+                .setType(SourceType.CARD)
+                .setToken(stripeTokenId);
+        final Map<String, Object> addressMap;
+        final String phone;
+        final String name;
+        if (googlePayBillingAddress != null) {
+            name = googlePayBillingAddress.optString("name");
+            phone = googlePayBillingAddress.optString("phoneNumber");
+            addressMap = new HashMap<>();
+            addressMap.put(FIELD_LINE_1,
+                    googlePayBillingAddress.optString("address1"));
+            addressMap.put(FIELD_LINE_2,
+                    googlePayBillingAddress.optString("address2"));
+            addressMap.put(FIELD_CITY,
+                    googlePayBillingAddress.optString("locality"));
+            addressMap.put(FIELD_COUNTRY,
+                    googlePayBillingAddress.optString("countryCode"));
+            addressMap.put(FIELD_STATE,
+                    googlePayBillingAddress.optString("administrativeArea"));
+            addressMap.put(FIELD_POSTAL_CODE,
+                    googlePayBillingAddress.optString("postalCode"));
+            removeNullAndEmptyParams(addressMap);
+        } else {
+            name = null;
+            phone = null;
+            addressMap = null;
+        }
+
+        final Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put(FIELD_EMAIL, googlePayPaymentData.optString("email"));
+        if (name != null) {
+            ownerMap.put(FIELD_NAME, name);
+        }
+        if (phone != null) {
+            ownerMap.put(FIELD_PHONE, phone);
+        }
+        if (addressMap != null && !addressMap.isEmpty()) {
+            ownerMap.put(FIELD_ADDRESS, addressMap);
+        }
+        removeNullAndEmptyParams(ownerMap);
+        if (!ownerMap.isEmpty()) {
+            params.setOwner(ownerMap);
         }
 
         return params;
@@ -876,5 +949,30 @@ public final class SourceParams {
         simpleMap.put(key1, value1);
         simpleMap.put(key2, value2);
         return simpleMap;
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hash(mAmount, mApiParameterMap, mCurrency, mTypeRaw, mOwner, mMetaData,
+                mRedirect, mExtraParams, mToken, mUsage, mType);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this == obj || (obj instanceof SourceParams && typedEquals((SourceParams) obj));
+    }
+
+    private boolean typedEquals(@NonNull SourceParams params) {
+        return ObjectUtils.equals(mAmount, params.mAmount) &&
+                ObjectUtils.equals(mApiParameterMap, params.mApiParameterMap) &&
+                ObjectUtils.equals(mCurrency, params.mCurrency) &&
+                ObjectUtils.equals(mTypeRaw, params.mTypeRaw) &&
+                ObjectUtils.equals(mOwner, params.mOwner) &&
+                ObjectUtils.equals(mMetaData, params.mMetaData) &&
+                ObjectUtils.equals(mRedirect, params.mRedirect) &&
+                ObjectUtils.equals(mExtraParams, params.mExtraParams) &&
+                ObjectUtils.equals(mToken, params.mToken) &&
+                ObjectUtils.equals(mUsage, params.mUsage) &&
+                ObjectUtils.equals(mType, params.mType);
     }
 }

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.stripe.android.testharness.JsonTestUtils;
 
+import org.json.JSONException;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -274,6 +275,44 @@ public class SourceParamsTest {
         totalExpectedMap.put("metadata", metadata);
 
         JsonTestUtils.assertMapEquals(totalExpectedMap, params.toParamMap());
+    }
+
+    @Test
+    public void createCardParamsFromGooglePay_withNoBillingAddress() throws JSONException {
+        final SourceParams createdParams =
+                SourceParams.createCardParamsFromGooglePay(
+                        GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS);
+
+        final SourceParams expectedParams =
+                SourceParams.createSourceFromTokenParams("tok_1F4ACMCRMbs6FrXf6fPqLnN7");
+
+        assertEquals(expectedParams, createdParams);
+    }
+
+    @Test
+    public void createCardParamsFromGooglePay_withFullBillingAddress() throws JSONException {
+        final SourceParams createdParams =
+                SourceParams.createCardParamsFromGooglePay(
+                        GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS);
+
+        final Map<String, String> addressParams = new HashMap<>();
+        addressParams.put("line1", "510 Townsend St");
+        addressParams.put("city", "San Francisco");
+        addressParams.put("state", "CA");
+        addressParams.put("postal_code", "94103");
+        addressParams.put("country", "US");
+
+        final Map<String, Object> ownerParams = new HashMap<>();
+        ownerParams.put("email", "stripe@example.com");
+        ownerParams.put("name", "Stripe Johnson");
+        ownerParams.put("phone", "1-888-555-1234");
+        ownerParams.put("address", addressParams);
+
+        final SourceParams expectedParams =
+                SourceParams.createSourceFromTokenParams("tok_1F4VSjBbvEcIpqUbSsbEtBap")
+                        .setOwner(ownerParams);
+
+        assertEquals(expectedParams, createdParams);
     }
 
     @Test
