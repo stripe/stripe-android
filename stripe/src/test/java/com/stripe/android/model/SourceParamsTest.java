@@ -714,12 +714,19 @@ public class SourceParamsTest {
         // Using the Giropay constructor to add some free params and expected values,
         // including a source type params
         final String DOGECOIN = "dogecoin";
-        final SourceParams params = SourceParams.createGiropayParams(
-                150L,
-                "Stripe",
-                "stripe://return",
-                "stripe descriptor");
-        params.setTypeRaw(DOGECOIN);
+
+        final Map<String, Object> ownerMap = new HashMap<>();
+        ownerMap.put("name", "Stripe");
+
+        final Map<String, Object> dogecoinParams = new HashMap<>();
+        dogecoinParams.put("statement_descriptor", "stripe descriptor");
+
+        final SourceParams params = SourceParams.createCustomParams(DOGECOIN)
+                .setCurrency(Source.EURO)
+                .setAmount(150L)
+                .setReturnUrl("stripe://return")
+                .setOwner(ownerMap)
+                .setApiParameterMap(dogecoinParams);
 
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", DOGECOIN);
@@ -757,22 +764,23 @@ public class SourceParamsTest {
 
     @Test
     public void setCustomType_forEmptyParams_setsTypeToUnknown() {
-        final SourceParams params = SourceParams.createCustomParams();
-        params.setTypeRaw("dogecoin");
+        final SourceParams params = SourceParams.createCustomParams("dogecoin");
         assertEquals(Source.SourceType.UNKNOWN, params.getType());
         assertEquals("dogecoin", params.getTypeRaw());
     }
 
     @Test
-    public void setCustomType_forStandardParams_overridesStandardType() {
-        final SourceParams params = SourceParams.createThreeDSecureParams(
-                99000L,
-                "brl",
-                "stripe://returnaddress",
-                "card_id_123");
-        params.setTypeRaw("bar_tab");
-        assertEquals(Source.SourceType.UNKNOWN, params.getType());
-        assertEquals("bar_tab", params.getTypeRaw());
+    public void createCustomParams_withCustomType() {
+        final Map<String, Object> apiParamMap = new HashMap<>();
+        apiParamMap.put("card", "card_id_123");
+
+        final SourceParams sourceParams = SourceParams.createCustomParams("bar_tab")
+                .setAmount(99000L)
+                .setCurrency("brl")
+                .setReturnUrl("stripe://returnaddress")
+                .setApiParameterMap(apiParamMap);
+        assertEquals(Source.SourceType.UNKNOWN, sourceParams.getType());
+        assertEquals("bar_tab", sourceParams.getTypeRaw());
     }
 
     @SuppressWarnings("unchecked")

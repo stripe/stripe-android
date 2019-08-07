@@ -576,8 +576,12 @@ public final class Source extends StripeModel implements StripePaymentSource {
             return SourceType.BANCONTACT;
         } else if (SourceType.ALIPAY.equals(sourceType)) {
             return SourceType.ALIPAY;
+        } else if (SourceType.EPS.equals(sourceType)) {
+            return SourceType.EPS;
         } else if (SourceType.P24.equals(sourceType)) {
             return SourceType.P24;
+        } else if (SourceType.MULTIBANCO.equals(sourceType)) {
+            return SourceType.MULTIBANCO;
         } else if (SourceType.WECHAT.equals(sourceType)) {
             return SourceType.WECHAT;
         } else if (SourceType.UNKNOWN.equals(sourceType)) {
