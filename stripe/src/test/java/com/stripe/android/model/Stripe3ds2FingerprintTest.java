@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNotNull;
 public class Stripe3ds2FingerprintTest {
 
     @NonNull
-    public static final String DS_CERT_DATA_RSA = "-----BEGIN CERTIFICATE-----\n" +
+    static final String DS_CERT_DATA_RSA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIE0TCCA7mgAwIBAgIUXbeqM1duFcHk4dDBwT8o7Ln5wX8wDQYJKoZIhvcNAQEL\n" +
             "BQAwXjELMAkGA1UEBhMCVVMxITAfBgNVBAoTGEFtZXJpY2FuIEV4cHJlc3MgQ29t\n" +
             "cGFueTEsMCoGA1UEAxMjQW1lcmljYW4gRXhwcmVzcyBTYWZla2V5IElzc3Vpbmcg\n" +
@@ -113,7 +113,7 @@ public class Stripe3ds2FingerprintTest {
             return (X509Certificate) factory
                     .generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
         } catch (CertificateException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }

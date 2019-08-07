@@ -11,9 +11,6 @@ import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
@@ -46,16 +43,6 @@ public abstract class Wallet extends StripeModel implements Parcelable {
         dest.writeString(walletType.code);
     }
 
-    @NonNull
-    @Override
-    public final Map<String, Object> toMap() {
-        final AbstractMap<String, Object> wallet = new HashMap<>();
-        wallet.put(FIELD_TYPE, walletType.code);
-        wallet.put(FIELD_DYNAMIC_LAST4, dynamicLast4);
-        wallet.put(walletType.code, getWalletTypeMap());
-        return wallet;
-    }
-
     @Override
     public int hashCode() {
         return ObjectUtils.hash(dynamicLast4, walletType);
@@ -71,14 +58,11 @@ public abstract class Wallet extends StripeModel implements Parcelable {
                 && ObjectUtils.equals(walletType, wallet.walletType);
     }
 
-    @NonNull
-    abstract Map<String, Object> getWalletTypeMap();
-
     abstract static class Builder<W extends Wallet> {
         @Nullable private String mDynamicLast4;
 
         @NonNull
-        public Builder setDynamicLast4(@Nullable String dynamicLast4) {
+        Builder setDynamicLast4(@Nullable String dynamicLast4) {
             this.mDynamicLast4 = dynamicLast4;
             return this;
         }
@@ -173,19 +157,6 @@ public abstract class Wallet extends StripeModel implements Parcelable {
                         return new Address[size];
                     }
                 };
-
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> address = new HashMap<>();
-            address.put(FIELD_CITY, city);
-            address.put(FIELD_COUNTRY, country);
-            address.put(FIELD_LINE1, line1);
-            address.put(FIELD_LINE2, line2);
-            address.put(FIELD_POSTAL_CODE, postalCode);
-            address.put(FIELD_STATE, state);
-            return address;
-        }
 
         @Nullable
         static Address fromJson(@Nullable JSONObject addressJson) {

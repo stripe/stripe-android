@@ -12,11 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -28,14 +23,14 @@ import java.util.Objects;
  */
 abstract class EphemeralKey extends StripeModel implements Parcelable {
 
-    static final String FIELD_CREATED = "created";
-    static final String FIELD_EXPIRES = "expires";
-    static final String FIELD_SECRET = "secret";
-    static final String FIELD_LIVEMODE = "livemode";
-    static final String FIELD_OBJECT = "object";
-    static final String FIELD_ID = "id";
-    static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
-    static final String FIELD_TYPE = "type";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_EXPIRES = "expires";
+    private static final String FIELD_SECRET = "secret";
+    private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
+    private static final String FIELD_TYPE = "type";
 
     @NonNull final String mObjectId;
     private final long mCreated;
@@ -82,27 +77,6 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
         mObject = object;
         mSecret = secret;
         mType = type;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_CREATED, mCreated);
-        map.put(FIELD_EXPIRES, mExpires);
-        map.put(FIELD_OBJECT, mObject);
-        map.put(FIELD_ID, mId);
-        map.put(FIELD_SECRET, mSecret);
-        map.put(FIELD_LIVEMODE, mLiveMode);
-
-        final List<Object> associatedObjectsList = new ArrayList<>();
-        final Map<String, String> associatedObjectMap = new HashMap<>();
-        associatedObjectMap.put(FIELD_ID, mObjectId);
-        associatedObjectMap.put(FIELD_TYPE, mType);
-        associatedObjectsList.add(associatedObjectMap);
-
-        map.put(FIELD_ASSOCIATED_OBJECTS, associatedObjectsList);
-        return map;
     }
 
     @Override

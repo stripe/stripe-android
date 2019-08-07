@@ -3,10 +3,6 @@ package com.stripe.android.model;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -19,24 +15,9 @@ public class SourceRedirectTest {
             "\"url\": \"examplecompany://redirect-link\"" +
             "}";
 
-    private static final Map<String, Object> EXAMPLE_MAP_REDIRECT =
-            new HashMap<String, Object>() {{
-                put("return_url", "https://google.com");
-                put("status", "succeeded");
-                put("url", "examplecompany://redirect-link");
-            }};
-
-    private SourceRedirect mSourceRedirect;
-
     @Before
     public void setup() {
-        mSourceRedirect = SourceRedirect.fromString(EXAMPLE_JSON_REDIRECT);
-        assertNotNull(mSourceRedirect);
-    }
-
-    @Test
-    public void fromJsonString_toMap_createsExpectedMap() {
-        assertMapEquals(EXAMPLE_MAP_REDIRECT, mSourceRedirect.toMap());
+        assertNotNull(SourceRedirect.fromString(EXAMPLE_JSON_REDIRECT));
     }
 
     @Test

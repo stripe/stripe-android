@@ -1,13 +1,12 @@
 package com.stripe.android.model;
 
-import org.junit.Before;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
-import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for {@link SourceReceiver}.
@@ -16,30 +15,19 @@ public class SourceReceiverTest {
 
     private static final String EXAMPLE_JSON_RECEIVER = "{" +
             "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\"," +
-            "\"amount_charged\": 0," +
-            "\"amount_received\": 0," +
-            "\"amount_returned\": 0" +
+            "\"amount_charged\": 10," +
+            "\"amount_received\": 20," +
+            "\"amount_returned\": 30" +
             "}";
 
-    static final Map<String, Object> EXAMPLE_MAP_RECEIVER =
-            new HashMap<String, Object>() {{
-                put("address", "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N");
-                put("amount_charged", 0L);
-                put("amount_received", 0L);
-                put("amount_returned", 0L);
-            }};
-
-    private SourceReceiver mSourceReceiver;
-
-    @Before
-    public void setup() {
-        mSourceReceiver = SourceReceiver.fromString(EXAMPLE_JSON_RECEIVER);
-        assertNotNull(mSourceReceiver);
-    }
-
     @Test
-    public void fromJsonString_toMap_createsExpectedMap() {
-        assertMapEquals(EXAMPLE_MAP_RECEIVER, mSourceReceiver.toMap());
+    public void fromJson_createsExpectedObject() throws JSONException {
+        final SourceReceiver sourceReceiver = Objects.requireNonNull(
+                        SourceReceiver.fromJson(new JSONObject(EXAMPLE_JSON_RECEIVER)));
+        assertEquals("test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+                sourceReceiver.getAddress());
+        assertEquals(10, sourceReceiver.getAmountCharged());
+        assertEquals(20, sourceReceiver.getAmountReceived());
+        assertEquals(30, sourceReceiver.getAmountReturned());
     }
-
 }

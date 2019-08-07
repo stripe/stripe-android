@@ -5,14 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -229,26 +226,6 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
                 .setUsage(Usage.fromCode(optString(jsonObject, FIELD_USAGE)))
                 .setNextAction(optMap(jsonObject, FIELD_NEXT_ACTION))
                 .build();
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_ID, mId);
-        map.put(FIELD_OBJECT, mObjectType);
-        map.put(FIELD_PAYMENT_METHOD, mPaymentMethodId);
-        map.put(FIELD_PAYMENT_METHOD_TYPES, mPaymentMethodTypes);
-        map.put(FIELD_CLIENT_SECRET, mClientSecret);
-        map.put(FIELD_CREATED, mCreated);
-        map.put(FIELD_CUSTOMER, mCustomerId);
-        map.put(FIELD_DESCRIPTION, mDescription);
-        map.put(FIELD_LIVEMODE, mLiveMode);
-        map.put(FIELD_NEXT_ACTION, mNextAction);
-        map.put(FIELD_STATUS, mStatus != null ? mStatus.code : null);
-        map.put(FIELD_USAGE, mUsage != null ? mUsage.code : null);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Override

@@ -8,10 +8,7 @@ import android.support.annotation.Size;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import java.util.AbstractMap;
 import java.util.Currency;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,13 +26,6 @@ public final class ShippingMethod extends StripeModel implements Parcelable {
             return new ShippingMethod[size];
         }
     };
-
-    private static final String FIELD_AMOUNT = "amount";
-    /*ISO Currency Code*/
-    private static final String FIELD_CURRENCY_CODE = "currency_code";
-    private static final String FIELD_DETAIL = "detail";
-    private static final String FIELD_IDENTIFIER = "identifier";
-    private static final String FIELD_LABEL = "label";
 
     private final long mAmount;
     @NonNull @Size(min = 0, max = 3) private final String mCurrencyCode;
@@ -110,18 +100,6 @@ public final class ShippingMethod extends StripeModel implements Parcelable {
     @NonNull
     public String getIdentifier() {
         return mIdentifier;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_AMOUNT, mAmount);
-        map.put(FIELD_CURRENCY_CODE, mCurrencyCode);
-        map.put(FIELD_DETAIL, mDetail);
-        map.put(FIELD_IDENTIFIER, mIdentifier);
-        map.put(FIELD_LABEL, mLabel);
-        return map;
     }
 
     /************** Parcelable *********************/

@@ -12,11 +12,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
@@ -68,17 +64,6 @@ public final class SourceRedirect extends StripeModel {
     @Nullable
     public String getUrl() {
         return mUrl;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_RETURN_URL, mReturnUrl);
-        map.put(FIELD_STATUS, mStatus);
-        map.put(FIELD_URL, mUrl);
-        removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

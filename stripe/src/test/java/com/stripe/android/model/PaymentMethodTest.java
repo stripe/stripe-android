@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -81,7 +80,7 @@ public class PaymentMethodTest {
 
     @Test
     public void toJson_withIdeal_shouldReturnExpectedJson() {
-        final JSONObject paymentMethod = new JSONObject(new PaymentMethod.Builder()
+        final PaymentMethod paymentMethod = new PaymentMethod.Builder()
                 .setId("pm_123456789")
                 .setCreated(1550757934255L)
                 .setLiveMode(true)
@@ -92,11 +91,9 @@ public class PaymentMethodTest {
                         .setBank("my bank")
                         .setBankIdentifierCode("bank id")
                         .build())
-                .build()
-                .toMap());
+                .build();
 
-        assertEquals(PaymentMethod.fromJson(paymentMethod),
-                PaymentMethod.fromString(RAW_IDEAL_JSON));
+        assertEquals(paymentMethod, PaymentMethod.fromString(RAW_IDEAL_JSON));
     }
 
     @Test
@@ -127,12 +124,12 @@ public class PaymentMethodTest {
     }
 
     @Test
-    public void billingDetailsToMap_removesNullValues() {
+    public void billingDetails_toParamMap_removesNullValues() {
         final Map<String, Object> billingDetails =
                 new PaymentMethod.BillingDetails.Builder()
                         .setName("name")
                         .build()
-                        .toMap();
+                        .toParamMap();
         assertEquals(1, billingDetails.size());
         assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_ADDRESS));
         assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_NAME));

@@ -2,10 +2,6 @@ package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
 
-import com.stripe.android.testharness.JsonTestUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -682,14 +678,6 @@ public class CardTest {
         final Card expectedCard = createUsdCard();
         final Card actualCard = Card.fromString(JSON_CARD_USD);
         assertEquals(expectedCard, actualCard);
-    }
-
-    @Test
-    public void toMap_catchesAllFields_fromRawJson() throws JSONException {
-        final JSONObject rawJsonObject = new JSONObject(JSON_CARD_USD);
-        final Map<String, Object> rawMap = StripeJsonUtils.jsonObjectToMap(rawJsonObject);
-        final Card expectedCard = createUsdCard();
-        JsonTestUtils.assertMapEquals(rawMap, expectedCard.toMap());
     }
 
     @Test

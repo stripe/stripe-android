@@ -11,8 +11,6 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
@@ -59,17 +57,6 @@ public final class SourceCodeVerification extends StripeModel {
     @Status
     public String getStatus() {
         return mStatus;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final Map<String, Object> map = new HashMap<>();
-        map.put(FIELD_ATTEMPTS_REMAINING, mAttemptsRemaining);
-        if (mStatus != null) {
-            map.put(FIELD_STATUS, mStatus);
-        }
-        return map;
     }
 
     @Nullable

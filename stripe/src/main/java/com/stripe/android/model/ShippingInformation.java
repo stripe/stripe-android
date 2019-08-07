@@ -82,16 +82,6 @@ public final class ShippingInformation
                 optString(jsonObject, FIELD_PHONE));
     }
 
-    /**
-     * @deprecated use {@link #toParamMap()}
-     */
-    @Deprecated
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        return toParamMap();
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {

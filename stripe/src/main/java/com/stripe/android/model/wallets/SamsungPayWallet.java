@@ -4,9 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class SamsungPayWallet extends Wallet {
     private SamsungPayWallet(@NonNull Builder builder) {
         super(Type.SamsungPay, builder);
@@ -14,12 +11,6 @@ public final class SamsungPayWallet extends Wallet {
 
     private SamsungPayWallet(@NonNull Parcel in) {
         super(in);
-    }
-
-    @NonNull
-    @Override
-    Map<String, Object> getWalletTypeMap() {
-        return new HashMap<>();
     }
 
     @NonNull

@@ -1,13 +1,15 @@
 package com.stripe.android.model;
 
+import android.support.annotation.NonNull;
+
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Test class for {@link Address}.
@@ -32,12 +34,12 @@ public class AddressTest {
         put("state", "CA");
     }};
 
-    private static final Address ADDRESS = Address.fromString(JSON_ADDRESS);
+    @NonNull private static final Address ADDRESS =
+            Objects.requireNonNull(Address.fromString(JSON_ADDRESS));
 
     @Test
-    public void fromJsonString_toMap_createsExpectedMap() {
-        assertNotNull(ADDRESS);
-        assertMapEquals(MAP_ADDRESS, ADDRESS.toMap());
+    public void fromJsonString_toParamMap_createsExpectedParamMap() {
+        assertMapEquals(MAP_ADDRESS, ADDRESS.toParamMap());
     }
 
     @Test

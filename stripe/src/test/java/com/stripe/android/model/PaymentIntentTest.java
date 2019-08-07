@@ -1,19 +1,11 @@
 package com.stripe.android.model;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static com.stripe.android.testharness.JsonTestUtils.assertMapEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -155,39 +147,6 @@ public class PaymentIntentTest {
             "\t\t}\n" +
             "\t}\n" +
             "}";
-
-    private static final List<String> PAYMENT_METHOD_TYPES = new ArrayList<String>() {{
-        add("card");
-    }};
-
-    private static final Map<String, Object> PAYMENT_INTENT_WITH_SOURCE_MAP =
-            new HashMap<String, Object>() {{
-                put(PaymentIntent.FIELD_ID, "pi_1CkiBMLENEVhOs7YMtUehLau");
-                put(PaymentIntent.FIELD_OBJECT, "payment_intent");
-                put(PaymentIntent.FIELD_PAYMENT_METHOD_TYPES, PAYMENT_METHOD_TYPES);
-                put(PaymentIntent.FIELD_AMOUNT, 1000L);
-                put(PaymentIntent.FIELD_CANCELED, 1530839340L);
-                put(PaymentIntent.FIELD_CLIENT_SECRET,
-                        "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA");
-                put(PaymentIntent.FIELD_CONFIRMATION_METHOD, "publishable");
-                put(PaymentIntent.FIELD_CREATED, 1530838340L);
-                put(PaymentIntent.FIELD_CURRENCY, "usd");
-                put(PaymentIntent.FIELD_DESCRIPTION, "Example PaymentIntent charge");
-                put(PaymentIntent.FIELD_LIVEMODE, false);
-                put(PaymentIntent.FIELD_SOURCE, "src_1CkiC3LENEVhOs7YMSa4yx4G");
-                put(PaymentIntent.FIELD_CAPTURE_METHOD, "automatic");
-                put(PaymentIntent.FIELD_STATUS, StripeIntent.Status.Succeeded.code);
-            }};
-
-    @NonNull private static final PaymentIntent PAYMENT_INTENT_WITH_SOURCE =
-            Objects.requireNonNull(PaymentIntent.fromString(PAYMENT_INTENT_WITH_SOURCE_JSON));
-
-    @Test
-    public void fromJsonString_toMap_createsExpectedMap() {
-        assertNotNull(PAYMENT_INTENT_WITH_SOURCE);
-        final Map<String, Object> paymentIntentMap = PAYMENT_INTENT_WITH_SOURCE.toMap();
-        assertMapEquals(paymentIntentMap, PAYMENT_INTENT_WITH_SOURCE_MAP);
-    }
 
     @Test
     public void getAuthorizationUrl_whenProvidedBadUrl_doesNotCrash() {

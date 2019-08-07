@@ -3,15 +3,10 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Model for a
@@ -56,20 +51,6 @@ public final class SourceReceiver extends StripeModel {
 
     public long getAmountReturned() {
         return mAmountReturned;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        if (!StripeTextUtils.isBlank(mAddress)) {
-            map.put(FIELD_ADDRESS, mAddress);
-        }
-        map.put(FIELD_ADDRESS, mAddress);
-        map.put(FIELD_AMOUNT_CHARGED, mAmountCharged);
-        map.put(FIELD_AMOUNT_RECEIVED, mAmountReceived);
-        map.put(FIELD_AMOUNT_RETURNED, mAmountReturned);
-        return map;
     }
 
     @Nullable

@@ -30,14 +30,6 @@ public class StripeJsonUtilsTest {
                     "    \"numkey\": 123\n" +
                     "}";
 
-    private static final String SIMPLE_JSON_HASH_OBJECT =
-            "{\n" +
-                    "    \"akey\": \"avalue\",\n" +
-                    "    \"bkey\": \"bvalue\",\n" +
-                    "    \"ckey\": \"cvalue\",\n" +
-                    "    \"dkey\": \"dvalue\"\n" +
-                    "}";
-
     private static final String NESTED_JSON_TEST_OBJECT =
             "{\n" +
                     "    \"top_key\": {\n" +

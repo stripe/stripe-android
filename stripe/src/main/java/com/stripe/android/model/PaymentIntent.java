@@ -4,14 +4,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,23 +29,23 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String VALUE_PAYMENT_INTENT = "payment_intent";
 
-    static final String FIELD_ID = "id";
-    static final String FIELD_OBJECT = "object";
-    static final String FIELD_AMOUNT = "amount";
-    static final String FIELD_CREATED = "created";
-    static final String FIELD_CANCELED = "canceled_at";
-    static final String FIELD_CAPTURE_METHOD = "capture_method";
-    static final String FIELD_CLIENT_SECRET = "client_secret";
-    static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
-    static final String FIELD_CURRENCY = "currency";
-    static final String FIELD_DESCRIPTION = "description";
-    static final String FIELD_LIVEMODE = "livemode";
-    static final String FIELD_NEXT_ACTION = "next_action";
-    static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
-    static final String FIELD_RECEIPT_EMAIL = "receipt_email";
-    static final String FIELD_SOURCE = "source";
-    static final String FIELD_STATUS = "status";
-    static final String FIELD_SETUP_FUTURE_USAGE = "setup_future_usage";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_AMOUNT = "amount";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_CANCELED = "canceled_at";
+    private static final String FIELD_CAPTURE_METHOD = "capture_method";
+    private static final String FIELD_CLIENT_SECRET = "client_secret";
+    private static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
+    private static final String FIELD_CURRENCY = "currency";
+    private static final String FIELD_DESCRIPTION = "description";
+    private static final String FIELD_LIVEMODE = "livemode";
+    private static final String FIELD_NEXT_ACTION = "next_action";
+    private static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
+    private static final String FIELD_RECEIPT_EMAIL = "receipt_email";
+    private static final String FIELD_SOURCE = "source";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_SETUP_FUTURE_USAGE = "setup_future_usage";
 
     private static final String FIELD_NEXT_ACTION_TYPE = "type";
 
@@ -309,32 +306,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 source,
                 status,
                 setupFutureUsage);
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_ID, mId);
-        map.put(FIELD_OBJECT, mObjectType);
-        map.put(FIELD_PAYMENT_METHOD_TYPES, mPaymentMethodTypes);
-        map.put(FIELD_AMOUNT, mAmount);
-        map.put(FIELD_CANCELED, mCanceledAt);
-        map.put(FIELD_CLIENT_SECRET, mClientSecret);
-        map.put(FIELD_CAPTURE_METHOD, mCaptureMethod);
-        map.put(FIELD_CONFIRMATION_METHOD, mConfirmationMethod);
-        map.put(FIELD_CREATED, mCreated);
-        map.put(FIELD_CURRENCY, mCurrency);
-        map.put(FIELD_DESCRIPTION, mDescription);
-        map.put(FIELD_LIVEMODE, mLiveMode);
-        map.put(FIELD_NEXT_ACTION, mNextAction);
-        map.put(FIELD_RECEIPT_EMAIL, mReceiptEmail);
-        map.put(FIELD_STATUS, mStatus != null ? mStatus.code : null);
-        map.put(FIELD_SETUP_FUTURE_USAGE,
-                mSetupFutureUsage != null ? mSetupFutureUsage.code : null);
-        map.put(FIELD_SOURCE, mSource);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Override

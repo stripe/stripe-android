@@ -4,15 +4,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -116,21 +113,6 @@ public final class SourceSepaDebitData extends StripeSourceTypeModel {
     @Nullable
     public String getMandateUrl() {
         return mMandateUrl;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>(super.toMap());
-        map.put(FIELD_BANK_CODE, mBankCode);
-        map.put(FIELD_BRANCH_CODE, mBranchCode);
-        map.put(FIELD_COUNTRY, mCountry);
-        map.put(FIELD_FINGERPRINT, mFingerPrint);
-        map.put(FIELD_LAST4, mLast4);
-        map.put(FIELD_MANDATE_REFERENCE, mMandateReference);
-        map.put(FIELD_MANDATE_URL, mMandateUrl);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

@@ -3,18 +3,14 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.stripe.android.model.StripeJsonUtils.optBoolean;
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
@@ -100,35 +96,6 @@ public final class Customer extends StripeModel {
             }
         }
         return null;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_ID, mId);
-        map.put(FIELD_OBJECT, VALUE_CUSTOMER);
-        map.put(FIELD_DEFAULT_SOURCE, mDefaultSource);
-        if (mShippingInformation != null) {
-            map.put(FIELD_SHIPPING, mShippingInformation.toMap());
-        }
-
-        final AbstractMap<String, Object> sourcesObject = new HashMap<>();
-        sourcesObject.put(FIELD_HAS_MORE, mHasMore);
-        sourcesObject.put(FIELD_TOTAL_COUNT, mTotalCount);
-        sourcesObject.put(FIELD_OBJECT, VALUE_LIST);
-        sourcesObject.put(FIELD_URL, mUrl);
-        final List<Map<String, Object>> sourcesMaps = new ArrayList<>(mSources.size());
-        for (int i = 0; i < mSources.size(); i++) {
-            sourcesMaps.add(mSources.get(i).toMap());
-        }
-        sourcesObject.put(FIELD_DATA, sourcesMaps);
-        StripeNetworkUtils.removeNullAndEmptyParams(sourcesObject);
-
-        map.put(FIELD_SOURCES, sourcesObject);
-
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

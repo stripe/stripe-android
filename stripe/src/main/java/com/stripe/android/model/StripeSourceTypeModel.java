@@ -23,12 +23,6 @@ public abstract class StripeSourceTypeModel extends StripeModel {
                 builder.mAdditionalFields : new HashMap<String, Object>();
     }
 
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        return new HashMap<>(mAdditionalFields);
-    }
-
     /**
      * Convert a {@link JSONObject} to a flat, string-keyed map.
      *

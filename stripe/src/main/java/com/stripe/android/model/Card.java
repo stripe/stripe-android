@@ -10,7 +10,6 @@ import android.support.annotation.StringDef;
 import com.stripe.android.CardUtils;
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.R;
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -19,7 +18,6 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -626,37 +624,6 @@ public final class Card extends StripeModel implements StripePaymentSource {
     @Nullable
     public String getCvcCheck() {
         return cvcCheck;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_NAME, name);
-        map.put(FIELD_ADDRESS_CITY, addressCity);
-        map.put(FIELD_ADDRESS_COUNTRY, addressCountry);
-        map.put(FIELD_ADDRESS_LINE1, addressLine1);
-        map.put(FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
-        map.put(FIELD_ADDRESS_LINE2, addressLine2);
-        map.put(FIELD_ADDRESS_STATE, addressState);
-        map.put(FIELD_ADDRESS_ZIP, addressZip);
-        map.put(FIELD_ADDRESS_ZIP_CHECK, addressZipCheck);
-        map.put(FIELD_BRAND, brand);
-        map.put(FIELD_CURRENCY, currency);
-        map.put(FIELD_COUNTRY, country);
-        map.put(FIELD_CUSTOMER, customerId);
-        map.put(FIELD_CVC_CHECK, cvcCheck);
-        map.put(FIELD_EXP_MONTH, expMonth);
-        map.put(FIELD_EXP_YEAR, expYear);
-        map.put(FIELD_FINGERPRINT, fingerprint);
-        map.put(FIELD_FUNDING, funding);
-        map.put(FIELD_ID, id);
-        map.put(FIELD_LAST4, last4);
-        map.put(FIELD_TOKENIZATION_METHOD, tokenizationMethod);
-        map.put(FIELD_METADATA, metadata);
-        map.put(FIELD_OBJECT, VALUE_CARD);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

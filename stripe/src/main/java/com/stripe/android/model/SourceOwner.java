@@ -8,11 +8,6 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
@@ -97,26 +92,6 @@ public final class SourceOwner extends StripeModel {
     @Nullable
     public String getVerifiedPhone() {
         return mVerifiedPhone;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        if (mAddress != null) {
-            map.put(FIELD_ADDRESS, mAddress.toMap());
-        }
-        map.put(FIELD_EMAIL, mEmail);
-        map.put(FIELD_NAME, mName);
-        map.put(FIELD_PHONE, mPhone);
-        if (mVerifiedAddress != null) {
-            map.put(FIELD_VERIFIED_ADDRESS, mVerifiedAddress.toMap());
-        }
-        map.put(FIELD_VERIFIED_EMAIL, mVerifiedEmail);
-        map.put(FIELD_VERIFIED_NAME, mVerifiedName);
-        map.put(FIELD_VERIFIED_PHONE, mVerifiedPhone);
-        removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable
