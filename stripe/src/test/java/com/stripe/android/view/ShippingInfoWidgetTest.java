@@ -228,7 +228,7 @@ public class ShippingInfoWidgetTest extends BaseViewTest<ShippingInfoTestActivit
         mPostalEditText.setText("12345");
         mCountryAutoCompleteTextView.updateUIForCountryEntered(Locale.US.getDisplayCountry());
         ShippingInformation inputShippingInfo = mShippingInfoWidget.getShippingInformation();
-        assertEquals(inputShippingInfo.toMap(), mShippingInfo.toMap());
+        assertEquals(inputShippingInfo, mShippingInfo);
     }
 
     @Test
