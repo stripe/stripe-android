@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verify;
 /**
  * Test class for {@link Stripe}.
  */
-@SuppressWarnings({"ConstantConditions", "deprecation"})
+@SuppressWarnings({"ConstantConditions"})
 @RunWith(RobolectricTestRunner.class)
 public class StripeTest {
     // publishable keys
@@ -1020,7 +1020,7 @@ public class StripeTest {
                 .setState("CA")
                 .build();
         final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", exampleAddress.toMap());
+            put("address", exampleAddress.toParamMap());
             put("ssn_last_4", "1234");
             put("first_name", "Kathy");
             put("last_name", "Sun");
@@ -1046,7 +1046,7 @@ public class StripeTest {
                 .setCountry("US")
                 .setState("CA").build();
         final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", exampleAddress.toMap());
+            put("address", exampleAddress.toParamMap());
             put("tax_id", "123-23-1234");
             put("name", "My Corp.");
         }};
@@ -1070,7 +1070,7 @@ public class StripeTest {
                 .setCountry("US")
                 .setState("CA").build();
         final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", address.toMap());
+            put("address", address.toParamMap());
             put("ssn_last_4", "1234");
             put("first_name", "Kathy");
             put("last_name", "Sun");
