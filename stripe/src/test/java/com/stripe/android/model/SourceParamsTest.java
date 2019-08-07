@@ -737,6 +737,25 @@ public class SourceParamsTest {
     }
 
     @Test
+    public void createWeChatPayParams_shouldCreateExpectedParams() {
+        final SourceParams.WeChatParams expectedWeChatParams =
+                new SourceParams.WeChatParams(
+                        "wxa0df51ec63e578ce",
+                        "WIDGET STORE"
+                );
+
+        final Map<String, ?> paramMap = SourceParams
+                .createWeChatPayParams(
+                        150L,
+                        "USD",
+                        "wxa0df51ec63e578ce",
+                        "WIDGET STORE"
+                )
+                .toParamMap();
+        assertEquals(expectedWeChatParams.toParamMap(), paramMap.get("wechat"));
+    }
+
+    @Test
     public void setCustomType_forEmptyParams_setsTypeToUnknown() {
         final SourceParams params = SourceParams.createCustomParams();
         params.setTypeRaw("dogecoin");
