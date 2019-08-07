@@ -328,10 +328,7 @@ public class StripeTest {
         final Token token = stripe.createTokenSynchronous(CARD);
         assertNotNull(token);
 
-        final SourceParams sourceParams = SourceParams.createCustomParams()
-                .setType(Source.SourceType.CARD)
-                .setToken(token.getId());
-
+        final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
     }

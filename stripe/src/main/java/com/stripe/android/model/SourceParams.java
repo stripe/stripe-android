@@ -63,20 +63,24 @@ public final class SourceParams implements StripeParamsModel {
     private static final String TRANSACTION_ID = "transaction_id";
     private static final String CART_ID = "cart_id";
 
-    @IntRange(from = 0) private Long mAmount;
-    private Map<String, Object> mApiParameterMap;
-    private String mCurrency;
-    @Nullable private String mTypeRaw;
-    private Map<String, Object> mOwner;
-    private Map<String, String> mMetaData;
-    private Map<String, Object> mRedirect;
-    private Map<String, Object> mExtraParams;
-    private String mToken;
+    @NonNull @SourceType private final String mType;
+    @NonNull private final String mTypeRaw;
+
+    @Nullable @IntRange(from = 0) private Long mAmount;
+    @Nullable private Map<String, Object> mApiParameterMap;
+    @Nullable private String mCurrency;
+    @Nullable private Map<String, Object> mOwner;
+    @Nullable private Map<String, String> mMetaData;
+    @Nullable private Map<String, Object> mRedirect;
+    @Nullable private Map<String, Object> mExtraParams;
+    @Nullable private String mToken;
     @Nullable @Source.Usage private String mUsage;
-    @SourceType private String mType;
     @Nullable private WeChatParams mWeChatParams;
 
-    private SourceParams() {}
+    private SourceParams(@NonNull @SourceType String typeRaw) {
+        mTypeRaw = Objects.requireNonNull(typeRaw);
+        mType = Source.asSourceType(typeRaw);
+    }
 
     /**
      * Create parameters necessary for creating a P24 source.
@@ -99,9 +103,8 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @NonNull String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams()
+        final SourceParams params = new SourceParams(SourceType.P24)
                 .setAmount(amount)
-                .setType(SourceType.P24)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
@@ -136,8 +139,7 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.ALIPAY)
+        final SourceParams params = new SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
                 .setUsage(Source.Usage.REUSABLE);
@@ -176,8 +178,7 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.ALIPAY)
+        final SourceParams params = new SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -199,8 +200,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String currency,
             @NonNull String weChatAppId,
             @NonNull String statementDescriptor) {
-        return new SourceParams()
-                .setType(SourceType.WECHAT)
+        return new SourceParams(SourceType.WECHAT)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setWeChatParams(new WeChatParams(weChatAppId, statementDescriptor));
@@ -230,8 +230,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor,
             @Nullable String preferredLanguage) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.BANCONTACT)
+        final SourceParams params = new SourceParams(SourceType.BANCONTACT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -254,11 +253,12 @@ public final class SourceParams implements StripeParamsModel {
      * Create a custom {@link SourceParams} object. Incorrect attributes may result in errors
      * when connecting to Stripe's API.
      *
+     * @param type a custom type
      * @return an empty {@link SourceParams} object.
      */
     @NonNull
-    public static SourceParams createCustomParams() {
-        return new SourceParams();
+    public static SourceParams createCustomParams(@NonNull String type) {
+        return new SourceParams(type);
     }
 
     /**
@@ -269,8 +269,7 @@ public final class SourceParams implements StripeParamsModel {
      */
     @NonNull
     public static SourceParams createSourceFromTokenParams(@NonNull String tokenId) {
-        return SourceParams.createCustomParams()
-                .setType(SourceType.CARD)
+        return new SourceParams(SourceType.CARD)
                 .setToken(tokenId);
     }
 
@@ -284,7 +283,7 @@ public final class SourceParams implements StripeParamsModel {
      */
     @NonNull
     public static SourceParams createCardParams(@NonNull Card card) {
-        final SourceParams params = new SourceParams().setType(SourceType.CARD);
+        final SourceParams params = new SourceParams(SourceType.CARD);
 
         // Not enforcing all fields to exist at this level.
         // Instead, the server will return an error for invalid data.
@@ -344,8 +343,7 @@ public final class SourceParams implements StripeParamsModel {
         final Token stripeToken = Token.fromJson(new JSONObject(paymentToken));
         final String stripeTokenId = Objects.requireNonNull(stripeToken).getId();
 
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.CARD)
+        final SourceParams params = new SourceParams(SourceType.CARD)
                 .setToken(stripeTokenId);
         final Map<String, Object> addressMap;
         final String phone;
@@ -411,8 +409,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String name,
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.EPS)
+        final SourceParams params = new SourceParams(SourceType.EPS)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -446,8 +443,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String name,
             @NonNull String returnUrl,
             @Nullable String statementDescriptor) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.GIROPAY)
+        final SourceParams params = new SourceParams(SourceType.GIROPAY)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(createSimpleMap(FIELD_NAME, name))
@@ -483,8 +479,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String returnUrl,
             @Nullable String statementDescriptor,
             @Nullable String bank) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.IDEAL)
+        final SourceParams params = new SourceParams(SourceType.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -521,8 +516,7 @@ public final class SourceParams implements StripeParamsModel {
             @IntRange(from = 0) long amount,
             @NonNull String returnUrl,
             @NonNull String email) {
-        return new SourceParams()
-                .setType(SourceType.MULTIBANCO)
+        return new SourceParams(SourceType.MULTIBANCO)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
@@ -563,8 +557,7 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String city,
             @Nullable String postalCode,
             @Nullable @Size(2) String country) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.SEPA_DEBIT)
+        final SourceParams params = new SourceParams(SourceType.SEPA_DEBIT)
                 .setCurrency(Source.EURO);
 
         final AbstractMap<String, Object> address = new HashMap<>();
@@ -602,8 +595,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String returnUrl,
             @NonNull @Size(2) String country,
             @Nullable String statementDescriptor) {
-        final SourceParams params = new SourceParams()
-                .setType(SourceType.SOFORT)
+        final SourceParams params = new SourceParams(SourceType.SOFORT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
@@ -635,8 +627,7 @@ public final class SourceParams implements StripeParamsModel {
             @NonNull String currency,
             @NonNull String returnUrl,
             @NonNull String cardID) {
-        return new SourceParams()
-                .setType(SourceType.THREE_D_SECURE)
+        return new SourceParams(SourceType.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
@@ -654,8 +645,7 @@ public final class SourceParams implements StripeParamsModel {
      */
     @NonNull
     public static SourceParams createVisaCheckoutParams(@NonNull String callId) {
-        return new SourceParams()
-                .setType(SourceType.CARD)
+        return new SourceParams(SourceType.CARD)
                 .setApiParameterMap(
                         createSimpleMap(VISA_CHECKOUT, createSimpleMap(CALL_ID, callId)));
     }
@@ -680,8 +670,7 @@ public final class SourceParams implements StripeParamsModel {
         final Map<String, Object> map = createSimpleMap(TRANSACTION_ID, transactionId);
         map.put(CART_ID, cartID);
 
-        return new SourceParams()
-                .setType(SourceType.CARD)
+        return new SourceParams(SourceType.CARD)
                 .setApiParameterMap(createSimpleMap(MASTERPASS, map));
     }
 
@@ -770,6 +759,7 @@ public final class SourceParams implements StripeParamsModel {
     /**
      * @return the custom metadata set on these params
      */
+    @Nullable
     public Map<String, String> getMetaData() {
         return mMetaData;
     }
@@ -857,34 +847,6 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Sets the {@link SourceType} for this source. If you are creating a custom type,
-     * use {@link #setTypeRaw(String)}.
-     *
-     * @param type the {@link SourceType}
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public SourceParams setType(@Source.SourceType String type) {
-        mType = type;
-        mTypeRaw = type;
-        return this;
-    }
-
-    /**
-     * Sets a custom type for the source, and sets the {@link #mType type} for these parameters
-     * to be {@link SourceType#UNKNOWN}.
-     *
-     * @param typeRaw the name of the source type
-     * @return {@code this}, for chaining purposes
-     */
-    @NonNull
-    public SourceParams setTypeRaw(@NonNull String typeRaw) {
-        mType = Source.asSourceType(typeRaw);
-        mTypeRaw = typeRaw;
-        return this;
-    }
-
-    /**
      * Set custom metadata on the parameters.
      *
      * @return {@code this}, for chaining purposes
@@ -958,17 +920,16 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     @NonNull
-    private static Map<String, Object> createSimpleMap(
-            @NonNull String key, @NonNull Object value) {
+    private static <T> Map<String, Object> createSimpleMap(@NonNull String key, @NonNull T value) {
         final Map<String, Object> simpleMap = new HashMap<>();
         simpleMap.put(key, value);
         return simpleMap;
     }
 
     @NonNull
-    private static Map<String, Object> createSimpleMap(
-            @NonNull String key1, @NonNull Object value1,
-            @NonNull String key2, @NonNull Object value2) {
+    private static <T> Map<String, Object> createSimpleMap(
+            @NonNull String key1, @NonNull T value1,
+            @NonNull String key2, @NonNull T value2) {
         final Map<String, Object> simpleMap = new HashMap<>();
         simpleMap.put(key1, value1);
         simpleMap.put(key2, value2);
