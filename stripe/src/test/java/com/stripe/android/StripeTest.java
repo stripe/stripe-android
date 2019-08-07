@@ -500,7 +500,7 @@ public class StripeTest {
         final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
                 1000L,
                 "USD",
-                "my-demo-app",
+                "wxa0df51ec63e578ce",
                 "WIDGET STORE"
         );
         final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);

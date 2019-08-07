@@ -14,13 +14,13 @@ import java.util.Objects;
  * <a href="https://stripe.com/docs/sources/wechat-pay">WeChat Pay Payments with Sources</a>
  */
 public final class WeChat extends StripeModel {
-    private static final String FIELD_APPID = "android_appid";
-    private static final String FIELD_NONCE = "android_noncestr";
+    private static final String FIELD_APPID = "android_appId";
+    private static final String FIELD_NONCE = "android_nonceStr";
     private static final String FIELD_PACKAGE = "android_package";
-    private static final String FIELD_PARTNERID = "android_partnerid";
-    private static final String FIELD_PREPAYID = "android_prepayid";
+    private static final String FIELD_PARTNERID = "android_partnerId";
+    private static final String FIELD_PREPAYID = "android_prepayId";
     private static final String FIELD_SIGN = "android_sign";
-    private static final String FIELD_TIMESTAMP = "android_timestamp";
+    private static final String FIELD_TIMESTAMP = "android_timeStamp";
     private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
     private static final String FIELD_QR_CODE_URL = "qr_code_url";
 
@@ -72,15 +72,15 @@ public final class WeChat extends StripeModel {
     @NonNull
     public static WeChat fromJson(@NonNull JSONObject json) {
         return new Builder()
-                .setAppId(json.optString(FIELD_APPID))
-                .setNonce(json.optString(FIELD_NONCE))
-                .setPackageValue(json.optString(FIELD_PACKAGE))
-                .setPartnerId(json.optString(FIELD_PARTNERID))
-                .setPrepayId(json.optString(FIELD_PREPAYID))
-                .setSign(json.optString(FIELD_SIGN))
-                .setTimestamp(json.optString(FIELD_TIMESTAMP))
-                .setStatementDescriptor(json.optString(FIELD_STATEMENT_DESCRIPTOR))
-                .setQrCodeUrl(json.optString(FIELD_QR_CODE_URL))
+                .setAppId(StripeJsonUtils.optString(json, FIELD_APPID))
+                .setNonce(StripeJsonUtils.optString(json, FIELD_NONCE))
+                .setPackageValue(StripeJsonUtils.optString(json, FIELD_PACKAGE))
+                .setPartnerId(StripeJsonUtils.optString(json, FIELD_PARTNERID))
+                .setPrepayId(StripeJsonUtils.optString(json, FIELD_PREPAYID))
+                .setSign(StripeJsonUtils.optString(json, FIELD_SIGN))
+                .setTimestamp(StripeJsonUtils.optString(json, FIELD_TIMESTAMP))
+                .setStatementDescriptor(StripeJsonUtils.optString(json, FIELD_STATEMENT_DESCRIPTOR))
+                .setQrCodeUrl(StripeJsonUtils.optString(json, FIELD_QR_CODE_URL))
                 .build();
     }
 
