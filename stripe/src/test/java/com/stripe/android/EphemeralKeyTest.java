@@ -64,9 +64,9 @@ public class EphemeralKeyTest {
 
     @Test
     public void toMap_createsMapWithExpectedValues() throws JSONException {
-        CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
+        final CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
         assertNotNull(ephemeralKey);
-        Map<String, Object> expectedMap = new HashMap<String, Object>() {{
+        final Map<String, Object> expectedMap = new HashMap<String, Object>() {{
             put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
             put(CustomerEphemeralKey.FIELD_OBJECT, "ephemeral_key");
             put(CustomerEphemeralKey.FIELD_SECRET, ApiKeyFixtures.FAKE_EPHEMERAL_KEY);

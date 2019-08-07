@@ -94,29 +94,18 @@ public class CustomerTest {
         final JSONArray sourcesArray = sourcesObject.getJSONArray("data");
 
         sourcesObject.put("total_count", 5);
-        final CustomerSource applePayCard = CustomerSource.fromString(JSON_APPLE_PAY_CARD);
-        assertNotNull(applePayCard);
-        sourcesArray.put(new JSONObject(applePayCard.toMap()));
-
-        final Card testCard = Card.fromString(JSON_CARD_USD);
-        assertNotNull(testCard);
+        sourcesArray.put(new JSONObject(JSON_APPLE_PAY_CARD));
 
         final JSONObject manipulatedCard = new JSONObject(JSON_CARD_USD);
         manipulatedCard.put("id", "card_id55555");
         manipulatedCard.put("tokenization_method", "apple_pay");
-        final Card manipulatedApplePayCard = Card.fromJson(manipulatedCard);
-        assertNotNull(manipulatedApplePayCard);
 
-        Source sourceCardWithApplePay = Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
         // Note that we don't yet explicitly support bitcoin sources, but this data is
         // convenient for the test because it is not an apple pay source.
-        final Source alipaySource = Source.fromString(EXAMPLE_ALIPAY_SOURCE);
-        assertNotNull(sourceCardWithApplePay);
-        assertNotNull(alipaySource);
-        sourcesArray.put(new JSONObject(sourceCardWithApplePay.toMap()));
-        sourcesArray.put(new JSONObject(alipaySource.toMap()));
-        sourcesArray.put(new JSONObject(testCard.toMap()));
-        sourcesArray.put(new JSONObject(manipulatedApplePayCard.toMap()));
+        sourcesArray.put(new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
+        sourcesArray.put(new JSONObject(EXAMPLE_ALIPAY_SOURCE));
+        sourcesArray.put(new JSONObject(JSON_CARD_USD));
+        sourcesArray.put(manipulatedCard);
         sourcesObject.put("data", sourcesArray);
 
         rawJsonCustomer.put("sources", sourcesObject);
@@ -126,6 +115,7 @@ public class CustomerTest {
         assertTrue(rawJsonCustomer.getJSONObject("sources").has("data"));
         assertEquals(5,
                 rawJsonCustomer.getJSONObject("sources").getJSONArray("data").length());
+
         return rawJsonCustomer.toString();
     }
 }

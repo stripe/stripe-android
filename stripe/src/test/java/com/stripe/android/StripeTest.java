@@ -981,7 +981,7 @@ public class StripeTest {
 
         // We aren't actually updating the source on the server, so the two sources should
         // be identical.
-        JsonTestUtils.assertMapEquals(threeDSource.toMap(), retrievedSource.toMap());
+        assertEquals(threeDSource, retrievedSource);
     }
 
     @Test
@@ -1017,7 +1017,8 @@ public class StripeTest {
                 .Builder()
                 .setCity("SF")
                 .setCountry("US")
-                .setState("CA").build();
+                .setState("CA")
+                .build();
         final Map<String, Object> businessData = new HashMap<String, Object>() {{
             put("address", exampleAddress.toMap());
             put("ssn_last_4", "1234");
