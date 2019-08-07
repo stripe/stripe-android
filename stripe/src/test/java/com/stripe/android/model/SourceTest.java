@@ -170,13 +170,13 @@ public class SourceTest {
             "\t\"usage\": \"single_use\",\n" +
             "\t\"wechat\": {\n" +
             "\t\t\"statement_descriptor\": \"ORDER AT11990\",\n" +
-            "\t\t\"android_appid\": \"wxa0df8has9d78ce\",\n" +
-            "\t\t\"android_noncestr\": \"yFNjg8d9hsfaEPYID\",\n" +
+            "\t\t\"android_appId\": \"wxa0df8has9d78ce\",\n" +
+            "\t\t\"android_nonceStr\": \"yFNjg8d9hsfaEPYID\",\n" +
             "\t\t\"android_package\": \"Sign=WXPay\",\n" +
-            "\t\t\"android_partnerid\": \"268716457\",\n" +
-            "\t\t\"android_prepayid\": \"wx070440550af89hAh8941913701900\",\n" +
+            "\t\t\"android_partnerId\": \"268716457\",\n" +
+            "\t\t\"android_prepayId\": \"wx070440550af89hAh8941913701900\",\n" +
             "\t\t\"android_sign\": \"1A98A09EA74DCF006598h89433DED3FF6BCED1C062C63B43AE773D8\",\n" +
-            "\t\t\"android_timestamp\": \"1565124055\",\n" +
+            "\t\t\"android_timeStamp\": \"1565124055\",\n" +
             "\t\t\"ios_native_url\": \"weixin://app/wxa0df8has9d78ce/pay/\",\n" +
             "\t\t\"qr_code_url\": null\n" +
             "\t}\n" +
