@@ -2,8 +2,8 @@ package com.stripe.example.controller
 
 import android.content.Context
 import android.widget.Button
+import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.TokenCallback
 import com.stripe.android.model.Token
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
@@ -37,7 +37,7 @@ class AsyncTaskTokenController(
         mCardInputWidget = null
     }
 
-    private fun saveCard(tokenCallback: TokenCallback) {
+    private fun saveCard(tokenCallback: ApiResultCallback<Token>) {
         val cardToSave = mCardInputWidget?.card
         if (cardToSave == null) {
             mErrorDialogHandler.show("Invalid Card Data")
@@ -52,7 +52,7 @@ class AsyncTaskTokenController(
         private val mErrorDialogHandler: ErrorDialogHandler,
         private val mOutputListController: ListViewController,
         private val mProgressDialogController: ProgressDialogController
-    ) : TokenCallback {
+    ) : ApiResultCallback<Token> {
         override fun onSuccess(token: Token) {
             mOutputListController.addToList(token)
             mProgressDialogController.dismiss()

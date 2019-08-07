@@ -101,7 +101,7 @@ public class Stripe {
                             @NonNull final ApiRequest.Options options,
                             @NonNull @Token.TokenType final String tokenType,
                             @Nullable final Executor executor,
-                            @NonNull final TokenCallback callback) {
+                            @NonNull final ApiResultCallback<Token> callback) {
                         executeTask(executor,
                                 new CreateTokenTask(apiHandler, tokenParams, options,
                                         tokenType, callback));
@@ -402,11 +402,11 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param bankAccount the {@link BankAccount} used to create this token
-     * @param callback a {@link TokenCallback} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
      */
     public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createBankAccountToken(bankAccount, mDefaultPublishableKey, null, callback);
     }
 
@@ -418,13 +418,13 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link TokenCallback} to receive the result or error message
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
      */
     public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         Objects.requireNonNull(bankAccount,
 
                     "Required parameter: 'bankAccount' is requred to create a token");
@@ -442,11 +442,11 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param personalId the personal id used to create this token
-     * @param callback a {@link TokenCallback} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
      */
     public void createPiiToken(
             @NonNull final String personalId,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createPiiToken(personalId, mDefaultPublishableKey, null, callback);
     }
 
@@ -458,13 +458,13 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link TokenCallback} to receive the result or error message
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
      */
     public void createPiiToken(
             @NonNull final String personalId,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createTokenFromParams(
                 createPersonalIdTokenParams(personalId),
                 publishableKey,
@@ -533,11 +533,11 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param cvc the CVC used to create this token
-     * @param callback a {@link TokenCallback} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
      */
     public void createCvcUpdateToken(
             @NonNull @Size(min = 3, max = 4) final String cvc,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createCvcUpdateToken(cvc, mDefaultPublishableKey, null, callback);
     }
 
@@ -549,13 +549,13 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link TokenCallback} to receive the result or error message
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
      */
     public void createCvcUpdateToken(
             @NonNull @Size(min = 3, max = 4) final String cvc,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createTokenFromParams(
                 createUpdateCvcTokenParams(cvc),
                 publishableKey,
@@ -569,9 +569,10 @@ public class Stripe {
      * publishable api key that has already been set on this {@link Stripe} instance.
      *
      * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link SourceCallback} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback<Source>} to receive a result or an error message
      */
-    public void createSource(@NonNull SourceParams sourceParams, @NonNull SourceCallback callback) {
+    public void createSource(@NonNull SourceParams sourceParams,
+                             @NonNull ApiResultCallback<Source> callback) {
         createSource(sourceParams, callback, mDefaultPublishableKey, null);
     }
 
@@ -579,13 +580,13 @@ public class Stripe {
      * Create a {@link Source} using an {@link AsyncTask}.
      *
      * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link SourceCallback} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback<Source>} to receive a result or an error message
      * @param publishableKey the publishable api key to be used
      * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
      */
     public void createSource(
             @NonNull SourceParams sourceParams,
-            @NonNull SourceCallback callback,
+            @NonNull ApiResultCallback<Source> callback,
             @NonNull String publishableKey,
             @Nullable Executor executor) {
         executeTask(executor,
@@ -625,14 +626,15 @@ public class Stripe {
     }
 
     /**
-     * The simplest way to create a token, using a {@link Card} and {@link TokenCallback}. This
-     * runs on the default {@link Executor} and with the
+     * The simplest way to create a token, using a {@link Card} and
+     * {@link ApiResultCallback<Token>}. This runs on the default {@link Executor} and with the
      * currently set {@link #mDefaultPublishableKey}.
      *
      * @param card the {@link Card} used to create this payment token
-     * @param callback a {@link TokenCallback} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
      */
-    public void createToken(@NonNull final Card card, @NonNull final TokenCallback callback) {
+    public void createToken(@NonNull final Card card,
+                            @NonNull final ApiResultCallback<Token> callback) {
         createToken(card, mDefaultPublishableKey, callback);
     }
 
@@ -641,12 +643,12 @@ public class Stripe {
      *
      * @param card the {@link Card} used for this transaction
      * @param publishableKey the public key used for this transaction
-     * @param callback a {@link TokenCallback} to receive the result of this operation
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result of this operation
      */
     public void createToken(
             @NonNull final Card card,
             @NonNull final String publishableKey,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createToken(card, publishableKey, null, callback);
     }
 
@@ -656,12 +658,12 @@ public class Stripe {
      * @param card the {@link Card} to use for this token creation
      * @param executor An {@link Executor} on which to run this operation. If you don't wish to
      *         specify an executor, use one of the other createTokenFromParams methods.
-     * @param callback a {@link TokenCallback} to receive the result of this operation
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result of this operation
      */
     public void createToken(
             @NonNull final Card card,
             @NonNull final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         createToken(card, mDefaultPublishableKey, executor, callback);
     }
 
@@ -672,13 +674,13 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link TokenCallback} to receive the result or error message
+     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
      */
     public void createToken(
             @NonNull final Card card,
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         Objects.requireNonNull(card,
                 "Required Parameter: 'card' is required to create a token");
 
@@ -1171,7 +1173,7 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @NonNull @Token.TokenType final String tokenType,
             @Nullable final Executor executor,
-            @NonNull final TokenCallback callback) {
+            @NonNull final ApiResultCallback<Token> callback) {
         Objects.requireNonNull(callback,
                     "Required Parameter: 'callback' is required to use the created " +
                             "token and handle errors");
@@ -1197,7 +1199,7 @@ public class Stripe {
                     @NonNull ApiRequest.Options options,
                     @NonNull @Token.TokenType String tokenType,
                     @Nullable Executor executor,
-                    @NonNull TokenCallback callback);
+                    @NonNull ApiResultCallback<Token> callback);
     }
 
     private static class CreateSourceTask extends ApiOperation<Source> {
@@ -1209,7 +1211,7 @@ public class Stripe {
                          @NonNull SourceParams sourceParams,
                          @NonNull String publishableKey,
                          @Nullable String stripeAccount,
-                         @NonNull SourceCallback callback) {
+                         @NonNull ApiResultCallback<Source> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mSourceParams = sourceParams;
@@ -1257,7 +1259,7 @@ public class Stripe {
                 @NonNull final Map<String, Object> tokenParams,
                 @NonNull final ApiRequest.Options options,
                 @NonNull @Token.TokenType final String tokenType,
-                @NonNull final TokenCallback callback) {
+                @NonNull final ApiResultCallback<Token> callback) {
             super(callback);
             mApiHandler = apiHandler;
             mTokenParams = tokenParams;
