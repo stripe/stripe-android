@@ -5,12 +5,10 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,13 +83,16 @@ public final class ShippingInformation
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_NAME, mName);
-        map.put(FIELD_PHONE, mPhone);
+        final Map<String, Object> map = new HashMap<>();
+        if (mName != null) {
+            map.put(FIELD_NAME, mName);
+        }
+        if (mPhone != null) {
+            map.put(FIELD_PHONE, mPhone);
+        }
         if (mAddress != null) {
             map.put(FIELD_ADDRESS, mAddress.toParamMap());
         }
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
     }
 

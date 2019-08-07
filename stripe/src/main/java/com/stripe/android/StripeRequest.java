@@ -8,6 +8,8 @@ import com.stripe.android.utils.ObjectUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +38,7 @@ abstract class StripeRequest {
                   @NonNull String mimeType) {
         this.method = method;
         this.mUrl = url;
-        this.params = params;
+        this.params = params != null ? compactParams(params) : null;
         mMimeType = mimeType;
     }
 
@@ -182,6 +184,42 @@ abstract class StripeRequest {
         return flatParams;
     }
 
+    /**
+     * Copy the {@param params} map and recursively remove null and empty values. The Stripe API
+     * requires that parameters with null values are removed from requests.
+     *
+     * @param params a {@link Map} from which to remove the keys that have {@code null} values
+     */
+    @SuppressWarnings("unchecked")
+    @NonNull
+    private static Map<String, Object> compactParams(@NonNull final Map<String, ?> params) {
+        final Map<String, Object> compactParams = new HashMap<>(params);
+
+        // Remove all null values; they cause validation errors
+        for (String key : new HashSet<>(compactParams.keySet())) {
+            if (compactParams.get(key) == null) {
+                compactParams.remove(key);
+            }
+
+            if (compactParams.get(key) instanceof CharSequence) {
+                final CharSequence sequence = (CharSequence) compactParams.get(key);
+                if (StripeTextUtils.isEmpty(sequence)) {
+                    compactParams.remove(key);
+                }
+            }
+
+            if (compactParams.get(key) instanceof Map) {
+                final Map<String, Object> nestedMap =
+                        (Map<String, Object>) compactParams.get(key);
+                if (nestedMap != null) {
+                    final Map<String, Object> compactNestedMap = compactParams(nestedMap);
+                    compactParams.put(key, compactNestedMap);
+                }
+            }
+        }
+
+        return compactParams;
+    }
 
     @NonNull
     private String urlEncodePair(@NonNull String k, @NonNull String v)

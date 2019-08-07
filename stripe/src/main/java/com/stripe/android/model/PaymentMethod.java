@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
 import com.stripe.android.utils.ObjectUtils;
@@ -17,7 +16,6 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -210,9 +208,13 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         customerId = in.readString();
         final int mapSize = in.readInt();
         if (mapSize >= 0) {
-            final AbstractMap<String, String> metadata = new HashMap<>(mapSize);
+            final Map<String, String> metadata = new HashMap<>(mapSize);
             for (int i = 0; i < mapSize; i++) {
-                metadata.put(in.readString(), in.readString());
+                final String key = in.readString();
+                final String value = in.readString();
+                if (key != null && value != null) {
+                    metadata.put(key, value);
+                }
             }
             this.metadata = metadata;
         } else {
@@ -390,7 +392,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             if (phone != null) {
                 billingDetails.put(FIELD_PHONE, phone);
             }
-            StripeNetworkUtils.removeNullAndEmptyParams(billingDetails);
             return billingDetails;
         }
 

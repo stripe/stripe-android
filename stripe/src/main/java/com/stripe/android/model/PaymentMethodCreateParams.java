@@ -379,8 +379,10 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         @NonNull
         @Override
         public Map<String, Object> toParamMap() {
-            final AbstractMap<String, Object> map = new HashMap<>();
-            map.put(FIELD_BANK, mBank);
+            final Map<String, Object> map = new HashMap<>();
+            if (mBank != null) {
+                map.put(FIELD_BANK, mBank);
+            }
             return map;
         }
 

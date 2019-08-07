@@ -11,7 +11,6 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -103,8 +102,11 @@ final class ApiRequest extends StripeRequest {
 
     @NonNull
     private String createStripeClientUserAgent() {
-        final AbstractMap<String, String> propertyMap = new HashMap<>();
-        propertyMap.put("java.version", System.getProperty("java.version"));
+        final Map<String, String> propertyMap = new HashMap<>();
+        final String javaVersion = System.getProperty("java.version");
+        if (javaVersion != null) {
+            propertyMap.put("java.version", javaVersion);
+        }
         propertyMap.put("os.name", "android");
         propertyMap.put("os.version", String.valueOf(Build.VERSION.SDK_INT));
         propertyMap.put("bindings.version", BuildConfig.VERSION_NAME);

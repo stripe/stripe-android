@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -118,7 +116,7 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         if (mCity != null) {
             map.put(FIELD_CITY, mCity);
         }
@@ -137,7 +135,6 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
         if (mState != null) {
             map.put(FIELD_STATE, mState);
         }
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;
     }
 

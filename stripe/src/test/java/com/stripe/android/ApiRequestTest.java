@@ -108,7 +108,7 @@ public class ApiRequestTest {
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .createQuery();
 
-        final String expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050";
+        final String expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123";
         assertEquals(expectedValue, query);
     }
 

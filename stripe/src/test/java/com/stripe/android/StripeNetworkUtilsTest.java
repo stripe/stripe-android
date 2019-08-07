@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
@@ -15,12 +14,10 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -40,10 +37,6 @@ public class StripeNetworkUtilsTest {
     private static final String CARD_NUMBER = "4242424242424242";
     private static final String CARD_STATE = "CA";
     private static final String CARD_ZIP = "94107";
-
-    private static final String BANK_ACCOUNT_NUMBER = "000123456789";
-    private static final String BANK_ROUTING_NUMBER = "110000000";
-    private static final String BANK_ACCOUNT_HOLDER_NAME = "Lily Thomas";
 
     @NonNull private final StripeNetworkUtils mNetworkUtils =
             new StripeNetworkUtils("com.example.app", new FakeUidSupplier());
@@ -73,23 +66,7 @@ public class StripeNetworkUtilsTest {
     }
 
     @Test
-    public void hashMapFromBankAccount_mapsCorrectFields() {
-        final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER,
-                BANK_ACCOUNT_HOLDER_NAME, BankAccount.BankAccountType.INDIVIDUAL, null, "US",
-                "usd", null, null, BANK_ROUTING_NUMBER);
-        final Map<String, Object> bankAccountMap = getBankAccountTokenParamData(bankAccount);
-        assertNotNull(bankAccountMap);
-
-        assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
-        assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
-        assertEquals("US", bankAccountMap.get("country"));
-        assertEquals("usd", bankAccountMap.get("currency"));
-        assertEquals(BANK_ACCOUNT_HOLDER_NAME, bankAccountMap.get("account_holder_name"));
-        assertEquals(BankAccount.BankAccountType.INDIVIDUAL, bankAccountMap.get("account_holder_type"));
-    }
-
-    @Test
-    public void hashMapFromCard_omitsEmptyFields() {
+    public void createCardTokenParams_hasExpectedEntries() {
         final Card card = new Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
                 .build();
 
@@ -100,77 +77,6 @@ public class StripeNetworkUtilsTest {
         assertEquals(CARD_CVC, cardMap.get("cvc"));
         assertEquals(8, cardMap.get("exp_month"));
         assertEquals(2019, cardMap.get("exp_year"));
-        assertFalse(cardMap.containsKey("name"));
-        assertFalse(cardMap.containsKey("currency"));
-        assertFalse(cardMap.containsKey("address_line1"));
-        assertFalse(cardMap.containsKey("address_line2"));
-        assertFalse(cardMap.containsKey("address_city"));
-        assertFalse(cardMap.containsKey("address_zip"));
-        assertFalse(cardMap.containsKey("address_state"));
-        assertFalse(cardMap.containsKey("address_country"));
-    }
-
-    @Test
-    public void hashMapFromBankAccount_omitsEmptyFields() {
-        final BankAccount bankAccount = new BankAccount(BANK_ACCOUNT_NUMBER, "US",
-                "usd", BANK_ROUTING_NUMBER);
-        final Map<String, Object> bankAccountMap = getBankAccountTokenParamData(bankAccount);
-        assertNotNull(bankAccountMap);
-
-        assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap.get("account_number"));
-        assertEquals(BANK_ROUTING_NUMBER, bankAccountMap.get("routing_number"));
-        assertEquals("US", bankAccountMap.get("country"));
-        assertEquals("usd", bankAccountMap.get("currency"));
-        assertFalse(bankAccountMap.containsKey("account_holder_name"));
-        assertFalse(bankAccountMap.containsKey("account_holder_type"));
-    }
-
-    @Test
-    public void removeNullAndEmptyParams_removesNullParams() {
-        final AbstractMap<String, Object> testMap = new HashMap<>();
-        testMap.put("a", null);
-        testMap.put("b", "not null");
-        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
-        assertEquals(1, testMap.size());
-        assertTrue(testMap.containsKey("b"));
-    }
-
-    @Test
-    public void removeNullAndEmptyParams_removesEmptyStringParams() {
-        final Map<String, Object> testMap = new HashMap<>();
-        testMap.put("a", "fun param");
-        testMap.put("b", "not null");
-        testMap.put("c", "");
-        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
-        assertEquals(2, testMap.size());
-        assertTrue(testMap.containsKey("a"));
-        assertTrue(testMap.containsKey("b"));
-    }
-
-    @Test
-    public void removeNullAndEmptyParams_removesNestedEmptyParams() {
-        final Map<String, Object> testMap = new HashMap<>();
-        final AbstractMap<String, Object> firstNestedMap = new HashMap<>();
-        final Map<String, Object> secondNestedMap = new HashMap<>();
-        testMap.put("a", "fun param");
-        testMap.put("b", "not null");
-        firstNestedMap.put("1a", "something");
-        firstNestedMap.put("1b", null);
-        secondNestedMap.put("2a", "");
-        secondNestedMap.put("2b", "hello world");
-        firstNestedMap.put("1c", secondNestedMap);
-        testMap.put("c", firstNestedMap);
-
-        StripeNetworkUtils.removeNullAndEmptyParams(testMap);
-        assertEquals(3, testMap.size());
-        assertTrue(testMap.containsKey("a"));
-        assertTrue(testMap.containsKey("b"));
-        assertTrue(testMap.containsKey("c"));
-        assertEquals(2, firstNestedMap.size());
-        assertTrue(firstNestedMap.containsKey("1a"));
-        assertTrue(firstNestedMap.containsKey("1c"));
-        assertEquals(1, secondNestedMap.size());
-        assertTrue(secondNestedMap.containsKey("2b"));
     }
 
     @Test
@@ -214,14 +120,4 @@ public class StripeNetworkUtilsTest {
         assertNotNull(cardTokenParams);
         return (Map<String, Object>) cardTokenParams.get("card");
     }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    private Map<String, Object> getBankAccountTokenParamData(@NonNull BankAccount bankAccount) {
-        final Map<String, Object> params = bankAccount.toParamMap();
-        params.putAll(mNetworkUtils.createUidParams());
-        assertNotNull(params);
-        return (Map<String, Object>) params.get("bank_account");
-    }
-
 }

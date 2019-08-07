@@ -46,7 +46,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -208,18 +207,22 @@ public class StripeTest {
         });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createTokenShouldFailWithNullPublishableKey() {
-        new Stripe(mContext)
-                .createToken(DEFAULT_CARD, new ApiResultCallback<Token>() {
+        final Stripe stripe = new Stripe(mContext);
+        assertThrows(IllegalArgumentException.class,
+                new ThrowingRunnable() {
                     @Override
-                    public void onError(@NonNull Exception error) {
-                        fail("Should not call method");
-                    }
+                    public void run() {
+                        stripe.createToken(DEFAULT_CARD, new ApiResultCallback<Token>() {
+                            @Override
+                            public void onError(@NonNull Exception error) {
+                            }
 
-                    @Override
-                    public void onSuccess(@NonNull Token token) {
-                        fail("Should not call method");
+                            @Override
+                            public void onSuccess(@NonNull Token token) {
+                            }
+                        });
                     }
                 });
     }
@@ -1130,12 +1133,16 @@ public class StripeTest {
                 authenticationException.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void createTokenSynchronous_withoutKey_shouldThrowException()
-            throws StripeException {
+    @Test
+    public void createTokenSynchronous_withoutKey_shouldThrowException() {
         final Stripe stripe = new Stripe(mContext);
-        // This test should not log anything, so we set it to be theoretically capable of logging
-        stripe.createTokenSynchronous(CARD);
+        assertThrows(IllegalArgumentException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createTokenSynchronous(CARD);
+                    }
+                });
     }
 
     @Test

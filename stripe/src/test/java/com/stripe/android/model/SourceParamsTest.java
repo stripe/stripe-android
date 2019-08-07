@@ -550,7 +550,7 @@ public class SourceParamsTest {
                 "stripe://testactivity",
                 "multibancoholder@stripe.com");
 
-        Map<String, Object> expectedMap = new HashMap<>();
+        final Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", Source.SourceType.MULTIBANCO);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 150L);
@@ -652,7 +652,7 @@ public class SourceParamsTest {
                 "UK",
                 "a thing you bought");
 
-        Map<String, Object> expectedMap = new HashMap<>();
+        final Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", Source.SourceType.SOFORT);
         expectedMap.put("currency", Source.EURO);
         expectedMap.put("amount", 50000L);
@@ -697,7 +697,7 @@ public class SourceParamsTest {
                 "stripe://returnaddress",
                 "card_id_123");
 
-        Map<String, Object> expectedMap = new HashMap<>();
+        final Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("type", Source.SourceType.THREE_D_SECURE);
         expectedMap.put("currency", "brl");
         expectedMap.put("amount", 99000L);

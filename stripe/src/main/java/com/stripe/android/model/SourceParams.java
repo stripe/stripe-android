@@ -10,12 +10,10 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.Source.SourceType;
 
 /**
@@ -104,10 +102,9 @@ public final class SourceParams implements StripeParamsModel {
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        final AbstractMap<String, Object> ownerMap = new HashMap<>();
+        final Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
-        removeNullAndEmptyParams(ownerMap);
         if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
@@ -140,10 +137,13 @@ public final class SourceParams implements StripeParamsModel {
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
                 .setUsage(Source.Usage.REUSABLE);
 
-        final AbstractMap<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_NAME, name);
-        ownerMap.put(FIELD_EMAIL, email);
-        removeNullAndEmptyParams(ownerMap);
+        final Map<String, Object> ownerMap = new HashMap<>();
+        if (name != null) {
+            ownerMap.put(FIELD_NAME, name);
+        }
+        if (email != null) {
+            ownerMap.put(FIELD_EMAIL, email);
+        }
         if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
@@ -179,10 +179,14 @@ public final class SourceParams implements StripeParamsModel {
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
-        final AbstractMap<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_NAME, name);
-        ownerMap.put(FIELD_EMAIL, email);
-        removeNullAndEmptyParams(ownerMap);
+        final Map<String, Object> ownerMap = new HashMap<>();
+        if (name != null) {
+            ownerMap.put(FIELD_NAME, name);
+        }
+        if (email != null) {
+            ownerMap.put(FIELD_EMAIL, email);
+        }
+
         if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
@@ -233,12 +237,13 @@ public final class SourceParams implements StripeParamsModel {
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
         if (statementDescriptor != null || preferredLanguage != null) {
-            final AbstractMap<String, Object> additionalParamsMap = new HashMap<>();
-
-            additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-            additionalParamsMap.put(FIELD_PREFERRED_LANGUAGE, preferredLanguage);
-            removeNullAndEmptyParams(additionalParamsMap);
-
+            final Map<String, Object> additionalParamsMap = new HashMap<>();
+            if (statementDescriptor != null) {
+                additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+            }
+            if (preferredLanguage != null) {
+                additionalParamsMap.put(FIELD_PREFERRED_LANGUAGE, preferredLanguage);
+            }
             params.setApiParameterMap(additionalParamsMap);
         }
 
@@ -283,12 +288,11 @@ public final class SourceParams implements StripeParamsModel {
 
         // Not enforcing all fields to exist at this level.
         // Instead, the server will return an error for invalid data.
-        final AbstractMap<String, Object> basicInfoMap = new HashMap<>();
+        final Map<String, Object> basicInfoMap = new HashMap<>();
         basicInfoMap.put(FIELD_NUMBER, card.getNumber());
         basicInfoMap.put(FIELD_EXP_MONTH, card.getExpMonth());
         basicInfoMap.put(FIELD_EXP_YEAR, card.getExpYear());
         basicInfoMap.put(FIELD_CVC, card.getCVC());
-        removeNullAndEmptyParams(basicInfoMap);
 
         params.setApiParameterMap(basicInfoMap);
 
@@ -303,12 +307,11 @@ public final class SourceParams implements StripeParamsModel {
                 .toParamMap();
 
         // If there are any keys left...
-        final AbstractMap<String, Object> ownerMap = new HashMap<>();
+        final Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, card.getName());
         if (!addressMap.isEmpty()) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
         }
-        removeNullAndEmptyParams(ownerMap);
         if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
@@ -346,19 +349,23 @@ public final class SourceParams implements StripeParamsModel {
         final String phone;
         final String name;
         if (googlePayBillingAddress != null) {
-            name = googlePayBillingAddress.optString("name");
-            phone = googlePayBillingAddress.optString("phoneNumber");
-
+            name = StripeJsonUtils.optString(googlePayBillingAddress, "name");
+            phone = StripeJsonUtils.optString(googlePayBillingAddress, "phoneNumber");
             addressMap = new Address.Builder()
-                    .setLine1(googlePayBillingAddress.optString("address1"))
-                    .setLine2(googlePayBillingAddress.optString("address2"))
-                    .setCity(googlePayBillingAddress.optString("locality"))
-                    .setState(googlePayBillingAddress.optString("administrativeArea"))
-                    .setPostalCode(googlePayBillingAddress.optString("postalCode"))
-                    .setCountry(googlePayBillingAddress.optString("countryCode"))
+                    .setLine1(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "address1"))
+                    .setLine2(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "address2"))
+                    .setCity(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "locality"))
+                    .setState(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "administrativeArea"))
+                    .setPostalCode(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "postalCode"))
+                    .setCountry(StripeJsonUtils.optString(
+                            googlePayBillingAddress, "countryCode"))
                     .build()
                     .toParamMap();
-            removeNullAndEmptyParams(addressMap);
         } else {
             name = null;
             phone = null;
@@ -366,7 +373,10 @@ public final class SourceParams implements StripeParamsModel {
         }
 
         final Map<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_EMAIL, googlePayPaymentData.optString("email"));
+        final String email = StripeJsonUtils.optString(googlePayPaymentData, "email");
+        if (email != null) {
+            ownerMap.put(FIELD_EMAIL, email);
+        }
         if (name != null) {
             ownerMap.put(FIELD_NAME, name);
         }
@@ -376,7 +386,6 @@ public final class SourceParams implements StripeParamsModel {
         if (addressMap != null && !addressMap.isEmpty()) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
         }
-        removeNullAndEmptyParams(ownerMap);
         if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
@@ -896,24 +905,40 @@ public final class SourceParams implements StripeParamsModel {
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
+        final Map<String, Object> networkReadyMap = new HashMap<>();
 
         networkReadyMap.put(API_PARAM_TYPE, mTypeRaw);
-        networkReadyMap.put(mTypeRaw, mApiParameterMap);
-        networkReadyMap.put(API_PARAM_AMOUNT, mAmount);
-        networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
-        networkReadyMap.put(API_PARAM_OWNER, mOwner);
-        networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
-        networkReadyMap.put(API_PARAM_METADATA, mMetaData);
-        networkReadyMap.put(API_PARAM_TOKEN, mToken);
-        networkReadyMap.put(API_PARAM_USAGE, mUsage);
+
+        if (mApiParameterMap != null) {
+            networkReadyMap.put(mTypeRaw, mApiParameterMap);
+        }
+        if (mAmount != null) {
+            networkReadyMap.put(API_PARAM_AMOUNT, mAmount);
+        }
+        if (mCurrency != null) {
+            networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
+        }
+        if (mOwner != null) {
+            networkReadyMap.put(API_PARAM_OWNER, mOwner);
+        }
+        if (mRedirect != null) {
+            networkReadyMap.put(API_PARAM_REDIRECT, mRedirect);
+        }
+        if (mMetaData != null) {
+            networkReadyMap.put(API_PARAM_METADATA, mMetaData);
+        }
+        if (mToken != null) {
+            networkReadyMap.put(API_PARAM_TOKEN, mToken);
+        }
+        if (mUsage != null) {
+            networkReadyMap.put(API_PARAM_USAGE, mUsage);
+        }
         if (mExtraParams != null) {
             networkReadyMap.putAll(mExtraParams);
         }
         if (mWeChatParams != null) {
             networkReadyMap.put(API_PARAM_WECHAT, mWeChatParams.toParamMap());
         }
-        removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
     }
 
