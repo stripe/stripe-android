@@ -1014,8 +1014,8 @@ public final class SourceParams implements StripeParamsModel {
 
         @NonNull
         @Override
-        public Map<String, ?> toParamMap() {
-            final Map<String, String> params = new HashMap<>();
+        public Map<String, Object> toParamMap() {
+            final Map<String, Object> params = new HashMap<>();
             if (appId != null) {
                 params.put(FIELD_APPID, appId);
             }

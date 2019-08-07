@@ -152,7 +152,7 @@ public class StripeNetworkUtils {
     }
 
     void addUidToConfirmPaymentIntentParams(
-            @NonNull Map<String, Object> confirmPaymentIntentParams) {
+            @NonNull Map<String, ?> confirmPaymentIntentParams) {
         final Object sourceData =
                 confirmPaymentIntentParams.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA);
         if (sourceData instanceof Map) {

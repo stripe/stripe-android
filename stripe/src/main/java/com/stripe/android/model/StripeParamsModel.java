@@ -10,5 +10,5 @@ import java.util.Map;
 public interface StripeParamsModel {
 
     @NonNull
-    Map<String, ?> toParamMap();
+    Map<String, Object> toParamMap();
 }

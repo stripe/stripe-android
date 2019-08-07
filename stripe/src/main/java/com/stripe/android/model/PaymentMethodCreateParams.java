@@ -24,7 +24,7 @@ import java.util.Objects;
  *
  * See {@link PaymentMethod} for API object.
  */
-public final class PaymentMethodCreateParams {
+public final class PaymentMethodCreateParams implements StripeParamsModel {
 
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_CARD = "card";
@@ -137,14 +137,15 @@ public final class PaymentMethodCreateParams {
     }
 
     @NonNull
+    @Override
     public Map<String, Object> toParamMap() {
         final Map<String, Object> params = new HashMap<>();
         params.put(FIELD_TYPE, type.mCode);
 
         if (type == Type.Card && card != null) {
-            params.put(FIELD_CARD, card.toMap());
+            params.put(FIELD_CARD, card.toParamMap());
         } else if (type == Type.Ideal && ideal != null) {
-            params.put(FIELD_IDEAL, ideal.toMap());
+            params.put(FIELD_IDEAL, ideal.toParamMap());
         }
 
         if (billingDetails != null) {
@@ -194,7 +195,7 @@ public final class PaymentMethodCreateParams {
         }
     }
 
-    public static final class Card {
+    public static final class Card implements StripeParamsModel {
         private static final String FIELD_NUMBER = "number";
         private static final String FIELD_EXP_MONTH = "exp_month";
         private static final String FIELD_EXP_YEAR = "exp_year";
@@ -247,7 +248,8 @@ public final class PaymentMethodCreateParams {
         }
 
         @NonNull
-        public Map<String, Object> toMap() {
+        @Override
+        public Map<String, Object> toParamMap() {
             final Map<String, Object> map = new HashMap<>();
             if (mNumber != null) {
                 map.put(FIELD_NUMBER, mNumber);
@@ -313,7 +315,7 @@ public final class PaymentMethodCreateParams {
         }
     }
 
-    public static final class Ideal {
+    public static final class Ideal implements StripeParamsModel {
         private static final String FIELD_BANK = "bank";
 
         @Nullable private final String mBank;
@@ -323,7 +325,8 @@ public final class PaymentMethodCreateParams {
         }
 
         @NonNull
-        public Map<String, Object> toMap() {
+        @Override
+        public Map<String, Object> toParamMap() {
             final AbstractMap<String, Object> map = new HashMap<>();
             map.put(FIELD_BANK, mBank);
             return map;

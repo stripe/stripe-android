@@ -299,7 +299,7 @@ class PaymentActivity : AppCompatActivity() {
         params["payment_method"] = data.paymentMethod!!.id!!
         params["customer_id"] = customerId
         if (data.shippingInformation != null) {
-            params["shipping"] = data.shippingInformation!!.toMap()
+            params["shipping"] = data.shippingInformation!!.toParamMap()
         }
         params["return_url"] = "stripe://payment-auth-return"
         if (stripeAccountId != null) {

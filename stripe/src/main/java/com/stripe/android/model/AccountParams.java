@@ -13,7 +13,7 @@ import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 /**
  * Represents a grouping of parameters needed to create a Token for a Connect account on the server.
  */
-public final class AccountParams {
+public final class AccountParams implements StripeParamsModel {
 
     static final String API_BUSINESS_TYPE = "business_type";
     static final String API_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted";
@@ -70,6 +70,7 @@ public final class AccountParams {
      * @return a String-keyed map
      */
     @NonNull
+    @Override
     public Map<String, Object> toParamMap() {
         final Map<String, Object> accountData = new HashMap<>();
         if (mBusinessType != null) {

@@ -322,7 +322,9 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
     }
 
-    public static final class BillingDetails extends StripeModel implements Parcelable {
+    public static final class BillingDetails
+            extends StripeModel
+            implements StripeParamsModel, Parcelable {
         static final String FIELD_ADDRESS = "address";
         static final String FIELD_EMAIL = "email";
         static final String FIELD_NAME = "name";
@@ -373,12 +375,22 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     }
                 };
 
+        /**
+         * @deprecated use {@link #toParamMap()}
+         */
+        @Deprecated
         @NonNull
         @Override
         public Map<String, Object> toMap() {
+            return toParamMap();
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Object> toParamMap() {
             final Map<String, Object> billingDetails = new HashMap<>();
             if (address != null) {
-                billingDetails.put(FIELD_ADDRESS, address.toMap());
+                billingDetails.put(FIELD_ADDRESS, address.toParamMap());
             }
             if (email != null) {
                 billingDetails.put(FIELD_EMAIL, email);
