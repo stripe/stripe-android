@@ -13,7 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class WeChatPay extends StripeModel {
+/**
+ * <a href="https://stripe.com/docs/sources/wechat-pay">WeChat Pay Payments with Sources</a>
+ */
+public final class WeChat extends StripeModel {
     private static final String FIELD_APPID = "android_appid";
     private static final String FIELD_NONCE = "android_noncestr";
     private static final String FIELD_PACKAGE = "android_package";
@@ -22,6 +25,7 @@ public final class WeChatPay extends StripeModel {
     private static final String FIELD_SIGN = "android_sign";
     private static final String FIELD_TIMESTAMP = "android_timestamp";
     private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
+    private static final String FIELD_QR_CODE_URL = "qr_code_url";
 
     @Nullable public final String statementDescriptor;
     @Nullable public final String appId;
@@ -31,8 +35,9 @@ public final class WeChatPay extends StripeModel {
     @Nullable public final String prepayId;
     @Nullable public final String sign;
     @Nullable public final String timestamp;
+    @Nullable public final String qrCodeUrl;
 
-    private WeChatPay(@NonNull Builder builder) {
+    private WeChat(@NonNull Builder builder) {
         statementDescriptor = builder.statementDescriptor;
         appId = builder.appId;
         nonce = builder.nonce;
@@ -41,6 +46,7 @@ public final class WeChatPay extends StripeModel {
         prepayId = builder.prepayId;
         sign = builder.sign;
         timestamp = builder.timestamp;
+        qrCodeUrl = builder.qrCodeUrl;
     }
 
     @NonNull
@@ -55,6 +61,7 @@ public final class WeChatPay extends StripeModel {
         map.put(FIELD_SIGN, sign);
         map.put(FIELD_TIMESTAMP, timestamp);
         map.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+        map.put(FIELD_QR_CODE_URL, qrCodeUrl);
         return map;
     }
 
@@ -66,10 +73,10 @@ public final class WeChatPay extends StripeModel {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return this == obj || (obj instanceof WeChatPay && typedEquals((WeChatPay) obj));
+        return this == obj || (obj instanceof WeChat && typedEquals((WeChat) obj));
     }
 
-    private boolean typedEquals(@NonNull WeChatPay obj) {
+    private boolean typedEquals(@NonNull WeChat obj) {
         return Objects.equals(statementDescriptor, obj.statementDescriptor) &&
                 Objects.equals(appId, obj.appId) &&
                 Objects.equals(nonce, obj.nonce) &&
@@ -77,11 +84,12 @@ public final class WeChatPay extends StripeModel {
                 Objects.equals(partnerId, obj.partnerId) &&
                 Objects.equals(prepayId, obj.prepayId) &&
                 Objects.equals(sign, obj.sign) &&
-                Objects.equals(timestamp, obj.timestamp);
+                Objects.equals(timestamp, obj.timestamp) &&
+                Objects.equals(qrCodeUrl, obj.qrCodeUrl);
     }
 
     @NonNull
-    public static WeChatPay fromJson(@NonNull JSONObject json) {
+    public static WeChat fromJson(@NonNull JSONObject json) {
         return new Builder()
                 .setAppId(json.optString(FIELD_APPID))
                 .setNonce(json.optString(FIELD_NONCE))
@@ -91,10 +99,11 @@ public final class WeChatPay extends StripeModel {
                 .setSign(json.optString(FIELD_SIGN))
                 .setTimestamp(json.optString(FIELD_TIMESTAMP))
                 .setStatementDescriptor(json.optString(FIELD_STATEMENT_DESCRIPTOR))
+                .setQrCodeUrl(json.optString(FIELD_QR_CODE_URL))
                 .build();
     }
 
-    static final class Builder implements ObjectBuilder<WeChatPay> {
+    static final class Builder implements ObjectBuilder<WeChat> {
         private String statementDescriptor;
         private String appId;
         private String nonce;
@@ -103,6 +112,7 @@ public final class WeChatPay extends StripeModel {
         private String prepayId;
         private String sign;
         private String timestamp;
+        private String qrCodeUrl;
 
         @NonNull
         Builder setStatementDescriptor(@Nullable String statementDescriptor) {
@@ -153,9 +163,15 @@ public final class WeChatPay extends StripeModel {
         }
 
         @NonNull
+        Builder setQrCodeUrl(@Nullable String qrCodeUrl) {
+            this.qrCodeUrl = qrCodeUrl;
+            return this;
+        }
+
+        @NonNull
         @Override
-        public WeChatPay build() {
-            return new WeChatPay(this);
+        public WeChat build() {
+            return new WeChat(this);
         }
     }
 }
