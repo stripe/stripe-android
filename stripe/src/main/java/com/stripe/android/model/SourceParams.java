@@ -82,7 +82,8 @@ public final class SourceParams implements StripeParamsModel {
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *               charge the customer (e.g., 1099 for a €10.99 payment).
-     * @param currency `eur` or `pln` (P24 payments must be in either Euros or Polish Zloty).
+     * @param currency <code>eur</code> or <code>pln</code> (P24 payments must be in either Euros
+     *                 or Polish Zloty).
      * @param name The name of the account holder (optional).
      * @param email The email address of the account holder.
      * @param returnUrl The URL the customer should be redirected to after the authorization
