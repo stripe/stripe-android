@@ -1,9 +1,9 @@
 # CHANGELOG
 
 ## 10.2.1 - 2019-08-06
-* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via `Stripe.API_VERSION`
-* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create `SourceParams#createCardParamsFromGooglePay`
-* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using `ConfirmSetupIntentParams` with `PaymentMethodCreateParams` 
+* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
+* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/SourceParams.html#createCardParamsFromGooglePay-org.json.JSONObject-)
+* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create(PaymentMethodCreateParams, String)](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html#create-com.stripe.android.model.PaymentMethodCreateParams-java.lang.String-)
 
 ## 10.2.0 - 2019-08-05
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
