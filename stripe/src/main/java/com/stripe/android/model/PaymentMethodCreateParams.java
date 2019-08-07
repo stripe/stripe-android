@@ -149,7 +149,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         }
 
         if (billingDetails != null) {
-            params.put(FIELD_BILLING_DETAILS, billingDetails.toMap());
+            params.put(FIELD_BILLING_DETAILS, billingDetails.toParamMap());
         }
 
         if (metadata != null) {
