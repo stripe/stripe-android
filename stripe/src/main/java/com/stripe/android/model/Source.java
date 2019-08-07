@@ -16,7 +16,9 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
@@ -47,6 +49,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
             SourceType.P24,
             SourceType.EPS,
             SourceType.MULTIBANCO,
+            SourceType.WECHAT,
             SourceType.UNKNOWN
     })
     public @interface SourceType {
@@ -61,6 +64,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
         String P24 = "p24";
         String EPS = "eps";
         String MULTIBANCO = "multibanco";
+        String WECHAT = "wechat";
         String UNKNOWN = "unknown";
     }
 
@@ -126,6 +130,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_USAGE = "usage";
+    private static final String FIELD_WECHAT = "wechat";
 
     @Nullable private String mId;
     @Nullable private Long mAmount;
@@ -145,6 +150,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @Nullable private final StripeSourceTypeModel mSourceTypeModel;
     @Nullable @SourceType private String mType;
     @Nullable @Usage private String mUsage;
+    @Nullable private final WeChat mWeChat;
 
     private Source(
             @Nullable String id,
@@ -164,8 +170,8 @@ public final class Source extends StripeModel implements StripePaymentSource {
             @Nullable StripeSourceTypeModel sourceTypeModel,
             @NonNull @SourceType String type,
             @NonNull String rawType,
-            @Nullable @Usage String usage
-    ) {
+            @Nullable @Usage String usage,
+            @Nullable WeChat weChat) {
         mId = id;
         mAmount = amount;
         mClientSecret = clientSecret;
@@ -184,6 +190,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
         mType = type;
         mTypeRaw = rawType;
         mUsage = usage;
+        mWeChat = weChat;
     }
 
     @Nullable
@@ -379,6 +386,17 @@ public final class Source extends StripeModel implements StripePaymentSource {
     }
 
     @NonNull
+    public WeChat getWeChat() {
+        if (!SourceType.WECHAT.equals(mType)) {
+            throw new IllegalStateException(
+                    String.format(Locale.ENGLISH, "Source type must be '%s'", SourceType.WECHAT)
+            );
+        }
+
+        return Objects.requireNonNull(mWeChat);
+    }
+
+    @NonNull
     @Override
     public Map<String, Object> toMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
@@ -448,7 +466,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
         return new Source(id, null, null, null, null,
                 null, null, null, null, null, null,
                 null, null, null, sourceTypeModel, SourceType.CARD,
-                SourceType.CARD, null);
+                SourceType.CARD, null, null);
     }
 
     @NonNull
@@ -492,6 +510,13 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
         @Usage final String usage = asUsage(optString(jsonObject, FIELD_USAGE));
 
+        final WeChat weChat;
+        if (SourceType.WECHAT.equals(type)) {
+            weChat = WeChat.fromJson(jsonObject.optJSONObject(FIELD_WECHAT));
+        } else {
+            weChat = null;
+        }
+
         return new Source(
                 id,
                 amount,
@@ -510,7 +535,9 @@ public final class Source extends StripeModel implements StripePaymentSource {
                 sourceTypeModel,
                 type,
                 typeRaw,
-                usage);
+                usage,
+                weChat
+        );
     }
 
     @Nullable
@@ -591,6 +618,8 @@ public final class Source extends StripeModel implements StripePaymentSource {
             return SourceType.ALIPAY;
         } else if (SourceType.P24.equals(sourceType)) {
             return SourceType.P24;
+        } else if (SourceType.WECHAT.equals(sourceType)) {
+            return SourceType.WECHAT;
         } else if (SourceType.UNKNOWN.equals(sourceType)) {
             return SourceType.UNKNOWN;
         } else {

@@ -199,6 +199,44 @@ public class SourceTest {
             "  \"tokenization_method\": null\n" +
             "}\n";
 
+    private static final String SOURCE_WECHAT_JSON = "{\n" +
+            "\t\"id\": \"src_1F4ZSkBNJ02\",\n" +
+            "\t\"object\": \"source\",\n" +
+            "\t\"amount\": 100,\n" +
+            "\t\"client_secret\": \"src_client_secret_FZiuAs6g3ri\",\n" +
+            "\t\"created\": 1565124054,\n" +
+            "\t\"currency\": \"usd\",\n" +
+            "\t\"flow\": \"none\",\n" +
+            "\t\"livemode\": true,\n" +
+            "\t\"metadata\": {},\n" +
+            "\t\"owner\": {\n" +
+            "\t\t\"address\": null,\n" +
+            "\t\t\"email\": null,\n" +
+            "\t\t\"name\": null,\n" +
+            "\t\t\"phone\": null,\n" +
+            "\t\t\"verified_address\": null,\n" +
+            "\t\t\"verified_email\": null,\n" +
+            "\t\t\"verified_name\": null,\n" +
+            "\t\t\"verified_phone\": null\n" +
+            "\t},\n" +
+            "\t\"statement_descriptor\": null,\n" +
+            "\t\"status\": \"pending\",\n" +
+            "\t\"type\": \"wechat\",\n" +
+            "\t\"usage\": \"single_use\",\n" +
+            "\t\"wechat\": {\n" +
+            "\t\t\"statement_descriptor\": \"ORDER AT11990\",\n" +
+            "\t\t\"android_appid\": \"wxa0df8has9d78ce\",\n" +
+            "\t\t\"android_noncestr\": \"yFNjg8d9hsfaEPYID\",\n" +
+            "\t\t\"android_package\": \"Sign=WXPay\",\n" +
+            "\t\t\"android_partnerid\": \"268716457\",\n" +
+            "\t\t\"android_prepayid\": \"wx070440550af89hAh8941913701900\",\n" +
+            "\t\t\"android_sign\": \"1A98A09EA74DCF006598h89433DED3FF6BCED1C062C63B43AE773D8\",\n" +
+            "\t\t\"android_timestamp\": \"1565124055\",\n" +
+            "\t\t\"ios_native_url\": \"weixin://app/wxa0df8has9d78ce/pay/\",\n" +
+            "\t\t\"qr_code_url\": null\n" +
+            "\t}\n" +
+            "}";
+
     @Test
     public void fromJsonStringWithoutNulls_isNotNull() {
         assertNotNull(Source.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
@@ -238,5 +276,15 @@ public class SourceTest {
 
         final SourceCardData sourceCardData = (SourceCardData) source.getSourceTypeModel();
         assertEquals(Card.CardBrand.VISA, sourceCardData.getBrand());
+    }
+
+    @Test
+    public void fromJsonString_withWeChatSourceJson() {
+        final Source source = Source.fromString(SOURCE_WECHAT_JSON);
+        assertNotNull(source);
+
+        final WeChat weChat = source.getWeChat();
+        assertNotNull(weChat);
+        assertEquals("wxa0df8has9d78ce", weChat.appId);
     }
 }

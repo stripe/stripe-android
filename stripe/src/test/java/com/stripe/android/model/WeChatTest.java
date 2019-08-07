@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class WeChatPayTest {
+public class WeChatTest {
 
     private static final String WE_CHAT_PAY_JSON = "{\n" +
             "\t\t\"statement_descriptor\": \"ORDER 123\",\n" +
@@ -21,9 +21,9 @@ public class WeChatPayTest {
 
     @Test
     public void fromJson_shouldReturnExpectedObject() throws JSONException {
-        final WeChatPay actual = WeChatPay.fromJson(new JSONObject(WE_CHAT_PAY_JSON));
+        final WeChat actual = WeChat.fromJson(new JSONObject(WE_CHAT_PAY_JSON));
 
-        final WeChatPay expected = new WeChatPay.Builder()
+        final WeChat expected = new WeChat.Builder()
                 .setStatementDescriptor("ORDER 123")
                 .setAppId("wxa0dfnoie578ce")
                 .setNonce("yFNjgfoni3kZEPYID")
