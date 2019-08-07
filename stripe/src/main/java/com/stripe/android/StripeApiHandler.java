@@ -98,7 +98,7 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
+        final Map<String, ?> paramMap = confirmPaymentIntentParams.toParamMap();
         mNetworkUtils.addUidToConfirmPaymentIntentParams(paramMap);
 
         try {
@@ -170,7 +170,7 @@ class StripeApiHandler {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        final Map<String, Object> paramMap = confirmSetupIntentParams.toParamMap();
+        final Map<String, ?> paramMap = confirmSetupIntentParams.toParamMap();
         mNetworkUtils.addUidToConfirmPaymentIntentParams(paramMap);
 
         try {
@@ -357,7 +357,7 @@ class StripeApiHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     Token createToken(
-            @NonNull Map<String, Object> tokenParams,
+            @NonNull Map<String, ?> tokenParams,
             @NonNull ApiRequest.Options options,
             @NonNull @Token.TokenType String tokenType)
             throws AuthenticationException,
@@ -604,7 +604,7 @@ class StripeApiHandler {
             AuthenticationException,
             CardException {
         final Map<String, Object> params = new HashMap<>();
-        params.put("shipping", shippingInformation.toMap());
+        params.put("shipping", shippingInformation.toParamMap());
 
         fireAnalyticsRequest(
                 mAnalyticsDataFactory.getEventLoggingParams(productUsageTokens,
@@ -1099,7 +1099,7 @@ class StripeApiHandler {
     @Nullable
     private Token requestToken(
             @NonNull String url,
-            @NonNull Map<String, Object> params,
+            @NonNull Map<String, ?> params,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException, InvalidRequestException,
             APIConnectionException, CardException, APIException {

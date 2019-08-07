@@ -19,7 +19,9 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * Model representing a shipping address object
  */
-public final class ShippingInformation extends StripeModel implements Parcelable {
+public final class ShippingInformation
+        extends StripeModel
+        implements StripeParamsModel, Parcelable {
     public static final Creator<ShippingInformation> CREATOR = new Creator<ShippingInformation>() {
         @Override
         public ShippingInformation createFromParcel(Parcel source) {
@@ -80,14 +82,24 @@ public final class ShippingInformation extends StripeModel implements Parcelable
                 optString(jsonObject, FIELD_PHONE));
     }
 
+    /**
+     * @deprecated use {@link #toParamMap()}
+     */
+    @Deprecated
     @NonNull
     @Override
     public Map<String, Object> toMap() {
+        return toParamMap();
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toParamMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         map.put(FIELD_NAME, mName);
         map.put(FIELD_PHONE, mPhone);
         if (mAddress != null) {
-            map.put(FIELD_ADDRESS, mAddress.toMap());
+            map.put(FIELD_ADDRESS, mAddress.toParamMap());
         }
         StripeNetworkUtils.removeNullAndEmptyParams(map);
         return map;

@@ -26,7 +26,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
  * object in the Source api.
  */
-public final class Address extends StripeModel implements Parcelable {
+public final class Address extends StripeModel implements StripeParamsModel, Parcelable {
 
     @IntDef({
             RequiredBillingAddressFields.NONE,
@@ -115,9 +115,19 @@ public final class Address extends StripeModel implements Parcelable {
         return mState;
     }
 
+    /**
+     * @deprecated use {@link #toParamMap()}
+     */
+    @Deprecated
     @NonNull
     @Override
     public Map<String, Object> toMap() {
+        return toParamMap();
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toParamMap() {
         final AbstractMap<String, Object> map = new HashMap<>();
         if (mCity != null) {
             map.put(FIELD_CITY, mCity);

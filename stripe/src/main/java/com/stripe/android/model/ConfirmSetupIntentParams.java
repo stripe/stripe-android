@@ -115,6 +115,7 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
      * @return a String-keyed map
      */
     @NonNull
+    @Override
     public Map<String, Object> toParamMap() {
         final Map<String, Object> networkReadyMap = new HashMap<>();
 

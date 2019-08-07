@@ -369,6 +369,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     @NonNull
+    @Override
     public Map<String, Object> toParamMap() {
         final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
 

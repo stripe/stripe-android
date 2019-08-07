@@ -3,6 +3,8 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.model.StripeParamsModel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-class Stripe3ds2AuthParams {
+final class Stripe3ds2AuthParams implements StripeParamsModel {
 
     static final String FIELD_APP = "app";
     static final String FIELD_SOURCE = "source";
@@ -63,7 +65,8 @@ class Stripe3ds2AuthParams {
     }
 
     @NonNull
-    Map<String, Object> toParamMap() {
+    @Override
+    public Map<String, Object> toParamMap() {
         final Map<String, Object> params = new HashMap<>();
         params.put(FIELD_SOURCE, mSourceId);
         params.put(FIELD_APP, createAppParams().toString());
