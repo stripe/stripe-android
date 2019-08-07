@@ -99,7 +99,7 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = confirmPaymentIntentParams.toParamMap();
-        mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
+        mNetworkUtils.addUidToConfirmPaymentIntentParams(paramMap);
 
         try {
             fireFingerprintRequest();
@@ -171,7 +171,7 @@ class StripeApiHandler {
             APIConnectionException,
             APIException {
         final Map<String, Object> paramMap = confirmSetupIntentParams.toParamMap();
-        mNetworkUtils.addUidParamsToPaymentIntent(paramMap);
+        mNetworkUtils.addUidToConfirmPaymentIntentParams(paramMap);
 
         try {
             fireFingerprintRequest();

@@ -151,13 +151,15 @@ public class StripeNetworkUtils {
         }
     }
 
-    void addUidParamsToPaymentIntent(@NonNull Map<String, Object> params) {
-        final Object sourceData = params.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA);
+    void addUidToConfirmPaymentIntentParams(
+            @NonNull Map<String, Object> confirmPaymentIntentParams) {
+        final Object sourceData =
+                confirmPaymentIntentParams.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA);
         if (sourceData instanceof Map) {
             //noinspection unchecked
             ((Map<String, Object>) sourceData).putAll(createUidParams());
         } else {
-            final Object paymentMethodData = params
+            final Object paymentMethodData = confirmPaymentIntentParams
                     .get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
             if (paymentMethodData instanceof Map) {
                 //noinspection unchecked
