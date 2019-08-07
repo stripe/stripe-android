@@ -63,14 +63,16 @@ public class StripeTest {
     private static final String DEFAULT_SECRET_KEY = "sk_default";
 
     private static final Card DEFAULT_CARD = Card.create(null, null, null, null);
-    private static final TokenCallback DEFAULT_TOKEN_CALLBACK = new TokenCallback() {
-        @Override
-        public void onError(@NonNull Exception error) {
-        }
-        @Override
-        public void onSuccess(@NonNull Token token) {
-        }
-    };
+    private static final ApiResultCallback<Token> DEFAULT_TOKEN_CALLBACK =
+            new ApiResultCallback<Token>() {
+                @Override
+                public void onError(@NonNull Exception error) {
+                }
+
+                @Override
+                public void onSuccess(@NonNull Token token) {
+                }
+            };
 
     private static final String TEST_CARD_NUMBER = "4242424242424242";
     private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
@@ -207,7 +209,7 @@ public class StripeTest {
     @Test(expected = IllegalArgumentException.class)
     public void createTokenShouldFailWithNullPublishableKey() {
         new Stripe(mContext)
-                .createToken(DEFAULT_CARD, new TokenCallback() {
+                .createToken(DEFAULT_CARD, new ApiResultCallback<Token>() {
                     @Override
                     public void onError(@NonNull Exception error) {
                         fail("Should not call method");
@@ -230,7 +232,7 @@ public class StripeTest {
                                        @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
-                                       @NonNull TokenCallback callback) {
+                                       @NonNull ApiResultCallback<Token> callback) {
                         tokenCreatorCalled[0] = true;
                     }
                 });
@@ -252,7 +254,7 @@ public class StripeTest {
                                        @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
-                                       @NonNull TokenCallback callback) {
+                                       @NonNull ApiResultCallback<Token> callback) {
                         assertEquals(expectedExecutor, executor);
                         assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -270,7 +272,7 @@ public class StripeTest {
                                        @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
-                                       @NonNull TokenCallback callback) {
+                                       @NonNull ApiResultCallback<Token> callback) {
                         assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
                         assertNull(executor);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
@@ -358,7 +360,7 @@ public class StripeTest {
                         "1JWtPxqbdX5Gamtc",
                         "6789",
                         "110000000"),
-                new TokenCallback() {
+                new ApiResultCallback<Token>() {
                     @Override
                     public void onSuccess(@NonNull Token result) {
                     }
@@ -372,7 +374,7 @@ public class StripeTest {
     @Test
     public void createPiiToken() {
         createNonLoggingStripe().createPiiToken("123-45-6789",
-                new TokenCallback() {
+                new ApiResultCallback<Token>() {
                     @Override
                     public void onSuccess(@NonNull Token result) {
 
@@ -388,7 +390,7 @@ public class StripeTest {
     @Test
     public void createSource() {
         createNonLoggingStripe().createSource(CARD_SOURCE_PARAMS,
-                new SourceCallback() {
+                new ApiResultCallback<Source>() {
                     @Override
                     public void onSuccess(@NonNull Source result) {
 
@@ -404,7 +406,7 @@ public class StripeTest {
     @Test
     public void createCvcUpdateToken() {
         createNonLoggingStripe().createCvcUpdateToken("123",
-                new TokenCallback() {
+                new ApiResultCallback<Token>() {
                     @Override
                     public void onSuccess(@NonNull Token result) {
 

@@ -32,6 +32,7 @@ public class WeChatTest {
                 .setPrepayId("wx070440552351e841913701900")
                 .setSign("1A98A09EA74DCF12349B33DED3FF6BCED1C062C63B43AE773D8")
                 .setTimestamp("1565134055")
+                .setQrCodeUrl("")
                 .build();
 
         assertEquals(expected, actual);
