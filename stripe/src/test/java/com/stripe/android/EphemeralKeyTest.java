@@ -3,18 +3,11 @@ package com.stripe.android;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 
-import com.stripe.android.testharness.JsonTestUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,29 +53,6 @@ public class EphemeralKeyTest {
     @Test
     public void fromJson_createsObject() throws JSONException {
         assertNotNull(CustomerEphemeralKey.fromJson(new JSONObject(SAMPLE_KEY_RAW)));
-    }
-
-    @Test
-    public void toMap_createsMapWithExpectedValues() throws JSONException {
-        final CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
-        assertNotNull(ephemeralKey);
-        final Map<String, Object> expectedMap = new HashMap<String, Object>() {{
-            put(CustomerEphemeralKey.FIELD_ID, "ephkey_123");
-            put(CustomerEphemeralKey.FIELD_OBJECT, "ephemeral_key");
-            put(CustomerEphemeralKey.FIELD_SECRET, ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
-            put(CustomerEphemeralKey.FIELD_LIVEMODE, false);
-            put(CustomerEphemeralKey.FIELD_CREATED, 1483575790L);
-            put(CustomerEphemeralKey.FIELD_EXPIRES, 1483579790L);
-        }};
-
-        Map<String, String> subMap = new HashMap<>();
-        subMap.put(CustomerEphemeralKey.FIELD_ID, "cus_123");
-        subMap.put(CustomerEphemeralKey.FIELD_TYPE, "customer");
-        List<Object> list = new ArrayList<>();
-        list.add(subMap);
-        expectedMap.put(CustomerEphemeralKey.FIELD_ASSOCIATED_OBJECTS, list);
-
-        JsonTestUtils.assertMapEquals(expectedMap, ephemeralKey.toMap());
     }
 
     @Test

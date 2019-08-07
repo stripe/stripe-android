@@ -12,16 +12,13 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
 import static com.stripe.android.model.StripeJsonUtils.optLong;
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
@@ -394,43 +391,6 @@ public final class Source extends StripeModel implements StripePaymentSource {
         }
 
         return Objects.requireNonNull(mWeChat);
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_ID, mId);
-        map.put(FIELD_OBJECT, VALUE_SOURCE);
-        map.put(FIELD_AMOUNT, mAmount);
-        map.put(FIELD_CLIENT_SECRET, mClientSecret);
-        if (mCodeVerification != null) {
-            map.put(FIELD_CODE_VERIFICATION, mCodeVerification.toMap());
-        }
-
-        map.put(FIELD_CREATED, mCreated);
-        map.put(FIELD_CURRENCY, mCurrency);
-        map.put(FIELD_FLOW, mFlow);
-        map.put(FIELD_LIVEMODE, mLiveMode);
-        map.put(FIELD_METADATA, mMetaData);
-
-        if (mOwner != null) {
-            map.put(FIELD_OWNER, mOwner.toMap());
-        }
-        if (mReceiver != null) {
-            map.put(FIELD_RECEIVER, mReceiver.toMap());
-        }
-        if (mRedirect != null) {
-            map.put(FIELD_REDIRECT, mRedirect.toMap());
-        }
-
-        map.put(mTypeRaw, mSourceTypeData);
-
-        map.put(FIELD_STATUS, mStatus);
-        map.put(FIELD_TYPE, mTypeRaw);
-        map.put(FIELD_USAGE, mUsage);
-        removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

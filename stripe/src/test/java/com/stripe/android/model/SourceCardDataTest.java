@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import org.junit.Test;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
@@ -41,22 +40,6 @@ public class SourceCardDataTest {
     }
 
     @Test
-    public void fromExampleJsonCard_toMap_createsExpectedMapping() {
-        assertNotNull(CARD_DATA);
-        final Map<String, Object> cardDataMap = CARD_DATA.toMap();
-        assertNotNull(cardDataMap);
-        assertEquals("US", cardDataMap.get("country"));
-        assertEquals("4242", cardDataMap.get("last4"));
-        assertEquals(12, cardDataMap.get("exp_month"));
-        assertEquals(2050, cardDataMap.get("exp_year"));
-        assertEquals(Card.FundingType.CREDIT, cardDataMap.get("funding"));
-        assertEquals(Card.CardBrand.VISA, cardDataMap.get("brand"));
-        assertEquals("optional", cardDataMap.get("three_d_secure"));
-        assertEquals("apple_pay", cardDataMap.get("tokenization_method"));
-        assertEquals("4242", cardDataMap.get("dynamic_last4"));
-    }
-
-    @Test
     public void testEquals() {
         assertEquals(CARD_DATA,
                 SourceCardData.fromString(EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY));
@@ -73,13 +56,16 @@ public class SourceCardDataTest {
 
     @Test
     public void testAsThreeDSecureStatus() {
-        assertEquals(SourceCardData.ThreeDSecureStatus.REQUIRED, SourceCardData.asThreeDSecureStatus("required"));
-        assertEquals(SourceCardData.ThreeDSecureStatus.OPTIONAL, SourceCardData.asThreeDSecureStatus("optional"));
+        assertEquals(SourceCardData.ThreeDSecureStatus.REQUIRED,
+                SourceCardData.asThreeDSecureStatus("required"));
+        assertEquals(SourceCardData.ThreeDSecureStatus.OPTIONAL,
+                SourceCardData.asThreeDSecureStatus("optional"));
         assertEquals(SourceCardData.ThreeDSecureStatus.NOT_SUPPORTED,
                 SourceCardData.asThreeDSecureStatus("not_supported"));
         assertEquals(SourceCardData.ThreeDSecureStatus.RECOMMENDED,
                 SourceCardData.asThreeDSecureStatus("recommended"));
-        assertEquals(SourceCardData.ThreeDSecureStatus.UNKNOWN, SourceCardData.asThreeDSecureStatus("unknown"));
+        assertEquals(SourceCardData.ThreeDSecureStatus.UNKNOWN,
+                SourceCardData.asThreeDSecureStatus("unknown"));
         assertNull(SourceCardData.asThreeDSecureStatus(""));
     }
 }

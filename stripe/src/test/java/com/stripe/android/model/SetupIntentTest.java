@@ -27,7 +27,7 @@ public class SetupIntentTest {
         assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV", setupIntent.getId());
         assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
                 setupIntent.getClientSecret());
-        assertEquals(1561677666, (long)setupIntent.getCreated());
+        assertEquals(1561677666, setupIntent.getCreated());
         assertEquals("a description", setupIntent.getDescription());
         assertEquals("pm_1EqTSoGMT9dGPIDG7dgafX1H", setupIntent.getPaymentMethodId());
         assertFalse(setupIntent.isLiveMode());
@@ -39,7 +39,7 @@ public class SetupIntentTest {
         assertNotNull(redirectData);
         assertNotNull(redirectData.returnUrl);
         assertNotNull(setupIntent.getRedirectUrl());
-        assertEquals("stripe://setup_intent_return", redirectData.returnUrl.toString());
+        assertEquals("stripe://setup_intent_return", redirectData.returnUrl);
         assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" +
                 "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString());
         assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" +

@@ -8,15 +8,11 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Model for a Stripe API object.
  */
 public abstract class StripeModel {
-
-    @NonNull
-    public abstract Map<String, Object> toMap();
 
     @Override
     public abstract int hashCode();

@@ -92,27 +92,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         return type != null;
     }
 
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> paymentMethod = new HashMap<>();
-        paymentMethod.put(FIELD_ID, id);
-        paymentMethod.put(FIELD_CREATED, created);
-        paymentMethod.put(FIELD_CUSTOMER, customerId);
-        paymentMethod.put(FIELD_LIVEMODE, liveMode);
-        paymentMethod.put(FIELD_TYPE, type);
-        paymentMethod.put(FIELD_BILLING_DETAILS,
-                billingDetails != null ? billingDetails.toMap() : null);
-        paymentMethod.put(FIELD_CARD,
-                card != null ? card.toMap() : null);
-        paymentMethod.put(FIELD_CARD_PRESENT,
-                cardPresent != null ? cardPresent.toMap() : null);
-        paymentMethod.put(FIELD_IDEAL,
-                ideal != null ? ideal.toMap() : null);
-        paymentMethod.put(FIELD_METADATA, metadata);
-        return paymentMethod;
-    }
-
     @Nullable
     public static PaymentMethod fromString(@Nullable String jsonString) {
         if (jsonString == null) {
@@ -375,16 +354,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     }
                 };
 
-        /**
-         * @deprecated use {@link #toParamMap()}
-         */
-        @Deprecated
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            return toParamMap();
-        }
-
         @NonNull
         @Override
         public Map<String, Object> toParamMap() {
@@ -584,23 +553,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             }
         };
 
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> map = new HashMap<>();
-            map.put(FIELD_BRAND, brand);
-            map.put(FIELD_CHECKS, checks != null ? checks.toMap() : null);
-            map.put(FIELD_COUNTRY, country);
-            map.put(FIELD_EXP_MONTH, expiryMonth);
-            map.put(FIELD_EXP_YEAR, expiryYear);
-            map.put(FIELD_FUNDING, funding);
-            map.put(FIELD_LAST4, last4);
-            map.put(FIELD_THREE_D_SECURE_USAGE,
-                    threeDSecureUsage != null ? threeDSecureUsage.toMap() : null);
-            map.put(FIELD_WALLET, wallet);
-            return map;
-        }
-
         @Nullable
         public static Card fromJson(@Nullable JSONObject cardJson) {
             if (cardJson == null) {
@@ -762,16 +714,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                         }
                     };
 
-            @NonNull
-            @Override
-            public Map<String, Object> toMap() {
-                final AbstractMap<String, Object> map = new HashMap<>();
-                map.put(FIELD_ADDRESS_LINE1_CHECK, addressLine1Check);
-                map.put(FIELD_ADDRESS_POSTAL_CODE_CHECK, addressPostalCodeCheck);
-                map.put(FIELD_CVC_CHECK, cvcCheck);
-                return map;
-            }
-
             @Nullable
             public static Checks fromJson(@Nullable JSONObject checksJson) {
                 if (checksJson == null) {
@@ -868,14 +810,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                         }
                     };
 
-            @NonNull
-            @Override
-            public Map<String, Object> toMap() {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(FIELD_IS_SUPPORTED, isSupported);
-                return map;
-            }
-
             @Nullable
             public static ThreeDSecureUsage fromJson(@Nullable JSONObject threeDSecureUsage) {
                 if (threeDSecureUsage == null) {
@@ -944,12 +878,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     }
                 };
 
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            return new HashMap<>();
-        }
-
         @Override
         public int hashCode() {
             return ObjectUtils.hash(type);
@@ -1002,15 +930,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 return new Ideal[size];
             }
         };
-
-        @NonNull
-        @Override
-        public Map<String, Object> toMap() {
-            final AbstractMap<String, Object> ideal = new HashMap<>();
-            ideal.put(FIELD_BANK, bank);
-            ideal.put(FIELD_BIC, bankIdentifierCode);
-            return ideal;
-        }
 
         @Nullable
         public static Ideal fromJson(@Nullable JSONObject ideal) {

@@ -171,7 +171,8 @@ class SetupIntentActivity : AppCompatActivity() {
     }
 
     private fun displaySetupIntent(setupIntent: SetupIntent) {
-        setupIntentValue.text = JSONObject(setupIntent.toMap()).toString()
+        val displayText = "Setup Intent status: ${setupIntent.status?.code}"
+        setupIntentValue.text = displayText
     }
 
     private fun confirmSetupIntent() {

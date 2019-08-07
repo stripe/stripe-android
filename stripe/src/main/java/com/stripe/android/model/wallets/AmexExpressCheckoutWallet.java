@@ -4,9 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class AmexExpressCheckoutWallet extends Wallet {
     private AmexExpressCheckoutWallet(@NonNull Builder builder) {
         super(Type.AmexExpressCheckout, builder);
@@ -14,12 +11,6 @@ public final class AmexExpressCheckoutWallet extends Wallet {
 
     private AmexExpressCheckoutWallet(@NonNull Parcel in) {
         super(in);
-    }
-
-    @NonNull
-    @Override
-    Map<String, Object> getWalletTypeMap() {
-        return new HashMap<>();
     }
 
     @NonNull

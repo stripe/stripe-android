@@ -8,9 +8,6 @@ import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,22 +44,6 @@ public final class WeChat extends StripeModel {
         sign = builder.sign;
         timestamp = builder.timestamp;
         qrCodeUrl = builder.qrCodeUrl;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>();
-        map.put(FIELD_APPID, appId);
-        map.put(FIELD_NONCE, nonce);
-        map.put(FIELD_PACKAGE, packageValue);
-        map.put(FIELD_PARTNERID, partnerId);
-        map.put(FIELD_PREPAYID, prepayId);
-        map.put(FIELD_SIGN, sign);
-        map.put(FIELD_TIMESTAMP, timestamp);
-        map.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
-        map.put(FIELD_QR_CODE_URL, qrCodeUrl);
-        return map;
     }
 
     @Override

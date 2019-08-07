@@ -8,9 +8,6 @@ import com.stripe.android.utils.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 /**
@@ -108,17 +105,6 @@ public final class CustomerSource extends StripeModel implements StripePaymentSo
         } else {
             return new CustomerSource(sourceObject);
         }
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        if (mStripePaymentSource instanceof Source) {
-            return ((Source) mStripePaymentSource).toMap();
-        } else if (mStripePaymentSource instanceof Card) {
-            return ((Card) mStripePaymentSource).toMap();
-        }
-        return new HashMap<>();
     }
 
     @Override

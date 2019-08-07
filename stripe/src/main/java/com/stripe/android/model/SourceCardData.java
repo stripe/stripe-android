@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -13,9 +12,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -164,25 +161,6 @@ public final class SourceCardData extends StripeSourceTypeModel {
     @Nullable
     public String getTokenizationMethod() {
         return mTokenizationMethod;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        final AbstractMap<String, Object> map = new HashMap<>(super.toMap());
-        map.put(FIELD_ADDRESS_LINE1_CHECK, mAddressLine1Check);
-        map.put(FIELD_ADDRESS_ZIP_CHECK, mAddressZipCheck);
-        map.put(FIELD_BRAND, mBrand);
-        map.put(FIELD_COUNTRY, mCountry);
-        map.put(FIELD_DYNAMIC_LAST4, mDynamicLast4);
-        map.put(FIELD_EXP_MONTH, mExpiryMonth);
-        map.put(FIELD_EXP_YEAR, mExpiryYear);
-        map.put(FIELD_FUNDING, mFunding);
-        map.put(FIELD_LAST4, mLast4);
-        map.put(FIELD_THREE_D_SECURE, mThreeDSecureStatus);
-        map.put(FIELD_TOKENIZATION_METHOD, mTokenizationMethod);
-        StripeNetworkUtils.removeNullAndEmptyParams(map);
-        return map;
     }
 
     @Nullable

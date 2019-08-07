@@ -9,10 +9,6 @@ import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONObject;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.stripe.android.model.StripeJsonUtils.optString;
 
 public final class VisaCheckoutWallet extends Wallet {
@@ -32,19 +28,6 @@ public final class VisaCheckoutWallet extends Wallet {
         email = builder.mEmail;
         name = builder.mName;
         shippingAddress = builder.mShippingAddress;
-    }
-
-    @NonNull
-    @Override
-    Map<String, Object> getWalletTypeMap() {
-        final AbstractMap<String, Object> wallet = new HashMap<>();
-        wallet.put(FIELD_BILLING_ADDRESS,
-                billingAddress != null ? billingAddress.toMap() : null);
-        wallet.put(FIELD_EMAIL, email);
-        wallet.put(FIELD_NAME, name);
-        wallet.put(FIELD_SHIPPING_ADDRESS,
-                shippingAddress != null ? shippingAddress.toMap() : null);
-        return wallet;
     }
 
     @NonNull

@@ -115,16 +115,6 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
         return mState;
     }
 
-    /**
-     * @deprecated use {@link #toParamMap()}
-     */
-    @Deprecated
-    @NonNull
-    @Override
-    public Map<String, Object> toMap() {
-        return toParamMap();
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
