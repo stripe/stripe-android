@@ -15,6 +15,7 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
@@ -1160,25 +1161,13 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withCard()
             throws StripeException {
-        final PaymentMethod.BillingDetails expectedBillingDetails =
-                new PaymentMethod.BillingDetails.Builder()
-                        .setName("Home")
-                        .setEmail("me@example.com")
-                        .setPhone("1-800-555-1234")
-                        .setAddress(new Address.Builder()
-                                .setLine1("123 Main St")
-                                .setCity("Los Angeles")
-                                .setState("CA")
-                                .setCountry("US")
-                                .build())
-                        .build();
         final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
                 .setBrand("visa")
                 .setChecks(new PaymentMethod.Card.Checks.Builder()
                         .build())
                 .setCountry("US")
-                .setExpiryMonth(8)
-                .setExpiryYear(2022)
+                .setExpiryMonth(1)
+                .setExpiryYear(2024)
                 .setFunding("credit")
                 .setLast4("4242")
                 .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
@@ -1188,19 +1177,13 @@ public class StripeTest {
                 .build();
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Card.Builder()
-                                .setNumber("4242424242424242")
-                                .setExpiryMonth(8)
-                                .setExpiryYear(2022)
-                                .setCvc("123")
-                                .build(),
-                        expectedBillingDetails);
+                PaymentMethodCreateParamsFixtures.DEFAULT;
         final Stripe stripe = createNonLoggingStripe();
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
-        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+                createdPaymentMethod.billingDetails);
         assertEquals(expectedCard, createdPaymentMethod.card);
     }
 
@@ -1240,25 +1223,13 @@ public class StripeTest {
         final FireAndForgetRequestExecutor fireAndForgetRequestExecutor =
                 mock(FireAndForgetRequestExecutor.class);
 
-        final PaymentMethod.BillingDetails expectedBillingDetails =
-                new PaymentMethod.BillingDetails.Builder()
-                        .setName("Home")
-                        .setEmail("me@example.com")
-                        .setPhone("1-800-555-1234")
-                        .setAddress(new Address.Builder()
-                                .setLine1("123 Main St")
-                                .setCity("Los Angeles")
-                                .setState("CA")
-                                .setCountry("US")
-                                .build())
-                        .build();
         final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
                 .setBrand("visa")
                 .setChecks(new PaymentMethod.Card.Checks.Builder()
                         .build())
                 .setCountry("US")
-                .setExpiryMonth(8)
-                .setExpiryYear(2022)
+                .setExpiryMonth(1)
+                .setExpiryYear(2024)
                 .setFunding("credit")
                 .setLast4("4242")
                 .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
@@ -1271,20 +1242,13 @@ public class StripeTest {
         metadata.put("order_id", "123456789");
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Card.Builder()
-                                .setNumber("4242424242424242")
-                                .setExpiryMonth(8)
-                                .setExpiryYear(2022)
-                                .setCvc("123")
-                                .build(),
-                        expectedBillingDetails,
-                        metadata);
+                PaymentMethodCreateParamsFixtures.createWith(metadata);
         final Stripe stripe = createNonLoggingStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
-        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+                createdPaymentMethod.billingDetails);
         assertEquals(expectedCard, createdPaymentMethod.card);
         assertEquals(metadata, createdPaymentMethod.metadata);
 

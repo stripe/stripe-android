@@ -31,17 +31,6 @@ public class ConfirmPaymentIntentParamsTest {
     private static final String SOURCE_ID = "src_123testsourceid";
     private static final String PM_ID = "pm_123456789";
 
-    private static final PaymentMethodCreateParams PM_CREATE_PARAMS =
-            PaymentMethodCreateParams.create(
-                    new PaymentMethodCreateParams.Card.Builder()
-                            .setNumber("4242424242424242")
-                            .setExpiryMonth(1)
-                            .setExpiryYear(2024)
-                            .setCvc("111")
-                            .build(),
-                    null
-            );
-
     @Test
     public void createConfirmPaymentIntentWithSourceDataParams_withAllFields_hasExpectedFields() {
         final SourceParams sourceParams = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD);
@@ -85,8 +74,7 @@ public class ConfirmPaymentIntentParamsTest {
     @Test
     public void createWithPaymentMethodCreateParams_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
-                        .build(), null);
+                PaymentMethodCreateParamsFixtures.DEFAULT;
         final ConfirmPaymentIntentParams params = ConfirmPaymentIntentParams
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         CLIENT_SECRET, RETURN_URL);
@@ -112,8 +100,7 @@ public class ConfirmPaymentIntentParamsTest {
     @Test
     public void createConfirmPaymentIntentWithPaymentMethodCreateParams_withSavePaymentMethod_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(new PaymentMethodCreateParams.Card.Builder()
-                        .build(), null);
+                PaymentMethodCreateParamsFixtures.DEFAULT;
         final ConfirmPaymentIntentParams params = ConfirmPaymentIntentParams
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         CLIENT_SECRET, RETURN_URL, true);
@@ -235,7 +222,7 @@ public class ConfirmPaymentIntentParamsTest {
         extraParams.put("key", "value");
         final ConfirmPaymentIntentParams params =
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                        PM_CREATE_PARAMS, CLIENT_SECRET, RETURN_URL, true, extraParams
+                        PaymentMethodCreateParamsFixtures.DEFAULT, CLIENT_SECRET, RETURN_URL, true, extraParams
                 );
 
         assertEquals(params, params.toBuilder().build());

@@ -9,7 +9,7 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
-import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -189,25 +189,24 @@ public class StripeNetworkUtilsTest {
         final Map<String, Object> sourceDataMap = new HashMap<>();
         existingMap.put(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA, sourceDataMap);
 
-        mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
+        mNetworkUtils.addUidToConfirmPaymentIntentParams(existingMap);
         assertEquals(1, existingMap.size());
         assertTrue(sourceDataMap.containsKey("muid"));
         assertTrue(sourceDataMap.containsKey("guid"));
     }
 
     @Test
-    public void addUidParamsToPaymentIntent_withPaymentMethod_addsParamsAtRightLevel() {
+    public void addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
         final Map<String, Object> existingMap = new HashMap<>();
-        final Map<String, Object> paymentMethodData = new PaymentMethod.Builder()
-                .setType(PaymentMethod.Type.Card.code)
-                .build()
-                .toMap();
-        existingMap.put(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA, paymentMethodData);
+        final Map<String, Object> paymentMethodCreateParamsMap =
+                PaymentMethodCreateParamsFixtures.DEFAULT.toParamMap();
+        existingMap.put(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA,
+                paymentMethodCreateParamsMap);
 
-        mNetworkUtils.addUidParamsToPaymentIntent(existingMap);
+        mNetworkUtils.addUidToConfirmPaymentIntentParams(existingMap);
         assertEquals(1, existingMap.size());
-        assertTrue(paymentMethodData.containsKey("muid"));
-        assertTrue(paymentMethodData.containsKey("guid"));
+        assertTrue(paymentMethodCreateParamsMap.containsKey("muid"));
+        assertTrue(paymentMethodCreateParamsMap.containsKey("guid"));
     }
 
     @SuppressWarnings("unchecked")
