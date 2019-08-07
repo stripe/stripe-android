@@ -21,7 +21,7 @@ import static com.stripe.android.model.Source.SourceType;
 /**
  * Represents a grouping of parameters needed to create a {@link Source} object on the server.
  */
-public final class SourceParams {
+public final class SourceParams implements StripeParamsModel {
 
     private static final String API_PARAM_AMOUNT = "amount";
     private static final String API_PARAM_CURRENCY = "currency";
@@ -31,6 +31,7 @@ public final class SourceParams {
     private static final String API_PARAM_TYPE = "type";
     private static final String API_PARAM_TOKEN = "token";
     private static final String API_PARAM_USAGE = "usage";
+    private static final String API_PARAM_WECHAT = "wechat";
 
     private static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
@@ -73,6 +74,7 @@ public final class SourceParams {
     private String mToken;
     @Nullable @Source.Usage private String mUsage;
     @SourceType private String mType;
+    @Nullable private WeChatParams mWeChatParams;
 
     private SourceParams() {}
 
@@ -189,6 +191,19 @@ public final class SourceParams {
         }
 
         return params;
+    }
+
+    @NonNull
+    public static SourceParams createWeChatPayParams(
+            @IntRange(from = 0) long amount,
+            @NonNull String currency,
+            @NonNull String weChatAppId,
+            @NonNull String statementDescriptor) {
+        return new SourceParams()
+                .setType(SourceType.WECHAT)
+                .setCurrency(currency)
+                .setAmount(amount)
+                .setWeChatParams(new WeChatParams(weChatAppId, statementDescriptor));
     }
 
     /**
@@ -872,7 +887,6 @@ public final class SourceParams {
     /**
      * Set custom metadata on the parameters.
      *
-     * @param metaData
      * @return {@code this}, for chaining purposes
      */
     @NonNull
@@ -907,6 +921,12 @@ public final class SourceParams {
         return this;
     }
 
+    @NonNull
+    public SourceParams setWeChatParams(@NonNull WeChatParams weChatParams) {
+        mWeChatParams = weChatParams;
+        return this;
+    }
+
     /**
      * Create a string-keyed map representing this object that is
      * ready to be sent over the network.
@@ -914,6 +934,7 @@ public final class SourceParams {
      * @return a String-keyed map
      */
     @NonNull
+    @Override
     public Map<String, Object> toParamMap() {
         final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
 
@@ -928,6 +949,9 @@ public final class SourceParams {
         networkReadyMap.put(API_PARAM_USAGE, mUsage);
         if (mExtraParams != null) {
             networkReadyMap.putAll(mExtraParams);
+        }
+        if (mWeChatParams != null) {
+            networkReadyMap.put(API_PARAM_WECHAT, mWeChatParams.toParamMap());
         }
         removeNullAndEmptyParams(networkReadyMap);
         return networkReadyMap;
@@ -974,5 +998,31 @@ public final class SourceParams {
                 ObjectUtils.equals(mToken, params.mToken) &&
                 ObjectUtils.equals(mUsage, params.mUsage) &&
                 ObjectUtils.equals(mType, params.mType);
+    }
+
+    static final class WeChatParams implements StripeParamsModel {
+        private static final String FIELD_APPID = "appid";
+        private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
+
+        @Nullable private final String appId;
+        @Nullable private final String statementDescriptor;
+
+        WeChatParams(@Nullable String appId, @Nullable String statementDescriptor) {
+            this.appId = appId;
+            this.statementDescriptor = statementDescriptor;
+        }
+
+        @NonNull
+        @Override
+        public Map<String, ?> toParamMap() {
+            final Map<String, String> params = new HashMap<>();
+            if (appId != null) {
+                params.put(FIELD_APPID, appId);
+            }
+            if (statementDescriptor != null) {
+                params.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
+            }
+            return params;
+        }
     }
 }

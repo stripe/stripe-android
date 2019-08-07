@@ -469,7 +469,7 @@ public class StripeTest {
     public void createSourceSynchronous_withAlipaySingleUseParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createNonLoggingStripe();
-        SourceParams alipayParams = SourceParams.createAlipaySingleUseParams(
+        final SourceParams alipayParams = SourceParams.createAlipaySingleUseParams(
                 1000L,
                 "usd",
                 "Example Payer",
@@ -491,6 +491,22 @@ public class StripeTest {
         assertEquals(Source.Usage.SINGLE_USE, alipaySource.getUsage());
         assertNotNull(alipaySource.getRedirect());
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
+    }
+
+    @Test
+    public void createSourceSynchronous_withWeChatPayParams_passesIntegrationTest()
+            throws StripeException {
+        final Stripe stripe = createNonLoggingStripe();
+        final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
+                1000L,
+                "USD",
+                "my-demo-app",
+                "WIDGET STORE"
+        );
+        final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);
+        assertNotNull(weChatPaySource);
+        assertEquals("WIDGET STORE",
+                weChatPaySource.getWeChat().statementDescriptor);
     }
 
     @Test

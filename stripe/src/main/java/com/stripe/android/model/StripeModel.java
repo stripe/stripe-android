@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a JSON model used in the Stripe Api.
+ * Model for a Stripe API object.
  */
 public abstract class StripeModel {
 
