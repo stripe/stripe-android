@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
+import com.stripe.android.StripeNetworkUtils;
+import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -12,6 +14,9 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Model class representing a bank account that can be used to create a token
@@ -19,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
  * <a href="https://stripe.com/docs/api/java#create_bank_account_token">the Stripe
  * documentation.</a>
  */
-public final class BankAccount {
+public final class BankAccount implements StripeParamsModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({BankAccountType.COMPANY, BankAccountType.INDIVIDUAL})
@@ -178,6 +183,30 @@ public final class BankAccount {
         }
 
         return null;
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toParamMap() {
+        final Map<String, Object> params = new HashMap<>();
+        final AbstractMap<String, Object> accountParams = new HashMap<>();
+
+        accountParams.put("country", getCountryCode());
+        accountParams.put("currency", getCurrency());
+        accountParams.put("account_number", getAccountNumber());
+        accountParams.put("routing_number",
+                StripeTextUtils.nullIfBlank(getRoutingNumber()));
+        accountParams.put("account_holder_name",
+                StripeTextUtils.nullIfBlank(getAccountHolderName()));
+        accountParams.put("account_holder_type",
+                StripeTextUtils.nullIfBlank(getAccountHolderType()));
+
+        // Remove all null values; they cause validation errors
+        StripeNetworkUtils.removeNullAndEmptyParams(accountParams);
+
+        params.put(Token.TokenType.BANK_ACCOUNT, accountParams);
+
+        return params;
     }
 
     @Nullable

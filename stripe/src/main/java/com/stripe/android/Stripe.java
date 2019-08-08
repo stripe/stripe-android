@@ -21,9 +21,11 @@ import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.ConfirmSetupIntentParams;
+import com.stripe.android.model.CvcTokenParams;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PiiTokenParams;
 import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -34,9 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-
-import static com.stripe.android.StripeNetworkUtils.createPersonalIdTokenParams;
-import static com.stripe.android.StripeNetworkUtils.createUpdateCvcTokenParams;
 
 /**
  * Entry-point to the Stripe SDK that handles
@@ -425,16 +424,15 @@ public class Stripe {
             @NonNull @Size(min = 1) final String publishableKey,
             @Nullable final Executor executor,
             @NonNull final ApiResultCallback<Token> callback) {
-        Objects.requireNonNull(bankAccount,
-
-                    "Required parameter: 'bankAccount' is requred to create a token");
-
+        final Map<String, Object> params = bankAccount.toParamMap();
+        params.putAll(mStripeNetworkUtils.createUidParams());
         createTokenFromParams(
-                mStripeNetworkUtils.createBankAccountTokenParams(bankAccount),
+                params,
                 publishableKey,
                 Token.TokenType.BANK_ACCOUNT,
                 executor,
-                callback);
+                callback
+        );
     }
 
     /**
@@ -466,7 +464,7 @@ public class Stripe {
             @Nullable final Executor executor,
             @NonNull final ApiResultCallback<Token> callback) {
         createTokenFromParams(
-                createPersonalIdTokenParams(personalId),
+                new PiiTokenParams(personalId).toParamMap(),
                 publishableKey,
                 Token.TokenType.PII,
                 executor,
@@ -521,8 +519,10 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
+        final Map<String, Object> params = bankAccount.toParamMap();
+        params.putAll(mStripeNetworkUtils.createUidParams());
         return mApiHandler.createToken(
-                mStripeNetworkUtils.createBankAccountTokenParams(bankAccount),
+                params,
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TokenType.BANK_ACCOUNT
         );
@@ -557,7 +557,7 @@ public class Stripe {
             @Nullable final Executor executor,
             @NonNull final ApiResultCallback<Token> callback) {
         createTokenFromParams(
-                createUpdateCvcTokenParams(cvc),
+                new CvcTokenParams(cvc).toParamMap(),
                 publishableKey,
                 Token.TokenType.CVC_UPDATE,
                 executor,
@@ -978,7 +978,7 @@ public class Stripe {
             CardException,
             APIException {
         return mApiHandler.createToken(
-                createPersonalIdTokenParams(personalId),
+                new PiiTokenParams(personalId).toParamMap(),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TokenType.PII
         );
@@ -1028,7 +1028,7 @@ public class Stripe {
             CardException,
             APIException {
         return mApiHandler.createToken(
-                createUpdateCvcTokenParams(cvc),
+                new CvcTokenParams(cvc).toParamMap(),
                 ApiRequest.Options.create(publishableKey, mStripeAccount),
                 Token.TokenType.CVC_UPDATE
         );
