@@ -99,7 +99,7 @@ public class PaymentSessionTest {
         assertNotNull(FIRST_CUSTOMER);
 
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
 
         when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
@@ -181,7 +181,7 @@ public class PaymentSessionTest {
         boolean handled = paymentSession.handlePaymentData(
                 PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK,
                 new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
-                        PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON)));
+                        PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)));
 
         assertTrue(handled);
 
@@ -189,7 +189,7 @@ public class PaymentSessionTest {
                 .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
         final PaymentSessionData data = mPaymentSessionDataArgumentCaptor.getValue();
         assertNotNull(data);
-        assertEquals(PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON),
+        assertEquals(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
                 data.getPaymentMethod());
     }
 

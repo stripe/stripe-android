@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class PaymentSessionDataTest {
 
     private static final PaymentMethod PAYMENT_METHOD =
-            PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
 
     @Test
     public void updateIsPaymentReadyToCharge_noShippingRequired() {

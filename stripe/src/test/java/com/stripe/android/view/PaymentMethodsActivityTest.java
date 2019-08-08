@@ -68,7 +68,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
 
-        mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON),
+        mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
                 PaymentMethod.fromString(MaskedCardAdapterTest.PAYMENT_METHOD_JSON));
 
         mPaymentMethodsActivity = createActivity();
@@ -113,7 +113,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         // reset the mock because the activity is being re-created again
         reset(mCustomerSession);
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
         mPaymentMethodsActivity = createActivity(new Intent().putExtra(
                 PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id));
@@ -166,7 +166,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Test
     public void onActivityResult_withValidPaymentMethod_refreshesPaymentMethods() {
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
 
         final Intent resultIntent = new Intent()

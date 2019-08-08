@@ -2,6 +2,8 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -16,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentMethodTest {
-    public static final String RAW_CARD_JSON = "{\n" +
+    public static final String PM_CARD_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +
             "\t\"created\": 1550757934255,\n" +
             "\t\"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -54,7 +56,7 @@ public class PaymentMethodTest {
             "\t}\n" +
             "}";
 
-    private static final String RAW_IDEAL_JSON = "{\n" +
+    private static final String PM_IDEAL_JSON = "{\n" +
             "\t\"id\": \"pm_123456789\",\n" +
             "\t\"created\": 1550757934255,\n" +
             "\t\"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -78,8 +80,35 @@ public class PaymentMethodTest {
             "\t}\n" +
             "}";
 
+    private static final String PM_FPX_JSON = "{\n" +
+            "\t\"id\": \"pm_1F5GlnH8dsfnfKo3gtixzcq0\",\n" +
+            "\t\"object\": \"payment_method\",\n" +
+            "\t\"billing_details\": {\n" +
+            "\t\t\"address\": {\n" +
+            "\t\t\t\"city\": \"San Francisco\",\n" +
+            "\t\t\t\"country\": \"USA\",\n" +
+            "\t\t\t\"line1\": \"510 Townsend St\",\n" +
+            "\t\t\t\"line2\": null,\n" +
+            "\t\t\t\"postal_code\": \"94103\",\n" +
+            "\t\t\t\"state\": \"CA\"\n" +
+            "\t\t},\n" +
+            "\t\t\"email\": \"patrick@example.com\",\n" +
+            "\t\t\"name\": \"Patrick\",\n" +
+            "\t\t\"phone\": \"123-456-7890\"\n" +
+            "\t},\n" +
+            "\t\"created\": 1565290527,\n" +
+            "\t\"customer\": null,\n" +
+            "\t\"fpx\": {\n" +
+            "\t\t\"account_holder_type\": \"individual\",\n" +
+            "\t\t\"bank\": \"hsbc\"\n" +
+            "\t},\n" +
+            "\t\"livemode\": true,\n" +
+            "\t\"metadata\": {},\n" +
+            "\t\"type\": \"fpx\"\n" +
+            "}";
+
     @Test
-    public void toJson_withIdeal_shouldReturnExpectedJson() {
+    public void toJson_withIdeal_shouldCreateExpectedObject() throws JSONException {
         final PaymentMethod paymentMethod = new PaymentMethod.Builder()
                 .setId("pm_123456789")
                 .setCreated(1550757934255L)
@@ -93,7 +122,24 @@ public class PaymentMethodTest {
                         .build())
                 .build();
 
-        assertEquals(paymentMethod, PaymentMethod.fromString(RAW_IDEAL_JSON));
+        assertEquals(paymentMethod, PaymentMethod.fromJson(new JSONObject(PM_IDEAL_JSON)));
+    }
+
+    @Test
+    public void toJson_withFpx_shouldCreateExpectedObject() throws JSONException {
+        final PaymentMethod paymentMethod = new PaymentMethod.Builder()
+                .setId("pm_1F5GlnH8dsfnfKo3gtixzcq0")
+                .setCreated(1565290527L)
+                .setLiveMode(true)
+                .setType("fpx")
+                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+                .setFpx(new PaymentMethod.Fpx.Builder()
+                        .setBank("hsbc")
+                        .setAccountHolderType("individual")
+                        .build())
+                .build();
+
+        assertEquals(paymentMethod, PaymentMethod.fromJson(new JSONObject(PM_FPX_JSON)));
     }
 
     @Test
@@ -111,14 +157,14 @@ public class PaymentMethodTest {
     }
 
     @Test
-    public void fromString_shouldReturnExpectedPaymentMethod() {
+    public void fromString_shouldReturnExpectedPaymentMethod() throws JSONException {
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                PaymentMethod.fromString(RAW_CARD_JSON));
+                PaymentMethod.fromJson(new JSONObject(PM_CARD_JSON)));
     }
 
     @Test
-    public void fromString_withIdeal_returnsExpectedObject() {
-        final PaymentMethod paymentMethod = PaymentMethod.fromString(RAW_IDEAL_JSON);
+    public void fromString_withIdeal_returnsExpectedObject() throws JSONException {
+        final PaymentMethod paymentMethod = PaymentMethod.fromJson(new JSONObject(PM_IDEAL_JSON));
         assertNotNull(paymentMethod);
         assertEquals("ideal", paymentMethod.type);
     }

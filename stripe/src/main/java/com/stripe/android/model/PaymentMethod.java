@@ -39,29 +39,35 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 public final class PaymentMethod extends StripeModel implements Parcelable {
     private static final String FIELD_ID = "id";
     private static final String FIELD_BILLING_DETAILS = "billing_details";
-    private static final String FIELD_CARD = "card";
-    private static final String FIELD_CARD_PRESENT = "card_present";
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_CUSTOMER = "customer";
-    private static final String FIELD_IDEAL = "ideal";
     private static final String FIELD_LIVEMODE = "livemode";
     private static final String FIELD_METADATA = "metadata";
+
+    // types
     private static final String FIELD_TYPE = "type";
+    private static final String FIELD_CARD = "card";
+    private static final String FIELD_CARD_PRESENT = "card_present";
+    private static final String FIELD_FPX = "fpx";
+    private static final String FIELD_IDEAL = "ideal";
 
     @Nullable public final String id;
     @Nullable public final Long created;
     public final boolean liveMode;
     @Nullable public final String type;
     @Nullable public final BillingDetails billingDetails;
-    @Nullable public final Card card;
-    @Nullable public final CardPresent cardPresent;
-    @Nullable public final Ideal ideal;
     @Nullable public final String customerId;
     @Nullable public final Map<String, String> metadata;
+
+    @Nullable public final Card card;
+    @Nullable public final CardPresent cardPresent;
+    @Nullable public final Fpx fpx;
+    @Nullable public final Ideal ideal;
 
     public enum Type {
         Card("card"),
         CardPresent("card_present"),
+        Fpx("fpx"),
         Ideal("ideal");
 
         @NonNull public final String code;
@@ -78,11 +84,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         created = builder.mCreated;
         billingDetails = builder.mBillingDetails;
         customerId = builder.mCustomerId;
+        metadata = builder.mMetadata;
 
         card = builder.mCard;
         cardPresent = builder.mCardPresent;
+        fpx = builder.mFpx;
         ideal = builder.mIdeal;
-        metadata = builder.mMetadata;
     }
 
     /**
@@ -128,6 +135,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             builder.setCardPresent(CardPresent.EMPTY);
         } else if (FIELD_IDEAL.equals(type)) {
             builder.setIdeal(Ideal.fromJson(paymentMethod.optJSONObject(FIELD_IDEAL)));
+        } else if (FIELD_FPX.equals(type)) {
+            builder.setFpx(Fpx.fromJson(paymentMethod.optJSONObject(FIELD_FPX)));
         }
 
         return builder.build();
@@ -146,6 +155,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 && ObjectUtils.equals(billingDetails, paymentMethod.billingDetails)
                 && ObjectUtils.equals(card, paymentMethod.card)
                 && ObjectUtils.equals(cardPresent, paymentMethod.cardPresent)
+                && ObjectUtils.equals(fpx, paymentMethod.fpx)
                 && ObjectUtils.equals(ideal, paymentMethod.ideal)
                 && ObjectUtils.equals(customerId, paymentMethod.customerId);
     }
@@ -153,7 +163,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     @Override
     public int hashCode() {
         return ObjectUtils.hash(id, created, liveMode, type, billingDetails, card, cardPresent,
-                ideal, customerId);
+                fpx, ideal, customerId);
     }
 
     @Override
@@ -175,6 +185,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         dest.writeParcelable(billingDetails, flags);
         dest.writeParcelable(card, flags);
         dest.writeParcelable(cardPresent, flags);
+        dest.writeParcelable(fpx, flags);
         dest.writeParcelable(ideal, flags);
         dest.writeString(customerId);
         dest.writeInt(metadata == null ? -1 : metadata.size());
@@ -194,6 +205,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         billingDetails = in.readParcelable(BillingDetails.class.getClassLoader());
         card = in.readParcelable(Card.class.getClassLoader());
         cardPresent = in.readParcelable(CardPresent.class.getClassLoader());
+        fpx = in.readParcelable(Fpx.class.getClassLoader());
         ideal = in.readParcelable(Ideal.class.getClassLoader());
         customerId = in.readString();
         final int mapSize = in.readInt();
@@ -230,10 +242,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         private String mType;
         private BillingDetails mBillingDetails;
         private Map<String, String> mMetadata;
+        private String mCustomerId;
+
         private Card mCard;
         private CardPresent mCardPresent;
         private Ideal mIdeal;
-        private String mCustomerId;
+        private Fpx mFpx;
 
         @NonNull
         public Builder setId(@Nullable String id) {
@@ -292,6 +306,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         @NonNull
         public Builder setIdeal(@Nullable Ideal ideal) {
             this.mIdeal = ideal;
+            return this;
+        }
+
+        @NonNull
+        public Builder setFpx(@Nullable Fpx fpx) {
+            this.mFpx = fpx;
             return this;
         }
 
@@ -977,6 +997,94 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             @NonNull
             public Ideal build() {
                 return new Ideal(this);
+            }
+        }
+    }
+
+    public static final class Fpx extends PaymentMethodTypeImpl {
+        private static final String FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type";
+        private static final String FIELD_BANK = "bank";
+
+        @Nullable public final String bank;
+        @Nullable public final String accountHolderType;
+
+        private Fpx(@NonNull Builder builder) {
+            super(Type.Fpx);
+            bank = builder.mBank;
+            accountHolderType = builder.mAccountHolderType;
+        }
+
+        private Fpx(@NonNull Parcel in) {
+            super(in);
+            bank = in.readString();
+            accountHolderType = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeString(bank);
+            dest.writeString(accountHolderType);
+        }
+
+        public static final Parcelable.Creator<Fpx> CREATOR = new Parcelable.Creator<Fpx>() {
+            @Override
+            public Fpx createFromParcel(@NonNull Parcel in) {
+                return new Fpx(in);
+            }
+
+            @Override
+            public Fpx[] newArray(int size) {
+                return new Fpx[size];
+            }
+        };
+
+        @Nullable
+        public static Fpx fromJson(@Nullable JSONObject fpx) {
+            if (fpx == null) {
+                return null;
+            }
+
+            return new Fpx.Builder()
+                    .setBank(optString(fpx, FIELD_BANK))
+                    .setAccountHolderType(optString(fpx, FIELD_ACCOUNT_HOLDER_TYPE))
+                    .build();
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(bank, accountHolderType);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || obj instanceof Fpx && typedEquals((Fpx) obj);
+        }
+
+        private boolean typedEquals(@NonNull Fpx obj) {
+            return ObjectUtils.equals(bank, obj.bank)
+                    && ObjectUtils.equals(accountHolderType, obj.accountHolderType);
+        }
+
+        public static final class Builder implements ObjectBuilder<Fpx> {
+            private String mBank;
+            private String mAccountHolderType;
+
+            @NonNull
+            public Builder setBank(@Nullable String bank) {
+                this.mBank = bank;
+                return this;
+            }
+
+            @NonNull
+            public Builder setAccountHolderType(@Nullable String bankIdentifierCode) {
+                this.mAccountHolderType = bankIdentifierCode;
+                return this;
+            }
+
+            @NonNull
+            public Fpx build() {
+                return new Fpx(this);
             }
         }
     }
