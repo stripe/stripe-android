@@ -3,8 +3,6 @@ package com.stripe.android;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import androidx.test.core.app.ApplicationProvider;
-
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardFixtures;
@@ -212,9 +210,7 @@ public class StripeNetworkUtilsTest {
     @SuppressWarnings("unchecked")
     @Nullable
     private Map<String, Object> getCardTokenParamData(@NonNull Card card) {
-        final Map<String, Object> cardTokenParams =
-                new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                .createCardTokenParams(card);
+        final Map<String, Object> cardTokenParams = mNetworkUtils.createCardTokenParams(card);
         assertNotNull(cardTokenParams);
         return (Map<String, Object>) cardTokenParams.get("card");
     }
@@ -222,11 +218,10 @@ public class StripeNetworkUtilsTest {
     @SuppressWarnings("unchecked")
     @Nullable
     private Map<String, Object> getBankAccountTokenParamData(@NonNull BankAccount bankAccount) {
-        final Map<String, Object> bankAccountTokenParams =
-                new StripeNetworkUtils(ApplicationProvider.getApplicationContext())
-                .createBankAccountTokenParams(bankAccount);
-        assertNotNull(bankAccountTokenParams);
-        return (Map<String, Object>) bankAccountTokenParams.get("bank_account");
+        final Map<String, Object> params = bankAccount.toParamMap();
+        params.putAll(mNetworkUtils.createUidParams());
+        assertNotNull(params);
+        return (Map<String, Object>) params.get("bank_account");
     }
 
 }

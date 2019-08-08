@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.Token;
@@ -71,53 +70,6 @@ public class StripeNetworkUtils {
         tokenParams.put(Token.TokenType.CARD, cardParams);
         tokenParams.putAll(createUidParams());
 
-        return tokenParams;
-    }
-
-    @NonNull
-    static Map<String, Object> createPersonalIdTokenParams(@NonNull String personalId) {
-        final Map<String, Object> tokenParams = new HashMap<>();
-        tokenParams.put("personal_id_number", personalId);
-        final Map<String, Object> piiParams = new HashMap<>();
-        piiParams.put(Token.TokenType.PII, tokenParams);
-        return piiParams;
-    }
-
-    @NonNull
-    static Map<String, Object> createUpdateCvcTokenParams(@NonNull String cvc) {
-        final Map<String, Object> tokenParams = new HashMap<>();
-        tokenParams.put("cvc", cvc);
-        final Map<String, Object> cvcParams = new HashMap<>();
-        cvcParams.put(Token.TokenType.CVC_UPDATE, tokenParams);
-        return cvcParams;
-    }
-
-    /**
-     * Util function for creating parameters for a bank account.
-     *
-     * @param bankAccount {@link BankAccount} object used to create the paramters
-     * @return a map that can be used as parameters to create a bank account object
-     */
-    @NonNull
-    Map<String, Object> createBankAccountTokenParams(@NonNull BankAccount bankAccount) {
-        Map<String, Object> tokenParams = new HashMap<>();
-        AbstractMap<String, Object> accountParams = new HashMap<>();
-
-        accountParams.put("country", bankAccount.getCountryCode());
-        accountParams.put("currency", bankAccount.getCurrency());
-        accountParams.put("account_number", bankAccount.getAccountNumber());
-        accountParams.put("routing_number",
-                StripeTextUtils.nullIfBlank(bankAccount.getRoutingNumber()));
-        accountParams.put("account_holder_name",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderName()));
-        accountParams.put("account_holder_type",
-                StripeTextUtils.nullIfBlank(bankAccount.getAccountHolderType()));
-
-        // Remove all null values; they cause validation errors
-        removeNullAndEmptyParams(accountParams);
-
-        tokenParams.put(Token.TokenType.BANK_ACCOUNT, accountParams);
-        tokenParams.putAll(createUidParams());
         return tokenParams;
     }
 
