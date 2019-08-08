@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import static com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION;
 
 /**
- * An {@link Activity} that relays the intent extras that it received as a result and finishes.
+ * An <code>Activity</code> that relays the intent extras that it received as a result and finishes.
  */
 public class PaymentRelayActivity extends AppCompatActivity {
     @Override

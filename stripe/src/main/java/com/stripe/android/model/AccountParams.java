@@ -26,24 +26,13 @@ public final class AccountParams implements StripeParamsModel {
      * Create an {@link AccountParams} instance for a {@link BusinessType#Individual} or
      * {@link BusinessType#Company}.
      *
-     * <ol>
-     * <li>
-     * <a href="https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted">account.tos_shown_and_accepted</a>
-     * </li>
-     * <li>
-     * <a href="https://stripe.com/docs/api/accounts/create#create_account-company">company</a>
-     * </li>
-     * <li>
-     * <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">individual</a>
-     * </li>
-     * </ol>
-     *
      * @param tosShownAndAccepted Whether the user described by the data in the token has been shown
-     *                            the Stripe Connected Account Agreement [1]. When creating an
-     *                            account token to create a new Connect account, this value must
-     *                            be true.
+     *                            the <a href="https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted">Stripe Connected Account Agreement</a>.
+     *                            When creating an account token to create a new Connect account,
+     *                            this value must be <code>true</code>.
      * @param businessType        See {@link BusinessType}
-     * @param businessData        A map of company [2] or individual [3] params.
+     * @param businessData        A map of <a href="https://stripe.com/docs/api/accounts/create#create_account-company">company</a>
+     *                            or <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">individual</a> params.
      *
      *
      * @return {@link AccountParams}

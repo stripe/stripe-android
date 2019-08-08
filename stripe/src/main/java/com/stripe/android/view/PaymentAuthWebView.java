@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A {@link WebView} used for authenticating payment details
+ * A <code>WebView</code> used for authenticating payment details
  */
 class PaymentAuthWebView extends WebView {
     @SuppressWarnings("RedundantModifier")

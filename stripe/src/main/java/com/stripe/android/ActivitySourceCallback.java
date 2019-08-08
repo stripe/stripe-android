@@ -9,8 +9,8 @@ import com.stripe.android.model.Source;
 import java.lang.ref.WeakReference;
 
 /**
- * Abstract implementation of {@link ApiResultCallback<Source>} that holds a {@link WeakReference}
- * to an {@link Activity} object.
+ * Abstract implementation of {@link ApiResultCallback} that holds a {@link WeakReference}
+ * to an <code>Activity</code> object.
  */
 public abstract class ActivitySourceCallback<A extends Activity>
         implements ApiResultCallback<Source> {

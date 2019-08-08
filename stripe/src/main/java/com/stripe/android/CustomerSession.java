@@ -910,7 +910,7 @@ public class CustomerSession {
 
     /**
      * Abstract implementation of {@link PaymentMethodsRetrievalListener} that holds a
-     * {@link WeakReference} to an {@link Activity} object.
+     * {@link WeakReference} to an <code>Activity</code> object.
      */
     public abstract static class ActivityPaymentMethodsRetrievalListener<A extends Activity>
             implements PaymentMethodsRetrievalListener {
@@ -928,7 +928,7 @@ public class CustomerSession {
 
     /**
      * Abstract implementation of {@link SourceRetrievalListener} that holds a
-     * {@link WeakReference} to an {@link Activity} object.
+     * {@link WeakReference} to an <code>Activity</code> object.
      */
     public abstract static class ActivitySourceRetrievalListener<A extends Activity>
             implements SourceRetrievalListener {
@@ -946,7 +946,7 @@ public class CustomerSession {
 
     /**
      * Abstract implementation of {@link PaymentMethodRetrievalListener} that holds a
-     * {@link WeakReference} to an {@link Activity} object.
+     * {@link WeakReference} to an <code>Activity</code> object.
      */
     public abstract static class ActivityPaymentMethodRetrievalListener<A extends Activity>
             implements PaymentMethodRetrievalListener {

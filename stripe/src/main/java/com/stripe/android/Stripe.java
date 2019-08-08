@@ -141,7 +141,7 @@ public class Stripe {
     /**
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
-     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param activity the <code>Activity</code> that is launching the payment authentication flow
      */
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
@@ -164,7 +164,7 @@ public class Stripe {
     /**
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
-     * @param fragment the {@link Fragment} that is launching the payment authentication flow
+     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
      */
     public void confirmSetupIntent(@NonNull Fragment fragment,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
@@ -189,7 +189,7 @@ public class Stripe {
      * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
      * automatic confirmation</a> flow.
      *
-     * @param activity the {@link Activity} that is launching the payment authentication flow
+     * @param activity the <code>Activity</code> that is launching the payment authentication flow
      * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
      *                                   {@link PaymentIntent}
      */
@@ -216,7 +216,7 @@ public class Stripe {
      * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
      * automatic confirmation</a> flow.
      *
-     * @param fragment the {@link Fragment} that is launching the payment authentication flow
+     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
      * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
      *                                   {@link PaymentIntent}
      */
@@ -243,8 +243,9 @@ public class Stripe {
      * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
      * manual confirmation</a> flow.
      *
-     * @param activity the {@link Activity} that is launching the payment authentication flow
-     * @param clientSecret the `client_secret` property of a confirmed {@link PaymentIntent} object
+     * @param activity the <code>Activity</code> that is launching the payment authentication flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link PaymentIntent} object
      */
     public void authenticatePayment(@NonNull Activity activity,
                                     @NonNull String clientSecret,
@@ -269,8 +270,9 @@ public class Stripe {
      * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
      * manual confirmation</a> flow.
      *
-     * @param fragment the {@link Activity} that is launching the payment authentication flow
-     * @param clientSecret the `client_secret` property of a confirmed {@link PaymentIntent} object
+     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link PaymentIntent} object
      */
     public void authenticatePayment(@NonNull Fragment fragment,
                                     @NonNull String clientSecret,
@@ -293,8 +295,10 @@ public class Stripe {
     /**
      * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
      *
-     * @param activity     the {@link Activity} that is launching the payment authentication flow
-     * @param clientSecret the `client_secret` property of a confirmed {@link SetupIntent} object
+     * @param activity     the <code>Activity</code> that is launching the payment authentication
+     *                     flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link SetupIntent} object
      */
     public void authenticateSetup(@NonNull Activity activity,
                                   @NonNull String clientSecret,
@@ -317,8 +321,9 @@ public class Stripe {
     /**
      * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
      *
-     * @param fragment     the {@link Fragment} that is launching the payment authentication flow
-     * @param clientSecret the `client_secret` property of a confirmed {@link SetupIntent} object
+     * @param fragment     the <code>Fragment</code> launching the payment authentication flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link SetupIntent} object
      */
     public void authenticateSetup(@NonNull Fragment fragment,
                                   @NonNull String clientSecret,
@@ -401,7 +406,7 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param bankAccount the {@link BankAccount} used to create this token
-     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
     public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
@@ -417,7 +422,7 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
+     * @param callback a {@link ApiResultCallback} to receive the result or error message
      */
     public void createBankAccountToken(
             @NonNull final BankAccount bankAccount,
@@ -440,7 +445,7 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param personalId the personal id used to create this token
-     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
     public void createPiiToken(
             @NonNull final String personalId,
@@ -456,7 +461,7 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
+     * @param callback a {@link ApiResultCallback} to receive the result or error message
      */
     public void createPiiToken(
             @NonNull final String personalId,
@@ -533,7 +538,7 @@ public class Stripe {
      * {@link Executor} and with the currently set {@link #mDefaultPublishableKey}.
      *
      * @param cvc the CVC used to create this token
-     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
     public void createCvcUpdateToken(
             @NonNull @Size(min = 3, max = 4) final String cvc,
@@ -549,7 +554,7 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
+     * @param callback a {@link ApiResultCallback} to receive the result or error message
      */
     public void createCvcUpdateToken(
             @NonNull @Size(min = 3, max = 4) final String cvc,
@@ -569,7 +574,7 @@ public class Stripe {
      * publishable api key that has already been set on this {@link Stripe} instance.
      *
      * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link ApiResultCallback<Source>} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback} to receive a result or an error message
      */
     public void createSource(@NonNull SourceParams sourceParams,
                              @NonNull ApiResultCallback<Source> callback) {
@@ -580,9 +585,10 @@ public class Stripe {
      * Create a {@link Source} using an {@link AsyncTask}.
      *
      * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link ApiResultCallback<Source>} to receive a result or an error message
+     * @param callback a {@link ApiResultCallback} to receive a result or an error message
      * @param publishableKey the publishable api key to be used
-     * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
+     * @param executor an {@link Executor} on which to execute the task,
+     *                 or <code>null</code> for default
      */
     public void createSource(
             @NonNull SourceParams sourceParams,
@@ -599,7 +605,7 @@ public class Stripe {
      * with a publishable api key that has already been set on this {@link Stripe} instance.
      *
      * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link ApiResultCallback<PaymentMethod>} to receive a result or an error
+     * @param callback a {@link ApiResultCallback} to receive a result or an error
      *         message
      */
     public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -611,10 +617,10 @@ public class Stripe {
      * Create a {@link PaymentMethod} using an {@link AsyncTask}.
      *
      * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link ApiResultCallback<PaymentMethod>} to receive a result or an error
-     *         message
+     * @param callback a {@link ApiResultCallback} to receive a result or an error message
      * @param publishableKey the publishable api key to be used
-     * @param executor an {@link Executor} on which to execute the task, or {@link null} for default
+     * @param executor an {@link Executor} on which to execute the task,
+     *                 or <code>null</code> for default for default
      */
     public void createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
@@ -627,11 +633,11 @@ public class Stripe {
 
     /**
      * The simplest way to create a token, using a {@link Card} and
-     * {@link ApiResultCallback<Token>}. This runs on the default {@link Executor} and with the
+     * {@link ApiResultCallback}. This runs on the default {@link Executor} and with the
      * currently set {@link #mDefaultPublishableKey}.
      *
      * @param card the {@link Card} used to create this payment token
-     * @param callback a {@link ApiResultCallback<Token>} to receive either the token or an error
+     * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
     public void createToken(@NonNull final Card card,
                             @NonNull final ApiResultCallback<Token> callback) {
@@ -643,7 +649,7 @@ public class Stripe {
      *
      * @param card the {@link Card} used for this transaction
      * @param publishableKey the public key used for this transaction
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result of this operation
+     * @param callback a {@link ApiResultCallback} to receive the result of this operation
      */
     public void createToken(
             @NonNull final Card card,
@@ -658,7 +664,7 @@ public class Stripe {
      * @param card the {@link Card} to use for this token creation
      * @param executor An {@link Executor} on which to run this operation. If you don't wish to
      *         specify an executor, use one of the other createTokenFromParams methods.
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result of this operation
+     * @param callback a {@link ApiResultCallback} to receive the result of this operation
      */
     public void createToken(
             @NonNull final Card card,
@@ -674,7 +680,7 @@ public class Stripe {
      * @param publishableKey the publishable key to use
      * @param executor an {@link Executor} to run this operation on. If null, this is run on a
      *         default non-ui executor
-     * @param callback a {@link ApiResultCallback<Token>} to receive the result or error message
+     * @param callback a {@link ApiResultCallback} to receive the result or error message
      */
     public void createToken(
             @NonNull final Card card,

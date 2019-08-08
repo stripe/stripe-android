@@ -227,7 +227,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     }
 
     /**
-     * Set an optional CVC field label to override defaults. Set to `null` to use defaults.
+     * Set an optional CVC field label to override defaults, or <code>null</code> to use defaults.
      */
     public void setCvcLabel(@Nullable String cvcLabel) {
         mCustomCvcLabel = cvcLabel;

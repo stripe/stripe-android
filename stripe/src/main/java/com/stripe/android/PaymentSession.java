@@ -44,10 +44,10 @@ public class PaymentSession {
     /**
      * Create a PaymentSession attached to the given host Activity.
      *
-     * @param activity an {@link Activity} from which to launch other Stripe Activities. This
+     * @param activity an <code>Activity</code> from which to launch other Stripe Activities. This
      *                     Activity will receive results in
-     *                     {@link Activity#onActivityResult(int, int, Intent)} that should be passed
-     *                     back to this session.
+     *                     <code>Activity#onActivityResult(int, int, Intent)</code> that should be
+     *                     passed back to this session.
      */
     public PaymentSession(@NonNull Activity activity) {
         this(CustomerSession.getInstance(),
@@ -88,7 +88,7 @@ public class PaymentSession {
 
     /**
      * Method to handle Activity results from Stripe activities. Pass data here from your
-     * host Activity's {@link Activity#onActivityResult(int, int, Intent)} function.
+     * host's <code>#onActivityResult(int, int, Intent)</code> function.
      *
      * @param requestCode the request code used to open the resulting activity
      * @param resultCode a result code representing the success of the intended action
@@ -173,8 +173,9 @@ public class PaymentSession {
      *                 in payment session status, including networking status
      * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
      *                             necessary in the PaymentSession.
-     * @param savedInstanceState a {@link Bundle} containing the saved state of a PaymentSession
-     *                           that was stored in {@link #savePaymentSessionInstanceState(Bundle)}
+     * @param savedInstanceState a <code>Bundle</code> containing the saved state of a
+     *                           PaymentSession that was stored in
+     *                           {@link #savePaymentSessionInstanceState(Bundle)}
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
      * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
      */
@@ -280,10 +281,10 @@ public class PaymentSession {
     }
 
     /**
-     * Save the data associated with this PaymentSession. This should be called in the host Activity
-     * {@link Activity#onSaveInstanceState(Bundle)} method.
+     * Save the data associated with this PaymentSession. This should be called in the host's
+     * <code>onSaveInstanceState(Bundle)</code> method.
      *
-     * @param outState the host activity's outgoing {@link Bundle}
+     * @param outState the host activity's outgoing <code>Bundle</code>
      */
     public void savePaymentSessionInstanceState(@NonNull Bundle outState) {
         outState.putParcelable(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
@@ -318,7 +319,7 @@ public class PaymentSession {
     }
 
     /**
-     * Should be called during the host {@link Activity}'s onDestroy to detach listeners.
+     * Should be called during the host <code>Activity</code>'s onDestroy to detach listeners.
      */
     public void onDestroy() {
         mPaymentSessionListener = null;
@@ -383,7 +384,7 @@ public class PaymentSession {
 
     /**
      * Abstract implementation of {@link PaymentSessionListener} that holds a
-     * {@link WeakReference} to an {@link Activity} object.
+     * {@link WeakReference} to an <code>Activity</code> object.
      */
     public abstract static class ActivityPaymentSessionListener<A extends Activity>
             implements PaymentSessionListener {
