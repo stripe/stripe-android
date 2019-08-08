@@ -229,8 +229,8 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
         }
 
         @NonNull
-        public Builder setCountry(@NonNull String country) {
-            mCountry = country.toUpperCase(Locale.ROOT);
+        public Builder setCountry(@Nullable String country) {
+            mCountry = country != null ? country.toUpperCase(Locale.ROOT) : null;
             return this;
         }
 

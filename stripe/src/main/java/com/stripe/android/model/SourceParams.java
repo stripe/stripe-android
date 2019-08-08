@@ -38,21 +38,16 @@ public final class SourceParams implements StripeParamsModel {
     private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_BANK = "bank";
     private static final String FIELD_CARD = "card";
-    private static final String FIELD_CITY = "city";
     private static final String FIELD_COUNTRY = "country";
     private static final String FIELD_CVC = "cvc";
     private static final String FIELD_EMAIL = "email";
     private static final String FIELD_EXP_MONTH = "exp_month";
     private static final String FIELD_EXP_YEAR = "exp_year";
     private static final String FIELD_IBAN = "iban";
-    private static final String FIELD_LINE_1 = "line1";
-    private static final String FIELD_LINE_2 = "line2";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_NUMBER = "number";
     private static final String FIELD_PHONE = "phone";
-    private static final String FIELD_POSTAL_CODE = "postal_code";
     private static final String FIELD_RETURN_URL = "return_url";
-    private static final String FIELD_STATE = "state";
     private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
     private static final String FIELD_PREFERRED_LANGUAGE = "preferred_language";
 
@@ -112,7 +107,7 @@ public final class SourceParams implements StripeParamsModel {
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
-        if (ownerMap.keySet().size() > 0) {
+        if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
 
@@ -148,7 +143,7 @@ public final class SourceParams implements StripeParamsModel {
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
-        if (ownerMap.keySet().size() > 0) {
+        if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
 
@@ -187,7 +182,7 @@ public final class SourceParams implements StripeParamsModel {
         ownerMap.put(FIELD_NAME, name);
         ownerMap.put(FIELD_EMAIL, email);
         removeNullAndEmptyParams(ownerMap);
-        if (ownerMap.keySet().size() > 0) {
+        if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
 
@@ -296,23 +291,24 @@ public final class SourceParams implements StripeParamsModel {
 
         params.setApiParameterMap(basicInfoMap);
 
-        final AbstractMap<String, Object> addressMap = new HashMap<>();
-        addressMap.put(FIELD_LINE_1, card.getAddressLine1());
-        addressMap.put(FIELD_LINE_2, card.getAddressLine2());
-        addressMap.put(FIELD_CITY, card.getAddressCity());
-        addressMap.put(FIELD_COUNTRY, card.getAddressCountry());
-        addressMap.put(FIELD_STATE, card.getAddressState());
-        addressMap.put(FIELD_POSTAL_CODE, card.getAddressZip());
-        removeNullAndEmptyParams(addressMap);
+        final Map<String, Object> addressMap = new Address.Builder()
+                .setLine1(card.getAddressLine1())
+                .setLine2(card.getAddressLine2())
+                .setCity(card.getAddressCity())
+                .setState(card.getAddressState())
+                .setPostalCode(card.getAddressZip())
+                .setCountry(card.getAddressCountry())
+                .build()
+                .toParamMap();
 
         // If there are any keys left...
         final AbstractMap<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, card.getName());
-        if (addressMap.keySet().size() > 0) {
+        if (!addressMap.isEmpty()) {
             ownerMap.put(FIELD_ADDRESS, addressMap);
         }
         removeNullAndEmptyParams(ownerMap);
-        if (ownerMap.keySet().size() > 0) {
+        if (!ownerMap.isEmpty()) {
             params.setOwner(ownerMap);
         }
 
@@ -351,19 +347,16 @@ public final class SourceParams implements StripeParamsModel {
         if (googlePayBillingAddress != null) {
             name = googlePayBillingAddress.optString("name");
             phone = googlePayBillingAddress.optString("phoneNumber");
-            addressMap = new HashMap<>();
-            addressMap.put(FIELD_LINE_1,
-                    googlePayBillingAddress.optString("address1"));
-            addressMap.put(FIELD_LINE_2,
-                    googlePayBillingAddress.optString("address2"));
-            addressMap.put(FIELD_CITY,
-                    googlePayBillingAddress.optString("locality"));
-            addressMap.put(FIELD_COUNTRY,
-                    googlePayBillingAddress.optString("countryCode"));
-            addressMap.put(FIELD_STATE,
-                    googlePayBillingAddress.optString("administrativeArea"));
-            addressMap.put(FIELD_POSTAL_CODE,
-                    googlePayBillingAddress.optString("postalCode"));
+
+            addressMap = new Address.Builder()
+                    .setLine1(googlePayBillingAddress.optString("address1"))
+                    .setLine2(googlePayBillingAddress.optString("address2"))
+                    .setCity(googlePayBillingAddress.optString("locality"))
+                    .setState(googlePayBillingAddress.optString("administrativeArea"))
+                    .setPostalCode(googlePayBillingAddress.optString("postalCode"))
+                    .setCountry(googlePayBillingAddress.optString("countryCode"))
+                    .build()
+                    .toParamMap();
             removeNullAndEmptyParams(addressMap);
         } else {
             name = null;
@@ -560,15 +553,19 @@ public final class SourceParams implements StripeParamsModel {
         final SourceParams params = new SourceParams(SourceType.SEPA_DEBIT)
                 .setCurrency(Source.EURO);
 
-        final AbstractMap<String, Object> address = new HashMap<>();
-        address.put(FIELD_LINE_1, addressLine1);
-        address.put(FIELD_CITY, city);
-        address.put(FIELD_POSTAL_CODE, postalCode);
-        address.put(FIELD_COUNTRY, country);
+        final Map<String, Object> address = new Address.Builder()
+                .setLine1(addressLine1)
+                .setCity(city)
+                .setPostalCode(postalCode)
+                .setCountry(country)
+                .build()
+                .toParamMap();
 
-        final AbstractMap<String, Object> ownerMap = new HashMap<>();
+        final Map<String, Object> ownerMap = new HashMap<>();
         ownerMap.put(FIELD_NAME, name);
-        ownerMap.put(FIELD_EMAIL, email);
+        if (email != null) {
+            ownerMap.put(FIELD_EMAIL, email);
+        }
         ownerMap.put(FIELD_ADDRESS, address);
 
         return params
