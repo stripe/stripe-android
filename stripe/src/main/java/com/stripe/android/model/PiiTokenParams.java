@@ -1,9 +1,6 @@
-package com.stripe.android;
+package com.stripe.android.model;
 
 import android.support.annotation.NonNull;
-
-import com.stripe.android.model.StripeParamsModel;
-import com.stripe.android.model.Token;
 
 import java.util.HashMap;
 import java.util.Map;

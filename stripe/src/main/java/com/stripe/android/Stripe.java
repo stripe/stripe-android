@@ -25,6 +25,7 @@ import com.stripe.android.model.CvcTokenParams;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PiiTokenParams;
 import com.stripe.android.model.SetupIntent;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;

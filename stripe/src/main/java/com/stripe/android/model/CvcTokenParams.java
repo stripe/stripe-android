@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class CvcTokenParams implements StripeParamsModel {
-    private final String mCvc;
+    @NonNull private final String mCvc;
 
-    public CvcTokenParams(String cvc) {
+    public CvcTokenParams(@NonNull String cvc) {
         this.mCvc = cvc;
     }
 
