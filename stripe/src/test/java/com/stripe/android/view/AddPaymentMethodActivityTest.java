@@ -211,7 +211,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertFalse(mCardMultilineWidget.isEnabled());
 
         final PaymentMethod expectedPaymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(expectedPaymentMethod);
         callback.onSuccess(expectedPaymentMethod);
 
@@ -307,7 +307,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertFalse(mCardMultilineWidget.isEnabled());
 
         final PaymentMethod expectedPaymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(expectedPaymentMethod);
         callback.onSuccess(expectedPaymentMethod);
 
@@ -353,7 +353,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
 
         final PaymentMethod expectedPaymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(expectedPaymentMethod);
         callback.onSuccess(expectedPaymentMethod);
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());

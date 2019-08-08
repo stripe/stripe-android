@@ -80,7 +80,7 @@ public class MaskedCardAdapterTest {
     @Test
     public void setSelection_changesSelection() {
         final PaymentMethod paymentMethod1 =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         final PaymentMethod paymentMethod2 = PaymentMethod.fromString(PAYMENT_METHOD_JSON);
         assertNotNull(paymentMethod1);
         assertNotNull(paymentMethod2);
@@ -108,7 +108,7 @@ public class MaskedCardAdapterTest {
     @Test
     public void updatePaymentMethods_removesExistingPaymentMethodsAndAddsAllPaymentMethods() {
         final PaymentMethod paymentMethod1 =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         final PaymentMethod paymentMethod2 = PaymentMethod.fromString(PAYMENT_METHOD_JSON);
         final List<PaymentMethod> singlePaymentMethod = Collections.singletonList(paymentMethod1);
         final List<PaymentMethod> paymentMethods = Arrays.asList(paymentMethod1, paymentMethod2);
@@ -132,7 +132,7 @@ public class MaskedCardAdapterTest {
     @Test
     public void updatePaymentMethods_withSelection_updatesPaymentMethodsAndSelectionMaintained() {
         final PaymentMethod paymentMethod1 =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         final PaymentMethod paymentMethod2 = PaymentMethod.fromString(PAYMENT_METHOD_JSON);
         assertNotNull(paymentMethod1);
         assertNotNull(paymentMethod2);

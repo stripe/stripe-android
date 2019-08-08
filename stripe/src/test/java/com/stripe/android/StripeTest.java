@@ -62,6 +62,7 @@ public class StripeTest {
     private static final String LOGGING_PK = "pk_test_6pRNASCoBOKtIshFeQd4XMUh";
     private static final String NON_LOGGING_PK = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY;
     private static final String DEFAULT_SECRET_KEY = "sk_default";
+    private static final String FPX_PK = "pk_test_gQDRnExb8Jjs2Dk6RiQ09RSg007c7pKhDT";
 
     private static final Card DEFAULT_CARD = Card.create(null, null, null, null);
     private static final ApiResultCallback<Token> DEFAULT_TOKEN_CALLBACK =
@@ -1312,6 +1313,53 @@ public class StripeTest {
                         .setBankIdentifierCode("INGBNL2A")
                         .build(),
                 createdPaymentMethod.ideal);
+
+        verify(fireAndForgetRequestExecutor, times(2))
+                .executeAsync(mStripeRequestArgumentCaptor.capture());
+        final List<StripeRequest> fireAndForgetRequests =
+                mStripeRequestArgumentCaptor.getAllValues();
+        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        assertEquals(ApiRequest.ANALYTICS_HOST, analyticsRequest.getBaseUrl());
+        assertEquals(createdPaymentMethod.id,
+                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+    }
+
+    @Test
+    public void createPaymentMethodSynchronous_withFpx()
+            throws StripeException {
+        final FireAndForgetRequestExecutor fireAndForgetRequestExecutor =
+                mock(FireAndForgetRequestExecutor.class);
+
+        final PaymentMethod.BillingDetails expectedBillingDetails =
+                new PaymentMethod.BillingDetails.Builder()
+                        .setName("Home")
+                        .setEmail("me@example.com")
+                        .setPhone("1-800-555-1234")
+                        .setAddress(new Address.Builder()
+                                .setLine1("123 Main St")
+                                .setCity("Los Angeles")
+                                .setState("CA")
+                                .setCountry("US")
+                                .build())
+                        .build();
+
+        final PaymentMethodCreateParams paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                        new PaymentMethodCreateParams.Fpx.Builder()
+                                .setBank("hsbc")
+                                .build(),
+                        expectedBillingDetails);
+        final Stripe stripe = createNonLoggingStripe(FPX_PK, fireAndForgetRequestExecutor);
+        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams);
+        assertNotNull(createdPaymentMethod);
+        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertNull(createdPaymentMethod.card);
+        assertEquals(new PaymentMethod.Fpx.Builder()
+                        .setBank("hsbc")
+                        .setAccountHolderType("individual")
+                        .build(),
+                createdPaymentMethod.fpx);
 
         verify(fireAndForgetRequestExecutor, times(2))
                 .executeAsync(mStripeRequestArgumentCaptor.capture());

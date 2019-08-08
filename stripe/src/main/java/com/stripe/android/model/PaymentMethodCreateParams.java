@@ -26,17 +26,25 @@ import java.util.Objects;
  */
 public final class PaymentMethodCreateParams implements StripeParamsModel {
 
-    private static final String FIELD_BILLING_DETAILS = "billing_details";
-    private static final String FIELD_CARD = "card";
-    private static final String FIELD_IDEAL = "ideal";
-    private static final String FIELD_METADATA = "metadata";
     private static final String FIELD_TYPE = "type";
+    private static final String FIELD_CARD = "card";
+    private static final String FIELD_FPX = "fpx";
+    private static final String FIELD_IDEAL = "ideal";
+
+    private static final String FIELD_BILLING_DETAILS = "billing_details";
+    private static final String FIELD_METADATA = "metadata";
 
     @NonNull private final Type type;
     @Nullable private final PaymentMethodCreateParams.Card card;
     @Nullable private final PaymentMethodCreateParams.Ideal ideal;
+    @Nullable private final PaymentMethodCreateParams.Fpx fpx;
     @Nullable private final PaymentMethod.BillingDetails billingDetails;
     @Nullable private final Map<String, String> metadata;
+
+    @NonNull
+    public static PaymentMethodCreateParams create(@NonNull PaymentMethodCreateParams.Card card) {
+        return create(card, null);
+    }
 
     @NonNull
     public static PaymentMethodCreateParams create(
@@ -54,6 +62,11 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     }
 
     @NonNull
+    public static PaymentMethodCreateParams create(@NonNull PaymentMethodCreateParams.Ideal ideal) {
+        return new PaymentMethodCreateParams(ideal, null, null);
+    }
+
+    @NonNull
     public static PaymentMethodCreateParams create(
             @NonNull PaymentMethodCreateParams.Ideal ideal,
             @Nullable PaymentMethod.BillingDetails billingDetails) {
@@ -66,6 +79,28 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
             @Nullable PaymentMethod.BillingDetails billingDetails,
             @Nullable Map<String, String> metadata) {
         return new PaymentMethodCreateParams(ideal, billingDetails, metadata);
+    }
+
+    @NonNull
+    public static PaymentMethodCreateParams create(@NonNull PaymentMethodCreateParams.Fpx fpx) {
+        return create(fpx, null);
+    }
+
+
+    @NonNull
+    public static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.Fpx fpx,
+            @Nullable PaymentMethod.BillingDetails billingDetails) {
+        return create(fpx, billingDetails, null);
+    }
+
+
+    @NonNull
+    public static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.Fpx fpx,
+            @Nullable PaymentMethod.BillingDetails billingDetails,
+            @Nullable Map<String, String> metadata) {
+        return new PaymentMethodCreateParams(fpx, billingDetails, metadata);
     }
 
     /**
@@ -122,6 +157,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.type = Type.Card;
         this.card = card;
         this.ideal = null;
+        this.fpx = null;
         this.billingDetails = billingDetails;
         this.metadata = metadata;
     }
@@ -132,6 +168,18 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.type = Type.Ideal;
         this.card = null;
         this.ideal = ideal;
+        this.fpx = null;
+        this.billingDetails = billingDetails;
+        this.metadata = metadata;
+    }
+
+    private PaymentMethodCreateParams(@NonNull PaymentMethodCreateParams.Fpx fpx,
+                                      @Nullable PaymentMethod.BillingDetails billingDetails,
+                                      @Nullable Map<String, String> metadata) {
+        this.type = Type.Fpx;
+        this.card = null;
+        this.ideal = null;
+        this.fpx = fpx;
         this.billingDetails = billingDetails;
         this.metadata = metadata;
     }
@@ -146,6 +194,8 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
             params.put(FIELD_CARD, card.toParamMap());
         } else if (type == Type.Ideal && ideal != null) {
             params.put(FIELD_IDEAL, ideal.toParamMap());
+        } else if (type == Type.Fpx && fpx != null) {
+            params.put(FIELD_FPX, fpx.toParamMap());
         }
 
         if (billingDetails != null) {
@@ -166,7 +216,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(type, card, ideal, billingDetails, metadata);
+        return ObjectUtils.hash(type, card, fpx, ideal, billingDetails, metadata);
     }
 
     @Override
@@ -179,6 +229,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     private boolean typedEquals(@NonNull PaymentMethodCreateParams params) {
         return ObjectUtils.equals(type, params.type)
                 && ObjectUtils.equals(card, params.card)
+                && ObjectUtils.equals(fpx, params.fpx)
                 && ObjectUtils.equals(ideal, params.ideal)
                 && ObjectUtils.equals(billingDetails, params.billingDetails)
                 && ObjectUtils.equals(metadata, params.metadata);
@@ -186,7 +237,8 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
     enum Type {
         Card("card"),
-        Ideal("ideal");
+        Ideal("ideal"),
+        Fpx("fpx");
 
         @NonNull private final String mCode;
 
@@ -358,6 +410,53 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
             @NonNull
             public Ideal build() {
                 return new Ideal(this);
+            }
+        }
+    }
+
+    public static final class Fpx implements StripeParamsModel {
+        private static final String FIELD_BANK = "bank";
+
+        @Nullable private final String mBank;
+
+        private Fpx(@NonNull Fpx.Builder builder) {
+            this.mBank = builder.mBank;
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Object> toParamMap() {
+            final AbstractMap<String, Object> map = new HashMap<>();
+            map.put(FIELD_BANK, mBank);
+            return map;
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(mBank);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || (obj instanceof Fpx && typedEquals((Fpx) obj));
+        }
+
+        private boolean typedEquals(@NonNull Fpx fpx) {
+            return ObjectUtils.equals(mBank, fpx.mBank);
+        }
+
+        public static final class Builder implements ObjectBuilder<Fpx> {
+            @Nullable private String mBank;
+
+            @NonNull
+            public Fpx.Builder setBank(@Nullable String bank) {
+                this.mBank = bank;
+                return this;
+            }
+
+            @NonNull
+            public Fpx build() {
+                return new Fpx(this);
             }
         }
     }

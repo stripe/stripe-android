@@ -58,7 +58,7 @@ public class MaskedCardViewTest {
     @Test
     public void setPaymentMethod_setsCorrectData() {
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
         mMaskedCardView.setPaymentMethod(paymentMethod);
         assertEquals("4242", mMaskedCardView.getLast4());
@@ -69,7 +69,7 @@ public class MaskedCardViewTest {
     @Test
     public void setSelected_changesCheckMarkVisibility() {
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
         mMaskedCardView.setPaymentMethod(paymentMethod);
 
@@ -85,7 +85,7 @@ public class MaskedCardViewTest {
     @Test
     public void toggleSelected_switchesState() {
         final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.RAW_CARD_JSON);
+                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
         mMaskedCardView.setPaymentMethod(paymentMethod);
         assertFalse(mMaskedCardView.isSelected());

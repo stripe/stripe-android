@@ -1,5 +1,7 @@
 package com.stripe.android.model;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -57,5 +59,32 @@ public class PaymentMethodCreateParamsTest {
                         .build()
         );
         assertEquals(expectedParams, createdParams);
+    }
+
+    @Test
+    public void equals_withFpx() {
+        assertEquals(createFpx(), createFpx());
+    }
+
+    @NonNull
+    private PaymentMethodCreateParams createFpx() {
+        return PaymentMethodCreateParams.create(
+                new PaymentMethodCreateParams.Fpx.Builder()
+                        .setBank("hsbc")
+                        .build(),
+                new PaymentMethod.BillingDetails.Builder()
+                        .setPhone("1-888-555-1234")
+                        .setEmail("stripe@example.com")
+                        .setName("Stripe Johnson")
+                        .setAddress(new Address.Builder()
+                                .setLine1("510 Townsend St")
+                                .setLine2("")
+                                .setCity("San Francisco")
+                                .setState("CA")
+                                .setPostalCode("94103")
+                                .setCountry("US")
+                                .build())
+                        .build()
+        );
     }
 }
