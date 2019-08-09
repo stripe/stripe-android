@@ -128,7 +128,8 @@ public class CustomerSession {
      * @param keyProvider An {@link EphemeralKeyProvider} used to retrieve
      *                    {@link CustomerEphemeralKey EphemeralKeys}
      * @param stripeAccountId An optional Stripe Connect account to associate with Customer-related
-     *                        Stripe API Requests. See {@link Stripe#setStripeAccount(String)}.
+     *                        Stripe API Requests.
+     *                        See {@link Stripe#Stripe(Context, String, String)}.
      */
     public static void initCustomerSession(@NonNull Context context,
                                            @NonNull EphemeralKeyProvider keyProvider,

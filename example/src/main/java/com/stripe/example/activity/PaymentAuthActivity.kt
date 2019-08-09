@@ -64,12 +64,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         stripeService = RetrofitFactory.instance.create(StripeService::class.java)
-        stripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
-
-        // set an optional Stripe Connect account to use for API requests
-
-        if (stripeAccountId != null) {
-            stripe.setStripeAccount(stripeAccountId)
+        stripe = if (stripeAccountId != null) {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey, stripeAccountId)
+        } else {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
         }
 
         buyButton = findViewById(R.id.buy_button)
