@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 10.3.0 - upcoming
+* [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
+    * Use `ApiResultCallback<Source>` and `ApiResultCallback<Token>` respectively
+* [#1332](https://github.com/stripe/stripe-android/pull/1332) Create `StripeParamsModel` interface for Stripe API param classes
+* [#1334](https://github.com/stripe/stripe-android/pull/1344) Remove `StripeModel#toMap()`
+* [#1340](https://github.com/stripe/stripe-android/pull/1340) Upgrade AGP to `3.5.0-rc03`
+* [#1342](https://github.com/stripe/stripe-android/pull/1342) Update Builds Tools to `29.0.2`
+* [#1347](https://github.com/stripe/stripe-android/pull/1347) Mark `Stripe.setStripeAccount()` as deprecated
+    * Use `new Stripe(context, "publishable_key", "stripe_account_id")` instead
+
 ## 10.2.1 - 2019-08-06
 * [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
 * [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/SourceParams.html#createCardParamsFromGooglePay-org.json.JSONObject-)
