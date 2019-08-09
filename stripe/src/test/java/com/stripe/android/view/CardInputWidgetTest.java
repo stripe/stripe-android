@@ -40,7 +40,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -698,9 +697,7 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
     @Test
     public void setAllCardFields_whenValidValues_allowsGetCardWithExpectedValues() {
-        if (Calendar.getInstance().get(Calendar.YEAR) > 2079) {
-            fail("Update the code with a date that is still valid. Also, hello from the past.");
-        }
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2079);
 
         mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
         mCardInputWidget.setExpiryDate(12, 2079);

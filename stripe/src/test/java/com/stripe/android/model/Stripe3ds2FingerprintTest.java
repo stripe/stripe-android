@@ -3,6 +3,7 @@ package com.stripe.android.model;
 import android.support.annotation.NonNull;
 
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 @RunWith(RobolectricTestRunner.class)
 public class Stripe3ds2FingerprintTest {
@@ -98,12 +100,19 @@ public class Stripe3ds2FingerprintTest {
                 stripe3ds2Fingerprint.directoryServerEncryption.keyId);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void create_with3ds1SdkData_shouldThrowException() throws CertificateException {
+    @Test
+    public void create_with3ds1SdkData_shouldThrowException() {
         final PaymentIntent.SdkData sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS1
                 .getStripeSdkData();
         assertNotNull(sdkData);
-        Stripe3ds2Fingerprint.create(sdkData);
+
+        assertThrows(IllegalArgumentException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws CertificateException {
+                        Stripe3ds2Fingerprint.create(sdkData);
+                    }
+                });
     }
 
     @NonNull

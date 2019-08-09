@@ -18,7 +18,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -97,9 +96,7 @@ public class ExpiryDateEditTextTest {
 
     @Test
     public void afterAddingFinalDigit_whenGoingFromInvalidToValid_callsListener() {
-        if (Calendar.getInstance().get(Calendar.YEAR) > 2059) {
-            fail("Update the code with a date that is still valid. Also, hello from the past.");
-        }
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059);
 
         mExpiryDateEditText.append("1");
         mExpiryDateEditText.append("2");
@@ -113,9 +110,7 @@ public class ExpiryDateEditTextTest {
 
     @Test
     public void afterAddingFinalDigit_whenDeletingItem_revertsToInvalidState() {
-        if (Calendar.getInstance().get(Calendar.YEAR) > 2059) {
-            fail("Update the code with a date that is still valid. Also, hello from the past.");
-        }
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059);
 
         mExpiryDateEditText.append("12");
         mExpiryDateEditText.append("59");
