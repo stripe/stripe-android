@@ -640,7 +640,8 @@ public final class Source extends StripeModel implements StripePaymentSource {
                 && ObjectUtils.equals(mSourceTypeData, source.mSourceTypeData)
                 && ObjectUtils.equals(mSourceTypeModel, source.mSourceTypeModel)
                 && ObjectUtils.equals(mType, source.mType)
-                && ObjectUtils.equals(mUsage, source.mUsage);
+                && ObjectUtils.equals(mUsage, source.mUsage)
+                && ObjectUtils.equals(mWeChat, source.mWeChat);
     }
 
     @Override
