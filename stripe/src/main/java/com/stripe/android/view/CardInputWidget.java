@@ -37,6 +37,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Objects;
 
 import static com.stripe.android.model.Card.CardBrand;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
@@ -73,39 +74,54 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
 
     private static final long ANIMATION_LENGTH = 150L;
 
-    private ImageView mCardIconImageView;
+    @NonNull private final ImageView mCardIconImageView;
+    @NonNull private final FrameLayout mFrameLayout;
+    @NonNull private final CardNumberEditText mCardNumberEditText;
+    @NonNull private final StripeEditText mCvcNumberEditText;
+    @NonNull private final ExpiryDateEditText mExpiryDateEditText;
+
     @Nullable private CardInputListener mCardInputListener;
-    private CardNumberEditText mCardNumberEditText;
     private boolean mCardNumberIsViewed = true;
-    private StripeEditText mCvcNumberEditText;
-    private ExpiryDateEditText mExpiryDateEditText;
 
-    private FrameLayout mFrameLayout;
-
-    private String mCardHintText;
-    private @ColorInt int mErrorColorInt;
-    private @ColorInt int mTintColorInt;
+    @ColorInt private int mTintColorInt;
 
     private boolean mIsAmEx;
     private boolean mInitFlag;
 
     private int mTotalLengthInPixels;
 
-    private DimensionOverrideSettings mDimensionOverrides;
-    private PlacementParameters mPlacementParameters;
+    @Nullable private DimensionOverrideSettings mDimensionOverrides;
+    @NonNull private final PlacementParameters mPlacementParameters;
 
-    public CardInputWidget(Context context) {
-        super(context);
-        initView(null);
+    public CardInputWidget(@NonNull Context context) {
+        this(context, null);
     }
 
-    public CardInputWidget(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView(attrs);
+    public CardInputWidget(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public CardInputWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CardInputWidget(@NonNull Context context, @Nullable AttributeSet attrs,
+                           int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        inflate(getContext(), R.layout.card_input_widget, this);
+
+        // This ensures that onRestoreInstanceState is called
+        // during rotations.
+        if (getId() == NO_ID) {
+            setId(DEFAULT_READER_ID);
+        }
+
+        setOrientation(LinearLayout.HORIZONTAL);
+        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
+
+        mPlacementParameters = new PlacementParameters();
+        mCardIconImageView = findViewById(R.id.iv_card_icon);
+        mCardNumberEditText = findViewById(R.id.et_card_number);
+        mExpiryDateEditText = findViewById(R.id.et_expiry_date);
+        mCvcNumberEditText = findViewById(R.id.et_cvc_number);
+        mFrameLayout = findViewById(R.id.frame_container);
+
         initView(attrs);
     }
 
@@ -117,10 +133,12 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      * {@code null} if any field is invalid
      */
     @Nullable
+    @Override
     public PaymentMethodCreateParams.Card getPaymentMethodCard() {
         final String cardNumber = mCardNumberEditText.getCardNumber();
         final int[] cardDate = mExpiryDateEditText.getValidDateFields();
-        final String cvcValue = mCvcNumberEditText.getText().toString().trim();
+        final String cvcValue = Objects.requireNonNull(mCvcNumberEditText.getText())
+                .toString().trim();
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
         if (cardNumber == null || cardDate == null || cardDate.length != 2 ||
@@ -159,7 +177,8 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
         }
 
         // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-        final String cvcValue = mCvcNumberEditText.getText().toString().trim();
+        final String cvcValue = Objects.requireNonNull(mCvcNumberEditText.getText())
+                .toString().trim();
         if (!isCvcLengthValid(cvcValue)) {
             return null;
         }
@@ -173,6 +192,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      *
      * @param listener the listener
      */
+    @Override
     public void setCardInputListener(@Nullable CardInputListener listener) {
         mCardInputListener = listener;
     }
@@ -218,6 +238,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     /**
      * Clear all text fields in the CardInputWidget.
      */
+    @Override
     public void clear() {
         if (mCardNumberEditText.hasFocus()
                 || mExpiryDateEditText.hasFocus()
@@ -394,7 +415,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     @VisibleForTesting
-    void setDimensionOverrideSettings(DimensionOverrideSettings dimensonOverrides) {
+    void setDimensionOverrideSettings(@Nullable DimensionOverrideSettings dimensonOverrides) {
         mDimensionOverrides = dimensonOverrides;
     }
 
@@ -477,7 +498,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     private void setLayoutValues(int width, int margin, @NonNull StripeEditText editText) {
-        FrameLayout.LayoutParams layoutParams =
+        final FrameLayout.LayoutParams layoutParams =
                 (FrameLayout.LayoutParams) editText.getLayoutParams();
         layoutParams.width = width;
         layoutParams.leftMargin = margin;
@@ -496,23 +517,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
                 : mDimensionOverrides.getFrameWidth();
     }
 
-    private void initView(AttributeSet attrs) {
-        inflate(getContext(), R.layout.card_input_widget, this);
-
-        // This ensures that onRestoreInstanceState is called
-        // during rotations.
-        if (getId() == NO_ID) {
-            setId(DEFAULT_READER_ID);
-        }
-
-        setOrientation(LinearLayout.HORIZONTAL);
-        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
-        mPlacementParameters = new PlacementParameters();
-        mCardIconImageView = findViewById(R.id.iv_card_icon);
-        mCardNumberEditText = findViewById(R.id.et_card_number);
-        mExpiryDateEditText = findViewById(R.id.et_expiry_date);
-        mCvcNumberEditText = findViewById(R.id.et_cvc_number);
-
+    private void initView(@Nullable AttributeSet attrs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mCardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
             mExpiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
@@ -536,33 +541,33 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
 
         mCardNumberIsViewed = true;
 
-        mFrameLayout = findViewById(R.id.frame_container);
-        mErrorColorInt = mCardNumberEditText.getDefaultErrorColorInt();
+        @ColorInt int errorColorInt = mCardNumberEditText.getDefaultErrorColorInt();
         mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
+        String cardHintText = null;
         if (attrs != null) {
-            TypedArray a = getContext().getTheme().obtainStyledAttributes(
+            final TypedArray a = getContext().getTheme().obtainStyledAttributes(
                     attrs,
                     R.styleable.CardInputView,
                     0, 0);
 
             try {
-                mErrorColorInt =
-                        a.getColor(R.styleable.CardInputView_cardTextErrorColor, mErrorColorInt);
                 mTintColorInt =
                         a.getColor(R.styleable.CardInputView_cardTint, mTintColorInt);
-                mCardHintText =
+                errorColorInt =
+                        a.getColor(R.styleable.CardInputView_cardTextErrorColor, errorColorInt);
+                cardHintText =
                         a.getString(R.styleable.CardInputView_cardHintText);
             } finally {
                 a.recycle();
             }
         }
 
-        if (mCardHintText != null) {
-            mCardNumberEditText.setHint(mCardHintText);
+        if (cardHintText != null) {
+            mCardNumberEditText.setHint(cardHintText);
         }
-        mCardNumberEditText.setErrorColor(mErrorColorInt);
-        mExpiryDateEditText.setErrorColor(mErrorColorInt);
-        mCvcNumberEditText.setErrorColor(mErrorColorInt);
+        mCardNumberEditText.setErrorColor(errorColorInt);
+        mExpiryDateEditText.setErrorColor(errorColorInt);
+        mCvcNumberEditText.setErrorColor(errorColorInt);
 
         mCardNumberEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
@@ -606,7 +611,8 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
                 updateIconCvc(
                         mCardNumberEditText.getCardBrand(),
                         hasFocus,
-                        mCvcNumberEditText.getText().toString());
+                        Objects.requireNonNull(mCvcNumberEditText.getText()).toString()
+                );
             }
         });
 
@@ -991,9 +997,10 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
         int dateRightTouchBufferLimit;
         int cvcStartPosition;
 
+        @NonNull
         @Override
         public String toString() {
-            String touchBufferData = String.format(Locale.ENGLISH,
+            final String touchBufferData = String.format(Locale.ENGLISH,
                     "Touch Buffer Data:\n" +
                             "CardTouchBufferLimit = %d\n" +
                             "DateStartPosition = %d\n" +
@@ -1003,7 +1010,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
                     dateStartPosition,
                     dateRightTouchBufferLimit,
                     cvcStartPosition);
-            String elementSizeData = String.format(Locale.ENGLISH,
+            final String elementSizeData = String.format(Locale.ENGLISH,
                     "CardWidth = %d\n" +
                             "HiddenCardWidth = %d\n" +
                             "PeekCardWidth = %d\n" +

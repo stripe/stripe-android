@@ -97,6 +97,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     /**
      * Clear all entered data and hide all error messages.
      */
+    @Override
     public void clear() {
         mCardNumberEditText.setText("");
         mExpiryDateEditText.setText("");
@@ -113,6 +114,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
      * @param cardInputListener A {@link CardInputListener} to be notified of changes
      *                          to the user's focused field
      */
+    @Override
     public void setCardInputListener(@Nullable CardInputListener cardInputListener) {
         mCardInputListener = cardInputListener;
     }
@@ -125,6 +127,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
      * {@code null} if any field is invalid
      */
     @Nullable
+    @Override
     public PaymentMethodCreateParams.Card getPaymentMethodCard() {
         if (validateAllFields()) {
             final int[] cardDate = mExpiryDateEditText.getValidDateFields();

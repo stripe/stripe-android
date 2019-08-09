@@ -160,7 +160,7 @@ public class StripeEditText extends AppCompatEditText {
      */
     public void setShouldShowError(boolean shouldShowError) {
         if (mErrorMessage != null && mErrorMessageListener != null) {
-            String errorMessage = shouldShowError ? mErrorMessage : null;
+            final String errorMessage = shouldShowError ? mErrorMessage : null;
             mErrorMessageListener.displayErrorMessage(errorMessage);
             mShouldShowError = shouldShowError;
         } else {
