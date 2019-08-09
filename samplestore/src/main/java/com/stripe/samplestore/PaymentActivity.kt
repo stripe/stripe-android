@@ -92,13 +92,6 @@ class PaymentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
-        stripe = if (Settings.STRIPE_ACCOUNT_ID != null) {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey,
-                Settings.STRIPE_ACCOUNT_ID)
-        } else {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
-        }
-
         val selectCustomization = PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()
             .setBackgroundColor("#EC4847")
             .setTextColor("#000000")
@@ -113,6 +106,13 @@ class PaymentActivity : AppCompatActivity() {
                 .setUiCustomization(uiCustomization)
                 .build())
             .build())
+
+        stripe = if (Settings.STRIPE_ACCOUNT_ID != null) {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey,
+                    Settings.STRIPE_ACCOUNT_ID)
+        } else {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+        }
 
         service = RetrofitFactory.instance.create(StripeService::class.java)
 
