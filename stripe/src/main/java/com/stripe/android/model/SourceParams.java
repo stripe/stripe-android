@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -33,18 +34,14 @@ public final class SourceParams implements StripeParamsModel {
 
     private static final String API_PARAM_CLIENT_SECRET = "client_secret";
 
-    private static final String FIELD_ADDRESS = "address";
     private static final String FIELD_BANK = "bank";
     private static final String FIELD_CARD = "card";
     private static final String FIELD_COUNTRY = "country";
     private static final String FIELD_CVC = "cvc";
-    private static final String FIELD_EMAIL = "email";
     private static final String FIELD_EXP_MONTH = "exp_month";
     private static final String FIELD_EXP_YEAR = "exp_year";
     private static final String FIELD_IBAN = "iban";
-    private static final String FIELD_NAME = "name";
     private static final String FIELD_NUMBER = "number";
-    private static final String FIELD_PHONE = "phone";
     private static final String FIELD_RETURN_URL = "return_url";
     private static final String FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor";
     private static final String FIELD_PREFERRED_LANGUAGE = "preferred_language";
@@ -76,7 +73,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary for creating a P24 source.
+     * Create P24 Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *               charge the customer (e.g., 1099 for a €10.99 payment).
@@ -88,7 +85,7 @@ public final class SourceParams implements StripeParamsModel {
      *                  process.
      * @return a {@link SourceParams} that can be used to create a P24 source
      *
-     * @see <a href="https://stripe.com/docs/sources/p24">https://stripe.com/docs/sources/p24</a>
+     * @see <a href="https://stripe.com/docs/sources/p24">Przelewy24 Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createP24Params(
@@ -97,23 +94,20 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @NonNull String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams(SourceType.P24)
+        return new SourceParams(SourceType.P24)
                 .setAmount(amount)
                 .setCurrency(currency)
-                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-
-        final Map<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_NAME, name);
-        ownerMap.put(FIELD_EMAIL, email);
-        if (!ownerMap.isEmpty()) {
-            params.setOwner(ownerMap);
-        }
-
-        return params;
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setOwner(new Owner.Builder()
+                        .setEmail(email)
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                );
     }
 
     /**
-     * Create parameters necessary for creating a reusable Alipay source.
+     * Create reusable Alipay Source params.
      *
      * @param currency The currency of the payment. Must be the default currency for your country.
      *                 Can be aud, cad, eur, gbp, hkd, jpy, nzd, sgd, or usd. Users in Denmark,
@@ -124,7 +118,7 @@ public final class SourceParams implements StripeParamsModel {
      *                 process.
      * @return a {@link SourceParams} that can be used to create an Alipay reusable source
      *
-     * @see <a href="https://stripe.com/docs/sources/alipay">https://stripe.com/docs/sources/alipay</a>
+     * @see <a href="https://stripe.com/docs/sources/alipay">Alipay Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createAlipayReusableParams(
@@ -132,27 +126,20 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams(SourceType.ALIPAY)
+        return new SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
-                .setUsage(Source.Usage.REUSABLE);
-
-        final Map<String, Object> ownerMap = new HashMap<>();
-        if (name != null) {
-            ownerMap.put(FIELD_NAME, name);
-        }
-        if (email != null) {
-            ownerMap.put(FIELD_EMAIL, email);
-        }
-        if (!ownerMap.isEmpty()) {
-            params.setOwner(ownerMap);
-        }
-
-        return params;
+                .setUsage(Source.Usage.REUSABLE)
+                .setOwner(new Owner.Builder()
+                        .setEmail(email)
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                );
     }
 
     /**
-     * Create parameters necessary for creating a single use Alipay source.
+     * Create single-use Alipay Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *              charge the customer (e.g., 1099 for a $10.99 payment).
@@ -165,7 +152,7 @@ public final class SourceParams implements StripeParamsModel {
      *                 process.
      * @return a {@link SourceParams} that can be used to create an Alipay single-use source
      *
-     * @see <a href="https://stripe.com/docs/sources/alipay">https://stripe.com/docs/sources/alipay</a>
+     * @see <a href="https://stripe.com/docs/sources/alipay">Alipay Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createAlipaySingleUseParams(
@@ -174,24 +161,16 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String name,
             @Nullable String email,
             @NonNull String returnUrl) {
-        final SourceParams params = new SourceParams(SourceType.ALIPAY)
+        return new SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-
-        final Map<String, Object> ownerMap = new HashMap<>();
-        if (name != null) {
-            ownerMap.put(FIELD_NAME, name);
-        }
-        if (email != null) {
-            ownerMap.put(FIELD_EMAIL, email);
-        }
-
-        if (!ownerMap.isEmpty()) {
-            params.setOwner(ownerMap);
-        }
-
-        return params;
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setOwner(new Owner.Builder()
+                        .setEmail(email)
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                );
     }
 
     @NonNull
@@ -207,7 +186,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary for creating a Bancontact source.
+     * Create Bancontact Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *              charge the customer (e.g., 1099 for a €10.99 payment). The charge amount must be
@@ -221,7 +200,7 @@ public final class SourceParams implements StripeParamsModel {
      *                          (optional).
      * @return a {@link SourceParams} object that can be used to create a Bancontact source
      *
-     * @see <a href="https://stripe.com/docs/sources/bancontact">https://stripe.com/docs/sources/bancontact</a>
+     * @see <a href="https://stripe.com/docs/sources/bancontact">Bancontact Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createBancontactParams(
@@ -233,7 +212,11 @@ public final class SourceParams implements StripeParamsModel {
         final SourceParams params = new SourceParams(SourceType.BANCONTACT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(createSimpleMap(FIELD_NAME, name))
+                .setOwner(new Owner.Builder()
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                )
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
         if (statementDescriptor != null || preferredLanguage != null) {
@@ -275,12 +258,12 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary for creating a card source.
+     * Create Card Source params.
      *
      * @param card A {@link Card} object containing the details necessary for the source.
      * @return a {@link SourceParams} object that can be used to create a card source.
      *
-     * @see <a href="https://stripe.com/docs/sources/cards">https://stripe.com/docs/sources/cards</a>
+     * @see <a href="https://stripe.com/docs/sources/cards">Card Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createCardParams(@NonNull Card card) {
@@ -296,25 +279,20 @@ public final class SourceParams implements StripeParamsModel {
 
         params.setApiParameterMap(basicInfoMap);
 
-        final Map<String, Object> addressMap = new Address.Builder()
-                .setLine1(card.getAddressLine1())
-                .setLine2(card.getAddressLine2())
-                .setCity(card.getAddressCity())
-                .setState(card.getAddressState())
-                .setPostalCode(card.getAddressZip())
-                .setCountry(card.getAddressCountry())
+        params.setOwner(new Owner.Builder()
+                .setAddress(new Address.Builder()
+                        .setLine1(card.getAddressLine1())
+                        .setLine2(card.getAddressLine2())
+                        .setCity(card.getAddressCity())
+                        .setState(card.getAddressState())
+                        .setPostalCode(card.getAddressZip())
+                        .setCountry(card.getAddressCountry())
+                        .build()
+                )
+                .setName(card.getName())
                 .build()
-                .toParamMap();
-
-        // If there are any keys left...
-        final Map<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_NAME, card.getName());
-        if (!addressMap.isEmpty()) {
-            ownerMap.put(FIELD_ADDRESS, addressMap);
-        }
-        if (!ownerMap.isEmpty()) {
-            params.setOwner(ownerMap);
-        }
+                .toParamMap()
+        );
 
         final Map<String, String> metadata = card.getMetadata();
         if (metadata != null) {
@@ -345,13 +323,13 @@ public final class SourceParams implements StripeParamsModel {
 
         final SourceParams params = new SourceParams(SourceType.CARD)
                 .setToken(stripeTokenId);
-        final Map<String, Object> addressMap;
+        final Address address;
         final String phone;
         final String name;
         if (googlePayBillingAddress != null) {
             name = StripeJsonUtils.optString(googlePayBillingAddress, "name");
             phone = StripeJsonUtils.optString(googlePayBillingAddress, "phoneNumber");
-            addressMap = new Address.Builder()
+            address = new Address.Builder()
                     .setLine1(StripeJsonUtils.optString(
                             googlePayBillingAddress, "address1"))
                     .setLine2(StripeJsonUtils.optString(
@@ -364,37 +342,25 @@ public final class SourceParams implements StripeParamsModel {
                             googlePayBillingAddress, "postalCode"))
                     .setCountry(StripeJsonUtils.optString(
                             googlePayBillingAddress, "countryCode"))
-                    .build()
-                    .toParamMap();
+                    .build();
         } else {
             name = null;
             phone = null;
-            addressMap = null;
+            address = null;
         }
 
-        final Map<String, Object> ownerMap = new HashMap<>();
-        final String email = StripeJsonUtils.optString(googlePayPaymentData, "email");
-        if (email != null) {
-            ownerMap.put(FIELD_EMAIL, email);
-        }
-        if (name != null) {
-            ownerMap.put(FIELD_NAME, name);
-        }
-        if (phone != null) {
-            ownerMap.put(FIELD_PHONE, phone);
-        }
-        if (addressMap != null && !addressMap.isEmpty()) {
-            ownerMap.put(FIELD_ADDRESS, addressMap);
-        }
-        if (!ownerMap.isEmpty()) {
-            params.setOwner(ownerMap);
-        }
-
-        return params;
+        return params.setOwner(new Owner.Builder()
+                .setAddress(address)
+                .setEmail(StripeJsonUtils.optString(googlePayPaymentData, "email"))
+                .setName(name)
+                .setPhone(phone)
+                .build()
+                .toParamMap()
+        );
     }
 
     /**
-     * Create parameters necessary for creating an EPS source.
+     * Create EPS Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *               charge the customer (e.g., 1099 for a €10.99 payment).
@@ -404,7 +370,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param statementDescriptor A custom statement descriptor for the payment (optional).
      * @return a {@link SourceParams} object that can be used to create an EPS source
      *
-     * @see <a href="https://stripe.com/docs/sources/eps">https://stripe.com/docs/sources/eps</a>
+     * @see <a href="https://stripe.com/docs/sources/eps">EPS Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createEPSParams(
@@ -415,7 +381,11 @@ public final class SourceParams implements StripeParamsModel {
         final SourceParams params = new SourceParams(SourceType.EPS)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(createSimpleMap(FIELD_NAME, name))
+                .setOwner(new Owner.Builder()
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                )
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
         if (statementDescriptor != null) {
@@ -428,7 +398,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary for creating a Giropay source
+     * Create Giropay Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *              charge the customer (e.g., 1099 for a €10.99 payment).
@@ -438,7 +408,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param statementDescriptor A custom statement descriptor for the payment (optional).
      * @return a {@link SourceParams} object that can be used to create a Giropay source
      *
-     * @see <a href="https://stripe.com/docs/sources/giropay">https://stripe.com/docs/sources/giropay</a>
+     * @see <a href="https://stripe.com/docs/sources/giropay">Giropay Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createGiropayParams(
@@ -449,7 +419,11 @@ public final class SourceParams implements StripeParamsModel {
         final SourceParams params = new SourceParams(SourceType.GIROPAY)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(createSimpleMap(FIELD_NAME, name))
+                .setOwner(new Owner.Builder()
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                )
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
 
         if (statementDescriptor != null) {
@@ -462,7 +436,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary for creating an iDEAL source.
+     * Create iDEAL Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *               charge the customer (e.g., 1099 for a €10.99 payment).
@@ -473,7 +447,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param bank The customer’s bank (optional).
      * @return a {@link SourceParams} object that can be used to create an iDEAL source
      *
-     * @see <a href="https://stripe.com/docs/sources/ideal">https://stripe.com/docs/sources/ideal</a>
+     * @see <a href="https://stripe.com/docs/sources/ideal">iDEAL Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createIdealParams(
@@ -485,10 +459,12 @@ public final class SourceParams implements StripeParamsModel {
         final SourceParams params = new SourceParams(SourceType.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl));
-        if (name != null) {
-            params.setOwner(createSimpleMap(FIELD_NAME, name));
-        }
+                .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
+                .setOwner(new Owner.Builder()
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                );
         final Map<String, Object> additionalParamsMap = new HashMap<>();
         if (statementDescriptor != null) {
             additionalParamsMap.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
@@ -503,7 +479,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary to create a Multibanco source.
+     * Create Multibanco Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *               charge the customer (e.g., 1099 for a €10.99 payment).
@@ -512,7 +488,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param email The full email address of the customer.
      * @return a {@link SourceParams} object that can be used to create a Multibanco source
      *
-     * @see <a href="https://stripe.com/docs/sources/multibanco">https://stripe.com/docs/sources/multibanco</a>
+     * @see <a href="https://stripe.com/docs/sources/multibanco">Multibanco Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createMultibancoParams(
@@ -523,7 +499,11 @@ public final class SourceParams implements StripeParamsModel {
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setRedirect(createSimpleMap(FIELD_RETURN_URL, returnUrl))
-                .setOwner(createSimpleMap(FIELD_EMAIL, email));
+                .setOwner(new Owner.Builder()
+                        .setEmail(email)
+                        .build()
+                        .toParamMap()
+                );
     }
 
     @NonNull
@@ -538,7 +518,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary to create a SEPA debit source
+     * Create SEPA Debit Source params.
      *
      * @param name The full name of the account holder.
      * @param iban The IBAN number for the bank account that you wish to debit.
@@ -549,7 +529,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param country The ISO-3166 2-letter country code of the owner's address.
      * @return a {@link SourceParams} object that can be used to create a SEPA debit source
      *
-     * @see <a href="https://stripe.com/docs/sources/sepa-debit">https://stripe.com/docs/sources/sepa-debit</a>
+     * @see <a href="https://stripe.com/docs/sources/sepa-debit">SEPA Direct Debit Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createSepaDebitParams(
@@ -560,31 +540,25 @@ public final class SourceParams implements StripeParamsModel {
             @Nullable String city,
             @Nullable String postalCode,
             @Nullable @Size(2) String country) {
-        final SourceParams params = new SourceParams(SourceType.SEPA_DEBIT)
-                .setCurrency(Source.EURO);
-
-        final Map<String, Object> address = new Address.Builder()
-                .setLine1(addressLine1)
-                .setCity(city)
-                .setPostalCode(postalCode)
-                .setCountry(country)
-                .build()
-                .toParamMap();
-
-        final Map<String, Object> ownerMap = new HashMap<>();
-        ownerMap.put(FIELD_NAME, name);
-        if (email != null) {
-            ownerMap.put(FIELD_EMAIL, email);
-        }
-        ownerMap.put(FIELD_ADDRESS, address);
-
-        return params
-                .setOwner(ownerMap)
+        return new SourceParams(SourceType.SEPA_DEBIT)
+                .setCurrency(Source.EURO)
+                .setOwner(new Owner.Builder()
+                        .setAddress(new Address.Builder()
+                                .setLine1(addressLine1)
+                                .setCity(city)
+                                .setPostalCode(postalCode)
+                                .setCountry(country)
+                                .build())
+                        .setEmail(email)
+                        .setName(name)
+                        .build()
+                        .toParamMap()
+                )
                 .setApiParameterMap(createSimpleMap(FIELD_IBAN, iban));
     }
 
     /**
-     * Create parameters necessary to create a SOFORT source.
+     * Create SOFORT Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *              charge the customer (e.g., 1099 for a €10.99 payment).
@@ -594,7 +568,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param statementDescriptor A custom statement descriptor for the payment (optional).
      * @return a {@link SourceParams} object that can be used to create a SOFORT source
      *
-     * @see <a href="https://stripe.com/docs/sources/sofort">https://stripe.com/docs/sources/sofort</a>
+     * @see <a href="https://stripe.com/docs/sources/sofort">SOFORT Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createSofortParams(
@@ -617,7 +591,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     /**
-     * Create parameters necessary to create a 3D Secure source.
+     * Create 3D Secure Source params.
      *
      * @param amount A positive integer in the smallest currency unit representing the amount to
      *              charge the customer (e.g., 1099 for a €10.99 payment).
@@ -626,7 +600,7 @@ public final class SourceParams implements StripeParamsModel {
      * @param cardID The ID of the card source.
      * @return a {@link SourceParams} object that can be used to create a 3D Secure source
      *
-     * @see <a href="https://stripe.com/docs/sources/three-d-secure">https://stripe.com/docs/sources/three-d-secure</a>
+     * @see <a href="https://stripe.com/docs/sources/three-d-secure">3D Secure Card Payments with Sources</a>
      */
     @NonNull
     public static SourceParams createThreeDSecureParams(
@@ -749,7 +723,7 @@ public final class SourceParams implements StripeParamsModel {
     /**
      * @return a custom type of this source, if one has been set
      */
-    @Nullable
+    @NonNull
     public String getTypeRaw() {
         return mTypeRaw;
     }
@@ -809,8 +783,8 @@ public final class SourceParams implements StripeParamsModel {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public SourceParams setOwner(Map<String, Object> owner) {
-        mOwner = owner;
+    public SourceParams setOwner(@NonNull Map<String, Object> owner) {
+        mOwner = !owner.isEmpty() ? owner : null;
         return this;
     }
 
@@ -891,7 +865,7 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     @NonNull
-    public SourceParams setWeChatParams(@NonNull WeChatParams weChatParams) {
+    private SourceParams setWeChatParams(@NonNull WeChatParams weChatParams) {
         mWeChatParams = weChatParams;
         return this;
     }
@@ -918,7 +892,7 @@ public final class SourceParams implements StripeParamsModel {
         if (mCurrency != null) {
             networkReadyMap.put(API_PARAM_CURRENCY, mCurrency);
         }
-        if (mOwner != null) {
+        if (mOwner != null && !mOwner.isEmpty()) {
             networkReadyMap.put(API_PARAM_OWNER, mOwner);
         }
         if (mRedirect != null) {
@@ -946,16 +920,6 @@ public final class SourceParams implements StripeParamsModel {
     private static <T> Map<String, Object> createSimpleMap(@NonNull String key, @NonNull T value) {
         final Map<String, Object> simpleMap = new HashMap<>();
         simpleMap.put(key, value);
-        return simpleMap;
-    }
-
-    @NonNull
-    private static <T> Map<String, Object> createSimpleMap(
-            @NonNull String key1, @NonNull T value1,
-            @NonNull String key2, @NonNull T value2) {
-        final Map<String, Object> simpleMap = new HashMap<>();
-        simpleMap.put(key1, value1);
-        simpleMap.put(key2, value2);
         return simpleMap;
     }
 
@@ -1007,6 +971,84 @@ public final class SourceParams implements StripeParamsModel {
                 params.put(FIELD_STATEMENT_DESCRIPTOR, statementDescriptor);
             }
             return params;
+        }
+    }
+
+    /**
+     * <a href="https://stripe.com/docs/api/sources/create#create_source-owner">Owner param</a>
+     */
+    private static final class Owner implements StripeParamsModel {
+        private static final String FIELD_ADDRESS = "address";
+        private static final String FIELD_EMAIL = "email";
+        private static final String FIELD_NAME = "name";
+        private static final String FIELD_PHONE = "phone";
+
+        @Nullable private final Address mAddress;
+        @Nullable private final String mEmail;
+        @Nullable private final String mName;
+        @Nullable private final String mPhone;
+
+        private Owner(@NonNull Builder builder) {
+            mAddress = builder.mAddress;
+            mEmail = builder.mEmail;
+            mName = builder.mName;
+            mPhone = builder.mPhone;
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Object> toParamMap() {
+            final Map<String, Object> params = new HashMap<>();
+            if (mAddress != null) {
+                params.put(FIELD_ADDRESS, mAddress.toParamMap());
+            }
+            if (mEmail != null) {
+                params.put(FIELD_EMAIL, mEmail);
+            }
+            if (mName != null) {
+                params.put(FIELD_NAME, mName);
+            }
+            if (mPhone != null) {
+                params.put(FIELD_PHONE, mPhone);
+            }
+            return params;
+        }
+
+        private static final class Builder implements ObjectBuilder<Owner> {
+            @Nullable private Address mAddress;
+            @Nullable private String mEmail;
+            @Nullable private String mName;
+            @Nullable private String mPhone;
+
+            @NonNull
+            private Builder setAddress(@Nullable Address address) {
+                this.mAddress = address;
+                return this;
+            }
+
+            @NonNull
+            private Builder setEmail(@Nullable String email) {
+                this.mEmail = email;
+                return this;
+            }
+
+            @NonNull
+            private Builder setName(@Nullable String name) {
+                this.mName = name;
+                return this;
+            }
+
+            @NonNull
+            private Builder setPhone(@Nullable String phone) {
+                this.mPhone = phone;
+                return this;
+            }
+
+            @NonNull
+            @Override
+            public Owner build() {
+                return new Owner(this);
+            }
         }
     }
 }
