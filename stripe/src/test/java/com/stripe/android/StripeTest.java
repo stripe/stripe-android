@@ -306,9 +306,11 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken()
             throws StripeException {
-        final Stripe stripe = new Stripe(mContext,
-                ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY);
-        stripe.setStripeAccount("acct_1Acj2PBUgO3KuWzz");
+        final Stripe stripe = new Stripe(
+                mContext,
+                ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                "acct_1Acj2PBUgO3KuWzz"
+        );
 
         final Token token = stripe.createTokenSynchronous(CARD);
 
@@ -1402,7 +1404,8 @@ public class StripeTest {
                 apiHandler,
                 new StripeNetworkUtils(mContext),
                 new PaymentController(mContext, apiHandler),
-                publishableKey
+                publishableKey,
+                null
         );
     }
 
@@ -1415,6 +1418,7 @@ public class StripeTest {
                 new StripeNetworkUtils(mContext),
                 new PaymentController(mContext, apiHandler),
                 NON_LOGGING_PK,
+                null,
                 tokenCreator
         );
     }

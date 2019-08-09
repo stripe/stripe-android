@@ -92,9 +92,11 @@ class PaymentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
-        stripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
-        if (Settings.STRIPE_ACCOUNT_ID != null) {
-            stripe.setStripeAccount(Settings.STRIPE_ACCOUNT_ID)
+        stripe = if (Settings.STRIPE_ACCOUNT_ID != null) {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey,
+                Settings.STRIPE_ACCOUNT_ID)
+        } else {
+            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
         }
 
         val selectCustomization = PaymentAuthConfig.Stripe3ds2ButtonCustomization.Builder()

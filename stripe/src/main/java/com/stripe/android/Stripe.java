@@ -58,41 +58,66 @@ public class Stripe {
     @NonNull private final TokenCreator mTokenCreator;
     @NonNull private final ApiKeyValidator mApiKeyValidator;
     private String mDefaultPublishableKey;
-    @Nullable private String mStripeAccount;
+    @Nullable private String mStripeAccountId;
 
     /**
-     * A constructor with only context, to set the key later.
+     * Constructor that requires the key to be set with {@link #setDefaultPublishableKey(String)}.
      *
-     * @param context {@link Context} for resolving resources
+     * @param context Activity or application context
+     *
+     * @deprecated use {@link Stripe#Stripe(Context, String)}
      */
+    @Deprecated
     public Stripe(@NonNull Context context) {
         this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
-                null);
+                null, null);
     }
 
     /**
      * Constructor with publishable key.
      *
-     * @param context {@link Context} for resolving resources
+     * @param context Activity or application context
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
         this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
-                ApiKeyValidator.get().requireValid(publishableKey));
+                ApiKeyValidator.get().requireValid(publishableKey), null);
     }
 
-    Stripe(@NonNull Context context, @NonNull final StripeApiHandler apiHandler,
-                   @NonNull StripeNetworkUtils stripeNetworkUtils,
-                   @Nullable String publishableKey) {
+    /**
+     * Constructor with publishable key and Stripe Connect account id.
+     *
+     * @param context Activity or application context
+     * @param publishableKey the client's publishable key
+     * @param stripeAccountId the Stripe Connect account id to attach to
+     *                        <a href="https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header">Stripe API requests</a>
+     */
+    public Stripe(@NonNull Context context,
+                  @NonNull String publishableKey,
+                  @NonNull String stripeAccountId) {
+        this(context,
+                new StripeApiHandler(context, sAppInfo),
+                new StripeNetworkUtils(context),
+                ApiKeyValidator.get().requireValid(publishableKey),
+                stripeAccountId
+        );
+    }
+
+    Stripe(@NonNull Context context,
+           @NonNull final StripeApiHandler apiHandler,
+           @NonNull StripeNetworkUtils stripeNetworkUtils,
+           @Nullable String publishableKey,
+           @Nullable String stripeAccountId) {
         this(apiHandler, stripeNetworkUtils,
-                new PaymentController(context, apiHandler), publishableKey);
+                new PaymentController(context, apiHandler), publishableKey, stripeAccountId);
     }
 
     Stripe(@NonNull final StripeApiHandler apiHandler,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
-           @Nullable String publishableKey) {
-        this(apiHandler, stripeNetworkUtils, paymentController, publishableKey,
+           @Nullable String publishableKey,
+           @Nullable String stripeAccountId) {
+        this(apiHandler, stripeNetworkUtils, paymentController, publishableKey, stripeAccountId,
                 new TokenCreator() {
                     @Override
                     public void create(
@@ -113,12 +138,14 @@ public class Stripe {
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
            @Nullable String publishableKey,
+           @Nullable String stripeAccountId,
            @NonNull TokenCreator tokenCreator) {
         mApiKeyValidator = new ApiKeyValidator();
         mApiHandler = apiHandler;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentController = paymentController;
         mTokenCreator = tokenCreator;
+        mStripeAccountId = stripeAccountId;
         mDefaultPublishableKey = publishableKey != null ?
                 mApiKeyValidator.requireValid(publishableKey) : null;
     }
@@ -149,7 +176,7 @@ public class Stripe {
         mPaymentController.startConfirmAndAuth(
                 AuthActivityStarter.Host.create(activity),
                 confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -172,7 +199,7 @@ public class Stripe {
         mPaymentController.startConfirmAndAuth(
                 AuthActivityStarter.Host.create(fragment),
                 confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -199,7 +226,7 @@ public class Stripe {
         mPaymentController.startConfirmAndAuth(
                 AuthActivityStarter.Host.create(activity),
                 confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -226,7 +253,7 @@ public class Stripe {
         mPaymentController.startConfirmAndAuth(
                 AuthActivityStarter.Host.create(fragment),
                 confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -253,7 +280,7 @@ public class Stripe {
         mPaymentController.startAuth(
                 AuthActivityStarter.Host.create(activity),
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -280,7 +307,7 @@ public class Stripe {
         mPaymentController.startAuth(
                 AuthActivityStarter.Host.create(fragment),
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -306,7 +333,7 @@ public class Stripe {
         mPaymentController.startAuth(
                 AuthActivityStarter.Host.create(activity),
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -331,7 +358,7 @@ public class Stripe {
         mPaymentController.startAuth(
                 AuthActivityStarter.Host.create(fragment),
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -356,7 +383,7 @@ public class Stripe {
                 mPaymentController.shouldHandlePaymentResult(requestCode, data)) {
             mPaymentController.handlePaymentResult(
                     data,
-                    ApiRequest.Options.create(publishableKey, mStripeAccount),
+                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
                     callback);
             return true;
         }
@@ -384,7 +411,7 @@ public class Stripe {
                 mPaymentController.shouldHandleSetupResult(requestCode, data)) {
             mPaymentController.handleSetupResult(
                     data,
-                    ApiRequest.Options.create(publishableKey, mStripeAccount),
+                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
                     callback
             );
             return true;
@@ -528,7 +555,7 @@ public class Stripe {
         params.putAll(mStripeNetworkUtils.createUidParams());
         return mApiHandler.createToken(
                 params,
-                ApiRequest.Options.create(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.BANK_ACCOUNT
         );
     }
@@ -596,7 +623,7 @@ public class Stripe {
             @NonNull String publishableKey,
             @Nullable Executor executor) {
         executeTask(executor,
-                new CreateSourceTask(mApiHandler, sourceParams, publishableKey, mStripeAccount,
+                new CreateSourceTask(mApiHandler, sourceParams, publishableKey, mStripeAccountId,
                         callback));
     }
 
@@ -628,7 +655,7 @@ public class Stripe {
             @NonNull String publishableKey,
             @Nullable Executor executor) {
         executeTask(executor, new CreatePaymentMethodTask(mApiHandler, paymentMethodCreateParams,
-                publishableKey, mStripeAccount, callback));
+                publishableKey, mStripeAccountId, callback));
     }
 
     /**
@@ -743,7 +770,7 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.createSource(params,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
     /**
@@ -763,7 +790,7 @@ public class Stripe {
             APIException {
         return mApiHandler.retrievePaymentIntent(
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -794,7 +821,7 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmPaymentIntent(
                 confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -826,7 +853,7 @@ public class Stripe {
             APIException {
         return mApiHandler.retrieveSetupIntent(
                 clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -857,7 +884,7 @@ public class Stripe {
             APIException {
         return mApiHandler.confirmSetupIntent(
                 confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount)
+                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -876,7 +903,7 @@ public class Stripe {
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
         return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
     /**
@@ -935,7 +962,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 mStripeNetworkUtils.createCardTokenParams(card),
-                ApiRequest.Options.create(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.CARD
         );
     }
@@ -985,7 +1012,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 new PiiTokenParams(personalId).toParamMap(),
-                ApiRequest.Options.create(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.PII
         );
     }
@@ -1035,7 +1062,7 @@ public class Stripe {
             APIException {
         return mApiHandler.createToken(
                 new CvcTokenParams(cvc).toParamMap(),
-                ApiRequest.Options.create(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.CVC_UPDATE
         );
     }
@@ -1087,7 +1114,7 @@ public class Stripe {
         try {
             return mApiHandler.createToken(
                     accountParams.toParamMap(),
-                    ApiRequest.Options.create(publishableKey, mStripeAccount),
+                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
                     Token.TokenType.ACCOUNT
             );
         } catch (CardException exception) {
@@ -1148,7 +1175,7 @@ public class Stripe {
             APIConnectionException,
             APIException {
         return mApiHandler.retrieveSource(sourceId, clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccount));
+                ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
     /**
@@ -1166,12 +1193,15 @@ public class Stripe {
     /**
      * Set the Stripe Connect account to use with this Stripe instance.
      *
-     * @param stripeAccount the account ID to be set
-     * @see <a href=https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header>
+     * @param stripeAccountId the account ID to be set
+     * @see <a href="https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header">
      *         Authentication via the stripe account header</a>
+     *
+     * @deprecated use {@link Stripe#Stripe(Context, String, String)}
      */
-    public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccount) {
-        mStripeAccount = stripeAccount;
+    @Deprecated
+    public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccountId) {
+        mStripeAccountId = stripeAccountId;
     }
 
     private void createTokenFromParams(
@@ -1185,7 +1215,7 @@ public class Stripe {
                             "token and handle errors");
         mTokenCreator.create(
                 tokenParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccount),
+                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 tokenType,
                 executor, callback);
     }

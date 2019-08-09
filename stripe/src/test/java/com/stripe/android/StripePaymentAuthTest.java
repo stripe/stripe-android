@@ -147,7 +147,8 @@ public class StripePaymentAuthTest {
                         null),
                 new StripeNetworkUtils(mContext),
                 mPaymentController,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                null
         );
     }
 }
