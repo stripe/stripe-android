@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import java.util.Map;
-
 final class FingerprintRequestFactory implements Factory0<FingerprintRequest> {
 
     @NonNull private final TelemetryClientUtil mTelemetryClientUtil;
@@ -22,8 +20,9 @@ final class FingerprintRequestFactory implements Factory0<FingerprintRequest> {
     @NonNull
     @Override
     public FingerprintRequest create() {
-        final Map<String, Object> params = mTelemetryClientUtil.createTelemetryMap();
-        StripeNetworkUtils.removeNullAndEmptyParams(params);
-        return new FingerprintRequest(params, mTelemetryClientUtil.getHashedId());
+        return new FingerprintRequest(
+                mTelemetryClientUtil.createTelemetryMap(),
+                mTelemetryClientUtil.getHashedId()
+        );
     }
 }

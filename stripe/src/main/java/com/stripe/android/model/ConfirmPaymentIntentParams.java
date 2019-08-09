@@ -7,7 +7,6 @@ import android.support.annotation.VisibleForTesting;
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -371,7 +370,7 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final AbstractMap<String, Object> networkReadyMap = new HashMap<>();
+        final Map<String, Object> networkReadyMap = new HashMap<>();
 
         if (mPaymentMethodCreateParams != null) {
             networkReadyMap.put(API_PARAM_PAYMENT_METHOD_DATA,

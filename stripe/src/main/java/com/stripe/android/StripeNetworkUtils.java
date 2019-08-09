@@ -10,7 +10,6 @@ import com.stripe.android.model.Token;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -60,9 +59,6 @@ public class StripeNetworkUtils {
         cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
         cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
 
-        // Remove all null values; they cause validation errors
-        removeNullAndEmptyParams(cardParams);
-
         // We store the logging items in this field, which is extracted from the parameters
         // sent to the API.
         tokenParams.put(AnalyticsDataFactory.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
@@ -71,36 +67,6 @@ public class StripeNetworkUtils {
         tokenParams.putAll(createUidParams());
 
         return tokenParams;
-    }
-
-    /**
-     * Remove null values from a map. This helps with JSON conversion and validation.
-     *
-     * @param mapToEdit a {@link Map} from which to remove the keys that have {@code null} values
-     */
-    @SuppressWarnings("unchecked")
-    public static void removeNullAndEmptyParams(@NonNull Map<String, Object> mapToEdit) {
-        // Remove all null values; they cause validation errors
-        for (String key : new HashSet<>(mapToEdit.keySet())) {
-            if (mapToEdit.get(key) == null) {
-                mapToEdit.remove(key);
-            }
-
-            if (mapToEdit.get(key) instanceof CharSequence) {
-                CharSequence sequence = (CharSequence) mapToEdit.get(key);
-                if (StripeTextUtils.isEmpty(sequence)) {
-                    mapToEdit.remove(key);
-                }
-            }
-
-            if (mapToEdit.get(key) instanceof Map) {
-                final Map<String, Object> stringObjectMap =
-                        (Map<String, Object>) mapToEdit.get(key);
-                if (stringObjectMap != null) {
-                    removeNullAndEmptyParams(stringObjectMap);
-                }
-            }
-        }
     }
 
     void addUidToConfirmPaymentIntentParams(

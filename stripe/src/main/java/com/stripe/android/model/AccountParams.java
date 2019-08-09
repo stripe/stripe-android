@@ -8,8 +8,6 @@ import com.stripe.android.utils.ObjectUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.stripe.android.StripeNetworkUtils.removeNullAndEmptyParams;
-
 /**
  * Represents a grouping of parameters needed to create a Token for a Connect account on the server.
  */
@@ -73,7 +71,6 @@ public final class AccountParams implements StripeParamsModel {
 
         final Map<String, Object> params = new HashMap<>();
         params.put("account", accountData);
-        removeNullAndEmptyParams(params);
         return params;
     }
 

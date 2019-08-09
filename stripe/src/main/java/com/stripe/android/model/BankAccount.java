@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.StringDef;
 
-import com.stripe.android.StripeNetworkUtils;
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -200,9 +199,6 @@ public final class BankAccount implements StripeParamsModel {
                 StripeTextUtils.nullIfBlank(getAccountHolderName()));
         accountParams.put("account_holder_type",
                 StripeTextUtils.nullIfBlank(getAccountHolderType()));
-
-        // Remove all null values; they cause validation errors
-        StripeNetworkUtils.removeNullAndEmptyParams(accountParams);
 
         params.put(Token.TokenType.BANK_ACCOUNT, accountParams);
 
