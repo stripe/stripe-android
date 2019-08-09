@@ -1,7 +1,6 @@
 package com.stripe.android.view;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -27,22 +26,19 @@ import com.stripe.android.model.Source;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
 /**
  * Activity used to display a {@link CardMultilineWidget} and receive the resulting
  * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of the launching activity.
+ *
+ * <p>Can be started with {@link AddPaymentMethodActivityStarter}
  */
 public class AddPaymentMethodActivity extends StripeActivity {
 
     public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
 
     public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
-    public static final String EXTRA_SHOULD_REQUIRE_POSTAL_CODE = "require_postal";
-
-    static final String EXTRA_PROXY_DELAY = "proxy_delay";
-    static final String EXTRA_UPDATE_CUSTOMER = "update_customer";
 
     @Nullable private CardMultilineWidget mCardMultilineWidget;
     @Nullable private Stripe mStripe;
@@ -50,42 +46,25 @@ public class AddPaymentMethodActivity extends StripeActivity {
     private boolean mStartedFromPaymentSession;
     private boolean mUpdatesCustomer;
 
-    /**
-     * Create an {@link Intent} to start a {@link AddPaymentMethodActivity}.
-     *
-     * @param context the {@link Context} used to launch the activity
-     * @param shouldRequirePostalCode {@code true} to require the postal code
-     * @param updatesCustomer {@code true} if the activity should update using an
-     *         already-initialized {@link CustomerSession}, or {@code false} if it should just
-     *         return a source.
-     * @return an {@link Intent} that can be used to start this activity
-     */
-    @NonNull
-    public static Intent newIntent(@NonNull Context context,
-                                   boolean shouldRequirePostalCode,
-                                   boolean updatesCustomer) {
-        return new Intent(context, AddPaymentMethodActivity.class)
-                .putExtra(EXTRA_SHOULD_REQUIRE_POSTAL_CODE, shouldRequirePostalCode)
-                .putExtra(EXTRA_UPDATE_CUSTOMER, updatesCustomer);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mStripe = new Stripe(getApplicationContext(),
                 PaymentConfiguration.getInstance().getPublishableKey());
+
+        final AddPaymentMethodActivityStarter.Args args =
+                AddPaymentMethodActivityStarter.Args.create(getIntent());
+
         mViewStub.setLayoutResource(R.layout.activity_add_source);
         mViewStub.inflate();
         mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
         initEnterListeners(mCardMultilineWidget);
-        final boolean shouldShowPostalCode = getIntent()
-                .getBooleanExtra(EXTRA_SHOULD_REQUIRE_POSTAL_CODE, false);
-        mUpdatesCustomer = getIntent().getBooleanExtra(EXTRA_UPDATE_CUSTOMER, false);
-        mStartedFromPaymentSession =
-                getIntent().getBooleanExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
+        final boolean shouldShowPostalCode = args.shouldRequirePostalCode;
+        mUpdatesCustomer = args.shouldUpdateCustomer;
+        mStartedFromPaymentSession = args.isPaymentSessionActive;
         mCardMultilineWidget.setShouldShowPostalCode(shouldShowPostalCode);
 
-        if (mUpdatesCustomer && !getIntent().getBooleanExtra(EXTRA_PROXY_DELAY, false)) {
+        if (mUpdatesCustomer && args.shouldInitCustomerSessionTokens) {
             initCustomerSessionTokens();
         }
 

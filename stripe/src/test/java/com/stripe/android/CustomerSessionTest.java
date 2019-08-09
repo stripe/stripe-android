@@ -26,6 +26,7 @@ import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.BaseViewTest;
 import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentFlowActivity;
+import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
 
 import org.json.JSONException;
@@ -52,8 +53,6 @@ import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
-import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -803,12 +802,11 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     public void shippingInfoScreen_whenLaunched_logs() {
         final CustomerSession customerSession = createCustomerSession(null);
         CustomerSession.setInstance(customerSession);
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, new PaymentSessionConfig.Builder()
+        createActivity(new PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
                         .build())
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-
-        createActivity(intent);
+                .setPaymentSessionData(new PaymentSessionData())
+                .build());
 
         final List<String> actualTokens = new ArrayList<>(customerSession.getProductUsageTokens());
         assertTrue(actualTokens.contains("ShippingInfoScreen"));
@@ -819,13 +817,12 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         final CustomerSession customerSession = createCustomerSession(null);
         CustomerSession.setInstance(customerSession);
 
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, new PaymentSessionConfig.Builder()
+        createActivity(new PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
                         .setShippingInfoRequired(false)
                         .build())
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-
-        createActivity(intent);
+                .setPaymentSessionData(new PaymentSessionData())
+                .build());
 
         assertTrue(new ArrayList<>(customerSession.getProductUsageTokens())
                 .contains("ShippingMethodScreen"));

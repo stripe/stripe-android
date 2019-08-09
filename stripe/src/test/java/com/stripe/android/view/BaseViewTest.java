@@ -27,11 +27,18 @@ public abstract class BaseViewTest<T extends Activity> {
 
     @NonNull
     protected T createActivity() {
-        return createActivity(null);
+        final ActivityController<T> activityController = Robolectric.buildActivity(mClazz)
+                .create().start()
+                .postCreate(null).resume().visible();
+        final T activity = activityController.get();
+        mActivityControllers.put(activity.hashCode(), activityController);
+        return activityController.get();
     }
 
     @NonNull
-    protected T createActivity(@Nullable Intent intent) {
+    protected T createActivity(@Nullable ActivityStarter.Args args) {
+        final Intent intent = new Intent()
+                .putExtra(ActivityStarter.Args.EXTRA, args);
         final ActivityController<T> activityController = Robolectric.buildActivity(mClazz, intent)
                 .create().start()
                 .postCreate(null).resume().visible();

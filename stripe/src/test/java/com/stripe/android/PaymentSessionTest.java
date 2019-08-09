@@ -19,9 +19,10 @@ import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentFlowActivity;
+import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
+import com.stripe.android.view.PaymentMethodsActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +45,6 @@ import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
 import static com.stripe.android.CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT;
 import static com.stripe.android.CustomerSessionTest.SECOND_TEST_CUSTOMER_OBJECT;
-import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -81,8 +81,10 @@ public class PaymentSessionTest {
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
     @Mock private CustomerSession mCustomerSession;
-    @Mock private ActivityStarter<PaymentMethodsActivity> mPaymentMethodsActivityStarter;
-    @Mock private ActivityStarter<PaymentFlowActivity> mPaymentFlowActivityStarter;
+    @Mock private ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>
+            mPaymentMethodsActivityStarter;
+    @Mock private ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>
+            mPaymentFlowActivityStarter;
     @Mock private PaymentSessionPrefs mPaymentSessionPrefs;
 
     @Captor private ArgumentCaptor<PaymentSessionData> mPaymentSessionDataArgumentCaptor;
@@ -178,11 +180,10 @@ public class PaymentSessionTest {
         // We have already tested the functionality up to here.
         reset(mPaymentSessionListener);
 
-        boolean handled = paymentSession.handlePaymentData(
+        final boolean handled = paymentSession.handlePaymentData(
                 PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK,
                 new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
                         PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)));
-
         assertTrue(handled);
 
         verify(mPaymentSessionListener)
@@ -209,10 +210,10 @@ public class PaymentSessionTest {
         assertNotNull(intent.getComponent());
         assertEquals(PaymentMethodsActivity.class.getName(),
                 intent.getComponent().getClassName());
-        assertTrue(intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
-        assertFalse(
-                intent.getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
-                        false));
+
+        final PaymentMethodsActivityStarter.Args args =
+                PaymentMethodsActivityStarter.Args.create(intent);
+        assertFalse(args.shouldRequirePostalCode);
     }
 
     @Test
@@ -225,11 +226,8 @@ public class PaymentSessionTest {
 
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
                 eq(PaymentSession.PAYMENT_METHOD_REQUEST));
-
-        final Intent intent = mIntentArgumentCaptor.getValue();
-        assertTrue(
-                intent.getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
-                        false));
+        assertTrue(PaymentMethodsActivityStarter.Args.create(mIntentArgumentCaptor.getValue())
+                .shouldRequirePostalCode);
     }
 
     @Test
