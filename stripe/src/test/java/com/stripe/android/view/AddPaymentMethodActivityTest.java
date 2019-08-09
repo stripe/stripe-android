@@ -8,8 +8,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 
-import androidx.test.core.app.ApplicationProvider;
-
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
@@ -40,9 +38,7 @@ import java.util.Calendar;
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
-import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
-import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_PROXY_DELAY;
 import static com.stripe.android.view.AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -104,7 +100,8 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     }
 
     private void setUpForLocalTest() {
-        mActivity = createActivity();
+        mActivity = createActivity(new AddPaymentMethodActivityStarter.Args.Builder()
+                .build());
         mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
@@ -113,11 +110,12 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     }
 
     private void setUpForProxySessionTest() {
-        final Intent intent = AddPaymentMethodActivity
-                .newIntent(ApplicationProvider.getApplicationContext(), true, true)
-                .putExtra(EXTRA_PROXY_DELAY, true)
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mActivity = createActivity(intent);
+        mActivity = createActivity(new AddPaymentMethodActivityStarter.Args.Builder()
+                .setShouldUpdateCustomer(true)
+                .setShouldRequirePostalCode(true)
+                .setIsPaymentSessionActive(true)
+                .setShouldInitCustomerSessionTokens(false)
+                .build());
         mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
         mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);

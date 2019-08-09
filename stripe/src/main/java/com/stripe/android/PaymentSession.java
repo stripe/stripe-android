@@ -12,8 +12,8 @@ import android.support.v4.app.Fragment;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.ActivityStarter;
-import com.stripe.android.view.AddPaymentMethodActivity;
 import com.stripe.android.view.PaymentFlowActivity;
+import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 
@@ -31,10 +31,14 @@ public class PaymentSession {
     static final int PAYMENT_METHOD_REQUEST = 3003;
 
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
-    public static final String PAYMENT_SESSION_CONFIG = "payment_session_config";
 
-    @NonNull private final ActivityStarter<PaymentMethodsActivity> mPaymentMethodsActivityStarter;
-    @NonNull private final ActivityStarter<PaymentFlowActivity> mPaymentFlowActivityStarter;
+    @NonNull
+    private final ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>
+            mPaymentMethodsActivityStarter;
+    @NonNull
+    private final ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>
+            mPaymentFlowActivityStarter;
+
     @NonNull private final CustomerSession mCustomerSession;
     @NonNull private final PaymentSessionPrefs mPaymentSessionPrefs;
     private PaymentSessionData mPaymentSessionData;
@@ -68,8 +72,10 @@ public class PaymentSession {
     @VisibleForTesting
     PaymentSession(
             @NonNull CustomerSession customerSession,
-            @NonNull ActivityStarter<PaymentMethodsActivity> paymentMethodsActivityStarter,
-            @NonNull ActivityStarter<PaymentFlowActivity> paymentFlowActivityStarter,
+            @NonNull ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>
+                    paymentMethodsActivityStarter,
+            @NonNull ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>
+                    paymentFlowActivityStarter,
             @NonNull PaymentSessionData paymentSessionData,
             @NonNull PaymentSessionPrefs paymentSessionPrefs) {
         mCustomerSession = customerSession;
@@ -253,13 +259,15 @@ public class PaymentSession {
      */
     public void presentPaymentMethodSelection(boolean shouldRequirePostalCode,
                                               @Nullable String userSelectedPaymentMethodId) {
-        final Bundle bundle = new Bundle();
-        bundle.putBoolean(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        bundle.putBoolean(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE,
-                shouldRequirePostalCode);
-        bundle.putString(PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID,
-                getSelectedPaymentMethodId(userSelectedPaymentMethodId));
-        mPaymentMethodsActivityStarter.startForResult(PAYMENT_METHOD_REQUEST, bundle);
+
+        mPaymentMethodsActivityStarter.startForResult(PAYMENT_METHOD_REQUEST,
+                new PaymentMethodsActivityStarter.Args.Builder()
+                        .setInitialPaymentMethodId(
+                                getSelectedPaymentMethodId(userSelectedPaymentMethodId))
+                        .setShouldRequirePostalCode(shouldRequirePostalCode)
+                        .setIsPaymentSessionActive(true)
+                        .build()
+        );
     }
 
     @Nullable
@@ -304,11 +312,12 @@ public class PaymentSession {
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
      */
     public void presentShippingFlow() {
-        final Bundle bundle = new Bundle();
-        bundle.putParcelable(PAYMENT_SESSION_CONFIG, mPaymentSessionConfig);
-        bundle.putParcelable(PAYMENT_SESSION_DATA_KEY, mPaymentSessionData);
-        bundle.putBoolean(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-        mPaymentFlowActivityStarter.startForResult(PAYMENT_SHIPPING_DETAILS_REQUEST, bundle);
+        mPaymentFlowActivityStarter.startForResult(PAYMENT_SHIPPING_DETAILS_REQUEST,
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(mPaymentSessionConfig)
+                        .setPaymentSessionData(mPaymentSessionData)
+                        .setIsPaymentSessionActive(true)
+                        .build());
     }
 
     /**

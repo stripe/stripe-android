@@ -11,7 +11,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
 import com.stripe.android.CustomerSession;
-import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
 import com.stripe.android.R;
 import com.stripe.android.model.ShippingInformation;
@@ -20,7 +19,6 @@ import com.stripe.android.model.ShippingMethod;
 import java.util.List;
 
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
-import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
@@ -45,21 +43,24 @@ public class PaymentFlowActivity extends StripeActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        final PaymentFlowActivityStarter.Args args =
+                PaymentFlowActivityStarter.Args.create(getIntent());
+
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
         mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
         mViewStub.inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
-        final PaymentSessionConfig paymentSessionConfig =
-                getIntent().getParcelableExtra(PAYMENT_SESSION_CONFIG);
-        mPaymentSessionData = getIntent().getParcelableExtra(PAYMENT_SESSION_DATA_KEY);
+        mPaymentSessionData = args.paymentSessionData;
 
         if (mPaymentSessionData == null) {
             throw new IllegalArgumentException(
                     "PaymentFlowActivity launched without PaymentSessionData");
         }
 
-        mPaymentFlowPagerAdapter = new PaymentFlowPagerAdapter(this, paymentSessionConfig);
+        mPaymentFlowPagerAdapter =
+                new PaymentFlowPagerAdapter(this, args.paymentSessionConfig);
         mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

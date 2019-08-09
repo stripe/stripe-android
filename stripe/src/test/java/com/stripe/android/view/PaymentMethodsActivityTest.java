@@ -71,7 +71,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
                 PaymentMethod.fromString(MaskedCardAdapterTest.PAYMENT_METHOD_JSON));
 
-        mPaymentMethodsActivity = createActivity();
+        mPaymentMethodsActivity = createActivity(
+                new PaymentMethodsActivityStarter.Args.Builder().build()
+        );
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
 
         mProgressBar = mPaymentMethodsActivity.findViewById(R.id.payment_methods_progress_bar);
@@ -115,8 +117,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         final PaymentMethod paymentMethod =
                 PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
-        mPaymentMethodsActivity = createActivity(new Intent().putExtra(
-                PaymentMethodsActivity.EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id));
+        mPaymentMethodsActivity = createActivity(new PaymentMethodsActivityStarter.Args.Builder()
+                .setInitialPaymentMethodId(paymentMethod.id)
+                .build());
         mRecyclerView = mPaymentMethodsActivity.findViewById(R.id.payment_methods_recycler);
 
         verify(mCustomerSession).getPaymentMethods(eq(PaymentMethod.Type.Card),
@@ -148,8 +151,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
 
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
-        mPaymentMethodsActivity = createActivity(new Intent()
-                .putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true));
+        mPaymentMethodsActivity = createActivity(new PaymentMethodsActivityStarter.Args.Builder()
+                .setIsPaymentSessionActive(true)
+                .build());
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
         mAddCardView =
                 mPaymentMethodsActivity.findViewById(R.id.payment_methods_add_payment_container);
@@ -160,7 +164,8 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertNotNull(intentForResult.intent.getComponent());
         assertEquals(AddPaymentMethodActivity.class.getName(),
                 intentForResult.intent.getComponent().getClassName());
-        assertTrue(intentForResult.intent.hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE));
+        assertTrue(AddPaymentMethodActivityStarter.Args.create(intentForResult.intent)
+                .isPaymentSessionActive);
     }
 
     @Test
@@ -190,7 +195,6 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertNotNull(maskedCardAdapter);
         assertNotNull(maskedCardAdapter.getSelectedPaymentMethod());
         assertEquals(paymentMethod.id, maskedCardAdapter.getSelectedPaymentMethod().id);
-
     }
 
     @Test

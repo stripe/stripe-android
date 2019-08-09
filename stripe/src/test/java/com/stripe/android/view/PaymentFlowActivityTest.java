@@ -41,7 +41,6 @@ import java.util.Collections;
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.CustomerSession.EXTRA_EXCEPTION;
-import static com.stripe.android.PaymentSession.PAYMENT_SESSION_CONFIG;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED;
 import static com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID;
@@ -93,25 +92,27 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setShippingInfoRequired(false)
-                .build();
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData())
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig);
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .setShippingInfoRequired(false)
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         assertNull(paymentFlowActivity.findViewById(R.id.shipping_info_widget));
         assertNotNull(paymentFlowActivity.findViewById(R.id.select_shipping_method_widget));
     }
 
     @Test
     public void onShippingInfoSave_whenShippingNotPopulated_doesNotFinish() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .build();
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         mShippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
         paymentFlowActivity.onActionSave();
@@ -120,12 +121,13 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onShippingInfoSave_whenShippingInfoNotPopulated_doesNotContinue() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .build();
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         mShippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
         paymentFlowActivity.onActionSave();
@@ -135,14 +137,14 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onShippingInfoSave_whenShippingPopulated_sendsCorrectIntent() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                .build();
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         mShippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget);
         assertNotNull(mShippingInfoWidget);
         paymentFlowActivity.onActionSave();
@@ -157,15 +159,15 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onErrorBroadcast_displaysAlertDialog() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .build();
-        final Intent intent = new Intent()
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-
         final StripeActivity.AlertMessageListener mockListener =
                 mock(StripeActivity.AlertMessageListener.class);
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         paymentFlowActivity.setAlertMessageListener(mockListener);
 
         final Bundle bundle = new Bundle();
@@ -182,14 +184,14 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onShippingInfoProcessed_whenInvalidShippingInfoSubmitted_rendersCorrectly() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                .build();
-        final Intent intent = new Intent(ApplicationProvider.getApplicationContext(),
-                PaymentFlowActivity.class)
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
 
         // invalid result
         paymentFlowActivity.onActionSave();
@@ -204,14 +206,14 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onShippingInfoProcessed_whenValidShippingInfoSubmitted_rendersCorrectly() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                .build();
-        final Intent intent = new Intent(ApplicationProvider.getApplicationContext(),
-                PaymentFlowActivity.class)
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
 
         // valid result
         paymentFlowActivity.onActionSave();
@@ -234,15 +236,15 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
     @Test
     public void onShippingInfoSaved_whenOnlyShippingInfo_finishWithSuccess() {
-        final PaymentSessionConfig paymentSessionConfig = new PaymentSessionConfig.Builder()
-                .setPrepopulatedShippingInfo(getExampleShippingInfo())
-                .setShippingMethodsRequired(false)
-                .build();
-        final Intent intent = new Intent(ApplicationProvider.getApplicationContext(),
-                PaymentFlowActivity.class)
-                .putExtra(PAYMENT_SESSION_CONFIG, paymentSessionConfig)
-                .putExtra(PAYMENT_SESSION_DATA_KEY, new PaymentSessionData());
-        final PaymentFlowActivity paymentFlowActivity = createActivity(intent);
+        final PaymentFlowActivity paymentFlowActivity = createActivity(
+                new PaymentFlowActivityStarter.Args.Builder()
+                        .setPaymentSessionConfig(new PaymentSessionConfig.Builder()
+                                .setPrepopulatedShippingInfo(getExampleShippingInfo())
+                                .setShippingMethodsRequired(false)
+                                .build())
+                        .setPaymentSessionData(new PaymentSessionData())
+                        .build()
+        );
         final ShadowActivity shadowActivity = shadowOf(paymentFlowActivity);
 
         // valid result

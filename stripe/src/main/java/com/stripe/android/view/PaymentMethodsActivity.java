@@ -25,7 +25,6 @@ import com.stripe.android.view.i18n.TranslatorManager;
 
 import java.util.List;
 
-import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD;
 
@@ -38,8 +37,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private static final String STATE_SELECTED_PAYMENT_METHOD = "state_selected_payment_method";
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
-    public static final String EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID =
-            "initial_selected_payment_method_id";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
@@ -65,26 +62,27 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_methods);
 
+        final PaymentMethodsActivityStarter.Args args =
+                PaymentMethodsActivityStarter.Args.create(getIntent());
+
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = findViewById(R.id.payment_methods_recycler);
         final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
 
         mCustomerSession = CustomerSession.getInstance();
-        mStartedFromPaymentSession = getIntent().hasExtra(EXTRA_PAYMENT_SESSION_ACTIVE);
+        mStartedFromPaymentSession = args.isPaymentSessionActive;
 
-        final boolean shouldShowPostalField = getIntent()
-                .getBooleanExtra(AddPaymentMethodActivity.EXTRA_SHOULD_REQUIRE_POSTAL_CODE, false);
+        final boolean shouldShowPostalField = args.shouldRequirePostalCode;
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-                final Intent addPaymentMethodIntent = AddPaymentMethodActivity.newIntent(
-                        PaymentMethodsActivity.this,
-                        shouldShowPostalField,
-                        true);
-                if (mStartedFromPaymentSession) {
-                    addPaymentMethodIntent.putExtra(EXTRA_PAYMENT_SESSION_ACTIVE, true);
-                }
-                startActivityForResult(addPaymentMethodIntent, REQUEST_CODE_ADD_CARD);
+                new AddPaymentMethodActivityStarter(PaymentMethodsActivity.this)
+                        .startForResult(REQUEST_CODE_ADD_CARD,
+                                new AddPaymentMethodActivityStarter.Args.Builder()
+                                        .setShouldUpdateCustomer(true)
+                                        .setShouldRequirePostalCode(shouldShowPostalField)
+                                        .setIsPaymentSessionActive(mStartedFromPaymentSession)
+                                        .build());
             }
         });
 
@@ -99,11 +97,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (savedInstanceState != null &&
                 savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD)) {
             selectedPaymentMethodId = savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD);
-        } else if (getIntent().hasExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID)) {
-            selectedPaymentMethodId =
-                    getIntent().getStringExtra(EXTRA_INITIAL_SELECTED_PAYMENT_METHOD_ID);
         } else {
-            selectedPaymentMethodId = null;
+            selectedPaymentMethodId = args.initialPaymentMethodId;
         }
 
         getCustomerPaymentMethods(selectedPaymentMethodId);
