@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link CountryAdapter}
@@ -44,9 +44,10 @@ public class CountryAdapterTest {
         for (int i = 2; i < mCountryAdapter.getCount(); i++) {
             final String country = mCountryAdapter.getItem(i);
             final String prevCountry = mCountryAdapter.getItem(i - 1);
-            if (prevCountry != null && country != null && country.compareTo(prevCountry) < 0) {
-                fail("Countries are not ordered");
-            }
+            assertFalse(
+                    "Countries are not ordered",
+                    prevCountry != null && country != null && country.compareTo(prevCountry) < 0
+            );
         }
     }
 

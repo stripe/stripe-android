@@ -2,11 +2,12 @@ package com.stripe.android;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 /**
  * Test class for {@link PaymentConfiguration}.
@@ -20,10 +21,14 @@ public class PaymentConfigurationTest {
         PaymentConfiguration.clearInstance();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void getInstance_beforeInit_throwsRuntimeException() {
-        PaymentConfiguration.getInstance();
-        fail("Should not be able to get a payment configuration before it has been initialized.");
+        assertThrows(IllegalStateException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                PaymentConfiguration.getInstance();
+            }
+        });
     }
 
     @Test

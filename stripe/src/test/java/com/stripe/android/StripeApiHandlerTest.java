@@ -39,7 +39,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -261,11 +260,10 @@ public class StripeApiHandlerTest {
                 STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT))) {
             accounts = responseHeaders.get(STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT));
         } else {
-            fail("Stripe API response should contain 'Stripe-Account' header");
             accounts = null;
         }
 
-        assertNotNull(accounts);
+        assertNotNull("Stripe API response should contain 'Stripe-Account' header", accounts);
         assertEquals(1, accounts.size());
         assertEquals(connectAccountId, accounts.get(0));
     }

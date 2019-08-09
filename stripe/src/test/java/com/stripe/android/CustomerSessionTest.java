@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -56,8 +57,8 @@ import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -287,11 +288,16 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         }).when(mThreadPoolExecutor).execute(any(Runnable.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void getInstance_withoutInitializing_throwsException() {
         CustomerSession.clearInstance();
-        CustomerSession.getInstance();
-        fail("Should not be able to get instance of CustomerSession without initializing");
+
+        assertThrows(IllegalStateException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                CustomerSession.getInstance();
+            }
+        });
     }
 
     @Test
