@@ -9,8 +9,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.stripe.android.ObjectBuilder;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.utils.ObjectUtils;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public final class PaymentMethodsActivityStarter
         extends ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> {
@@ -28,6 +33,7 @@ public final class PaymentMethodsActivityStarter
         @Nullable final String initialPaymentMethodId;
         public final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;
+        @NonNull final Set<PaymentMethod.Type> paymentMethodTypes;
 
         @NonNull
         public static Args create(@NonNull Intent intent) {
@@ -39,12 +45,22 @@ public final class PaymentMethodsActivityStarter
             initialPaymentMethodId = builder.mInitialPaymentMethodId;
             shouldRequirePostalCode = builder.mShouldRequirePostalCode;
             isPaymentSessionActive = builder.mIsPaymentSessionActive;
+            paymentMethodTypes = ObjectUtils.getOrEmpty(
+                    builder.mPaymentMethodTypes,
+                    Collections.singleton(PaymentMethod.Type.Card)
+            );
         }
 
         private Args(@NonNull Parcel in) {
             initialPaymentMethodId = in.readString();
             shouldRequirePostalCode = in.readInt() == 1;
             isPaymentSessionActive = in.readInt() == 1;
+
+            final int paymentMethodTypesSize = in.readInt();
+            paymentMethodTypes = new HashSet<>(paymentMethodTypesSize);
+            for (int i = 0; i < paymentMethodTypesSize; i++) {
+                paymentMethodTypes.add(PaymentMethod.Type.valueOf(in.readString()));
+            }
         }
 
         @Override
@@ -56,7 +72,30 @@ public final class PaymentMethodsActivityStarter
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(initialPaymentMethodId);
             dest.writeInt(shouldRequirePostalCode ? 1 : 0);
-            dest.writeInt(shouldRequirePostalCode ? 1 : 0);
+            dest.writeInt(isPaymentSessionActive ? 1 : 0);
+
+            dest.writeInt(paymentMethodTypes.size());
+            for (PaymentMethod.Type paymentMethodType : paymentMethodTypes) {
+                dest.writeString(paymentMethodType.name());
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(initialPaymentMethodId, shouldRequirePostalCode,
+                    isPaymentSessionActive, paymentMethodTypes);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return super.equals(obj) || (obj instanceof Args && typedEquals((Args) obj));
+        }
+
+        private boolean typedEquals(@NonNull PaymentMethodsActivityStarter.Args args) {
+            return ObjectUtils.equals(initialPaymentMethodId, args.initialPaymentMethodId) &&
+                    ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
+                    ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
+                    ObjectUtils.equals(paymentMethodTypes, args.paymentMethodTypes);
         }
 
         public static final Parcelable.Creator<Args> CREATOR = new Parcelable.Creator<Args>() {
@@ -76,6 +115,7 @@ public final class PaymentMethodsActivityStarter
             @Nullable private String mInitialPaymentMethodId = null;
             private boolean mShouldRequirePostalCode = false;
             private boolean mIsPaymentSessionActive = false;
+            private Set<PaymentMethod.Type> mPaymentMethodTypes;
 
             @NonNull
             public Builder setInitialPaymentMethodId(@Nullable String initialPaymentMethodId) {
@@ -92,6 +132,13 @@ public final class PaymentMethodsActivityStarter
             @NonNull
             public Builder setIsPaymentSessionActive(boolean isPaymentSessionActive) {
                 this.mIsPaymentSessionActive = isPaymentSessionActive;
+                return this;
+            }
+
+            @NonNull
+            public Builder setPaymentMethodTypes(
+                    @NonNull Set<PaymentMethod.Type> paymentMethodTypes) {
+                mPaymentMethodTypes = paymentMethodTypes;
                 return this;
             }
 
