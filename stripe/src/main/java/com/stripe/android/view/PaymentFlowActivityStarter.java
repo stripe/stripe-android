@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
+import com.stripe.android.utils.ObjectUtils;
 
 import java.util.Objects;
 
@@ -39,7 +40,8 @@ public final class PaymentFlowActivityStarter
         }
 
         private Args(@NonNull PaymentFlowActivityStarter.Args.Builder builder) {
-            paymentSessionConfig = Objects.requireNonNull(builder.mPaymentSessionConfig);
+            paymentSessionConfig = ObjectUtils.getOrDefault(builder.mPaymentSessionConfig,
+                    new PaymentSessionConfig.Builder().build());
             paymentSessionData = builder.mPaymentSessionData;
             isPaymentSessionActive = builder.mIsPaymentSessionActive;
         }
