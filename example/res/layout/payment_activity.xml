@@ -22,21 +22,14 @@
         android:id="@+id/save"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
-        android:text="@string/save"
+        android:text="@string/create_asynctask"
         />
 
     <Button
         android:id="@+id/saverx"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
-        android:text="@string/saverx"
-        />
-
-    <Button
-        android:id="@+id/saveWithService"
-        android:layout_height="wrap_content"
-        android:layout_width="160dp"
-        android:text="@string/saveService"
+        android:text="@string/create_rxjava"
         />
 
     <TextView android:id="@+id/token_list_title"

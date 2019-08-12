@@ -29,5 +29,6 @@
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:duplicateParentState="true"
+        android:contentDescription="@null"
         android:src="@drawable/pay_with_google_button_overlay"/>
 </RelativeLayout>

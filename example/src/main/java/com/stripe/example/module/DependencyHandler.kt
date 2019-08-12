@@ -1,6 +1,5 @@
 package com.stripe.example.module
 
-import android.app.Activity
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
@@ -8,7 +7,6 @@ import android.widget.ListView
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.controller.AsyncTaskTokenController
 import com.stripe.example.controller.ErrorDialogHandler
-import com.stripe.example.controller.IntentServiceTokenController
 import com.stripe.example.controller.ListViewController
 import com.stripe.example.controller.ProgressDialogController
 import com.stripe.example.controller.RxTokenController
@@ -31,7 +29,6 @@ class DependencyHandler(
         activity.resources
     )
     private val mErrorDialogHandler: ErrorDialogHandler = ErrorDialogHandler(activity)
-    private var mIntentServiceTokenController: IntentServiceTokenController? = null
     private val mListViewController: ListViewController = ListViewController(outputListView)
     private var mRxTokenController: RxTokenController? = null
 
@@ -51,26 +48,6 @@ class DependencyHandler(
                 mListViewController,
                 mProgressDialogController,
                 mPublishableKey)
-        }
-    }
-
-    /**
-     * Attach a listener that creates a token using an [android.app.IntentService] and the
-     * synchronous [com.stripe.android.Stripe.createTokenSynchronous] method.
-     *
-     * Only gets attached once, unless you call [.clearReferences].
-     *
-     * @param button a button that, when clicked, gets a token.
-     */
-    fun attachIntentServiceTokenController(activity: Activity, button: Button) {
-        if (mIntentServiceTokenController == null) {
-            mIntentServiceTokenController = IntentServiceTokenController(
-                activity,
-                button,
-                mCardInputWidget,
-                mErrorDialogHandler,
-                mListViewController,
-                mProgressDialogController)
         }
     }
 
@@ -108,12 +85,7 @@ class DependencyHandler(
             mRxTokenController!!.detach()
         }
 
-        if (mIntentServiceTokenController != null) {
-            mIntentServiceTokenController!!.detach()
-        }
-
         mAsyncTaskController = null
         mRxTokenController = null
-        mIntentServiceTokenController = null
     }
 }
