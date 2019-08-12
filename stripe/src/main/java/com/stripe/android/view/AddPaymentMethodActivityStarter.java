@@ -13,10 +13,12 @@ import java.util.Objects;
 public class AddPaymentMethodActivityStarter
         extends ActivityStarter<AddPaymentMethodActivity, AddPaymentMethodActivityStarter.Args> {
     AddPaymentMethodActivityStarter(@NonNull Activity activity) {
-        super(activity, AddPaymentMethodActivity.class);
+        super(activity, AddPaymentMethodActivity.class, Args.DEFAULT);
     }
 
     public static final class Args implements ActivityStarter.Args {
+        private static final Args DEFAULT = new Args.Builder().build();
+
         final boolean shouldUpdateCustomer;
         final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;

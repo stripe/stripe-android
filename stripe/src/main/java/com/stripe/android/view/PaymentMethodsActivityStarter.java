@@ -15,14 +15,16 @@ import java.util.Objects;
 public final class PaymentMethodsActivityStarter
         extends ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> {
     public PaymentMethodsActivityStarter(@NonNull Activity activity) {
-        super(activity, PaymentMethodsActivity.class);
+        super(activity, PaymentMethodsActivity.class, Args.DEFAULT);
     }
 
     public PaymentMethodsActivityStarter(@NonNull Fragment fragment) {
-        super(fragment, PaymentMethodsActivity.class);
+        super(fragment, PaymentMethodsActivity.class, Args.DEFAULT);
     }
 
     public static final class Args implements ActivityStarter.Args {
+        private static final Args DEFAULT = new Builder().build();
+
         @Nullable final String initialPaymentMethodId;
         public final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;
