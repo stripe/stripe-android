@@ -9,28 +9,32 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 
 > If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
-* The [changelog](/stripe/stripe-android/blob/master/CHANGELOG.md) provides a summary of changes in each release.
-* The [migration guide](/stripe/stripe-android/blob/master/MIGRATING.md) provides instructions on upgrading from older versions.
 
-## Requirements
+## Installation
+
+### Requirements
 
 * Android 4.4 (API level 19) and above
 * [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.4.1+
 * [Gradle](https://gradle.org/releases/) 5.1.1+
 
-## Installation
+### Configuration
 
-### Android Studio (or Gradle)
-
-No need to clone the repository or download any files -- just add this line to your app's `build.gradle` inside the `dependencies` section:
+Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
-implementation 'com.stripe:stripe-android:10.2.1'
+dependencies {
+    implementation 'com.stripe:stripe-android:10.2.1'
+}
 ```
 
-Note: We recommend that you don't use `compile 'com.stripe:stripe-android:+`, as future versions of the SDK may not maintain full backwards compatibility. When such a change occurs, a major version number change will accompany it.
+### Releases
+* The [changelog](/stripe/stripe-android/blob/master/CHANGELOG.md) provides a summary of changes in each release.
+* The [migration guide](/stripe/stripe-android/blob/master/MIGRATING.md) provides instructions on upgrading from older versions.
 
-Please note that if enabling minification in your `build.gradle` file, you must also add this line to the `proguard-rules.pro`:
+### Proguard
+
+If enabling minification in your `build.gradle` file, you must also add this line to the `proguard-rules.pro`:
 
 ```
 -keep class com.stripe.android.** { *; }
@@ -78,7 +82,7 @@ You can add a Material-style multiline widget to your apps that handles card dat
     />
 ```
 
-Note: A `CardMultiline` widget can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
+Note: A `CardMultilineWidget` can only be added in the view of an `Activity` whose `Theme` descends from an `AppCompat` theme.
 
 In order to use the `app:shouldShowPostalCode` tag, you'll need to enable the app XML namespace somewhere in the layout.
 
