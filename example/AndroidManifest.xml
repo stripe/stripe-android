@@ -12,6 +12,7 @@
         android:label="@string/appName"
         android:name=".ExampleApplication"
         android:theme="@style/AppTheme"
+        android:supportsRtl="true"
         tools:ignore="AllowBackup">
 
         <!-- Enables the Google Payment API -->

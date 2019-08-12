@@ -2,8 +2,6 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.Button
-
 import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.module.DependencyHandler
@@ -23,15 +21,8 @@ class PaymentActivity : AppCompatActivity() {
             PaymentConfiguration.getInstance().publishableKey
         )
 
-        val saveButton = findViewById<Button>(R.id.save)
-        dependencyHandler.attachAsyncTaskTokenController(saveButton)
-
-        val saveRxButton = findViewById<Button>(R.id.saverx)
-        dependencyHandler.attachRxTokenController(saveRxButton)
-
-        val saveIntentServiceButton = findViewById<Button>(R.id.saveWithService)
-        dependencyHandler.attachIntentServiceTokenController(this,
-            saveIntentServiceButton)
+        dependencyHandler.attachAsyncTaskTokenController(findViewById(R.id.save))
+        dependencyHandler.attachRxTokenController(findViewById(R.id.saverx))
     }
 
     override fun onDestroy() {

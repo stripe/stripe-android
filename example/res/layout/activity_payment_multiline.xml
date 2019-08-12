@@ -25,7 +25,7 @@
         android:id="@+id/save_payment"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
-        android:text="@string/save"
+        android:text="@string/create_asynctask"
         />
 
     <TextView android:id="@+id/source_list_title"

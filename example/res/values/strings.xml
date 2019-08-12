@@ -2,7 +2,6 @@
 <resources>
     <string name="appName">Stripe Payments Example</string>
 
-    <string name="addAddress">Add Address</string>
     <string name="addPayment">Add Payment Method</string>
     <string name="addThreeDSecureCard">Add Source</string>
     <string name="addThreeDSecureCardSync">Add Source Rx</string>
@@ -15,35 +14,21 @@
     <string name="create_card_tokens">Create Card Tokens</string>
     <string name="create_card_payment_methods">Create Card PaymentMethods</string>
     <string name="create_three_d_secure">Create 3DS Sources</string>
-    <string name="cardNumber">Card Number</string>
     <string name="createSource">Creating source&#8230;</string>
-    <string name="confirmPayment">Confirm payment details</string>
-    <string name="changeDetails">Change payment details</string>
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Customer Session</string>
     <string name="launch_pay_with_google">Pay with Google</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
-    <string name="pollingSource">Polling for source changes&#8230;</string>
-    <string name="save">Save</string>
-    <string name="saverx">Save Rx</string>
-    <string name="saveService">Save with Service</string>
+    <string name="create_asynctask">Create Token with AsyncTask</string>
+    <string name="create_rxjava">Create Token with RxJava</string>
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
-    <string name="selectSampleActivity">Select sample activity</string>
-    <string name="selectShippingMethod">Select Shipping Method</string>
-    <string name="startPolling">Start polling</string>
-    <string name="tryThreeDSecure">Try 3DS</string>
-    <string name="verify">Verify</string>
     <string name="updatedSources">Source results</string>
-    <string name="updatedShippingInfo">Shipping detail results</string>
 
-    <string name="cvc">CVC</string>
     <string name="payment_session_select_payment">Select Payment Method</string>
     <string name="payment_session_select_shipping">Set Shipping Information</string>
     <string name="payment_session_data">Payment Session Data</string>
-    <string name="startPaymentFlow">Start Payment Flow</string>
-    <string name="load_items">Load Items</string>
     <string name="ok">OK</string>
 
     <string name="label_source_type">Type</string>
@@ -56,27 +41,18 @@
 
     <string name="pay_with_google_content_description">Pay with Google</string>
 
-    <string-array name="currency_array">
-        <item>Currency (optional)</item>
-        <item>Unspecified</item>
-        <item>USD</item>
-    </string-array>
-
     <string name="launch_payment_intent_example">PaymentIntent Example</string>
     <string name="creating_payment_intent">Creating PaymentIntent&#8230;</string>
-    <string name="confirming_payment_intent">Confirming PaymentIntent&#8230;</string>
     <string name="retrieving_payment_intent">Retrieving PaymentIntent&#8230;</string>
     <string name="create_payment_intent_backend">First, create a PaymentIntent on your backend.</string>
     <string name="create_payment_intent">Create PaymentIntent</string>
     <string name="create_payment_method_and_confirm_payment_intent">Second, create a payment method and confirm the PaymentIntent</string>
     <string name="confirm_payment_intent">Confirm PaymentIntent</string>
     <string name="retrieve_payment_intent">Retrieve PaymentIntent</string>
-    <string name="error_while_retrieving_payment_intent">An error occurred while retrieving the PaymentIntent</string>
 
     <string name="launch_setup_intent_example">SetupIntent Example</string>
     <string name="creating_setup_intent">Creating SetupIntent&#8230;</string>
     <string name="creating_payment_method">Creating Payment Method&#8230;</string>
-    <string name="confirming_setup_intent">Confirming SetupIntent&#8230;</string>
     <string name="retrieving_setup_intent">Retrieving SetupIntent&#8230;</string>
     <string name="create_setup_intent_backend">First, create a SetupIntent on your backend.</string>
     <string name="create_setup_intent">Create SetupIntent</string>
@@ -84,7 +60,6 @@
     <string name="create_payment_method">Create Payment Method</string>
     <string name="confirm_setup_intent">Confirm SetupIntent</string>
     <string name="retrieve_setup_intent">Retrieve SetupIntent</string>
-    <string name="error_while_retrieving_setup_intent">An error occurred while retrieving the SetupIntent</string>
 
     <string name="authentication_dialog_title">Authentication required</string>
     <string name="authentication_dialog_message">Authenticate %1$s ending in %2$s?</string>
@@ -92,7 +67,6 @@
 
     <!-- Payment Auth example -->
     <string name="payment_auth_example">Payment Auth Example</string>
-    <string name="launch_payment_auth">Launch Payment Auth Flow</string>
     <string name="auth_payment_intent">Authenticate PaymentIntent</string>
     <string name="auth_setup_intent">Authenticate SetupIntent</string>
     <string name="buy">Buy!</string>
