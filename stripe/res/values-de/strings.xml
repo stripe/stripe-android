@@ -108,7 +108,7 @@
     <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
     <string name="add_card">Fügen Sie eine neue Debit- oder Kreditkarte hinzu, um in dieser App Käufe zu tätigen.</string>
     <!--Used to display masked card numbers-->
-    <string name="ending_in">" - "</string>
+    <string name="ending_in">%1$s - %2$s</string>
     <!-- Text informing user there are no existing payment methods in the application -->
     <string name="no_payment_methods">Keine Zahlungsmethoden.</string>
     <!-- Human friendly label for something with $0 price -->

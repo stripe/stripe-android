@@ -67,7 +67,7 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun buildCardString(data: PaymentMethod.Card): String {
-        return data.brand + getString(R.string.ending_in) + data.last4
+        return getString(R.string.ending_in, data.brand, data.last4)
     }
 
     private fun onCustomerRetrieved() {
