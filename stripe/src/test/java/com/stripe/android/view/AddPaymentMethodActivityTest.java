@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 
 import com.stripe.android.ApiKeyFixtures;
@@ -77,8 +75,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     private Stripe mStripe;
     @Mock
     private CustomerSession mCustomerSession;
-    @Mock
-    private InputMethodManager mInputMethodManager;
 
     public AddPaymentMethodActivityTest() {
         super(AddPaymentMethodActivity.class);
@@ -138,16 +134,6 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         setUpForProxySessionTest();
         assertNotNull(mCardMultilineWidget);
         assertEquals(View.VISIBLE, mWidgetControlGroup.postalCodeInputLayout.getVisibility());
-    }
-
-    @Test
-    public void softEnterKey_whenDataIsValid_hidesKeyboardAndAttemptsToSave() {
-        final AddPaymentMethodActivity activity = mock(AddPaymentMethodActivity.class);
-        when(activity.hasValidCard()).thenReturn(true);
-        new AddPaymentMethodActivity.OnEditorActionListenerImpl(activity, mInputMethodManager)
-                .onEditorAction(null, EditorInfo.IME_ACTION_DONE, null);
-        verify(mInputMethodManager).hideSoftInputFromWindow(null, 0);
-        verify(activity).onActionSave();
     }
 
     @Test
