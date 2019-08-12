@@ -169,7 +169,7 @@ public class PaymentFlowActivity extends StripeActivity {
     private void onShippingInfoSubmitted() {
         final ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
         final ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
-        if (shippingInformation !=  null) {
+        if (shippingInformation != null) {
             mShippingInformationSubmitted = shippingInformation;
             setCommunicatingProgress(true);
             broadcastShippingInfoSubmitted(shippingInformation);

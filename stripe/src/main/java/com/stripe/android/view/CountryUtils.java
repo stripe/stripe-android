@@ -8,9 +8,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
-class CountryUtils {
+final class CountryUtils {
 
     private static final String[] NO_POSTAL_CODE_COUNTRIES = {
             "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF",
@@ -24,18 +23,6 @@ class CountryUtils {
 
     static boolean doesCountryUsePostalCode(@NonNull String countryCode) {
         return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode);
-    }
-
-    static boolean isUSZipCodeValid(@NonNull String zipCode) {
-        return Pattern.matches("^[0-9]{5}(?:-[0-9]{4})?$", zipCode);
-    }
-
-    static boolean isCanadianPostalCodeValid(@NonNull String postalCode) {
-        return Pattern.matches("^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$", postalCode);
-    }
-
-    static boolean isUKPostcodeValid(@NonNull String postcode) {
-        return Pattern.matches("^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$", postcode);
     }
 
     @NonNull
