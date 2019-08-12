@@ -228,8 +228,8 @@ public class ShippingInfoWidget extends LinearLayout {
         mCountryAutoCompleteTextView.setCountryChangeListener(new CountryAutoCompleteTextView
                 .CountryChangeListener() {
             @Override
-            public void onCountryChanged(String countryCode) {
-                renderCountrySpecificLabels(mCountryAutoCompleteTextView.getSelectedCountryCode());
+            public void onCountryChanged(@NonNull String countryCode) {
+                renderCountrySpecificLabels(countryCode);
             }
         });
         mPhoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
@@ -292,7 +292,7 @@ public class ShippingInfoWidget extends LinearLayout {
         }
     }
 
-    private void renderCountrySpecificLabels(String countrySelected) {
+    private void renderCountrySpecificLabels(@NonNull String countrySelected) {
         if (countrySelected.equals(Locale.US.getCountry())) {
             renderUSForm();
         } else if (countrySelected.equals(Locale.UK.getCountry())) {
