@@ -91,7 +91,7 @@ public final class PaymentMethodsActivityStarter
             return super.equals(obj) || (obj instanceof Args && typedEquals((Args) obj));
         }
 
-        private boolean typedEquals(@NonNull PaymentMethodsActivityStarter.Args args) {
+        private boolean typedEquals(@NonNull Args args) {
             return ObjectUtils.equals(initialPaymentMethodId, args.initialPaymentMethodId) &&
                     ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
                     ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&

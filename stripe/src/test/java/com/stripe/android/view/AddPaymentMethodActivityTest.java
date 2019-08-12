@@ -115,6 +115,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 .setShouldRequirePostalCode(true)
                 .setIsPaymentSessionActive(true)
                 .setShouldInitCustomerSessionTokens(false)
+                .setPaymentMethodType(PaymentMethod.Type.Card)
                 .build());
         mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
