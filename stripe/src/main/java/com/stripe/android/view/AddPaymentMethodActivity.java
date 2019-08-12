@@ -6,12 +6,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
+import android.view.ViewGroup;
 
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
@@ -21,7 +18,6 @@ import com.stripe.android.Stripe;
 import com.stripe.android.StripeError;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
-import com.stripe.android.model.Source;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -29,18 +25,20 @@ import java.util.Objects;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
 /**
- * Activity used to display a {@link CardMultilineWidget} and receive the resulting
- * {@link Source} in the {@link #onActivityResult(int, int, Intent)} of the launching activity.
+ * Activity used to display a {@link AddPaymentMethodView} and receive the resulting
+ * {@link PaymentMethod} in the <code>Activity#onActivityResult(int, int, Intent)</code> of the
+ * launching Activity.
  *
- * <p>Can be started with {@link AddPaymentMethodActivityStarter}
+ * <p>Should be started with {@link AddPaymentMethodActivityStarter}.</p>
  */
+@SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class AddPaymentMethodActivity extends StripeActivity {
 
     public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
 
     public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
 
-    @Nullable private CardMultilineWidget mCardMultilineWidget;
+    @Nullable private AddPaymentMethodView mAddPaymentMethodView;
     @Nullable private Stripe mStripe;
 
     private boolean mStartedFromPaymentSession;
@@ -60,33 +58,51 @@ public class AddPaymentMethodActivity extends StripeActivity {
         }
         mStripe = new Stripe(getApplicationContext(), paymentConfiguration.getPublishableKey());
 
-        mViewStub.setLayoutResource(R.layout.activity_add_source);
-        mViewStub.inflate();
-        mCardMultilineWidget = findViewById(R.id.add_source_card_entry_widget);
-        initEnterListeners(mCardMultilineWidget);
-        final boolean shouldShowPostalCode = args.shouldRequirePostalCode;
+        configureView(args);
+
         mUpdatesCustomer = args.shouldUpdateCustomer;
         mStartedFromPaymentSession = args.isPaymentSessionActive;
-        mCardMultilineWidget.setShouldShowPostalCode(shouldShowPostalCode);
 
         if (mUpdatesCustomer && args.shouldInitCustomerSessionTokens) {
             initCustomerSessionTokens();
         }
-
-        setTitle(R.string.title_add_a_card);
     }
 
-    private void initEnterListeners(@NonNull View cardMultilineWidget) {
-        final TextView.OnEditorActionListener listener = new OnEditorActionListenerImpl(this,
-                (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE));
-        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
-                .setOnEditorActionListener(listener);
-        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_expiry_ml))
-                .setOnEditorActionListener(listener);
-        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_cvc_ml))
-                .setOnEditorActionListener(listener);
-        ((TextView) cardMultilineWidget.findViewById(R.id.et_add_source_postal_ml))
-                .setOnEditorActionListener(listener);
+    private void configureView(@NonNull AddPaymentMethodActivityStarter.Args args) {
+        mViewStub.setLayoutResource(R.layout.add_payment_method_layout);
+        final ViewGroup contentRoot = (ViewGroup) mViewStub.inflate();
+
+        mAddPaymentMethodView = createPaymentMethodView(args);
+        contentRoot.addView(mAddPaymentMethodView);
+
+        setTitle(getTitleStringRes(args.paymentMethodType));
+    }
+
+    @StringRes
+    private int getTitleStringRes(@NonNull PaymentMethod.Type paymentMethodType) {
+        switch (paymentMethodType) {
+            case Card: {
+                return R.string.title_add_a_card;
+            }
+            default: {
+                throw new IllegalArgumentException(
+                        "Unsupported Payment Method type: " + paymentMethodType.code);
+            }
+        }
+    }
+
+    @NonNull
+    private AddPaymentMethodView createPaymentMethodView(
+            @NonNull AddPaymentMethodActivityStarter.Args args) {
+        switch (args.paymentMethodType) {
+            case Card: {
+                return AddPaymentMethodCardView.create(this, args.shouldRequirePostalCode);
+            }
+            default: {
+                throw new IllegalArgumentException(
+                        "Unsupported Payment Method type: " + args.paymentMethodType.code);
+            }
+        }
     }
 
     @VisibleForTesting
@@ -97,30 +113,19 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     @Override
     protected void onActionSave() {
-        if (mCardMultilineWidget == null) {
-            return;
-        }
-
         createPaymentMethod(Objects.requireNonNull(mStripe));
     }
 
     @VisibleForTesting
     void createPaymentMethod(@NonNull Stripe stripe) {
-        final PaymentMethodCreateParams.Card card =
-                Objects.requireNonNull(mCardMultilineWidget).getPaymentMethodCard();
-        final PaymentMethod.BillingDetails billingDetails =
-                mCardMultilineWidget.getPaymentMethodBillingDetails();
-
-        if (card == null) {
-            // In this case, the error will be displayed on the card widget itself.
+        final PaymentMethodCreateParams params =
+                Objects.requireNonNull(mAddPaymentMethodView).getCreateParams();
+        if (params == null) {
             return;
         }
 
-        final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParams.create(card, billingDetails);
-
         setCommunicatingProgress(true);
-        stripe.createPaymentMethod(paymentMethodCreateParams,
+        stripe.createPaymentMethod(params,
                 new PaymentMethodCallbackImpl(this, mUpdatesCustomer));
     }
 
@@ -144,10 +149,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
         finish();
     }
 
-    boolean hasValidCard() {
-        return Objects.requireNonNull(mCardMultilineWidget).getCard() != null;
-    }
-
     @Nullable
     IBinder getWindowToken() {
         return mViewStub.getWindowToken();
@@ -156,8 +157,8 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @Override
     protected void setCommunicatingProgress(boolean communicating) {
         super.setCommunicatingProgress(communicating);
-        if (mCardMultilineWidget != null) {
-            mCardMultilineWidget.setEnabled(!communicating);
+        if (mAddPaymentMethodView != null) {
+            mAddPaymentMethodView.setCommunicatingProgress(communicating);
         }
     }
 
@@ -244,32 +245,6 @@ public class AddPaymentMethodActivity extends StripeActivity {
         @Nullable
         public A getActivity() {
             return mActivityRef.get();
-        }
-    }
-
-    @VisibleForTesting
-    static final class OnEditorActionListenerImpl
-            implements TextView.OnEditorActionListener {
-        @NonNull private final AddPaymentMethodActivity mActivity;
-        @NonNull private final InputMethodManager mInputMethodManager;
-
-        OnEditorActionListenerImpl(@NonNull AddPaymentMethodActivity activity,
-                                   @NonNull InputMethodManager inputMethodManager) {
-            mActivity = activity;
-            mInputMethodManager = inputMethodManager;
-
-        }
-
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (mActivity.hasValidCard()) {
-                    mInputMethodManager.hideSoftInputFromWindow(mActivity.getWindowToken(), 0);
-                }
-                mActivity.onActionSave();
-                return true;
-            }
-            return false;
         }
     }
 }
