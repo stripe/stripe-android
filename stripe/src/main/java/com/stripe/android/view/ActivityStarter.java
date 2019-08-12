@@ -14,29 +14,28 @@ public abstract class ActivityStarter
     @NonNull private final Activity mActivity;
     @Nullable private final Fragment mFragment;
     @NonNull private final Class<TargetActivityType> mTargetClass;
+    @NonNull private final ArgsType mDefaultArgs;
 
     ActivityStarter(@NonNull Activity activity,
-                    @NonNull Class<TargetActivityType> targetClass) {
+                    @NonNull Class<TargetActivityType> targetClass,
+                    @NonNull ArgsType args) {
         mActivity = activity;
         mFragment = null;
         mTargetClass = targetClass;
+        mDefaultArgs = args;
     }
 
     ActivityStarter(@NonNull Fragment fragment,
-                    @NonNull Class<TargetActivityType> targetClass) {
+                    @NonNull Class<TargetActivityType> targetClass,
+                    @NonNull ArgsType args) {
         mActivity = fragment.requireActivity();
         mFragment = fragment;
         mTargetClass = targetClass;
+        mDefaultArgs = args;
     }
 
     public final void startForResult(final int requestCode) {
-        final Intent intent = newIntent();
-
-        if (mFragment != null) {
-            Objects.requireNonNull(mFragment).startActivityForResult(intent, requestCode);
-        } else {
-            mActivity.startActivityForResult(intent, requestCode);
-        }
+        startForResult(requestCode, mDefaultArgs);
     }
 
     public final void startForResult(int requestCode, @NonNull ArgsType args) {

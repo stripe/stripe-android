@@ -17,14 +17,16 @@ import java.util.Objects;
 public final class PaymentFlowActivityStarter
         extends ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> {
     public PaymentFlowActivityStarter(@NonNull Activity activity) {
-        super(activity, PaymentFlowActivity.class);
+        super(activity, PaymentFlowActivity.class, Args.DEFAULT);
     }
 
     public PaymentFlowActivityStarter(@NonNull Fragment fragment) {
-        super(fragment, PaymentFlowActivity.class);
+        super(fragment, PaymentFlowActivity.class, Args.DEFAULT);
     }
 
     public static final class Args implements ActivityStarter.Args {
+        private static final Args DEFAULT = new Builder().build();
+
         @NonNull final PaymentSessionConfig paymentSessionConfig;
         @Nullable final PaymentSessionData paymentSessionData;
         final boolean isPaymentSessionActive;
