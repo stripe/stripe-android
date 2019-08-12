@@ -8,7 +8,7 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 > If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
 * The [changelog](/stripe/stripe-android/blob/master/CHANGELOG.md) provides a summary of changes in each release.
-* The [migration guide](/stripe/stripe-android/blob/master/MIGRATING.md) provides instructions on upgrading between major versions.
+* The [migration guide](/stripe/stripe-android/blob/master/MIGRATING.md) provides instructions on upgrading from older versions.
 
 ## Requirements
 
@@ -36,7 +36,7 @@ Please note that if enabling minification in your `build.gradle` file, you must 
 
 ## Usage
 
-### Using `CardInputWidget`
+### Using CardInputWidget
 
 You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
 
@@ -50,12 +50,12 @@ First, add the `CardInputWidget` to your layout.
     />
 ```
 
-Note: The minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, we assign one for you when the object is instantiated.
+Note: The minimum width for this widget is 320dp. The widget also requires an ID to ensure proper layout on rotation, so if you don't do this, an ID is assigned when the object is instantiated.
 
-Once this widget is in your layout, you can read the `Card` object simply by querying the widget. You'll be given a `null` object if the card data is invalid according to our client-side checks.
+If the customer's input is valid, [CardInputWidget#getCard()](https://stripe.dev/stripe-android/com/stripe/android/view/CardInputWidget.html#getCard--) will return a [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) instance; otherwise, it will return `null`. 
 
 ```java
-Card cardToSave = mCardInputWidget.getCard();
+final Card cardToSave = mCardInputWidget.getCard();
 
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
@@ -63,7 +63,7 @@ if (cardToSave == null) {
 }
 ```
 
-### Using `CardMultilineWidget`
+### Using CardMultilineWidget
 
 You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
 
@@ -86,10 +86,10 @@ Note: We currently only support US ZIP in the postal code field.
 xmlns:app="http://schemas.android.com/apk/res-auto"
 ```
 
-To get a `Card` object from the `CardMultilineWidget`, you query the widget for its card, just like the `CardInputWidget`.
+If the customer's input is valid, [CardMultilineWidget#getCard()](https://stripe.dev/stripe-android/com/stripe/android/view/CardMultilineWidget.html#getCard--) will return a [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) instance; otherwise, it will return `null`. 
 
 ```java
-Card cardToSave = mCardMultilineWidget.getCard();
+final Card cardToSave = mCardMultilineWidget.getCard();
 
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
@@ -99,7 +99,7 @@ if (cardToSave == null) {
 
 If the returned `Card` is `null`, error states will show on the fields that need to be fixed.
 
-Once you have a non-null `Card` object from either widget, you can call [createToken](#using-createtoken).
+Once you have a non-null `Card` object from either widget, you can call [Stripe#createToken()](#using-createtoken).
 
 ### Setting your Publishable Key
 
@@ -112,9 +112,9 @@ The [Android Integration doc](https://stripe.com/docs/mobile/android) explains t
 new Stripe(context, "YOUR_PUBLISHABLE_KEY");
 ```
 
-### Using `createToken`
+### Creating Card Tokens
 
-The `stripe.createToken` converts sensitive card data into a single-use token which you can safely pass to your server to charge the user. This [tutorial](https://stripe.com/docs/tutorials/forms) explains this flow in more detail.
+[Stripe#createToken()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createToken-com.stripe.android.model.Card-com.stripe.android.TokenCallback-) makes an asynchronous call to Stripe's [Tokens API](https://stripe.com/docs/api/tokens/create_card) that converts sensitive card data into a single-use token which you can safely pass to your server to charge the user. The [Collecting Card Details on Android](https://stripe.com/docs/payments/cards/collecting/android) explains this flow in more detail.
 
 ```java
 stripe.createToken(
@@ -123,7 +123,7 @@ stripe.createToken(
 );
 ```
 
-The first argument to `createToken` is a Card object. A Card contains the following fields:
+The first argument to `createToken()` is a `Card` object. A `Card` contains the following fields:
 
 + `number`: Card number as a string without any separators, e.g. `4242424242424242`.
 + `expMonth`: Integer representing the card's expiration month, e.g. `12`.
@@ -144,14 +144,14 @@ The following fields are entirely optional — they cannot result in a token cre
 + `addressCountry`: Billing address country.
 
 The second argument `tokenCallback` is a callback you provide to handle responses from Stripe.
-It should send the token to your server for processing `onSuccess`, and notify the user `onError`.
+It should send the token to your server for processing `onSuccess()`, and notify the user `onError()`.
 
 Here's a sample implementation of the token callback:
 
 ```java
 stripe.createToken(
     card,
-    new TokenCallback() {
+    new ApiResultCallback<Token>() {
         public void onSuccess(Token token) {
             // Send token to your own web service
             MyServer.chargeToken(token);
@@ -165,164 +165,44 @@ stripe.createToken(
 );
 ```
 
-The `stripe.createToken` is an asynchronous call – it returns immediately and invokes the callback on the UI thread when it receives a response from Stripe's servers.
 
-### Using `createTokenSynchronous`
+### Creating Card Tokens synchronously
 
-The `stripe.createTokenSynchronous` method allows you to handle threading on your own, using any IO framework you choose. In particular, you can now create a token using RxJava or an IntentService.
+[Stripe#createTokenSynchronous()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createTokenSynchronous-com.stripe.android.model.Card-) allows you to handle threading on your own, using any IO framework you choose.
 
-Note: Do not call this method on the main thread or your app will crash!
+Note: Do not call this method on the main thread or your app will crash.
 
 #### RxJava Example
 
-```java
-Observable<Token> tokenObservable =
-    Observable.fromCallable(
-            new Callable<Token>() {
-                @Override
-                public Token call() throws Exception {
-                    // When executed, this method will conduct i/o on whatever thread it is run on
-                    return stripe.createTokenSynchronous(cardToCharge);
-                }
-            });
+```kotlin
+val tokenObservable = Observable.fromCallable {
+    mStripe.createTokenSynchronous(cardToSave)!!
+}
 
 tokenObservable
     .subscribeOn(Schedulers.io())
     .observeOn(AndroidSchedulers.mainThread())
-    .doOnSubscribe(
-            new Action0() {
-                @Override
-                public void call() {
-                    // Show a progress dialog if you prefer
-                    showProgressDialog();
-                }
-            })
-    .doOnUnsubscribe(
-            new Action0() {
-                @Override
-                public void call() {
-                    // Close the progress dialog if you opened one
-                    closeProgressDialog();
-                }
-            })
     .subscribe(
-            new Action1<Token>() {
-                @Override
-                public void call(Token token) {
-                    // Send token to your own web service
-                    MyServer.chargeToken(token);
-                }
-            },
-            new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    // Tell the user about the error
-                    handleError(throwable.getLocalizedMessage());
-                }
-            });
+        { token -> ... },
+        { throwable -> ... }
+    )
 ```
 
-#### IntentService Example
 
-You can invoke the following from your code (where `cardToSave` is some Card object that you have created.)
+### Client-side Card Validation
 
-```java
-Intent tokenServiceIntent = TokenIntentService.createTokenIntent(
-        mActivity,
-        cardToSave.getNumber(),
-        cardToSave.getExpMonth(),
-        cardToSave.getExpYear(),
-        cardToSave.getCVC(),
-        mPublishableKey);
-mActivity.startService(tokenServiceIntent);
-```
+The [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) object allows you to validate user input before you send the information to the Stripe API.
 
-Your IntentService can then perform the following in its `onHandleIntent` method.
-
-```java
-@Override
-protected void onHandleIntent(Intent intent) {
-    String errorMessage = null;
-    Token token = null;
-    if (intent != null) {
-        String cardNumber = intent.getStringExtra(EXTRA_CARD_NUMBER);
-        Integer month = (Integer) intent.getExtras().get(EXTRA_MONTH);
-        Integer year = (Integer) intent.getExtras().get(EXTRA_YEAR);
-        String cvc = intent.getStringExtra(EXTRA_CVC);
-        String publishableKey = intent.getStringExtra(EXTRA_PUBLISHABLE_KEY);
-        Card card = new Card(cardNumber, month, year, cvc);
-        Stripe stripe = new Stripe();
-        try {
-            token = stripe.createTokenSynchronous(card, publishableKey);
-        } catch (StripeException stripeEx) {
-            errorMessage = stripeEx.getLocalizedMessage();
-        }
-    }
-    Intent localIntent = new Intent(TOKEN_ACTION);
-    if (token != null) {
-        // extract whatever information you want from your Token object
-        localIntent.putExtra(STRIPE_CARD_LAST_FOUR, token.getCard().getLast4());
-        localIntent.putExtra(STRIPE_CARD_TOKEN_ID, token.getId());
-    }
-    if (errorMessage != null) {
-        localIntent.putExtra(STRIPE_ERROR_MESSAGE, errorMessage);
-    }
-    // Broadcasts the Intent to receivers in this app.
-    LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
-}
-```
-
-Registering a local BroadcastReceiver in your activity then allows you to handle the results.
-
-```java
-private class TokenBroadcastReceiver extends BroadcastReceiver {
-
-    private TokenBroadcastReceiver() { }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        mProgressDialogController.finishProgress();
-        if (intent == null) {
-            return;
-        }
-        if (intent.hasExtra(TokenIntentService.STRIPE_ERROR_MESSAGE)) {
-            // handle your error!
-            return;
-        }
-        if (intent.hasExtra(TokenIntentService.STRIPE_CARD_TOKEN_ID) &&
-                intent.hasExtra(TokenIntentService.STRIPE_CARD_LAST_FOUR)) {
-                    // handle your resulting token here
-                }
-        }
-    }
-}
-```
-
-### Client-side validation helpers
-
-The Card object allows you to validate user input before you send the information to Stripe.
-
-#### validateNumber
-
-Checks that the number is formatted correctly and passes the [Luhn check](http://en.wikipedia.org/wiki/Luhn_algorithm).
-
-#### validateExpiryDate
-
-Checks whether or not the expiration date represents an actual month in the future.
-
-#### validateCVC
-
-Checks whether or not the supplied number could be a valid verification code.
-
-#### validateCard
-
-Convenience method to validate card number, expiry date and CVC.
+- [Card#validateNumber()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateNumber--) - Checks that the number is formatted correctly and passes the [Luhn check](http://en.wikipedia.org/wiki/Luhn_algorithm).
+- [Card#validateExpiryDate()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateExpiryDate--) - Checks whether or not the expiration date represents an actual month in the future.
+- [Card#validateCVC()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCVC--) - Checks whether or not the supplied number could be a valid verification code.
+- [Card#validateCard()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCard--) - Convenience method to validate card number, expiry date and CVC.
 
 ## Example apps
 
 There are 2 example apps included in the repository:
-- Example project is a simple example of different ways to connect our components, including how to make tokens and sources, how to connect the synchronous and asynchronous methods, and how to use the CardInputWidget.
-- SampleStore project is a full walk-through of building a shop activity, including connecting to a back end.
+- [Example project](https://github.com/stripe/stripe-android/tree/master/example) is a simple example of different ways to connect our components, including how to make tokens and sources, how to connect the synchronous and asynchronous methods, and how to use the CardInputWidget.
+- [Samplestore project](https://github.com/stripe/stripe-android/tree/master/samplestore) is a full walk-through of building a shop activity, including connecting to a back end.
 
 To build and run the example apps, clone the repository and open the project. Running "example" will run the Example application, and running "samplestore" will run the shop activity.
 
@@ -337,12 +217,11 @@ Note: Both example apps require an [Android SDK](https://developer.android.com/s
 3. Import the project in Android Studio
     * Choose _Import Project..._ from the "Welcome to Android Studio" screen.
     * Select `build.gradle` at the top of the `stripe-android` repository.
-4. Build and run the project on your device or in the Android emulator.
+4. Set your publishable key in [Settings.PUBLISHABLE_KEY](example/src/main/java/com/stripe/example/Settings.kt).
+5. Build and run the project on your device or in the Android emulator.
 
-The example application needs a public key from your Stripe account to interact with the Stripe API. To add this, [replace the value of PUBLISHABLE_KEY in LauncherActivity with your test key](example/src/main/java/com/stripe/example/activity/LauncherActivity.java#L28).
-
-Three different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
-[AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java), [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java), and [IntentServiceTokenController](example/src/main/java/com/stripe/example/controller/IntentServiceTokenController.java).
+Two different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
+[AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java) and [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java).
 
 ### Configuring the samplestore app
 
@@ -354,7 +233,3 @@ Before you can run the SampleStore application or use the CustomerSessionActivit
 4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in [Settings.kt](samplestore/src/main/java/com/stripe/samplestore/Settings.kt) with the app URL Heroku provides you with (e.g. `"https://my-example-app.herokuapp.com"`)
 
 After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to [https://stripe.com/docs/testing#cards](https://stripe.com/docs/testing#cards) for a list of test card numbers.
-
-## Migrating from older versions
-
-See `MIGRATING.md`
