@@ -168,8 +168,8 @@ public class ApiRequestTest {
 
     @Test
     public void getHeaders_withAppInfo() throws JSONException {
-        final ApiRequest apiRequest = new ApiRequest(StripeRequest.Method.GET,
-                StripeApiHandler.getPaymentMethodsUrl(), null,
+        final ApiRequest apiRequest = ApiRequest.createGet(
+                StripeApiHandler.getPaymentMethodsUrl(),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
                 AppInfoTest.APP_INFO);
         final Map<String, String> headers = apiRequest.getHeaders();

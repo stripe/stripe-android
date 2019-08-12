@@ -237,14 +237,13 @@ class PaymentController {
                         Objects.requireNonNull(stripeIntent.getStripeSdkData());
                 if (sdkData.is3ds2()) {
                     mAnalyticsRequestExecutor.executeAsync(
-                            ApiRequest.createAnalyticsRequest(
+                            AnalyticsRequest.create(
                                     mAnalyticsDataFactory.createAuthParams(
                                             AnalyticsDataFactory.EventName.AUTH_3DS2_FINGERPRINT,
                                             StripeTextUtils.emptyIfNull(stripeIntent.getId()),
                                             requestOptions.apiKey
                                     ),
-                                    requestOptions,
-                                    null
+                                    requestOptions
                             )
                     );
                     try {
@@ -264,13 +263,12 @@ class PaymentController {
                 }
             } else if (StripeIntent.NextActionType.RedirectToUrl == nextActionType) {
                 mAnalyticsRequestExecutor.executeAsync(
-                        ApiRequest.createAnalyticsRequest(
+                        AnalyticsRequest.create(
                                 mAnalyticsDataFactory.createAuthParams(
                                         AnalyticsDataFactory.EventName.AUTH_REDIRECT,
                                         StripeTextUtils.emptyIfNull(stripeIntent.getId()),
                                         requestOptions.apiKey),
-                                requestOptions,
-                                null
+                                requestOptions
                         )
                 );
 
@@ -575,13 +573,12 @@ class PaymentController {
 
         private void startFrictionlessFlow() {
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.createAuthParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_FRICTIONLESS,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     mRequestOptions.apiKey),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mStripeIntent));
@@ -675,15 +672,14 @@ class PaymentController {
                               @NonNull String uiTypeCode) {
             super.completed(completionEvent, uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
@@ -697,15 +693,14 @@ class PaymentController {
         public void cancelled(@NonNull String uiTypeCode) {
             super.cancelled(uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
@@ -716,15 +711,14 @@ class PaymentController {
         public void timedout(@NonNull String uiTypeCode) {
             super.timedout(uiTypeCode);
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     uiTypeCode,
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
@@ -735,14 +729,13 @@ class PaymentController {
         public void protocolError(@NonNull ProtocolErrorEvent protocolErrorEvent) {
             super.protocolError(protocolErrorEvent);
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     protocolErrorEvent,
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
@@ -753,14 +746,13 @@ class PaymentController {
         public void runtimeError(@NonNull RuntimeErrorEvent runtimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent);
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
                                     runtimeErrorEvent,
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
             notifyCompletion(new Stripe3ds2CompletionStarter.StartData(mStripeIntent,
@@ -770,7 +762,7 @@ class PaymentController {
         private void notifyCompletion(
                 @NonNull final Stripe3ds2CompletionStarter.StartData startData) {
             mAnalyticsRequestExecutor.executeAsync(
-                    ApiRequest.createAnalyticsRequest(
+                    AnalyticsRequest.create(
                             mAnalyticsDataFactory.create3ds2ChallengeParams(
                                     AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
                                     StripeTextUtils.emptyIfNull(mStripeIntent.getId()),
@@ -778,8 +770,7 @@ class PaymentController {
                                             mTransaction.getInitialChallengeUiType()),
                                     mRequestOptions.apiKey
                             ),
-                            mRequestOptions,
-                            null
+                            mRequestOptions
                     )
             );
 
