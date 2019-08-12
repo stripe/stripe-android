@@ -93,6 +93,8 @@
     <!-- Payment Auth example -->
     <string name="payment_auth_example">Payment Auth Example</string>
     <string name="launch_payment_auth">Launch Payment Auth Flow</string>
+    <string name="auth_payment_intent">Authenticate PaymentIntent</string>
+    <string name="auth_setup_intent">Authenticate SetupIntent</string>
     <string name="buy">Buy!</string>
     <string name="setup">Buy in the Future!</string>
     <string name="payment_intent_status">PaymentIntent status: %s</string>

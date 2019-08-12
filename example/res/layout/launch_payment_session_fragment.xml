@@ -35,7 +35,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/example_vertical_spacing"
-        android:text="@string/launch_payment_auth"
+        android:text="@string/auth_payment_intent"
+        />
+
+    <Button
+        android:id="@+id/launch_setup_auth"
+        android:enabled="true"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:text="@string/auth_setup_intent"
         />
 
     <TextView
