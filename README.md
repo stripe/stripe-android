@@ -6,6 +6,9 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 
 > If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
+* The [changelog](/stripe/stripe-android/blob/master/CHANGELOG.md) provides a summary of changes in each release.
+* The [migration guide](/stripe/stripe-android/blob/master/MIGRATING.md) provides instructions on upgrading between major versions.
+
 ## Requirements
 
 * Android 4.4 (API level 19) and above
