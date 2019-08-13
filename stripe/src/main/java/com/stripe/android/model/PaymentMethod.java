@@ -65,13 +65,19 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     public enum Type {
         Card("card"),
         CardPresent("card_present"),
-        Fpx("fpx"),
+        Fpx("fpx", false),
         Ideal("ideal");
 
         @NonNull public final String code;
+        public final boolean isReusable;
 
         Type(@NonNull String code) {
+            this(code, true);
+        }
+
+        Type(@NonNull String code, boolean isReusable) {
             this.code = code;
+            this.isReusable = isReusable;
         }
     }
 
