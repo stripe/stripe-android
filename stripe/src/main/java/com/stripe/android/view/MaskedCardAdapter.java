@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
@@ -66,16 +65,26 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.setMaskedCardData(mPaymentMethods.get(position));
-        holder.setIndex(position);
         holder.setSelected(position == mSelectedIndex);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final int currentPosition = holder.getAdapterPosition();
+                if (!holder.mMaskedCardView.isSelected()) {
+                    holder.mMaskedCardView.toggleSelected();
+                    setSelectedIndex(currentPosition);
+                    notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        FrameLayout itemView = (FrameLayout) LayoutInflater.from(parent.getContext())
+        final View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.masked_card_row, parent, false);
         return new ViewHolder(itemView);
     }
@@ -119,36 +128,21 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
         mSelectedIndex = selectedIndex;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
-        @NonNull private final MaskedCardView maskedCardView;
-        private int index;
+        @NonNull private final MaskedCardView mMaskedCardView;
 
-        ViewHolder(FrameLayout itemLayout) {
-            super(itemLayout);
-            maskedCardView = itemLayout.findViewById(R.id.masked_card_item);
-            itemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!maskedCardView.isSelected()) {
-                        maskedCardView.toggleSelected();
-                        setSelectedIndex(index);
-                        notifyDataSetChanged();
-                    }
-                }
-            });
+        private ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mMaskedCardView = itemView.findViewById(R.id.masked_card_item);
         }
 
-        void setMaskedCardData(@NonNull PaymentMethod paymentMethod) {
-            maskedCardView.setPaymentMethod(paymentMethod);
+        private void setMaskedCardData(@NonNull PaymentMethod paymentMethod) {
+            mMaskedCardView.setPaymentMethod(paymentMethod);
         }
 
-        void setIndex(int index) {
-            this.index = index;
-        }
-
-        void setSelected(boolean selected) {
-            maskedCardView.setSelected(selected);
+        private void setSelected(boolean selected) {
+            mMaskedCardView.setSelected(selected);
         }
     }
 }
