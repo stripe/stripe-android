@@ -259,13 +259,13 @@ public class PaymentSession {
      */
     public void presentPaymentMethodSelection(boolean shouldRequirePostalCode,
                                               @Nullable String userSelectedPaymentMethodId) {
-
         mPaymentMethodsActivityStarter.startForResult(PAYMENT_METHOD_REQUEST,
                 new PaymentMethodsActivityStarter.Args.Builder()
                         .setInitialPaymentMethodId(
                                 getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                         .setShouldRequirePostalCode(shouldRequirePostalCode)
                         .setIsPaymentSessionActive(true)
+                        .setPaymentConfiguration(PaymentConfiguration.getInstance())
                         .build()
         );
     }

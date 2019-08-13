@@ -6,8 +6,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.CustomerSessionTestHelper;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
@@ -67,12 +69,15 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     public void setup() {
         MockitoAnnotations.initMocks(this);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
+        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
                 PaymentMethod.fromString(MaskedCardAdapterTest.PAYMENT_METHOD_JSON));
 
         mPaymentMethodsActivity = createActivity(
-                new PaymentMethodsActivityStarter.Args.Builder().build()
+                new PaymentMethodsActivityStarter.Args.Builder()
+                        .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                        .build()
         );
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
 
@@ -152,6 +157,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
         mPaymentMethodsActivity = createActivity(new PaymentMethodsActivityStarter.Args.Builder()
+                .setPaymentConfiguration(PaymentConfiguration.getInstance())
                 .setIsPaymentSessionActive(true)
                 .build());
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
