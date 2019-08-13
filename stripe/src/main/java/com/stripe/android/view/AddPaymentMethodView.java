@@ -18,10 +18,15 @@ abstract class AddPaymentMethodView extends FrameLayout {
         super(context, attrs);
     }
 
-    public AddPaymentMethodView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public AddPaymentMethodView(@NonNull Context context, @Nullable AttributeSet attrs,
+                                int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
+    /**
+     * @return a {@link PaymentMethodCreateParams} if the customer input for the given payment
+     *         method type is valid; otherwise, {@code null}
+     */
     @Nullable abstract PaymentMethodCreateParams getCreateParams();
 
     abstract void setCommunicatingProgress(boolean communicating);
