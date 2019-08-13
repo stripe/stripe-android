@@ -59,7 +59,8 @@ public class AddPaymentMethodCardView extends AddPaymentMethodView {
                 new AddPaymentMethodCardView.OnEditorActionListenerImpl(
                         activity,
                         this,
-                        (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE)
+                        (InputMethodManager) activity
+                                .getSystemService(Activity.INPUT_METHOD_SERVICE)
                 );
 
         ((TextView) mCardMultilineWidget.findViewById(R.id.et_add_source_card_number_ml))
