@@ -34,14 +34,15 @@ import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT
  */
 public class PaymentMethodsActivity extends AppCompatActivity {
 
-    private static final String STATE_SELECTED_PAYMENT_METHOD = "state_selected_payment_method";
+    private static final String STATE_SELECTED_PAYMENT_METHOD_ID =
+            "state_selected_payment_method_id";
 
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
-    @Nullable private MaskedCardAdapter mMaskedCardAdapter;
+    @Nullable private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private boolean mStartedFromPaymentSession;
@@ -95,10 +96,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
 
         final String selectedPaymentMethodId;
-
         if (savedInstanceState != null &&
-                savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD)) {
-            selectedPaymentMethodId = savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD);
+                savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD_ID)) {
+            selectedPaymentMethodId =
+                    savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD_ID);
         } else {
             selectedPaymentMethodId = args.initialPaymentMethodId;
         }
@@ -167,17 +168,17 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods,
                                       @Nullable String selectPaymentMethodId) {
-        if (mMaskedCardAdapter == null) {
-            mMaskedCardAdapter = new MaskedCardAdapter(paymentMethods);
+        if (mAdapter == null) {
+            mAdapter = new PaymentMethodsAdapter();
             // init the RecyclerView
             mRecyclerView.setHasFixedSize(false);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            mRecyclerView.setAdapter(mMaskedCardAdapter);
-        } else {
-            mMaskedCardAdapter.setPaymentMethods(paymentMethods);
+            mRecyclerView.setAdapter(mAdapter);
         }
+
+        mAdapter.setPaymentMethods(paymentMethods);
         if (selectPaymentMethodId != null) {
-            mMaskedCardAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
+            mAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
         }
     }
 
@@ -204,19 +205,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void setSelectionAndFinish() {
-        if (mMaskedCardAdapter == null || mMaskedCardAdapter.getSelectedPaymentMethod() == null) {
-            cancelAndFinish();
-            return;
-        }
-
-        final PaymentMethod paymentMethod = mMaskedCardAdapter.getSelectedPaymentMethod();
+        final PaymentMethod paymentMethod = mAdapter != null ?
+                mAdapter.getSelectedPaymentMethod() : null;
         if (paymentMethod == null || paymentMethod.id == null) {
             cancelAndFinish();
             return;
         }
 
-        final Intent intent = new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod);
-        setResult(RESULT_OK, intent);
+        setResult(RESULT_OK, new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod));
         finish();
     }
 
@@ -278,9 +274,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mMaskedCardAdapter != null) {
-            outState.putString(STATE_SELECTED_PAYMENT_METHOD,
-                    mMaskedCardAdapter.getSelectedPaymentMethodId());
+        if (mAdapter != null) {
+            final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
+            if (paymentMethod != null) {
+                outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id);
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,12 +22,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test class for {@link MaskedCardAdapter}
+ * Test class for {@link PaymentMethodsAdapter}
  */
 @RunWith(RobolectricTestRunner.class)
-public class MaskedCardAdapterTest {
+public class PaymentMethodsAdapterTest {
 
-    public static final String PAYMENT_METHOD_JSON = "{\n" +
+    static final String PAYMENT_METHOD_JSON = "{\n" +
             "\t\"id\": \"pm_987654321\",\n" +
             "\t\"created\": 1550757934256,\n" +
             "\t\"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
@@ -68,13 +67,13 @@ public class MaskedCardAdapterTest {
 
 
     @Mock RecyclerView.AdapterDataObserver mAdapterDataObserver;
-    private MaskedCardAdapter mMaskedCardAdapter;
+    private PaymentMethodsAdapter mPaymentMethodsAdapter;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mMaskedCardAdapter = new MaskedCardAdapter(new ArrayList<PaymentMethod>());
-        mMaskedCardAdapter.registerAdapterDataObserver(mAdapterDataObserver);
+        mPaymentMethodsAdapter = new PaymentMethodsAdapter();
+        mPaymentMethodsAdapter.registerAdapterDataObserver(mAdapterDataObserver);
     }
 
     @Test
@@ -87,22 +86,22 @@ public class MaskedCardAdapterTest {
         assertNotNull(paymentMethod1.id);
         assertNotNull(paymentMethod2.id);
         final List<PaymentMethod> paymentMethods = Arrays.asList(paymentMethod1, paymentMethod2);
-        mMaskedCardAdapter.setPaymentMethods(paymentMethods);
-        assertEquals(2, mMaskedCardAdapter.getItemCount());
+        mPaymentMethodsAdapter.setPaymentMethods(paymentMethods);
+        assertEquals(2, mPaymentMethodsAdapter.getItemCount());
         verify(mAdapterDataObserver, times(1)).onChanged();
 
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod2.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod2.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
 
-        mMaskedCardAdapter.setSelectedPaymentMethod(paymentMethod1.id);
+        mPaymentMethodsAdapter.setSelectedPaymentMethod(paymentMethod1.id);
         verify(mAdapterDataObserver, times(1)).onChanged();
 
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod1.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod1.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
 
-        mMaskedCardAdapter.setSelectedIndex(1);
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod2.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        mPaymentMethodsAdapter.setSelectedIndex(1);
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod2.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
     }
 
     @Test
@@ -116,16 +115,16 @@ public class MaskedCardAdapterTest {
         assertNotNull(paymentMethod1);
         assertNotNull(paymentMethod1.id);
 
-        mMaskedCardAdapter.setPaymentMethods(singlePaymentMethod);
-        assertEquals(1, mMaskedCardAdapter.getItemCount());
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
+        mPaymentMethodsAdapter.setPaymentMethods(singlePaymentMethod);
+        assertEquals(1, mPaymentMethodsAdapter.getItemCount());
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
 
-        assertEquals(paymentMethod1.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        assertEquals(paymentMethod1.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
 
-        mMaskedCardAdapter.setPaymentMethods(paymentMethods);
-        assertEquals(2, mMaskedCardAdapter.getItemCount());
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod1.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        mPaymentMethodsAdapter.setPaymentMethods(paymentMethods);
+        assertEquals(2, mPaymentMethodsAdapter.getItemCount());
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod1.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
         verify(mAdapterDataObserver, times(2)).onChanged();
     }
 
@@ -139,14 +138,14 @@ public class MaskedCardAdapterTest {
         final List<PaymentMethod> singlePaymentMethod = Collections.singletonList(paymentMethod2);
         final List<PaymentMethod> paymentMethods = Arrays.asList(paymentMethod1, paymentMethod2);
 
-        mMaskedCardAdapter.setPaymentMethods(singlePaymentMethod);
-        assertEquals(1, mMaskedCardAdapter.getItemCount());
-        mMaskedCardAdapter.setSelectedIndex(0);
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
+        mPaymentMethodsAdapter.setPaymentMethods(singlePaymentMethod);
+        assertEquals(1, mPaymentMethodsAdapter.getItemCount());
+        mPaymentMethodsAdapter.setSelectedIndex(0);
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
 
-        mMaskedCardAdapter.setPaymentMethods(paymentMethods);
-        assertEquals(2, mMaskedCardAdapter.getItemCount());
-        assertNotNull(mMaskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod2.id, mMaskedCardAdapter.getSelectedPaymentMethod().id);
+        mPaymentMethodsAdapter.setPaymentMethods(paymentMethods);
+        assertEquals(2, mPaymentMethodsAdapter.getItemCount());
+        assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod2.id, mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
     }
 }

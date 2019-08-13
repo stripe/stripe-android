@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -12,20 +13,22 @@ import com.stripe.android.model.PaymentMethod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A {@link RecyclerView.Adapter} that holds a set of {@link MaskedCardView} items for a given set
  * of {@link PaymentMethod} objects.
  */
-class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolder> {
+final class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder> {
+
+    private static final int TYPE_CARD = 0;
 
     private static final int NO_SELECTION = -1;
-    @NonNull private final List<PaymentMethod> mPaymentMethods;
+    @NonNull private final List<PaymentMethod> mPaymentMethods = new ArrayList<>();
     private int mSelectedIndex = NO_SELECTION;
 
-    MaskedCardAdapter(@NonNull List<PaymentMethod> paymentMethods) {
-        mPaymentMethods = new ArrayList<>();
-        setPaymentMethods(paymentMethods);
+    PaymentMethodsAdapter() {
+        setHasStableIds(true);
     }
 
     void setPaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
@@ -47,7 +50,7 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
 
     private int getNewestPaymentMethodIndex() {
         int index = NO_SELECTION;
-        Long created = 0L;
+        long created = 0L;
         for (int i = 0; i < mPaymentMethods.size(); i++) {
             final PaymentMethod paymentMethod = mPaymentMethods.get(i);
             if (paymentMethod.created != null && paymentMethod.created > created) {
@@ -65,15 +68,30 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     @Override
+    public int getItemViewType(int position) {
+        final String type = mPaymentMethods.get(position).type;
+        if (PaymentMethod.Type.Card.code.equals(type)) {
+            return TYPE_CARD;
+        } else {
+            return super.getItemViewType(position);
+        }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return Objects.requireNonNull(mPaymentMethods.get(position).id).hashCode();
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        holder.setMaskedCardData(mPaymentMethods.get(position));
+        holder.setPaymentMethod(mPaymentMethods.get(position));
         holder.setSelected(position == mSelectedIndex);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final int currentPosition = holder.getAdapterPosition();
-                if (!holder.mMaskedCardView.isSelected()) {
-                    holder.mMaskedCardView.toggleSelected();
+                if (currentPosition != mSelectedIndex) {
+                    holder.toggleSelected();
                     setSelectedIndex(currentPosition);
                     notifyDataSetChanged();
                 }
@@ -84,17 +102,21 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        @LayoutRes final int layoutRes;
+        if (viewType == TYPE_CARD) {
+            layoutRes = R.layout.masked_card_row;
+        } else {
+            throw new IllegalArgumentException("Unsupported type: " + viewType);
+        }
         final View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.masked_card_row, parent, false);
+                .inflate(layoutRes, parent, false);
         return new ViewHolder(itemView);
     }
 
     /**
-     * Sets the selected payment method to the one whose ID is identical to the input string, if
-     * such a value is found.
+     * Sets the selected payment method based on ID.
      *
-     * @param paymentMethodId a stripe ID to search for among the list of {@link PaymentMethod}
-     *         objects
+     * @param paymentMethodId the ID of the {@link PaymentMethod} to select
      * @return {@code true} if the value was found, {@code false} if not
      */
     boolean setSelectedPaymentMethod(@NonNull String paymentMethodId) {
@@ -105,14 +127,6 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
             }
         }
         return false;
-    }
-
-    @Nullable
-    String getSelectedPaymentMethodId() {
-        if (mSelectedIndex == NO_SELECTION) {
-            return null;
-        }
-        return mPaymentMethods.get(mSelectedIndex).id;
     }
 
     @Nullable
@@ -129,20 +143,23 @@ class MaskedCardAdapter extends RecyclerView.Adapter<MaskedCardAdapter.ViewHolde
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
-        @NonNull private final MaskedCardView mMaskedCardView;
+        @NonNull private final MaskedCardView mCardView;
 
         private ViewHolder(@NonNull View itemView) {
             super(itemView);
-            mMaskedCardView = itemView.findViewById(R.id.masked_card_item);
+            mCardView = itemView.findViewById(R.id.masked_card_item);
         }
 
-        private void setMaskedCardData(@NonNull PaymentMethod paymentMethod) {
-            mMaskedCardView.setPaymentMethod(paymentMethod);
+        private void setPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+            mCardView.setPaymentMethod(paymentMethod);
         }
 
         private void setSelected(boolean selected) {
-            mMaskedCardView.setSelected(selected);
+            mCardView.setSelected(selected);
+        }
+
+        private void toggleSelected() {
+            mCardView.toggleSelected();
         }
     }
 }
