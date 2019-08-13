@@ -83,6 +83,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                                         .setShouldRequirePostalCode(shouldShowPostalField)
                                         .setIsPaymentSessionActive(mStartedFromPaymentSession)
                                         .setPaymentMethodType(PaymentMethod.Type.Card)
+                                        .setPaymentConfiguration(args.paymentConfiguration)
                                         .build());
             }
         });

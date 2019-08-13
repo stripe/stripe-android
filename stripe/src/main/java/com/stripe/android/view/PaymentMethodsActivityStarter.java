@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.stripe.android.ObjectBuilder;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -34,6 +35,7 @@ public final class PaymentMethodsActivityStarter
         public final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;
         @NonNull final Set<PaymentMethod.Type> paymentMethodTypes;
+        @Nullable final PaymentConfiguration paymentConfiguration;
 
         @NonNull
         public static Args create(@NonNull Intent intent) {
@@ -49,6 +51,7 @@ public final class PaymentMethodsActivityStarter
                     builder.mPaymentMethodTypes,
                     Collections.singleton(PaymentMethod.Type.Card)
             );
+            paymentConfiguration = builder.mPaymentConfiguration;
         }
 
         private Args(@NonNull Parcel in) {
@@ -61,6 +64,8 @@ public final class PaymentMethodsActivityStarter
             for (int i = 0; i < paymentMethodTypesSize; i++) {
                 paymentMethodTypes.add(PaymentMethod.Type.valueOf(in.readString()));
             }
+
+            paymentConfiguration = in.readParcelable(PaymentConfiguration.class.getClassLoader());
         }
 
         @Override
@@ -78,12 +83,14 @@ public final class PaymentMethodsActivityStarter
             for (PaymentMethod.Type paymentMethodType : paymentMethodTypes) {
                 dest.writeString(paymentMethodType.name());
             }
+
+            dest.writeParcelable(paymentConfiguration, 0);
         }
 
         @Override
         public int hashCode() {
             return ObjectUtils.hash(initialPaymentMethodId, shouldRequirePostalCode,
-                    isPaymentSessionActive, paymentMethodTypes);
+                    isPaymentSessionActive, paymentMethodTypes, paymentConfiguration);
         }
 
         @Override
@@ -95,7 +102,8 @@ public final class PaymentMethodsActivityStarter
             return ObjectUtils.equals(initialPaymentMethodId, args.initialPaymentMethodId) &&
                     ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
                     ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
-                    ObjectUtils.equals(paymentMethodTypes, args.paymentMethodTypes);
+                    ObjectUtils.equals(paymentMethodTypes, args.paymentMethodTypes) &&
+                    ObjectUtils.equals(paymentConfiguration, args.paymentConfiguration);
         }
 
         public static final Parcelable.Creator<Args> CREATOR = new Parcelable.Creator<Args>() {
@@ -115,7 +123,8 @@ public final class PaymentMethodsActivityStarter
             @Nullable private String mInitialPaymentMethodId = null;
             private boolean mShouldRequirePostalCode = false;
             private boolean mIsPaymentSessionActive = false;
-            private Set<PaymentMethod.Type> mPaymentMethodTypes;
+            @Nullable private Set<PaymentMethod.Type> mPaymentMethodTypes;
+            @Nullable private PaymentConfiguration mPaymentConfiguration;
 
             @NonNull
             public Builder setInitialPaymentMethodId(@Nullable String initialPaymentMethodId) {
@@ -139,6 +148,13 @@ public final class PaymentMethodsActivityStarter
             public Builder setPaymentMethodTypes(
                     @NonNull Set<PaymentMethod.Type> paymentMethodTypes) {
                 mPaymentMethodTypes = paymentMethodTypes;
+                return this;
+            }
+
+            @NonNull
+            public Builder setPaymentConfiguration(
+                    @Nullable PaymentConfiguration paymentConfiguration) {
+                this.mPaymentConfiguration = paymentConfiguration;
                 return this;
             }
 

@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
+import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.utils.ObjectUtils;
 
@@ -27,6 +28,7 @@ public class AddPaymentMethodActivityStarter
         final boolean isPaymentSessionActive;
         final boolean shouldInitCustomerSessionTokens;
         @NonNull final PaymentMethod.Type paymentMethodType;
+        @Nullable final PaymentConfiguration paymentConfiguration;
 
         @NonNull
         public static AddPaymentMethodActivityStarter.Args create(@NonNull Intent intent) {
@@ -44,6 +46,7 @@ public class AddPaymentMethodActivityStarter
                     builder.mPaymentMethodType,
                     PaymentMethod.Type.Card
             );
+            this.paymentConfiguration = builder.mPaymentConfiguration;
         }
 
         private Args(@NonNull Parcel in) {
@@ -52,6 +55,8 @@ public class AddPaymentMethodActivityStarter
             this.isPaymentSessionActive = in.readInt() == 1;
             this.shouldInitCustomerSessionTokens = in.readInt() == 1;
             this.paymentMethodType = PaymentMethod.Type.valueOf(in.readString());
+            this.paymentConfiguration =
+                    in.readParcelable(PaymentConfiguration.class.getClassLoader());
         }
 
         @Override
@@ -66,12 +71,14 @@ public class AddPaymentMethodActivityStarter
             dest.writeInt(isPaymentSessionActive ? 1 : 0);
             dest.writeInt(shouldInitCustomerSessionTokens ? 1 : 0);
             dest.writeString(paymentMethodType.name());
+            dest.writeParcelable(paymentConfiguration, 0);
         }
 
         @Override
         public int hashCode() {
             return ObjectUtils.hash(shouldUpdateCustomer, shouldRequirePostalCode,
-                    isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType);
+                    isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType,
+                    paymentConfiguration);
         }
 
         @Override
@@ -85,7 +92,9 @@ public class AddPaymentMethodActivityStarter
                     ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
                     ObjectUtils.equals(shouldInitCustomerSessionTokens,
                             args.shouldInitCustomerSessionTokens) &&
-                    ObjectUtils.equals(paymentMethodType, args.paymentMethodType);
+                    ObjectUtils.equals(paymentMethodType, args.paymentMethodType) &&
+                    ObjectUtils.equals(paymentConfiguration, args.paymentConfiguration);
+
         }
 
         public static final Parcelable.Creator<AddPaymentMethodActivityStarter.Args> CREATOR =
@@ -109,7 +118,8 @@ public class AddPaymentMethodActivityStarter
             private boolean mShouldRequirePostalCode;
             private boolean mIsPaymentSessionActive = false;
             private boolean mShouldInitCustomerSessionTokens = true;
-            private PaymentMethod.Type mPaymentMethodType;
+            @Nullable private PaymentMethod.Type mPaymentMethodType;
+            @Nullable private PaymentConfiguration mPaymentConfiguration;
 
             /**
              * If true, update using an already-initialized
@@ -142,6 +152,12 @@ public class AddPaymentMethodActivityStarter
             @NonNull
             Builder setPaymentMethodType(@NonNull PaymentMethod.Type paymentMethodType) {
                 this.mPaymentMethodType = paymentMethodType;
+                return this;
+            }
+
+            @NonNull
+            Builder setPaymentConfiguration(@Nullable PaymentConfiguration paymentConfiguration) {
+                this.mPaymentConfiguration = paymentConfiguration;
                 return this;
             }
 

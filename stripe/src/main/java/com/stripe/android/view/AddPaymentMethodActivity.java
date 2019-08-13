@@ -49,11 +49,16 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mStripe = new Stripe(getApplicationContext(),
-                PaymentConfiguration.getInstance().getPublishableKey());
 
         final AddPaymentMethodActivityStarter.Args args =
                 AddPaymentMethodActivityStarter.Args.create(getIntent());
+        final PaymentConfiguration paymentConfiguration;
+        if (args.paymentConfiguration != null) {
+            paymentConfiguration = args.paymentConfiguration;
+        } else {
+            paymentConfiguration = PaymentConfiguration.getInstance();
+        }
+        mStripe = new Stripe(getApplicationContext(), paymentConfiguration.getPublishableKey());
 
         mViewStub.setLayoutResource(R.layout.activity_add_source);
         mViewStub.inflate();
