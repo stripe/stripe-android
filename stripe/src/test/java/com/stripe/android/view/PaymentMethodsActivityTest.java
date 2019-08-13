@@ -72,7 +72,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
-                PaymentMethod.fromString(MaskedCardAdapterTest.PAYMENT_METHOD_JSON));
+                PaymentMethod.fromString(PaymentMethodsAdapterTest.PAYMENT_METHOD_JSON));
 
         mPaymentMethodsActivity = createActivity(
                 new PaymentMethodsActivityStarter.Args.Builder()
@@ -136,10 +136,10 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
 
         listener.onPaymentMethodsRetrieved(mPaymentMethods);
 
-        final MaskedCardAdapter maskedCardAdapter = (MaskedCardAdapter) mRecyclerView.getAdapter();
-        assertNotNull(maskedCardAdapter);
-        assertNotNull(maskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod.id, maskedCardAdapter.getSelectedPaymentMethod().id);
+        final PaymentMethodsAdapter paymentMethodsAdapter = (PaymentMethodsAdapter) mRecyclerView.getAdapter();
+        assertNotNull(paymentMethodsAdapter);
+        assertNotNull(paymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod.id, paymentMethodsAdapter.getSelectedPaymentMethod().id);
     }
 
     @Test
@@ -197,10 +197,11 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertNotNull(mRecyclerView.getAdapter());
         assertEquals(2, mRecyclerView.getAdapter().getItemCount());
 
-        final MaskedCardAdapter maskedCardAdapter = (MaskedCardAdapter) mRecyclerView.getAdapter();
-        assertNotNull(maskedCardAdapter);
-        assertNotNull(maskedCardAdapter.getSelectedPaymentMethod());
-        assertEquals(paymentMethod.id, maskedCardAdapter.getSelectedPaymentMethod().id);
+        final PaymentMethodsAdapter paymentMethodsAdapter =
+                (PaymentMethodsAdapter) mRecyclerView.getAdapter();
+        assertNotNull(paymentMethodsAdapter);
+        assertNotNull(paymentMethodsAdapter.getSelectedPaymentMethod());
+        assertEquals(paymentMethod.id, paymentMethodsAdapter.getSelectedPaymentMethod().id);
     }
 
     @Test
@@ -218,9 +219,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertNotNull(listener);
 
         listener.onPaymentMethodsRetrieved(mPaymentMethods);
-        final MaskedCardAdapter maskedCardAdapter = (MaskedCardAdapter) mRecyclerView.getAdapter();
-        assertNotNull(maskedCardAdapter);
-        maskedCardAdapter.setSelectedIndex(0);
+        final PaymentMethodsAdapter paymentMethodsAdapter = (PaymentMethodsAdapter) mRecyclerView.getAdapter();
+        assertNotNull(paymentMethodsAdapter);
+        paymentMethodsAdapter.setSelectedIndex(0);
 
         final MenuItem menuItem = mock(MenuItem.class);
         when(menuItem.getItemId()).thenReturn(R.id.action_save);
