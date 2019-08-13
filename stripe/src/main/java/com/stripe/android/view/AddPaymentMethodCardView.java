@@ -14,8 +14,6 @@ import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
-import java.util.Objects;
-
 /**
  * View for adding a payment method of type {@link PaymentMethod.Type#Card}.
  *
@@ -76,16 +74,7 @@ public class AddPaymentMethodCardView extends AddPaymentMethodView {
     @Nullable
     @Override
     public PaymentMethodCreateParams getCreateParams() {
-        final PaymentMethodCreateParams.Card card =
-                Objects.requireNonNull(mCardMultilineWidget).getPaymentMethodCard();
-        if (card == null) {
-            return null;
-        }
-
-        final PaymentMethod.BillingDetails billingDetails =
-                mCardMultilineWidget.getPaymentMethodBillingDetails();
-
-        return PaymentMethodCreateParams.create(card, billingDetails);
+        return mCardMultilineWidget.getPaymentMethodCreateParams();
     }
 
     @Override

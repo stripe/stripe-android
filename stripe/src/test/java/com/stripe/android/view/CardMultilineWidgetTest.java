@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.stripe.android.R;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
@@ -20,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -252,6 +254,38 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
     }
 
     @Test
+    public void getPaymentMethodCreateParams_shouldReturnExpectedObject() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mFullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
+        mFullGroup.expiryDateEditText.append("12");
+        mFullGroup.expiryDateEditText.append("50");
+        mFullGroup.cvcEditText.append("123");
+        mFullGroup.postalCodeEditText.append("12345");
+
+        final PaymentMethodCreateParams params =
+                mCardMultilineWidget.getPaymentMethodCreateParams();
+        assertNotNull(params);
+
+        final PaymentMethodCreateParams expectedParams = PaymentMethodCreateParams.create(
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber(VALID_VISA_NO_SPACES)
+                        .setCvc("123")
+                        .setExpiryYear(2050)
+                        .setExpiryMonth(12)
+                        .build(),
+                new PaymentMethod.BillingDetails.Builder()
+                        .setAddress(new Address.Builder()
+                                .setPostalCode("12345")
+                                .build()
+                        )
+                .build()
+        );
+        assertEquals(expectedParams, params);
+    }
+
+    @Test
     public void getPaymentMethodCard_whenInputIsValidVisaWithZip_returnsCardAndBillingDetails() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
@@ -272,9 +306,10 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertEquals(inputCard, card);
 
         final PaymentMethod.BillingDetails billingDetails =
-                mCardMultilineWidget.getPaymentMethodBillingDetails();
+                Objects.requireNonNull(mCardMultilineWidget.getPaymentMethodBillingDetails());
 
-        assertEquals("12345", billingDetails.address.getPostalCode());
+        assertEquals("12345",
+                Objects.requireNonNull(billingDetails.address).getPostalCode());
     }
 
     @Test
