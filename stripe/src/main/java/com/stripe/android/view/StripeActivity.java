@@ -77,7 +77,7 @@ abstract class StripeActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_source_menu, menu);
+        getMenuInflater().inflate(R.menu.add_payment_method, menu);
         menu.findItem(R.id.action_save).setEnabled(!mCommunicating);
         return true;
     }
