@@ -65,7 +65,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         resultTextView = findViewById(R.id.tv_payment_session_data)
 
         // CustomerSession only needs to be initialized once per app.
-        val customerSession = setupCustomerSession()
+        val customerSession = createCustomerSession()
         paymentSession = createPaymentSession(customerSession)
 
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
@@ -101,13 +101,10 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupCustomerSession(): CustomerSession {
+    private fun createCustomerSession(): CustomerSession {
         CustomerSession.initCustomerSession(this,
             ExampleEphemeralKeyProvider(ProgressListenerImpl(this)))
-        val customerSession = CustomerSession.getInstance()
-        customerSession.retrieveCurrentCustomer(
-            InitialCustomerRetrievalListener(this))
-        return customerSession
+        return CustomerSession.getInstance()
     }
 
     private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
@@ -210,23 +207,6 @@ class PaymentSessionActivity : AppCompatActivity() {
             val activity = listenerActivity ?: return
 
             activity.onPaymentSessionDataChanged(mCustomerSession, data)
-        }
-    }
-
-    private class InitialCustomerRetrievalListener internal constructor(
-        activity: PaymentSessionActivity
-    ) : CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity>(activity) {
-
-        override fun onCustomerRetrieved(customer: Customer) {
-            val activity = activity ?: return
-
-            activity.progressBar.visibility = View.INVISIBLE
-        }
-
-        override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
-            val activity = activity ?: return
-            activity.errorDialogHandler.show(errorMessage)
-            activity.progressBar.visibility = View.INVISIBLE
         }
     }
 
