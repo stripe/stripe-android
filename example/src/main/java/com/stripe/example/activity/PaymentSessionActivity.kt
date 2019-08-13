@@ -102,8 +102,11 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun createCustomerSession(): CustomerSession {
-        CustomerSession.initCustomerSession(this,
-            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)))
+        CustomerSession.initCustomerSession(
+            this,
+            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)),
+            false
+        )
         return CustomerSession.getInstance()
     }
 

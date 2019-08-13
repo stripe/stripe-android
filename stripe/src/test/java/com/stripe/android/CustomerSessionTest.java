@@ -1152,6 +1152,6 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                "acct_abc123");
+                "acct_abc123", true);
     }
 }

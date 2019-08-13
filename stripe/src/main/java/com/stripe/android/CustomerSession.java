@@ -41,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a logged-in session of a single Customer.
+ *
+ * See <a href="https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys">Creating ephemeral keys</a>
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CustomerSession {
@@ -109,7 +111,7 @@ public class CustomerSession {
     @NonNull private final Map<String, RetrievalListener> mCustomerListeners = new HashMap<>();
 
     @NonNull private final OperationIdFactory mOperationIdFactory;
-    @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
+    @NonNull private final EphemeralKeyManager<CustomerEphemeralKey> mEphemeralKeyManager;
     @NonNull private final Handler mUiThreadHandler;
     @NonNull private final Set<String> mProductUsageTokens;
     @Nullable private final Calendar mProxyNowCalendar;
@@ -125,26 +127,48 @@ public class CustomerSession {
      * before calling this method.</p>
      *
      * @param context The application context
-     * @param keyProvider An {@link EphemeralKeyProvider} used to retrieve
-     *                    {@link CustomerEphemeralKey EphemeralKeys}
+     * @param ephemeralKeyProvider An {@link EphemeralKeyProvider} used to retrieve
+     *                             {@link CustomerEphemeralKey} ephemeral keys
      * @param stripeAccountId An optional Stripe Connect account to associate with Customer-related
      *                        Stripe API Requests.
      *                        See {@link Stripe#Stripe(Context, String, String)}.
+     * @param shouldPrefetchEphemeralKey If true, will immediately fetch an ephemeral key using
+     *                                   {@param ephemeralKeyProvider}. Otherwise, will only fetch
+     *                                   an ephemeral key when needed.
      */
     public static void initCustomerSession(@NonNull Context context,
-                                           @NonNull EphemeralKeyProvider keyProvider,
-                                           @Nullable String stripeAccountId) {
-        setInstance(new CustomerSession(context, keyProvider, Stripe.getAppInfo(),
+                                           @NonNull EphemeralKeyProvider ephemeralKeyProvider,
+                                           @Nullable String stripeAccountId,
+                                           boolean shouldPrefetchEphemeralKey) {
+        setInstance(new CustomerSession(context, ephemeralKeyProvider, Stripe.getAppInfo(),
                 PaymentConfiguration.getInstance().getPublishableKey(),
-                stripeAccountId));
+                stripeAccountId, shouldPrefetchEphemeralKey));
+    }
+
+    /**
+     * See {@link #initCustomerSession(Context, EphemeralKeyProvider, String, boolean)}
+     */
+    public static void initCustomerSession(@NonNull Context context,
+                                           @NonNull EphemeralKeyProvider ephemeralKeyProvider,
+                                           @Nullable String stripeAccountId) {
+        initCustomerSession(context, ephemeralKeyProvider, stripeAccountId, true);
+    }
+
+    /**
+     * See {@link #initCustomerSession(Context, EphemeralKeyProvider, String, boolean)}
+     */
+    public static void initCustomerSession(@NonNull Context context,
+                                           @NonNull EphemeralKeyProvider ephemeralKeyProvider,
+                                           boolean shouldPrefetchEphemeralKey) {
+        initCustomerSession(context, ephemeralKeyProvider, null, shouldPrefetchEphemeralKey);
     }
 
     /**
      * See {@link #initCustomerSession(Context, EphemeralKeyProvider, String)}
      */
     public static void initCustomerSession(@NonNull Context context,
-                                           @NonNull EphemeralKeyProvider keyProvider) {
-        initCustomerSession(context, keyProvider, null);
+                                           @NonNull EphemeralKeyProvider ephemeralKeyProvider) {
+        initCustomerSession(context, ephemeralKeyProvider, null);
     }
 
     /**
@@ -204,9 +228,10 @@ public class CustomerSession {
 
     private CustomerSession(@NonNull Context context, @NonNull EphemeralKeyProvider keyProvider,
                             @Nullable AppInfo appInfo, @NonNull String publishableKey,
-                            @Nullable String stripeAccountId) {
+                            @Nullable String stripeAccountId, boolean shouldPrefetchEphemeralKey) {
         this(context, keyProvider, null, createThreadPoolExecutor(),
-                new StripeApiHandler(context, appInfo), publishableKey, stripeAccountId);
+                new StripeApiHandler(context, appInfo), publishableKey, stripeAccountId,
+                shouldPrefetchEphemeralKey);
     }
 
     @VisibleForTesting
@@ -217,7 +242,8 @@ public class CustomerSession {
             @NonNull ThreadPoolExecutor threadPoolExecutor,
             @NonNull StripeApiHandler apiHandler,
             @NonNull String publishableKey,
-            @Nullable String stripeAccountId) {
+            @Nullable String stripeAccountId,
+            boolean shouldPrefetchEphemeralKey) {
         mOperationIdFactory = new OperationIdFactory();
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
         mThreadPoolExecutor = threadPoolExecutor;
@@ -287,7 +313,9 @@ public class CustomerSession {
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 mOperationIdFactory,
-                new CustomerEphemeralKey.Factory());
+                new CustomerEphemeralKey.Factory(),
+                shouldPrefetchEphemeralKey
+        );
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -433,7 +461,7 @@ public class CustomerSession {
      */
     public void getPaymentMethods(@NonNull PaymentMethod.Type paymentMethodType,
                                   @NonNull PaymentMethodsRetrievalListener listener) {
-        final Map<String, String> arguments = new HashMap<>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_PAYMENT_METHOD_TYPE, paymentMethodType.code);
 
         final String operationId = mOperationIdFactory.create();

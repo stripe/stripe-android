@@ -41,8 +41,11 @@ class CustomerSessionActivity : AppCompatActivity() {
         selectSourceButton = findViewById(R.id.btn_launch_payment_methods_acs)
         selectSourceButton.isEnabled = false
         errorDialogHandler = ErrorDialogHandler(this)
-        CustomerSession.initCustomerSession(this,
-            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)))
+        CustomerSession.initCustomerSession(
+            this,
+            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)),
+            false
+        )
 
         progressBar.visibility = View.VISIBLE
         CustomerSession.getInstance().retrieveCurrentCustomer(

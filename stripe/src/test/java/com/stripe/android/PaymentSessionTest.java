@@ -234,14 +234,14 @@ public class PaymentSessionTest {
     public void getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
         when(mCustomerSession.getCachedCustomer()).thenReturn(FIRST_CUSTOMER);
         CustomerSession.setInstance(mCustomerSession);
-        assertNull(createPaymentSesson().getSelectedPaymentMethodId(null));
+        assertNull(createPaymentSession().getSelectedPaymentMethodId(null));
     }
 
     @Test
     public void getSelectedPaymentMethodId_whenHasPaymentSessionData_returnsExpectedId() {
         mPaymentSessionData.setPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
         assertEquals("pm_123456789",
-                createPaymentSesson().getSelectedPaymentMethodId(null));
+                createPaymentSession().getSelectedPaymentMethodId(null));
     }
 
     @Test
@@ -253,14 +253,14 @@ public class PaymentSessionTest {
         CustomerSession.setInstance(mCustomerSession);
 
         assertEquals("pm_12345",
-                createPaymentSesson().getSelectedPaymentMethodId(null));
+                createPaymentSession().getSelectedPaymentMethodId(null));
     }
 
     @Test
     public void getSelectedPaymentMethodId_whenHasUserSpecifiedPaymentMethod_returnsExpectedId() {
         mPaymentSessionData.setPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
         assertEquals("pm_987",
-                createPaymentSesson().getSelectedPaymentMethodId("pm_987"));
+                createPaymentSession().getSelectedPaymentMethodId("pm_987"));
     }
 
     @Test
@@ -355,7 +355,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_withInvalidRequestCode_aborts() {
-        final PaymentSession paymentSession = createPaymentSesson();
+        final PaymentSession paymentSession = createPaymentSession();
         assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, new Intent()));
         verify(mCustomerSession, never()).retrieveCurrentCustomer(
                 ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
@@ -363,7 +363,7 @@ public class PaymentSessionTest {
 
     @Test
     public void handlePaymentData_withValidRequestCodeAndCanceledResult_retrievesCustomer() {
-        final PaymentSession paymentSession = createPaymentSesson();
+        final PaymentSession paymentSession = createPaymentSession();
         assertFalse(paymentSession.handlePaymentData(PaymentSession.PAYMENT_METHOD_REQUEST,
                 RESULT_CANCELED, new Intent()));
         verify(mCustomerSession).retrieveCurrentCustomer(
@@ -371,7 +371,7 @@ public class PaymentSessionTest {
     }
 
     @NonNull
-    private PaymentSession createPaymentSesson() {
+    private PaymentSession createPaymentSession() {
         return new PaymentSession(mCustomerSession, mPaymentMethodsActivityStarter,
                 mPaymentFlowActivityStarter, mPaymentSessionData,
                 mPaymentSessionPrefs);
@@ -382,6 +382,6 @@ public class PaymentSessionTest {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                "acct_abc123");
+                "acct_abc123", true);
     }
 }
