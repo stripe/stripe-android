@@ -153,6 +153,17 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
                 .setExpiryYear(cardDate[1]).build();
     }
 
+    @Nullable
+    @Override
+    public PaymentMethodCreateParams getPaymentMethodCreateParams() {
+        final PaymentMethodCreateParams.Card card = getPaymentMethodCard();
+        if (card == null) {
+            return null;
+        }
+
+        return PaymentMethodCreateParams.create(card);
+    }
+
     /**
      * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
      * {@code null}.

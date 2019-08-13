@@ -19,6 +19,15 @@ interface CardWidget {
      */
     @Nullable PaymentMethodCreateParams.Card getPaymentMethodCard();
 
+    /**
+     * Gets a {@link PaymentMethodCreateParams} object from the user input, if all fields are
+     * valid. If not, returns {@code null}.
+     *
+     * @return a valid {@link PaymentMethodCreateParams} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable PaymentMethodCreateParams getPaymentMethodCreateParams();
+
     void setCardInputListener(@Nullable CardInputListener listener);
 
     void clear();

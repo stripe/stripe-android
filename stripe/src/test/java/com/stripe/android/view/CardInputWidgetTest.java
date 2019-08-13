@@ -301,6 +301,30 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
     }
 
     @Test
+    public void getPaymentMethodCreateParams_shouldReturnExpectedObject() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
+
+        mCardInputWidget.setCardNumber(VALID_VISA_NO_SPACES);
+        mCardInputWidget.setExpiryDate(12, 2030);
+        mCardInputWidget.setCvcCode("123");
+
+        final PaymentMethodCreateParams params =
+                mCardInputWidget.getPaymentMethodCreateParams();
+        assertNotNull(params);
+
+        final PaymentMethodCreateParams expectedParams = PaymentMethodCreateParams.create(
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber(VALID_VISA_NO_SPACES)
+                        .setCvc("123")
+                        .setExpiryYear(2030)
+                        .setExpiryMonth(12)
+                        .build()
+        );
+        assertEquals(expectedParams, params);
+    }
+
+    @Test
     public void getCard_whenIncompleteCvCForDiners_returnsNull() {
         // The test will be testing the wrong variable after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
