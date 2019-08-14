@@ -225,4 +225,23 @@ public class PaymentIntentTest {
                 PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getNextActionType());
         assertNull(PaymentIntentFixtures.PI_REQUIRES_REDIRECT.getStripeSdkData());
     }
+
+    @Test
+    public void getLastPaymentError_parsesCorrectly() {
+        final PaymentIntent.Error lastPaymentError =
+                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR.getLastPaymentError();
+        assertNotNull(lastPaymentError);
+        assertNotNull(lastPaymentError.paymentMethod);
+        assertEquals("pm_1F7J1bCRMbs6FrXfQKsYwO3U", lastPaymentError.paymentMethod.id);
+        assertEquals("payment_intent_authentication_failure", lastPaymentError.code);
+        assertEquals(PaymentIntent.Error.Type.InvalidRequestError, lastPaymentError.type);
+        assertEquals(
+                "https://stripe.com/docs/error-codes/payment-intent-authentication-failure",
+                lastPaymentError.docUrl
+        );
+        assertEquals(
+                "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.",
+                lastPaymentError.message
+        );
+    }
 }
