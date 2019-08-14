@@ -9,6 +9,9 @@
 * [#1342](https://github.com/stripe/stripe-android/pull/1342) Update Builds Tools to `29.0.2`
 * [#1347](https://github.com/stripe/stripe-android/pull/1347) Mark `Stripe.setStripeAccount()` as deprecated
     * Use `new Stripe(context, "publishable_key", "stripe_account_id")` instead
+* [#1376](https://github.com/stripe/stripe-android/pull/1376) Add `shouldPrefetchEphemeralKey` arg to `CustomerSession.initCustomerSession()`
+* [#1378](https://github.com/stripe/stripe-android/pull/1378) Add `last_payment_error` field to PaymentIntent model
+* [#1379](https://github.com/stripe/stripe-android/pull/1379) Add `last_setup_error` field to SetupIntent model
 
 ## 10.2.1 - 2019-08-06
 * [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
