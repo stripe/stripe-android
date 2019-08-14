@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
 import org.json.JSONException;
@@ -39,6 +40,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
     private static final String FIELD_CURRENCY = "currency";
     private static final String FIELD_DESCRIPTION = "description";
+    private static final String FIELD_LAST_PAYMENT_ERROR = "last_payment_error";
     private static final String FIELD_LIVEMODE = "livemode";
     private static final String FIELD_NEXT_ACTION = "next_action";
     private static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
@@ -67,6 +69,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final String mSource;
     @Nullable private final Status mStatus;
     @Nullable private final Usage mSetupFutureUsage;
+    @Nullable private final Error mLastPaymentError;
 
     @Nullable
     @Override
@@ -208,6 +211,14 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         return mStatus;
     }
 
+    /**
+     * @return The payment error encountered in the previous PaymentIntent confirmation.
+     */
+    @Nullable
+    public Error getLastPaymentError() {
+        return mLastPaymentError;
+    }
+
     private PaymentIntent(
             @Nullable String id,
             @Nullable String objectType,
@@ -225,7 +236,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @Nullable String receiptEmail,
             @Nullable String source,
             @Nullable Status status,
-            @Nullable Usage setupFutureUsage) {
+            @Nullable Usage setupFutureUsage,
+            @Nullable Error lastPaymentError) {
         mId = id;
         mObjectType = objectType;
         mPaymentMethodTypes = paymentMethodTypes;
@@ -245,6 +257,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         mSetupFutureUsage = setupFutureUsage;
         mNextActionType = mNextAction != null ?
                 NextActionType.fromCode((String) mNextAction.get(FIELD_NEXT_ACTION_TYPE)) : null;
+        mLastPaymentError = lastPaymentError;
     }
 
     @NonNull
@@ -287,6 +300,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 Usage.fromCode(optString(jsonObject, FIELD_SETUP_FUTURE_USAGE));
         final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
         final String source = optString(jsonObject, FIELD_SOURCE);
+        final Error lastPaymentError =
+                Error.fromJson(jsonObject.optJSONObject(FIELD_LAST_PAYMENT_ERROR));
 
         return new PaymentIntent(
                 id,
@@ -305,7 +320,9 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 receiptEmail,
                 source,
                 status,
-                setupFutureUsage);
+                setupFutureUsage,
+                lastPaymentError
+        );
     }
 
     @Override
@@ -331,7 +348,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mSetupFutureUsage, paymentIntent.mSetupFutureUsage)
                 && ObjectUtils.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
                 && ObjectUtils.equals(mNextAction, paymentIntent.mNextAction)
-                && ObjectUtils.equals(mNextActionType, paymentIntent.mNextActionType);
+                && ObjectUtils.equals(mNextActionType, paymentIntent.mNextActionType)
+                && ObjectUtils.equals(mLastPaymentError, paymentIntent.mLastPaymentError);
     }
 
     @Override
@@ -339,7 +357,212 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCaptureMethod,
                 mClientSecret, mConfirmationMethod, mCreated, mCurrency, mDescription, mLiveMode,
                 mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction,
-                mNextActionType, mSetupFutureUsage);
+                mNextActionType, mSetupFutureUsage, mLastPaymentError);
     }
 
+    /**
+     * The payment error encountered in the previous PaymentIntent confirmation.
+     *
+     * See <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error">last_payment_error</a>.
+     */
+    public static final class Error {
+        private static final String FIELD_CHARGE = "charge";
+        private static final String FIELD_CODE = "code";
+        private static final String FIELD_DECLINE_CODE = "decline_code";
+        private static final String FIELD_DOC_URL = "doc_url";
+        private static final String FIELD_MESSAGE = "message";
+        private static final String FIELD_PARAM = "param";
+        private static final String FIELD_PAYMENT_METHOD = "payment_method";
+        private static final String FIELD_TYPE = "type";
+
+        /**
+         * For card errors, the ID of the failed charge.
+         */
+        @Nullable public final String charge;
+
+        /**
+         * For some errors that could be handled programmatically, a short string indicating the
+         * <a href="https://stripe.com/docs/error-codes">error code</a> reported.
+         */
+        @Nullable public final String code;
+
+        /**
+         * For card errors resulting from a card issuer decline, a short string indicating the
+         * <a href="https://stripe.com/docs/declines#issuer-declines">card issuer’s reason for the decline</a>
+         * if they provide one.
+         */
+        @Nullable public final String declineCode;
+
+        /**
+         * A URL to more information about the
+         * <a href="https://stripe.com/docs/error-codes">error code</a> reported.
+         */
+        @Nullable public final String docUrl;
+
+        /**
+         * A human-readable message providing more details about the error. For card errors,
+         * these messages can be shown to your users.
+         */
+        @Nullable public final String message;
+
+        /**
+         * If the error is parameter-specific, the parameter related to the error.
+         * For example, you can use this to display a message near the correct form field.
+         */
+        @Nullable public final String param;
+
+        /**
+         * The PaymentMethod object for errors returned on a request involving a PaymentMethod.
+         */
+        @Nullable public final PaymentMethod paymentMethod;
+
+        /**
+         * The type of error returned.
+         */
+        @Nullable public final Type type;
+
+        private Error(@NonNull Builder builder) {
+            charge = builder.mCharge;
+            code = builder.mCode;
+            declineCode = builder.mDeclineCode;
+            docUrl = builder.mDocUrl;
+            message = builder.mMessage;
+            param = builder.mParam;
+            paymentMethod = builder.mPaymentMethod;
+            type = builder.mType;
+        }
+
+        @Nullable
+        private static Error fromJson(@Nullable JSONObject errorJson) {
+            if (errorJson == null) {
+                return null;
+            }
+
+            return new Builder()
+                    .setCharge(StripeJsonUtils.optString(errorJson, FIELD_CHARGE))
+                    .setCode(StripeJsonUtils.optString(errorJson, FIELD_CODE))
+                    .setDeclineCode(StripeJsonUtils.optString(errorJson, FIELD_DECLINE_CODE))
+                    .setDocUrl(StripeJsonUtils.optString(errorJson, FIELD_DOC_URL))
+                    .setMessage(StripeJsonUtils.optString(errorJson, FIELD_MESSAGE))
+                    .setParam(StripeJsonUtils.optString(errorJson, FIELD_PARAM))
+                    .setPaymentMethod(
+                            PaymentMethod.fromJson(errorJson.optJSONObject(FIELD_PAYMENT_METHOD)))
+                    .setType(Type.fromCode(StripeJsonUtils.optString(errorJson, FIELD_TYPE)))
+                    .build();
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(charge, code, declineCode, docUrl, message, param,
+                    paymentMethod, type);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return super.equals(obj) || (obj instanceof Error && typedEquals((Error) obj));
+        }
+
+        private boolean typedEquals(@NonNull Error error) {
+            return ObjectUtils.equals(charge, error.charge) &&
+                    ObjectUtils.equals(code, error.code) &&
+                    ObjectUtils.equals(declineCode, error.declineCode) &&
+                    ObjectUtils.equals(docUrl, error.docUrl) &&
+                    ObjectUtils.equals(message, error.message) &&
+                    ObjectUtils.equals(param, error.param) &&
+                    ObjectUtils.equals(paymentMethod, error.paymentMethod) &&
+                    ObjectUtils.equals(type, error.type);
+        }
+
+        private static final class Builder implements ObjectBuilder<Error> {
+            @Nullable private String mCharge;
+            @Nullable private String mCode;
+            @Nullable private String mDeclineCode;
+            @Nullable private String mDocUrl;
+            @Nullable private String mMessage;
+            @Nullable private String mParam;
+            @Nullable private PaymentMethod mPaymentMethod;
+            @Nullable private Type mType;
+
+            @NonNull
+            private Builder setCharge(@Nullable String charge) {
+                this.mCharge = charge;
+                return this;
+            }
+
+            @NonNull
+            private Builder setCode(@Nullable String code) {
+                this.mCode = code;
+                return this;
+            }
+
+            @NonNull
+            private Builder setDeclineCode(@Nullable String declineCode) {
+                this.mDeclineCode = declineCode;
+                return this;
+            }
+
+            @NonNull
+            private Builder setDocUrl(@Nullable String docUrl) {
+                this.mDocUrl = docUrl;
+                return this;
+            }
+
+            @NonNull
+            private Builder setMessage(@Nullable String message) {
+                this.mMessage = message;
+                return this;
+            }
+
+            @NonNull
+            private Builder setParam(@Nullable String mParam) {
+                this.mParam = mParam;
+                return this;
+            }
+
+            @NonNull
+            private Builder setPaymentMethod(@Nullable PaymentMethod paymentMethod) {
+                this.mPaymentMethod = paymentMethod;
+                return this;
+            }
+
+            @NonNull
+            private Builder setType(@Nullable Type type) {
+                this.mType = type;
+                return this;
+            }
+
+            @NonNull
+            @Override
+            public Error build() {
+                return new Error(this);
+            }
+        }
+
+        public enum Type {
+            ApiConnectionError("api_connection_error"),
+            ApiError("api_error"),
+            AuthenticationError("authentication_error"),
+            CardError("card_error"),
+            IdempotencyError("idempotency_error"),
+            InvalidRequestError("invalid_request_error"),
+            RateLimitError("rate_limit_error");
+
+            @NonNull public final String code;
+
+            Type(@NonNull String code) {
+                this.code = code;
+            }
+
+            @Nullable
+            private static Type fromCode(@Nullable String typeCode) {
+                for (Type type : values()) {
+                    if (type.code.equals(typeCode)) {
+                        return type;
+                    }
+                }
+
+                return null;
+            }
+        }
+    }
 }

@@ -263,6 +263,78 @@ public final class PaymentIntentFixtures {
                     "}"
             ));
 
+    public static final PaymentIntent PI_WITH_LAST_PAYMENT_ERROR =
+            Objects.requireNonNull(PaymentIntent.fromString("{\n" +
+                    "\t\"id\": \"pi_1F7J1aCRMbs6FrXfaJcvbxF6\",\n" +
+                    "\t\"object\": \"payment_intent\",\n" +
+                    "\t\"amount\": 1000,\n" +
+                    "\t\"canceled_at\": null,\n" +
+                    "\t\"cancellation_reason\": null,\n" +
+                    "\t\"capture_method\": \"manual\",\n" +
+                    "\t\"client_secret\": \"pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s\",\n" +
+                    "\t\"confirmation_method\": \"automatic\",\n" +
+                    "\t\"created\": 1565775850,\n" +
+                    "\t\"currency\": \"usd\",\n" +
+                    "\t\"description\": \"Example PaymentIntent\",\n" +
+                    "\t\"last_payment_error\": {\n" +
+                    "\t\t\"code\": \"payment_intent_authentication_failure\",\n" +
+                    "\t\t\"doc_url\": \"https://stripe.com/docs/error-codes/payment-intent-authentication-failure\",\n" +
+                    "\t\t\"message\": \"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.\",\n" +
+                    "\t\t\"payment_method\": {\n" +
+                    "\t\t\t\"id\": \"pm_1F7J1bCRMbs6FrXfQKsYwO3U\",\n" +
+                    "\t\t\t\"object\": \"payment_method\",\n" +
+                    "\t\t\t\"billing_details\": {\n" +
+                    "\t\t\t\t\"address\": {\n" +
+                    "\t\t\t\t\t\"city\": null,\n" +
+                    "\t\t\t\t\t\"country\": null,\n" +
+                    "\t\t\t\t\t\"line1\": null,\n" +
+                    "\t\t\t\t\t\"line2\": null,\n" +
+                    "\t\t\t\t\t\"postal_code\": null,\n" +
+                    "\t\t\t\t\t\"state\": null\n" +
+                    "\t\t\t\t},\n" +
+                    "\t\t\t\t\"email\": null,\n" +
+                    "\t\t\t\t\"name\": null,\n" +
+                    "\t\t\t\t\"phone\": null\n" +
+                    "\t\t\t},\n" +
+                    "\t\t\t\"card\": {\n" +
+                    "\t\t\t\t\"brand\": \"visa\",\n" +
+                    "\t\t\t\t\"checks\": {\n" +
+                    "\t\t\t\t\t\"address_line1_check\": null,\n" +
+                    "\t\t\t\t\t\"address_postal_code_check\": null,\n" +
+                    "\t\t\t\t\t\"cvc_check\": null\n" +
+                    "\t\t\t\t},\n" +
+                    "\t\t\t\t\"country\": null,\n" +
+                    "\t\t\t\t\"exp_month\": 8,\n" +
+                    "\t\t\t\t\"exp_year\": 2020,\n" +
+                    "\t\t\t\t\"funding\": \"credit\",\n" +
+                    "\t\t\t\t\"generated_from\": null,\n" +
+                    "\t\t\t\t\"last4\": \"3220\",\n" +
+                    "\t\t\t\t\"three_d_secure_usage\": {\n" +
+                    "\t\t\t\t\t\"supported\": true\n" +
+                    "\t\t\t\t},\n" +
+                    "\t\t\t\t\"wallet\": null\n" +
+                    "\t\t\t},\n" +
+                    "\t\t\t\"created\": 1565775851,\n" +
+                    "\t\t\t\"customer\": null,\n" +
+                    "\t\t\t\"livemode\": false,\n" +
+                    "\t\t\t\"metadata\": {},\n" +
+                    "\t\t\t\"type\": \"card\"\n" +
+                    "\t\t},\n" +
+                    "\t\t\"type\": \"invalid_request_error\"\n" +
+                    "\t},\n" +
+                    "\t\"livemode\": false,\n" +
+                    "\t\"next_action\": null,\n" +
+                    "\t\"payment_method\": null,\n" +
+                    "\t\"payment_method_types\": [\n" +
+                    "\t\t\"card\"\n" +
+                    "\t],\n" +
+                    "\t\"receipt_email\": null,\n" +
+                    "\t\"setup_future_usage\": null,\n" +
+                    "\t\"shipping\": null,\n" +
+                    "\t\"source\": null,\n" +
+                    "\t\"status\": \"requires_payment_method\"\n" +
+                    "}"));
+
     public static final PaymentIntent.RedirectData REDIRECT_DATA =
             new PaymentIntent.RedirectData("https://example.com",
                     "yourapp://post-authentication-return-url");
