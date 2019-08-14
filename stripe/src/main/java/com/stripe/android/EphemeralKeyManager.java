@@ -28,14 +28,18 @@ class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
             long timeBufferInSeconds,
             @Nullable Calendar overrideCalendar,
             @NonNull OperationIdFactory operationIdFactory,
-            @NonNull EphemeralKey.Factory<TEphemeralKey> factory) {
+            @NonNull EphemeralKey.Factory<TEphemeralKey> factory,
+            boolean shouldPrefetchEphemeralKey) {
         mFactory = factory;
         mEphemeralKeyProvider = ephemeralKeyProvider;
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
         mApiVersion = ApiVersion.get().code;
-        retrieveEphemeralKey(operationIdFactory.create(), null, null);
+
+        if (shouldPrefetchEphemeralKey) {
+            retrieveEphemeralKey(operationIdFactory.create(), null, null);
+        }
     }
 
     void retrieveEphemeralKey(@NonNull String operationId,

@@ -1,6 +1,7 @@
 package com.stripe.android;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
@@ -124,7 +125,7 @@ public class EphemeralKeyManagerTest {
 
     @Test
     public void shouldRefreshKey_whenKeyExpiryIsInFutureButWithinBuffer_returnsTrue() {
-        Calendar fixedCalendar = Calendar.getInstance();
+        final Calendar fixedCalendar = Calendar.getInstance();
         assertNotNull(mCustomerEphemeralKey);
 
         long parsedExpiryTimeInMillis = TimeUnit.SECONDS
@@ -145,13 +146,7 @@ public class EphemeralKeyManagerTest {
         assertNotNull(mCustomerEphemeralKey);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                null,
-                mOperationIdFactory,
-                mEphemeralKeyFactory);
+        createEphemeralKeyManager(mOperationIdFactory, null);
 
         verify(mKeyManagerListener).onKeyUpdate(
                 mEphemeralKeyArgumentCaptor.capture(),
@@ -168,13 +163,8 @@ public class EphemeralKeyManagerTest {
         final Calendar fixedCalendar = Calendar.getInstance();
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
 
-        EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                fixedCalendar,
-                mOperationIdFactory,
-                new CustomerEphemeralKey.Factory());
+        final EphemeralKeyManager<CustomerEphemeralKey> keyManager =
+                createEphemeralKeyManager(mOperationIdFactory, fixedCalendar);
 
         final String operationId = mOperationIdFactory.create();
         final String actionString = "action";
@@ -200,7 +190,7 @@ public class EphemeralKeyManagerTest {
     public void updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
         assertNotNull(mCustomerEphemeralKey);
 
-        Calendar proxyCalendar = Calendar.getInstance();
+        final Calendar proxyCalendar = Calendar.getInstance();
         long expiryTimeInMillis = TimeUnit.SECONDS.toMillis(mCustomerEphemeralKey.getExpires());
         // The time is one millisecond past the expiration date for this test.
         proxyCalendar.setTimeInMillis(expiryTimeInMillis + 1L);
@@ -208,13 +198,8 @@ public class EphemeralKeyManagerTest {
         assertEquals(expiryTimeInMillis + 1L, proxyCalendar.getTimeInMillis());
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
-        final EphemeralKeyManager<CustomerEphemeralKey> keyManager = new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                proxyCalendar,
-                mOperationIdFactory,
-                mEphemeralKeyFactory);
+        final EphemeralKeyManager<CustomerEphemeralKey> keyManager =
+                createEphemeralKeyManager(mOperationIdFactory, proxyCalendar);
 
         // Make sure we're in a good state
         verify(mKeyManagerListener).onKeyUpdate(
@@ -243,13 +228,7 @@ public class EphemeralKeyManagerTest {
         when(operationIdFactory.create()).thenReturn(operationId);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON");
-        new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                null,
-                operationIdFactory,
-                mEphemeralKeyFactory);
+        createEphemeralKeyManager(operationIdFactory, null);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -271,13 +250,7 @@ public class EphemeralKeyManagerTest {
         when(operationIdFactory.create()).thenReturn(operationId);
 
         mTestEphemeralKeyProvider.setNextRawEphemeralKey("{}");
-        new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                null,
-                operationIdFactory,
-                mEphemeralKeyFactory);
+        createEphemeralKeyManager(operationIdFactory, null);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -300,13 +273,7 @@ public class EphemeralKeyManagerTest {
 
         //noinspection ConstantConditions
         mTestEphemeralKeyProvider.setNextRawEphemeralKey(null);
-        new EphemeralKeyManager<>(
-                mTestEphemeralKeyProvider,
-                mKeyManagerListener,
-                TEST_SECONDS_BUFFER,
-                null,
-                operationIdFactory,
-                mEphemeralKeyFactory);
+        createEphemeralKeyManager(operationIdFactory, null);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
                 ArgumentMatchers.<CustomerEphemeralKey>isNull(),
@@ -316,6 +283,37 @@ public class EphemeralKeyManagerTest {
         verify(mKeyManagerListener).onKeyError(operationId,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value");
+    }
+
+    @Test
+    public void init_whenShouldPrefetchEphemeralKeyIsFalse_shouldNotFetch() {
+        final OperationIdFactory operationIdFactory = mock(OperationIdFactory.class);
+        new EphemeralKeyManager<>(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                null,
+                operationIdFactory,
+                mEphemeralKeyFactory,
+                false
+        );
+        verify(operationIdFactory, never()).create();
+    }
+
+    @NonNull
+    private EphemeralKeyManager<CustomerEphemeralKey> createEphemeralKeyManager(
+            @NonNull OperationIdFactory operationIdFactory,
+            @Nullable Calendar calendar
+    ) {
+        return new EphemeralKeyManager<>(
+                mTestEphemeralKeyProvider,
+                mKeyManagerListener,
+                TEST_SECONDS_BUFFER,
+                calendar,
+                operationIdFactory,
+                mEphemeralKeyFactory,
+                true
+        );
     }
 
     @NonNull

@@ -73,14 +73,16 @@ public class IssuingCardPinService
             @NonNull StripeApiHandler apiHandler,
             @NonNull OperationIdFactory operationIdFactory) {
         mOperationIdFactory = operationIdFactory;
+        mApiHandler = apiHandler;
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 null,
                 operationIdFactory,
-                new IssuingCardEphemeralKey.Factory());
-        mApiHandler = apiHandler;
+                new IssuingCardEphemeralKey.Factory(),
+                true
+        );
     }
 
     /**
