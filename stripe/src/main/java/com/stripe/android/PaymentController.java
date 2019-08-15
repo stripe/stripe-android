@@ -53,6 +53,7 @@ class PaymentController {
     @NonNull private final PaymentAuthConfig mConfig;
     @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
     @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
+    @NonNull private final ChallengeFlowStarter mChallengeFlowStarter;
 
     PaymentController(@NonNull Context context,
                       @NonNull StripeRepository stripeRepository) {
@@ -62,7 +63,8 @@ class PaymentController {
                 new MessageVersionRegistry(),
                 PaymentAuthConfig.get(),
                 new StripeFireAndForgetRequestExecutor(),
-                new AnalyticsDataFactory(context.getApplicationContext()));
+                new AnalyticsDataFactory(context.getApplicationContext()),
+                new ChallengeFlowStarterImpl());
     }
 
     @VisibleForTesting
@@ -72,7 +74,8 @@ class PaymentController {
                       @NonNull MessageVersionRegistry messageVersionRegistry,
                       @NonNull PaymentAuthConfig config,
                       @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
-                      @NonNull AnalyticsDataFactory analyticsDataFactory) {
+                      @NonNull AnalyticsDataFactory analyticsDataFactory,
+                      @NonNull ChallengeFlowStarter challengeFlowStarter) {
         mConfig = config;
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
@@ -81,6 +84,7 @@ class PaymentController {
         mMessageVersionRegistry = messageVersionRegistry;
         mAnalyticsRequestExecutor = analyticsRequestExecutor;
         mAnalyticsDataFactory = analyticsDataFactory;
+        mChallengeFlowStarter = challengeFlowStarter;
     }
 
     /**
@@ -362,7 +366,8 @@ class PaymentController {
                 requestOptions,
                 new Stripe3ds2AuthCallback(host, mStripeRepository, transaction, timeout,
                         stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
-                        mAnalyticsRequestExecutor, mAnalyticsDataFactory)
+                        mAnalyticsRequestExecutor, mAnalyticsDataFactory,
+                        mChallengeFlowStarter)
         );
     }
 
@@ -488,9 +493,9 @@ class PaymentController {
         @NonNull private final String mSourceId;
         @NonNull private final ApiRequest.Options mRequestOptions;
         @NonNull private final PaymentRelayStarter mPaymentRelayStarter;
-        @NonNull private final Handler mBackgroundHandler;
         @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
         @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
+        @NonNull private final ChallengeFlowStarter mChallengeFlowStarter;
 
         private Stripe3ds2AuthCallback(
                 @NonNull AuthActivityStarter.Host host,
@@ -501,12 +506,14 @@ class PaymentController {
                 @NonNull String sourceId,
                 @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
-                @NonNull AnalyticsDataFactory analyticsDataFactory) {
+                @NonNull AnalyticsDataFactory analyticsDataFactory,
+                @NonNull ChallengeFlowStarter challengeFlowStarter) {
             this(host, stripeRepository, transaction, maxTimeout, stripeIntent,
                     sourceId, requestOptions,
                     new PaymentRelayStarter(host, getRequestCode(stripeIntent)),
                     analyticsRequestExecutor,
-                    analyticsDataFactory);
+                    analyticsDataFactory,
+                    challengeFlowStarter);
         }
 
         @VisibleForTesting
@@ -520,7 +527,8 @@ class PaymentController {
                 @NonNull ApiRequest.Options requestOptions,
                 @NonNull PaymentRelayStarter paymentRelayStarter,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
-                @NonNull AnalyticsDataFactory analyticsDataFactory) {
+                @NonNull AnalyticsDataFactory analyticsDataFactory,
+                @NonNull ChallengeFlowStarter challengeFlowStarter) {
             mHost = host;
             mStripeRepository = stripeRepository;
             mTransaction = transaction;
@@ -531,12 +539,7 @@ class PaymentController {
             mPaymentRelayStarter = paymentRelayStarter;
             mAnalyticsRequestExecutor = analyticsRequestExecutor;
             mAnalyticsDataFactory = analyticsDataFactory;
-
-            // create Handler to notifyCompletion challenge flow on background thread
-            final HandlerThread handlerThread =
-                    new HandlerThread(Stripe3ds2AuthCallback.class.getSimpleName());
-            handlerThread.start();
-            mBackgroundHandler = new Handler(handlerThread.getLooper());
+            mChallengeFlowStarter = challengeFlowStarter;
         }
 
         @Override
@@ -594,7 +597,7 @@ class PaymentController {
             challengeParameters.set3DSServerTransactionID(ares.threeDSServerTransId);
             challengeParameters.setAcsTransactionID(ares.acsTransId);
 
-            mBackgroundHandler.postDelayed(new Runnable() {
+            mChallengeFlowStarter.start(new Runnable() {
                 @Override
                 public void run() {
                     final Activity activity = mHost.getActivity();
@@ -609,7 +612,7 @@ class PaymentController {
                                     mTransaction),
                             mMaxTimeout);
                 }
-            }, TimeUnit.SECONDS.toMillis(2));
+            });
         }
     }
 
@@ -617,8 +620,6 @@ class PaymentController {
             extends StripeChallengeStatusReceiver {
         private static final String VALUE_YES = "Y";
 
-        @NonNull private final AuthActivityStarter.Host mHost;
-        @NonNull private final AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
         @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
@@ -626,6 +627,7 @@ class PaymentController {
         @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
         @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
         @NonNull private final Transaction mTransaction;
+        @NonNull private final Complete3ds2AuthCallbackFactory mComplete3ds2AuthCallbackFactory;
 
         @NonNull
         static PaymentAuth3ds2ChallengeStatusReceiver create(
@@ -638,29 +640,31 @@ class PaymentController {
                 @NonNull AnalyticsDataFactory analyticsDataFactory,
                 @NonNull Transaction transaction) {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
-                    host,
-                    new Stripe3ds2CompletionStarter(host, getRequestCode(stripeIntent)),
                     stripeRepository,
                     stripeIntent,
                     sourceId,
                     requestOptions,
                     analyticsRequestExecutor,
                     analyticsDataFactory,
-                    transaction);
+                    transaction,
+                    createComplete3ds2AuthCallbackFactory(
+                            new Stripe3ds2CompletionStarter(host, getRequestCode(stripeIntent)),
+                            host,
+                            stripeIntent
+                    )
+            );
         }
 
         PaymentAuth3ds2ChallengeStatusReceiver(
-                @NonNull AuthActivityStarter.Host host,
-                @NonNull AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> starter,
                 @NonNull StripeRepository stripeRepository,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
                 @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory,
-                @NonNull Transaction transaction) {
-            mHost = host;
-            mStarter = starter;
+                @NonNull Transaction transaction,
+                @NonNull Complete3ds2AuthCallbackFactory complete3ds2AuthCallbackFactory
+        ) {
             mStripeRepository = stripeRepository;
             mStripeIntent = stripeIntent;
             mSourceId = sourceId;
@@ -668,6 +672,7 @@ class PaymentController {
             mAnalyticsRequestExecutor = analyticsRequestExecutor;
             mAnalyticsDataFactory = analyticsDataFactory;
             mTransaction = transaction;
+            mComplete3ds2AuthCallbackFactory = complete3ds2AuthCallbackFactory;
         }
 
         @Override
@@ -778,18 +783,58 @@ class PaymentController {
             );
 
             mStripeRepository.complete3ds2Auth(mSourceId, mRequestOptions,
-                    new ApiResultCallback<Boolean>() {
+                    mComplete3ds2AuthCallbackFactory.create(startData));
+        }
+
+        @NonNull
+        private static Complete3ds2AuthCallbackFactory createComplete3ds2AuthCallbackFactory(
+                @NonNull final Stripe3ds2CompletionStarter starter,
+                @NonNull final AuthActivityStarter.Host host,
+                @NonNull final StripeIntent stripeIntent
+        ) {
+            return new Complete3ds2AuthCallbackFactory() {
+                @NonNull
+                @Override
+                public ApiResultCallback<Boolean> create(
+                        @NonNull final Stripe3ds2CompletionStarter.StartData startData) {
+                    return new ApiResultCallback<Boolean>() {
                         @Override
                         public void onSuccess(@NonNull Boolean result) {
-                            mStarter.start(startData);
+                            starter.start(startData);
                         }
 
                         @Override
                         public void onError(@NonNull Exception e) {
-                            handleError(mHost, getRequestCode(mStripeIntent), e);
+                            handleError(host, getRequestCode(stripeIntent), e);
                         }
-                    });
+                    };
+                }
+            };
+        }
+
+        interface Complete3ds2AuthCallbackFactory
+                extends Factory<Stripe3ds2CompletionStarter.StartData, ApiResultCallback<Boolean>> {
         }
     }
 
+    private static final class ChallengeFlowStarterImpl implements ChallengeFlowStarter {
+        @NonNull private final Handler mHandler;
+
+        private ChallengeFlowStarterImpl() {
+            // create Handler to notifyCompletion challenge flow on background thread
+            final HandlerThread handlerThread =
+                    new HandlerThread(Stripe3ds2AuthCallback.class.getSimpleName());
+            handlerThread.start();
+            mHandler = new Handler(handlerThread.getLooper());
+        }
+
+        @Override
+        public void start(@NonNull Runnable runnable) {
+            mHandler.postDelayed(runnable, TimeUnit.SECONDS.toMillis(2));
+        }
+    }
+
+    interface ChallengeFlowStarter {
+        void start(@NonNull Runnable runnable);
+    }
 }
