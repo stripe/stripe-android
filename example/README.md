@@ -1,16 +1,20 @@
 # Stripe Examples App
 
-## Install
+**Contents**
+1. [Setup](#setup)
+2. [Examples](#examples)
+   - [Google Pay](#google-pay)
+
+## Setup
+
+### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After configuring, build and run the project.
+3. After deploying the example backend to Heroku and configuring the app, build and run the project.
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/run.png" />
 
-
-## Configure
-
-### Deploy example backend to Heroku
+### Deploy the example backend to Heroku
 1. [Create a Heroku account](https://signup.heroku.com/) if you don't have one.
 2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-ios-backend)
    and click "Deploy to Heroku".
@@ -21,8 +25,7 @@
 
 <img width="700" height="793" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/heroku.png" />
 
-
-### Configure app
+### Configure the app
 1. Set [Settings.PUBLISHABLE_KEY](example/src/main/java/com/stripe/example/Settings.kt)
    to your [test publishable key](https://dashboard.stripe.com/test/apikeys). 
 
